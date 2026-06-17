@@ -1,26 +1,177 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #1a1a1a;
+    --bg-surface: rgba(255, 255, 255, 0.04);
+    --bg-surface-soft: rgba(255, 255, 255, 0.06);
+    --text-primary: #f5f5f3;
+    --text-secondary: #a1a1aa;
+    --accent: #166534;
+    --accent-hover: #15803d;
+    --border: rgba(255, 255, 255, 0.08);
+    --nav-bg: rgba(10, 10, 10, 0.24);
+
+    --font-space-grotesk: var(--font-space-grotesk, 'Space Grotesk', sans-serif);
+    --font-inter: var(--font-inter, 'Inter', sans-serif);
+
+    color-scheme: dark;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f3;
+      --bg-surface: rgba(17, 24, 39, 0.04);
+      --bg-surface-soft: rgba(17, 24, 39, 0.08);
+      --text-primary: #111827;
+      --text-secondary: #4b5563;
+      --accent: #10D45A;
+      --accent-hover: #0ab247;
+      --border: rgba(17, 24, 39, 0.08);
+      --nav-bg: rgba(255, 255, 255, 0.16);
+
+      color-scheme: light;
+    }
+  }
+
+  * {
+    @apply border-[color:var(--border)];
+    transition: background-color 250ms ease, color 250ms ease, border-color 250ms ease, fill 250ms ease, stroke 250ms ease, box-shadow 250ms ease;
+  }
+
+  html {
+    @apply scroll-smooth;
+    transition: color 250ms ease, background-color 250ms ease;
+  }
+
+  body {
+    @apply bg-[color:var(--bg-primary)] text-[color:var(--text-primary)];
+    transition: background-color 250ms ease, color 250ms ease;
+    font-family: var(--font-inter);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-space-grotesk);
+    @apply font-bold;
+  }
+
+  a {
+    @apply transition-colors duration-300;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .container-wide {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-colors active:scale-95;
+    color: var(--bg-primary);
+    background-color: var(--accent);
+    border: 1px solid transparent;
+    opacity: 1;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--accent-hover);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-colors;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.16);
+  }
+
+  .section-padding {
+    @apply py-16 md:py-24 lg:py-32;
+  }
+
+  .glass {
+    @apply backdrop-blur-xl rounded-xl;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border);
+  }
+
+  .grid-reveal {
+    mask-image: radial-gradient(circle at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.3) 220px, transparent 420px);
+    -webkit-mask-image: radial-gradient(circle at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.3) 220px, transparent 420px);
+    mask-mode: alpha;
+    -webkit-mask-mode: alpha;
+  }
+}
+
+/* Scroll snap: ensure main snaps to sections */
+main#site-root {
+  scroll-snap-type: y mandatory;
+}
+
+/* Hide mobile scroll bar*/ 
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+main#site-root > section {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* Left progress nav */
+.progress-nav {
+  pointer-events: auto;
+}
+
+.progress-step {
+  cursor: pointer;
+  outline: none;
+}
+
+.progress-step[aria-current="true"] {
+  transform: scaleY(1.12);
+}
+
+@layer utilities {
+  .gradient-accent {
+    background: linear-gradient(to right, var(--accent), var(--accent-hover));
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-secondary {
+    color: var(--text-secondary);
+  }
+
+  .border-subtle {
+    border-color: var(--border);
+  }
+
+  .logo-icon {
+    transition: filter 250ms ease;
+  }
+
 }
