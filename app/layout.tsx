@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 import ProgressNav from "@/components/layout/ProgressNav";
@@ -77,6 +78,7 @@ export default function RootLayout({
         <main id="site-root" className="snap-y snap-proximity h-screen overflow-y-auto">
           {children}
         </main>
+        <Analytics />
       </body>
     </html>
   );
