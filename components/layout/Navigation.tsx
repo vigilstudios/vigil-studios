@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { CalendlyPopup } from "@/components/CalendlyModal";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -90,8 +91,8 @@ export function Navigation() {
   const navItems = [
     { href: "#services", label: "Services" },
     { href: "#portfolio", label: "Portfolio" },
-    { href: "#pricing", label: "Pricing" },
     { href: "#process", label: "Process" },
+    { href: "#pricing", label: "Pricing" },
     { href: "#contact", label: "Contact" },
   ];
 
@@ -133,9 +134,9 @@ export function Navigation() {
               </a>
             ))}
           </div>
-          <a href="#contact" className="btn-primary text-sm h-14 inline-flex items-center rounded-[1.25rem]">
+          <CalendlyPopup className="btn-primary h-14 flex items-center justify-center rounded-[1.25rem]">
             Book a Call
-          </a>
+          </CalendlyPopup>
         </div>
 
         {/* Mobile Menu Button */}

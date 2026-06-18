@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { ArrowRight, ChevronDown } from "lucide-react";
+import { CalendlyPopup } from "@/components/CalendlyModal";
 
 export function HeroSection() {
   const [cursor, setCursor] = useState({ x: "50%", y: "50%" });
@@ -117,18 +118,12 @@ export function HeroSection() {
 
           {/* CTA Buttons */}
           <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 mb-12">
-            <a
-              href="#contact"
-              className="btn-primary group flex items-center justify-center gap-2"
-            >
-              Book a Call
-              <ArrowRight
-                size={18}
-                className="group-hover:translate-x-1 transition-transform"
-              />
-            </a>
+              <CalendlyPopup className="btn-primary flex items-center justify-center gap-2">
+                Book a Free Strategy Call
+                <ArrowRight size={18} />
+              </CalendlyPopup>
             <a href="#portfolio" className="btn-secondary flex items-center justify-center">
-              View Portfolio
+              View Our Work
             </a>
           </motion.div>
 

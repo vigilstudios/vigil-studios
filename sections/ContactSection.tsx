@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Mail, MapPin, Phone } from "lucide-react";
-import { ContactFormData } from "@/types";
+//import { ContactFormData } from "@/types";
 
 const contactFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -215,7 +215,7 @@ export function ContactSection() {
                     <option value="custom-website">New Website</option>
                     <option value="landing-page">Landing Page</option>
                     <option value="ecommerce">E-Commerce</option>
-                    <option value="ecommerce">Website Redesign</option>
+                    <option value="website-redesign">Website Redesign</option>
                     <option value="seo">SEO Optimization</option>
                     <option value="maintenance">Website Maintenance</option>
                     <option value="other">Not Sure Yet</option>

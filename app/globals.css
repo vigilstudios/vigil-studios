@@ -6,34 +6,43 @@
     --bg-secondary: #1a1a1a;
     --bg-surface: rgba(255, 255, 255, 0.04);
     --bg-surface-soft: rgba(255, 255, 255, 0.06);
+
     --text-primary: #f5f5f3;
     --text-secondary: #a1a1aa;
-    --accent: #166534;
-    --accent-hover: #15803d;
+
+    --accent: #10d45a;
+    --accent-hover: #0ab247;
+
     --border: rgba(255, 255, 255, 0.08);
     --nav-bg: rgba(10, 10, 10, 0.24);
 
-    --font-space-grotesk: var(--font-space-grotesk, 'Space Grotesk', sans-serif);
-    --font-inter: var(--font-inter, 'Inter', sans-serif);
+    --font-space-grotesk: var(--font-space-grotesk, "Space Grotesk", sans-serif);
+    --font-inter: var(--font-inter, "Inter", sans-serif);
 
     color-scheme: dark;
   }
 
-  @media (prefers-color-scheme: light) {
-    :root {
-      --bg-primary: #ffffff;
-      --bg-secondary: #f5f5f3;
-      --bg-surface: rgba(17, 24, 39, 0.04);
-      --bg-surface-soft: rgba(17, 24, 39, 0.08);
-      --text-primary: #111827;
-      --text-secondary: #4b5563;
-      --accent: #10D45A;
-      --accent-hover: #0ab247;
-      --border: rgba(17, 24, 39, 0.08);
-      --nav-bg: rgba(255, 255, 255, 0.16);
+  [data-theme="light"] {
+    --bg-primary: #e4f9ec;
+    --bg-secondary: #cee1d6;
 
-      color-scheme: light;
-    }
+    --bg-surface: rgba(17, 24, 39, 0.04);
+    --bg-surface-soft: rgba(17, 24, 39, 0.08);
+
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+
+    --accent: #1e8846;
+    --accent-hover: #15803d;
+
+    --border: rgba(17, 24, 39, 0.08);
+    --nav-bg: rgba(255, 255, 255, 0.16);
+
+    color-scheme: light;
+  }
+
+  [data-theme="dark"] {
+    color-scheme: dark;
   }
 
   * {
@@ -151,6 +160,20 @@ main#site-root > section {
 
 .progress-step[aria-current="true"] {
   transform: scaleY(1.12);
+}
+
+/* Calendly inner booking wrapper */
+[data-booking-page-wrapper="true"] {
+  background: #000000 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Calendly booking layout */
+[data-booking-layout="true"] {
+  background: #000000 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 @layer utilities {

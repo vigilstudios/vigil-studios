@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 import { PORTFOLIO_PROJECTS } from "@/lib/constants";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight , ArrowRight } from "lucide-react";
+import { CalendlyPopup } from "@/components/CalendlyModal";
 import Image from "next/image";
 
 export function PortfolioSection() {
@@ -143,10 +144,10 @@ export function PortfolioSection() {
           viewport={{ once: true }}
           className="text-center mt-16"
         >
-          <a href="#contact" className="btn-primary inline-flex items-center gap-2">
-            See All Projects
-            <ArrowUpRight size={18} />
-          </a>
+          <CalendlyPopup className="btn-primary inline-flex items-center justify-center gap-2">
+              Start Your Project
+              <ArrowRight size={18} />
+          </CalendlyPopup>
         </motion.div>
       </div>
     </section>
