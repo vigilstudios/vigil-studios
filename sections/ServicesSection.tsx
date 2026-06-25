@@ -40,6 +40,7 @@ export function ServicesSection() {
             <div className="w-2 h-2 rounded-full bg-[color:var(--accent)]" />
             <span className="text-sm font-medium text-[color:var(--accent)]">Services</span>
           </div>
+          
           <h2 className="text-4xl md:text-5xl font-bold text-[color:var(--text-primary)] mb-4">
             What We Offer
           </h2>

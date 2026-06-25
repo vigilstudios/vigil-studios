@@ -18,6 +18,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.vigilstudios.co"),
+  alternates: {
+    canonical: "https://www.vigilstudios.co",
+  },
   title: "Vigil Studios | Web Development Agency",
   description:
     "Custom-coded websites built for speed, search visibility, and measurable growth. No templates. No compromises.",
@@ -25,6 +29,7 @@ export const metadata: Metadata = {
     "web design",
     "web development",
     "Long Island web developer",
+    "New York web developer",
     "custom websites",
     "SEO services",
   ],
@@ -32,7 +37,7 @@ export const metadata: Metadata = {
     title: "Vigil Studios | Web Development Agency",
     description:
       "Custom-coded websites built for speed, search visibility, and measurable growth. No templates. No compromises.",
-    url: "https://vigilstudios.co",
+    url: "https://www.vigilstudios.co",
     type: "website",
   },
   twitter: {
@@ -63,11 +68,23 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               name: "Vigil Studios",
-              url: "https://vigilstudios.co",
-              logo: "https://vigilstudios.co/logo.svg",
+              url: "https://www.vigilstudios.co",
+              logo: "https://www.vigilstudios.co/logo.svg",
               description:
                 "Custom-coded websites built for speed, search visibility, and measurable growth. No templates. No compromises.",
               sameAs: [],
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "Vigil Studios",
+              alternateName: "Vigil Studios Web Development",
+              url: "https://www.vigilstudios.co",
             }),
           }}
         />

@@ -5,7 +5,6 @@ import { PortfolioSection } from "@/sections/PortfolioSection";
 import { ProcessSection } from "@/sections/ProcessSection";
 import { WhyVigilSection } from "@/sections/WhyVigilSection";
 import { PricingSection } from "@/sections/PricingSection";
-import { TestimonialsSection } from "@/sections/TestimonialsSection";
 import { FAQSection } from "@/sections/FAQSection";
 import { ContactSection } from "@/sections/ContactSection";
 
@@ -14,11 +13,10 @@ export default function Home() {
     <>
       <HeroSection />
       <ServicesSection />
-      <PortfolioSection />
       <ProcessSection />
-      <WhyVigilSection />
       <PricingSection />
-      <TestimonialsSection />
+      <WhyVigilSection />
+      <PortfolioSection />
       <FAQSection />
       <ContactSection />
       <Footer />

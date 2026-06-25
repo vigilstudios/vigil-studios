@@ -90,9 +90,9 @@ export function Navigation() {
 
   const navItems = [
     { href: "#services", label: "Services" },
-    { href: "#portfolio", label: "Portfolio" },
     { href: "#process", label: "Process" },
     { href: "#pricing", label: "Pricing" },
+    { href: "#portfolio", label: "Projects" },
     { href: "#contact", label: "Contact" },
   ];
 
@@ -134,9 +134,6 @@ export function Navigation() {
               </a>
             ))}
           </div>
-          <CalendlyPopup className="btn-primary h-14 flex items-center justify-center rounded-[1.25rem]">
-            Book a Call
-          </CalendlyPopup>
         </div>
 
         {/* Mobile Menu Button */}
@@ -177,9 +174,9 @@ export function Navigation() {
                   {item.label}
                 </a>
               ))}
-              <a href="#contact" className="btn-primary w-full text-center">
+              <CalendlyPopup className="btn-primary h-14 flex items-center justify-center rounded-[1.25rem]">
                 Book a Call
-              </a>
+              </CalendlyPopup>
             </div>
           </motion.div>
         )}

@@ -115,7 +115,7 @@ export const PROCESS_STEPS = [
 export const PRICING_TIERS = [
   {
     name: "Starter",
-    price: "499",
+    price: "799",
     description: "Perfect for small businesses",
     features: [
       { label: "Single-page website", type: "check" },
