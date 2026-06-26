@@ -47,6 +47,8 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/vigil-vstar-white.svg",
+    shortcut: "/vigil-vstar-white.svg",
+    apple: "/vigil-vstar-white.svg",
   },
 };
 

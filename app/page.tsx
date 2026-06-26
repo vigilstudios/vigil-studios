@@ -1,4 +1,5 @@
 import { Footer } from "@/components/layout/Footer";
+import { AnimatedGridBackground } from "@/components/ui/AnimatedGridBackground";
 import { HeroSection } from "@/sections/HeroSection";
 import { ServicesSection } from "@/sections/ServicesSection";
 import { PortfolioSection } from "@/sections/PortfolioSection";
@@ -11,6 +12,7 @@ import { ContactSection } from "@/sections/ContactSection";
 export default function Home() {
   return (
     <>
+      <AnimatedGridBackground />
       <HeroSection />
       <ServicesSection />
       <ProcessSection />

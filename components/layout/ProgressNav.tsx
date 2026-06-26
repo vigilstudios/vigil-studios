@@ -1,33 +1,51 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export default function ProgressNav() {
+  const pathname = usePathname();
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
   const [sections, setSections] = useState<HTMLElement[]>([]);
   const [active, setActive] = useState<number>(0);
 
   useEffect(() => {
-    const main = document.querySelector("main#site-root") || document.querySelector("main");
-    if (!main) return;
+    observerRef.current?.disconnect();
 
-    const secs = Array.from(main.querySelectorAll<HTMLElement>("section"));
-    setSections(secs);
+    const timeout = window.setTimeout(() => {
+      const main =
+        document.querySelector("main#site-root") ||
+        document.querySelector("main");
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const idx = secs.indexOf(entry.target as HTMLElement);
-            if (idx !== -1) setActive(idx);
-          }
-        });
-      },
-      { threshold: 0.6 }
-    );
+      if (!main) return;
 
-    secs.forEach((s) => observer.observe(s));
-    return () => observer.disconnect();
-  }, []);
+      const secs = Array.from(main.querySelectorAll<HTMLElement>("section"));
+
+      setSections(secs);
+      setActive(0);
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const idx = secs.indexOf(entry.target as HTMLElement);
+              if (idx !== -1) setActive(idx);
+            }
+          });
+        },
+        { threshold: 0.6 }
+      );
+
+      secs.forEach((s) => observer.observe(s));
+      observerRef.current = observer;
+    }, 100);
+
+    return () => {
+      window.clearTimeout(timeout);
+      observerRef.current?.disconnect();
+    };
+  }, [pathname]);
 
   const handleClick = (i: number) => {
     const el = sections[i];
@@ -35,6 +53,8 @@ export default function ProgressNav() {
   };
 
   if (sections.length === 0) return null;
+
+  if (pathname !== "/") return null;
 
   return (
     <nav
@@ -47,7 +67,9 @@ export default function ProgressNav() {
           onClick={() => handleClick(i)}
           aria-current={i === active}
           className={`progress-step relative w-0.5 h-16 rounded transition-all ${
-            i === active ? "bg-[color:var(--accent)] scale-y-110" : "bg-[color:var(--border)]"
+            i === active
+              ? "bg-[color:var(--accent)] scale-y-110"
+              : "bg-[color:var(--border)]"
           }`}
         />
       ))}

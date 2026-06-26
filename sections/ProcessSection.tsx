@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import { PROCESS_STEPS } from "@/lib/constants";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 export function ProcessSection() {
   const containerVariants = {
@@ -45,6 +47,7 @@ export function ProcessSection() {
           <p className="text-lg text-[color:var(--text-secondary)]">
             From discovery to launch, we follow a structured approach
           </p>
+
         </motion.div>
 
         {/* Process Timeline */}
@@ -114,6 +117,22 @@ export function ProcessSection() {
             </div>
           </div>
         </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          viewport={{ once: true }}
+          className="mt-12 flex justify-center"
+        >
+          <Link
+            href="/process"
+            className="btn-primary inline-flex items-center justify-center gap-2"
+          >
+            View Our Full Process
+            <ArrowRight size={18} />
+          </Link>
+        </motion.div>
+
       </div>
     </section>
   );
