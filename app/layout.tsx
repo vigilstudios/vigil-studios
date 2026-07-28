@@ -47,11 +47,34 @@ export const metadata: Metadata = {
     description: "Custom-coded websites built for speed, search visibility, and measurable growth. No templates. No compromises.",
   },
   icons: {
-    icon: "/vigil-vstar-white.svg",
-    shortcut: "/vigil-vstar-white.svg",
-    apple: "/vigil-vstar-white.svg",
+    icon: [
+      {
+        url: "/favicon.png",
+        type: "image/png",
+      },
+    ],
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
 };
+
+const faviconLinks = [
+  {
+    rel: "icon",
+    href: "/favicon.png",
+    type: "image/png",
+    sizes: "any",
+  },
+  {
+    rel: "shortcut icon",
+    href: "/favicon.png",
+    type: "image/png",
+  },
+  {
+    rel: "apple-touch-icon",
+    href: "/favicon.png",
+  },
+];
 
 export default function RootLayout({
   children,
@@ -64,6 +87,9 @@ export default function RootLayout({
       className={`${spaceGrotesk.variable} ${inter.variable} scroll-smooth`}
     >
       <head>
+        {faviconLinks.map((link) => (
+          <link key={`${link.rel}-${link.href}`} {...link} />
+        ))}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
