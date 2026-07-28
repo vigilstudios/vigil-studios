@@ -16,26 +16,6 @@ export function Footer() {
             <p className="text-[color:var(--text-secondary)] text-sm mb-6">
               Building websites that drive growth.
             </p>
-            <div className="flex gap-4">
-              <a
-                href="#"
-                className="p-2 hover:bg-[color:var(--bg-primary)] rounded-lg transition-colors"
-              >
-                <Github size={18} className="text-[color:var(--text-secondary)]" />
-              </a>
-              <a
-                href="#"
-                className="p-2 hover:bg-[color:var(--bg-primary)] rounded-lg transition-colors"
-              >
-                <Linkedin size={18} className="text-[color:var(--text-secondary)]" />
-              </a>
-              <a
-                href="#"
-                className="p-2 hover:bg-[color:var(--bg-primary)] rounded-lg transition-colors"
-              >
-                <Twitter size={18} className="text-[color:var(--text-secondary)]" />
-              </a>
-            </div>
           </div>
 
           {/* Services */}
@@ -69,7 +49,7 @@ export function Footer() {
               Company
             </h3>
             <ul className="space-y-3">
-              {["About", "Portfolio", "Pricing", "Process", "Contact"].map(
+              {["About", "Services", "Process", "Pricing", "Projects", "Contact"].map(
                 (item) => (
                   <li key={item}>
                     <a

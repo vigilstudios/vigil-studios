@@ -56,20 +56,20 @@ export function ProcessSection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-4 gap-4"
+          className="grid grid-cols-1 md:grid-cols-4 gap-4 items-stretch"
         >
           {PROCESS_STEPS.map((step, index) => {
             const Icon = step.icon;
             return (
-              <motion.div key={index} variants={itemVariants}>
-                <div className="relative">
+              <motion.div key={index} variants={itemVariants} className="h-full">
+                <div className="relative h-full">
                   {/* Connector Line */}
                   {index < PROCESS_STEPS.length - 1 && (
                     <div className="hidden md:block absolute top-16 left-[50%] w-[calc(100%-2rem)] h-0.5 bg-gradient-to-r from-[--accent] to-[--accent]/20 transform translate-x-[50%]" />
                   )}
 
                   {/* Step Card */}
-                  <div className="glass p-5 rounded-2xl h-full relative z-10 md:p-8">
+                  <div className="glass p-5 rounded-2xl h-full relative z-10 md:p-8 flex flex-col">
                     {/* Number */}
                     <div className="text-4xl md:text-5xl font-bold text-[color:var(--accent)]/20 mb-4">
                       {step.number}
@@ -84,7 +84,7 @@ export function ProcessSection() {
                     <h3 className="text-xl font-bold text-[color:var(--text-primary)] mb-3">
                       {step.title}
                     </h3>
-                    <p className="text-[color:var(--text-secondary)] text-sm leading-relaxed">
+                    <p className="text-[color:var(--text-secondary)] text-sm leading-relaxed mt-auto">
                       {step.description}
                     </p>
                   </div>
