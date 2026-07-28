@@ -52,7 +52,7 @@ const roadmapSteps = [
     icon: ClipboardCheck,
     timeline: "Day 2-3",
     description:
-      "You receive a private onboarding link with instructions for sending brand assets, content, login access, photos, domain info, and business details.",
+      "You receive instructions for sending brand assets, content, login access, photos, domain info, and business details.",
     deliverables: ["Logo/assets", "Website content", "Domain/access details"],
   },
   {
