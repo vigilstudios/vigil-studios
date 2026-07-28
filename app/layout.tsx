@@ -49,16 +49,25 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
+        url: "/favicon.ico",
+        type: "image/x-icon",
+      },
+      {
         url: "/favicon.png",
         type: "image/png",
       },
     ],
-    shortcut: "/favicon.png",
+    shortcut: "/favicon.ico",
     apple: "/favicon.png",
   },
 };
 
 const faviconLinks = [
+  {
+    rel: "icon",
+    href: "/favicon.ico",
+    type: "image/x-icon",
+  },
   {
     rel: "icon",
     href: "/favicon.png",
@@ -67,8 +76,8 @@ const faviconLinks = [
   },
   {
     rel: "shortcut icon",
-    href: "/favicon.png",
-    type: "image/png",
+    href: "/favicon.ico",
+    type: "image/x-icon",
   },
   {
     rel: "apple-touch-icon",
