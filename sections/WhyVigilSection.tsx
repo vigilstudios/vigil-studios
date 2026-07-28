@@ -125,11 +125,11 @@ export function WhyVigilSection() {
           viewport={{ once: true }}
           className="
             -mx-6 px-6
-            flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6
+            flex gap-4 overflow-x-auto pb-5 snap-none
 
             md:mx-0 md:px-0
             md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6
-            md:overflow-visible md:snap-none md:pb-0
+            md:overflow-visible md:pb-0 md:snap-x md:snap-mandatory
 
             scrollbar-hide
           "
@@ -139,10 +139,10 @@ export function WhyVigilSection() {
               key={diff.title}
               variants={itemVariants}
               className="
-                glass p-6 rounded-2xl
-                shrink-0 w-[82%] max-w-[340px] snap-center
+                glass p-4 rounded-2xl
+                shrink-0 w-[74%] max-w-[280px]
 
-                md:w-auto md:max-w-none md:shrink md:snap-none
+                snap-none md:w-auto md:max-w-none md:shrink md:snap-center md:p-6 md:max-w-[340px]
               "
             >
               <div className="w-10 h-10 rounded-lg bg-[color:var(--accent)]/10 flex items-center justify-center mb-4">

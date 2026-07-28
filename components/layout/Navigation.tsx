@@ -104,8 +104,8 @@ export function Navigation() {
         isOpen
           ? "bg-[color:var(--bg-secondary)] border-b border-[color:var(--border)]"
           : isScrolled
-          ? "bg-transparent shadow-none"
-          : "bg-transparent shadow-none"
+          ? "bg-[linear-gradient(0deg,transparent_0%,var(--bg-primary)_100%)] shadow-none"
+          : "bg-[linear-gradient(0deg,transparent_0%,var(--bg-primary)_100%)] shadow-none"
       }`}
     >
       <div className="container-wide flex items-center justify-between h-20">

@@ -65,7 +65,7 @@ export function FAQSection() {
                 onClick={() =>
                   setOpenIndex(openIndex === index ? null : index)
                 }
-                className="w-full glass p-6 rounded-2xl text-left hover:border-[color:var(--accent)]/50 transition-all duration-300"
+                className="w-full glass p-4 rounded-2xl text-left hover:border-[color:var(--accent)]/50 transition-all duration-300 md:p-6"
               >
                 <div className="flex items-start justify-between gap-4">
                   <h3 className="text-lg font-bold text-[color:var(--text-primary)]">

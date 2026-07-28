@@ -56,7 +56,7 @@ export function ProcessSection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-4 gap-6"
+          className="grid grid-cols-1 md:grid-cols-4 gap-4"
         >
           {PROCESS_STEPS.map((step, index) => {
             const Icon = step.icon;
@@ -69,7 +69,7 @@ export function ProcessSection() {
                   )}
 
                   {/* Step Card */}
-                  <div className="glass p-8 rounded-2xl h-full relative z-10">
+                  <div className="glass p-5 rounded-2xl h-full relative z-10 md:p-8">
                     {/* Number */}
                     <div className="text-4xl md:text-5xl font-bold text-[color:var(--accent)]/20 mb-4">
                       {step.number}
@@ -100,7 +100,7 @@ export function ProcessSection() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
           viewport={{ once: true }}
-          className="mt-16 glass p-8 rounded-2xl"
+          className="mt-8 glass p-5 rounded-2xl md:mt-16 md:p-8"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>

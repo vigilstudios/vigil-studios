@@ -57,12 +57,12 @@ export function ServicesSection() {
           viewport={{ once: true }}
           className="
             -mx-6 px-6
-            grid grid-flow-col auto-cols-[85%] grid-rows-2 gap-6
-            overflow-x-auto snap-x snap-mandatory pb-6
+            grid grid-flow-col auto-cols-[80%] grid-rows-2 gap-4
+            overflow-x-auto pb-5 snap-none
 
             md:mx-0 md:px-0
             md:grid-flow-row md:auto-cols-auto md:grid-rows-none md:grid-cols-2
-            md:overflow-visible md:snap-none md:pb-0
+            md:overflow-visible md:pb-0 md:snap-x md:snap-mandatory
 
             lg:grid-cols-3
 
@@ -78,10 +78,11 @@ export function ServicesSection() {
                 variants={itemVariants}
                 whileHover={{ y: -8, transition: { duration: 0.3 } }}
                 className="
-                  group glass p-8 rounded-2xl
-                  snap-center
+                  group glass p-5 rounded-2xl
                   hover:border-[color:var(--accent)]/50
+                  snap-none md:snap-center
                   transition-all duration-300
+                  md:p-8
                 "
               >
                 <div className="mb-6">

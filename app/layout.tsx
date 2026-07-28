@@ -95,7 +95,7 @@ export default function RootLayout({
       <body className="font-sans">
         <Navigation />
         <ProgressNav />
-        <main id="site-root" className="snap-y snap-proximity h-screen overflow-y-auto">
+        <main id="site-root" className="h-screen overflow-y-auto md:snap-y md:snap-proximity">
           {children}
         </main>
         <Analytics />

@@ -70,11 +70,11 @@ export function PricingSection() {
             viewport={{ once: true }}
             className="
               -mx-6 px-6
-              flex gap-6 overflow-x-auto snap-x snap-mandatory pb-8 pt-2
+              flex gap-4 overflow-x-auto pb-6 pt-2 snap-none
 
               md:mx-0 md:px-0
               md:grid md:grid-cols-3 md:gap-8
-              md:overflow-visible md:snap-none md:pb-0 md:pt-0
+              md:overflow-visible md:pb-0 md:pt-0 md:snap-x md:snap-mandatory
 
               scrollbar-hide
             "
@@ -83,9 +83,9 @@ export function PricingSection() {
               <div
                 key={tier.name}
                 className={`
-                  shrink-0 w-[85%] max-w-[360px] snap-center overflow-visible
+                  shrink-0 w-[80%] max-w-[320px] overflow-visible snap-none
 
-                  md:w-full md:max-w-none md:shrink md:snap-none
+                  md:w-full md:max-w-none md:shrink md:snap-center
 
                   ${tier.highlighted ? "relative" : ""}
                 `}
@@ -106,7 +106,7 @@ export function PricingSection() {
               <motion.div
                 variants={itemVariants}
                 whileHover={{ y: -8 }}
-                className={`glass p-8 rounded-2xl flex flex-col h-full ${
+                className={`glass p-5 rounded-2xl flex flex-col h-full md:p-8 ${
                   tier.highlighted
                     ? "md:scale-105 border-[color:var(--accent)] border-2 relative z-10"
                     : "border border-[color:var(--border)]"

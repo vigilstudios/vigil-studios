@@ -50,7 +50,7 @@ export function PortfolioSection() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true }}
-          className="glass rounded-3xl p-8 md:p-12 relative overflow-hidden"
+          className="glass rounded-3xl p-5 md:p-12 relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-[color:var(--accent)]/10 via-transparent to-transparent pointer-events-none" />
 
@@ -80,7 +80,7 @@ export function PortfolioSection() {
               ].map((item) => (
                 <div
                   key={item}
-                  className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-secondary)]/60 p-5"
+                  className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-secondary)]/60 p-3 md:p-5"
                 >
                   <p className="text-sm font-medium text-[color:var(--text-primary)]">
                     {item}

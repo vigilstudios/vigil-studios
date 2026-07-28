@@ -90,7 +90,7 @@ export function ContactSection() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="glass flex flex-col justify-center rounded-2xl p-8 lg:p-12"
+            className="glass flex flex-col justify-center rounded-2xl p-5 lg:p-12"
           >
             <h3 className="mb-4 text-2xl font-bold text-[color:var(--text-primary)]">
               Ready to start?
