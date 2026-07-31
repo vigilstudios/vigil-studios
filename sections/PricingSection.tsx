@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { PRICING_TIERS } from "@/lib/constants";
 import { Check } from "lucide-react";
+import { GradientEdge, SpotlightOverlay, handleSpotlightMove } from "@/components/ui/Spotlight";
 
 export function PricingSection() {
   const containerVariants = {
@@ -106,12 +107,15 @@ export function PricingSection() {
               <motion.div
                 variants={itemVariants}
                 whileHover={{ y: -8 }}
-                className={`glass p-5 rounded-2xl flex flex-col h-full md:p-8 ${
+                onMouseMove={handleSpotlightMove}
+                className={`group/spot glass p-5 rounded-2xl flex flex-col h-full md:p-8 ${
                   tier.highlighted
                     ? "md:scale-105 border-[color:var(--accent)] border-2 relative z-10"
-                    : "border border-[color:var(--border)]"
+                    : "border border-[color:var(--border)] relative"
                 }`}
               >
+                <SpotlightOverlay />
+                {!tier.highlighted && <GradientEdge strength={30} />}
                 {/* Badge */}
                 {tier.highlighted && (
                   <div className="mb-4">

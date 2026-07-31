@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { CalendlyPopup } from "@/components/CalendlyModal";
+import { AmbientGlow } from "@/components/ui/AmbientGlow";
 
 export function PortfolioSection() {
   const containerVariants = {
@@ -27,7 +28,9 @@ export function PortfolioSection() {
 
   return (
     <section id="portfolio" className="section-padding relative overflow-hidden">
-      <div className="container-wide">
+      <AmbientGlow className="top-10 -left-52" size={600} opacity={0.24} />
+
+      <div className="container-wide relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

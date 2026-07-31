@@ -8,6 +8,7 @@ import { X } from "lucide-react";
 type CalendlyPopupProps = {
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
 };
 
 const BASE_URL =
@@ -16,6 +17,7 @@ const BASE_URL =
 export function CalendlyPopup({
   children,
   className = "",
+  style,
 }: CalendlyPopupProps) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -111,7 +113,7 @@ export function CalendlyPopup({
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={className}>
+      <button type="button" onClick={() => setOpen(true)} className={className} style={style}>
         {children}
       </button>
 

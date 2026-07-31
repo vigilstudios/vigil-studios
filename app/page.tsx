@@ -4,6 +4,7 @@ import { HeroSection } from "@/sections/HeroSection";
 import { ServicesSection } from "@/sections/ServicesSection";
 import { PortfolioSection } from "@/sections/PortfolioSection";
 import { ProcessSection } from "@/sections/ProcessSection";
+import { CtaBandSection } from "@/sections/CtaBandSection";
 import { WhyVigilSection } from "@/sections/WhyVigilSection";
 import { PricingSection } from "@/sections/PricingSection";
 import { FAQSection } from "@/sections/FAQSection";
@@ -16,6 +17,7 @@ export default function Home() {
       <HeroSection />
       <ServicesSection />
       <ProcessSection />
+      <CtaBandSection />
       <PricingSection />
       <WhyVigilSection />
       <PortfolioSection />

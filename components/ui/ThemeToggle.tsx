@@ -34,6 +34,18 @@ const themes = {
 export function ThemeToggle() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
 
+  const applyTheme = (selectedTheme: "dark" | "light") => {
+    const root = document.documentElement;
+    const themeValues = themes[selectedTheme];
+    Object.entries(themeValues).forEach(([key, value]) => {
+      root.style.setProperty(key, value);
+    });
+    root.dataset.theme = selectedTheme;
+    window.dispatchEvent(
+      new CustomEvent("site-theme-change", { detail: selectedTheme })
+    );
+  };
+
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("site-theme") as
       | "dark"
@@ -50,18 +62,6 @@ export function ThemeToggle() {
       applyTheme("dark");
     }
   }, []);
-
-  const applyTheme = (selectedTheme: "dark" | "light") => {
-    const root = document.documentElement;
-    const themeValues = themes[selectedTheme];
-    Object.entries(themeValues).forEach(([key, value]) => {
-      root.style.setProperty(key, value);
-    });
-    root.dataset.theme = selectedTheme;
-    window.dispatchEvent(
-      new CustomEvent("site-theme-change", { detail: selectedTheme })
-    );
-  };
 
   const toggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";

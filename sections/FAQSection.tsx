@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FAQ_ITEMS } from "@/lib/constants";
 import { ChevronDown } from "lucide-react";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 export function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -29,27 +30,14 @@ export function FAQSection() {
   };
 
   return (
-    <section className="section-padding relative overflow-hidden">
+    <section className="section-padding section-alt relative overflow-hidden">
       <div className="container-wide">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="max-w-2xl mx-auto text-center mb-16"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[color:var(--accent)]/10 border border-[color:var(--accent)]/30 mb-6">
-            <div className="w-2 h-2 rounded-full bg-[color:var(--accent)]" />
-            <span className="text-sm font-medium text-[color:var(--accent)]">FAQ</span>
-          </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-[color:var(--text-primary)] mb-4">
-            Frequently Asked Questions
-          </h2>
-          <p className="text-lg text-[color:var(--text-secondary)]">
-            Get answers to common questions about our services
-          </p>
-        </motion.div>
+        <SectionHeader
+          eyebrow="FAQ"
+          title="Frequently Asked Questions"
+          subtitle="Get answers to common questions about our services"
+          align="center"
+        />
 
         {/* FAQ List */}
         <motion.div

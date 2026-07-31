@@ -4,123 +4,115 @@ import { motion } from "framer-motion";
 import { PROCESS_STEPS } from "@/lib/constants";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 export function ProcessSection() {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  };
-
   return (
-    <section id="process" className="section-padding relative overflow-hidden">
+    <section id="process" className="section-padding section-alt relative overflow-hidden">
       <div className="container-wide">
-        {/* Header */}
+        <SectionHeader
+          eyebrow="Process"
+          title="Our Proven Process"
+          subtitle="From discovery to launch, we follow a structured approach"
+        />
+
+        {/* Alternating timeline rather than a row of identical cards */}
+        <div className="relative max-w-4xl mx-auto">
+          {/* Spine */}
+          <div
+            className="absolute left-6 md:left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-[color:var(--border)]"
+            aria-hidden="true"
+          />
+          <motion.div
+            initial={{ scaleY: 0 }}
+            whileInView={{ scaleY: 1 }}
+            transition={{ duration: 1.4, ease: "easeOut" }}
+            viewport={{ once: true, amount: 0.2 }}
+            style={{ transformOrigin: "top" }}
+            className="absolute left-6 md:left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-gradient-to-b from-[color:var(--accent)] to-[color:var(--accent)]/10"
+            aria-hidden="true"
+          />
+
+          <ol className="space-y-10 md:space-y-16">
+            {PROCESS_STEPS.map((step, index) => {
+              const Icon = step.icon;
+              const flipped = index % 2 === 1;
+
+              return (
+                <motion.li
+                  key={step.number}
+                  initial={{ opacity: 0, y: 28 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  viewport={{ once: true, amount: 0.4 }}
+                  className="relative pl-16 md:pl-0 md:grid md:grid-cols-2 md:gap-12 md:items-center"
+                >
+                  {/* Node */}
+                  <div className="absolute left-6 md:left-1/2 top-1 md:top-1/2 -translate-x-1/2 md:-translate-y-1/2 z-10">
+                    <div className="w-12 h-12 rounded-full bg-[color:var(--bg-section-alt)] border border-[color:var(--accent)]/40 flex items-center justify-center shadow-[0_0_0_6px_var(--bg-section-alt)]">
+                      <Icon size={20} className="text-[color:var(--accent)]" />
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div
+                    className={
+                      flipped
+                        ? "md:col-start-2 md:pl-12 md:text-left"
+                        : "md:col-start-1 md:pr-12 md:text-right"
+                    }
+                  >
+                    <div className="text-5xl md:text-6xl font-bold text-[color:var(--accent)]/15 leading-none mb-2">
+                      {step.number}
+                    </div>
+                    <h3 className="text-xl md:text-2xl font-bold text-[color:var(--text-primary)] mb-2">
+                      {step.title}
+                    </h3>
+                    <p className="text-[color:var(--text-secondary)] leading-relaxed">
+                      {step.description}
+                    </p>
+                  </div>
+                </motion.li>
+              );
+            })}
+          </ol>
+        </div>
+
+        {/* Timeline facts */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="max-w-2xl mb-16"
+          className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[color:var(--accent)]/10 border border-[color:var(--accent)]/30 mb-6">
-            <div className="w-2 h-2 rounded-full bg-[color:var(--accent)]" />
-            <span className="text-sm font-medium text-[color:var(--accent)]">Process</span>
-          </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-[color:var(--text-primary)] mb-4">
-            Our Proven Process
-          </h2>
-          <p className="text-lg text-[color:var(--text-secondary)]">
-            From discovery to launch, we follow a structured approach
-          </p>
-
+          {[
+            { label: "Average Timeline", value: "2-4 Weeks", accent: false },
+            { label: "Number of Revisions", value: "2 Per Round", accent: false },
+            { label: "Support After Launch", value: "Always Here", accent: true },
+          ].map((fact) => (
+            <div
+              key={fact.label}
+              className="text-center md:text-left border-t border-[color:var(--border)] pt-4"
+            >
+              <p className="text-[color:var(--text-secondary)] text-sm mb-2">{fact.label}</p>
+              <p
+                className={`text-2xl font-bold ${
+                  fact.accent
+                    ? "text-[color:var(--accent)]"
+                    : "text-[color:var(--text-primary)]"
+                }`}
+              >
+                {fact.value}
+              </p>
+            </div>
+          ))}
         </motion.div>
 
-        {/* Process Timeline */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-4 gap-4 items-stretch"
-        >
-          {PROCESS_STEPS.map((step, index) => {
-            const Icon = step.icon;
-            return (
-              <motion.div key={index} variants={itemVariants} className="h-full">
-                <div className="relative h-full">
-                  {/* Connector Line */}
-                  {index < PROCESS_STEPS.length - 1 && (
-                    <div className="hidden md:block absolute top-16 left-[50%] w-[calc(100%-2rem)] h-0.5 bg-gradient-to-r from-[--accent] to-[--accent]/20 transform translate-x-[50%]" />
-                  )}
-
-                  {/* Step Card */}
-                  <div className="glass p-5 rounded-2xl h-full relative z-10 md:p-8 flex flex-col">
-                    {/* Number */}
-                    <div className="text-4xl md:text-5xl font-bold text-[color:var(--accent)]/20 mb-4">
-                      {step.number}
-                    </div>
-
-                    {/* Icon */}
-                    <div className="w-12 h-12 rounded-lg bg-[color:var(--accent)]/10 flex items-center justify-center mb-6">
-                      <Icon size={24} className="text-[color:var(--accent)]" />
-                    </div>
-
-                    {/* Content */}
-                    <h3 className="text-xl font-bold text-[color:var(--text-primary)] mb-3">
-                      {step.title}
-                    </h3>
-                    <p className="text-[color:var(--text-secondary)] text-sm leading-relaxed mt-auto">
-                      {step.description}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </motion.div>
-
-        {/* Timeline Info */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          viewport={{ once: true }}
-          className="mt-8 glass p-5 rounded-2xl md:mt-16 md:p-8"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <p className="text-[color:var(--text-secondary)] text-sm mb-2">Average Timeline</p>
-              <p className="text-2xl font-bold text-[color:var(--text-primary)]">2-4 Weeks</p>
-            </div>
-            <div>
-              <p className="text-[color:var(--text-secondary)] text-sm mb-2">Number of Revisions</p>
-              <p className="text-2xl font-bold text-[color:var(--text-primary)]">2 Revisions Per Round</p>
-            </div>
-            <div>
-              <p className="text-[color:var(--text-secondary)] text-sm mb-2">Support After Launch</p>
-              <p className="text-2xl font-bold text-[color:var(--accent)]">Always Here</p>
-            </div>
-          </div>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true }}
           className="mt-12 flex justify-center"
         >
@@ -132,7 +124,6 @@ export function ProcessSection() {
             <ArrowRight size={18} />
           </Link>
         </motion.div>
-
       </div>
     </section>
   );

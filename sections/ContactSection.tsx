@@ -3,11 +3,14 @@
 import { motion } from "framer-motion";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { CalendlyPopup } from "@/components/CalendlyModal";
+import { AmbientGlow } from "@/components/ui/AmbientGlow";
 
 export function ContactSection() {
   return (
     <section id="contact" className="section-padding relative overflow-hidden">
-      <div className="container-wide">
+      <AmbientGlow className="-bottom-40 left-1/4" size={700} opacity={0.26} />
+
+      <div className="container-wide relative z-10">
         <div className="grid grid-cols-1 gap-16 lg:grid-cols-2">
           {/* Left Column */}
           <motion.div
