@@ -5,6 +5,13 @@ import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 import ProgressNav from "@/components/layout/ProgressNav";
 import { Navigation } from "@/components/layout/Navigation";
+import {
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_TITLE,
+  SITE_URL,
+  url,
+} from "@/lib/site";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -19,13 +26,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.vigilstudios.co"),
+  metadataBase: new URL(SITE_URL),
   alternates: {
-    canonical: "https://www.vigilstudios.co",
+    canonical: "/",
   },
-  title: "Vigil Studios | Web Development Agency",
-  description:
-    "Custom-coded websites built for speed, search visibility, and measurable growth. No templates. No compromises.",
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
   keywords: [
     "web design",
     "web development",
@@ -35,55 +41,21 @@ export const metadata: Metadata = {
     "SEO services",
   ],
   openGraph: {
-    title: "Vigil Studios | Web Development Agency",
-    description:
-      "Custom-coded websites built for speed, search visibility, and measurable growth. No templates. No compromises.",
-    url: "https://www.vigilstudios.co",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_NAME,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vigil Studios | Web Development Agency",
-    description: "Custom-coded websites built for speed, search visibility, and measurable growth. No templates. No compromises.",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
   },
-  icons: {
-    icon: [
-      {
-        url: "/favicon.ico",
-        type: "image/x-icon",
-      },
-      {
-        url: "/favicon.png",
-        type: "image/png",
-      },
-    ],
-    shortcut: "/favicon.ico",
-    apple: "/favicon.png",
-  },
+  // Icons are not declared here on purpose: defining `metadata.icons` suppresses
+  // the app/ file conventions (favicon.ico, icon.svg, apple-icon.png, manifest.ts),
+  // which emit the correct types, sizes, and cache-busting hashes on their own.
 };
-
-const faviconLinks = [
-  {
-    rel: "icon",
-    href: "/favicon.ico",
-    type: "image/x-icon",
-  },
-  {
-    rel: "icon",
-    href: "/favicon.png",
-    type: "image/png",
-    sizes: "any",
-  },
-  {
-    rel: "shortcut icon",
-    href: "/favicon.ico",
-    type: "image/x-icon",
-  },
-  {
-    rel: "apple-touch-icon",
-    href: "/favicon.png",
-  },
-];
 
 export default function RootLayout({
   children,
@@ -96,20 +68,16 @@ export default function RootLayout({
       className={`${spaceGrotesk.variable} ${inter.variable} scroll-smooth`}
     >
       <head>
-        {faviconLinks.map((link) => (
-          <link key={`${link.rel}-${link.href}`} {...link} />
-        ))}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              name: "Vigil Studios",
-              url: "https://www.vigilstudios.co",
-              logo: "https://www.vigilstudios.co/logo.svg",
-              description:
-                "Custom-coded websites built for speed, search visibility, and measurable growth. No templates. No compromises.",
+              name: SITE_NAME,
+              url: SITE_URL,
+              logo: url("/icon-512.png"),
+              description: SITE_DESCRIPTION,
               sameAs: [],
             }),
           }}
@@ -120,9 +88,9 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebSite",
-              name: "Vigil Studios",
+              name: SITE_NAME,
               alternateName: "Vigil Studios Web Development",
-              url: "https://www.vigilstudios.co",
+              url: SITE_URL,
             }),
           }}
         />
