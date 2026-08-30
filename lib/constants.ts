@@ -112,20 +112,93 @@ export const PROCESS_STEPS = [
   },
 ];
 
+// The Express tier replaces the old manually built Starter. Same deliverable —
+// single page, responsive, basic SEO, one revision — but produced from a
+// per-industry template rather than a bespoke build, which is what makes the
+// lower price and the 1-2 day turnaround possible.
+export const EXPRESS_PRICE = "599";
+
+// The Stripe payment link. Empty until the link exists; the catalogue falls
+// back to the contact form rather than rendering a button that goes nowhere.
+//
+// DELIBERATELY EMPTY as of 28 Aug 2026. The link is live and works, but nothing
+// catches the payment yet — no webhook, no order record, no intake form — so a
+// purchase would take the money and leave the buyer with silence. Restore it
+// only once the checkout.session.completed webhook writes to `orders` and the
+// intake form is reachable (vigil-leadgen HANDOFF.md, "Where to start next
+// session"). The live link, for when that day comes:
+//   https://buy.stripe.com/eVq4gyezB6T5gZK1dxfIs04
+export const EXPRESS_CHECKOUT_URL = "";
+
+// One finished example per industry, each built from the exact template a real
+// order is produced from. The businesses are fictional and each page says so.
+export const EXPRESS_TEMPLATES = [
+  {
+    slug: "home-services",
+    industry: "Home services",
+    example: "Northgate Plumbing & Heating",
+    description:
+      "Trade-forward and direct. Services with prices, recent work, and a call button that follows you down the page.",
+    accent: "#f15e18",
+  },
+  {
+    slug: "auto-services",
+    industry: "Auto repair",
+    example: "Halstead Motor Works",
+    description:
+      "Workshop-forward, set in condensed caps. Built around what comes through the bay doors and what it costs.",
+    accent: "#c53f21",
+  },
+  {
+    slug: "restaurant",
+    industry: "Restaurant and cafe",
+    example: "Marlow & Fen",
+    description:
+      "A proper menu, grouped by course with prices, rather than a grid of cards. Warm, editorial, unhurried.",
+    accent: "#a97c33",
+  },
+  {
+    slug: "retail",
+    industry: "Retail and boutique",
+    example: "Quillon Supply",
+    description:
+      "Product-forward. Portrait tiles for each range, and a get-directions button, because a shop converts on a visit.",
+    accent: "#5c6b3c",
+  },
+  {
+    slug: "salon-spa",
+    industry: "Salon and spa",
+    example: "Ashcombe Studio",
+    description:
+      "Soft and editorial, with a treatment list that shows how long each appointment takes as well as the price.",
+    accent: "#8c5b78",
+  },
+  {
+    slug: "medical",
+    industry: "Medical and dental",
+    example: "Trelawn Dental Practice",
+    description:
+      "Calm and restrained. What the practice offers, written plainly, with no prices and no claims about outcomes.",
+    accent: "#2f8f9d",
+  },
+];
+
 export const PRICING_TIERS = [
   {
-    name: "Starter",
-    price: "799",
-    description: "Perfect for small businesses",
+    name: "Express Sites",
+    price: EXPRESS_PRICE,
+    description: "Pick a template, launch in days",
     features: [
       { label: "Single-page website", type: "check" },
       { label: "Mobile responsive", type: "check" },
-      { label: "Contact form", type: "check" },
+      { label: "Tap-to-call and email contact", type: "check" },
       { label: "Basic SEO", type: "check" },
+      { label: "1-2 day turnaround", type: "check" },
       { label: "Design Direction", type: "number", value: 1 },
       { label: "Revision Round", type: "number", value: 1 },
     ],
-    cta: "Get Started",
+    cta: "Browse templates",
+    href: "/express",
   },
   {
     name: "Professional",

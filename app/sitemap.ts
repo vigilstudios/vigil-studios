@@ -15,5 +15,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    {
+      url: url("/express"),
+      lastModified: new Date("2026-08-27"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
   ];
 }

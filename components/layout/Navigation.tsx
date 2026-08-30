@@ -92,7 +92,10 @@ export function Navigation() {
     { href: "/#services", label: "Services" },
     { href: "/#process", label: "Process" },
     { href: "/#pricing", label: "Pricing" },
-    { href: "/#portfolio", label: "Projects" },
+    // Replaces the old Projects link. The portfolio section still says
+    // "launching soon"; the Express catalogue is finished work somebody can
+    // actually look at, which is what that nav slot was there to offer.
+    { href: "/express", label: "Express Sites" },
     { href: "/#contact", label: "Contact" },
   ];
 

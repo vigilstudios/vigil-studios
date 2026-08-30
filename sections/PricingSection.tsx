@@ -144,7 +144,12 @@ export function PricingSection() {
                 </div>
 
                 {/* CTA */}
-                <a href="#contact" className="btn-primary mb-8 text-center w-full">
+                {/* Express sends people to the catalogue to choose a template;
+                    the bespoke tiers still start with a conversation. */}
+                <a
+                  href={"href" in tier ? tier.href : "#contact"}
+                  className="btn-primary mb-8 text-center w-full"
+                >
                   {tier.cta}
                 </a>
 
