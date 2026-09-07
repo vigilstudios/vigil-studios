@@ -106,7 +106,7 @@ This keeps true build effort to 6 systems, not 24 — the catalogue's *breadth* 
 
 *Added 28 Aug 2026, after reading the spec above against the code. The spec is
 the owner's; this section is where it meets the build, in the same way
-`vigil-leadgen/BUILD-CONTEXT.md` pairs with `EXPRESS.md`.*
+`vigil-leadgen/HANDOFF.md` and `EXPRESS.md` are the engineering and commercial pair.*
 
 ## Adopt immediately, costs nothing
 
