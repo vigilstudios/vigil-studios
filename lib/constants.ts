@@ -144,10 +144,10 @@ export const EXPRESS_TEMPLATES = [
   {
     slug: "auto-services",
     industry: "Auto repair",
-    example: "Halstead Motor Works",
+    example: "Torque & Theory",
     description:
-      "Workshop-forward, set in condensed caps. Built around what comes through the bay doors and what it costs.",
-    accent: "#c53f21",
+      "Editorial and motion-rich, with a transparent brake inspection, service ledger, and a review rail that stays alive.",
+    accent: "#dcf763",
   },
   {
     slug: "restaurant",
