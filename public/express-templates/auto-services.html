@@ -166,7 +166,23 @@ h3,
   object-position: left center;
 }
 .navigation nav {
-  display: none;
+  display: block;
+  position: fixed;
+  inset: var(--nav-height) 0 auto;
+  max-height: calc(100svh - var(--nav-height) - var(--dock-height));
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  border-top: 1px solid var(--color-border-inverse);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-24px);
+  transition:
+    transform 360ms var(--ease-out),
+    opacity 240ms var(--ease-out),
+    visibility 0s linear 360ms;
 }
 .menu-toggle {
   position: relative;
@@ -208,21 +224,17 @@ h3,
   transform: translateY(-8px) rotate(-45deg);
 }
 .navigation nav.is-open {
-  display: block;
-  position: fixed;
-  inset: var(--nav-height) 0 auto;
-  max-height: calc(100svh - var(--nav-height) - var(--dock-height));
-  overflow-y: auto;
-  padding: var(--spacing-md);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  border-top: 1px solid var(--color-border-inverse);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition-delay: 0s;
 }
-.navigation nav.is-open ul {
+.navigation nav ul {
   display: flex;
   flex-direction: column;
 }
-.navigation nav.is-open a {
+.navigation nav a {
   display: flex;
   align-items: center;
   min-height: 72px;
@@ -917,6 +929,18 @@ h3,
   }
   .navigation nav {
     display: block;
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    border: 0;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+    transition: none;
     margin-left: auto;
   }
   .menu-toggle {
@@ -924,6 +948,7 @@ h3,
   }
   .navigation ul {
     display: flex;
+    flex-direction: row;
     gap: var(--spacing-lg);
     font-size: 14px;
     line-height: 22px;
@@ -932,6 +957,9 @@ h3,
     display: inline-flex;
     align-items: center;
     min-height: 44px;
+    border: 0;
+    font: inherit;
+    text-transform: none;
   }
   .desktop-label {
     display: inline;
