@@ -168,6 +168,71 @@ h3,
 .navigation nav {
   display: none;
 }
+.menu-toggle {
+  position: relative;
+  flex: 0 0 54px;
+  width: 54px;
+  height: 54px;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+.menu-toggle span,
+.menu-toggle::before,
+.menu-toggle::after {
+  content: "";
+  position: absolute;
+  left: 15px;
+  width: 24px;
+  height: 2px;
+  background: currentColor;
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    opacity var(--motion-fast) var(--ease-out);
+}
+.menu-toggle::before {
+  top: 18px;
+}
+.menu-toggle span {
+  top: 26px;
+}
+.menu-toggle::after {
+  top: 34px;
+}
+.menu-toggle[aria-expanded="true"]::before {
+  transform: translateY(8px) rotate(45deg);
+}
+.menu-toggle[aria-expanded="true"] span {
+  opacity: 0;
+}
+.menu-toggle[aria-expanded="true"]::after {
+  transform: translateY(-8px) rotate(-45deg);
+}
+.navigation nav.is-open {
+  display: block;
+  position: fixed;
+  inset: var(--nav-height) 0 auto;
+  max-height: calc(100svh - var(--nav-height) - var(--dock-height));
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  border-top: 1px solid var(--color-border-inverse);
+}
+.navigation nav.is-open ul {
+  display: flex;
+  flex-direction: column;
+}
+.navigation nav.is-open a {
+  display: flex;
+  align-items: center;
+  min-height: 72px;
+  border-bottom: 1px solid var(--color-border-inverse);
+  font: 600 36px/40px var(--font-display);
+  text-transform: uppercase;
+}
+.menu-open {
+  overflow: hidden;
+}
 .desktop-label {
   display: none;
 }
@@ -216,6 +281,7 @@ h3,
 }
 .nav-action {
   flex-shrink: 0;
+  display: none;
 }
 .hero {
   background: var(--color-primary);
@@ -853,6 +919,9 @@ h3,
     display: block;
     margin-left: auto;
   }
+  .menu-toggle {
+    display: none;
+  }
   .navigation ul {
     display: flex;
     gap: var(--spacing-lg);
@@ -1222,6 +1291,59 @@ main {
   stroke: var(--color-on-accent);
   stroke-width: 2;
   stroke-dasharray: 1;
+  filter: drop-shadow(0 0 2px var(--color-accent));
+}
+.part-callout circle {
+  stroke: var(--color-accent);
+  stroke-width: 4;
+  paint-order: stroke;
+}
+@media (max-width: 699px) {
+  .hero {
+    position: relative;
+    display: flex;
+    isolation: isolate;
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: var(--color-primary);
+    opacity: 0.76;
+    pointer-events: none;
+  }
+  .hero-copy {
+    position: relative;
+    z-index: 2;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: inherit;
+    padding: 48px 24px;
+    text-align: center;
+  }
+  .hero-copy > p:not(.label) {
+    max-width: 34ch;
+  }
+  .hero-action {
+    max-width: 342px;
+  }
+  .hero-media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .hero-photo {
+    height: 100%;
+    min-height: 0;
+  }
+  .hero-photo > img {
+    object-position: 62% center;
+  }
+  .hero .shop-ticket {
+    display: none;
+  }
 }
 @media (min-width: 700px) and (max-width: 1099px) {
   .hero {
@@ -1241,6 +1363,7 @@ main {
     padding: 16px 64px;
   }
   .nav-action {
+    display: inline-flex;
     min-height: 54px;
     padding: 16px;
     gap: 24px;
@@ -1291,9 +1414,6 @@ main {
   .hero .shop-ticket {
     display: none;
   }
-  .hero {
-    grid-template-rows: auto minmax(100px, 1fr);
-  }
   .hero-photo {
     min-height: 100px;
   }
@@ -1316,7 +1436,8 @@ main {
 <div class="reading-progress" aria-hidden="true"></div>
 <header class="navigation">
   <a class="brand" href="#main">Torque &amp; Theory</a>
-  <nav aria-label="Main navigation"><ul>
+  <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-navigation" aria-label="Open menu" data-open-label="Open menu" data-close-label="Close menu"><span aria-hidden="true"></span></button>
+  <nav id="site-navigation" aria-label="Main navigation"><ul>
 <li><a href="#services">Services</a></li>    <li><a href="#gallery">The shop</a></li>
 <li><a href="#reviews">Reviews</a></li>  </ul></nav>
   <a class="action nav-action" href="#appointment"><span class="desktop-label">Request an appointment</span><span class="mobile-label">Book</span><span class="onward" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1424,7 +1545,7 @@ THEN WE WRENCH.</h2></div><p data-reveal>Good repairs start with a clear picture
 <path d="M485 108L551 130C563 134.667 568.333 145.333 567 162L541 327C538.333 343 528.333 350 511 348L448 331L456 284L491 289L506 189L471 178L485 108Z" fill="var(--color-secondary)" stroke="var(--color-on-accent)" stroke-width="3"/>
 <path d="M516 139L543 148L519 320L491 312M486 172L525 182M469 278L510 290" stroke="var(--color-on-accent)" stroke-width="3"/>
 </svg>
-</div><svg class="part-labels" viewBox="0 0 720 580" aria-hidden="true"><g class="part-callout" data-part="0"><path class="callout-line" pathLength="1" d="M520 290L404 372L168 446H26"/><circle cx="520" cy="290" r="7"/><text x="26" y="477" text-anchor="start">01 / PADS</text></g><g class="part-callout" data-part="1"><path class="callout-line" pathLength="1" d="M422 117L566 52H690"/><circle cx="422" cy="117" r="7"/><text x="690" y="35" text-anchor="end">02 / ROTOR</text></g><g class="part-callout" data-part="2"><path class="callout-line" pathLength="1" d="M449 336L627 393H690"/><circle cx="449" cy="336" r="7"/><text x="690" y="428" text-anchor="end">03 / CALIPER</text></g></svg></div>
+</div><svg class="part-labels" viewBox="0 0 720 580" aria-hidden="true"><g class="part-callout" data-part="0"><path class="callout-line" pathLength="1" d="M520 290L625 290H690"/><circle cx="520" cy="290" r="7"/><text x="690" y="275" text-anchor="end">01 / PADS</text></g><g class="part-callout" data-part="1"><path class="callout-line" pathLength="1" d="M245 365L168 446H26"/><circle cx="245" cy="365" r="7"/><text x="26" y="477" text-anchor="start">02 / ROTOR</text></g><g class="part-callout" data-part="2"><path class="callout-line" pathLength="1" d="M550 180L590 52H690"/><circle cx="550" cy="180" r="7"/><text x="690" y="35" text-anchor="end">03 / CALIPER</text></g></svg></div>
       <div class="inspection-report" data-reveal>
         <div class="part-tabs" aria-label="Explore a brake inspection"><a class="part-tab label" id="part-tab-0" href="#part-0">01 PADS</a><a class="part-tab label" id="part-tab-1" href="#part-1">02 ROTOR</a><a class="part-tab label" id="part-tab-2" href="#part-2">03 CALIPER</a></div>
         <div class="part-panels"><article class="part-panel" id="part-0" aria-labelledby="part-tab-0"><p class="label">WHAT WE LOOK FOR</p><h3>SMALL PART.
@@ -1591,6 +1712,37 @@ Brooklyn, NY 11231</p><div><a href="tel:7185550142">(718) 555-0142</a><a href="m
     observer.observe(dock);
   }
   window.addEventListener("resize", measureChrome, { passive: true });
+  const menu = document.querySelector("#site-navigation");
+  const menuToggle = document.querySelector(".menu-toggle");
+  function closeMenu(returnFocus = false) {
+    menu.classList.remove("is-open");
+    menuToggle.setAttribute("aria-expanded", "false");
+    menuToggle.setAttribute("aria-label", menuToggle.dataset.openLabel);
+    document.body.classList.remove("menu-open");
+    if (returnFocus) menuToggle.focus();
+  }
+  menuToggle.addEventListener("click", () => {
+    const opening = menuToggle.getAttribute("aria-expanded") !== "true";
+    if (!opening) return closeMenu();
+    menu.classList.add("is-open");
+    menuToggle.setAttribute("aria-expanded", "true");
+    menuToggle.setAttribute("aria-label", menuToggle.dataset.closeLabel);
+    document.body.classList.add("menu-open");
+  });
+  menu.querySelectorAll("a").forEach((link) =>
+    link.addEventListener("click", () => closeMenu()),
+  );
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && menu.classList.contains("is-open"))
+      closeMenu(true);
+  });
+  window.addEventListener(
+    "resize",
+    () => {
+      if (innerWidth >= 1100) closeMenu();
+    },
+    { passive: true },
+  );
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
   const ease = "cubic-bezier(.16,1,.3,1)";
   const running = new Set();
