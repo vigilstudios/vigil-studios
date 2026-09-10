@@ -312,6 +312,8 @@
 }
 
 .slideFooter {
+  position: relative;
+  z-index: 6;
   display: flex;
   width: min(92vw, 900px);
   align-items: center;
@@ -325,6 +327,11 @@
   color: var(--text-primary);
   font-size: clamp(18px, 1.8vw, 27px);
   line-height: 1.05;
+}
+
+.templateIdentity {
+  position: relative;
+  z-index: 1;
 }
 
 .actions {
@@ -560,16 +567,7 @@
   }
 
   .peek {
-    top: 44%;
-    width: 122px;
-  }
-
-  .peekPrevious {
-    left: 0;
-  }
-
-  .peekNext {
-    right: 0;
+    display: none;
   }
 
   .carouselButton {
