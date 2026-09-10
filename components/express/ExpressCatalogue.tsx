@@ -33,7 +33,9 @@ function groupTemplates(): IndustryGroup[] {
   }, []);
 }
 
-const INDUSTRIES = groupTemplates();
+const INDUSTRIES = groupTemplates().sort((a, b) =>
+  a.industry.localeCompare(b.industry)
+);
 const MOBILE_VIEWPORT_QUERY = "(max-width: 767px)";
 const slideVariants = {
   enter: (direction: number) => ({
