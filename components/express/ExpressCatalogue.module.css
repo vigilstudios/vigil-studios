@@ -5,8 +5,7 @@
   width: 100%;
   min-height: 100svh;
   max-width: 100vw;
-  overflow-x: clip;
-  overflow-y: hidden;
+  overflow: clip;
   padding: 96px 20px 24px;
   background:
     radial-gradient(circle at 50% 58%, color-mix(in srgb, var(--template-accent) 10%, transparent), transparent 34%),
@@ -120,6 +119,7 @@
   margin: 0 auto;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
+  overscroll-behavior-block: none;
   border-bottom: 1px solid var(--border);
   scroll-padding-inline: 36px;
   scroll-snap-type: inline proximity;
@@ -203,6 +203,7 @@
   position: relative;
   z-index: 3;
   display: flex;
+  grid-area: 1 / 1;
   width: 100%;
   min-width: 0;
   flex-direction: column;
@@ -363,15 +364,12 @@
   position: absolute;
   top: 50%;
   z-index: 1;
+  display: flex;
   width: clamp(112px, 17vw, 260px);
-  aspect-ratio: 3 / 4;
-  overflow: hidden;
+  flex-direction: column;
+  gap: 14px;
+  overflow: visible;
   border: 0;
-  border-radius: 14px;
-  filter: blur(2.4px) saturate(0.78);
-  box-shadow:
-    0 0 38px color-mix(in srgb, var(--peek-accent) 36%, transparent),
-    0 18px 52px rgba(0, 0, 0, 0.42);
   transform-origin: center;
 }
 
@@ -383,29 +381,26 @@
   right: -64px;
 }
 
-.peekImage {
-  object-fit: cover;
-  object-position: top;
-  filter: blur(8px) saturate(0.72);
-  transform: scale(1.08);
-}
-
-.peekShade {
-  position: absolute;
-  inset: 0;
-  background: var(--bg-primary);
-  opacity: 0.28;
+.peekOutline {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border: 1px solid color-mix(in srgb, var(--peek-accent) 64%, var(--border));
+  border-radius: 14px;
+  background: transparent;
+  box-shadow:
+    inset 0 0 28px color-mix(in srgb, var(--peek-accent) 4%, transparent),
+    0 0 32px color-mix(in srgb, var(--peek-accent) 20%, transparent);
 }
 
 .peekLabel {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  left: 12px;
-  color: white;
+  display: block;
+  color: var(--text-secondary);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-align: center;
   text-transform: uppercase;
 }
 
@@ -523,7 +518,7 @@
   }
 
   .viewSwitch {
-    align-self: center;
+    display: none;
   }
 
   .viewSwitch button span:not(.switchIndicator) {
@@ -554,7 +549,14 @@
 
   .mobile {
     width: min(78vw, 340px);
-    height: clamp(400px, 52svh, 480px);
+    height: clamp(470px, 60svh, 520px);
+  }
+
+  .mobile iframe {
+    width: 128.205%;
+    height: 128.205%;
+    transform: scale(0.78);
+    transform-origin: top left;
   }
 
   .peek {
@@ -563,11 +565,11 @@
   }
 
   .peekPrevious {
-    left: -92px;
+    left: 0;
   }
 
   .peekNext {
-    right: -92px;
+    right: 0;
   }
 
   .carouselButton {

@@ -2,7 +2,6 @@
 
 import type { CSSProperties } from "react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -36,6 +35,19 @@ function groupTemplates(): IndustryGroup[] {
 
 const INDUSTRIES = groupTemplates();
 const MOBILE_VIEWPORT_QUERY = "(max-width: 767px)";
+const slideVariants = {
+  enter: (direction: number) => ({
+    opacity: 0,
+    x: direction > 0 ? "32%" : "-32%",
+    scale: 0.94,
+  }),
+  center: { opacity: 1, x: 0, scale: 1 },
+  exit: (direction: number) => ({
+    opacity: 0,
+    x: direction > 0 ? "-28%" : "28%",
+    scale: 0.96,
+  }),
+};
 
 function subscribeToMobileViewport(onChange: () => void) {
   const mediaQuery = window.matchMedia(MOBILE_VIEWPORT_QUERY);
@@ -82,9 +94,9 @@ function PreviewPeek({
       type="button"
       onClick={onSelect}
       initial={{ opacity: 0, x: side === "previous" ? -36 : 36, scale: 0.68 }}
-      animate={{ opacity: 0.34, x: 0, scale: 0.76 }}
+      animate={{ opacity: 0.52, x: 0, scale: 0.76 }}
       exit={{ opacity: 0, x: side === "previous" ? 36 : -36, scale: 0.68 }}
-      whileHover={{ opacity: 0.62, scale: 0.8 }}
+      whileHover={{ opacity: 0.86, scale: 0.8 }}
       transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
       style={{ "--peek-accent": accent } as CSSProperties}
       className={`${styles.peek} ${
@@ -92,14 +104,7 @@ function PreviewPeek({
       }`}
       aria-label={`Show ${template.industry}`}
     >
-      <Image
-        src={`/express-templates/previews/${template.slug}.jpg`}
-        alt=""
-        fill
-        sizes="(max-width: 768px) 28vw, 18vw"
-        className={styles.peekImage}
-      />
-      <span className={styles.peekShade} />
+      <span className={styles.peekOutline} aria-hidden="true" />
       <span className={styles.peekLabel}>{template.industry}</span>
     </motion.button>
   );
@@ -279,14 +284,16 @@ export function ExpressCatalogue() {
             />
           </AnimatePresence>
 
-          <AnimatePresence mode="wait" initial={false} custom={direction}>
+          <AnimatePresence initial={false} custom={direction}>
             <motion.div
               key={active.slug}
+              custom={direction}
+              variants={slideVariants}
               className={styles.activeSlide}
-              initial={{ opacity: 0, x: direction * 110, scale: 0.92 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: direction * -90, scale: 0.94 }}
-              transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.62, ease: [0.16, 1, 0.3, 1] }}
             >
               <div className={styles.previewFrame}>
                 <button
