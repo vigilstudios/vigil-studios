@@ -157,8 +157,8 @@ export const EXPRESS_TEMPLATES = [
     industry: "Restaurant and cafe",
     example: "Marlow & Fen",
     description:
-      "A proper menu, grouped by course with prices, rather than a grid of cards. Warm, editorial, unhurried.",
-    accent: "#a97c33",
+      "An all-day menu, warm food photography, and an invitation to stay. Designed for neighborhood restaurants and cafes.",
+    accent: "#ad3827",
   },
   {
     slug: "retail",
