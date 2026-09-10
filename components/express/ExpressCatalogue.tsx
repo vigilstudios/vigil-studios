@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
@@ -12,7 +12,7 @@ import {
   Monitor,
   Smartphone,
 } from "lucide-react";
-import { EXPRESS_PRICE, EXPRESS_TEMPLATES } from "@/lib/constants";
+import { EXPRESS_TEMPLATES } from "@/lib/constants";
 import accentsBySlug from "@/lib/express-accents.json";
 import styles from "./ExpressCatalogue.module.css";
 
@@ -35,6 +35,21 @@ function groupTemplates(): IndustryGroup[] {
 }
 
 const INDUSTRIES = groupTemplates();
+const MOBILE_VIEWPORT_QUERY = "(max-width: 767px)";
+
+function subscribeToMobileViewport(onChange: () => void) {
+  const mediaQuery = window.matchMedia(MOBILE_VIEWPORT_QUERY);
+  mediaQuery.addEventListener("change", onChange);
+  return () => mediaQuery.removeEventListener("change", onChange);
+}
+
+function getMobileViewportSnapshot() {
+  return window.matchMedia(MOBILE_VIEWPORT_QUERY).matches;
+}
+
+function getServerMobileViewportSnapshot() {
+  return false;
+}
 
 function readableAccentText(hex: string) {
   const value = hex.replace("#", "");
@@ -59,6 +74,8 @@ function PreviewPeek({
   side: "previous" | "next";
   onSelect: () => void;
 }) {
+  const accent = ACCENTS[template.slug] ?? template.accent;
+
   return (
     <motion.button
       key={`${side}-${template.slug}`}
@@ -69,6 +86,7 @@ function PreviewPeek({
       exit={{ opacity: 0, x: side === "previous" ? 36 : -36, scale: 0.68 }}
       whileHover={{ opacity: 0.62, scale: 0.8 }}
       transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      style={{ "--peek-accent": accent } as CSSProperties}
       className={`${styles.peek} ${
         side === "previous" ? styles.peekPrevious : styles.peekNext
       }`}
@@ -94,6 +112,12 @@ export function ExpressCatalogue() {
   const [direction, setDirection] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>("desktop");
   const industryTabsRef = useRef<HTMLDivElement>(null);
+  const isMobileViewport = useSyncExternalStore(
+    subscribeToMobileViewport,
+    getMobileViewportSnapshot,
+    getServerMobileViewportSnapshot
+  );
+  const effectiveViewMode = isMobileViewport ? "mobile" : viewMode;
 
   const group = industries[industryIndex];
   const active = group.variants[variantIndex] ?? group.variants[0];
@@ -105,10 +129,18 @@ export function ExpressCatalogue() {
   const href = `/express-templates/${active.slug}.html`;
 
   useEffect(() => {
-    const selected = industryTabsRef.current?.querySelector<HTMLElement>(
-      '[aria-selected="true"]'
-    );
-    selected?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    const rail = industryTabsRef.current;
+    const selected = rail?.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (!rail || !selected) return;
+
+    const railBounds = rail.getBoundingClientRect();
+    const selectedBounds = selected.getBoundingClientRect();
+    const centeredLeft =
+      rail.scrollLeft +
+      selectedBounds.left -
+      railBounds.left -
+      (rail.clientWidth - selectedBounds.width) / 2;
+    rail.scrollTo({ left: centeredLeft, behavior: "smooth" });
   }, [industryIndex]);
 
   function selectIndustry(nextIndustry: number, forcedDirection?: number) {
@@ -134,7 +166,7 @@ export function ExpressCatalogue() {
       <div className={styles.shell}>
         <header className={styles.header}>
           <div className={styles.heading}>
-            <p>Express Sites &middot; ${EXPRESS_PRICE}</p>
+            <p>Express Sites</p>
             <h1 id="catalogue-title">Choose your starting point.</h1>
           </div>
 
@@ -143,12 +175,18 @@ export function ExpressCatalogue() {
               <button
                 key={mode}
                 type="button"
-                aria-pressed={viewMode === mode}
+                aria-pressed={effectiveViewMode === mode}
+                disabled={isMobileViewport && mode === "desktop"}
+                title={
+                  isMobileViewport && mode === "desktop"
+                    ? "Desktop preview is available on larger screens"
+                    : undefined
+                }
                 onClick={() => setViewMode(mode)}
               >
                 {mode === "desktop" ? <Monitor size={16} /> : <Smartphone size={16} />}
                 <span>{mode === "desktop" ? "Desktop" : "Mobile"}</span>
-                {viewMode === mode && (
+                {effectiveViewMode === mode && (
                   <motion.span
                     layoutId="view-mode"
                     className={styles.switchIndicator}
@@ -241,23 +279,6 @@ export function ExpressCatalogue() {
             />
           </AnimatePresence>
 
-          <button
-            type="button"
-            className={`${styles.carouselButton} ${styles.carouselPrevious}`}
-            onClick={() => selectIndustry(previousIndex, -1)}
-            aria-label={`Previous industry: ${previous.industry}`}
-          >
-            <ArrowLeft size={19} />
-          </button>
-          <button
-            type="button"
-            className={`${styles.carouselButton} ${styles.carouselNext}`}
-            onClick={() => selectIndustry(nextIndex, 1)}
-            aria-label={`Next industry: ${next.industry}`}
-          >
-            <ArrowRight size={19} />
-          </button>
-
           <AnimatePresence mode="wait" initial={false} custom={direction}>
             <motion.div
               key={active.slug}
@@ -267,35 +288,57 @@ export function ExpressCatalogue() {
               exit={{ opacity: 0, x: direction * -90, scale: 0.94 }}
               transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
             >
-              <motion.div
-                layout
-                className={`${styles.browser} ${
-                  viewMode === "desktop" ? styles.desktop : styles.mobile
-                }`}
-                transition={{ layout: { type: "spring", stiffness: 210, damping: 28 } }}
-              >
-                <div className={styles.browserBar}>
-                  <span className={styles.browserDots} aria-hidden="true">
-                    <i />
-                    <i />
-                    <i />
-                  </span>
-                  <span className={styles.browserAddress}>
-                    {active.slug}.preview
-                  </span>
-                  <span className={styles.viewportLabel}>
-                    {viewMode === "desktop" ? "1200 px" : "390 px"}
-                  </span>
-                </div>
-                <div className={styles.viewport}>
-                  <iframe
-                    src={href}
-                    title={`${active.industry}, ${active.variant} preview`}
-                    tabIndex={-1}
-                    loading="eager"
-                  />
-                </div>
-              </motion.div>
+              <div className={styles.previewFrame}>
+                <button
+                  type="button"
+                  className={`${styles.carouselButton} ${styles.carouselPrevious}`}
+                  onClick={() => selectIndustry(previousIndex, -1)}
+                  aria-label={`Previous industry: ${previous.industry}`}
+                >
+                  <ArrowLeft size={19} />
+                </button>
+
+                <motion.div
+                  layout
+                  className={`${styles.browser} ${
+                    effectiveViewMode === "desktop" ? styles.desktop : styles.mobile
+                  }`}
+                  transition={{
+                    layout: { type: "spring", stiffness: 210, damping: 28 },
+                  }}
+                >
+                  <div className={styles.browserBar}>
+                    <span className={styles.browserDots} aria-hidden="true">
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                    <span className={styles.browserAddress}>
+                      {active.slug}.preview
+                    </span>
+                    <span className={styles.viewportLabel}>
+                      {effectiveViewMode === "desktop" ? "1200 px" : "390 px"}
+                    </span>
+                  </div>
+                  <div className={styles.viewport}>
+                    <iframe
+                      src={href}
+                      title={`${active.industry}, ${active.variant} preview`}
+                      tabIndex={-1}
+                      loading="eager"
+                    />
+                  </div>
+                </motion.div>
+
+                <button
+                  type="button"
+                  className={`${styles.carouselButton} ${styles.carouselNext}`}
+                  onClick={() => selectIndustry(nextIndex, 1)}
+                  aria-label={`Next industry: ${next.industry}`}
+                >
+                  <ArrowRight size={19} />
+                </button>
+              </div>
 
               <div className={styles.slideFooter}>
                 <div className={styles.templateIdentity}>
