@@ -135,6 +135,7 @@ export const EXPRESS_CHECKOUT_URL = "";
 export const EXPRESS_TEMPLATES = [
   {
     slug: "home-services",
+    variant: "Variant 1",
     industry: "Home services",
     example: "Northgate Plumbing & Heating",
     description:
@@ -143,6 +144,7 @@ export const EXPRESS_TEMPLATES = [
   },
   {
     slug: "auto-services",
+    variant: "Variant 1",
     industry: "Auto repair",
     example: "Torque & Theory",
     description:
@@ -151,6 +153,7 @@ export const EXPRESS_TEMPLATES = [
   },
   {
     slug: "restaurant",
+    variant: "Variant 1",
     industry: "Restaurant and cafe",
     example: "Marlow & Fen",
     description:
@@ -159,6 +162,7 @@ export const EXPRESS_TEMPLATES = [
   },
   {
     slug: "retail",
+    variant: "Variant 1",
     industry: "Retail and boutique",
     example: "Quillon Supply",
     description:
@@ -167,6 +171,7 @@ export const EXPRESS_TEMPLATES = [
   },
   {
     slug: "salon-spa",
+    variant: "Variant 1",
     industry: "Salon and spa",
     example: "Ashcombe Studio",
     description:
@@ -175,6 +180,7 @@ export const EXPRESS_TEMPLATES = [
   },
   {
     slug: "medical",
+    variant: "Variant 1",
     industry: "Medical and dental",
     example: "Trelawn Dental Practice",
     description:
