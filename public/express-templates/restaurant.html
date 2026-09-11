@@ -6,7 +6,7 @@ The kind of place that becomes your place."><link rel="icon" href="data:,"><meta
   box-sizing: border-box;
 }
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   scroll-padding-top: 110px;
 }
 body {
@@ -1457,6 +1457,20 @@ Babylon, NY 11702</p><a href="tel:6315550146">(631) 555-0146</a><a href="mailto:
   new ResizeObserver(() => document.documentElement.style.setProperty('--nav-height', `${header.offsetHeight}px`)).observe(header);
   const onScroll = () => header.classList.toggle('scrolled', scrollY > 16);
   addEventListener('scroll', onScroll, {passive: true}); onScroll();
+  const navigateTo = hash => {
+    const target = hash && $(hash);
+    if (!target) return;
+    const navHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || header.offsetHeight;
+    const top = target.getBoundingClientRect().top + scrollY - navHeight - 16;
+    history.pushState(null, '', hash);
+    scrollTo({top: Math.max(0, top), behavior: 'auto'});
+    target.tabIndex = -1;
+    target.focus({preventScroll: true});
+  };
+  $$('.desktop-nav a[href^="#"]').forEach(link => link.addEventListener('click', event => {
+    event.preventDefault();
+    navigateTo(link.hash);
+  }));
 
   const toggle = $('.nav-toggle'), nav = $('#mobile-nav');
   let navOpen = false, navSequence = 0;
@@ -1501,13 +1515,8 @@ Babylon, NY 11702</p><a href="tel:6315550146">(631) 555-0146</a><a href="mailto:
   $$('a', nav).forEach(a => a.addEventListener('click', async event => {
     if (!a.hash) return;
     event.preventDefault();
-    const target = a.hash && $(a.hash);
     await setNav(false, false);
-    if (!target) return;
-    history.pushState(null, '', a.hash);
-    target.scrollIntoView({behavior: reduced.matches ? 'auto' : 'smooth', block: 'start'});
-    target.tabIndex = -1;
-    target.focus({preventScroll: true});
+    navigateTo(a.hash);
   }));
   document.addEventListener('keydown', e => {
     if (!navOpen) return;
