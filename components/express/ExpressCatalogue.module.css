@@ -220,7 +220,7 @@
 
 .browser {
   display: flex;
-  overflow: hidden;
+  overflow: clip;
   flex-direction: column;
   border: 1px solid color-mix(in srgb, var(--template-accent) 38%, var(--border));
   border-radius: 16px;
@@ -279,7 +279,9 @@
 .viewport {
   position: relative;
   flex: 1;
-  overflow: hidden;
+  /* Clipping must not create a scroll container: iframe anchor/focus
+     navigation can otherwise scroll this wrapper and crop its fixed nav. */
+  overflow: clip;
   background: #ffffff;
 }
 

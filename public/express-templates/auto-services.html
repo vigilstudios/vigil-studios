@@ -1462,132 +1462,21 @@ main {
   }
 }
 
-/* --- scroll-linked entrances ------------------------------------------
-   The same reveal the home-services template uses: content rises and fades
-   in against scroll position rather than against a clock. A timed entrance
-   plays whether or not the reader is looking; a scroll-linked one moves
-   while they move, which is what makes it read as content floating in.
-
-   Two things this layer must not break, both learned the hard way:
-
-   * The hidden state lives INSIDE @supports. A browser without view
-     timelines never hides anything it has no way to reveal, and the
-     reduced-motion block above cancels the animation with `!important`,
-     which lands on the element's natural, visible state.
-   * `view()` resolves against the nearest scroll container, not the page.
-     `.review-strip` is one (`overflow-x: auto`), so its cards would bind
-     to a strip that barely scrolls vertically and freeze at opacity 0.
-     Those, and the hero -- which is on screen before any scrolling has
-     happened -- stay with the script's entrance. motion.js skips exactly
-     the set this block claims; the two lists have to move together. */
+/* Headings own word entrances; motion.js owns content fades and slides. */
 @media (prefers-reduced-motion: no-preference) {
-    /* --- the headline, a word at a time -------------------------------
-       The entrance the shared template gives every vertical it renders, and
-       the one that separates these heroes from the rest: each word slides up
-       from behind its own mask rather than the whole block fading at once.
-
-       `.w` is the mask and the inner span is what moves, so `overflow` clips
-       the word against its own edge instead of against the heading box.
-       `backwards` fill means an animation that never runs leaves the words
-       simply sitting there -- which is also what happens under
-       `prefers-reduced-motion: reduce`, since this whole block is inside the
-       no-preference query.
-
-       Nothing else may animate the h1. A block-level fade on the heading
-       runs at the same time and reads as two entrances fighting, which is
-       why the script no longer marks it. */
-    .hero h1 .w {
-      display: inline-block;
-      overflow: hidden;
-      vertical-align: bottom;
-    }
-    .hero h1 .w > span {
-      display: inline-block;
-      animation: wordUp 0.85s var(--ease-out) backwards;
-      animation-delay: calc(0.12s + var(--i) * 0.055s);
-    }
-    @keyframes wordUp {
-      from { transform: translateY(105%); }
-      to { transform: none; }
-    }
-  @supports (animation-timeline: view()) {
-    @keyframes reveal {
-      from {
-        opacity: 0;
-        transform: translateY(var(--reveal-travel));
-      }
-      to {
-        opacity: 1;
-        transform: none;
-      }
-    }
-    :root {
-      --reveal-travel: 26px;
-      /* `entry 0%` is the element's edge crossing the bottom of the
-         viewport, which on a phone is underneath the call dock. Insetting
-         the scrollport by the dock moves the starting line to the part of
-         the screen somebody can actually see. --dock-height is measured by
-         motion.js and is already 0px on desktop. */
-      --reveal-inset: calc(var(--dock-height, 0px) + 32px);
-    }
-    /* `:where()` so this base rule carries the specificity of `[data-reveal]`
-       alone. Written plainly it reaches (0,3,1) -- `:is(...)` takes its most
-       specific argument and `:not(...)` does the same -- which outranks every
-       stagger rule below and flattens the whole sequence into one range. The
-       exclusions still apply; they just stop competing. The strip is
-       excluded here rather than overridden afterwards for the same reason:
-       an override at (0,2,0) loses, and its cards bind to the strip anyway --
-       which showed up as four reviews frozen at opacity 0. */
-    :where(section:not(.hero), .footer) [data-reveal]:where(:not(.review-strip > *)) {
-      animation: reveal 1ms var(--ease-out) both;
-      animation-timeline: view(block auto var(--reveal-inset));
-      /* Duration is ignored on a scroll timeline: progress comes entirely
-         from the range. Ending on `cover` rather than `entry` is what buys
-         enough scroll distance for the move to happen on screen. */
-      animation-range: entry 12% cover 34%;
-    }
-    /* Stagger by shifting the range. Delays are ignored on a scroll
-       timeline, which is a quiet way to end up with no stagger at all. */
-    .trust .proof:nth-child(1),
-    .intro > [data-reveal]:nth-child(1),
-    .service-ledger .service-row:nth-child(1),
-    .form-fields .field:nth-child(1),
-    .footer-directory > [data-reveal]:nth-child(1) {
-      animation-range: entry 10% cover 30%;
-    }
-    .trust .proof:nth-child(2),
-    .intro > [data-reveal]:nth-child(2),
-    .service-ledger .service-row:nth-child(2),
-    .form-fields .field:nth-child(2),
-    .footer-directory > [data-reveal]:nth-child(2) {
-      animation-range: entry 16% cover 34%;
-    }
-    .trust .proof:nth-child(3),
-    .intro > [data-reveal]:nth-child(3),
-    .service-ledger .service-row:nth-child(3),
-    .form-fields .field:nth-child(3),
-    .footer-directory > [data-reveal]:nth-child(3) {
-      animation-range: entry 22% cover 38%;
-    }
-    .trust .proof:nth-child(4),
-    .service-ledger .service-row:nth-child(4),
-    .form-fields .field:nth-child(4) {
-      animation-range: entry 28% cover 42%;
-    }
-    .service-ledger .service-row:nth-child(5),
-    .form-fields .field:nth-child(5) {
-      animation-range: entry 34% cover 46%;
-    }
-    .service-ledger .service-row:nth-child(6),
-    .form-fields .field:nth-child(6) {
-      animation-range: entry 40% cover 50%;
-    }
-    /* The inspection stage and the gallery read as a pair rather than a
-       list: the visual leads and its explanation follows it up. */
-    .inspection-stage > [data-reveal]:nth-child(2),
-    .gallery-item > [data-reveal]:nth-child(2) {
-      animation-range: entry 20% cover 40%;
-    }
+  .hero h1 .w, [data-word-heading] .w {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+  }
+  .hero h1 .w > span, [data-word-heading] .w > span { display: inline-block; }
+  .hero h1 .w > span {
+    animation: wordUp 0.85s var(--ease-out) backwards;
+    animation-delay: calc(0.12s + var(--i) * 0.055s);
+  }
+  @keyframes wordUp {
+    from { opacity: 0; transform: translateY(105%); }
+    to { opacity: 1; transform: none; }
   }
 }
 
@@ -1854,6 +1743,63 @@ Brooklyn, NY 11231</p><div><a href="tel:7185550142">(718) 555-0142</a><a href="m
 </svg>
 </div></template>
 <script>(() => {
+  'use strict';
+  // Enhance text nodes only, preserving emphasis, links and authored line breaks.
+  // Everything remains readable without JavaScript or IntersectionObserver.
+  if (!('IntersectionObserver' in window)) return;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const running = new Set();
+  const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    observer.unobserve(entry.target);
+    if (reduced.matches) return;
+    entry.target.querySelectorAll('.w > span').forEach((word, index) => {
+      const animation = word.animate([
+        {opacity: 0, transform: 'translateY(105%)'},
+        {opacity: 1, transform: 'none'},
+      ], {duration: 850, delay: index * 55, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards'});
+      running.add(animation);
+      animation.finished.catch(() => {}).finally(() => running.delete(animation));
+    });
+  }), {threshold: .12});
+  document.querySelectorAll('main h2, main .menu-title').forEach(heading => {
+    if (heading.closest('.trust')) return;
+    // A parent fade would compete with the word animation. Give its other
+    // children their own content entrance instead, before motion.js observes.
+    let owner = heading.closest('[data-reveal]');
+    while (owner) {
+      owner.removeAttribute('data-reveal');
+      if (owner !== heading) [...owner.children].forEach(child => {
+        if (child !== heading && !child.contains(heading)) child.setAttribute('data-reveal', '');
+      });
+      owner = heading.closest('[data-reveal]');
+    }
+    heading.dataset.wordHeading = '';
+    const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(node => {
+      const fragment = document.createDocumentFragment();
+      node.textContent.split(/(\s+)/).forEach(text => {
+        if (!text || /^\s+$/.test(text)) fragment.append(document.createTextNode(text));
+        else {
+          const mask = document.createElement('span');
+          mask.className = 'w';
+          const word = document.createElement('span');
+          word.textContent = text;
+          mask.append(word);
+          fragment.append(mask);
+        }
+      });
+      node.replaceWith(fragment);
+    });
+    observer.observe(heading);
+  });
+  reduced.addEventListener('change', () => {
+    if (reduced.matches) running.forEach(animation => animation.cancel());
+  });
+})();</script>
+<script>(() => {
   "use strict";
   const nav = document.querySelector(".navigation");
   const dock = document.querySelector(".mobile-dock");
@@ -1891,8 +1837,18 @@ Brooklyn, NY 11231</p><div><a href="tel:7185550142">(718) 555-0142</a><a href="m
     menuToggle.setAttribute("aria-label", menuToggle.dataset.closeLabel);
     document.body.classList.add("menu-open");
   });
-  menu.querySelectorAll("a").forEach((link) =>
-    link.addEventListener("click", () => closeMenu()),
+  document.querySelectorAll('a[href^="#"]:not(.part-tab)').forEach((link) =>
+    link.addEventListener("click", (event) => {
+      const target = document.getElementById(link.hash.slice(1));
+      if (!target) return;
+      event.preventDefault();
+      closeMenu();
+      const top = target.getBoundingClientRect().top + scrollY - nav.offsetHeight - 16;
+      history.pushState(null, "", link.hash);
+      window.scrollTo({ top: Math.max(0, top), behavior: "instant" });
+      target.tabIndex = -1;
+      target.focus({ preventScroll: true });
+    }),
   );
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && menu.classList.contains("is-open"))
@@ -1975,18 +1931,7 @@ Brooklyn, NY 11231</p><div><a href="tel:7185550142">(718) 555-0142</a><a href="m
       },
       { threshold: 0.08 },
     );
-    // style.css drives the same entrance from scroll position wherever view
-    // timelines exist, and a Web Animation would silently outrank it -- the
-    // animation API sits above the CSS cascade, so both running means only
-    // this one is seen. The script keeps the two places CSS cannot reach: the
-    // opening scene, which is on screen before there is any scroll to link
-    // to, and the review strip, whose own horizontal overflow is the scroll
-    // container a `view()` timeline would bind to. Widen the CSS selector and
-    // this predicate has to widen with it.
-    const scrollLinked =
-      CSS.supports("animation-timeline", "view()") && !reduced.matches;
     document.querySelectorAll("[data-reveal]").forEach((node) => {
-      if (scrollLinked && !node.closest(".hero, .review-strip")) return;
       reveal.observe(node);
     });
   }

@@ -1296,104 +1296,21 @@ html {
 .nav-toggle[aria-expanded=true] svg { opacity: 0; transform: rotate(90deg); }
 .nav-toggle[aria-expanded=true] .nav-close { opacity: 1; transform: none; }
 
-/* --- scroll-linked entrances ------------------------------------------
-   The reveal from the home-services template: copy and buttons rise and
-   fade against scroll position rather than against a clock, so the motion
-   tracks the reader instead of playing on its own schedule.
-
-   Three constraints hold this together:
-
-   * The hidden state is declared INSIDE @supports, so a browser with no
-     view timelines never hides content it cannot reveal. The reduced-motion
-     block above cancels the animation with `!important`, which leaves the
-     element on its natural, visible state.
-   * `view()` binds to the nearest scroll container, not the page. The hero
-     is excluded because it is already on screen before there is any scroll
-     to link to, and #full-menu because a dialog in the top layer has no
-     useful relationship to the page scroller -- hence `main`/`.footer`
-     rather than a bare [data-reveal].
-   * motion.js runs the same entrance for whatever this block does not
-     claim, and a Web Animation outranks the CSS cascade, so exactly one of
-     the two may own an element. Widen this selector and widen that
-     predicate in the same edit. */
+/* Headings own word entrances; motion.js owns content fades and slides. */
 @media (prefers-reduced-motion: no-preference) {
-    /* --- the headline, a word at a time -------------------------------
-       The entrance the shared template gives every vertical it renders, and
-       the one that separates these heroes from the rest: each word slides up
-       from behind its own mask rather than the whole block fading at once.
-
-       `.w` is the mask and the inner span is what moves, so `overflow` clips
-       the word against its own edge instead of against the heading box.
-       `backwards` fill means an animation that never runs leaves the words
-       simply sitting there -- which is also what happens under
-       `prefers-reduced-motion: reduce`, since this whole block is inside the
-       no-preference query.
-
-       Nothing else may animate the h1. A block-level fade on the heading
-       runs at the same time and reads as two entrances fighting, which is
-       why the script no longer marks it. */
-    .hero h1 .w {
-      display: inline-block;
-      overflow: hidden;
-      vertical-align: bottom;
-    }
-    .hero h1 .w > span {
-      display: inline-block;
-      animation: wordUp 0.85s cubic-bezier(.22, 1, .36, 1) backwards;
-      animation-delay: calc(0.12s + var(--i) * 0.055s);
-    }
-    @keyframes wordUp {
-      from { transform: translateY(105%); }
-      to { transform: none; }
-    }
-  @supports (animation-timeline: view()) {
-    @keyframes reveal {
-      from { opacity: 0; transform: translateY(var(--reveal-travel)); }
-      to { opacity: 1; transform: none; }
-    }
-    :root {
-      --reveal-travel: 24px;
-      --reveal-ease: cubic-bezier(.22, 1, .36, 1);
-      /* `entry 0%` is the bottom of the viewport, which on a phone sits
-         under the reservation dock. Insetting the scrollport by the dock
-         starts the reveal where somebody can see it begin. */
-      --reveal-inset: 32px;
-    }
-    /* `:where()` so this base rule carries the specificity of `[data-reveal]`
-       alone. Written plainly it reaches (0,3,1) -- `:is(...)` takes its most
-       specific argument and `:not(...)` does the same -- which outranks every
-       stagger rule below and flattens the whole sequence into one range. The
-       exclusions still apply; they just stop competing. */
-    :where(main section:not(.hero), .footer) [data-reveal] {
-      animation: reveal 1ms var(--reveal-ease) both;
-      animation-timeline: view(block auto var(--reveal-inset));
-      /* Duration is ignored on a scroll timeline -- progress comes from the
-         range alone, and ending on `cover` rather than `entry` is what buys
-         enough scroll distance for the movement to happen in view. */
-      animation-range: entry 12% cover 34%;
-    }
-    /* Stagger by shifting the range: delays do nothing on a scroll
-       timeline, which is a quiet way to end up with no stagger. */
-    .dishes > [data-reveal]:nth-child(1),
-    .gallery > [data-reveal]:nth-child(1),
-    .footer-grid > [data-reveal]:nth-child(1) { animation-range: entry 10% cover 30%; }
-    .dishes > [data-reveal]:nth-child(2),
-    .gallery > [data-reveal]:nth-child(2),
-    .footer-grid > [data-reveal]:nth-child(2) { animation-range: entry 16% cover 34%; }
-    .dishes > [data-reveal]:nth-child(3),
-    .gallery > [data-reveal]:nth-child(3),
-    .footer-grid > [data-reveal]:nth-child(3) { animation-range: entry 22% cover 38%; }
-    .dishes > [data-reveal]:nth-child(4),
-    .gallery > [data-reveal]:nth-child(4) { animation-range: entry 28% cover 42%; }
-    .dishes > [data-reveal]:nth-child(5) { animation-range: entry 34% cover 46%; }
-    .dishes > [data-reveal]:nth-child(n+6) { animation-range: entry 40% cover 50%; }
-    /* The featured plate leads its menu; the dish list answers it. */
-    .menu-columns > .featured { animation-range: entry 8% cover 30%; }
+  .hero h1 .w, [data-word-heading] .w {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
   }
-}
-@media (prefers-reduced-motion: no-preference) and (max-width: 760px) {
-  @supports (animation-timeline: view()) {
-    :root { --reveal-inset: 96px; }
+  .hero h1 .w > span, [data-word-heading] .w > span { display: inline-block; }
+  .hero h1 .w > span {
+    animation: wordUp 0.85s cubic-bezier(.22, 1, .36, 1) backwards;
+    animation-delay: calc(0.12s + var(--i) * 0.055s);
+  }
+  @keyframes wordUp {
+    from { opacity: 0; transform: translateY(105%); }
+    to { opacity: 1; transform: none; }
   }
 }
 </style></head><body>
@@ -1422,6 +1339,62 @@ Babylon, NY 11702</p><a href="tel:6315550146">(631) 555-0146</a><a href="mailto:
 <div class="mobile-dock"><a class="button  " href="#reserve"><span>Book a table</span><span aria-hidden="true">↗</span></a></div>
 <dialog id="full-menu"><div class="dialog-header"><h2>The menu</h2><button class="circle full-menu-close" aria-label="Close full menu">×</button></div><section><h3 class="menu-title">Breakfast</h3><p class="label">SERVED UNTIL 11 AM</p><div class="dish"><div class="dish-top"><h3>Apricot &amp; ricotta toast</h3><span class="price">$16</span></div><p>Whipped ricotta, roasted apricots, thyme, toasted sourdough.</p><span class="label dietary">VEGETARIAN</span></div><div class="dish"><div class="dish-top"><h3>Eggs, your way</h3><span class="price">$14</span></div><p>Farm eggs, sourdough, slow-roasted tomatoes.</p><span class="label dietary">VEGETARIAN</span></div><div class="dish"><div class="dish-top"><h3>The morning bowl</h3><span class="price">$12</span></div><p>Thick yogurt, seasonal fruit, house granola.</p><span class="label dietary">VEGETARIAN</span></div><div class="dish"><div class="dish-top"><h3>Something from the oven</h3><span class="price">$6</span></div><p>A warm pastry, baked fresh each morning.</p><span class="label dietary">VEGETARIAN</span></div></section><section><h3 class="menu-title">Lunch</h3><p class="label">SERVED 11 AM TO 4 PM</p><div class="dish"><div class="dish-top"><h3>The open sandwich</h3><span class="price">$18</span></div><p>Seasonal vegetables, whipped ricotta, toasted sourdough.</p><span class="label dietary">VEGETARIAN</span></div><div class="dish"><div class="dish-top"><h3>Little gem Caesar</h3><span class="price">$17</span></div><p>Crisp leaves, parmesan, sourdough crumbs.</p></div><div class="dish"><div class="dish-top"><h3>Soup &amp; sourdough</h3><span class="price">$14</span></div><p>A bowl of the season, something warm to dip.</p><span class="label dietary">ASK ABOUT TODAY</span></div><div class="dish"><div class="dish-top"><h3>The market salad</h3><span class="price">$19</span></div><p>Tender greens, grains, herbs, lemon dressing.</p><span class="label dietary">PLANT BASED</span></div></section><section><h3 class="menu-title">Dinner</h3><p class="label">SERVED FROM 5 PM</p><div class="dish"><div class="dish-top"><h3>Burrata &amp; late tomatoes</h3><span class="price">$18</span></div><p>Basil oil, toasted sourdough, a pinch of sea salt.</p><span class="label dietary">VEGETARIAN</span></div><div class="dish"><div class="dish-top"><h3>Wild mushroom mafaldine</h3><span class="price">$28</span></div><p>Brown butter, crispy sage, aged parmesan.</p><span class="label dietary">VEGETARIAN</span></div><div class="dish"><div class="dish-top"><h3>Roast chicken, made slowly</h3><span class="price">$32</span></div><p>Lemon pan jus, charred leeks, golden potatoes.</p><span class="label dietary">GLUTEN FREE</span></div><div class="dish"><div class="dish-top"><h3>The market plate</h3><span class="price">$24</span></div><p>Seasonal vegetables, butter beans, green tahini.</p><span class="label dietary">PLANT BASED</span></div></section><section><h3 class="menu-title">Drinks</h3><p class="label">POURED ALL DAY</p><div class="dish"><div class="dish-top"><h3>The house cappuccino</h3><span class="price">$5.50</span></div><p>A double espresso, silky milk, a moment to yourself.</p><span class="label dietary">OAT MILK AVAILABLE</span></div><div class="dish"><div class="dish-top"><h3>A proper flat white</h3><span class="price">$5</span></div><p>Rich espresso, finely textured milk.</p><span class="label dietary">OAT MILK AVAILABLE</span></div><div class="dish"><div class="dish-top"><h3>Something sparkling</h3><span class="price">$8</span></div><p>House citrus, garden herbs, sparkling water.</p><span class="label dietary">ALCOHOL FREE</span></div><div class="dish"><div class="dish-top"><h3>A glass of the season</h3><span class="price">$12</span></div><p>Ask us what we are pouring today.</p><span class="label dietary">BY THE GLASS</span></div></section></dialog><script id="restaurant-config" type="application/json">{"copy": {"allergy_note": "Please tell us about allergies. Our kitchen will guide you.", "come_in": "Come on in", "contact_note": "Please contact us directly to arrange your visit.", "contact_submit": "Contact us to book", "copyright": "\u00a9", "date_label": "DATE", "date_placeholder": "Choose a day", "directions": "Get directions", "email_label": "EMAIL", "email_open": "Open email draft", "email_ready": "Your email draft is ready to send.", "email_subject": "Table request", "email_submit": "Prepare email request", "feature_label": "THE ONE TO COME BACK FOR", "footer_brand": "", "footer_contact": "COME ON OVER", "footer_hours": "WHEN THE LIGHTS ARE ON", "footer_social": "STAY A LITTLE CLOSE", "footer_tagline": "GOOD FOOD. GOOD COMPANY. ALL DAY.", "form_error": "We could not send your request. Please try again or contact us directly.", "full_menu": "View the full menu", "full_menu_close": "Close full menu", "gallery_heading": "Made for the everyday.\nAnd the just-because.", "gallery_intro": "A first date. Your usual order.\nA Tuesday that needed something good.\nThere is a place for all of it here.", "gallery_label": "03 / THE LITTLE THINGS", "group_note": "Bringing 7 or more? Call us and we will make room.", "hero_alt": "Apricot toast with whipped ricotta and a morning cappuccino", "hero_badge_bottom": "SINCE 2014", "hero_badge_title": "all day", "hero_badge_top": "GOOD FOOD", "hero_emphasis": "longer.", "hero_hours": "COFFEE FROM 8 AM / DINNER UNTIL LATE", "hero_subline": "Good coffee. Seasonal plates.\nThe kind of place that becomes your place.", "hero_tagline": "Stay a little", "language": "en", "menu_close": "Close menu", "menu_empty": "Ask us what is cooking.", "menu_group_default": "The menu", "menu_heading": "A table for every hour.", "menu_intro": "From a slow morning to one more course.\nFollow your appetite. We will take care of the rest.", "menu_label": "01 / AT THE TABLE", "menu_open": "Open menu", "name_label": "YOUR NAME", "nav_label": "Main navigation", "nav_menu": "The menu", "nav_story": "Our story", "nav_visit": "Find us", "next": "Next review", "party_label": "YOUR PARTY", "party_placeholder": "Choose your party size", "pause": "Pause reviews", "phone_intro": "Prefer a familiar voice?", "play": "Play reviews", "preview_note": "Example website. This form does not make a reservation.", "preview_result": "This is a preview. No reservation has been made.", "preview_submit": "Find a table", "previous": "Previous review", "primary_cta": "Book a table", "provider_submit": "Find a table", "reservation_heading": "Your next\nfavorite memory.", "reservation_intro": "A coffee catch-up, a long lunch, or an evening worth dressing up for. We would love to have you.", "reservation_label": "05 / LET US SAVE YOU A SEAT", "reservation_title": "A table for you", "review_source": "GUEST REVIEW", "reviews_heading": "Word around\nthe table.", "reviews_label": "04 / GOOD COMPANY", "reviews_rating": "4.9 / 5 from our guests", "secondary_cta": "Explore the menu", "sending": "Sending request...", "skip": "Skip to content", "story_alt": "A sunlit neighborhood dining room with wine-colored banquettes and warm wood tables", "story_heading": "Pull up a chair.", "story_label": "02 / A PLACE TO BELONG", "story_signature": "Good food. Good company. Since 2014.", "submit": "Request a table", "success": "Your request was received. Your table is not confirmed until we contact you.", "time_label": "TIME", "time_placeholder": "Choose a time"}, "email": "mailto:hello@marlowandfen.example", "endpoint": "", "hidden": {}, "mode": "preview", "selected": "daypart-2"}</script><script>(() => {
   'use strict';
+  // Enhance text nodes only, preserving emphasis, links and authored line breaks.
+  // Everything remains readable without JavaScript or IntersectionObserver.
+  if (!('IntersectionObserver' in window)) return;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const running = new Set();
+  const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    observer.unobserve(entry.target);
+    if (reduced.matches) return;
+    entry.target.querySelectorAll('.w > span').forEach((word, index) => {
+      const animation = word.animate([
+        {opacity: 0, transform: 'translateY(105%)'},
+        {opacity: 1, transform: 'none'},
+      ], {duration: 850, delay: index * 55, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards'});
+      running.add(animation);
+      animation.finished.catch(() => {}).finally(() => running.delete(animation));
+    });
+  }), {threshold: .12});
+  document.querySelectorAll('main h2, main .menu-title').forEach(heading => {
+    if (heading.closest('.trust')) return;
+    // A parent fade would compete with the word animation. Give its other
+    // children their own content entrance instead, before motion.js observes.
+    let owner = heading.closest('[data-reveal]');
+    while (owner) {
+      owner.removeAttribute('data-reveal');
+      if (owner !== heading) [...owner.children].forEach(child => {
+        if (child !== heading && !child.contains(heading)) child.setAttribute('data-reveal', '');
+      });
+      owner = heading.closest('[data-reveal]');
+    }
+    heading.dataset.wordHeading = '';
+    const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(node => {
+      const fragment = document.createDocumentFragment();
+      node.textContent.split(/(\s+)/).forEach(text => {
+        if (!text || /^\s+$/.test(text)) fragment.append(document.createTextNode(text));
+        else {
+          const mask = document.createElement('span');
+          mask.className = 'w';
+          const word = document.createElement('span');
+          word.textContent = text;
+          mask.append(word);
+          fragment.append(mask);
+        }
+      });
+      node.replaceWith(fragment);
+    });
+    observer.observe(heading);
+  });
+  reduced.addEventListener('change', () => {
+    if (reduced.matches) running.forEach(animation => animation.cancel());
+  });
+})();</script><script>(() => {
+  'use strict';
   const config = JSON.parse(document.getElementById('restaurant-config').textContent);
   const $ = (s, root = document) => root.querySelector(s);
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
@@ -1442,15 +1415,7 @@ Babylon, NY 11702</p><a href="tel:6315550146">(631) 555-0146</a><a href="mailto:
     animate(target, [{opacity: 0, transform: 'translateY(16px)'}, {opacity: 1, transform: 'none'}],
       {duration: target.classList.contains('hero-photo') ? 700 : 600, delay: target.closest('.hero') ? Math.max(0, $$('[data-reveal]', $('.hero')).indexOf(target)) * 80 : 0});
   }), {threshold: .12});
-  // Wherever view timelines exist, style.css runs this same entrance off
-  // scroll position, and a Web Animation would quietly outrank it -- the
-  // animation API sits above the CSS cascade, so running both means only this
-  // one is ever seen. The script keeps what CSS cannot bind to a page scroll:
-  // the opening scene, which is on screen before any scrolling happens, and
-  // the full-menu dialog, which renders in the top layer.
-  const scrollLinked = CSS.supports('animation-timeline', 'view()') && !reduced.matches;
   $$('[data-reveal]').forEach(el => {
-    if (scrollLinked && !el.closest('.hero, #full-menu')) return;
     reveal.observe(el);
   });
   const header = $('.header');
