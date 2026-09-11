@@ -1428,7 +1428,15 @@ Babylon, NY 11702</p><a href="tel:6315550146">(631) 555-0146</a><a href="mailto:
     const navHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || header.offsetHeight;
     const top = target.getBoundingClientRect().top + scrollY - navHeight - 16;
     history.pushState(null, '', hash);
-    scrollTo({top: Math.max(0, top), behavior: 'auto'});
+    // Smooth, but still `scrollTo` on this window rather than
+    // `scrollIntoView`: scrollIntoView walks up and scrolls every ancestor
+    // scroller, so inside the storefront's preview iframes a nav click dragged
+    // the catalogue page along with it. Computing the offset by hand keeps the
+    // scroll inside the document that was clicked. An explicit `behavior`
+    // beats the stylesheet's `scroll-behavior`, so this option is the only
+    // thing deciding whether the jump slides -- it has to honour reduced
+    // motion itself.
+    scrollTo({top: Math.max(0, top), behavior: reduced.matches ? 'auto' : 'smooth'});
     target.tabIndex = -1;
     target.focus({preventScroll: true});
   };

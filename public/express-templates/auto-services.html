@@ -1845,7 +1845,18 @@ Brooklyn, NY 11231</p><div><a href="tel:7185550142">(718) 555-0142</a><a href="m
       closeMenu();
       const top = target.getBoundingClientRect().top + scrollY - nav.offsetHeight - 16;
       history.pushState(null, "", link.hash);
-      window.scrollTo({ top: Math.max(0, top), behavior: "instant" });
+      // Smooth, but still `scrollTo` on this window rather than
+      // `scrollIntoView`: scrollIntoView walks up and scrolls every ancestor
+      // scroller, so inside the storefront's preview iframes a nav click
+      // dragged the catalogue page along with it. Computing the offset by hand
+      // keeps the scroll inside the document that was clicked. An explicit
+      // `behavior` beats the stylesheet's `scroll-behavior`, so this option is
+      // the only thing deciding whether the jump slides -- it has to honour
+      // reduced motion itself.
+      window.scrollTo({
+        top: Math.max(0, top),
+        behavior: reduced.matches ? "instant" : "smooth",
+      });
       target.tabIndex = -1;
       target.focus({ preventScroll: true });
     }),
