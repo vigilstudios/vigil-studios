@@ -158,7 +158,7 @@ export const EXPRESS_TEMPLATES = [
     example: "Marlow & Fen",
     description:
       "An all-day menu, warm food photography, and an invitation to stay. Designed for neighborhood restaurants and cafes.",
-    accent: "#ad3827",
+    accent: "#4a1728",
   },
   {
     slug: "retail",
@@ -173,10 +173,10 @@ export const EXPRESS_TEMPLATES = [
     slug: "salon-spa",
     variant: "Variant 1",
     industry: "Salon and spa",
-    example: "Ashcombe Studio",
+    example: "still & form",
     description:
-      "Soft and editorial, with a treatment list that shows how long each appointment takes as well as the price.",
-    accent: "#8c5b78",
+      "Quiet and editorial. A service menu by category with durations and prices, the people you book by name, and a booking slip.",
+    accent: "#263c35",
   },
   {
     slug: "medical",
