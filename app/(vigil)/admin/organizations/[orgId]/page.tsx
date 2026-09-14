@@ -22,6 +22,9 @@ import { requireStaff } from "@/lib/vigil/auth/session";
 import { formatDate, formatDateTime, formatMoney, humanizeAction, titleCase } from "@/lib/vigil/format";
 import { domainTransitions, projectTransitions, subscriptionTransitions, websiteTransitions } from "@/lib/vigil/lifecycle";
 import { getCatalog, getOrganizationDetail } from "@/lib/vigil/queries/admin";
+import { getProjectAssets } from "@/lib/vigil/queries/onboarding";
+import { parseBrief } from "@/lib/vigil/onboarding/brief";
+import { ReviewStep } from "@/app/(vigil)/dashboard/onboarding/steps/ReviewStep";
 import { Constants } from "@/types/database.types";
 
 export const metadata: Metadata = { title: "Customer" };
@@ -31,8 +34,12 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
   const { orgId } = await params;
   const [detail, catalog] = await Promise.all([getOrganizationDetail(orgId), getCatalog()]);
   if (!detail) notFound();
-  const { organization: org, members, invites, websites, domains, subscriptions, projects, overrides, audit, jobs } = detail;
+  const { organization: org, members, invites, websites, domains, subscriptions, projects, overrides, audit, jobs, orders } = detail;
   const isAdmin = staff.staffRole === "admin";
+  const briefProject = projects.find((p) => !["closed", "cancelled"].includes(p.status)) ?? projects[0] ?? null;
+  const brief = briefProject ? parseBrief(briefProject.brief) : null;
+  const briefAssets = briefProject ? await getProjectAssets(briefProject.id) : [];
+  const briefDomain = brief?.domain?.domainId ? domains.find((d) => d.id === brief.domain?.domainId) ?? null : null;
   const openInvites = invites.filter((i) => !i.accepted_at && !i.revoked_at);
 
   return (
@@ -306,6 +313,75 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
           )}
         </Card>
       </div>
+
+      {briefProject && brief ? (
+        <Card className="mt-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-base font-semibold">Customer brief</h2>
+            <StatusPill tone={briefProject.intake_completed_at ? "good" : "warn"}>
+              {briefProject.intake_completed_at ? `Sent ${formatDateTime(briefProject.intake_completed_at)}` : `In progress · last step ${brief.progress.lastStep}`}
+            </StatusPill>
+          </div>
+          <p className="mt-1 text-xs text-[color:var(--text-secondary)]">
+            {briefProject.name}. {briefAssets.length} file{briefAssets.length === 1 ? "" : "s"} uploaded{briefAssets.length ? " (links valid 30 minutes)" : ""}.
+          </p>
+          {briefAssets.length > 0 ? (
+            <ul className="mt-2 flex flex-wrap gap-2">
+              {briefAssets.map((a) => (
+                <li key={a.id}>
+                  <a href={a.url ?? "#"} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-md border border-[color:var(--border)] px-2 py-1 text-xs hover:border-[color:var(--accent)]">
+                    <span className="uppercase text-[10px] text-[color:var(--text-secondary)]">{a.kind}</span> {a.file_name}{a.caption ? ` — ${a.caption}` : ""}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <div className="mt-3">
+            <ReviewStep
+              brief={brief}
+              assets={briefAssets}
+              domain={briefDomain ? { domainId: briefDomain.id, hostname: briefDomain.hostname, status: briefDomain.status, registrar: brief.domain?.registrar ?? "other", records: [], dnsOk: briefDomain.dns_ok, statusReason: briefDomain.status_reason } : null}
+              onEdit={() => undefined}
+              onSend={() => undefined}
+              sending={false}
+              error={null}
+              readOnly
+            />
+          </div>
+        </Card>
+      ) : null}
+
+      <Card className="mt-4">
+        <h2 className="text-base font-semibold">Orders</h2>
+        {orders.length === 0 ? (
+          <p className="mt-2 text-sm text-[color:var(--text-secondary)]">None. <Link href="/admin/orders" className="underline">Send a checkout link</Link>.</p>
+        ) : (
+          <Table className="mt-2">
+            <thead>
+              <tr>
+                <th className={thClass}>Created</th>
+                <th className={thClass}>Kind</th>
+                <th className={thClass}>Plan</th>
+                <th className={thClass}>Build</th>
+                <th className={thClass}>Status</th>
+                <th className={thClass}>Paid</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((o) => (
+                <tr key={o.id}>
+                  <td className={tdClass}>{formatDateTime(o.created_at)}</td>
+                  <td className={tdClass}>{titleCase(o.project_kind)}{o.template_slug ? ` · ${o.template_slug}` : ""}</td>
+                  <td className={tdClass}>{o.plan?.name ?? "—"}{o.plan_amount_cents != null ? ` · ${formatMoney(o.plan_amount_cents, o.currency)}/mo` : ""}</td>
+                  <td className={tdClass}>{o.build_amount_cents != null ? formatMoney(o.build_amount_cents, o.currency) : "Quoted"}</td>
+                  <td className={tdClass}><StatusPill tone={o.status === "provisioned" ? "good" : o.status === "paid" ? "info" : o.status === "pending" ? "warn" : "neutral"}>{titleCase(o.status)}</StatusPill></td>
+                  <td className={tdClass}>{o.paid_at ? formatDateTime(o.paid_at) : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        )}
+      </Card>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <Card>

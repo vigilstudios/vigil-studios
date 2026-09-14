@@ -1,6 +1,6 @@
 import "server-only";
 
-import { readFile } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import JSZip from "jszip";
 import { EXPRESS_TEMPLATES } from "@/lib/constants";
@@ -37,7 +37,72 @@ export const expressTemplateSource: SiteSource = {
   },
 };
 
-const sources: SiteSource[] = [expressTemplateSource];
+/**
+ * The customer's own folder: `websites.repository_ref` names a directory
+ * (e.g. `clients/<org-slug>`) under VIGIL_CLIENTS_ROOT — by default the
+ * parent of this repo, where `Websites/clients/` lives. `site/` is the
+ * deployable site and is required; `content/` (what the customer supplied)
+ * and a README are included when present. Absent folder = source does not
+ * apply, so the template fallback still works where the folder is not
+ * checked out (a serverless deploy, for instance).
+ */
+export const repositorySource: SiteSource = {
+  name: "repository",
+  async collect(website) {
+    const ref = website.repository_ref?.trim();
+    if (!ref) return null;
+    const root = path.resolve(process.env.VIGIL_CLIENTS_ROOT ?? path.join(process.cwd(), ".."));
+    const dir = path.resolve(root, ref);
+    if (dir !== root && !dir.startsWith(root + path.sep)) return null; // no escaping the root
+    const site = path.join(dir, "site");
+    if (!(await isDir(site))) return null;
+    const files: SiteFile[] = [];
+    await walk(site, "site", files);
+    const content = path.join(dir, "content");
+    if (await isDir(content)) await walk(content, "content", files);
+    for (const name of ["README.md", "readme.md"]) {
+      const f = path.join(dir, name);
+      if (await isFile(f)) {
+        files.push({ path: "PROJECT-README.md", content: await readFile(f) });
+        break;
+      }
+    }
+    return files.length > 0 ? files : null;
+  },
+};
+
+const SKIP = new Set(["node_modules", ".git", ".DS_Store", ".next", ".vercel", ".env", ".env.local"]);
+
+async function walk(dir: string, prefix: string, out: SiteFile[]): Promise<void> {
+  const entries = await readdir(dir, { withFileTypes: true });
+  entries.sort((a, b) => a.name.localeCompare(b.name));
+  for (const e of entries) {
+    if (SKIP.has(e.name) || e.name.startsWith(".env")) continue;
+    const full = path.join(dir, e.name);
+    const rel = `${prefix}/${e.name}`;
+    if (e.isDirectory()) await walk(full, rel, out);
+    else if (e.isFile()) out.push({ path: rel, content: await readFile(full) });
+  }
+}
+
+async function isDir(p: string): Promise<boolean> {
+  try {
+    return (await stat(p)).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+async function isFile(p: string): Promise<boolean> {
+  try {
+    return (await stat(p)).isFile();
+  } catch {
+    return false;
+  }
+}
+
+/** Order matters: the customer's own folder wins over the template capture. */
+const sources: SiteSource[] = [repositorySource, expressTemplateSource];
 
 export class ExportUnavailableError extends Error {
   constructor(message: string) {
@@ -103,8 +168,9 @@ Exported ${exportedAt.toUTCString()} for ${ctx.organizationName} by ${ctx.export
 ${files.map((f) => `- \`${f.path}\``).join("\n")}
 - \`manifest.json\` — what was exported and when
 
-\`site/index.html\` is the current published build of your website: a
-self-contained page you can host anywhere. Open it in a browser to check it.
+\`site/\` is your website as it is built and published: static files you can
+host anywhere. Open \`site/index.html\` in a browser to check it. \`content/\`
+(when present) holds the text, images and documents you supplied.
 
 ## What you own
 

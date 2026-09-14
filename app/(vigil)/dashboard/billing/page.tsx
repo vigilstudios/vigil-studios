@@ -6,6 +6,10 @@ import { formatDate, formatMoney, titleCase } from "@/lib/vigil/format";
 import { describeSubscriptionStatus } from "@/lib/vigil/lifecycle";
 import { getOrgSubscription } from "@/lib/vigil/queries/dashboard";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
+import { getBillingProvider } from "@/lib/vigil/providers/registry";
+import { findExternalId, providerEnum } from "@/lib/vigil/services/provider-links";
+import { ManageBillingButton } from "./ManageBillingButton";
 
 export const metadata: Metadata = { title: "Subscription" };
 
@@ -15,6 +19,15 @@ export default async function BillingPage() {
 
   const supabase = await createClient();
   const { data: features } = await supabase.from("features").select("code, name, value_kind").order("code");
+  const canManage = ctx.role === "owner" || ctx.role === "manager" || ctx.isImpersonating;
+
+  // Online billing exists for this organization when the provider knows the customer.
+  let portalAvailable = false;
+  if (hasAdminClient() && subscription) {
+    const provider = getBillingProvider();
+    const customerId = await findExternalId(createAdminClient(), { provider: providerEnum(provider.name), resourceKind: "customer", entityType: "organization", entityId: ctx.organization.id }).catch(() => null);
+    portalAvailable = Boolean(customerId) && provider.name !== "null";
+  }
 
   return (
     <div>
@@ -51,9 +64,16 @@ export default async function BillingPage() {
               { label: "Trial ends", value: subscription.trial_end ? formatDate(subscription.trial_end) : "—" },
             ]}
           />
-          <p className="mt-3 text-xs text-[color:var(--text-secondary)]">
-            Invoices and payment methods will be manageable here once online billing is enabled. Until then, contact Vigil Studios for any billing change.
-          </p>
+          {portalAvailable && canManage ? (
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <ManageBillingButton />
+              <p className="text-xs text-[color:var(--text-secondary)]">Invoices, receipts, payment method and cancellation, on a secure page from our payment provider.</p>
+            </div>
+          ) : (
+            <p className="mt-3 text-xs text-[color:var(--text-secondary)]">
+              {portalAvailable ? "Only the account owner or a manager can change billing." : "Invoices and payment methods are managed with Vigil Studios for this account. Write to hello@vigilstudios.co for any billing change."}
+            </p>
+          )}
         </Card>
       )}
 

@@ -1,4 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
 import JSZip from "jszip";
 import { buildSiteExport, ExportUnavailableError } from "../services/export";
 import type { Website } from "../types";
@@ -27,6 +30,10 @@ const base: Website = {
 };
 
 describe("buildSiteExport", () => {
+  afterEach(() => {
+    delete process.env.VIGIL_CLIENTS_ROOT;
+  });
+
   it("packages the published build with a manifest and README", async () => {
     const out = await buildSiteExport(base, { organizationName: "Marlow & Fen", exportedBy: "owner@example.com", exportedAt: new Date("2026-09-14T12:00:00Z") });
     expect(out.filename).toBe("marlow-fen-website-site-2026-09-14.zip");
@@ -40,6 +47,34 @@ describe("buildSiteExport", () => {
     expect(html).toMatch(/<html/i);
     const readme = await zip.file("README.md")!.async("string");
     expect(readme).toMatch(/does not include Vigil platform code/);
+  });
+
+  it("prefers the customer's own folder named by repository_ref", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "vigil-clients-"));
+    process.env.VIGIL_CLIENTS_ROOT = root;
+    await mkdir(path.join(root, "clients/marlow-fen/site/assets"), { recursive: true });
+    await mkdir(path.join(root, "clients/marlow-fen/content"), { recursive: true });
+    await mkdir(path.join(root, "clients/marlow-fen/site/node_modules/x"), { recursive: true });
+    await writeFile(path.join(root, "clients/marlow-fen/site/index.html"), "<html>custom</html>");
+    await writeFile(path.join(root, "clients/marlow-fen/site/assets/logo.svg"), "<svg/>");
+    await writeFile(path.join(root, "clients/marlow-fen/site/node_modules/x/index.js"), "ignored");
+    await writeFile(path.join(root, "clients/marlow-fen/content/brief.md"), "# brief");
+    await writeFile(path.join(root, "clients/marlow-fen/README.md"), "# Marlow & Fen");
+
+    const out = await buildSiteExport({ ...base, repository_ref: "clients/marlow-fen" }, { organizationName: "Marlow & Fen", exportedBy: "owner@example.com" });
+    expect(out.source).toBe("repository");
+    const zip = await JSZip.loadAsync(out.bytes);
+    expect(Object.keys(zip.files).filter((n) => !zip.files[n].dir).sort()).toEqual(["PROJECT-README.md", "README.md", "content/brief.md", "manifest.json", "site/assets/logo.svg", "site/index.html"]);
+    expect(await zip.file("site/index.html")!.async("string")).toBe("<html>custom</html>");
+  });
+
+  it("falls back to the template when the folder is missing, and never leaves the root", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "vigil-clients-"));
+    process.env.VIGIL_CLIENTS_ROOT = root;
+    const missing = await buildSiteExport({ ...base, repository_ref: "clients/nobody" }, { organizationName: "x", exportedBy: "y" });
+    expect(missing.source).toBe("express-template");
+    const escape = await buildSiteExport({ ...base, repository_ref: "../../etc" }, { organizationName: "x", exportedBy: "y" });
+    expect(escape.source).toBe("express-template");
   });
 
   it("refuses when there is nothing to export", async () => {

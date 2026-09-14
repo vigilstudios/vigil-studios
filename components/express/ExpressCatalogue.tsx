@@ -11,7 +11,7 @@ import {
   Monitor,
   Smartphone,
 } from "lucide-react";
-import { EXPRESS_TEMPLATES } from "@/lib/constants";
+import { EXPRESS_PRICE, EXPRESS_TEMPLATES } from "@/lib/constants";
 import accentsBySlug from "@/lib/express-accents.json";
 import styles from "./ExpressCatalogue.module.css";
 
@@ -362,8 +362,8 @@ export function ExpressCatalogue() {
                     View
                     <ArrowUpRight size={17} />
                   </a>
-                  <Link href="/#contact" className={styles.enquire}>
-                    Enquire
+                  <Link href={`/checkout?template=${active.slug}`} className={styles.enquire}>
+                    Buy · ${EXPRESS_PRICE}
                   </Link>
                 </div>
               </div>

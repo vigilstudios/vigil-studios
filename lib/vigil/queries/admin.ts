@@ -46,7 +46,7 @@ export const listOrganizations = cache(async (search?: string) => {
 
 export const getOrganizationDetail = cache(async (orgId: string) => {
   const supabase = await createClient();
-  const [org, members, invites, websites, domains, subscriptions, projects, overrides, audit, jobs] = await Promise.all([
+  const [org, members, invites, websites, domains, subscriptions, projects, overrides, audit, jobs, orders] = await Promise.all([
     supabase.from("organizations").select("*").eq("id", orgId).maybeSingle(),
     supabase
       .from("organization_members")
@@ -60,8 +60,9 @@ export const getOrganizationDetail = cache(async (orgId: string) => {
     supabase.from("entitlement_overrides").select("*").eq("organization_id", orgId),
     supabase.from("audit_events").select("id, action, actor_kind, entity_type, entity_id, created_at").eq("organization_id", orgId).order("created_at", { ascending: false }).limit(20),
     supabase.from("provisioning_jobs").select("id, kind, status, attempts, max_attempts, scheduled_for, error, updated_at").eq("organization_id", orgId).order("created_at", { ascending: false }).limit(20),
+    supabase.from("orders").select("id, status, project_kind, template_slug, build_amount_cents, plan_amount_cents, currency, email, checkout_token, paid_at, provisioned_at, created_at, plan:plans(code, name)").eq("organization_id", orgId).order("created_at", { ascending: false }),
   ]);
-  for (const r of [org, members, invites, websites, domains, subscriptions, projects, overrides, audit, jobs]) if (r.error) throw r.error;
+  for (const r of [org, members, invites, websites, domains, subscriptions, projects, overrides, audit, jobs, orders]) if (r.error) throw r.error;
   if (!org.data) return null;
   return {
     organization: org.data,
@@ -74,6 +75,7 @@ export const getOrganizationDetail = cache(async (orgId: string) => {
     overrides: overrides.data ?? [],
     audit: audit.data ?? [],
     jobs: jobs.data ?? [],
+    orders: orders.data ?? [],
   };
 });
 
