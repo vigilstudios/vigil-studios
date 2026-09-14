@@ -79,3 +79,23 @@ grant all on all functions in schema public to anon, authenticated, service_role
 alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
 alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
 alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
+
+-- --------------------------------------------------------------------------
+-- Legacy prototype fixtures, mirroring what the real project held on
+-- 13 Sep 2026, so 0000_retire_legacy_portal is exercised by the validation.
+-- --------------------------------------------------------------------------
+create table public.profiles (id uuid primary key, email text, created_at timestamptz default now());
+create table public.clients (id uuid primary key default gen_random_uuid(), profile_id uuid, company_name text, contact_name text, contact_email text, created_at timestamptz default now());
+create table public.projects (id uuid primary key default gen_random_uuid(), client_id uuid references public.clients (id), project_name text, package_name text, current_phase text, created_at timestamptz default now());
+create table public.project_phase_progress (id uuid primary key default gen_random_uuid(), project_id uuid references public.projects (id), phase text, progress int);
+create table public.onboarding_steps (id uuid primary key default gen_random_uuid(), project_id uuid references public.projects (id), title text);
+create table public.project_files (id uuid primary key default gen_random_uuid(), project_id uuid references public.projects (id), file_name text);
+insert into public.clients (id, company_name) values ('04bde33c-a596-49a3-ba46-769ca74b9455', 'Vigil Studios Demo Client');
+insert into public.projects (client_id, project_name) values ('04bde33c-a596-49a3-ba46-769ca74b9455', 'Demo Website Build');
+
+create function public.handle_new_user() returns trigger language plpgsql security definer as $$
+begin
+  insert into public.profiles (id, email) values (new.id, new.email);
+  return new;
+end $$;
+create trigger on_auth_user_created after insert on auth.users for each row execute function public.handle_new_user();

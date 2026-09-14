@@ -100,6 +100,20 @@ insert into public.subscriptions (organization_id, plan_id, status)
 select '10000000-0000-0000-0000-00000000000a', id, 'active' from public.plans where code = 'growth';
 
 -- --------------------------------------------------------------------------
+-- Legacy prototype was retired, not destroyed
+-- --------------------------------------------------------------------------
+do $$
+begin
+  perform test.ok(to_regclass('public.legacy_projects') is not null, 'legacy: projects renamed to legacy_projects');
+  perform test.ok(to_regclass('public.legacy_profiles') is not null, 'legacy: prototype profiles preserved as legacy_profiles');
+  perform test.ok(test.count('select 1 from public.legacy_clients') = 1, 'legacy: demo client row kept');
+  perform test.ok(not exists (select 1 from pg_proc where proname = 'handle_new_user'), 'legacy: prototype sign-up trigger function removed');
+  perform test.login_anon();
+  perform test.ok(test.count('select 1 from public.legacy_projects') = 0, 'legacy: anon can no longer read the old tables');
+  perform test.logout();
+end $$;
+
+-- --------------------------------------------------------------------------
 -- Profiles were created by trigger
 -- --------------------------------------------------------------------------
 do $$
