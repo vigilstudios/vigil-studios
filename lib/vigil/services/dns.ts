@@ -50,8 +50,17 @@ function fqdn(hostname: string, name: string): string {
 
 export type DnsCheck = { record: DnsRecord; found: string[]; ok: boolean };
 
+/** The slice of node:dns these helpers use; tests pass a fake. */
+export type RecordResolver = {
+  resolve4(hostname: string): Promise<string[]>;
+  resolve6(hostname: string): Promise<string[]>;
+  resolveCname(hostname: string): Promise<string[]>;
+  resolveTxt(hostname: string): Promise<string[][]>;
+};
+export type NsResolver = { resolveNs(hostname: string): Promise<string[]> };
+
 /** Resolve each required record and compare. Never throws; missing = not ok. */
-export async function checkDnsRecords(hostname: string, records: DnsRecord[], resolver: Pick<typeof dns, "resolve4" | "resolve6" | "resolveCname" | "resolveTxt"> = dns): Promise<DnsCheck[]> {
+export async function checkDnsRecords(hostname: string, records: DnsRecord[], resolver: RecordResolver = dns): Promise<DnsCheck[]> {
   const out: DnsCheck[] = [];
   for (const record of records) {
     const target = fqdn(hostname, record.name);
@@ -84,7 +93,7 @@ export async function checkDnsRecords(hostname: string, records: DnsRecord[], re
 }
 
 /** Which registrar's default nameservers the domain uses, when it is one we know. */
-export async function detectRegistrar(hostname: string, resolver: Pick<typeof dns, "resolveNs"> = dns): Promise<{ registrar: RegistrarKey | null; nameservers: string[] }> {
+export async function detectRegistrar(hostname: string, resolver: NsResolver = dns): Promise<{ registrar: RegistrarKey | null; nameservers: string[] }> {
   const apex = hostname.split(".").slice(-2).join(".");
   try {
     const nameservers = await resolver.resolveNs(apex);
