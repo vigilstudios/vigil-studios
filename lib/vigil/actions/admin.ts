@@ -7,6 +7,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/vigil/audit";
+import { BILLING_PERIODS } from "@/lib/vigil/billing-periods";
 import { ForbiddenError, NotFoundError, ValidationError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
 import { normalizeEmail } from "@/lib/vigil/auth/redirects";
 import { ACTIVE_ORG_COOKIE, requireAdminOrThrow, requireStaffOrThrow } from "@/lib/vigil/auth/session";
@@ -547,7 +548,9 @@ export async function updatePlan(planId: string, formData: FormData): Promise<Ac
       description: z.string().trim().max(2000).optional().or(z.literal("")),
       is_active: z.string().optional(),
       is_public: z.string().optional(),
-      amount_cents: z.string().trim().optional().or(z.literal("")),
+      amount_month: z.string().trim().optional().or(z.literal("")),
+      amount_year: z.string().trim().optional().or(z.literal("")),
+      amount_year3: z.string().trim().optional().or(z.literal("")),
     });
     const parsed = schema.safeParse(Object.fromEntries(formData));
     if (!parsed.success) throw new ValidationError("Check the highlighted fields.", issuesOf(parsed.error));
@@ -559,15 +562,20 @@ export async function updatePlan(planId: string, formData: FormData): Promise<Ac
       .eq("id", planId);
     if (error) throw error;
 
-    // Monthly USD price; empty means "not approved yet" and stays NULL.
-    const cents = v.amount_cents ? Math.round(Number(v.amount_cents) * 100) : null;
-    if (v.amount_cents && (!Number.isFinite(cents) || (cents as number) < 0)) throw new ValidationError("Price must be a number.", { amount_cents: ["Invalid"] });
-    const { error: priceError } = await supabase
-      .from("plan_prices")
-      .upsert({ plan_id: planId, currency: "usd", interval: "month", amount_cents: cents }, { onConflict: "plan_id,currency,interval" });
-    if (priceError) throw priceError;
+    // USD price per billing period; empty means "not approved yet" and stays NULL.
+    const amounts: Record<string, number | null> = {};
+    for (const period of BILLING_PERIODS) {
+      const raw = v[`amount_${period.key}` as "amount_month" | "amount_year" | "amount_year3"];
+      const cents = raw ? Math.round(Number(raw) * 100) : null;
+      if (raw && (!Number.isFinite(cents) || (cents as number) < 0)) throw new ValidationError(`${period.label} price must be a number.`, { [`amount_${period.key}`]: ["Invalid"] });
+      amounts[period.key] = cents;
+      const { error: priceError } = await supabase
+        .from("plan_prices")
+        .upsert({ plan_id: planId, currency: "usd", interval: period.interval, interval_count: period.intervalCount, amount_cents: cents }, { onConflict: "plan_id,currency,interval,interval_count" });
+      if (priceError) throw priceError;
+    }
 
-    await logAuditEvent(supabase, { action: "plan.updated", entityType: "plan", entityId: planId, after: { name: v.name, amount_cents: cents, is_public: v.is_public === "on" } });
+    await logAuditEvent(supabase, { action: "plan.updated", entityType: "plan", entityId: planId, after: { name: v.name, amounts, is_public: v.is_public === "on" } });
     revalidatePath("/admin/plans");
     return { ok: true, data: undefined };
   } catch (error) {

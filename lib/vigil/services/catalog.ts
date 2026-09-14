@@ -1,5 +1,6 @@
 import "server-only";
 
+import { billingPeriod, planPriceLookupKey } from "@/lib/vigil/billing-periods";
 import type { DbClient } from "@/lib/vigil/types";
 import { getBillingProvider } from "@/lib/vigil/providers/registry";
 import type { BillingProvider } from "@/lib/vigil/providers/types";
@@ -18,7 +19,7 @@ export async function syncCatalogToProvider(db: DbClient, provider: BillingProvi
 
   const [{ data: plans, error: planError }, { data: prices, error: priceError }, { data: builds, error: buildError }] = await Promise.all([
     db.from("plans").select("id, code, name, tagline"),
-    db.from("plan_prices").select("id, plan_id, currency, interval, amount_cents, is_active"),
+    db.from("plan_prices").select("id, plan_id, currency, interval, interval_count, amount_cents, is_active"),
     db.from("build_prices").select("id, kind, name, description, currency, amount_cents, is_active"),
   ]);
   if (planError) throw planError;
@@ -28,18 +29,19 @@ export async function syncCatalogToProvider(db: DbClient, provider: BillingProvi
   for (const price of prices ?? []) {
     const plan = plans?.find((p) => p.id === price.plan_id);
     if (!plan) continue;
-    const label = `${plan.name} · ${price.currency}/${price.interval}`;
+    const label = `${plan.name} · ${price.currency}/${billingPeriod(price.interval, price.interval_count)?.key ?? price.interval}`;
     if (!price.is_active || price.amount_cents === null) {
       report.skipped.push(`${label} (no approved amount)`);
       continue;
     }
     const result = await provider.ensurePrice({
-      lookupKey: `plan:${plan.code}:${price.currency}:${price.interval}`,
+      lookupKey: planPriceLookupKey(plan.code, price.currency, price.interval, price.interval_count),
       productName: plan.name,
       productDescription: plan.tagline,
       amountCents: price.amount_cents,
       currency: price.currency,
       interval: price.interval,
+      intervalCount: price.interval_count,
     });
     await upsertProviderLink(db, { provider: providerName, resourceKind: "price", externalId: result.externalId, entityType: "plan_price", entityId: price.id });
     report.synced.push({ label, externalId: result.externalId, created: result.created });

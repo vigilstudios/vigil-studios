@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Card, DefinitionList, EmptyState, PageHeader, StatusPill } from "@/components/vigil/ui";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
 import { resolveEntitlements } from "@/lib/vigil/entitlements";
+import { describePrice } from "@/lib/vigil/billing-periods";
 import { formatDate, formatMoney, titleCase } from "@/lib/vigil/format";
 import { describeSubscriptionStatus } from "@/lib/vigil/lifecycle";
 import { getOrgSubscription } from "@/lib/vigil/queries/dashboard";
@@ -55,9 +56,7 @@ export default async function BillingPage() {
             items={[
               {
                 label: "Price",
-                value: subscription.price
-                  ? `${formatMoney(subscription.price.amount_cents, subscription.price.currency)} / ${subscription.price.interval}`
-                  : "Set by agreement",
+                value: subscription.price ? describePrice(subscription.price, formatMoney) : "Set by agreement",
               },
               { label: "Current period", value: subscription.current_period_end ? `Renews ${formatDate(subscription.current_period_end)}` : "—" },
               { label: "Cancels at period end", value: subscription.cancel_at_period_end ? "Yes" : "No" },

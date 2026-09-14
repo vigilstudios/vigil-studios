@@ -15,7 +15,10 @@ const BUILD = "build_express";
 function seed() {
   return new FakeAdmin({
     plans: [{ id: PLAN, code: "care", name: "Vigil Care", is_active: true }],
-    plan_prices: [{ id: PRICE, plan_id: PLAN, amount_cents: 4900, currency: "usd", interval: "month", is_active: true }],
+    plan_prices: [
+      { id: PRICE, plan_id: PLAN, amount_cents: 4900, currency: "usd", interval: "month", interval_count: 1, is_active: true },
+      { id: "price_care_year3", plan_id: PLAN, amount_cents: 132300, currency: "usd", interval: "year", interval_count: 3, is_active: true },
+    ],
     build_prices: [
       { id: BUILD, kind: "express", name: "Express Site", amount_cents: 59900, currency: "usd", is_active: true },
       { id: "build_custom", kind: "custom", name: "Custom Build", amount_cents: null, currency: "usd", is_active: true },
@@ -23,6 +26,7 @@ function seed() {
     provider_links: [
       { provider: "other", resource_kind: "price", external_id: "price_ext_care", entity_type: "plan_price", entity_id: PRICE },
       { provider: "other", resource_kind: "price", external_id: "price_ext_build", entity_type: "build_price", entity_id: BUILD },
+      { provider: "other", resource_kind: "price", external_id: "price_ext_care_3y", entity_type: "plan_price", entity_id: "price_care_year3" },
     ],
   });
 }
@@ -43,6 +47,7 @@ describe("startCheckout", () => {
     expect(order.email).toBe("buyer@example.com");
     expect(order.business_name).toBe("Marlow & Fen");
     expect(order.plan_amount_cents).toBe(4900);
+    expect(order.plan_price_id).toBe(PRICE);
     expect(order.build_amount_cents).toBe(59900);
     expect(res.orderId).toBe(order.id);
 
@@ -55,6 +60,16 @@ describe("startCheckout", () => {
     const link = fake.rows("provider_links").find((l) => l.resource_kind === "checkout_session");
     expect(link).toMatchObject({ entity_type: "order", entity_id: order.id });
     expect((order.metadata as { checkout_session: string }).checkout_session).toBe(link?.external_id);
+  });
+
+  it("bills the chosen period and records which price row was bought", async () => {
+    const provider = new NullBillingProvider();
+    const spy = vi.spyOn(provider, "createCheckoutSession");
+    await startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", billingPeriod: "year3", appUrl: "https://app.test" }, provider);
+    expect(fake.rows("orders")[0]).toMatchObject({ plan_price_id: "price_care_year3", plan_amount_cents: 132300 });
+    expect(spy.mock.calls[0][0].lineItems[0]).toEqual({ priceExternalId: "price_ext_care_3y" });
+    expect(spy.mock.calls[0][0].reference.billing_period).toBe("year3");
+    await expect(startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", billingPeriod: "year", appUrl: "https://app.test" }, provider)).rejects.toThrow(/annual price/);
   });
 
   it("quotes a custom build as an ad-hoc line and reuses a staff-created order", async () => {
@@ -72,7 +87,7 @@ describe("startCheckout", () => {
 
   it("refuses a plan without an approved price and a plan that was never synced", async () => {
     fake.rows("plan_prices")[0].amount_cents = null;
-    await expect(startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, new NullBillingProvider())).rejects.toThrow(/approved price/);
+    await expect(startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, new NullBillingProvider())).rejects.toThrow(/approved monthly price/);
     fake.rows("plan_prices")[0].amount_cents = 4900;
     fake.rows("provider_links").splice(0, 1);
     await expect(startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, new NullBillingProvider())).rejects.toThrow(/not been synced/);

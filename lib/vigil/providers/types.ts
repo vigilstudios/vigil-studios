@@ -71,6 +71,8 @@ export type CatalogPriceInput = {
   currency: string;
   /** Omit for a one-time price. */
   interval?: "month" | "year";
+  /** With interval: bill every N intervals (3 years = year × 3). Default 1. */
+  intervalCount?: number;
 };
 
 export type BillingSubscriptionSnapshot = {

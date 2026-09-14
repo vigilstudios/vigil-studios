@@ -438,3 +438,29 @@ provisionOrder idempotency with an extended `FakeAdmin`), `stripe.test.ts`
   → wizard. Merge to `main` after that run.
 - Friends-and-family discounts and the custom-scope UI (backlog in the
   handoff) — `brief.scope` is reserved for the latter.
+
+## 2026-09-14 (later) — Billing periods and the approved price table
+
+Owner approved (14 Sep): Basic $29 / $290 / $779, Care $99 / $990 / $2,670,
+Growth $199 / $1,990 / $5,370, Priority $399 / $3,990 / $10,770 (monthly /
+annual / three years), sales tax charged to the customer at checkout.
+
+- Migration **0010** (pushed): `plan_prices.interval_count` (3 years = year
+  × 3, the provider's own model), unique key widened, `orders.plan_price_id`,
+  and the approved amounts inserted as rows (still editable on
+  `/admin/plans`, which now has three price inputs per plan).
+- `lib/vigil/billing-periods.ts`: the period registry (key ↔ interval ×
+  count, labels, months), lookup keys (`plan:care:usd:year3`), savings maths,
+  `describePrice`. Adding a period = one row plus one entry.
+- Checkout: billing-period toggle (Monthly / Annual / 3 years with the best
+  "save X%" badge), per-plan price for the chosen period with the monthly
+  equivalent, order summary and renewal sentence follow it; `startCheckout`
+  picks the (interval, count) row, snapshots `plan_price_id`, and
+  provisioning attributes the Stripe price to that row. `/checkout?plan=&period=`
+  preselects.
+- Stripe: `ensurePrice` creates/reuses prices with `interval_count`;
+  Checkout Sessions enable Stripe Tax with a required billing address and
+  `customer_update.address` (`STRIPE_TAX=true` is now the example default).
+- Types regenerated from the linked project. 89 tests, 98 RLS assertions,
+  build clean. Browser: `/admin/plans` shows the three columns from rows,
+  all "not synced" until Stripe credentials exist.

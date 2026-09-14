@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { BILLING_PERIODS, type BillingPeriodKey } from "@/lib/vigil/billing-periods";
 import { FEATURES } from "@/lib/vigil/entitlements";
 import { getBillingProvider } from "@/lib/vigil/providers/registry";
 import { buildPriceExternalId, planPriceExternalId } from "@/lib/vigil/services/catalog";
@@ -18,11 +19,17 @@ export type CheckoutPlan = {
   tagline: string | null;
   description: string | null;
   tierRank: number;
+  /** Approved and synced prices, one per billing period. */
+  prices: CheckoutPrice[];
+  /** The monthly amount, for "save X%" maths; null when not approved. */
   monthlyCents: number | null;
   currency: string;
+  /** At least one period can be bought online. */
   purchasable: boolean;
   includes: string[];
 };
+
+export type CheckoutPrice = { id: string; period: BillingPeriodKey; amountCents: number; purchasable: boolean };
 
 const includeLabels: [string, string][] = [
   [FEATURES.hostingManaged, "Managed hosting, SSL and security"],
@@ -37,7 +44,7 @@ export const getCheckoutCatalog = cache(async () => {
   const supabase = await createClient();
   const [plans, prices, planFeatures, builds] = await Promise.all([
     supabase.from("plans").select("id, code, name, tagline, description, tier_rank").eq("is_active", true).order("tier_rank"),
-    supabase.from("plan_prices").select("id, plan_id, amount_cents, currency, interval").eq("is_active", true).eq("interval", "month"),
+    supabase.from("plan_prices").select("id, plan_id, amount_cents, currency, interval, interval_count").eq("is_active", true),
     supabase.from("plan_features").select("plan_id, feature_code, value"),
     supabase.from("build_prices").select("id, kind, name, description, amount_cents, currency").eq("is_active", true),
   ]);
@@ -51,7 +58,13 @@ export const getCheckoutCatalog = cache(async () => {
   const synced = new Map(syncChecks);
 
   const catalogPlans: CheckoutPlan[] = (plans.data ?? []).map((p) => {
-    const price = prices.data?.find((x) => x.plan_id === p.id) ?? null;
+    const rows = (prices.data ?? []).filter((x) => x.plan_id === p.id && x.currency === "usd");
+    const planPrices: CheckoutPrice[] = [];
+    for (const period of BILLING_PERIODS) {
+      const row = rows.find((x) => x.interval === period.interval && x.interval_count === period.intervalCount);
+      if (!row || row.amount_cents === null) continue;
+      planPrices.push({ id: row.id, period: period.key, amountCents: row.amount_cents, purchasable: Boolean(synced.get(row.id)) });
+    }
     const features = (planFeatures.data ?? []).filter((f) => f.plan_id === p.id);
     return {
       id: p.id,
@@ -60,9 +73,10 @@ export const getCheckoutCatalog = cache(async () => {
       tagline: p.tagline,
       description: p.description,
       tierRank: p.tier_rank,
-      monthlyCents: price?.amount_cents ?? null,
-      currency: price?.currency ?? "usd",
-      purchasable: Boolean(price && price.amount_cents !== null && synced.get(price.id)),
+      prices: planPrices,
+      monthlyCents: planPrices.find((x) => x.period === "month")?.amountCents ?? null,
+      currency: rows[0]?.currency ?? "usd",
+      purchasable: planPrices.some((x) => x.purchasable),
       includes: includeLabels.filter(([code]) => features.some((f) => f.feature_code === code && f.value === true)).map(([, label]) => label),
     };
   });

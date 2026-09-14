@@ -1,7 +1,3 @@
-// Generated from the linked Supabase project — do not edit by hand.
-// Regenerate after every migration:
-//   npx supabase@latest gen types typescript --linked --schema public --schema vigil > types/database.types.ts
-
 export type Json =
   | string
   | number
@@ -858,6 +854,7 @@ export type Database = {
           paid_at: string | null
           plan_amount_cents: number | null
           plan_id: string | null
+          plan_price_id: string | null
           project_id: string | null
           project_kind: Database["public"]["Enums"]["project_kind"]
           provisioned_at: string | null
@@ -885,6 +882,7 @@ export type Database = {
           paid_at?: string | null
           plan_amount_cents?: number | null
           plan_id?: string | null
+          plan_price_id?: string | null
           project_id?: string | null
           project_kind?: Database["public"]["Enums"]["project_kind"]
           provisioned_at?: string | null
@@ -912,6 +910,7 @@ export type Database = {
           paid_at?: string | null
           plan_amount_cents?: number | null
           plan_id?: string | null
+          plan_price_id?: string | null
           project_id?: string | null
           project_kind?: Database["public"]["Enums"]["project_kind"]
           provisioned_at?: string | null
@@ -947,6 +946,13 @@ export type Database = {
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_plan_price_id_fkey"
+            columns: ["plan_price_id"]
+            isOneToOne: false
+            referencedRelation: "plan_prices"
             referencedColumns: ["id"]
           },
           {
@@ -1180,6 +1186,7 @@ export type Database = {
           currency: string
           id: string
           interval: Database["public"]["Enums"]["billing_interval"]
+          interval_count: number
           is_active: boolean
           plan_id: string
           updated_at: string
@@ -1190,6 +1197,7 @@ export type Database = {
           currency?: string
           id?: string
           interval?: Database["public"]["Enums"]["billing_interval"]
+          interval_count?: number
           is_active?: boolean
           plan_id: string
           updated_at?: string
@@ -1200,6 +1208,7 @@ export type Database = {
           currency?: string
           id?: string
           interval?: Database["public"]["Enums"]["billing_interval"]
+          interval_count?: number
           is_active?: boolean
           plan_id?: string
           updated_at?: string

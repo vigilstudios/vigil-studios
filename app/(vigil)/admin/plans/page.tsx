@@ -3,6 +3,7 @@ import { ActionButton, ActionForm } from "@/components/vigil/ActionControls";
 import { Card, PageHeader, Table, inputClass, labelClass, tdClass, thClass } from "@/components/vigil/ui";
 import { grantStaff, revokeStaff, updatePlan } from "@/lib/vigil/actions/admin";
 import { syncPrices, updateBuildPrice } from "@/lib/vigil/actions/admin-orders";
+import { BILLING_PERIODS, type BillingPeriod } from "@/lib/vigil/billing-periods";
 import { readProviderConfig } from "@/lib/vigil/providers/registry";
 import { formatMoney } from "@/lib/vigil/format";
 import { requireAdmin } from "@/lib/vigil/auth/session";
@@ -25,7 +26,7 @@ export default async function PlansPage() {
     .select("user_id, role, created_at, profile:profiles!staff_members_user_id_fkey(full_name, email)")
     .order("created_at");
 
-  const priceFor = (planId: string) => catalog.prices.find((p) => p.plan_id === planId && p.currency === "usd" && p.interval === "month");
+  const priceFor = (planId: string, period: BillingPeriod) => catalog.prices.find((p) => p.plan_id === planId && p.currency === "usd" && p.interval === period.interval && p.interval_count === period.intervalCount);
   const linkFor = (entityType: string, entityId: string) => catalog.priceLinks.find((l) => l.entity_type === entityType && l.entity_id === entityId)?.external_id ?? null;
   const billing = readProviderConfig().billing;
   const valueFor = (planId: string, code: string) => catalog.planFeatures.find((pf) => pf.plan_id === planId && pf.feature_code === code)?.value;
@@ -83,10 +84,17 @@ export default async function PlansPage() {
                 <label className={labelClass} htmlFor={`name-${plan.id}`}>Name</label>
                 <input id={`name-${plan.id}`} name="name" defaultValue={plan.name} className={inputClass} required />
               </div>
-              <div>
-                <label className={labelClass} htmlFor={`price-${plan.id}`}>Monthly price (USD)</label>
-                <input id={`price-${plan.id}`} name="amount_cents" inputMode="decimal" defaultValue={priceFor(plan.id)?.amount_cents != null ? (priceFor(plan.id)!.amount_cents! / 100).toFixed(2) : ""} placeholder="not approved" className={inputClass} />
-                <p className="mt-1 font-mono text-[10px] text-[color:var(--text-secondary)]">{priceFor(plan.id) ? linkFor("plan_price", priceFor(plan.id)!.id) ?? "not synced to provider" : ""}</p>
+              <div className="sm:col-span-2 grid gap-3 sm:grid-cols-3">
+                {BILLING_PERIODS.map((period) => {
+                  const row = priceFor(plan.id, period);
+                  return (
+                    <div key={period.key}>
+                      <label className={labelClass} htmlFor={`price-${plan.id}-${period.key}`}>{period.label} price (USD)</label>
+                      <input id={`price-${plan.id}-${period.key}`} name={`amount_${period.key}`} inputMode="decimal" defaultValue={row?.amount_cents != null ? (row.amount_cents / 100).toFixed(2) : ""} placeholder="not approved" className={inputClass} />
+                      <p className="mt-1 truncate font-mono text-[10px] text-[color:var(--text-secondary)]" title={row ? linkFor("plan_price", row.id) ?? "" : ""}>{row?.amount_cents != null ? linkFor("plan_price", row.id) ?? "not synced to provider" : ""}</p>
+                    </div>
+                  );
+                })}
               </div>
               <div className="sm:col-span-2">
                 <label className={labelClass} htmlFor={`tagline-${plan.id}`}>Tagline</label>

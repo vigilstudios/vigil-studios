@@ -400,8 +400,8 @@ begin
   perform test.logout();
 
   perform test.login('00000000-0000-0000-0000-00000000000d');
-  update public.plan_prices set amount_cents = 1 where plan_id = (select id from public.plans where code = 'basic');
-  perform test.ok((select amount_cents from public.plan_prices p join public.plans pl on pl.id = p.plan_id where pl.code = 'basic') = 1,
+  update public.plan_prices set amount_cents = 1 where plan_id = (select id from public.plans where code = 'basic') and interval = 'month' and interval_count = 1;
+  perform test.ok((select amount_cents from public.plan_prices p join public.plans pl on pl.id = p.plan_id where pl.code = 'basic' and p.interval = 'month' and p.interval_count = 1) = 1,
     'dave: admin can set a price');
   update public.plan_prices set amount_cents = null;
   insert into public.entitlement_overrides (organization_id, feature_code, value, reason)

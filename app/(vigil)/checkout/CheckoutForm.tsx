@@ -6,6 +6,7 @@ import { clsx } from "clsx";
 import { beginCheckout, type CheckoutState } from "@/lib/vigil/actions/checkout";
 import { FormError, inputClass, labelClass } from "@/components/vigil/ui";
 import type { CheckoutPlan } from "@/lib/vigil/queries/checkout";
+import { BILLING_PERIODS, billingPeriodByKey, savingsPercent, type BillingPeriodKey } from "@/lib/vigil/billing-periods";
 import { formatMoney } from "@/lib/vigil/format";
 
 export type CheckoutFormProps = {
@@ -14,7 +15,7 @@ export type CheckoutFormProps = {
   projectKind: "express" | "professional" | "custom";
   templateSlug: string | null;
   templateName: string | null;
-  initial: { email?: string; businessName?: string; contactName?: string; planCode?: string };
+  initial: { email?: string; businessName?: string; contactName?: string; planCode?: string; billingPeriod?: string };
   locked: { orderId: string; checkoutToken: string } | null;
   termsUrl: string | null;
   refundNote: string | null;
@@ -26,9 +27,16 @@ export function CheckoutForm(p: CheckoutFormProps) {
   const purchasable = p.plans.filter((x) => x.purchasable);
   const defaultPlan = purchasable.find((x) => x.code === p.initial.planCode) ?? purchasable[0] ?? null;
   const [planCode, setPlanCode] = useState<string>(defaultPlan?.code ?? "");
+  // Periods offered = those at least one plan can be bought for.
+  const periods = BILLING_PERIODS.filter((per) => purchasable.some((x) => x.prices.some((pr) => pr.period === per.key && pr.purchasable)));
+  const [periodKey, setPeriodKey] = useState<BillingPeriodKey>(() => (periods.find((x) => x.key === p.initial.billingPeriod) ?? periods[0])?.key ?? "month");
+  const period = billingPeriodByKey(periodKey) ?? BILLING_PERIODS[0];
   const plan = p.plans.find((x) => x.code === planCode) ?? null;
+  const priceOf = (x: CheckoutPlan) => x.prices.find((pr) => pr.period === periodKey) ?? null;
+  const price = plan ? priceOf(plan) : null;
   const buildCents = p.build?.amountCents ?? 0;
-  const dueToday = buildCents + (plan?.monthlyCents ?? 0);
+  const dueToday = buildCents + (price?.amountCents ?? 0);
+  const perMonth = price ? Math.round(price.amountCents / period.months) : null;
 
   if (purchasable.length === 0) {
     return (
@@ -54,25 +62,46 @@ export function CheckoutForm(p: CheckoutFormProps) {
         <section>
           <h2 className="text-sm font-semibold">1. Choose your Vigil plan</h2>
           <p className="mt-1 text-xs text-[color:var(--text-secondary)]">Every Vigil-hosted website includes the Vigil platform. Pick how much you want us to take off your plate; you can change it later.</p>
+          {periods.length > 1 ? (
+            <div className="mt-3 inline-flex rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-0.5" role="radiogroup" aria-label="Billing period">
+              {periods.map((per) => {
+                const active = per.key === periodKey;
+                const save = Math.max(0, ...purchasable.map((x) => savingsPercent(x.prices.find((pr) => pr.period === per.key)?.amountCents ?? 0, per.months, x.monthlyCents) ?? 0));
+                return (
+                  <button key={per.key} type="button" role="radio" aria-checked={active} onClick={() => setPeriodKey(per.key)} disabled={pending} className={clsx("min-h-10 rounded-md px-3 text-xs font-medium transition-colors", active ? "bg-[color:var(--accent)] text-[color:var(--bg-primary)]" : "text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]")}>
+                    {per.label}
+                    {save > 0 ? <span className={clsx("ml-1.5 rounded-full px-1.5 py-0.5 text-[10px]", active ? "bg-black/15" : "bg-[color-mix(in_srgb,var(--accent)_16%,transparent)] text-[color:var(--accent)]")}>save {save}%</span> : null}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
+          <input type="hidden" name="billing_period" value={periodKey} />
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {p.plans.map((x) => {
               const selected = x.code === planCode;
+              const xp = priceOf(x);
+              const xSave = xp ? savingsPercent(xp.amountCents, period.months, x.monthlyCents) : null;
+              const canBuy = Boolean(xp?.purchasable);
               return (
                 <label
                   key={x.id}
                   className={clsx(
                     "relative flex cursor-pointer flex-col rounded-xl border p-4 transition-colors",
                     selected ? "border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent)_8%,transparent)]" : "border-[color:var(--border)] bg-[color:var(--bg-surface)] hover:border-[color:var(--text-secondary)]",
-                    !x.purchasable && "opacity-60"
+                    !canBuy && "opacity-60"
                   )}
                 >
-                  <input type="radio" name="plan_code" value={x.code} checked={selected} disabled={!x.purchasable || pending} onChange={() => setPlanCode(x.code)} className="sr-only" />
+                  <input type="radio" name="plan_code" value={x.code} checked={selected} disabled={!canBuy || pending} onChange={() => setPlanCode(x.code)} className="sr-only" />
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="text-sm font-semibold">{x.name}</p>
                       {x.tagline ? <p className="text-xs text-[color:var(--text-secondary)]">{x.tagline}</p> : null}
                     </div>
-                    <p className="shrink-0 text-sm font-semibold">{x.monthlyCents !== null ? `${formatMoney(x.monthlyCents, x.currency)}/mo` : "—"}</p>
+                    <div className="shrink-0 text-right">
+                      <p className="text-sm font-semibold">{xp ? formatMoney(xp.amountCents, x.currency) : "—"}<span className="text-xs font-normal text-[color:var(--text-secondary)]">{xp ? (period.key === "month" ? "/mo" : ` ${period.every}`) : ""}</span></p>
+                      {xp && period.months > 1 ? <p className="text-[11px] text-[color:var(--text-secondary)]">{formatMoney(Math.round(xp.amountCents / period.months), x.currency)}/mo{xSave ? ` · save ${xSave}%` : ""}</p> : null}
+                    </div>
                   </div>
                   <ul className="mt-3 space-y-1 text-xs text-[color:var(--text-secondary)]">
                     {x.includes.map((i) => (
@@ -81,7 +110,7 @@ export function CheckoutForm(p: CheckoutFormProps) {
                       </li>
                     ))}
                   </ul>
-                  {!x.purchasable ? <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">Not available online yet</p> : null}
+                  {!canBuy ? <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">Not available online for this period yet</p> : null}
                 </label>
               );
             })}
@@ -133,8 +162,8 @@ export function CheckoutForm(p: CheckoutFormProps) {
             </div>
           ) : null}
           <div className="flex justify-between gap-3">
-            <dt className="text-[color:var(--text-secondary)]">{plan ? plan.name : "Vigil plan"}</dt>
-            <dd className="font-medium">{plan?.monthlyCents !== null && plan ? `${formatMoney(plan.monthlyCents, plan.currency)}/mo` : "—"}</dd>
+            <dt className="text-[color:var(--text-secondary)]">{plan ? `${plan.name} · ${period.label.toLowerCase()}` : "Vigil plan"}</dt>
+            <dd className="font-medium">{price && plan ? formatMoney(price.amountCents, plan.currency) : "—"}</dd>
           </div>
           <div className="flex justify-between gap-3 border-t border-[color:var(--border)] pt-2 text-base">
             <dt className="font-semibold">Due today</dt>
@@ -142,9 +171,9 @@ export function CheckoutForm(p: CheckoutFormProps) {
           </div>
         </dl>
         <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">
-          Then {plan?.monthlyCents !== null && plan ? `${formatMoney(plan.monthlyCents, plan.currency)} a month` : "your plan price monthly"}, cancel any time. Taxes are calculated at payment if they apply.
+          {price && plan ? `Then ${formatMoney(price.amountCents, plan.currency)} ${period.every}${perMonth && period.months > 1 ? ` (${formatMoney(perMonth, plan.currency)}/mo)` : ""}, cancel any time.` : "Your plan renews automatically; cancel any time."} Sales tax is added at payment where it applies.
         </p>
-        <button type="submit" className="btn-primary mt-4 w-full text-sm" disabled={pending || !plan}>
+        <button type="submit" className="btn-primary mt-4 w-full text-sm" disabled={pending || !price?.purchasable}>
           <Lock className="mr-1.5 h-3.5 w-3.5" />
           {pending ? "Opening secure payment…" : "Continue to secure payment"}
         </button>

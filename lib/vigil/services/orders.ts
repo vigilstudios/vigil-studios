@@ -3,6 +3,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NotFoundError, ProviderNotConfiguredError, ValidationError } from "@/lib/vigil/auth/errors";
 import { button, escapeHtml, layout, sendEmail, staffNotificationAddress } from "@/lib/vigil/email";
+import { billingPeriodByKey, type BillingPeriodKey } from "@/lib/vigil/billing-periods";
 import { slugify } from "@/lib/vigil/format";
 import { getBillingProvider } from "@/lib/vigil/providers/registry";
 import type { BillingCheckoutSnapshot, BillingProvider, CheckoutLineItem } from "@/lib/vigil/providers/types";
@@ -33,6 +34,8 @@ export type CheckoutRequest = {
   projectKind: "express" | "professional" | "custom";
   templateSlug?: string | null;
   planCode: string;
+  /** How the plan is paid for; defaults to monthly. */
+  billingPeriod?: BillingPeriodKey;
   /** Staff-created links carry an existing order; self-serve creates one. */
   existingOrderId?: string | null;
   /** Staff-quoted build amount (custom builds); overrides the catalog amount. */
@@ -46,15 +49,18 @@ export async function startCheckout(admin: DbClient, req: CheckoutRequest, provi
   if (planError) throw planError;
   if (!plan) throw new ValidationError("Choose a Vigil plan.");
 
+  const period = billingPeriodByKey(req.billingPeriod ?? "month");
+  if (!period) throw new ValidationError("Choose how you want to pay.");
   const { data: planPrice, error: ppError } = await admin
     .from("plan_prices")
-    .select("id, amount_cents, currency, interval")
+    .select("id, amount_cents, currency, interval, interval_count")
     .eq("plan_id", plan.id)
     .eq("is_active", true)
-    .eq("interval", "month")
+    .eq("interval", period.interval)
+    .eq("interval_count", period.intervalCount)
     .maybeSingle();
   if (ppError) throw ppError;
-  if (!planPrice || planPrice.amount_cents === null) throw new ValidationError(`${plan.name} does not have an approved price yet.`);
+  if (!planPrice || planPrice.amount_cents === null) throw new ValidationError(`${plan.name} does not have an approved ${period.label.toLowerCase()} price yet.`);
 
   const { data: build, error: buildError } = await admin.from("build_prices").select("id, amount_cents, currency, name").eq("kind", req.projectKind).eq("is_active", true).maybeSingle();
   if (buildError) throw buildError;
@@ -77,6 +83,7 @@ export async function startCheckout(admin: DbClient, req: CheckoutRequest, provi
     project_kind: req.projectKind,
     template_slug: req.templateSlug ?? null,
     plan_id: plan.id,
+    plan_price_id: planPrice.id,
     build_price_id: build.id,
     build_amount_cents: buildAmount,
     plan_amount_cents: planPrice.amount_cents,
@@ -101,7 +108,7 @@ export async function startCheckout(admin: DbClient, req: CheckoutRequest, provi
     customerEmail: email,
     successUrl: `${req.appUrl}/checkout/success?order=${orderId}`,
     cancelUrl: `${req.appUrl}/checkout/${await tokenFor(admin, orderId)}?canceled=1`,
-    reference: { order_id: orderId, plan_code: plan.code, project_kind: req.projectKind, template_slug: req.templateSlug ?? "" },
+    reference: { order_id: orderId, plan_code: plan.code, billing_period: period.key, project_kind: req.projectKind, template_slug: req.templateSlug ?? "" },
     collectTax: process.env.STRIPE_TAX === "true",
   });
 
@@ -208,10 +215,9 @@ export async function provisionOrder(admin: DbClient, orderId: string, provider:
       if (checkout?.subscriptionExternalId) {
         const snapshot = await provider.getSubscription(checkout.subscriptionExternalId);
         if (snapshot) {
-          // Ensure the price link points at this order's plan price so attribution works.
-          const { data: planPrice } = await admin.from("plan_prices").select("id").eq("plan_id", order.plan_id!).eq("interval", "month").maybeSingle();
-          if (snapshot.priceExternalId && planPrice) {
-            await upsertProviderLink(admin, { provider: providerName, resourceKind: "price", externalId: snapshot.priceExternalId, entityType: "plan_price", entityId: planPrice.id });
+          // Ensure the price link points at the plan price the buyer chose so attribution works.
+          if (snapshot.priceExternalId && order.plan_price_id) {
+            await upsertProviderLink(admin, { provider: providerName, resourceKind: "price", externalId: snapshot.priceExternalId, entityType: "plan_price", entityId: order.plan_price_id });
           }
           const applied = await applySubscriptionSnapshot(admin, snapshot, provider);
           linked = applied.subscriptionId;
@@ -221,7 +227,7 @@ export async function provisionOrder(admin: DbClient, orderId: string, provider:
     if (!linked && order.plan_id) {
       const { data: manual, error: subError } = await admin
         .from("subscriptions")
-        .insert({ organization_id: organizationId, plan_id: order.plan_id, status: "active", current_period_start: new Date().toISOString(), metadata: { source: `order:${orderId}` } })
+        .insert({ organization_id: organizationId, plan_id: order.plan_id, plan_price_id: order.plan_price_id, status: "active", current_period_start: new Date().toISOString(), metadata: { source: `order:${orderId}` } })
         .select("id")
         .single();
       if (subError) throw subError;

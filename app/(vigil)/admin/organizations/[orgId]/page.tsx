@@ -19,6 +19,7 @@ import {
   viewAsOrganization,
 } from "@/lib/vigil/actions/admin";
 import { requireStaff } from "@/lib/vigil/auth/session";
+import { describePrice } from "@/lib/vigil/billing-periods";
 import { formatDate, formatDateTime, formatMoney, humanizeAction, titleCase } from "@/lib/vigil/format";
 import { domainTransitions, projectTransitions, subscriptionTransitions, websiteTransitions } from "@/lib/vigil/lifecycle";
 import { getCatalog, getOrganizationDetail } from "@/lib/vigil/queries/admin";
@@ -248,7 +249,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
               <li key={s.id} className="py-2">
                 <div className="flex items-center justify-between gap-2">
                   <span>
-                    {s.plan?.name ?? "Plan"} · {s.price ? `${formatMoney(s.price.amount_cents, s.price.currency)}/${s.price.interval}` : "no price"}
+                    {s.plan?.name ?? "Plan"} · {s.price ? describePrice(s.price, formatMoney) : "no price"}
                   </span>
                   <StatusPill tone={s.status === "active" ? "good" : s.status === "canceled" ? "neutral" : "warn"}>{titleCase(s.status)}</StatusPill>
                 </div>

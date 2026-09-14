@@ -55,7 +55,7 @@ export const getOrganizationDetail = cache(async (orgId: string) => {
     supabase.from("organization_invites").select("id, email, role, expires_at, accepted_at, revoked_at").eq("organization_id", orgId).order("created_at", { ascending: false }),
     supabase.from("websites").select("*").eq("organization_id", orgId).order("created_at"),
     supabase.from("domains").select("*").eq("organization_id", orgId).order("created_at"),
-    supabase.from("subscriptions").select("*, plan:plans(code, name), price:plan_prices(amount_cents, currency, interval)").eq("organization_id", orgId).order("created_at", { ascending: false }),
+    supabase.from("subscriptions").select("*, plan:plans(code, name), price:plan_prices(amount_cents, currency, interval, interval_count)").eq("organization_id", orgId).order("created_at", { ascending: false }),
     supabase.from("projects").select("*").eq("organization_id", orgId).order("created_at", { ascending: false }),
     supabase.from("entitlement_overrides").select("*").eq("organization_id", orgId),
     supabase.from("audit_events").select("id, action, actor_kind, entity_type, entity_id, created_at").eq("organization_id", orgId).order("created_at", { ascending: false }).limit(20),
@@ -119,7 +119,7 @@ export const listSubscriptions = cache(async () => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("subscriptions")
-    .select("id, status, current_period_end, cancel_at_period_end, created_at, organization:organizations(id, name), plan:plans(code, name), price:plan_prices(amount_cents, currency, interval)")
+    .select("id, status, current_period_end, cancel_at_period_end, created_at, organization:organizations(id, name), plan:plans(code, name), price:plan_prices(amount_cents, currency, interval, interval_count)")
     .order("created_at", { ascending: false })
     .limit(300);
   if (error) throw error;

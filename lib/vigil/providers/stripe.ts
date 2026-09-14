@@ -47,8 +47,10 @@ export class StripeBillingProvider implements BillingProvider {
         metadata: input.reference,
         ...(input.mode === "subscription" ? { subscription_data: { metadata: input.reference } } : {}),
         allow_promotion_codes: input.allowPromotionCodes ?? false,
+        // Stripe Tax needs a billing address to calculate sales tax.
         automatic_tax: { enabled: input.collectTax ?? false },
-        billing_address_collection: "auto",
+        billing_address_collection: input.collectTax ? "required" : "auto",
+        ...(input.collectTax ? { customer_update: { address: "auto", name: "auto" } } : {}),
       })
     );
     if (!session.url) throw new ProviderError("stripe", "Stripe did not return a checkout URL.", { retryable: true });
@@ -64,7 +66,8 @@ export class StripeBillingProvider implements BillingProvider {
   async ensurePrice(input: CatalogPriceInput) {
     const existing = await this.call(() => this.stripe.prices.list({ lookup_keys: [input.lookupKey], limit: 1, active: true }));
     const found = existing.data[0];
-    if (found && found.unit_amount === input.amountCents && found.currency === input.currency && (found.recurring?.interval ?? undefined) === input.interval) {
+    const wantCount = input.interval ? input.intervalCount ?? 1 : undefined;
+    if (found && found.unit_amount === input.amountCents && found.currency === input.currency && (found.recurring?.interval ?? undefined) === input.interval && (found.recurring?.interval_count ?? undefined) === wantCount) {
       return { externalId: found.id, created: false };
     }
     // Reuse the product the previous price pointed at, or create one.
@@ -74,7 +77,7 @@ export class StripeBillingProvider implements BillingProvider {
         product: productId,
         unit_amount: input.amountCents,
         currency: input.currency,
-        ...(input.interval ? { recurring: { interval: input.interval } } : {}),
+        ...(input.interval ? { recurring: { interval: input.interval, interval_count: input.intervalCount ?? 1 } } : {}),
         lookup_key: input.lookupKey,
         transfer_lookup_key: true,
       })
