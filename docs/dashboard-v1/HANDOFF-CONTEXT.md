@@ -102,8 +102,92 @@ Buy on a template" → pay → guided onboarding → dashboard.
 | `app/(vigil)/admin/orders/*` | Orders list + "Send a checkout link" form; nav item added. |
 | `app/(vigil)/admin/plans/page.tsx` | Build prices table, provider price ids, "Sync prices" button. |
 
+### Onboarding spec (owner, 14 Sep): "Virtue guides you in"
+
+The owner wants the onboarding to be **100%** — everything from the moment
+payment clears until the customer is in their dashboard — presented as if
+**Virtue** is guiding them, with a domain-setup guide good enough for a
+customer who already manages their own domain to finish without help.
+
+**Virtue as the guide**
+- A persona, not a chatbot (no LLM calls needed for V1): Virtue "speaks" in
+  short, warm, first-person copy at the top of each step ("I'll set up your
+  hosting while you tell me about the business." / "Nice — that's everything
+  I need for the menu."). One voice, no exclamation marks, no jargon.
+- Visual: a **glass sphere with a green atmosphere**, Siri-like — a
+  translucent orb, soft inner glow in the accent green, slow drifting
+  gradients, a subtle rim highlight; idle = gentle breathing, working =
+  faster swirl, done = a settled glow. Build it as a self-contained
+  `components/vigil/VirtueOrb.tsx` (CSS radial/conic gradients + blur +
+  keyframes, or a small canvas), sizes `sm` (24px, inline next to copy),
+  `md` (56px, step header), `lg` (120px, welcome/success). Respect
+  `prefers-reduced-motion`. Both themes. Reusable later for the real Virtue.
+- Where it appears: `/checkout/success`, the onboarding wizard header and
+  step intros, the dashboard's "Finish onboarding" card, and the Virtue nav
+  item icon. Note: the master doc bundles Virtue the *AI employee* only with
+  Growth/Priority; Virtue the *onboarding guide* appears for every tier by
+  owner decision — say so in copy ("Virtue helps every Vigil customer get
+  set up; on Growth and Priority it keeps working for you after launch").
+
+**Flow (all of it, in order)**
+1. Success page → welcome email → first sign-in lands on
+   `/dashboard/onboarding` automatically (redirect while the active project
+   is `intake` with `intake_completed_at` null; a "Do this later" link goes
+   to the dashboard, which keeps a prominent "Finish setting up" card).
+2. Wizard, one step per screen, progress bar, autosave on every change to
+   `projects.brief`, resume where they left off, mobile-first:
+   1. Welcome (Virtue lg): what happens next, ~10 minutes, save as you go.
+   2. Business basics: name (prefilled), tagline, phone, email, address,
+      hours (day-by-day with "closed" and "same every day").
+   3. What you offer: services / menu items / products — repeatable rows
+      (name, short description, price optional), grouped sections optional.
+   4. About: story, what makes you different, a sentence for the hero.
+   5. Brand and photos: logo (upload), brand colours (pick or "use my logo's
+      colours"), photos (multi-upload, captions optional), social links.
+      Uploads go browser-direct to the `project-assets` bucket at
+      `<org>/<project>/<uuid>.<ext>` with rows in `project_assets`.
+   6. **Domain** (see below).
+   7. Review and send: summary of every step with "edit" links, then
+      "Send to Vigil" → `intake_completed_at`, email to staff, audit,
+      Virtue confirms what happens next and the expected timeline.
+3. After sending: dashboard Overview shows the project stepper at "Build",
+   Virtue card says "I've handed your details to the team; you'll hear from
+   us within X" (X is configurable copy, not a promise baked into code).
+
+**Domain step — extremely user friendly**
+- First question, plain language: "Do you already have a domain (like
+  yourbusiness.com)?" → *Yes, I own one* / *No, I need one* / *Not sure*.
+- **Yes, I own one:**
+  - Enter it; Vigil records it (`domains` row, source `customer_owned`,
+    status `pending`, `domain.connect` job) and, where practical, detects
+    the registrar from nameservers (add `lookupDns`/WHOIS-lite later; for
+    now let them pick from a list: GoDaddy, Namecheap, Squarespace/Google
+    Domains, Cloudflare, Wix, Bluehost, IONOS, Hover, Other).
+  - Then a **registrar-specific, numbered walkthrough**: where to log in,
+    which menu ("DNS" / "Manage DNS" / "Advanced DNS"), what to add — the
+    exact records from `domains.verification.required_records` with
+    one-tap copy buttons for name and value, what to delete if a
+    conflicting record exists, and screenshots/illustrations per
+    registrar if available. Keep registrar guides as data
+    (`lib/vigil/domain-guides.ts`: steps per registrar) so they're easy to
+    update.
+  - "I've added the records" → Vigil checks (queue `domain.verify`,
+    poll status on the page); show "Checking… this can take up to 48
+    hours, I'll keep checking and email you when it connects" — never a
+    dead end. A "Do this later" path keeps the step reopenable from the
+    dashboard's Domain page with the same guide.
+  - Option: "Prefer we do it? Add Vigil as a delegate / send us temporary
+    access" — text only for V1, routes to a change request.
+- **No, I need one:** ask for two or three preferred names; Vigil registers
+  it for them (manual on our side until the domain provider exists); status
+  "Vigil is registering your domain" with the registrant-ownership promise
+  from the master doc.
+- **Not sure:** short explanation, then the same two paths.
+- Everything the customer sees uses `describeDomainStatus` wording; no DNS
+  jargon without a one-line explanation beside it.
+
 ### Not built yet (in priority order)
-1. **Onboarding wizard** `/dashboard/onboarding` — steps: business basics
+1. **Onboarding wizard** `/dashboard/onboarding` — per the spec above; steps: business basics
    (tagline, phone, email, address, hours) → services/menu (repeatable) →
    about/story → brand & photos (upload to `project-assets` bucket via
    browser, rows in `project_assets`, kinds logo/photo/document) → domain
