@@ -1,0 +1,72 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
+import { logAuditEvent } from "@/lib/vigil/audit";
+import { ValidationError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
+import { assertOrgRole, requireOrgContextOrThrow } from "@/lib/vigil/auth/session";
+import { enqueueJob, JOB_KINDS } from "@/lib/vigil/jobs";
+import { normalizeHostname } from "@/lib/vigil/services/domain";
+
+export type DomainState = ActionResult<{ domainId: string }> | null;
+
+/**
+ * Flow B, step 1: the customer records a domain they own. The row is created
+ * under RLS (customer_owned + pending only); a job then asks the deployment
+ * provider for the DNS records the customer must set.
+ */
+export async function startDomainConnection(_prev: DomainState, formData: FormData): Promise<DomainState> {
+  try {
+    const ctx = await requireOrgContextOrThrow();
+    await assertOrgRole(ctx, ["owner", "manager"]);
+
+    const hostname = normalizeHostname(String(formData.get("hostname") ?? ""));
+    if (!hostname) throw new ValidationError("Enter a domain like yourbusiness.com.", { hostname: ["Invalid domain"] });
+    const websiteId = String(formData.get("website_id") ?? "") || null;
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("domains")
+      .insert({
+        organization_id: ctx.organization.id,
+        website_id: websiteId,
+        hostname,
+        kind: hostname.split(".").length > 2 ? "subdomain" : "apex",
+        source: "customer_owned",
+        status: "pending",
+      })
+      .select("id")
+      .single();
+    if (error) {
+      if (error.code === "23505") throw new ValidationError("That domain is already registered with Vigil.", { hostname: ["Already in use"] });
+      throw error;
+    }
+
+    await logAuditEvent(supabase, {
+      action: "domain.connect_started",
+      entityType: "domain",
+      entityId: data.id,
+      organizationId: ctx.organization.id,
+      after: { hostname, website_id: websiteId },
+    });
+
+    // Queue the provider hand-off. Without a service key the row still
+    // exists and staff can pick it up from the admin console.
+    if (hasAdminClient()) {
+      await enqueueJob(createAdminClient(), {
+        kind: JOB_KINDS.domainConnect,
+        idempotencyKey: `domain.connect:${data.id}`,
+        organizationId: ctx.organization.id,
+        websiteId,
+        domainId: data.id,
+        createdBy: ctx.user.id,
+      });
+    }
+
+    revalidatePath("/dashboard/domain");
+    return { ok: true, data: { domainId: data.id } };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
