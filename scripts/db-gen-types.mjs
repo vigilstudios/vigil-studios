@@ -8,9 +8,17 @@
 // the working directory (install them into a scratch folder and run from there,
 // or `npm i --no-save @supabase/postgres-meta`). With a linked project use
 // `npx supabase gen types typescript --linked --schema public --schema vigil` instead.
-import { PostgresMeta } from '@supabase/postgres-meta/dist/lib/index.js';
-import { getGeneratorMetadata } from '@supabase/postgres-meta/dist/lib/generators.js';
-import { generateTypescript } from '@supabase/postgrest-typegen';
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
+import path from 'node:path';
+
+// Resolve the generator packages from the current working directory so they
+// can live in a scratch folder rather than in this repo's dependencies.
+const require = createRequire(path.join(process.cwd(), 'package.json'));
+const load = (spec) => import(pathToFileURL(require.resolve(spec)).href);
+const { PostgresMeta } = await load('@supabase/postgres-meta/dist/lib/index.js');
+const { getGeneratorMetadata } = await load('@supabase/postgres-meta/dist/lib/generators.js');
+const { generateTypescript } = await load('@supabase/postgrest-typegen');
 
 const connectionString = process.argv[2];
 if (!connectionString) {

@@ -289,3 +289,37 @@ create trigger notifications_protect_columns
   for each row execute function vigil.protect_columns_from_customers(
     'id', 'user_id', 'organization_id', 'kind', 'title', 'body', 'href', 'created_at'
   );
+
+-- API wrappers (see 0002 for the reasoning).
+create or replace function public.log_audit_event(
+  p_action       text,
+  p_entity_type  text,
+  p_entity_id    uuid default null,
+  p_org          uuid default null,
+  p_before       jsonb default null,
+  p_after        jsonb default null,
+  p_metadata     jsonb default '{}'::jsonb
+)
+returns bigint
+language sql
+security invoker
+set search_path = ''
+as $$
+  select vigil.log_audit_event(p_action, p_entity_type, p_entity_id, p_org, p_before, p_after, p_metadata, null);
+$$;
+grant execute on function public.log_audit_event(text, text, uuid, uuid, jsonb, jsonb, jsonb)
+  to authenticated, service_role;
+
+create or replace function public.claim_jobs(
+  p_worker        text,
+  p_limit         integer default 10,
+  p_lease_seconds integer default 300
+)
+returns setof public.provisioning_jobs
+language sql
+security invoker
+set search_path = ''
+as $$
+  select * from vigil.claim_jobs(p_worker, p_limit, p_lease_seconds);
+$$;
+grant execute on function public.claim_jobs(text, integer, integer) to authenticated, service_role;

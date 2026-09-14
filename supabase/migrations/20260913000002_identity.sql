@@ -444,3 +444,17 @@ create policy organization_invites_delete on public.organization_invites
     vigil.is_staff()
     or vigil.has_org_role(organization_id, array['owner','manager']::public.org_role[])
   );
+
+-- --------------------------------------------------------------------------
+-- API surface. PostgREST only exposes `public`, so callable functions get a
+-- thin wrapper here; the implementation stays in `vigil`.
+-- --------------------------------------------------------------------------
+create or replace function public.accept_pending_invites()
+returns integer
+language sql
+security invoker
+set search_path = ''
+as $$
+  select vigil.accept_invites_for_current_user();
+$$;
+grant execute on function public.accept_pending_invites() to authenticated, service_role;

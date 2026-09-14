@@ -291,3 +291,15 @@ join (values
 -- deliberately NULL (master architecture §4: prices are not approved).
 insert into public.plan_prices (plan_id, currency, interval, amount_cents)
 select id, 'usd', 'month', null from public.plans;
+
+-- API wrapper (see 0002 for the reasoning).
+create or replace function public.resolve_entitlements(p_org uuid)
+returns table (feature_code text, value jsonb, source text, plan_code text)
+language sql
+stable
+security invoker
+set search_path = ''
+as $$
+  select * from vigil.resolve_entitlements(p_org);
+$$;
+grant execute on function public.resolve_entitlements(uuid) to authenticated, service_role;

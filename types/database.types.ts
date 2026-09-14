@@ -1370,7 +1370,62 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      accept_pending_invites: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      claim_jobs: {
+        Args: { p_lease_seconds?: number; p_limit?: number; p_worker: string }
+        Returns: {
+          attempts: number
+          created_at: string
+          created_by: string | null
+          domain_id: string | null
+          error: Json | null
+          finished_at: string | null
+          id: string
+          idempotency_key: string
+          kind: string
+          locked_at: string | null
+          locked_by: string | null
+          max_attempts: number
+          organization_id: string | null
+          payload: NonNullable<Json>
+          result: Json | null
+          scheduled_for: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["job_status"]
+          updated_at: string
+          website_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "provisioning_jobs"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      log_audit_event: {
+        Args: {
+          p_action: string
+          p_after?: Json
+          p_before?: Json
+          p_entity_id?: string
+          p_entity_type: string
+          p_metadata?: Json
+          p_org?: string
+        }
+        Returns: number
+      }
+      resolve_entitlements: {
+        Args: { p_org: string }
+        Returns: {
+          feature_code: string
+          plan_code: string
+          source: string
+          value: Json
+        }[]
+      }
     }
     Enums: {
       actor_kind: "user" | "staff" | "system" | "provider"
