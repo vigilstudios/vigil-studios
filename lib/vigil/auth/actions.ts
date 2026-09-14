@@ -33,18 +33,19 @@ export async function signInWithEmail(_prev: SignInState, formData: FormData): P
   const supabase = await createClient();
   const origin = await siteOrigin();
 
+  // The email template (supabase/templates/magic_link.html) appends
+  // ?token_hash=…&type=magiclink to this URL; /auth/confirm verifies it on a
+  // POST, so the link works in any browser and survives inbox prefetching.
   // The destination after sign-in travels in a cookie so the redirect URL
-  // stays a clean allow-list match. With Supabase's default email template
-  // the link completes through the PKCE code flow at /auth/callback; with the
-  // custom template (supabase/templates/magic_link.html, paid tier or custom
-  // SMTP) it would land on /auth/confirm instead — both read the cookie.
+  // stays a clean allow-list match. /auth/callback remains for the PKCE code
+  // flow (OAuth providers, or the default template) and reads the same cookie.
   const cookieStore = await cookies();
   cookieStore.set(NEXT_COOKIE, next, nextCookieOptions());
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${origin}/auth/callback`,
+      emailRedirectTo: `${origin}/auth/confirm`,
       // An invited address is new to Auth until its first sign-in, so user
       // creation stays on. A stranger who signs in gets a profile with no
       // organization and sees only the welcome screen; nothing is exposed.

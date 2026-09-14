@@ -23,11 +23,10 @@ additional_redirect_urls = [
   "http://127.0.0.1:3000/**",
 ]
 
-# Custom email templates are not available on the free tier with the default
-# email provider (config push returns 400). Once custom SMTP or a paid plan is
-# in place, uncomment this: the link then lands on the app's /auth/confirm,
-# which verifies on a POST that inbox link scanners never trigger, and works
-# in any browser rather than only the one that requested it.
-# [auth.email.template.magic_link]
-# subject = "Sign in to Vigil"
-# content_path = "./supabase/templates/magic_link.html"
+# The magic link lands on the app's /auth/confirm, which verifies on a POST
+# that inbox link scanners never trigger, and works in any browser rather
+# than only the one that requested it. (Template edits need a paid plan or
+# custom SMTP; the project is on Pro since 14 Sep 2026.)
+[auth.email.template.magic_link]
+subject = "Sign in to Vigil"
+content_path = "./supabase/templates/magic_link.html"
