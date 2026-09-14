@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Card, DefinitionList, EmptyState, PageHeader, StatusPill } from "@/components/vigil/ui";
+import { ArrowUpRight } from "lucide-react";
+import { ButtonLink, EmptyState } from "@/components/vigil/ui";
+import { Checklist, Meter, Panel, SitePreview, StatusLine, Stepper, Timeline } from "@/components/vigil/widgets";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
 import { FEATURES, resolveEntitlements } from "@/lib/vigil/entitlements";
-import { formatRelative, humanizeAction } from "@/lib/vigil/format";
-import {
-  describeDomainStatus,
-  describeProjectStatus,
-  describeSubscriptionStatus,
-  describeWebsiteStatus,
-} from "@/lib/vigil/lifecycle";
-import { getOrgDomains, getOrgProjects, getOrgSubscription, getOrgWebsites, getRecentActivity } from "@/lib/vigil/queries/dashboard";
+import { formatDate, formatRelative, humanizeAction, titleCase } from "@/lib/vigil/format";
+import { describeDomainStatus, describeProjectStatus, describeSubscriptionStatus, describeWebsiteStatus } from "@/lib/vigil/lifecycle";
+import { auditTone, periodProgress, projectStepIndex, projectSteps, requiredRecords, templateName } from "@/lib/vigil/presenters";
+import { getOrgDomains, getOrgProjects, getOrgSubscription, getOrgWebsites, getRecentActivity, getRecentDeployments } from "@/lib/vigil/queries/dashboard";
 
 export const metadata: Metadata = { title: "Overview" };
 
@@ -22,135 +20,219 @@ export default async function OverviewPage() {
     getOrgDomains(orgId),
     getOrgSubscription(orgId),
     getOrgProjects(orgId),
-    getRecentActivity(orgId),
+    getRecentActivity(orgId, 10),
     resolveEntitlements(orgId),
   ]);
 
   const website = websites[0] ?? null;
-  const domain = domains.find((d) => d.id === website?.primary_domain_id) ?? domains[0] ?? null;
-  const project = projects.find((p) => !["closed", "cancelled", "launched"].includes(p.status)) ?? null;
+  const deployments = website ? await getRecentDeployments(website.id, 1) : [];
+  const lastPublish = deployments[0] ?? null;
+  const domain = domains.find((d) => d.id === website?.primary_domain_id) ?? domains.find((d) => d.website_id === website?.id) ?? domains[0] ?? null;
+  const project = projects.find((p) => !["closed", "cancelled"].includes(p.status)) ?? projects[0] ?? null;
 
   const websiteStatus = website ? describeWebsiteStatus(website.status) : null;
   const domainStatus = domain ? describeDomainStatus(domain.status) : null;
   const subStatus = subscription ? describeSubscriptionStatus(subscription.status) : null;
   const projectStatus = project ? describeProjectStatus(project.status) : null;
+  const step = project ? projectStepIndex(project.status) : null;
+  const period = periodProgress(subscription?.current_period_start ?? null, subscription?.current_period_end ?? null);
+  const records = domain ? requiredRecords(domain.verification) : [];
 
   const firstName = ctx.profile.full_name?.split(" ")[0];
 
-  return (
-    <div>
-      <PageHeader
-        eyebrow={ctx.organization.name}
-        title={firstName ? `Hello, ${firstName}` : "Overview"}
-        description="Everything Vigil is running for your business, at a glance."
-      />
+  if (!website && !project) {
+    return (
+      <div>
+        <h1 className="text-lg font-semibold">{firstName ? `Hello, ${firstName}` : "Overview"}</h1>
+        <div className="mt-4">
+          <EmptyState title="Nothing to show yet" description="Once Vigil Studios starts your project, your website, domain and subscription will appear here." />
+        </div>
+      </div>
+    );
+  }
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <StatusCard
-          title="Website"
-          href="/dashboard/website"
-          status={websiteStatus}
-          detail={website?.live_url ? website.live_url.replace(/^https?:\/\//, "") : website?.name ?? "Not set up yet"}
-        />
-        <StatusCard
-          title="Domain"
-          href="/dashboard/domain"
-          status={domainStatus}
-          detail={domain?.hostname ?? "No domain connected"}
-        />
-        <StatusCard
-          title="Subscription"
-          href="/dashboard/billing"
-          status={subStatus}
-          detail={subscription?.plan?.name ?? "No active plan"}
-        />
+  return (
+    <div className="space-y-4">
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--accent)]">{ctx.organization.name}</p>
+        <h1 className="text-lg font-semibold tracking-tight sm:text-xl">{firstName ? `Hello, ${firstName}` : "Overview"}</h1>
+        <p className="mt-0.5 text-xs text-[color:var(--text-secondary)]">Everything Vigil is running for your business, at a glance.</p>
       </div>
 
-      {project ? (
-        <Card className="mt-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--accent)]">Your project</p>
-              <h2 className="mt-1 text-lg font-semibold">{project.name}</h2>
-            </div>
-            {projectStatus ? <StatusPill tone={projectStatus.tone}>{projectStatus.label}</StatusPill> : null}
+      <div className="grid gap-4 lg:grid-cols-12">
+        {/* Website */}
+        <Panel className="lg:col-span-5 lg:row-span-2" title="Website" action={<Link href="/dashboard/website" className="text-xs text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">Details</Link>}>
+          <SitePreview templateSlug={website?.template_slug ?? project?.template_slug ?? null} alt={website?.name ?? "Your website"} />
+          <div className="mt-3 flex items-start justify-between gap-3">
+            {websiteStatus ? (
+              <StatusLine tone={websiteStatus.tone} label={websiteStatus.label} hint={website?.status_reason ?? websiteStatus.hint} />
+            ) : (
+              <StatusLine tone="info" label="In production" hint="Your website appears here once it is published." />
+            )}
+            {website?.live_url ? (
+              <a href={website.live_url} target="_blank" rel="noreferrer" className="btn-secondary !px-2.5 !py-1 shrink-0 text-xs">
+                Open site <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
+              </a>
+            ) : null}
           </div>
-          {project.status === "review" ? (
-            <p className="mt-3 text-sm text-[color:var(--text-secondary)]">
-              Your website is ready for review. Reply to your project email with any changes or your approval.
-            </p>
-          ) : null}
-        </Card>
-      ) : null}
+          <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+            <div>
+              <dt className="text-[color:var(--text-secondary)]">Address</dt>
+              <dd className="truncate font-medium">{website?.live_url ? website.live_url.replace(/^https?:\/\//, "") : "Not published yet"}</dd>
+            </div>
+            <div>
+              <dt className="text-[color:var(--text-secondary)]">Last published</dt>
+              <dd className="font-medium">{lastPublish ? formatRelative(lastPublish.finished_at ?? lastPublish.created_at) : "—"}</dd>
+            </div>
+          </dl>
+        </Panel>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <h2 className="text-base font-semibold">Recent activity</h2>
-          {activity.length === 0 ? (
-            <p className="mt-3 text-sm text-[color:var(--text-secondary)]">Nothing yet. Activity appears here as Vigil works on your account.</p>
+        {/* Domain */}
+        <Panel className="lg:col-span-4" title="Domain" action={<Link href="/dashboard/domain" className="text-xs text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">Manage</Link>}>
+          {domain && domainStatus ? (
+            <>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-base font-semibold">{domain.hostname}</p>
+                  <p className="text-xs text-[color:var(--text-secondary)]">Owned by you{domain.source === "purchased_via_vigil" ? ", registered through Vigil" : ""}</p>
+                </div>
+                <StatusLine tone={domainStatus.tone} label={domainStatus.label} size="sm" />
+              </div>
+              <div className="mt-4">
+                <Checklist
+                  items={[
+                    ...records.map((r) => ({
+                      label: `${r.type} record at your registrar`,
+                      detail: `${r.name} → ${r.value}`,
+                      tone: (domain.dns_ok ? "good" : "warn") as "good" | "warn",
+                    })),
+                    { label: "DNS pointing at Vigil", tone: domain.dns_ok === null ? "neutral" : domain.dns_ok ? "good" : "warn" },
+                    { label: "SSL certificate", tone: domain.ssl_ok ? "good" : domain.status === "connected" ? "warn" : "neutral" },
+                  ]}
+                />
+              </div>
+              <p className="mt-3 text-[11px] text-[color:var(--text-secondary)]">
+                {domain.status_reason ?? domainStatus.hint ?? ""} {domain.last_checked_at ? `Last checked ${formatRelative(domain.last_checked_at)}.` : ""}
+              </p>
+            </>
           ) : (
-            <ul className="mt-3 divide-y divide-[color:var(--border)]">
-              {activity.map((event) => (
-                <li key={event.id} className="flex items-start justify-between gap-4 py-2.5 text-sm">
-                  <span>{humanizeAction(event.action)}</span>
-                  <span className="shrink-0 text-xs text-[color:var(--text-secondary)]">{formatRelative(event.created_at)}</span>
-                </li>
-              ))}
-            </ul>
+            <div className="flex h-full flex-col justify-between gap-3">
+              <StatusLine tone="neutral" label="No domain connected" hint="Own a domain? Connect it in a few minutes. Need one? Vigil can register it for you." />
+              <ButtonLink href="/dashboard/domain" variant="secondary" className="!px-3 !py-1.5 self-start text-xs">Connect a domain</ButtonLink>
+            </div>
           )}
-        </Card>
+        </Panel>
 
-        <Card>
-          <h2 className="text-base font-semibold">Your plan includes</h2>
-          <DefinitionList
+        {/* Subscription */}
+        <Panel className="lg:col-span-3" title="Subscription" action={<Link href="/dashboard/billing" className="text-xs text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">Billing</Link>}>
+          {subscription && subStatus ? (
+            <div className="flex h-full flex-col gap-4">
+              <div>
+                <p className="text-base font-semibold">{subscription.plan?.name ?? "Vigil"}</p>
+                {subscription.plan?.tagline ? <p className="text-xs text-[color:var(--text-secondary)]">{subscription.plan.tagline}</p> : null}
+              </div>
+              <StatusLine tone={subStatus.tone} label={subStatus.label} hint={subStatus.hint} size="sm" />
+              {period.total > 0 ? (
+                <Meter
+                  value={period.elapsed}
+                  max={period.total}
+                  tone={subscription.cancel_at_period_end ? "warn" : "good"}
+                  srLabel="Billing period"
+                  label={
+                    <>
+                      <span>{subscription.cancel_at_period_end ? "Ends" : "Renews"} {formatDate(subscription.current_period_end)}</span>
+                      <span>{period.daysLeft} days</span>
+                    </>
+                  }
+                />
+              ) : (
+                <p className="text-xs text-[color:var(--text-secondary)]">Billing period will show once online billing is set up.</p>
+              )}
+              <ul className="mt-auto grid grid-cols-2 gap-1 text-[11px]">
+                {[
+                  ["Hosting", ent.enabled(FEATURES.hostingManaged)],
+                  ["Domain", ent.enabled(FEATURES.domainManaged)],
+                  ["Updates", ent.enabled(FEATURES.requests)],
+                  ["Virtue", ent.enabled(FEATURES.virtue)],
+                ].map(([label, on]) => (
+                  <li key={String(label)} className={on ? "text-[color:var(--text-primary)]" : "text-[color:var(--text-secondary)] line-through decoration-[color:var(--border)]"}>
+                    {on ? "✓" : "–"} {label}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <StatusLine tone="neutral" label="No active plan" hint="Every Vigil-hosted website needs an active Vigil plan. Vigil Studios sets this up with you." />
+          )}
+        </Panel>
+
+        {/* Project */}
+        {project && projectStatus && step ? (
+          <Panel className="lg:col-span-7" title="Your project">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:gap-8">
+              <div className="min-w-0 xl:w-52">
+                <p className="truncate text-base font-semibold">{project.name}</p>
+                <div className="mt-1">
+                  <StatusLine tone={step.cancelled ? "neutral" : projectStatus.tone} label={projectStatus.label} size="sm" />
+                </div>
+                {project.status === "review" ? (
+                  <p className="mt-2 text-xs text-[color:var(--text-secondary)]">Reply to your project email with changes or your approval.</p>
+                ) : null}
+              </div>
+              <div className="min-w-0 flex-1">
+                <Stepper steps={projectSteps} current={step.current} done={step.done} tone={projectStatus.tone === "warn" ? "warn" : "info"} />
+                <p className="mt-2 text-center text-[11px] text-[color:var(--text-secondary)] sm:hidden">{projectSteps[step.current]?.label ?? projectStatus.label}</p>
+              </div>
+            </div>
+            <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-[color:var(--border)] pt-4 text-xs sm:grid-cols-4">
+              <div>
+                <dt className="text-[color:var(--text-secondary)]">Type</dt>
+                <dd className="font-medium">{titleCase(project.kind)} site</dd>
+              </div>
+              <div>
+                <dt className="text-[color:var(--text-secondary)]">Template</dt>
+                <dd className="font-medium">{templateName(project.template_slug ?? website?.template_slug ?? null)}</dd>
+              </div>
+              <div>
+                <dt className="text-[color:var(--text-secondary)]">Started</dt>
+                <dd className="font-medium">{formatDate(project.created_at)}</dd>
+              </div>
+              <div>
+                <dt className="text-[color:var(--text-secondary)]">{project.launched_at ? "Launched" : "Target launch"}</dt>
+                <dd className="font-medium">{project.launched_at ? formatDate(project.launched_at) : project.launch_target ? formatDate(project.launch_target) : "To be scheduled"}</dd>
+              </div>
+            </dl>
+          </Panel>
+        ) : null}
+
+        {/* Activity */}
+        <Panel className="lg:col-span-8" title="Recent activity">
+          <Timeline
+            empty="Nothing yet. Activity appears here as Vigil works on your account."
+            items={activity.map((e) => ({
+              key: String(e.id),
+              tone: auditTone(e.action, e.after),
+              title: humanizeAction(e.action),
+              when: formatRelative(e.created_at),
+            }))}
+          />
+        </Panel>
+
+        {/* Plan inclusions */}
+        <Panel className="lg:col-span-4" title="Your plan includes">
+          <Checklist
             items={[
-              { label: "Managed hosting", value: yesNo(ent.enabled(FEATURES.hostingManaged)) },
-              { label: "Managed domain", value: yesNo(ent.enabled(FEATURES.domainManaged)) },
-              { label: "Website updates", value: yesNo(ent.enabled(FEATURES.requests)) },
-              { label: "Virtue", value: yesNo(ent.enabled(FEATURES.virtue)) },
+              { label: "Managed hosting and deployment", tone: ent.enabled(FEATURES.hostingManaged) ? "good" : "neutral" },
+              { label: "Domain status and management", tone: ent.enabled(FEATURES.domainManaged) ? "good" : "neutral" },
+              { label: "Website updates and changes", tone: ent.enabled(FEATURES.requests) ? "good" : "neutral" },
+              { label: "Lead Hub", tone: ent.enabled(FEATURES.leads) ? "good" : "neutral" },
+              { label: "Vigil Insights", tone: ent.enabled(FEATURES.insights) ? "good" : "neutral" },
+              { label: "Virtue, your AI employee", tone: ent.enabled(FEATURES.virtue) ? "good" : "neutral" },
             ]}
           />
-          {!ent.planCode ? (
-            <p className="mt-2 text-xs text-[color:var(--text-secondary)]">No active subscription. Contact Vigil Studios to set one up.</p>
-          ) : null}
-        </Card>
+          {!ent.planCode ? <p className="mt-3 text-xs text-[color:var(--text-secondary)]">No active subscription yet.</p> : null}
+        </Panel>
       </div>
-
-      {!website && !project ? (
-        <div className="mt-6">
-          <EmptyState
-            title="Nothing to show yet"
-            description="Once Vigil Studios starts your project, your website, domain and subscription will appear here."
-          />
-        </div>
-      ) : null}
     </div>
-  );
-}
-
-function yesNo(value: boolean) {
-  return value ? <span className="text-[color:var(--accent)]">Included</span> : <span className="text-[color:var(--text-secondary)]">—</span>;
-}
-
-function StatusCard({
-  title,
-  href,
-  status,
-  detail,
-}: {
-  title: string;
-  href: string;
-  status: { label: string; tone: "neutral" | "good" | "warn" | "bad" | "info"; hint?: string } | null;
-  detail: string;
-}) {
-  return (
-    <Link href={href} className="block rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-5 transition-colors hover:border-[color:var(--accent)]">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-[color:var(--text-secondary)]">{title}</h2>
-        {status ? <StatusPill tone={status.tone}>{status.label}</StatusPill> : <StatusPill tone="neutral">Not set up</StatusPill>}
-      </div>
-      <p className="mt-3 truncate text-base font-medium">{detail}</p>
-      {status?.hint ? <p className="mt-1 text-xs text-[color:var(--text-secondary)]">{status.hint}</p> : null}
-    </Link>
   );
 }

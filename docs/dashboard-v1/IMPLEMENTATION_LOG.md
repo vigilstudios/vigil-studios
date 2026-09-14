@@ -245,6 +245,34 @@ Still open from this session:
   origins now derive from request headers (`lib/vigil/auth/origin.ts`).
 - Test tenant "Marlow & Fen" stays as the demo tenant by owner decision.
 
+## 2026-09-14 — App-frame redesign
+
+Owner feedback: the dashboard read like a website, not a platform. Rebuilt
+the chrome and the two overviews; data layer, actions and routes unchanged.
+
+- `components/vigil/AppFrame.tsx` + `AppShell.tsx`: 100dvh grid, 240px
+  sidebar collapsing to a 56px icon rail (cookie `vigil-sidebar`, read on the
+  server so there is no flash), off-canvas drawer under `md`, 48px top bar
+  with the section title and a `TopbarActions` portal, content stretches to
+  the viewport at a 13px base scale. Sidebar holds the workspace switcher,
+  grouped nav with icons, and an account block (theme, sign-out, Admin ⇄
+  Client). `ThemeSwitch` + a bootstrap script apply the saved theme before
+  paint (same `site-theme` key as the marketing toggle).
+- `components/vigil/widgets.tsx`: Panel, StatusLine, KpiTile, Meter,
+  DistributionBar, Stepper, Checklist, Timeline, SitePreview. All driven by
+  rows; no invented trends. Status = icon + label + colour, never colour
+  alone; status tokens in `components/vigil/vigil.css` were checked with the
+  dataviz validator against both surfaces (>= 3:1).
+- Client Overview: template preview (real Express capture), website status,
+  DNS checklist from `domains.verification`, subscription with billing-period
+  meter, project lifecycle stepper with metadata, activity timeline, plan
+  inclusions. Admin Overview: KPI row with a websites-live meter, attention
+  list (failed jobs, broken domains, suspended sites, unpaid subscriptions,
+  new requests), job-status distribution bar, platform wiring, latest
+  activity. `lib/vigil/presenters.ts` holds the pure mappers (tested).
+- Verified in Chrome at desktop (expanded and rail), in 390px iframes for the
+  phone layout and drawer, and in the light theme.
+
 ## Next phase
 
 Per master architecture §13, after locking the product catalog:

@@ -172,3 +172,26 @@ export const getCatalog = cache(async () => {
   for (const r of [plans, prices, features, planFeatures]) if (r.error) throw r.error;
   return { plans: plans.data ?? [], prices: prices.data ?? [], features: features.data ?? [], planFeatures: planFeatures.data ?? [] };
 });
+
+/** Job counts by status for the distribution widget. */
+export const jobStatusCounts = cache(async () => {
+  const supabase = await createClient();
+  const head = { count: "exact" as const, head: true };
+  const statuses = ["queued", "running", "succeeded", "failed", "canceled"] as const;
+  const results = await Promise.all(statuses.map((s) => supabase.from("provisioning_jobs").select("*", head).eq("status", s)));
+  return Object.fromEntries(statuses.map((s, i) => [s, results[i].error ? 0 : results[i].count ?? 0])) as Record<(typeof statuses)[number], number>;
+});
+
+/** Everything a human should look at, across tenants. Bounded lists; newest first. */
+export const attentionItems = cache(async () => {
+  const supabase = await createClient();
+  const [jobs, domains, websites, subs, requests] = await Promise.all([
+    supabase.from("provisioning_jobs").select("id, kind, error, updated_at, organization:organizations(id, name)").eq("status", "failed").order("updated_at", { ascending: false }).limit(10),
+    supabase.from("domains").select("id, hostname, status, status_reason, updated_at, organization:organizations(id, name)").in("status", ["error", "expired"]).order("updated_at", { ascending: false }).limit(10),
+    supabase.from("websites").select("id, name, status, status_reason, updated_at, organization:organizations(id, name)").in("status", ["error", "suspended"]).order("updated_at", { ascending: false }).limit(10),
+    supabase.from("subscriptions").select("id, status, updated_at, organization:organizations(id, name), plan:plans(name)").in("status", ["past_due", "unpaid", "incomplete"]).order("updated_at", { ascending: false }).limit(10),
+    supabase.from("change_requests").select("id, title, status, submitted_at, organization:organizations(id, name)").eq("status", "submitted").order("submitted_at", { ascending: true }).limit(10),
+  ]);
+  for (const r of [jobs, domains, websites, subs, requests]) if (r.error) throw r.error;
+  return { jobs: jobs.data ?? [], domains: domains.data ?? [], websites: websites.data ?? [], subscriptions: subs.data ?? [], requests: requests.data ?? [] };
+});

@@ -59,26 +59,43 @@ export function PageHeader({
 
 export type Tone = "neutral" | "good" | "warn" | "bad" | "info";
 
-const toneClasses: Record<Tone, string> = {
-  neutral: "bg-[color:var(--bg-surface-soft)] text-[color:var(--text-secondary)]",
-  good: "bg-[color-mix(in_srgb,var(--accent)_16%,transparent)] text-[color:var(--accent)]",
-  warn: "bg-[color-mix(in_srgb,#f59e0b_18%,transparent)] text-[#d97706]",
-  bad: "bg-[color-mix(in_srgb,#ef4444_16%,transparent)] text-[#ef4444]",
-  info: "bg-[color-mix(in_srgb,#3b82f6_16%,transparent)] text-[#3b82f6]",
+const toneVars: Record<Tone, string> = {
+  neutral: "var(--status-neutral, #71717a)",
+  good: "var(--status-good, #10d45a)",
+  warn: "var(--status-warn, #fab219)",
+  bad: "var(--status-bad, #ef4444)",
+  info: "var(--status-info, #60a5fa)",
 };
 
+/** Status is icon + label + colour, never colour alone. */
 export function StatusPill({ tone = "neutral", children }: { tone?: Tone; children: ReactNode }) {
+  const color = toneVars[tone];
   return (
     <span
-      className={clsx(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold",
-        toneClasses[tone]
-      )}
+      className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold"
+      style={{ color, background: `color-mix(in srgb, ${color} 14%, transparent)` }}
     >
-      <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
+      <StatusGlyph tone={tone} />
       {children}
     </span>
   );
+}
+
+function StatusGlyph({ tone }: { tone: Tone }) {
+  // Tiny inline glyphs so the pill never depends on colour alone.
+  const common = { width: 10, height: 10, viewBox: "0 0 10 10", "aria-hidden": true } as const;
+  switch (tone) {
+    case "good":
+      return <svg {...common}><path d="M2 5.2l2 2 4-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+    case "warn":
+      return <svg {...common}><path d="M5 1.5l4 7H1z" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" /><path d="M5 4v2.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>;
+    case "bad":
+      return <svg {...common}><path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>;
+    case "info":
+      return <svg {...common}><circle cx="5" cy="5" r="3.6" fill="none" stroke="currentColor" strokeWidth="1.4" /><path d="M5 5v2M5 3.2v.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>;
+    default:
+      return <svg {...common}><circle cx="5" cy="5" r="2.5" fill="currentColor" /></svg>;
+  }
 }
 
 export function EmptyState({

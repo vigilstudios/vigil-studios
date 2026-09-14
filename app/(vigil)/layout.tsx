@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Inter } from "next/font/google";
 import "@/app/globals.css";
+import "@/components/vigil/vigil.css";
 import { themeBootstrapScript } from "@/components/vigil/ThemeSwitch";
 
 const spaceGrotesk = Space_Grotesk({

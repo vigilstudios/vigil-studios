@@ -30,7 +30,7 @@ export function AccountBlock({
           {name ? <div className="truncate text-[11px] text-[color:var(--text-secondary)]">{email}</div> : null}
         </div>
       </div>
-      <div className="flex items-center gap-0.5 [aside[data-collapsed=true]_&]:flex-col">
+      <div className="flex items-center gap-0.5 whitespace-nowrap [aside[data-collapsed=true]_&]:flex-col">
         <ThemeSwitch />
         {crossLink ? (
           <Link

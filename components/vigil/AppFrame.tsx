@@ -134,7 +134,7 @@ export function AppFrame({
   );
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden bg-[color:var(--bg-primary)] text-[13px] text-[color:var(--text-primary)]">
+    <div className="vigil-frame flex h-dvh w-full overflow-hidden bg-[color:var(--bg-primary)] text-[13px] text-[color:var(--text-primary)]">
       {/* Desktop sidebar */}
       <aside
         className="hidden shrink-0 border-r border-[color:var(--border)] bg-[color:var(--bg-secondary)]/60 transition-[width] duration-200 md:block"
