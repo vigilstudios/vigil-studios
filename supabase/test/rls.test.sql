@@ -244,6 +244,47 @@ begin
 end $$;
 
 -- --------------------------------------------------------------------------
+-- Attachments: path must encode the organization; objects follow RLS
+-- --------------------------------------------------------------------------
+do $$
+declare v_req uuid; v_att uuid;
+begin
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  select id into v_req from public.change_requests where organization_id = '10000000-0000-0000-0000-00000000000a' limit 1;
+
+  insert into storage.objects (bucket_id, name, owner)
+    values ('request-attachments', '10000000-0000-0000-0000-00000000000a/' || v_req || '/photo.png', '00000000-0000-0000-0000-00000000000a');
+  perform test.ok(test.count('select 1 from storage.objects') = 1, 'alice: can upload into her organization folder');
+  perform test.fails(
+    'insert into storage.objects (bucket_id, name) values (''request-attachments'', ''10000000-0000-0000-0000-00000000000b/x/photo.png'')',
+    'alice: cannot upload into org B''s folder');
+  perform test.fails(
+    'insert into storage.objects (bucket_id, name) values (''request-attachments'', ''not-a-uuid/photo.png'')',
+    'alice: cannot upload outside an organization folder');
+
+  insert into public.change_request_attachments (organization_id, change_request_id, object_path, file_name, content_type, size_bytes, uploaded_by)
+    values ('10000000-0000-0000-0000-00000000000a', v_req, '10000000-0000-0000-0000-00000000000a/' || v_req || '/photo.png', 'photo.png', 'image/png', 1234, '00000000-0000-0000-0000-00000000000a')
+    returning id into v_att;
+  perform test.ok(v_att is not null, 'alice: attachment row recorded');
+  perform test.fails(
+    'insert into public.change_request_attachments (organization_id, change_request_id, object_path, file_name, content_type, size_bytes) values (''10000000-0000-0000-0000-00000000000a'', ''' || v_req || ''', ''10000000-0000-0000-0000-00000000000b/' || v_req || '/x.png'', ''x.png'', ''image/png'', 1)',
+    'alice: attachment path must encode her own organization');
+  perform test.fails(
+    'insert into public.change_request_attachments (organization_id, change_request_id, object_path, file_name, content_type, size_bytes) values (''10000000-0000-0000-0000-00000000000a'', ''' || v_req || ''', ''10000000-0000-0000-0000-00000000000a/' || v_req || '/big.png'', ''big.png'', ''image/png'', 99999999)',
+    'alice: attachment over 10 MB refused');
+  perform test.logout();
+
+  perform test.login('00000000-0000-0000-0000-00000000000b');
+  perform test.ok(test.count('select 1 from storage.objects') = 0, 'bob: cannot see org A''s objects');
+  perform test.ok(test.count('select 1 from public.change_request_attachments') = 0, 'bob: cannot see org A''s attachment rows');
+  perform test.logout();
+
+  perform test.login('00000000-0000-0000-0000-00000000000c');
+  perform test.ok(test.count('select 1 from storage.objects') = 1, 'carol: staff sees the object');
+  perform test.logout();
+end $$;
+
+-- --------------------------------------------------------------------------
 -- Bob (member of B) has read access but no management rights
 -- --------------------------------------------------------------------------
 do $$

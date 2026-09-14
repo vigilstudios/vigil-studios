@@ -128,7 +128,7 @@ export const listChangeRequests = cache(async () => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("change_requests")
-    .select("id, title, status, priority, submitted_at, created_at, organization:organizations(id, name), website:websites(id, name), requester:profiles!change_requests_requested_by_fkey(full_name, email)")
+    .select("id, title, description, status, priority, submitted_at, created_at, organization:organizations(id, name), website:websites(id, name), requester:profiles!change_requests_requested_by_fkey(full_name, email), attachments:change_request_attachments(id, file_name, content_type, size_bytes, object_path, bucket_id)")
     .order("created_at", { ascending: false })
     .limit(300);
   if (error) throw error;

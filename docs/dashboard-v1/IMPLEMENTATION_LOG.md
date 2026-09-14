@@ -280,6 +280,28 @@ the chrome and the two overviews; data layer, actions and routes unchanged.
   itself. `previewSource()` picks the live site when it has a real address,
   otherwise the Express template HTML; in-memory `.local` hosts never embed.
 
+## 2026-09-14 — Website page widgets, resizable preview, request attachments
+
+- `components/vigil/ResizableWidget.tsx`: drag the right edge (or arrow keys
+  on the handle) to resize; width remembered per widget in localStorage;
+  always full width under `sm`. The Website page preview uses it (default
+  520px), beside a 2×3 grid of tiles (live address, SSL, last published,
+  health, site code ownership, changes) and a "Request a change" button.
+- Migration `20260914000007_request_attachments.sql` (pushed to the linked
+  project): private bucket `request-attachments` (10 MB, images + PDF),
+  storage policies keyed on the `<organization_id>/…` path prefix via
+  `vigil.path_organization()`, and `change_request_attachments` with a
+  check that the path's organization matches the row's and a trigger that
+  the request belongs to the same organization. 9 new RLS assertions (84).
+- `createChangeRequest` validates files (`lib/vigil/attachments.ts`: up to 5,
+  10 MB, PNG/JPEG/WebP/GIF/PDF) before creating the row, uploads under the
+  user's own session, records a row per object, and removes the object if
+  the row fails. `experimental.serverActions.bodySizeLimit` raised to 52 MB.
+- Request lists (client and admin) show attachments with 30-minute signed
+  URLs (`signAttachments`); images get thumbnails.
+- Verified live: uploaded a JPEG from the form, the signed link served the
+  object from Supabase Storage, and the admin table shows the same file.
+
 ## Next phase
 
 Per master architecture §13, after locking the product catalog:

@@ -75,6 +75,67 @@ export type Database = {
           },
         ]
       }
+      change_request_attachments: {
+        Row: {
+          bucket_id: string
+          change_request_id: string
+          content_type: string
+          created_at: string
+          file_name: string
+          id: string
+          object_path: string
+          organization_id: string
+          size_bytes: number
+          uploaded_by: string | null
+        }
+        Insert: {
+          bucket_id?: string
+          change_request_id: string
+          content_type: string
+          created_at?: string
+          file_name: string
+          id?: string
+          object_path: string
+          organization_id: string
+          size_bytes: number
+          uploaded_by?: string | null
+        }
+        Update: {
+          bucket_id?: string
+          change_request_id?: string
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          id?: string
+          object_path?: string
+          organization_id?: string
+          size_bytes?: number
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "change_request_attachments_change_request_id_fkey"
+            columns: ["change_request_id"]
+            isOneToOne: false
+            referencedRelation: "change_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_request_attachments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_request_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       change_requests: {
         Row: {
           assigned_to: string | null
@@ -1777,6 +1838,7 @@ export type Database = {
         Args: { p_org: string }
         Returns: Database["public"]["Enums"]["org_role"]
       }
+      path_organization: { Args: { p_name: string }; Returns: string }
       resolve_entitlements: {
         Args: { p_org: string }
         Returns: {

@@ -110,10 +110,29 @@ export const getOrgChangeRequests = cache(async (organizationId: string) => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("change_requests")
-    .select("id, title, status, priority, created_at, submitted_at, website_id")
+    .select("id, title, description, status, priority, created_at, submitted_at, website_id, attachments:change_request_attachments(id, file_name, content_type, size_bytes, object_path, bucket_id)")
     .eq("organization_id", organizationId)
     .order("created_at", { ascending: false })
     .limit(50);
   if (error) throw error;
   return data;
 });
+
+export type SignedAttachment = { id: string; file_name: string; content_type: string; size_bytes: number; url: string | null };
+
+/** Signed, short-lived links for a set of attachment rows the caller can read. */
+export async function signAttachments(
+  rows: { id: string; file_name: string; content_type: string; size_bytes: number; object_path: string; bucket_id: string }[],
+  expiresInSeconds = 60 * 30
+): Promise<SignedAttachment[]> {
+  if (rows.length === 0) return [];
+  const supabase = await createClient();
+  const byBucket = new Map<string, typeof rows>();
+  for (const r of rows) byBucket.set(r.bucket_id, [...(byBucket.get(r.bucket_id) ?? []), r]);
+  const urls = new Map<string, string>();
+  for (const [bucket, list] of byBucket) {
+    const { data } = await supabase.storage.from(bucket).createSignedUrls(list.map((r) => r.object_path), expiresInSeconds);
+    for (const d of data ?? []) if (d.signedUrl && d.path) urls.set(`${bucket}:${d.path}`, d.signedUrl);
+  }
+  return rows.map((r) => ({ id: r.id, file_name: r.file_name, content_type: r.content_type, size_bytes: r.size_bytes, url: urls.get(`${r.bucket_id}:${r.object_path}`) ?? null }));
+}
