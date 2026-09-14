@@ -1,10 +1,12 @@
 # Handoff context — Vigil Dashboard V1 → first customer
 
 **Written:** 14 Sep 2026, mid-task. The previous session ran out of context.
-**Updated:** 14 Sep 2026 (evening) — the onboarding, Buy button, billing
-portal, repository export and tests are built and committed on the branch
-(see the last entry in `IMPLEMENTATION_LOG.md`). What remains is the Stripe
-test-mode run and the merge. Section 3 still lists what the owner must
+**Updated:** 14 Sep 2026 (night) — everything below is built, tested in
+Stripe test mode end to end, **merged to `main` and pushed** (`ec4cf7e`), so
+it is what vigilstudios.co deploys. See the last entries in
+`IMPLEMENTATION_LOG.md`. Remaining: production env vars on Vercel, Stripe
+Tax registrations, terms/refund copy, a cron for `/api/jobs/run`, and the
+friends-and-family backlog. Section 3 still lists what the owner must
 supply; section 2's "Not built yet" list is done except item 6.
 **Read first:** `ARCHITECTURE.md`, `IMPLEMENTATION_LOG.md` (same folder), the
 master product doc `../../../vigil-leadgen/VIGIL_STUDIOS_MASTER_ARCHITECTURE.md`,
