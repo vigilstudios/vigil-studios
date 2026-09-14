@@ -182,6 +182,58 @@ Steps 1–3 were completed on 13 Sep 2026 (see the entry below).
   `domains`, `organizations`, `plans`, `staff_members`, `provider_links` all
   return zero rows (RLS), where the prototype tables previously returned data.
 
+## 2026-09-14 — Live walkthrough against the real project
+
+Signed in as the first admin (staff row inserted in the SQL editor) and
+drove the whole loop in Chrome against `fotqwyfoqzjmcchwjpof`:
+
+| Step | Result |
+| --- | --- |
+| `/admin` overview | Counters at zero, providers `null`, service role reported missing |
+| Create customer "Marlow & Fen" with owner invite | Organization + invite rows, two audit events |
+| Create Express project (template `restaurant`) with website | Project `draft`, website `provisioning` |
+| Add Growth subscription | `active`, price shows "Not set" (unapproved) |
+| Add customer-owned domain | `pending` |
+| Project `draft → intake`, via TransitionSelect | Trigger-audited |
+| Queue provision + deploy, "Run due jobs now" | Both succeeded in one run: website `provisioning → building → live`, `provider_links` row `other/site`, deployment `ready`, `live_url` set |
+| Queue domain connect + verify | `connect` succeeded (domain `verifying`, DNS records stored); `verify` re-queued 15 min with "DNS not yet verified" (RetryLater, attempts not burned) |
+| "Open client view" → `/dashboard` | Website Live · Checking DNS (with propagation hint) · Subscription Active · project "Collecting your details" · activity · plan inclusions (Virtue included on Growth) |
+| `/dashboard/domain` | Registrar instructions table rendered from `domains.verification` |
+| `/dashboard/requests` (Growth ⇒ enabled) | Request submitted, listed as Submitted |
+| `/dashboard/settings` | Profile saved (audited with before/after); pending invite listed |
+| `/admin/requests` | `submitted → triaged`, assigned to the acting staff member |
+| `/admin/plans` | Four plans, prices "not approved", entitlement matrix editable, staff list |
+| `/admin/audit` | 14 events with diffs, trigger- and action-sourced |
+| 390px viewport | Horizontal nav strip, stacked status cards |
+
+Bugs found and fixed during the walkthrough (commit `e7ec98d`):
+
+1. Pages opened at `http://127.0.0.1:3000` never hydrated — Next 16 blocks
+   cross-origin dev resources and treats 127.0.0.1 as foreign. Added
+   `allowedDevOrigins: ["127.0.0.1"]` (dev only).
+2. `/admin/domains` crashed: `domains ↔ websites` has two foreign keys and
+   PostgREST refused the ambiguous embed. Query now names the FK.
+3. Uncontrolled "Website" selects kept a stale default after the website
+   list changed, so a domain could be saved unattached. Forms are keyed on
+   the website list and an attach-to-website control was added.
+4. Magic-link redirect fell back to the production site URL because the
+   allow-list is exact-match; wildcards pushed and `next` moved to a cookie.
+
+Still open from this session:
+
+- **Custom email template** cannot be pushed on the free tier with the
+  default sender. Until custom SMTP (Resend is already a dependency) or a
+  paid plan is set up, sign-in links must be opened in the browser that
+  requested them and a newer link invalidates older ones.
+- `SUPABASE_SECRET_KEY` is still unset locally; the console's "Run due jobs
+  now" used the staff session instead (works, attributed to staff rather
+  than system).
+- The prototype's remote magic-link subject "Your sign-in link" remains
+  (template edits are blocked); harmless.
+- Test data (Marlow & Fen) lives in the real project; delete it from
+  `/admin` → customer → "Mark closed" or the SQL editor before onboarding a
+  real customer, or keep it as the demo tenant.
+
 ## Next phase
 
 Per master architecture §13, after locking the product catalog:
