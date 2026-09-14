@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { clearNextCookie, resolveNext } from "@/lib/vigil/auth/next-cookie";
+import { requestOrigin } from "@/lib/vigil/auth/origin";
 
 const allowedTypes: EmailOtpType[] = ["magiclink", "email", "signup", "invite", "recovery", "email_change"];
 
@@ -15,7 +16,8 @@ const allowedTypes: EmailOtpType[] = ["magiclink", "email", "signup", "invite", 
  * flow this also works in a different browser from the one that asked.
  */
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl;
+  const { searchParams } = request.nextUrl;
+  const origin = requestOrigin(request);
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type");
 
@@ -57,7 +59,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { origin } = request.nextUrl;
+  const origin = requestOrigin(request);
   const form = await request.formData();
   const tokenHash = String(form.get("token_hash") ?? "");
   const type = String(form.get("type") ?? "") as EmailOtpType;
