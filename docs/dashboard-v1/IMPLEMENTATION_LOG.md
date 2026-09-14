@@ -464,3 +464,39 @@ annual / three years), sales tax charged to the customer at checkout.
 - Types regenerated from the linked project. 89 tests, 98 RLS assertions,
   build clean. Browser: `/admin/plans` shows the three columns from rows,
   all "not synced" until Stripe credentials exist.
+
+## 2026-09-14 (evening) — Stripe test-mode run, end to end
+
+With `.env.local` complete (service key, `BILLING_PROVIDER=stripe`, test
+secret key, `stripe listen` webhook secret, Resend, `STRIPE_TAX=true`):
+
+| Step | Result |
+| --- | --- |
+| `/admin/plans` → Sync prices to stripe | 12 plan prices (4 plans × month / year / 3 years, with `interval_count`) and 2 build prices created in Stripe; ids shown from `provider_links` |
+| `/checkout?template=restaurant&plan=care&period=year3` | Period toggle with save badges, Care selected, order summary $599 + $2,670 |
+| Stripe Checkout (test card 4242) | Correct line items ("Billed every 3 years"), Stripe Tax calculated from the billing address ($0 — no Texas registration yet) |
+| `/checkout/success` | Virtue orb, "Account ready" within the page's own refresh |
+| Webhooks (14 events) | Every event in `webhook_events` once; `checkout.session.completed`, `customer.subscription.created`, `invoice.paid` processed, the rest ignored |
+| Provisioning | Organization `ember-oak-cigar-lounge`, owner invite, project (intake), website (provisioning), subscription **Vigil Care · $2,670 / 3 years** attributed from Stripe, Stripe customer linked, audit rows; an auth user was created by `generateLink` (the welcome sign-in link path works against the real Auth API) |
+| Emails | Sent through Resend (no dry-run log): welcome to the test address, staff notification to `STAFF_NOTIFY_EMAIL` |
+| Staff link | "Send a checkout link" (custom $3,500 + Growth) → `/checkout/<token>` prefilled and locked to the order |
+
+Bugs found and fixed:
+
+1. Stripe refused `customer_update` on a session opened with `customer_email`
+   (only valid with an existing `customer`); now sent only in that case.
+2. A server-side checkout error wiped the typed form; inputs are controlled.
+3. Order amounts said "/mo" for every period; they now describe the period.
+4. A self-serve order whose payment page could not be opened stayed
+   `pending`; it is now `failed` with the provider's message (staff links
+   stay pending for a retry). Test added.
+
+Test rows in the live project: organization "Ember & Oak Cigar Lounge"
+(provisioned; delete from `/admin` or the SQL editor when no longer
+useful), one expired self-serve order, one expired staff link
+("Humidor House (test link)"), Stripe test-mode customer/subscription.
+
+Still to do before live: production env vars on Vercel (same names, live
+Stripe key, the dashboard webhook endpoint's secret), Stripe Tax
+registrations, `NEXT_PUBLIC_TERMS_URL` / `NEXT_PUBLIC_REFUND_NOTE`, and a
+Vercel Cron for `/api/jobs/run`.

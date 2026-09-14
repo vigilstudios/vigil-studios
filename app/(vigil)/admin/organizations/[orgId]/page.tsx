@@ -364,7 +364,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                 <tr key={o.id}>
                   <td className={tdClass}>{formatDateTime(o.created_at)}</td>
                   <td className={tdClass}>{titleCase(o.project_kind)}{o.template_slug ? ` · ${o.template_slug}` : ""}</td>
-                  <td className={tdClass}>{o.plan?.name ?? "—"}{o.plan_amount_cents != null ? ` · ${formatMoney(o.plan_amount_cents, o.currency)}/mo` : ""}</td>
+                  <td className={tdClass}>{o.plan?.name ?? "—"}{o.plan_amount_cents != null ? ` · ${describePrice({ amount_cents: o.plan_amount_cents, currency: o.currency, interval: o.price?.interval ?? "month", interval_count: o.price?.interval_count ?? 1 }, formatMoney)}` : ""}</td>
                   <td className={tdClass}>{o.build_amount_cents != null ? formatMoney(o.build_amount_cents, o.currency) : "Quoted"}</td>
                   <td className={tdClass}><StatusPill tone={o.status === "provisioned" ? "good" : o.status === "paid" ? "info" : o.status === "pending" ? "warn" : "neutral"}>{titleCase(o.status)}</StatusPill></td>
                   <td className={tdClass}>{o.paid_at ? formatDateTime(o.paid_at) : "—"}</td>

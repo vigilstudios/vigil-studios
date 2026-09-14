@@ -50,7 +50,8 @@ export class StripeBillingProvider implements BillingProvider {
         // Stripe Tax needs a billing address to calculate sales tax.
         automatic_tax: { enabled: input.collectTax ?? false },
         billing_address_collection: input.collectTax ? "required" : "auto",
-        ...(input.collectTax ? { customer_update: { address: "auto", name: "auto" } } : {}),
+        // Stripe only allows customer_update when the session is for an existing customer.
+        ...(input.collectTax && input.customerExternalId ? { customer_update: { address: "auto", name: "auto" } } : {}),
       })
     );
     if (!session.url) throw new ProviderError("stripe", "Stripe did not return a checkout URL.", { retryable: true });

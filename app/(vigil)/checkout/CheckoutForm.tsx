@@ -27,6 +27,9 @@ export function CheckoutForm(p: CheckoutFormProps) {
   const purchasable = p.plans.filter((x) => x.purchasable);
   const defaultPlan = purchasable.find((x) => x.code === p.initial.planCode) ?? purchasable[0] ?? null;
   const [planCode, setPlanCode] = useState<string>(defaultPlan?.code ?? "");
+  // Controlled so a server-side error does not wipe what the buyer typed.
+  const [fields, setFields] = useState({ businessName: p.initial.businessName ?? "", contactName: p.initial.contactName ?? "", email: p.initial.email ?? "", agree: false });
+  const setField = (k: keyof typeof fields, v: string | boolean) => setFields((f) => ({ ...f, [k]: v }));
   // Periods offered = those at least one plan can be bought for.
   const periods = BILLING_PERIODS.filter((per) => purchasable.some((x) => x.prices.some((pr) => pr.period === per.key && pr.purchasable)));
   const [periodKey, setPeriodKey] = useState<BillingPeriodKey>(() => (periods.find((x) => x.key === p.initial.billingPeriod) ?? periods[0])?.key ?? "month");
@@ -123,16 +126,16 @@ export function CheckoutForm(p: CheckoutFormProps) {
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label htmlFor="business_name" className={labelClass}>Business name</label>
-              <input id="business_name" name="business_name" defaultValue={p.initial.businessName ?? ""} className={inputClass} placeholder="Marlow & Fen" required disabled={pending} />
+              <input id="business_name" name="business_name" value={fields.businessName} onChange={(e) => setField("businessName", e.target.value)} className={inputClass} placeholder="Marlow & Fen" required disabled={pending} />
               {issues.business_name ? <p className="mt-1 text-xs text-[#ef4444]">{issues.business_name[0]}</p> : null}
             </div>
             <div>
               <label htmlFor="contact_name" className={labelClass}>Your name</label>
-              <input id="contact_name" name="contact_name" defaultValue={p.initial.contactName ?? ""} className={inputClass} placeholder="Alex Rivera" disabled={pending} />
+              <input id="contact_name" name="contact_name" value={fields.contactName} onChange={(e) => setField("contactName", e.target.value)} className={inputClass} placeholder="Alex Rivera" disabled={pending} />
             </div>
             <div>
               <label htmlFor="email" className={labelClass}>Email (this becomes your sign-in)</label>
-              <input id="email" name="email" type="email" defaultValue={p.initial.email ?? ""} className={inputClass} placeholder="you@yourbusiness.com" required disabled={pending} />
+              <input id="email" name="email" type="email" value={fields.email} onChange={(e) => setField("email", e.target.value)} className={inputClass} placeholder="you@yourbusiness.com" required disabled={pending} />
               {issues.email ? <p className="mt-1 text-xs text-[#ef4444]">{issues.email[0]}</p> : null}
             </div>
           </div>
@@ -140,7 +143,7 @@ export function CheckoutForm(p: CheckoutFormProps) {
 
         <section>
           <label className="flex items-start gap-2 text-xs text-[color:var(--text-secondary)]">
-            <input type="checkbox" name="agree" className="mt-0.5" disabled={pending} />
+            <input type="checkbox" name="agree" checked={fields.agree} onChange={(e) => setField("agree", e.target.checked)} className="mt-0.5" disabled={pending} />
             <span>
               I agree to the Vigil Studios {p.termsUrl ? <a className="underline" href={p.termsUrl} target="_blank" rel="noreferrer">service agreement</a> : "service agreement"}.
               {p.refundNote ? ` ${p.refundNote}` : ""}

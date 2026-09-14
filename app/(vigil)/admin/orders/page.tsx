@@ -7,6 +7,7 @@ import { cancelOrder, markOrderPaidAndProvision } from "@/lib/vigil/actions/admi
 import { requireStaff } from "@/lib/vigil/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatMoney, titleCase } from "@/lib/vigil/format";
+import { describePrice } from "@/lib/vigil/billing-periods";
 import { EXPRESS_TEMPLATES } from "@/lib/constants";
 import { NewOrderForm } from "./NewOrderForm";
 
@@ -18,7 +19,7 @@ export default async function OrdersPage() {
   await requireStaff("/admin/orders");
   const supabase = await createClient();
   const [{ data: orders }, { data: plans }] = await Promise.all([
-    supabase.from("orders").select("*, plan:plans(code, name), organization:organizations(id, name)").order("created_at", { ascending: false }).limit(200),
+    supabase.from("orders").select("*, plan:plans(code, name), price:plan_prices(interval, interval_count), organization:organizations(id, name)").order("created_at", { ascending: false }).limit(200),
     supabase.from("plans").select("code, name").eq("is_active", true).order("tier_rank"),
   ]);
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "");
@@ -60,7 +61,7 @@ export default async function OrdersPage() {
               </td>
               <td className={tdClass}>
                 <div>Build {o.build_amount_cents !== null ? formatMoney(o.build_amount_cents, o.currency) : "quoted"}</div>
-                <div className="text-xs text-[color:var(--text-secondary)]">Plan {o.plan_amount_cents !== null ? `${formatMoney(o.plan_amount_cents, o.currency)}/mo` : "at checkout"}</div>
+                <div className="text-xs text-[color:var(--text-secondary)]">Plan {o.plan_amount_cents !== null ? describePrice({ amount_cents: o.plan_amount_cents, currency: o.currency, interval: o.price?.interval ?? "month", interval_count: o.price?.interval_count ?? 1 }, formatMoney) : "at checkout"}</div>
               </td>
               <td className={tdClass}>
                 <StatusPill tone={tone(o.status)}>{titleCase(o.status)}</StatusPill>

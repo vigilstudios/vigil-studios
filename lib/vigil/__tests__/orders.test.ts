@@ -72,6 +72,13 @@ describe("startCheckout", () => {
     await expect(startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", billingPeriod: "year", appUrl: "https://app.test" }, provider)).rejects.toThrow(/annual price/);
   });
 
+  it("marks a self-serve order failed when the provider refuses to open a payment page", async () => {
+    const provider = new NullBillingProvider();
+    vi.spyOn(provider, "createCheckoutSession").mockRejectedValue(new Error("customer_update can only be used with customer"));
+    await expect(startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, provider)).rejects.toThrow(/customer_update/);
+    expect(fake.rows("orders")[0]).toMatchObject({ status: "failed" });
+  });
+
   it("quotes a custom build as an ad-hoc line and reuses a staff-created order", async () => {
     fake.rows("orders").push({ id: "ord_staff", status: "pending", checkout_token: "tok", email: "c@x.com", business_name: "Cigar Lounge", project_kind: "custom", metadata: {} });
     const provider = new NullBillingProvider();

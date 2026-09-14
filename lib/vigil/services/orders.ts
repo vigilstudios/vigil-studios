@@ -102,7 +102,9 @@ export async function startCheckout(admin: DbClient, req: CheckoutRequest, provi
   if (buildExternal) lineItems.push({ priceExternalId: buildExternal });
   else if (buildAmount !== null && buildAmount > 0) lineItems.push({ adHoc: { name: `${build.name} — ${req.businessName.trim()}`, description: "One-time website build", amountCents: buildAmount, currency: planPrice.currency } });
 
-  const session = await provider.createCheckoutSession({
+  let session: { url: string; externalId: string };
+  try {
+    session = await provider.createCheckoutSession({
     mode: "subscription",
     lineItems,
     customerEmail: email,
@@ -110,7 +112,14 @@ export async function startCheckout(admin: DbClient, req: CheckoutRequest, provi
     cancelUrl: `${req.appUrl}/checkout/${await tokenFor(admin, orderId)}?canceled=1`,
     reference: { order_id: orderId, plan_code: plan.code, billing_period: period.key, project_kind: req.projectKind, template_slug: req.templateSlug ?? "" },
     collectTax: process.env.STRIPE_TAX === "true",
-  });
+    });
+  } catch (err) {
+    // A self-serve order with no payment page is dead; staff links stay pending for a retry.
+    if (!req.existingOrderId) {
+      await admin.from("orders").update({ status: "failed", error: { message: err instanceof Error ? err.message : String(err) } as unknown as Json }).eq("id", orderId).eq("status", "pending");
+    }
+    throw err;
+  }
 
   await upsertProviderLink(admin, { provider: providerEnum(provider.name), resourceKind: "checkout_session", externalId: session.externalId, entityType: "order", entityId: orderId });
   await admin.from("orders").update({ metadata: { checkout_session: session.externalId } as unknown as Json }).eq("id", orderId);
