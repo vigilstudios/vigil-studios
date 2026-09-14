@@ -161,6 +161,41 @@ Buy on a template" → pay → guided onboarding → dashboard.
   the onboarding photo uploads must do the same (bucket `project-assets`,
   path `<org>/<project>/<uuid>.<ext>`, `validateAttachments`-style checks).
 
+### Backlog (owner request, 14 Sep): friends-and-family flexibility
+
+Two admin capabilities, both per-customer, both without pushing the customer
+to a higher tier:
+
+1. **Customer-specific discounts.** Design: Stripe coupons / promotion codes
+   are the source of truth for money; Vigil records the intent.
+   - `orders.discount` (jsonb or columns: `coupon_ref`, `percent_off`,
+     `amount_off_cents`, `reason`) set by staff on the "Send a checkout link"
+     form; `startCheckout` passes it to the provider (`discounts: [{coupon}]`
+     on the Checkout Session, or `allow_promotion_codes: true` for a code the
+     customer types). Extend `BillingCheckoutInput` with `discountExternalId`.
+   - Recurring discounts live on the Stripe subscription (coupon with
+     `duration`); the dashboard's billing page just shows the resulting
+     price from the snapshot. An admin "Apply discount" action on the
+     organization (provider `customers.update` / subscription coupon) can
+     come later — for the first cases, set it in the Stripe Dashboard.
+   - Audit every discount (`order.discount_applied`, who and why).
+
+2. **Custom scope on an Express site without upselling.** Two layers:
+   - *Platform features:* `entitlement_overrides` already does this — grant
+     `requests.enabled`, a bigger allowance, `virtue.enabled`, etc. to one
+     organization with a reason, no plan change. Admin UI exists on the
+     customer page (admin role). Just use it.
+   - *Site scope:* add a free-text-plus-checklist "scope" on the project
+     (`projects.brief.scope` or a `projects.scope` jsonb): extra sections,
+     integrations, custom components agreed for this build, plus an optional
+     `custom_build_addon_cents` on the order (already supported as the
+     ad-hoc build amount on staff-created links; a $0 add-on is fine). Show
+     it on the admin project view and in the client's project card so the
+     agreement is visible to both sides. No new plan, no new tier.
+
+Neither needs a migration beyond a nullable jsonb column; keep the money in
+Stripe and the intent in Vigil.
+
 ---
 
 ## 3. Still needed from the owner (asked, not yet answered)
