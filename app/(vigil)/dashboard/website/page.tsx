@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Calendar, FileCode2, Globe, HeartPulse, PenLine, ShieldCheck } from "lucide-react";
-import { ResizableWidget } from "@/components/vigil/ResizableWidget";
+import { AttributeWidget, WidgetLink } from "@/components/vigil/AttributeWidget";
+import { DownloadSiteButton } from "@/components/vigil/DownloadSiteButton";
 import { SiteFrame } from "@/components/vigil/SiteFrame";
 import { EmptyState, StatusPill } from "@/components/vigil/ui";
 import { Panel, StatusLine, Stepper } from "@/components/vigil/widgets";
@@ -22,6 +23,7 @@ export default async function WebsitePage() {
     resolveEntitlements(ctx.organization.id),
   ]);
   const canRequest = ent.enabled(FEATURES.requests);
+  const canExport = ctx.role === "owner" || ctx.role === "manager" || ctx.isImpersonating;
 
   if (websites.length === 0) {
     const project = projects[0] ?? null;
@@ -31,20 +33,15 @@ export default async function WebsitePage() {
       <div className="space-y-4">
         <Header canRequest={canRequest} />
         {project && step ? (
-          <Panel title={project.name} action={<StatusPill tone={describeProjectStatus(project.status).tone}>{describeProjectStatus(project.status).label}</StatusPill>}>
-            <p className="text-xs text-[color:var(--text-secondary)]">Your website appears here once it is published. Until then, this page tracks the build.</p>
-            <div className="mt-4">
-              <Stepper steps={projectSteps} current={step.current} done={step.done} />
-            </div>
-            {preview.kind !== "none" ? (
+          <>
+            <Panel title={project.name} action={<StatusPill tone={describeProjectStatus(project.status).tone}>{describeProjectStatus(project.status).label}</StatusPill>}>
+              <p className="text-xs text-[color:var(--text-secondary)]">Your website appears here once it is published. Until then, this page tracks the build.</p>
               <div className="mt-4">
-                <ResizableWidget storageKey="website-preview" defaultWidth={560}>
-                  <SiteFrame src={preview.src} address={preview.address} title={`${project.name} preview`} />
-                </ResizableWidget>
-                <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">The template your site is built from; your content replaces this as the build progresses.</p>
+                <Stepper steps={projectSteps} current={step.current} done={step.done} />
               </div>
-            ) : null}
-          </Panel>
+            </Panel>
+            {preview.kind !== "none" ? <PreviewWidget src={preview.src} address={preview.address} title={`${project.name} preview`} note="The template your site is built from; your content replaces this as the build progresses." /> : null}
+          </>
         ) : (
           <EmptyState title="No website yet" description="When Vigil Studios starts building your site, its status will show here." />
         )}
@@ -63,54 +60,106 @@ export default async function WebsitePage() {
           const project = projects.find((p) => p.id === site.project_id) ?? null;
           const preview = previewSource(site, project?.template_slug ?? null);
           const isLive = site.status === "live";
+          const exportable = site.export_eligible && site.code_ownership === "customer_owned";
 
           return (
-            <Panel
-              key={site.id}
-              title={site.name}
-              action={
-                <div className="flex items-center gap-2">
-                  <StatusPill tone={status.tone}>{status.label}</StatusPill>
-                  {site.live_url ? (
-                    <a href={site.live_url} target="_blank" rel="noreferrer" className="btn-secondary !px-2.5 !py-1 text-xs">
-                      Open site <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
-                    </a>
-                  ) : null}
-                </div>
-              }
-            >
-              {site.status_reason || status.hint ? (
-                <div className="mb-4">
-                  <StatusLine tone={status.tone} label={status.label} hint={site.status_reason ?? status.hint} size="sm" />
-                </div>
-              ) : null}
-
-              <div className="flex flex-wrap items-start gap-4">
-                {preview.kind !== "none" ? (
-                  <div className="min-w-0 max-w-full">
-                    <ResizableWidget storageKey={`website-preview:${site.id}`} defaultWidth={520}>
-                      <SiteFrame src={preview.src} address={preview.address} title={`${site.name} preview`} />
-                    </ResizableWidget>
-                    <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">
-                      {preview.kind === "template" ? "The template your site is built from; your content replaces this as the build progresses." : "Live view. Drag the edge to resize."}
-                    </p>
+            <div key={site.id} className="space-y-4">
+              {/* Website widget */}
+              <Panel
+                title={site.name}
+                action={
+                  <div className="flex items-center gap-2">
+                    <StatusPill tone={status.tone}>{status.label}</StatusPill>
+                    {site.live_url ? (
+                      <a href={site.live_url} target="_blank" rel="noreferrer" className="btn-secondary !px-2.5 !py-1 text-xs">
+                        Open site <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
+                      </a>
+                    ) : null}
+                  </div>
+                }
+              >
+                {site.status_reason || status.hint ? (
+                  <div className="mb-3">
+                    <StatusLine tone={status.tone} label={status.label} hint={site.status_reason ?? status.hint} size="sm" />
                   </div>
                 ) : null}
+                {preview.kind !== "none" ? (
+                  <>
+                    <div className="mx-auto w-full max-w-[760px]">
+                      <SiteFrame src={preview.src} address={preview.address} title={`${site.name} preview`} />
+                    </div>
+                    <p className="mt-2 text-center text-[11px] text-[color:var(--text-secondary)]">
+                      {preview.kind === "template" ? "The template your site is built from; your content replaces this as the build progresses." : "Live view of your published site."}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-xs text-[color:var(--text-secondary)]">A preview appears once your site is being built.</p>
+                )}
+              </Panel>
 
-                <div className="grid min-w-0 flex-1 basis-72 grid-cols-2 gap-3">
-                  <Tile icon={<Globe className="h-4 w-4" />} label="Live address" value={site.live_url ? site.live_url.replace(/^https?:\/\//, "") : "Not published yet"} tone={site.live_url ? "good" : "neutral"} href={site.live_url ?? undefined} />
-                  <Tile icon={<ShieldCheck className="h-4 w-4" />} label="SSL and security" value={isLive ? "Active" : "Pending"} tone={isLive ? "good" : "neutral"} hint={isLive ? "Certificate managed by Vigil" : "Activates when the site goes live"} />
-                  <Tile icon={<Calendar className="h-4 w-4" />} label="Last published" value={lastPublish ? formatRelative(lastPublish.finished_at ?? lastPublish.created_at) : site.last_deployed_at ? formatRelative(site.last_deployed_at) : "—"} hint={lastPublish ? formatDate(lastPublish.finished_at ?? lastPublish.created_at) : undefined} />
-                  <Tile icon={<HeartPulse className="h-4 w-4" />} label="Health" value={site.health_ok === null ? "Not checked yet" : site.health_ok ? "Healthy" : "Needs attention"} tone={site.health_ok === null ? "neutral" : site.health_ok ? "good" : "bad"} hint={site.last_health_at ? `Checked ${formatRelative(site.last_health_at)}` : "Automatic checks start once live"} />
-                  <Tile icon={<FileCode2 className="h-4 w-4" />} label="Site code" value={site.code_ownership === "customer_owned" ? "Yours" : "Vigil"} hint={site.export_eligible ? "Export eligible" : "Not export eligible"} />
-                  <Tile icon={<PenLine className="h-4 w-4" />} label="Changes" value={canRequest ? "Included in your plan" : "Care plan and up"} tone={canRequest ? "good" : "neutral"} href="/dashboard/requests" hint={canRequest ? "Submit a request any time" : "See what your plan includes"} />
-                </div>
+              {/* Attribute widgets — each its own card */}
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <AttributeWidget
+                  icon={<Globe className="h-4 w-4" />}
+                  label="Live address"
+                  value={site.live_url ? site.live_url.replace(/^https?:\/\//, "") : "Not published yet"}
+                  tone={site.live_url ? "good" : "neutral"}
+                  hint={site.live_url ? "Where visitors find your site" : "Assigned when the site is published"}
+                  action={site.live_url ? <WidgetLink href={site.live_url} external>Open site</WidgetLink> : undefined}
+                />
+                <AttributeWidget
+                  icon={<ShieldCheck className="h-4 w-4" />}
+                  label="SSL and security"
+                  value={isLive ? "Active" : "Pending"}
+                  tone={isLive ? "good" : "neutral"}
+                  hint={isLive ? "Certificate issued and renewed by Vigil" : "Activates when the site goes live"}
+                />
+                <AttributeWidget
+                  icon={<Calendar className="h-4 w-4" />}
+                  label="Last published"
+                  value={lastPublish ? formatRelative(lastPublish.finished_at ?? lastPublish.created_at) : site.last_deployed_at ? formatRelative(site.last_deployed_at) : "Not yet"}
+                  hint={lastPublish ? formatDate(lastPublish.finished_at ?? lastPublish.created_at) : "The date of the first publish will appear here"}
+                />
+                <AttributeWidget
+                  icon={<HeartPulse className="h-4 w-4" />}
+                  label="Health"
+                  value={site.health_ok === null ? "Not checked yet" : site.health_ok ? "Healthy" : "Needs attention"}
+                  tone={site.health_ok === null ? "neutral" : site.health_ok ? "good" : "bad"}
+                  hint={site.last_health_at ? `Checked ${formatRelative(site.last_health_at)}` : "Automatic checks start once the site is live"}
+                />
+                <AttributeWidget
+                  icon={<FileCode2 className="h-4 w-4" />}
+                  label="Site code"
+                  value={site.code_ownership === "customer_owned" ? "Yours" : "Vigil"}
+                  tone={exportable ? "good" : "neutral"}
+                  hint={exportable ? "Download a copy of your site any time" : "This site is not eligible for export"}
+                  action={exportable ? (canExport ? <DownloadSiteButton websiteId={site.id} /> : <span className="text-[11px] text-[color:var(--text-secondary)]">Owners and managers can download</span>) : undefined}
+                />
+                <AttributeWidget
+                  icon={<PenLine className="h-4 w-4" />}
+                  label="Changes"
+                  value={canRequest ? "Included" : "Care plan and up"}
+                  tone={canRequest ? "good" : "neutral"}
+                  hint={canRequest ? "Tell Vigil what to change; it gets done" : "See what your plan includes"}
+                  action={<WidgetLink href="/dashboard/requests" primary={canRequest}>{canRequest ? "Request a change" : "View plans"}</WidgetLink>}
+                />
               </div>
-            </Panel>
+            </div>
           );
         })
       )}
     </div>
+  );
+}
+
+function PreviewWidget({ src, address, title, note }: { src: string; address: string; title: string; note: string }) {
+  return (
+    <Panel title="Preview">
+      <div className="mx-auto w-full max-w-[760px]">
+        <SiteFrame src={src} address={address} title={title} />
+      </div>
+      <p className="mt-2 text-center text-[11px] text-[color:var(--text-secondary)]">{note}</p>
+    </Panel>
   );
 }
 
@@ -127,42 +176,4 @@ function Header({ canRequest }: { canRequest: boolean }) {
       </Link>
     </div>
   );
-}
-
-function Tile({
-  icon,
-  label,
-  value,
-  hint,
-  tone = "neutral",
-  href,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  hint?: string;
-  tone?: "good" | "warn" | "bad" | "info" | "neutral";
-  href?: string;
-}) {
-  const color = tone === "neutral" ? "var(--text-secondary)" : `var(--status-${tone})`;
-  const body = (
-    <>
-      <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wide text-[color:var(--text-secondary)]">
-        <span style={{ color }}>{icon}</span>
-        <span className="truncate">{label}</span>
-      </div>
-      <p className="mt-2 truncate text-sm font-semibold" title={value}>{value}</p>
-      {hint ? <p className="mt-0.5 truncate text-[11px] text-[color:var(--text-secondary)]">{hint}</p> : null}
-    </>
-  );
-  const cls = "flex min-w-0 flex-col rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-3";
-  if (href) {
-    const external = href.startsWith("http");
-    return external ? (
-      <a href={href} target="_blank" rel="noreferrer" className={`${cls} transition-colors hover:border-[color:var(--accent)]`}>{body}</a>
-    ) : (
-      <Link href={href} className={`${cls} transition-colors hover:border-[color:var(--accent)]`}>{body}</Link>
-    );
-  }
-  return <div className={cls}>{body}</div>;
 }

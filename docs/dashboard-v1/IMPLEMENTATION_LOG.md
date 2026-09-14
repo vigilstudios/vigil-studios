@@ -282,11 +282,20 @@ the chrome and the two overviews; data layer, actions and routes unchanged.
 
 ## 2026-09-14 — Website page widgets, resizable preview, request attachments
 
-- `components/vigil/ResizableWidget.tsx`: drag the right edge (or arrow keys
-  on the handle) to resize; width remembered per widget in localStorage;
-  always full width under `sm`. The Website page preview uses it (default
-  520px), beside a 2×3 grid of tiles (live address, SSL, last published,
-  health, site code ownership, changes) and a "Request a change" button.
+- Website page (revised after owner feedback): the preview is its own
+  widget, not resizable, scaling to the viewport with a 760px cap
+  (`SiteFrame` follows its container). Underneath, six standalone
+  `AttributeWidget` cards — live address, SSL, last published, health, site
+  code, changes — each with icon, value, hint and optional action, plus a
+  "Request a change" button in the header. The earlier resizable widget was
+  removed.
+- Site export: `GET /api/websites/[id]/export` streams a zip (jszip) built by
+  `lib/vigil/services/export.ts` — a `SiteSource` interface whose only
+  implementation today is the current Express build (`site/index.html`),
+  plus `manifest.json` and a README stating what is and is not included
+  (master architecture §5). Owners/managers only, `export_eligible` and
+  `customer_owned` required, audited as `website.exported`. Verified live:
+  2.2 MB zip with the three entries.
 - Migration `20260914000007_request_attachments.sql` (pushed to the linked
   project): private bucket `request-attachments` (10 MB, images + PDF),
   storage policies keyed on the `<organization_id>/…` path prefix via
