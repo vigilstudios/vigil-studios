@@ -196,6 +196,22 @@ to a higher tier:
 Neither needs a migration beyond a nullable jsonb column; keep the money in
 Stripe and the intent in Vigil.
 
+### Decision (owner, 14 Sep): where customer site code lives
+
+- One folder per customer: `Websites/clients/<org-slug>/` with `site/` (the
+  deployable site), `content/` (brief, copy, images they supplied) and a
+  `README.md` (template + version it started from, agreed scope, notes).
+  Set `websites.repository_ref = "clients/<org-slug>"` in admin.
+- **An Express site is a copy of the template, rendered once** with the
+  customer's content, colours and images. From then on `clients/<slug>/site/`
+  is the source of truth: change requests are hand edits to those files, no
+  re-rendering from data. Template improvements do not propagate to existing
+  customer copies automatically (manual pass if ever needed) — accepted.
+- Custom builds (the cigar lounge) are the same folder shape with real source.
+- Dashboard follow-ups: `SiteSource` in `lib/vigil/services/export.ts` should
+  read `repository_ref` (zip the `site/` folder) before falling back to the
+  showcase template; the future Vercel adapter deploys from the same folder.
+
 ---
 
 ## 3. Still needed from the owner (asked, not yet answered)

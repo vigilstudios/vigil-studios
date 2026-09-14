@@ -164,10 +164,10 @@ export const EXPRESS_TEMPLATES = [
     slug: "retail",
     variant: "Variant 1",
     industry: "Retail and boutique",
-    example: "Quillon Supply",
+    example: "Morrow",
     description:
-      "Product-forward. Portrait tiles for each range, and a get-directions button, because a shop converts on a visit.",
-    accent: "#5c6b3c",
+      "A bright editorial boutique with curated collections, an interactive outfit edit, and a visit-first path to the shop.",
+    accent: "#243cca",
   },
   {
     slug: "salon-spa",
