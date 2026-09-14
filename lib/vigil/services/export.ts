@@ -39,8 +39,8 @@ export const expressTemplateSource: SiteSource = {
 
 /**
  * The customer's own folder: `websites.repository_ref` names a directory
- * (e.g. `clients/<org-slug>`) under VIGIL_CLIENTS_ROOT — by default the
- * parent of this repo, where `Websites/clients/` lives. `site/` is the
+ * (e.g. `clients/<org-slug>`) under VIGIL_CLIENTS_ROOT (the `Websites`
+ * folder locally, where `clients/` lives; unset = this source is off). `site/` is the
  * deployable site and is required; `content/` (what the customer supplied)
  * and a README are included when present. Absent folder = source does not
  * apply, so the template fallback still works where the folder is not
@@ -51,17 +51,18 @@ export const repositorySource: SiteSource = {
   async collect(website) {
     const ref = website.repository_ref?.trim();
     if (!ref) return null;
-    const root = path.resolve(process.env.VIGIL_CLIENTS_ROOT ?? path.join(process.cwd(), ".."));
+    const root = clientsRoot();
+    if (!root) return null;
     const dir = path.resolve(root, ref);
     if (dir !== root && !dir.startsWith(root + path.sep)) return null; // no escaping the root
-    const site = path.join(dir, "site");
+    const site = under(dir, "site");
     if (!(await isDir(site))) return null;
     const files: SiteFile[] = [];
     await walk(site, "site", files);
-    const content = path.join(dir, "content");
+    const content = under(dir, "content");
     if (await isDir(content)) await walk(content, "content", files);
     for (const name of ["README.md", "readme.md"]) {
-      const f = path.join(dir, name);
+      const f = under(dir, name);
       if (await isFile(f)) {
         files.push({ path: "PROJECT-README.md", content: await readFile(f) });
         break;
@@ -71,6 +72,22 @@ export const repositorySource: SiteSource = {
   },
 };
 
+/**
+ * The customer folder is outside the app. The build's file tracer follows
+ * `path.join(x, "literal")` and would pull the whole workspace into this
+ * route's output, so paths under the root are joined by hand.
+ */
+function under(base: string, ...parts: string[]): string {
+  return [base, ...parts].join(path.sep);
+}
+
+function clientsRoot(): string | null {
+  // No default on purpose: a literal parent path here makes the build tracer
+  // pull the whole workspace into the route's output.
+  const configured = process.env.VIGIL_CLIENTS_ROOT;
+  return configured ? path.resolve(configured) : null;
+}
+
 const SKIP = new Set(["node_modules", ".git", ".DS_Store", ".next", ".vercel", ".env", ".env.local"]);
 
 async function walk(dir: string, prefix: string, out: SiteFile[]): Promise<void> {
@@ -78,7 +95,7 @@ async function walk(dir: string, prefix: string, out: SiteFile[]): Promise<void>
   entries.sort((a, b) => a.name.localeCompare(b.name));
   for (const e of entries) {
     if (SKIP.has(e.name) || e.name.startsWith(".env")) continue;
-    const full = path.join(dir, e.name);
+    const full = under(dir, e.name);
     const rel = `${prefix}/${e.name}`;
     if (e.isDirectory()) await walk(full, rel, out);
     else if (e.isFile()) out.push({ path: rel, content: await readFile(full) });
