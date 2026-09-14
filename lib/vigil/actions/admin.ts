@@ -30,6 +30,8 @@ import { Constants } from "@/types/database.types";
  * database — not this file — is the last line of defence.
  */
 
+const minuteBucket = () => Math.floor(Date.now() / 60_000).toString(36);
+
 function issuesOf(error: z.ZodError): Record<string, string[]> {
   const out: Record<string, string[]> = {};
   for (const issue of error.issues) (out[issue.path.join(".") || "_"] ??= []).push(issue.message);
@@ -256,8 +258,9 @@ export async function enqueueWebsiteJob(websiteId: string, kind: "website.provis
     const { data: site, error } = await supabase.from("websites").select("id, organization_id").eq("id", websiteId).maybeSingle();
     if (error) throw error;
     if (!site) throw new NotFoundError();
-    // A fresh deploy each time it is asked for; provisioning is once per site.
-    const key = kind === JOB_KINDS.websiteProvision ? `website.provision:${websiteId}` : `website.deploy:${websiteId}:${Date.now()}`;
+    // Provisioning is once per site; a deploy can be re-queued, but a double
+    // click inside the same minute collapses into one job.
+    const key = kind === JOB_KINDS.websiteProvision ? `website.provision:${websiteId}` : `website.deploy:${websiteId}:${minuteBucket()}`;
     const job = await enqueueJob(supabase, { kind, idempotencyKey: key, organizationId: site.organization_id, websiteId, createdBy: staff.user.id });
     revalidatePath(`/admin/websites/${websiteId}`);
     revalidatePath("/admin/jobs");
@@ -327,7 +330,7 @@ export async function enqueueDomainJob(domainId: string, kind: "domain.connect" 
     if (!domain) throw new NotFoundError();
     await enqueueJob(supabase, {
       kind,
-      idempotencyKey: `${kind}:${domainId}:${Date.now()}`,
+      idempotencyKey: `${kind}:${domainId}:${minuteBucket()}`,
       organizationId: domain.organization_id,
       websiteId: domain.website_id,
       domainId,

@@ -179,6 +179,12 @@ begin
   perform test.fails(
     'insert into public.domains (organization_id, hostname, source, status) values (''10000000-0000-0000-0000-00000000000a'', ''bought.example.com'', ''purchased_via_vigil'', ''pending'')',
     'alice: cannot claim a purchased domain');
+  perform test.fails(
+    'insert into public.domains (organization_id, website_id, hostname) values (''10000000-0000-0000-0000-00000000000a'', ''20000000-0000-0000-0000-00000000000b'', ''cross.example.com'')',
+    'alice: cannot attach her domain to org B''s website');
+  perform test.fails(
+    'insert into public.change_requests (organization_id, website_id, title) values (''10000000-0000-0000-0000-00000000000a'', ''20000000-0000-0000-0000-00000000000b'', ''x'')',
+    'alice: cannot file a request against org B''s website');
   update public.domains set status = 'connected' where id = v_id;
   perform test.ok((select status from public.domains where id = v_id) = 'pending',
     'alice: cannot mark a domain connected (update filtered by RLS)');
@@ -275,6 +281,9 @@ begin
 
   insert into public.provisioning_jobs (organization_id, kind, idempotency_key)
     values (v_org_b, 'website.provision', 'website.provision:' || v_org_b) returning id into v_job;
+  perform test.fails(
+    'insert into public.provisioning_jobs (organization_id, website_id, kind, idempotency_key) values (''' || v_org_b || ''', ''20000000-0000-0000-0000-00000000000a'', ''website.deploy'', ''x-org'')',
+    'carol: even staff cannot queue a job that crosses organizations');
   perform test.fails(
     'insert into public.provisioning_jobs (organization_id, kind, idempotency_key) values (''' || v_org_b || ''', ''website.provision'', ''website.provision:' || v_org_b || ''')',
     'carol: duplicate idempotency key refused');

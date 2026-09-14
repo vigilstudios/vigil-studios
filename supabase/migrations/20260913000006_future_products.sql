@@ -38,6 +38,10 @@ create trigger change_requests_audit_status
   after update of status on public.change_requests
   for each row execute function vigil.audit_status_change();
 
+create trigger change_requests_enforce_same_org
+  before insert or update of website_id, organization_id on public.change_requests
+  for each row execute function vigil.enforce_same_org_references();
+
 -- --------------------------------------------------------------------------
 -- leads: captured interactions from a website (Growth and above).
 -- --------------------------------------------------------------------------
@@ -61,6 +65,10 @@ create index leads_status_idx on public.leads (status);
 create trigger leads_set_updated_at
   before update on public.leads
   for each row execute function vigil.set_updated_at();
+
+create trigger leads_enforce_same_org
+  before insert or update of website_id, organization_id on public.leads
+  for each row execute function vigil.enforce_same_org_references();
 
 -- --------------------------------------------------------------------------
 -- virtue_settings: one row per organization; workflows come later.

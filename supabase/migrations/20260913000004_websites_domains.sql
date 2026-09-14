@@ -161,6 +161,61 @@ create trigger deployments_inherit_org
   for each row execute function vigil.deployments_inherit_org();
 
 -- --------------------------------------------------------------------------
+-- Cross-tenant reference guard. A row that names a website must belong to
+-- that website's organization, whoever inserts it. RLS checks membership of
+-- the row's organization; this closes the gap where a member of A points a
+-- row at B's website.
+-- --------------------------------------------------------------------------
+create or replace function vigil.enforce_same_org_references()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_row  jsonb := to_jsonb(new);
+  v_org  uuid := (v_row ->> 'organization_id')::uuid;
+  v_site uuid := (v_row ->> 'website_id')::uuid;
+  v_dom  uuid := (v_row ->> 'domain_id')::uuid;
+  v_proj uuid := (v_row ->> 'project_id')::uuid;
+  v_other uuid;
+begin
+  if v_site is not null then
+    select organization_id into v_other from public.websites where id = v_site;
+    if v_other is null or (v_org is not null and v_other <> v_org) then
+      raise exception 'website % does not belong to organization %', v_site, v_org using errcode = '23503';
+    end if;
+  end if;
+  if v_dom is not null then
+    select organization_id into v_other from public.domains where id = v_dom;
+    if v_other is null or (v_org is not null and v_other <> v_org) then
+      raise exception 'domain % does not belong to organization %', v_dom, v_org using errcode = '23503';
+    end if;
+  end if;
+  if v_proj is not null then
+    select organization_id into v_other from public.projects where id = v_proj;
+    if v_other is null or (v_org is not null and v_other <> v_org) then
+      raise exception 'project % does not belong to organization %', v_proj, v_org using errcode = '23503';
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+create trigger websites_enforce_same_org
+  before insert or update of project_id, organization_id on public.websites
+  for each row execute function vigil.enforce_same_org_references();
+create trigger domains_enforce_same_org
+  before insert or update of website_id, organization_id on public.domains
+  for each row execute function vigil.enforce_same_org_references();
+create trigger subscriptions_enforce_same_org
+  before insert or update of website_id, organization_id on public.subscriptions
+  for each row execute function vigil.enforce_same_org_references();
+create trigger usage_records_enforce_same_org
+  before insert or update of website_id, organization_id on public.usage_records
+  for each row execute function vigil.enforce_same_org_references();
+
+-- --------------------------------------------------------------------------
 -- provider_links: the only place provider identifiers are stored.
 -- --------------------------------------------------------------------------
 create table public.provider_links (

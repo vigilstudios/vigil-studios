@@ -166,9 +166,11 @@ create trigger provisioning_jobs_set_updated_at
   before update on public.provisioning_jobs
   for each row execute function vigil.set_updated_at();
 
-create trigger provisioning_jobs_audit_status
-  after update of status on public.provisioning_jobs
-  for each row execute function vigil.audit_status_change();
+-- Jobs are their own log (attempts, error, timestamps); auditing every
+-- queued→running→succeeded hop would bury customer-relevant history.
+create trigger provisioning_jobs_enforce_same_org
+  before insert or update of website_id, domain_id, organization_id on public.provisioning_jobs
+  for each row execute function vigil.enforce_same_org_references();
 
 -- Claim up to p_limit due jobs for a worker. SKIP LOCKED keeps concurrent
 -- runners from double-claiming; the lease lets a crashed runner's job be

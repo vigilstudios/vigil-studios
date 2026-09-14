@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 import { runDueJobs } from "@/lib/vigil/jobs";
@@ -12,7 +13,9 @@ function authorized(request: NextRequest): boolean {
   const secret = process.env.VIGIL_JOBS_SECRET || process.env.CRON_SECRET;
   if (!secret) return false;
   const header = request.headers.get("authorization") ?? "";
-  return header === `Bearer ${secret}`;
+  const expected = Buffer.from(`Bearer ${secret}`);
+  const actual = Buffer.from(header);
+  return expected.length === actual.length && timingSafeEqual(expected, actual);
 }
 
 async function handle(request: NextRequest) {

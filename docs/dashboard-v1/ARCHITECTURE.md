@@ -1,6 +1,6 @@
 # Vigil Dashboard V1 — Architecture
 
-**Status:** Proposal → implemented foundation (see `IMPLEMENTATION_LOG.md`)
+**Status:** Implemented foundation on branch `claude/dashboard-v1-foundation` (see `IMPLEMENTATION_LOG.md`)
 **Source of truth for product direction:** `../../../vigil-leadgen/VIGIL_STUDIOS_MASTER_ARCHITECTURE.md`
 **Written:** 13 Sep 2026
 
@@ -77,6 +77,8 @@ phases (domains, Stripe, Vercel, Requests, Leads, Insights, Virtue) must respect
 | D13 | No `stripe`, `@vercel/sdk` or Cloudflare SDK is added in this phase. Adapters are interface + `null` provider + a `not-configured` stub per named provider. | Provider choices for domains and deployment topology are undecided (§15). The interfaces are the deliverable. |
 | D14 | Sign-in is email magic link via Supabase Auth (PKCE, `token_hash` confirm route). No passwords are collected in V1. | Calm for customers, nothing to leak, no password UI to maintain. Password sign-in can be enabled later without schema changes. |
 | D15 | There is no self-serve organization creation. Staff create an organization and invite the owner by email; the invite auto-accepts when that email signs in. | Whether an Express purchase creates an org automatically is a product flow decision that belongs to the checkout phase. |
+| D16 | Column-level rules (who may change `organizations.status`, `profiles.email`, `change_requests.assigned_to`, …) are enforced by the `vigil.protect_columns_from_customers` trigger, not by column GRANTs. | Staff and customers share the `authenticated` database role, so GRANTs cannot tell them apart; a trigger can ask `vigil.is_staff()`. |
+| D17 | Any row that references a `website_id`, `domain_id` or `project_id` must point inside its own organization (`vigil.enforce_same_org_references`). | RLS checks the row's organization; without this a member of A could attach A's domain to B's website. |
 
 ---
 
