@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { ButtonLink, EmptyState } from "@/components/vigil/ui";
-import { Checklist, Meter, Panel, SitePreview, StatusLine, Stepper, Timeline } from "@/components/vigil/widgets";
+import { Checklist, Meter, Panel, StatusLine, Stepper, Timeline } from "@/components/vigil/widgets";
+import { SiteFrame } from "@/components/vigil/SiteFrame";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
 import { FEATURES, resolveEntitlements } from "@/lib/vigil/entitlements";
 import { formatDate, formatRelative, humanizeAction, titleCase } from "@/lib/vigil/format";
 import { describeDomainStatus, describeProjectStatus, describeSubscriptionStatus, describeWebsiteStatus } from "@/lib/vigil/lifecycle";
-import { auditTone, periodProgress, projectStepIndex, projectSteps, requiredRecords, templateName } from "@/lib/vigil/presenters";
+import { auditTone, periodProgress, previewSource, projectStepIndex, projectSteps, requiredRecords, templateName } from "@/lib/vigil/presenters";
 import { getOrgDomains, getOrgProjects, getOrgSubscription, getOrgWebsites, getRecentActivity, getRecentDeployments } from "@/lib/vigil/queries/dashboard";
 
 export const metadata: Metadata = { title: "Overview" };
@@ -37,6 +38,7 @@ export default async function OverviewPage() {
   const step = project ? projectStepIndex(project.status) : null;
   const period = periodProgress(subscription?.current_period_start ?? null, subscription?.current_period_end ?? null);
   const records = domain ? requiredRecords(domain.verification) : [];
+  const preview = previewSource(website, project?.template_slug ?? null);
 
   const firstName = ctx.profile.full_name?.split(" ")[0];
 
@@ -62,7 +64,16 @@ export default async function OverviewPage() {
       <div className="grid gap-4 lg:grid-cols-12">
         {/* Website */}
         <Panel className="lg:col-span-5 lg:row-span-2" title="Website" action={<Link href="/dashboard/website" className="text-xs text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">Details</Link>}>
-          <SitePreview templateSlug={website?.template_slug ?? project?.template_slug ?? null} alt={website?.name ?? "Your website"} />
+          {preview.kind === "none" ? (
+            <div className="flex aspect-[16/10] items-center justify-center rounded-lg border border-dashed border-[color:var(--border)] text-xs text-[color:var(--text-secondary)]">
+              A preview appears once your site is being built
+            </div>
+          ) : (
+            <SiteFrame src={preview.src} address={preview.address} title={`${website?.name ?? project?.name ?? "Website"} preview`} />
+          )}
+          {preview.kind === "template" ? (
+            <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">Showing the template your site is built from; your content replaces this as the build progresses.</p>
+          ) : null}
           <div className="mt-3 flex items-start justify-between gap-3">
             {websiteStatus ? (
               <StatusLine tone={websiteStatus.tone} label={websiteStatus.label} hint={website?.status_reason ?? websiteStatus.hint} />

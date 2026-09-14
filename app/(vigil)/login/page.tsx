@@ -26,7 +26,7 @@ export default async function LoginPage({
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <Link href="/" className="inline-flex items-center gap-2" aria-label="Vigil Studios home">
-            <Logo className="h-10" />
+            <Logo size="lg" />
           </Link>
           <h1 className="mt-6 text-2xl font-semibold tracking-tight">Sign in to Vigil</h1>
           <p className="mt-2 text-sm text-[color:var(--text-secondary)]">

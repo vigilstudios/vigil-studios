@@ -105,9 +105,9 @@ export function AppFrame({
   // The drawer is always the full sidebar; only the desktop aside collapses.
   const sidebar = (rail: boolean) => (
     <div className="flex h-full flex-col">
-      <div className={clsx("flex h-12 shrink-0 items-center border-b border-[color:var(--border)]", rail ? "justify-center px-0" : "gap-2 px-3")}>
+      <div className={clsx("flex h-14 shrink-0 items-center border-b border-[color:var(--border)] py-3", rail ? "justify-center px-0" : "gap-2.5 px-4")}>
         <Link href={homeHref} aria-label="Home" className="shrink-0">
-          <Logo />
+          <Logo size="sm" />
         </Link>
         {!rail ? <div className="min-w-0 flex-1">{workspace}</div> : null}
       </div>
@@ -163,7 +163,7 @@ export function AppFrame({
       ) : null}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-12 shrink-0 items-center gap-2 border-b border-[color:var(--border)] bg-[color:var(--bg-primary)] px-3 sm:px-4">
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b border-[color:var(--border)] bg-[color:var(--bg-primary)] px-3 sm:px-4">
           <button
             type="button"
             aria-label="Open navigation"

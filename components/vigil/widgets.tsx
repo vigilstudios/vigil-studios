@@ -1,8 +1,6 @@
-import Image from "next/image";
 import type { ReactNode } from "react";
 import { clsx } from "clsx";
-import { AlertTriangle, CheckCircle2, Circle, Clock, Info, XCircle } from "lucide-react";
-import { EXPRESS_TEMPLATES } from "@/lib/constants";
+import { AlertTriangle, CheckCircle2, Circle, Clock, XCircle } from "lucide-react";
 import type { Tone } from "./ui";
 
 /**
@@ -232,23 +230,5 @@ export function Timeline({ items, empty }: { items: { key: string; tone: Tone; t
         </li>
       ))}
     </ol>
-  );
-}
-
-const previewSlugs = new Set(EXPRESS_TEMPLATES.map((t) => t.slug));
-
-/** Site preview: the template's real capture when we have one, else a placeholder. */
-export function SitePreview({ templateSlug, alt, className }: { templateSlug: string | null; alt: string; className?: string }) {
-  const hasPreview = templateSlug !== null && previewSlugs.has(templateSlug);
-  return (
-    <div className={clsx("relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-secondary)]", className)}>
-      {hasPreview ? (
-        <Image src={`/express-templates/previews/${templateSlug}.jpg`} alt={alt} fill priority sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover object-top" />
-      ) : (
-        <div className="flex h-full items-center justify-center text-xs text-[color:var(--text-secondary)]">
-          <Info className="mr-1.5 h-4 w-4" aria-hidden /> Preview appears once the site is published
-        </div>
-      )}
-    </div>
   );
 }

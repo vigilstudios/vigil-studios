@@ -272,6 +272,13 @@ the chrome and the two overviews; data layer, actions and routes unchanged.
   activity. `lib/vigil/presenters.ts` holds the pure mappers (tested).
 - Verified in Chrome at desktop (expanded and rail), in 390px iframes for the
   phone layout and drawer, and in the light theme.
+- Owner review: logo too tight to the top (header now 56px, logo 24px) and
+  the static capture stretched the site. Replaced with
+  `components/vigil/SiteFrame.tsx`, the catalogue's approach: the real page
+  in an iframe at a true viewport (1200px desktop / 390px phone) scaled to
+  the card with a browser chrome and a desktop/phone toggle; it scrolls
+  itself. `previewSource()` picks the live site when it has a real address,
+  otherwise the Express template HTML; in-memory `.local` hosts never embed.
 
 ## Next phase
 

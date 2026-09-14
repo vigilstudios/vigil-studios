@@ -4,6 +4,8 @@ import { requireOrgContext } from "@/lib/vigil/auth/session";
 import { formatDateTime, formatRelative } from "@/lib/vigil/format";
 import { describeProjectStatus, describeWebsiteStatus } from "@/lib/vigil/lifecycle";
 import { getOrgProjects, getOrgWebsites, getRecentDeployments } from "@/lib/vigil/queries/dashboard";
+import { SiteFrame } from "@/components/vigil/SiteFrame";
+import { previewSource } from "@/lib/vigil/presenters";
 
 export const metadata: Metadata = { title: "Website" };
 
@@ -42,12 +44,21 @@ export default async function WebsitePage() {
             const status = describeWebsiteStatus(site.status);
             const deployments = await getRecentDeployments(site.id);
             const lastPublish = deployments.find((d) => d.environment === "production" && d.status === "ready");
+            const preview = previewSource(site, projects.find((p) => p.id === site.project_id)?.template_slug ?? null);
             return (
               <Card key={site.id}>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h2 className="text-lg font-semibold">{site.name}</h2>
                   <StatusPill tone={status.tone}>{status.label}</StatusPill>
                 </div>
+                {preview.kind !== "none" ? (
+                  <div className="mt-3">
+                    <SiteFrame src={preview.src} address={preview.address} title={`${site.name} preview`} />
+                    {preview.kind === "template" ? (
+                      <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">Showing the template your site is built from; your content replaces this as the build progresses.</p>
+                    ) : null}
+                  </div>
+                ) : null}
                 {site.status_reason ? (
                   <p className="mt-2 text-sm text-[color:var(--text-secondary)]">{site.status_reason}</p>
                 ) : status.hint ? (

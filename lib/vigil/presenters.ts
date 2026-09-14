@@ -63,3 +63,32 @@ export function templateName(slug: string | null): string {
   if (!slug) return "Custom";
   return EXPRESS_TEMPLATES.find((t) => t.slug === slug)?.industry ?? slug;
 }
+
+export type PreviewSource = { kind: "live" | "template"; src: string; address: string } | { kind: "none" };
+
+const templateHtmlSlugs = new Set(EXPRESS_TEMPLATES.map((t) => t.slug));
+
+/**
+ * What the site preview should show: the live site once it has a real
+ * address, otherwise the Express template it is built from, otherwise
+ * nothing. Placeholder hosts from the in-memory provider never embed.
+ */
+export function previewSource(website: { live_url: string | null; preview_url: string | null; template_slug: string | null; status: string } | null, fallbackSlug: string | null = null): PreviewSource {
+  const candidate = website?.status === "live" ? website.live_url : website?.preview_url ?? null;
+  if (candidate) {
+    try {
+      const u = new URL(candidate);
+      const placeholder = u.hostname.endsWith(".local") || u.hostname.endsWith(".invalid") || u.hostname === "localhost";
+      if ((u.protocol === "https:" || u.protocol === "http:") && !placeholder) {
+        return { kind: "live", src: u.toString(), address: u.hostname };
+      }
+    } catch {
+      /* fall through to the template */
+    }
+  }
+  const slug = website?.template_slug ?? fallbackSlug;
+  if (slug && templateHtmlSlugs.has(slug)) {
+    return { kind: "template", src: `/express-templates/${slug}.html`, address: `${slug}.preview` };
+  }
+  return { kind: "none" };
+}
