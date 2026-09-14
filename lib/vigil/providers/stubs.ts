@@ -18,6 +18,8 @@ export class StripeBillingProviderStub implements BillingProvider {
   readonly name = "stripe" as const;
   async createCustomer(): Promise<never> { return notConfigured("Stripe"); }
   async createCheckoutSession(): Promise<never> { return notConfigured("Stripe"); }
+  async getCheckoutSession(): Promise<never> { return notConfigured("Stripe"); }
+  async ensurePrice(): Promise<never> { return notConfigured("Stripe"); }
   async getSubscription(): Promise<never> { return notConfigured("Stripe"); }
   async cancelSubscription(): Promise<never> { return notConfigured("Stripe"); }
   async createPortalSession(): Promise<never> { return notConfigured("Stripe"); }

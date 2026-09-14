@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars -- signatures mirror the interfaces; unused inputs are the point of a null provider */
 import type {
   BillingCheckoutInput,
+  BillingCheckoutSnapshot,
   BillingCustomerInput,
   BillingEvent,
   BillingProvider,
   BillingSubscriptionSnapshot,
+  CatalogPriceInput,
   DeploymentProvider,
   DeploymentSnapshot,
   DnsRecordInput,
@@ -33,8 +35,50 @@ export class NullBillingProvider implements BillingProvider {
     return { externalId: nextId("cus_null") };
   }
 
+  private checkouts = new Map<string, BillingCheckoutSnapshot>();
+  private prices = new Map<string, string>();
+
+  /** The null checkout is "paid" immediately; the success URL is returned as the redirect. */
   async createCheckoutSession(input: BillingCheckoutInput) {
-    return { url: input.successUrl, externalId: nextId("cs_null") };
+    const externalId = nextId("cs_null");
+    const subscriptionExternalId = input.mode === "subscription" ? nextId("sub_null") : null;
+    this.checkouts.set(externalId, {
+      externalId,
+      status: "complete",
+      paymentStatus: "paid",
+      customerExternalId: input.customerExternalId ?? nextId("cus_null"),
+      customerEmail: input.customerEmail ?? null,
+      subscriptionExternalId,
+      amountTotalCents: null,
+      currency: null,
+      reference: input.reference,
+    });
+    if (subscriptionExternalId) {
+      this.subs.set(subscriptionExternalId, {
+        externalId: subscriptionExternalId,
+        customerExternalId: input.customerExternalId ?? "cus_null",
+        priceExternalId: (() => { const first = input.lineItems[0]; return first && "priceExternalId" in first ? first.priceExternalId : null; })(),
+        status: "active",
+        currentPeriodStart: nowIso(),
+        currentPeriodEnd: new Date(Date.now() + 30 * 86_400_000).toISOString(),
+        cancelAtPeriodEnd: false,
+        canceledAt: null,
+        trialEnd: null,
+      });
+    }
+    return { url: input.successUrl, externalId };
+  }
+
+  async getCheckoutSession(externalId: string) {
+    return this.checkouts.get(externalId) ?? null;
+  }
+
+  async ensurePrice(input: CatalogPriceInput) {
+    const existing = this.prices.get(input.lookupKey);
+    if (existing) return { externalId: existing, created: false };
+    const id = nextId("price_null");
+    this.prices.set(input.lookupKey, id);
+    return { externalId: id, created: true };
   }
 
   async getSubscription(externalId: string) {
@@ -66,7 +110,7 @@ export class NullBillingProvider implements BillingProvider {
 
   async parseWebhook(rawBody: string, _signature: string | null): Promise<BillingEvent> {
     const raw = rawBody ? JSON.parse(rawBody) : {};
-    return { externalEventId: nextId("evt_null"), type: "ignored", raw };
+    return { externalEventId: nextId("evt_null"), type: "ignored", rawType: "null.event", raw };
   }
 }
 

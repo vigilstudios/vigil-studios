@@ -32,13 +32,45 @@ export type BillingCustomerInput = {
 };
 
 export type BillingCheckoutInput = {
-  organizationId: string;
-  customerExternalId: string;
-  priceExternalId: string;
+  /** Hosted checkout: recurring plan price plus any one-time build price (catalog or ad hoc). */
+  lineItems: CheckoutLineItem[];
+  mode: "subscription" | "payment";
+  /** An existing provider customer, or an email for the provider to create one. */
+  customerExternalId?: string;
+  customerEmail?: string;
   successUrl: string;
   cancelUrl: string;
-  /** Echoed back on webhooks so the event can be matched to Vigil entities. */
+  /** Echoed back on the session and webhooks so events map to Vigil entities. */
   reference: Record<string, string>;
+  allowPromotionCodes?: boolean;
+  collectTax?: boolean;
+};
+
+export type CheckoutLineItem =
+  | { priceExternalId: string; quantity?: number }
+  | { adHoc: { name: string; description?: string | null; amountCents: number; currency: string } };
+
+export type BillingCheckoutSnapshot = {
+  externalId: string;
+  status: "open" | "complete" | "expired";
+  paymentStatus: "paid" | "unpaid" | "no_payment_required";
+  customerExternalId: string | null;
+  customerEmail: string | null;
+  subscriptionExternalId: string | null;
+  amountTotalCents: number | null;
+  currency: string | null;
+  reference: Record<string, string>;
+};
+
+export type CatalogPriceInput = {
+  /** Stable key Vigil uses to find the price again (e.g. "plan:care:usd:month"). */
+  lookupKey: string;
+  productName: string;
+  productDescription?: string | null;
+  amountCents: number;
+  currency: string;
+  /** Omit for a one-time price. */
+  interval?: "month" | "year";
 };
 
 export type BillingSubscriptionSnapshot = {
@@ -63,7 +95,11 @@ export type BillingEvent = {
     | "invoice.payment_failed"
     | "checkout.completed"
     | "ignored";
+  rawType: string;
   subscription?: BillingSubscriptionSnapshot;
+  checkout?: BillingCheckoutSnapshot;
+  /** Provider subscription id for invoice events. */
+  subscriptionExternalId?: string | null;
   reference?: Record<string, string>;
   raw: unknown;
 };
@@ -72,6 +108,9 @@ export interface BillingProvider {
   readonly name: ProviderName;
   createCustomer(input: BillingCustomerInput): Promise<{ externalId: string }>;
   createCheckoutSession(input: BillingCheckoutInput): Promise<{ url: string; externalId: string }>;
+  getCheckoutSession(externalId: string): Promise<BillingCheckoutSnapshot | null>;
+  /** Create-or-reuse a product + price for a catalog row; returns the provider price id. */
+  ensurePrice(input: CatalogPriceInput): Promise<{ externalId: string; created: boolean }>;
   getSubscription(externalId: string): Promise<BillingSubscriptionSnapshot | null>;
   cancelSubscription(externalId: string, options: { atPeriodEnd: boolean }): Promise<BillingSubscriptionSnapshot>;
   createPortalSession(customerExternalId: string, returnUrl: string): Promise<{ url: string }>;

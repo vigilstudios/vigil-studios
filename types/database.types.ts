@@ -75,6 +75,42 @@ export type Database = {
           },
         ]
       }
+      build_prices: {
+        Row: {
+          amount_cents: number | null
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["project_kind"]
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents?: number | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          kind: Database["public"]["Enums"]["project_kind"]
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["project_kind"]
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       change_request_attachments: {
         Row: {
           bucket_id: string
@@ -802,6 +838,133 @@ export type Database = {
           },
         ]
       }
+      orders: {
+        Row: {
+          build_amount_cents: number | null
+          build_price_id: string | null
+          business_name: string
+          checkout_token: string
+          contact_name: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          email: string
+          error: Json | null
+          expires_at: string | null
+          id: string
+          metadata: Json
+          notes: string | null
+          organization_id: string | null
+          paid_at: string | null
+          plan_amount_cents: number | null
+          plan_id: string | null
+          project_id: string | null
+          project_kind: Database["public"]["Enums"]["project_kind"]
+          provisioned_at: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          subscription_id: string | null
+          template_slug: string | null
+          updated_at: string
+        }
+        Insert: {
+          build_amount_cents?: number | null
+          build_price_id?: string | null
+          business_name: string
+          checkout_token?: string
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          email: string
+          error?: Json | null
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          organization_id?: string | null
+          paid_at?: string | null
+          plan_amount_cents?: number | null
+          plan_id?: string | null
+          project_id?: string | null
+          project_kind?: Database["public"]["Enums"]["project_kind"]
+          provisioned_at?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          subscription_id?: string | null
+          template_slug?: string | null
+          updated_at?: string
+        }
+        Update: {
+          build_amount_cents?: number | null
+          build_price_id?: string | null
+          business_name?: string
+          checkout_token?: string
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          email?: string
+          error?: Json | null
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          organization_id?: string | null
+          paid_at?: string | null
+          plan_amount_cents?: number | null
+          plan_id?: string | null
+          project_id?: string | null
+          project_kind?: Database["public"]["Enums"]["project_kind"]
+          provisioned_at?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          subscription_id?: string | null
+          template_slug?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_build_price_id_fkey"
+            columns: ["build_price_id"]
+            isOneToOne: false
+            referencedRelation: "build_prices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_invites: {
         Row: {
           accepted_at: string | null
@@ -1117,6 +1280,73 @@ export type Database = {
         }
         Relationships: []
       }
+      project_assets: {
+        Row: {
+          bucket_id: string
+          caption: string | null
+          content_type: string
+          created_at: string
+          file_name: string
+          id: string
+          kind: Database["public"]["Enums"]["project_asset_kind"]
+          object_path: string
+          organization_id: string
+          project_id: string
+          size_bytes: number
+          uploaded_by: string | null
+        }
+        Insert: {
+          bucket_id?: string
+          caption?: string | null
+          content_type: string
+          created_at?: string
+          file_name: string
+          id?: string
+          kind?: Database["public"]["Enums"]["project_asset_kind"]
+          object_path: string
+          organization_id: string
+          project_id: string
+          size_bytes: number
+          uploaded_by?: string | null
+        }
+        Update: {
+          bucket_id?: string
+          caption?: string | null
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["project_asset_kind"]
+          object_path?: string
+          organization_id?: string
+          project_id?: string
+          size_bytes?: number
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_assets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_assets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_assets_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           brief: Json
@@ -1124,6 +1354,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          intake_completed_at: string | null
           kind: Database["public"]["Enums"]["project_kind"]
           launch_target: string | null
           launched_at: string | null
@@ -1140,6 +1371,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          intake_completed_at?: string | null
           kind: Database["public"]["Enums"]["project_kind"]
           launch_target?: string | null
           launched_at?: string | null
@@ -1156,6 +1388,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          intake_completed_at?: string | null
           kind?: Database["public"]["Enums"]["project_kind"]
           launch_target?: string | null
           launched_at?: string | null
@@ -1747,8 +1980,16 @@ export type Database = {
       job_status: "queued" | "running" | "succeeded" | "failed" | "canceled"
       lead_status: "new" | "contacted" | "qualified" | "won" | "lost" | "spam"
       membership_status: "active" | "suspended"
+      order_status:
+        | "pending"
+        | "paid"
+        | "provisioned"
+        | "failed"
+        | "refunded"
+        | "expired"
       org_role: "owner" | "manager" | "member"
       organization_status: "active" | "suspended" | "offboarding" | "closed"
+      project_asset_kind: "logo" | "photo" | "document" | "other"
       project_kind: "express" | "professional" | "custom"
       project_phase:
         | "onboarding"
@@ -2009,8 +2250,17 @@ export const Constants = {
       job_status: ["queued", "running", "succeeded", "failed", "canceled"],
       lead_status: ["new", "contacted", "qualified", "won", "lost", "spam"],
       membership_status: ["active", "suspended"],
+      order_status: [
+        "pending",
+        "paid",
+        "provisioned",
+        "failed",
+        "refunded",
+        "expired",
+      ],
       org_role: ["owner", "manager", "member"],
       organization_status: ["active", "suspended", "offboarding", "closed"],
+      project_asset_kind: ["logo", "photo", "document", "other"],
       project_kind: ["express", "professional", "custom"],
       project_phase: [
         "onboarding",

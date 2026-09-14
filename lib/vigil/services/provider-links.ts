@@ -6,7 +6,7 @@ import type { Json } from "@/types/database.types";
  * helpers keep the (provider, resource_kind, external_id) ↔ entity mapping
  * idempotent so retries and reconciliation never duplicate a row.
  */
-export type LinkEntityType = "organization" | "subscription" | "plan_price" | "website" | "deployment" | "domain";
+export type LinkEntityType = "organization" | "subscription" | "plan_price" | "build_price" | "website" | "deployment" | "domain" | "order";
 
 export async function upsertProviderLink(
   admin: DbClient,

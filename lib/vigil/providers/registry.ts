@@ -1,4 +1,5 @@
 import { NullBillingProvider, NullDeploymentProvider, NullDomainProvider } from "./null";
+import { StripeBillingProvider } from "./stripe";
 import { CloudflareDomainProviderStub, StripeBillingProviderStub, VercelDeploymentProviderStub } from "./stubs";
 import type { BillingProvider, DeploymentProvider, DomainProvider } from "./types";
 
@@ -25,8 +26,11 @@ export function createBillingProvider(name: string): BillingProvider {
   switch (name) {
     case "null":
       return new NullBillingProvider();
-    case "stripe":
-      return new StripeBillingProviderStub();
+    case "stripe": {
+      // Without a key the named stub stays in place and fails loudly on use.
+      const key = process.env.STRIPE_SECRET_KEY;
+      return key ? new StripeBillingProvider(key, process.env.STRIPE_WEBHOOK_SECRET) : new StripeBillingProviderStub();
+    }
     default:
       throw new Error(`Unknown BILLING_PROVIDER "${name}" (expected null | stripe).`);
   }

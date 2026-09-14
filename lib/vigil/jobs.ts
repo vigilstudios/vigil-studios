@@ -3,6 +3,7 @@ import type { DbClient, ProvisioningJob } from "@/lib/vigil/types";
 import type { Json } from "@/types/database.types";
 import { deployWebsite, provisionWebsite } from "./services/deployment";
 import { beginDomainVerification, verifyDomain } from "./services/domain";
+import { provisionOrder } from "./services/orders";
 
 /**
  * Durable, idempotent background work (master architecture §9).
@@ -17,6 +18,7 @@ export const JOB_KINDS = {
   websiteDeploy: "website.deploy",
   domainConnect: "domain.connect",
   domainVerify: "domain.verify",
+  orderProvision: "order.provision",
 } as const;
 
 export type JobKind = (typeof JOB_KINDS)[keyof typeof JOB_KINDS];
@@ -53,6 +55,12 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
   [JOB_KINDS.domainConnect]: async ({ admin, job }) => {
     if (!job.domain_id) throw new Error("domain.connect requires domain_id");
     await beginDomainVerification(admin, job.domain_id);
+  },
+  [JOB_KINDS.orderProvision]: async ({ admin, job }) => {
+    const payload = (job.payload ?? {}) as { order_id?: string };
+    if (!payload.order_id) throw new Error("order.provision requires payload.order_id");
+    const result = await provisionOrder(admin, payload.order_id);
+    return { organization_id: result.organizationId, already_provisioned: result.alreadyProvisioned };
   },
   [JOB_KINDS.domainVerify]: async ({ admin, job }) => {
     if (!job.domain_id) throw new Error("domain.verify requires domain_id");

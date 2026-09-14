@@ -131,7 +131,7 @@ do $$
 begin
   perform test.login_anon();
   perform test.ok(test.count('select 1 from public.organizations') = 0, 'anon: no organizations');
-  perform test.ok(test.count('select 1 from public.plans') = 0, 'anon: no plans');
+  perform test.ok(test.count('select 1 from public.subscriptions') = 0, 'anon: no subscriptions');
   perform test.ok(test.count('select 1 from public.profiles') = 0, 'anon: no profiles');
   perform test.logout();
 end $$;
@@ -281,6 +281,49 @@ begin
 
   perform test.login('00000000-0000-0000-0000-00000000000c');
   perform test.ok(test.count('select 1 from storage.objects') = 1, 'carol: staff sees the object');
+  perform test.logout();
+end $$;
+
+-- --------------------------------------------------------------------------
+-- Commerce: anonymous catalog reads, orders staff-only, member brief edits
+-- --------------------------------------------------------------------------
+do $$
+declare v_proj uuid; v_order uuid;
+begin
+  perform test.login_anon();
+  perform test.ok(test.count('select 1 from public.plans') = 4, 'anon: can read the plan catalog for checkout');
+  perform test.ok(test.count('select 1 from public.build_prices') = 3, 'anon: can read build prices');
+  perform test.ok(test.count('select 1 from public.orders') = 0, 'anon: cannot read orders');
+  perform test.logout();
+
+  insert into public.orders (email, business_name, template_slug, plan_id)
+    select 'buyer@example.com', 'Buyer Co', 'restaurant', id from public.plans where code = 'care'
+    returning id into v_order;
+  perform test.ok((select length(checkout_token) from public.orders where id = v_order) = 64, 'order: checkout token generated');
+
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  perform test.ok(test.count('select 1 from public.orders') = 0, 'alice: cannot see unprovisioned orders');
+  perform test.logout();
+
+  perform test.login('00000000-0000-0000-0000-00000000000c');
+  perform test.ok(test.count('select 1 from public.orders') = 1, 'carol: staff sees orders');
+  insert into public.projects (organization_id, name, kind, status)
+    values ('10000000-0000-0000-0000-00000000000a', 'Intake test', 'express', 'intake') returning id into v_proj;
+  perform test.logout();
+
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  update public.projects set brief = '{"business":{"tagline":"x"}}'::jsonb, intake_completed_at = now() where id = v_proj;
+  perform test.ok((select brief ->> 'business' from public.projects where id = v_proj) is not null, 'alice: can fill in her project brief');
+  perform test.fails(
+    'update public.projects set status = ''launched'' where id = ''' || v_proj || '''',
+    'alice: cannot change project status');
+  insert into public.project_assets (organization_id, project_id, object_path, file_name, content_type, size_bytes)
+    values ('10000000-0000-0000-0000-00000000000a', v_proj, '10000000-0000-0000-0000-00000000000a/' || v_proj || '/logo.png', 'logo.png', 'image/png', 100);
+  perform test.ok(test.count('select 1 from public.project_assets') = 1, 'alice: can record a project asset');
+  perform test.logout();
+
+  perform test.login('00000000-0000-0000-0000-00000000000b');
+  perform test.ok(test.count('select 1 from public.project_assets') = 0, 'bob: cannot see org A''s assets');
   perform test.logout();
 end $$;
 

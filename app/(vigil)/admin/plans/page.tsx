@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { ActionButton, ActionForm } from "@/components/vigil/ActionControls";
 import { Card, PageHeader, Table, inputClass, labelClass, tdClass, thClass } from "@/components/vigil/ui";
 import { grantStaff, revokeStaff, updatePlan } from "@/lib/vigil/actions/admin";
+import { syncPrices, updateBuildPrice } from "@/lib/vigil/actions/admin-orders";
+import { readProviderConfig } from "@/lib/vigil/providers/registry";
+import { formatMoney } from "@/lib/vigil/format";
 import { requireAdmin } from "@/lib/vigil/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { getCatalog } from "@/lib/vigil/queries/admin";
@@ -23,6 +26,8 @@ export default async function PlansPage() {
     .order("created_at");
 
   const priceFor = (planId: string) => catalog.prices.find((p) => p.plan_id === planId && p.currency === "usd" && p.interval === "month");
+  const linkFor = (entityType: string, entityId: string) => catalog.priceLinks.find((l) => l.entity_type === entityType && l.entity_id === entityId)?.external_id ?? null;
+  const billing = readProviderConfig().billing;
   const valueFor = (planId: string, code: string) => catalog.planFeatures.find((pf) => pf.plan_id === planId && pf.feature_code === code)?.value;
 
   return (
@@ -30,7 +35,42 @@ export default async function PlansPage() {
       <PageHeader
         title="Plans, entitlements and staff"
         description="Nothing here is hard-coded. Empty prices and limits mean “not approved yet” and render as such for customers."
+        actions={<ActionButton variant="primary" action={syncPrices} confirmText={`Create or update prices in ${billing === "null" ? "the in-memory provider" : billing}?`}>Sync prices to {billing === "null" ? "provider" : billing}</ActionButton>}
       />
+
+      <Card>
+        <h2 className="text-base font-semibold">One-time build prices</h2>
+        <p className="mt-1 text-xs text-[color:var(--text-secondary)]">Charged once at checkout alongside the first month of the plan. Leave empty for “quoted separately”.</p>
+        <Table className="mt-3">
+          <thead>
+            <tr>
+              <th className={thClass}>Build</th>
+              <th className={thClass}>Amount (USD)</th>
+              <th className={thClass}>Active</th>
+              <th className={thClass}>Provider price</th>
+              <th className={thClass}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {catalog.builds.map((b) => (
+              <tr key={b.id}>
+                <td className={tdClass}>
+                  <div className="font-medium">{b.name}</div>
+                  <div className="text-xs text-[color:var(--text-secondary)]">{b.description}</div>
+                </td>
+                <td className={tdClass} colSpan={3}>
+                  <ActionForm action={updateBuildPrice.bind(null, b.id)} submitLabel="Save" className="flex flex-wrap items-center gap-3">
+                    <input name="amount" inputMode="decimal" defaultValue={b.amount_cents !== null ? (b.amount_cents / 100).toFixed(2) : ""} placeholder="quoted" className={`${inputClass} !w-32`} />
+                    <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="is_active" defaultChecked={b.is_active} /> Active</label>
+                    <code className="text-[11px] text-[color:var(--text-secondary)]">{linkFor("build_price", b.id) ?? "not synced"}</code>
+                  </ActionForm>
+                </td>
+                <td className={tdClass}>{b.amount_cents !== null ? formatMoney(b.amount_cents, b.currency) : "—"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </Card>
 
       <div className="grid gap-4 lg:grid-cols-2">
         {catalog.plans.map((plan) => (
@@ -46,6 +86,7 @@ export default async function PlansPage() {
               <div>
                 <label className={labelClass} htmlFor={`price-${plan.id}`}>Monthly price (USD)</label>
                 <input id={`price-${plan.id}`} name="amount_cents" inputMode="decimal" defaultValue={priceFor(plan.id)?.amount_cents != null ? (priceFor(plan.id)!.amount_cents! / 100).toFixed(2) : ""} placeholder="not approved" className={inputClass} />
+                <p className="mt-1 font-mono text-[10px] text-[color:var(--text-secondary)]">{priceFor(plan.id) ? linkFor("plan_price", priceFor(plan.id)!.id) ?? "not synced to provider" : ""}</p>
               </div>
               <div className="sm:col-span-2">
                 <label className={labelClass} htmlFor={`tagline-${plan.id}`}>Tagline</label>

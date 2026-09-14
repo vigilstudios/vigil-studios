@@ -163,14 +163,23 @@ export const listAudit = cache(async (orgId?: string) => {
 
 export const getCatalog = cache(async () => {
   const supabase = await createClient();
-  const [plans, prices, features, planFeatures] = await Promise.all([
+  const [plans, prices, features, planFeatures, builds, links] = await Promise.all([
     supabase.from("plans").select("*").order("tier_rank"),
     supabase.from("plan_prices").select("*"),
     supabase.from("features").select("*").order("code"),
     supabase.from("plan_features").select("*"),
+    supabase.from("build_prices").select("*").order("kind"),
+    supabase.from("provider_links").select("provider, resource_kind, external_id, entity_type, entity_id").eq("resource_kind", "price"),
   ]);
-  for (const r of [plans, prices, features, planFeatures]) if (r.error) throw r.error;
-  return { plans: plans.data ?? [], prices: prices.data ?? [], features: features.data ?? [], planFeatures: planFeatures.data ?? [] };
+  for (const r of [plans, prices, features, planFeatures, builds, links]) if (r.error) throw r.error;
+  return {
+    plans: plans.data ?? [],
+    prices: prices.data ?? [],
+    features: features.data ?? [],
+    planFeatures: planFeatures.data ?? [],
+    builds: builds.data ?? [],
+    priceLinks: links.data ?? [],
+  };
 });
 
 /** Job counts by status for the distribution widget. */
