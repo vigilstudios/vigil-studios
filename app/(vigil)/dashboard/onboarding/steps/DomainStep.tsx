@@ -215,7 +215,7 @@ export function DomainStep({ initial, projectId, businessName, domain, onDomain,
           <StepFooter
             onBack={() => setPhase("hostname")}
             onNext={() => continueNext({ later: domain.status === "pending" && !data.delegate })}
-            nextLabel={domain.status === "pending" && !data.delegate ? "Continue, I'll finish this later" : "Continue"}
+            nextLabel={domain.status === "pending" && !data.delegate && domain.records.length > 0 ? "Continue, I'll finish this later" : "Continue"}
             busy={busy}
             laterHref={null}
           />

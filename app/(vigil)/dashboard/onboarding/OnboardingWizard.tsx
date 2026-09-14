@@ -16,6 +16,7 @@ import { AboutStep } from "./steps/AboutStep";
 import { BrandStep } from "./steps/BrandStep";
 import { DomainStep } from "./steps/DomainStep";
 import { ReviewStep } from "./steps/ReviewStep";
+import { BriefSummary } from "@/components/vigil/BriefSummary";
 
 export type WizardProps = {
   projectId: string;
@@ -105,7 +106,7 @@ export function OnboardingWizard(props: WizardProps) {
         <details className="mt-4 rounded-xl border border-[color:var(--border)] p-4">
           <summary className="cursor-pointer text-[13px] font-semibold">What you sent</summary>
           <div className="mt-3">
-            <ReviewStep brief={brief} assets={assets} domain={domain} onEdit={() => undefined} onSend={() => undefined} sending={false} error={null} readOnly />
+            <BriefSummary brief={brief} assets={assets} domain={domain} />
           </div>
         </details>
       </div>

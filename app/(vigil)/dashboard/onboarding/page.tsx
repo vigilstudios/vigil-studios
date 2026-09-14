@@ -4,7 +4,7 @@ import { requireOrgContext } from "@/lib/vigil/auth/session";
 import { resumeStep, STEP_KEYS, type StepKey } from "@/lib/vigil/onboarding/brief";
 import { getOnboardingProject, getProjectAssets } from "@/lib/vigil/queries/onboarding";
 import { getOrgDomains } from "@/lib/vigil/queries/dashboard";
-import type { DnsRecord } from "@/lib/vigil/services/dns";
+import { requiredRecords } from "@/lib/vigil/services/dns";
 import { OnboardingWizard } from "./OnboardingWizard";
 
 export const metadata: Metadata = { title: "Getting set up" };
@@ -29,7 +29,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
         hostname: domainRow.hostname,
         status: domainRow.status,
         registrar: brief.domain?.registrar ?? ("other" as const),
-        records: ((domainRow.verification as { required_records?: DnsRecord[] } | null)?.required_records ?? []).filter((r) => r && r.type && r.value),
+        records: requiredRecords(domainRow.hostname, domainRow.verification),
         dnsOk: domainRow.dns_ok,
         statusReason: domainRow.status_reason,
       }

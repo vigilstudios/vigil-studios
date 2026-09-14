@@ -186,7 +186,7 @@ export function AppFrame({
           >
             {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
           </button>
-          <div className="min-w-0 flex-1 truncate text-sm font-medium">{active?.label ?? ""}</div>
+          <div className="min-w-0 flex-1 truncate text-sm font-medium">{active?.label ?? titleFromPath(pathname)}</div>
           <div id="vigil-topbar-actions" className="flex items-center gap-2" />
         </header>
 
@@ -196,6 +196,13 @@ export function AppFrame({
       </div>
     </div>
   );
+}
+
+/** Pages with no nav entry (onboarding after it is sent, detail views) still get a title. */
+function titleFromPath(pathname: string): string {
+  const last = pathname.split("/").filter(Boolean).pop() ?? "";
+  if (!last || /^[0-9a-f-]{36}$/.test(last)) return "";
+  return last.replace(/[-_]+/g, " ").replace(/^\w/, (c) => c.toUpperCase());
 }
 
 function isActive(item: NavItem, pathname: string): boolean {

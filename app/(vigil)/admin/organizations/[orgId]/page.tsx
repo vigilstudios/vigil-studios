@@ -24,7 +24,7 @@ import { domainTransitions, projectTransitions, subscriptionTransitions, website
 import { getCatalog, getOrganizationDetail } from "@/lib/vigil/queries/admin";
 import { getProjectAssets } from "@/lib/vigil/queries/onboarding";
 import { parseBrief } from "@/lib/vigil/onboarding/brief";
-import { ReviewStep } from "@/app/(vigil)/dashboard/onboarding/steps/ReviewStep";
+import { BriefSummary } from "@/components/vigil/BriefSummary";
 import { Constants } from "@/types/database.types";
 
 export const metadata: Metadata = { title: "Customer" };
@@ -337,16 +337,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
             </ul>
           ) : null}
           <div className="mt-3">
-            <ReviewStep
-              brief={brief}
-              assets={briefAssets}
-              domain={briefDomain ? { domainId: briefDomain.id, hostname: briefDomain.hostname, status: briefDomain.status, registrar: brief.domain?.registrar ?? "other", records: [], dnsOk: briefDomain.dns_ok, statusReason: briefDomain.status_reason } : null}
-              onEdit={() => undefined}
-              onSend={() => undefined}
-              sending={false}
-              error={null}
-              readOnly
-            />
+            <BriefSummary brief={brief} assets={briefAssets} domain={briefDomain ? { hostname: briefDomain.hostname, status: briefDomain.status } : null} />
           </div>
         </Card>
       ) : null}

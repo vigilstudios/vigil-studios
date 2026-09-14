@@ -126,7 +126,7 @@ export function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
 /** Big, tappable choice cards for one-of questions. */
 export function ChoiceCards<T extends string>({ value, onChange, options, name }: { value: T | null; onChange: (v: T) => void; options: { value: T; label: string; hint?: string }[]; name: string }) {
   return (
-    <div role="radiogroup" aria-label={name} className="grid gap-2 sm:grid-cols-3">
+    <div role="radiogroup" aria-label={name} className={clsx("grid gap-2", options.length % 3 === 0 ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
       {options.map((o) => {
         const active = o.value === value;
         return (
@@ -195,7 +195,7 @@ export function useAutosave<T>(value: T, save: (v: T) => Promise<boolean>, enabl
   const dirty = useRef(false);
   const timer = useRef<number | null>(null);
   const saveRef = useRef(save);
-  const first = useRef(true);
+  const lastSeen = useRef(value);
 
   useEffect(() => {
     saveRef.current = save;
@@ -206,10 +206,9 @@ export function useAutosave<T>(value: T, save: (v: T) => Promise<boolean>, enabl
 
   useEffect(() => {
     latest.current = value;
-    if (first.current) {
-      first.current = false;
-      return;
-    }
+    // Same object as last time (initial mount, StrictMode re-run): nothing changed.
+    if (value === lastSeen.current) return;
+    lastSeen.current = value;
     if (!enabled) return;
     dirty.current = true;
     if (timer.current) window.clearTimeout(timer.current);

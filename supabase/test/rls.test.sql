@@ -320,6 +320,11 @@ begin
   insert into public.project_assets (organization_id, project_id, object_path, file_name, content_type, size_bytes)
     values ('10000000-0000-0000-0000-00000000000a', v_proj, '10000000-0000-0000-0000-00000000000a/' || v_proj || '/logo.png', 'logo.png', 'image/png', 100);
   perform test.ok(test.count('select 1 from public.project_assets') = 1, 'alice: can record a project asset');
+  update public.project_assets set caption = 'Front room' where file_name = 'logo.png';
+  perform test.ok((select caption from public.project_assets where file_name = 'logo.png') = 'Front room', 'alice: can caption her upload');
+  perform test.fails(
+    'update public.project_assets set object_path = ''10000000-0000-0000-0000-00000000000a/other.png'' where file_name = ''logo.png''',
+    'alice: cannot move an uploaded object');
   perform test.logout();
 
   perform test.login('00000000-0000-0000-0000-00000000000b');

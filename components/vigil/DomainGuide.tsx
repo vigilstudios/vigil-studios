@@ -106,20 +106,21 @@ export function DomainGuide({
                 </p>
                 <ul className="space-y-2">
                   {records.map((r, i) => (
-                    <li key={i} className="rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-3">
+                    <li key={i} className="min-w-0 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-3">
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-[11px] font-semibold uppercase tracking-wide">{r.type} record</span>
                         {domain.dnsOk === true ? <span className="text-[11px] text-[color:var(--status-good)]">Found</span> : null}
                       </div>
                       <dl className="mt-2 grid gap-2">
                         <RecordField label={`Type`} value={r.type} />
-                        <RecordField label={guide.fields.name} value={r.displayName} copy={r.displayName.replace(/\s*\(.*\)$/, "")} />
-                        <RecordField label={guide.fields.value} value={r.value} copy={r.value} />
+                        <RecordField label={guide.fields.name} value={r.displayName} copy={r.displayName} />
+                        <RecordField label={guide.fields.valueByType?.[r.type.toUpperCase()] ?? guide.fields.value} value={r.value} copy={r.value} />
                       </dl>
                       {!compact && RECORD_TYPE_HELP[r.type.toUpperCase()] ? <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">{RECORD_TYPE_HELP[r.type.toUpperCase()]}</p> : null}
                     </li>
                   ))}
                 </ul>
+                {guide.apexNote && apex ? <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">{guide.apexNote}</p> : null}
                 {!apex ? <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">Because {domain.hostname} is a subdomain, only the part before the first dot goes in the name field.</p> : null}
               </Step>
               <Step n={4} title="Remove anything that clashes">
@@ -183,10 +184,10 @@ function Breadcrumb({ parts }: { parts: string[] }) {
 
 function RecordField({ label, value, copy }: { label: string; value: string; copy?: string }) {
   return (
-    <div className="flex items-center gap-2">
-      <dt className="w-24 shrink-0 text-[11px] text-[color:var(--text-secondary)]">{label}</dt>
-      <dd className="min-w-0 flex-1 truncate font-mono text-xs" title={value}>{value}</dd>
-      {copy ? <InlineCopy value={copy} label={label} /> : null}
+    <div className="grid min-w-0 grid-cols-[5.5rem_minmax(0,1fr)_auto] items-center gap-2">
+      <dt className="text-[11px] leading-4 text-[color:var(--text-secondary)]">{label}</dt>
+      <dd className="min-w-0 break-all font-mono text-xs">{value}</dd>
+      {copy ? <InlineCopy value={copy} label={label} /> : <span />}
     </div>
   );
 }

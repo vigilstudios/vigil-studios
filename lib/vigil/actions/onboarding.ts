@@ -12,7 +12,7 @@ import { assertTransition, domainTransitions, projectTransitions } from "@/lib/v
 import { REGISTRAR_GUIDES } from "@/lib/vigil/domain-guides";
 import { domainSchema, parseBrief, SECTION_SCHEMAS, STEP_KEYS, type Brief, type RegistrarKey, type SectionKey, type StepKey } from "@/lib/vigil/onboarding/brief";
 import { PROJECT_ASSETS_BUCKET, validateAssets, type AssetKind } from "@/lib/vigil/onboarding/assets";
-import { detectRegistrar, type DnsRecord } from "@/lib/vigil/services/dns";
+import { detectRegistrar, requiredRecords, type DnsRecord } from "@/lib/vigil/services/dns";
 import { beginDomainVerification, normalizeHostname, verifyDomain } from "@/lib/vigil/services/domain";
 import type { Json } from "@/types/database.types";
 
@@ -244,7 +244,7 @@ export async function startOnboardingDomain(projectId: string, input: { hostname
 async function domainSetup(supabase: Awaited<ReturnType<typeof createClient>>, domainId: string, registrar: RegistrarKey): Promise<DomainSetup> {
   const { data: domain, error } = await supabase.from("domains").select("id, hostname, status, verification, dns_ok, status_reason").eq("id", domainId).single();
   if (error) throw error;
-  const records = ((domain.verification as { required_records?: DnsRecord[] } | null)?.required_records ?? []).filter((r) => r && r.type && r.value);
+  const records = requiredRecords(domain.hostname, domain.verification);
   return { domainId: domain.id, hostname: domain.hostname, status: domain.status, registrar, records, dnsOk: domain.dns_ok, statusReason: domain.status_reason };
 }
 

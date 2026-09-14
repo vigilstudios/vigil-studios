@@ -15,9 +15,11 @@ export type RegistrarGuide = {
   /** Menu breadcrumb from the account home to the DNS editor. */
   dnsPath: string[];
   /** What this registrar calls the record fields. */
-  fields: { name: string; value: string; ttl?: string };
+  fields: { name: string; value: string; ttl?: string; valueByType?: Record<string, string> };
   /** How the registrar wants the root domain written in the name field. */
   apexName: string;
+  /** Shown under the records when the domain is a root domain. */
+  apexNote?: string;
   /** Anything specific worth knowing before adding records. */
   before?: string[];
   /** What to remove if something is already there. */
@@ -75,7 +77,7 @@ export const REGISTRAR_GUIDES: Record<RegistrarKey, RegistrarGuide> = {
     name: "Cloudflare",
     loginUrl: "https://dash.cloudflare.com/login",
     dnsPath: ["your domain", "DNS", "Records"],
-    fields: { name: "Name", value: "IPv4 address / Target", ttl: "TTL" },
+    fields: { name: "Name", value: "Content", ttl: "TTL", valueByType: { A: "IPv4 address", AAAA: "IPv6 address", CNAME: "Target", TXT: "Content" } },
     apexName: "@",
     before: ["Set the proxy status (the orange cloud) to “DNS only” on the records you add, so the certificate can be issued. You can switch it back later if you want."],
     conflicts: "Edit any existing A record for “@” or CNAME for “www” to the new values rather than adding duplicates.",
@@ -89,7 +91,8 @@ export const REGISTRAR_GUIDES: Record<RegistrarKey, RegistrarGuide> = {
     loginUrl: "https://manage.wix.com/account/domains",
     dnsPath: ["Domains", "… (next to your domain)", "Manage DNS records"],
     fields: { name: "Host name", value: "Value", ttl: "TTL" },
-    apexName: "(leave blank)",
+    apexName: "@",
+    apexNote: "Wix wants the name field left blank for the root domain instead of “@”.",
     before: ["Wix only lets you edit DNS for a domain you bought from Wix. If the domain was connected to Wix from elsewhere, go to the company you bought it from."],
     conflicts: "Wix pre-fills A records pointing at 185.230.63.x and a “www” CNAME pointing at cdn1.wixdns.net; replace them.",
     after: "Wix changes can take a few hours.",
@@ -138,7 +141,8 @@ export const REGISTRAR_GUIDES: Record<RegistrarKey, RegistrarGuide> = {
     loginUrl: "",
     dnsPath: ["your domain", "DNS settings (sometimes called “DNS management”, “Zone editor” or “Advanced DNS”)"],
     fields: { name: "Name (or Host)", value: "Value (or Points to / Target)", ttl: "TTL" },
-    apexName: "@ (some providers want it blank, or the full domain)",
+    apexName: "@",
+    apexNote: "If your provider rejects “@” for the name, leave the field blank or type the full domain; all three mean the root domain.",
     conflicts: "If a record with the same type and name already exists, change it to the new value instead of adding a second one.",
     after: "Most providers apply changes within an hour; the maximum is 48 hours.",
     nameservers: [],

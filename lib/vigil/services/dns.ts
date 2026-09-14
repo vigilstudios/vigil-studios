@@ -32,6 +32,16 @@ export function platformDnsRecords(hostname: string): DnsRecord[] {
   return records;
 }
 
+/**
+ * The records a customer must add: what the provider (or connect job) stored
+ * on the row, else the platform's standard targets. Never empty while the
+ * platform targets are configured, so the guide can always be completed.
+ */
+export function requiredRecords(hostname: string, verification: unknown): DnsRecord[] {
+  const stored = ((verification as { required_records?: DnsRecord[] } | null)?.required_records ?? []).filter((r) => r && r.type && r.value);
+  return stored.length > 0 ? stored : platformDnsRecords(hostname);
+}
+
 function fqdn(hostname: string, name: string): string {
   if (!name || name === "@" || name === hostname) return hostname;
   if (name.endsWith(hostname)) return name;

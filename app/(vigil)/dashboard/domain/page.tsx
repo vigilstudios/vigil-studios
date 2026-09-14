@@ -5,12 +5,11 @@ import { formatDate, formatRelative } from "@/lib/vigil/format";
 import { describeDomainStatus } from "@/lib/vigil/lifecycle";
 import { getOrgDomains, getOrgWebsites } from "@/lib/vigil/queries/dashboard";
 import { getOnboardingProject } from "@/lib/vigil/queries/onboarding";
+import { requiredRecords } from "@/lib/vigil/services/dns";
 import { ConnectDomainForm } from "./ConnectDomainForm";
 import { DomainGuidePanel } from "./DomainGuidePanel";
 
 export const metadata: Metadata = { title: "Domain" };
-
-type RequiredRecord = { type: string; name: string; value: string };
 
 export default async function DomainPage() {
   const ctx = await requireOrgContext("/dashboard/domain");
@@ -31,7 +30,7 @@ export default async function DomainPage() {
         <div className="space-y-4">
           {domains.map((domain) => {
             const status = describeDomainStatus(domain.status);
-            const records = ((domain.verification as { required_records?: RequiredRecord[] } | null)?.required_records ?? []);
+            const records = requiredRecords(domain.hostname, domain.verification);
             return (
               <Card key={domain.id}>
                 <div className="flex flex-wrap items-center justify-between gap-3">
