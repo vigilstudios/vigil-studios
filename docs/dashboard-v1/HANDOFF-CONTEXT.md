@@ -47,10 +47,17 @@ but the checkout/Stripe/provisioning code in it has **never been run**.
 - The owner's Chrome session was **signed out by accident** (a scripted
   click hit the sidebar sign-out form). They need to sign in again at
   `127.0.0.1:3000/login` before any browser verification.
-- No Docker. Migrations are validated with `scripts/db-validate.sh` against
-  a scratch PostgreSQL 14 (`/opt/homebrew/opt/postgresql@14`, data dir in the
-  session scratchpad — may need re-creating: `initdb` + start on port 54329,
-  see `scripts/db-validate.sh` for the URL it expects). Types come from
+- No Docker. `scripts/db-validate.sh` (`npm run db:validate`) applies the
+  migrations plus `supabase/test/rls.test.sql` to a throwaway database on a
+  local PostgreSQL at `postgres://postgres@127.0.0.1:54329/postgres`. That
+  server was a scratch cluster and is probably gone; recreate it with:
+  ```
+  PG=/opt/homebrew/opt/postgresql@14/bin; D=/tmp/vigil-pg
+  $PG/initdb -D $D -U postgres --auth=trust -E UTF8
+  $PG/pg_ctl -D $D -o "-p 54329 -k '' -h 127.0.0.1" -l $D/pg.log start
+  ```
+  (There is also an EDB PostgreSQL 17 on port 5432 that needs a password —
+  don't use it.) Types come from
   `npx supabase@latest gen types typescript --linked --schema public --schema vigil > types/database.types.ts`.
 
 ---
@@ -178,12 +185,13 @@ Buy on a template" → pay → guided onboarding → dashboard.
 
 ## 4. Working rules that applied (keep them)
 
-- Never edit Codex-owned files (`components/express/*`,
-  `public/express-templates/*`, `lib/express-accents.json`) beyond the one
-  Buy-button change above; never touch `vigil-leadgen`.
+- The Express catalogue (`components/express/*`, `public/express-templates/*`,
+  `lib/express-accents.json`) and the `vigil-leadgen` repo are Codex's; the
+  previous (Claude) session avoided them. If you are Codex, they are yours —
+  the Buy-button change and anything else there is fine.
 - Prices, allowances, provider choices are rows / env, never constants.
 - Status is always icon + label + colour. Widgets show real rows only.
 - Verify in a real browser (screenshots and green tests both hid bugs).
 - Commit per stage on the branch; do not push or merge without the owner.
-- Memory files for this project live in
-  `~/.claude/projects/-Users-belierjavier-Desktop-Vigil-Studios-Websites/memory/`.
+- Commit trailers: the previous session used `Co-Authored-By: Claude Opus 5`;
+  use whatever attribution your tooling prescribes.
