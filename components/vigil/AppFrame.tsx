@@ -7,7 +7,6 @@ import { createPortal } from "react-dom";
 import { clsx } from "clsx";
 import {
   BarChart3,
-  Bot,
   Briefcase,
   Building2,
   ClipboardList,
@@ -27,7 +26,13 @@ import {
   X,
 } from "lucide-react";
 import { Logo } from "./Logo";
+import { VirtueOrb } from "./VirtueOrb";
 import { SIDEBAR_COOKIE, type NavGroup, type NavIcon, type NavItem } from "./nav";
+
+/** Virtue's nav icon is the orb itself, sized like the other glyphs. */
+function VirtueNavIcon({ className }: { className?: string }) {
+  return <VirtueOrb size="sm" label="" className={clsx(className, "!h-4 !w-4")} />;
+}
 
 const icons: Record<NavIcon, React.ComponentType<{ className?: string }>> = {
   overview: LayoutDashboard,
@@ -37,7 +42,7 @@ const icons: Record<NavIcon, React.ComponentType<{ className?: string }>> = {
   requests: ClipboardList,
   leads: Inbox,
   insights: BarChart3,
-  virtue: Bot,
+  virtue: VirtueNavIcon,
   settings: Settings,
   customers: Building2,
   websites: MonitorSmartphone,
