@@ -1,4 +1,4 @@
-import type { AdminSupabaseClient } from "@/lib/supabase/admin";
+import type { DbClient } from "@/lib/vigil/types";
 import { assertTransition, websiteTransitions } from "@/lib/vigil/lifecycle";
 import { getDeploymentProvider } from "@/lib/vigil/providers/registry";
 import type { DeploymentProvider } from "@/lib/vigil/providers/types";
@@ -13,7 +13,7 @@ import { findExternalId, providerEnum, upsertProviderLink } from "./provider-lin
  * transitions are asserted so a retried job cannot regress a live site.
  */
 export async function provisionWebsite(
-  admin: AdminSupabaseClient,
+  admin: DbClient,
   websiteId: string,
   provider: DeploymentProvider = getDeploymentProvider()
 ): Promise<{ siteExternalId: string; organizationId: string }> {
@@ -63,7 +63,7 @@ export async function provisionWebsite(
 }
 
 export async function deployWebsite(
-  admin: AdminSupabaseClient,
+  admin: DbClient,
   websiteId: string,
   options: { environment?: "production" | "preview"; triggeredBy?: string | null } = {},
   provider: DeploymentProvider = getDeploymentProvider()

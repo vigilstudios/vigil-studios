@@ -1,4 +1,4 @@
-import type { AdminSupabaseClient } from "@/lib/supabase/admin";
+import type { DbClient } from "@/lib/vigil/types";
 
 /**
  * A very small in-memory stand-in for the supabase-js query builder, covering
@@ -111,7 +111,7 @@ export class FakeAdmin {
     return { data: null, error: { message: `unknown rpc ${name}` } };
   }
 
-  asClient(): AdminSupabaseClient {
-    return this as unknown as AdminSupabaseClient;
+  asClient(): DbClient {
+    return this as unknown as DbClient;
   }
 }

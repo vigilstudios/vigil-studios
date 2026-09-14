@@ -1,5 +1,4 @@
-import type { AdminSupabaseClient } from "@/lib/supabase/admin";
-import type { Provider } from "@/lib/vigil/types";
+import type { DbClient, Provider } from "@/lib/vigil/types";
 import type { Json } from "@/types/database.types";
 
 /**
@@ -10,7 +9,7 @@ import type { Json } from "@/types/database.types";
 export type LinkEntityType = "organization" | "subscription" | "plan_price" | "website" | "deployment" | "domain";
 
 export async function upsertProviderLink(
-  admin: AdminSupabaseClient,
+  admin: DbClient,
   link: {
     provider: Provider;
     resourceKind: string;
@@ -35,7 +34,7 @@ export async function upsertProviderLink(
 }
 
 export async function findExternalId(
-  admin: AdminSupabaseClient,
+  admin: DbClient,
   query: { provider: Provider; resourceKind: string; entityType: LinkEntityType; entityId: string }
 ): Promise<string | null> {
   const { data, error } = await admin
@@ -51,7 +50,7 @@ export async function findExternalId(
 }
 
 export async function findEntityByExternalId(
-  admin: AdminSupabaseClient,
+  admin: DbClient,
   query: { provider: Provider; resourceKind: string; externalId: string }
 ): Promise<{ entityType: string; entityId: string } | null> {
   const { data, error } = await admin

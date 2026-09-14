@@ -1,6 +1,5 @@
-import type { AdminSupabaseClient } from "@/lib/supabase/admin";
 import { ProviderError, ProviderNotConfiguredError, isVigilError } from "@/lib/vigil/auth/errors";
-import type { ProvisioningJob } from "@/lib/vigil/types";
+import type { DbClient, ProvisioningJob } from "@/lib/vigil/types";
 import type { Json } from "@/types/database.types";
 import { deployWebsite, provisionWebsite } from "./services/deployment";
 import { beginDomainVerification, verifyDomain } from "./services/domain";
@@ -23,7 +22,7 @@ export const JOB_KINDS = {
 export type JobKind = (typeof JOB_KINDS)[keyof typeof JOB_KINDS];
 
 export type JobContext = {
-  admin: AdminSupabaseClient;
+  admin: DbClient;
   job: ProvisioningJob;
 };
 
@@ -97,7 +96,7 @@ export type EnqueueInput = {
 
 /** Insert or return the existing job for the idempotency key. */
 export async function enqueueJob(
-  admin: AdminSupabaseClient,
+  admin: DbClient,
   input: EnqueueInput
 ): Promise<{ id: string; created: boolean }> {
   const { data: existing, error: lookupError } = await admin
@@ -171,7 +170,7 @@ export function classifyFailure(error: unknown): { retryable: boolean; delaySeco
 }
 
 export async function runDueJobs(
-  admin: AdminSupabaseClient,
+  admin: DbClient,
   options: { worker: string; limit?: number; leaseSeconds?: number } 
 ): Promise<JobOutcome[]> {
   const { data: claimed, error } = await admin.rpc("claim_jobs", {
@@ -188,7 +187,7 @@ export async function runDueJobs(
   return outcomes;
 }
 
-async function runOne(admin: AdminSupabaseClient, job: ProvisioningJob): Promise<JobOutcome> {
+async function runOne(admin: DbClient, job: ProvisioningJob): Promise<JobOutcome> {
   const finishedAt = new Date().toISOString();
 
   const handler = handlers.get(job.kind);

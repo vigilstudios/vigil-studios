@@ -1,4 +1,4 @@
-import type { AdminSupabaseClient } from "@/lib/supabase/admin";
+import type { DbClient } from "@/lib/vigil/types";
 import { assertTransition, domainTransitions } from "@/lib/vigil/lifecycle";
 import { getDeploymentProvider } from "@/lib/vigil/providers/registry";
 import type { DeploymentProvider } from "@/lib/vigil/providers/types";
@@ -18,7 +18,7 @@ export function normalizeHostname(input: string): string | null {
 
 /** Attach the domain to the website's provider project and record the DNS the customer must set. */
 export async function beginDomainVerification(
-  admin: AdminSupabaseClient,
+  admin: DbClient,
   domainId: string,
   provider: DeploymentProvider = getDeploymentProvider()
 ): Promise<void> {
@@ -60,7 +60,7 @@ export async function beginDomainVerification(
 
 /** Re-check DNS and SSL; move to connected when both are good. */
 export async function verifyDomain(
-  admin: AdminSupabaseClient,
+  admin: DbClient,
   domainId: string,
   provider: DeploymentProvider = getDeploymentProvider()
 ): Promise<{ connected: boolean }> {

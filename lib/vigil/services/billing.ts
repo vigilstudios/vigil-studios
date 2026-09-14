@@ -1,4 +1,4 @@
-import type { AdminSupabaseClient } from "@/lib/supabase/admin";
+import type { DbClient } from "@/lib/vigil/types";
 import { getBillingProvider } from "@/lib/vigil/providers/registry";
 import type { BillingProvider, BillingSubscriptionSnapshot } from "@/lib/vigil/providers/types";
 import { findEntityByExternalId, providerEnum, upsertProviderLink } from "./provider-links";
@@ -11,7 +11,7 @@ import { findEntityByExternalId, providerEnum, upsertProviderLink } from "./prov
  * provider_links; the Vigil row is what the dashboard and entitlements read.
  */
 export async function applySubscriptionSnapshot(
-  admin: AdminSupabaseClient,
+  admin: DbClient,
   snapshot: BillingSubscriptionSnapshot,
   provider: BillingProvider = getBillingProvider()
 ): Promise<{ subscriptionId: string | null; created: boolean }> {

@@ -1,4 +1,8 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database.types";
+
+/** Any typed client: the request-scoped RLS client or the service-role client. */
+export type DbClient = SupabaseClient<Database>;
 
 export type Tables<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Row"];
