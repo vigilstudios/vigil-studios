@@ -1,5 +1,13 @@
 # Changelog
 
+## Dashboard V1 foundation
+
+The Vigil platform now has its own root layout (`app/(vigil)`) beside the marketing site (`app/(site)`, moved verbatim): magic-link sign-in at `/login`, the client dashboard at `/dashboard` (Overview, Website, Domain, Subscription, Requests, Settings; Leads, Insights and Virtue gated by entitlements) and the staff console at `/admin` (customers, websites, domains, subscriptions, requests, jobs, audit log, plan and entitlement configuration). Six migrations under `supabase/migrations` define organizations, memberships, staff, the plan catalog and entitlements, projects, websites, domains, deployments, provider links, audit events, provisioning jobs, the webhook inbox, notifications and the future-facing requests, leads and Virtue tables, all with row-level security. Billing, deployment and domain providers are interfaces with in-memory adapters; no prices, allowances or provider credentials are hard-coded.
+
+`middleware.ts` is now `proxy.ts`. The dev-only `/admin`, `/client-portal` and `/supabase-test` stubs that read a database that no longer exists were removed. The referenced Supabase project is gone; a new one must be created and linked before the dashboard can be used (see `docs/dashboard-v1/IMPLEMENTATION_LOG.md`).
+
+Validation: `npm run check` (typecheck, 47 unit tests, migrations plus 70 RLS assertions against a local PostgreSQL), ESLint on the new code, Next.js production build, and browser checks that the marketing pages and Express catalogue render unchanged.
+
 ## Express preview clipping and content entrances
 
 Preview browser and viewport wrappers use non-scrolling clipping so navigation inside scaled template iframes cannot shift or crop the fixed navbar. Both published templates retain sequential heading words and restore their original content fades and slides. Auto Repair also uses explicit fixed-header anchor offsets. Browser regression coverage lives in `vigil-leadgen/tests/browser/express_motion_navigation.js` and must be run for future template navigation or motion changes.
