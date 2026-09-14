@@ -18,12 +18,14 @@ import type {
  */
 export class StripeBillingProvider implements BillingProvider {
   readonly name = "stripe" as const;
+  readonly mode: "live" | "test";
   private readonly stripe: Stripe;
   private readonly webhookSecret: string | undefined;
 
   constructor(secretKey: string, webhookSecret?: string) {
     this.stripe = new Stripe(secretKey, { apiVersion: "2025-08-27.basil", appInfo: { name: "Vigil", url: "https://www.vigilstudios.co" } });
     this.webhookSecret = webhookSecret;
+    this.mode = secretKey.startsWith("sk_live_") || secretKey.startsWith("rk_live_") ? "live" : "test";
   }
 
   async createCustomer(input: BillingCustomerInput) {

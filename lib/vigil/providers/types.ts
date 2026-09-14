@@ -108,6 +108,8 @@ export type BillingEvent = {
 
 export interface BillingProvider {
   readonly name: ProviderName;
+  /** "live" | "test" for providers with separate modes (Stripe); ids from one mode are invalid in the other. */
+  readonly mode?: "live" | "test";
   createCustomer(input: BillingCustomerInput): Promise<{ externalId: string }>;
   createCheckoutSession(input: BillingCheckoutInput): Promise<{ url: string; externalId: string }>;
   getCheckoutSession(externalId: string): Promise<BillingCheckoutSnapshot | null>;

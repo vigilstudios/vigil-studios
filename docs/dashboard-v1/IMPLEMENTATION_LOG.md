@@ -500,3 +500,18 @@ Still to do before live: production env vars on Vercel (same names, live
 Stripe key, the dashboard webhook endpoint's secret), Stripe Tax
 registrations, `NEXT_PUBLIC_TERMS_URL` / `NEXT_PUBLIC_REFUND_NOTE`, and a
 Vercel Cron for `/api/jobs/run`.
+
+## 2026-09-14 (night) — Live/test mode on price links
+
+Found while checking the first live sync: Stripe test and live ids share one
+`provider_links` table. A live sync would have added a second price link
+per row (unique key is on the external id), making the lookup ambiguous —
+and a later test-mode sync from a laptop would have repointed production.
+
+- `BillingProvider.mode` ("live" | "test", from the key prefix). Price links
+  record it in `metadata.mode`; one link per mode is kept and the lookup
+  picks the one matching the running key, so local test checkouts and the
+  live site read the same database safely. A price change re-sync replaces
+  only that mode's link.
+- Admin overview and Plans show "stripe (test mode)" / "(live mode)", and a
+  price id from the other mode is flagged "re-sync". Test added.

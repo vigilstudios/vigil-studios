@@ -4,7 +4,8 @@ import { billingPeriod, planPriceLookupKey } from "@/lib/vigil/billing-periods";
 import type { DbClient } from "@/lib/vigil/types";
 import { getBillingProvider } from "@/lib/vigil/providers/registry";
 import type { BillingProvider } from "@/lib/vigil/providers/types";
-import { findExternalId, providerEnum, upsertProviderLink } from "./provider-links";
+import type { Json } from "@/types/database.types";
+import { providerEnum, upsertProviderLink } from "./provider-links";
 
 /**
  * Catalog sync: every priced plan and build price gets a provider price,
@@ -14,7 +15,6 @@ import { findExternalId, providerEnum, upsertProviderLink } from "./provider-lin
 export type SyncReport = { synced: { label: string; externalId: string; created: boolean }[]; skipped: string[] };
 
 export async function syncCatalogToProvider(db: DbClient, provider: BillingProvider = getBillingProvider()): Promise<SyncReport> {
-  const providerName = providerEnum(provider.name);
   const report: SyncReport = { synced: [], skipped: [] };
 
   const [{ data: plans, error: planError }, { data: prices, error: priceError }, { data: builds, error: buildError }] = await Promise.all([
@@ -43,7 +43,7 @@ export async function syncCatalogToProvider(db: DbClient, provider: BillingProvi
       interval: price.interval,
       intervalCount: price.interval_count,
     });
-    await upsertProviderLink(db, { provider: providerName, resourceKind: "price", externalId: result.externalId, entityType: "plan_price", entityId: price.id });
+    await recordPriceLink(db, provider, "plan_price", price.id, result.externalId);
     report.synced.push({ label, externalId: result.externalId, created: result.created });
   }
 
@@ -60,18 +60,55 @@ export async function syncCatalogToProvider(db: DbClient, provider: BillingProvi
       amountCents: build.amount_cents,
       currency: build.currency,
     });
-    await upsertProviderLink(db, { provider: providerName, resourceKind: "price", externalId: result.externalId, entityType: "build_price", entityId: build.id });
+    await recordPriceLink(db, provider, "build_price", build.id, result.externalId);
     report.synced.push({ label, externalId: result.externalId, created: result.created });
   }
 
   return report;
 }
 
-/** Provider price id for a plan price, if it has been synced. */
+/**
+ * Price links remember which mode (live/test) created them, and one link per
+ * mode is kept, so a test key on a laptop and the live key in production
+ * read the same database and each get their own provider ids. A price
+ * synced in one mode is never handed to a checkout in the other.
+ */
+function modeMeta(provider: BillingProvider): Record<string, Json> {
+  return provider.mode ? { mode: provider.mode } : {};
+}
+
+function linkMode(row: { metadata: unknown }): string | null {
+  return (row.metadata as { mode?: string } | null)?.mode ?? null;
+}
+
+async function recordPriceLink(db: DbClient, provider: BillingProvider, entityType: "plan_price" | "build_price", entityId: string, externalId: string): Promise<void> {
+  const providerName = providerEnum(provider.name);
+  await upsertProviderLink(db, { provider: providerName, resourceKind: "price", externalId, entityType, entityId, metadata: modeMeta(provider) });
+  // Drop this mode's previous id for the same row (a price change made a new provider price).
+  const { data: others } = await db.from("provider_links").select("id, external_id, metadata").eq("provider", providerName).eq("resource_kind", "price").eq("entity_type", entityType).eq("entity_id", entityId);
+  const stale = (others ?? []).filter((l) => l.external_id !== externalId && (linkMode(l) ?? null) === (provider.mode ?? null));
+  for (const l of stale) await db.from("provider_links").delete().eq("id", l.id);
+}
+
+async function priceLinkFor(db: DbClient, provider: BillingProvider, entityType: "plan_price" | "build_price", entityId: string): Promise<string | null> {
+  const { data, error } = await db
+    .from("provider_links")
+    .select("external_id, metadata, created_at")
+    .eq("provider", providerEnum(provider.name))
+    .eq("resource_kind", "price")
+    .eq("entity_type", entityType)
+    .eq("entity_id", entityId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  const match = (data ?? []).find((l) => (linkMode(l) ?? null) === (provider.mode ?? null));
+  return match?.external_id ?? null;
+}
+
+/** Provider price id for a plan price, if it has been synced in this provider mode. */
 export async function planPriceExternalId(db: DbClient, planPriceId: string, provider: BillingProvider = getBillingProvider()): Promise<string | null> {
-  return findExternalId(db, { provider: providerEnum(provider.name), resourceKind: "price", entityType: "plan_price", entityId: planPriceId });
+  return priceLinkFor(db, provider, "plan_price", planPriceId);
 }
 
 export async function buildPriceExternalId(db: DbClient, buildPriceId: string, provider: BillingProvider = getBillingProvider()): Promise<string | null> {
-  return findExternalId(db, { provider: providerEnum(provider.name), resourceKind: "price", entityType: "build_price", entityId: buildPriceId });
+  return priceLinkFor(db, provider, "build_price", buildPriceId);
 }

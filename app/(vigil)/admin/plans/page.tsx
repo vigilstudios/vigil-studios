@@ -4,7 +4,7 @@ import { Card, PageHeader, Table, inputClass, labelClass, tdClass, thClass } fro
 import { grantStaff, revokeStaff, updatePlan } from "@/lib/vigil/actions/admin";
 import { syncPrices, updateBuildPrice } from "@/lib/vigil/actions/admin-orders";
 import { BILLING_PERIODS, type BillingPeriod } from "@/lib/vigil/billing-periods";
-import { readProviderConfig } from "@/lib/vigil/providers/registry";
+import { getBillingProvider, readProviderConfig } from "@/lib/vigil/providers/registry";
 import { formatMoney } from "@/lib/vigil/format";
 import { requireAdmin } from "@/lib/vigil/auth/session";
 import { createClient } from "@/lib/supabase/server";
@@ -27,8 +27,15 @@ export default async function PlansPage() {
     .order("created_at");
 
   const priceFor = (planId: string, period: BillingPeriod) => catalog.prices.find((p) => p.plan_id === planId && p.currency === "usd" && p.interval === period.interval && p.interval_count === period.intervalCount);
-  const linkFor = (entityType: string, entityId: string) => catalog.priceLinks.find((l) => l.entity_type === entityType && l.entity_id === entityId)?.external_id ?? null;
+  const linkFor = (entityType: string, entityId: string) => {
+    const l = catalog.priceLinks.find((x) => x.entity_type === entityType && x.entity_id === entityId);
+    if (!l) return null;
+    const mode = (l.metadata as { mode?: string } | null)?.mode;
+    return mode && mode !== billingMode ? `${l.external_id} (${mode} mode — re-sync)` : l.external_id;
+  };
   const billing = readProviderConfig().billing;
+  const billingMode = getBillingProvider().mode ?? null;
+  const billingLabel = billingMode ? `${billing} (${billingMode} mode)` : billing;
   const valueFor = (planId: string, code: string) => catalog.planFeatures.find((pf) => pf.plan_id === planId && pf.feature_code === code)?.value;
 
   return (
@@ -36,7 +43,7 @@ export default async function PlansPage() {
       <PageHeader
         title="Plans, entitlements and staff"
         description="Nothing here is hard-coded. Empty prices and limits mean “not approved yet” and render as such for customers."
-        actions={<ActionButton variant="primary" action={syncPrices} confirmText={`Create or update prices in ${billing === "null" ? "the in-memory provider" : billing}?`}>Sync prices to {billing === "null" ? "provider" : billing}</ActionButton>}
+        actions={<ActionButton variant="primary" action={syncPrices} confirmText={`Create or update prices in ${billing === "null" ? "the in-memory provider" : billingLabel}? Links from the other Stripe mode are replaced.`}>Sync prices to {billing === "null" ? "provider" : billingLabel}</ActionButton>}
       />
 
       <Card>

@@ -6,7 +6,7 @@ import { DistributionBar, KpiTile, Meter, Panel, StatusLine, Timeline } from "@/
 import { requireStaff } from "@/lib/vigil/auth/session";
 import { formatRelative, humanizeAction, titleCase } from "@/lib/vigil/format";
 import { auditTone } from "@/lib/vigil/presenters";
-import { readProviderConfig } from "@/lib/vigil/providers/registry";
+import { getBillingProvider, readProviderConfig } from "@/lib/vigil/providers/registry";
 import { adminCounts, attentionItems, jobStatusCounts, listAudit } from "@/lib/vigil/queries/admin";
 
 export const metadata: Metadata = { title: "Admin" };
@@ -15,6 +15,7 @@ export default async function AdminOverviewPage() {
   await requireStaff("/admin");
   const [counts, jobs, attention, audit] = await Promise.all([adminCounts(), jobStatusCounts(), attentionItems(), listAudit()]);
   const providers = readProviderConfig();
+  const billingMode = getBillingProvider().mode ?? null;
   const serviceRole = hasAdminClient();
 
   const attentionCount =
@@ -80,7 +81,7 @@ export default async function AdminOverviewPage() {
           <Panel title="Platform wiring">
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-xs">
               <dt className="text-[color:var(--text-secondary)]">Billing</dt>
-              <dd><Wiring value={providers.billing} /></dd>
+              <dd><Wiring value={billingMode ? `${providers.billing} (${billingMode} mode)` : providers.billing} /></dd>
               <dt className="text-[color:var(--text-secondary)]">Deployment</dt>
               <dd><Wiring value={providers.deployment} /></dd>
               <dt className="text-[color:var(--text-secondary)]">Domains</dt>

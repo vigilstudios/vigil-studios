@@ -171,7 +171,7 @@ export const getCatalog = cache(async () => {
     supabase.from("features").select("*").order("code"),
     supabase.from("plan_features").select("*"),
     supabase.from("build_prices").select("*").order("kind"),
-    supabase.from("provider_links").select("provider, resource_kind, external_id, entity_type, entity_id").eq("resource_kind", "price"),
+    supabase.from("provider_links").select("provider, resource_kind, external_id, entity_type, entity_id, metadata").eq("resource_kind", "price"),
   ]);
   for (const r of [plans, prices, features, planFeatures, builds, links]) if (r.error) throw r.error;
   return {
