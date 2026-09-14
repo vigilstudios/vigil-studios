@@ -4,6 +4,7 @@ import { OrgSwitcher } from "@/components/vigil/OrgSwitcher";
 import type { NavGroup } from "@/components/vigil/nav";
 import { getOrgContext, requireViewer } from "@/lib/vigil/auth/session";
 import { FEATURES, resolveEntitlements } from "@/lib/vigil/entitlements";
+import { getOnboardingProject, needsOnboarding } from "@/lib/vigil/queries/onboarding";
 
 /**
  * Client dashboard chrome. Requires a signed-in user; pages decide whether
@@ -15,10 +16,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   let groups: NavGroup[] = [];
   if (ctx) {
-    const ent = await resolveEntitlements(ctx.organization.id);
+    const [ent, onboarding] = await Promise.all([resolveEntitlements(ctx.organization.id), getOnboardingProject(ctx.organization.id)]);
     groups = [
       {
         items: [
+          ...(needsOnboarding(onboarding?.project) ? [{ href: "/dashboard/onboarding", label: "Getting set up", icon: "virtue" as const }] : []),
           { href: "/dashboard", label: "Overview", icon: "overview", exact: true },
           { href: "/dashboard/website", label: "Website", icon: "website" },
           { href: "/dashboard/domain", label: "Domain", icon: "domain" },

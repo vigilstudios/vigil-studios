@@ -67,6 +67,9 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
     const result = await verifyDomain(admin, job.domain_id);
     if (!result.connected) {
       // Not an error: DNS takes time. Re-check later without burning attempts.
+      // With no provider site yet there is nothing to connect to, so check
+      // less often; the deploy step re-queues a verify when the site exists.
+      if (result.reason === "no_site") throw new RetryLater(result.dnsOk ? "DNS correct; waiting for the website" : "DNS not yet verified; no site yet", 6 * 60 * 60);
       throw new RetryLater("DNS not yet verified", 15 * 60);
     }
     return { connected: true };

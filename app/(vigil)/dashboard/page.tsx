@@ -1,21 +1,34 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { ButtonLink, EmptyState } from "@/components/vigil/ui";
 import { Checklist, Meter, Panel, StatusLine, Stepper, Timeline } from "@/components/vigil/widgets";
 import { SiteFrame } from "@/components/vigil/SiteFrame";
+import { OnboardingCard } from "@/components/vigil/OnboardingCard";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
 import { FEATURES, resolveEntitlements } from "@/lib/vigil/entitlements";
 import { formatDate, formatRelative, humanizeAction, titleCase } from "@/lib/vigil/format";
 import { describeDomainStatus, describeProjectStatus, describeSubscriptionStatus, describeWebsiteStatus } from "@/lib/vigil/lifecycle";
 import { auditTone, periodProgress, previewSource, projectStepIndex, projectSteps, requiredRecords, templateName } from "@/lib/vigil/presenters";
 import { getOrgDomains, getOrgProjects, getOrgSubscription, getOrgWebsites, getRecentActivity, getRecentDeployments } from "@/lib/vigil/queries/dashboard";
+import { ONBOARDING_SKIP_COOKIE } from "@/lib/vigil/onboarding/constants";
+import { getOnboardingProject, needsOnboarding } from "@/lib/vigil/queries/onboarding";
 
 export const metadata: Metadata = { title: "Overview" };
 
 export default async function OverviewPage() {
   const ctx = await requireOrgContext("/dashboard");
   const orgId = ctx.organization.id;
+
+  // First sign-in after a purchase lands in the guided onboarding, until the
+  // customer sends the brief or chooses "Do this later".
+  const onboarding = await getOnboardingProject(orgId);
+  if (needsOnboarding(onboarding?.project)) {
+    const skipped = (await cookies()).get(ONBOARDING_SKIP_COOKIE)?.value === "1";
+    if (!skipped) redirect("/dashboard/onboarding");
+  }
   const [websites, domains, subscription, projects, activity, ent] = await Promise.all([
     getOrgWebsites(orgId),
     getOrgDomains(orgId),
@@ -60,6 +73,10 @@ export default async function OverviewPage() {
         <h1 className="text-lg font-semibold tracking-tight sm:text-xl">{firstName ? `Hello, ${firstName}` : "Overview"}</h1>
         <p className="mt-0.5 text-xs text-[color:var(--text-secondary)]">Everything Vigil is running for your business, at a glance.</p>
       </div>
+
+      {onboarding && (needsOnboarding(onboarding.project) || onboarding.project.intake_completed_at) ? (
+        <OnboardingCard brief={onboarding.brief} completedAt={onboarding.project.intake_completed_at} businessName={onboarding.brief.basics?.businessName || ctx.organization.name} />
+      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-12">
         {/* Website */}

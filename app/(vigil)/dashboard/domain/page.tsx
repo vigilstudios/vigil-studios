@@ -4,7 +4,9 @@ import { requireOrgContext } from "@/lib/vigil/auth/session";
 import { formatDate, formatRelative } from "@/lib/vigil/format";
 import { describeDomainStatus } from "@/lib/vigil/lifecycle";
 import { getOrgDomains, getOrgWebsites } from "@/lib/vigil/queries/dashboard";
+import { getOnboardingProject } from "@/lib/vigil/queries/onboarding";
 import { ConnectDomainForm } from "./ConnectDomainForm";
+import { DomainGuidePanel } from "./DomainGuidePanel";
 
 export const metadata: Metadata = { title: "Domain" };
 
@@ -12,8 +14,9 @@ type RequiredRecord = { type: string; name: string; value: string };
 
 export default async function DomainPage() {
   const ctx = await requireOrgContext("/dashboard/domain");
-  const [domains, websites] = await Promise.all([getOrgDomains(ctx.organization.id), getOrgWebsites(ctx.organization.id)]);
+  const [domains, websites, onboarding] = await Promise.all([getOrgDomains(ctx.organization.id), getOrgWebsites(ctx.organization.id), getOnboardingProject(ctx.organization.id)]);
   const canManage = ctx.role === "owner" || ctx.role === "manager" || ctx.isImpersonating;
+  const briefDomain = onboarding?.brief.domain ?? null;
 
   return (
     <div>
@@ -49,32 +52,13 @@ export default async function DomainPage() {
                     { label: "Last checked", value: formatRelative(domain.last_checked_at) },
                   ]}
                 />
-                {records.length > 0 && domain.status !== "connected" ? (
+                {domain.status !== "connected" && domain.source === "customer_owned" ? (
                   <div className="mt-4 rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-4">
-                    <h3 className="text-sm font-semibold">Add these records at your registrar</h3>
-                    <p className="mt-1 text-xs text-[color:var(--text-secondary)]">
-                      Sign in where you bought the domain, open its DNS settings, and add the records below. Vigil checks automatically.
-                    </p>
-                    <div className="mt-3 overflow-x-auto">
-                      <table className="w-full text-xs">
-                        <thead>
-                          <tr className="text-left text-[color:var(--text-secondary)]">
-                            <th className="pb-1 pr-4 font-medium">Type</th>
-                            <th className="pb-1 pr-4 font-medium">Name</th>
-                            <th className="pb-1 font-medium">Value</th>
-                          </tr>
-                        </thead>
-                        <tbody className="font-mono">
-                          {records.map((r, i) => (
-                            <tr key={i}>
-                              <td className="py-1 pr-4">{r.type}</td>
-                              <td className="py-1 pr-4">{r.name}</td>
-                              <td className="py-1 break-all">{r.value}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    <DomainGuidePanel
+                      domain={{ domainId: domain.id, hostname: domain.hostname, status: domain.status, records, dnsOk: domain.dns_ok, statusReason: domain.status_reason }}
+                      initialRegistrar={briefDomain?.domainId === domain.id && briefDomain.registrar ? briefDomain.registrar : "other"}
+                      canManage={canManage}
+                    />
                   </div>
                 ) : null}
               </Card>

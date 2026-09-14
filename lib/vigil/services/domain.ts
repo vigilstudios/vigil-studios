@@ -3,6 +3,7 @@ import { assertTransition, domainTransitions } from "@/lib/vigil/lifecycle";
 import { getDeploymentProvider } from "@/lib/vigil/providers/registry";
 import type { DeploymentProvider } from "@/lib/vigil/providers/types";
 import { NotFoundError } from "@/lib/vigil/auth/errors";
+import { checkDnsRecords, platformDnsRecords, type DnsRecord } from "./dns";
 import { findExternalId, providerEnum } from "./provider-links";
 
 /**
@@ -37,7 +38,18 @@ export async function beginDomainVerification(
     entityId: domain.website_id,
   });
   if (!siteExternalId) {
-    await admin.from("domains").update({ status_reason: "The website is still being set up." }).eq("id", domainId);
+    // No provider site yet (the build has not been published). The platform's
+    // standard records are still known, so the customer can do their part now;
+    // the provider's exact values replace them when the site exists.
+    const records = platformDnsRecords(domain.hostname);
+    if (records.length > 0) {
+      await admin
+        .from("domains")
+        .update({ verification: { required_records: records, source: "platform" }, status_reason: null })
+        .eq("id", domainId);
+    } else {
+      await admin.from("domains").update({ status_reason: "The website is still being set up." }).eq("id", domainId);
+    }
     return;
   }
 
@@ -63,19 +75,37 @@ export async function verifyDomain(
   admin: DbClient,
   domainId: string,
   provider: DeploymentProvider = getDeploymentProvider()
-): Promise<{ connected: boolean }> {
+): Promise<{ connected: boolean; reason?: "no_site"; dnsOk?: boolean }> {
   const { data: domain, error } = await admin.from("domains").select("*").eq("id", domainId).maybeSingle();
   if (error) throw error;
   if (!domain) throw new NotFoundError(`Domain ${domainId} not found.`);
-  if (!domain.website_id) return { connected: false };
 
-  const siteExternalId = await findExternalId(admin, {
-    provider: providerEnum(provider.name),
-    resourceKind: "site",
-    entityType: "website",
-    entityId: domain.website_id,
-  });
-  if (!siteExternalId) return { connected: false };
+  const siteExternalId = domain.website_id
+    ? await findExternalId(admin, {
+        provider: providerEnum(provider.name),
+        resourceKind: "site",
+        entityType: "website",
+        entityId: domain.website_id,
+      })
+    : null;
+  if (!siteExternalId) {
+    // Nothing to attach to yet: still check public DNS so the customer sees
+    // real progress ("your records are right; the site is next").
+    const records = (domain.verification as { required_records?: DnsRecord[] } | null)?.required_records ?? [];
+    if (records.length === 0) return { connected: false, reason: "no_site" };
+    const checks = await checkDnsRecords(domain.hostname, records);
+    const dnsOk = checks.every((c) => c.ok);
+    await admin
+      .from("domains")
+      .update({
+        dns_ok: dnsOk,
+        last_checked_at: new Date().toISOString(),
+        status_reason: dnsOk ? "Your DNS records are correct. Vigil finishes the connection when your website is published." : null,
+        verification: { ...(domain.verification as Record<string, unknown> | null), checks: checks.map((c) => ({ type: c.record.type, name: c.record.name, ok: c.ok, found: c.found })) },
+      })
+      .eq("id", domainId);
+    return { connected: false, reason: "no_site", dnsOk };
+  }
 
   const config = await provider.getDomainConfig(siteExternalId, domain.hostname);
   const connected = config.verified && config.sslReady && !config.misconfigured;

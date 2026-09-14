@@ -40,8 +40,8 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
   }
 
   return (
-    <CheckoutShell title={status === "pending" ? "Finishing your payment…" : `You're in, ${order.business_name}`}>
-      <SuccessPanel orderId={order.id} email={order.email} status={status} />
+    <CheckoutShell title={status === "pending" ? "Finishing your payment…" : "Welcome to Vigil"}>
+      <SuccessPanel orderId={order.id} email={order.email} status={status} businessName={order.business_name} />
     </CheckoutShell>
   );
 }

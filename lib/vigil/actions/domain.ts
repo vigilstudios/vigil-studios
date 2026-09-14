@@ -7,7 +7,7 @@ import { logAuditEvent } from "@/lib/vigil/audit";
 import { ValidationError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
 import { assertOrgRole, requireOrgContextOrThrow } from "@/lib/vigil/auth/session";
 import { enqueueJob, JOB_KINDS } from "@/lib/vigil/jobs";
-import { normalizeHostname } from "@/lib/vigil/services/domain";
+import { beginDomainVerification, normalizeHostname } from "@/lib/vigil/services/domain";
 
 export type DomainState = ActionResult<{ domainId: string }> | null;
 
@@ -54,14 +54,21 @@ export async function startDomainConnection(_prev: DomainState, formData: FormDa
     // Queue the provider hand-off. Without a service key the row still
     // exists and staff can pick it up from the admin console.
     if (hasAdminClient()) {
-      await enqueueJob(createAdminClient(), {
-        kind: JOB_KINDS.domainConnect,
-        idempotencyKey: `domain.connect:${data.id}`,
-        organizationId: ctx.organization.id,
-        websiteId,
-        domainId: data.id,
-        createdBy: ctx.user.id,
-      });
+      const admin = createAdminClient();
+      try {
+        // Inline so the records are on screen when the page re-renders.
+        await beginDomainVerification(admin, data.id);
+      } catch (err) {
+        console.error("beginDomainVerification failed inline; queueing:", err);
+        await enqueueJob(admin, {
+          kind: JOB_KINDS.domainConnect,
+          idempotencyKey: `domain.connect:${data.id}`,
+          organizationId: ctx.organization.id,
+          websiteId,
+          domainId: data.id,
+          createdBy: ctx.user.id,
+        });
+      }
     }
 
     revalidatePath("/dashboard/domain");
