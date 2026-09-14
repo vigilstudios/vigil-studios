@@ -234,6 +234,17 @@ Still open from this session:
   `/admin` → customer → "Mark closed" or the SQL editor before onboarding a
   real customer, or keep it as the demo tenant.
 
+## 2026-09-14 (late) — Pro plan, custom magic-link template
+
+- Project upgraded to Pro; `supabase/templates/magic_link.html` pushed via
+  `config push`. Sign-in now targets `/auth/confirm` (token_hash, POST
+  verify). **Not yet exercised end to end** — the first real click after the
+  change is the first thing to verify next session, ideally from a
+  different browser than the one that requested it.
+- Sign-out returned 403 and auth redirects switched hosts on 127.0.0.1;
+  origins now derive from request headers (`lib/vigil/auth/origin.ts`).
+- Test tenant "Marlow & Fen" stays as the demo tenant by owner decision.
+
 ## Next phase
 
 Per master architecture §13, after locking the product catalog:
