@@ -1,9 +1,10 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "./errors";
+import { NEXT_COOKIE, nextCookieOptions } from "./next-cookie";
 import { isPlausibleEmail, normalizeEmail, safeNextPath } from "./redirects";
 
 async function siteOrigin(): Promise<string> {
@@ -31,12 +32,19 @@ export async function signInWithEmail(_prev: SignInState, formData: FormData): P
 
   const supabase = await createClient();
   const origin = await siteOrigin();
-  const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(next)}`;
+
+  // The destination after sign-in travels in a cookie so the redirect URL
+  // stays a clean allow-list match. With Supabase's default email template
+  // the link completes through the PKCE code flow at /auth/callback; with the
+  // custom template (supabase/templates/magic_link.html, paid tier or custom
+  // SMTP) it would land on /auth/confirm instead — both read the cookie.
+  const cookieStore = await cookies();
+  cookieStore.set(NEXT_COOKIE, next, nextCookieOptions());
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: redirectTo,
+      emailRedirectTo: `${origin}/auth/callback`,
       // An invited address is new to Auth until its first sign-in, so user
       // creation stays on. A stranger who signs in gets a profile with no
       // organization and sees only the welcome screen; nothing is exposed.

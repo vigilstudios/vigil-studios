@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { safeNextPath } from "@/lib/vigil/auth/redirects";
+import { clearNextCookie, resolveNext } from "@/lib/vigil/auth/next-cookie";
 
 /**
  * PKCE code exchange. Used by the default Supabase magic-link template and by
@@ -9,7 +9,7 @@ import { safeNextPath } from "@/lib/vigil/auth/redirects";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get("code");
-  const next = safeNextPath(searchParams.get("next"));
+  const next = resolveNext(request);
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=missing_code`);
@@ -26,5 +26,7 @@ export async function GET(request: NextRequest) {
   const { error: inviteError } = await supabase.rpc("accept_pending_invites");
   if (inviteError) console.error("accept_pending_invites failed:", inviteError.message);
 
-  return NextResponse.redirect(`${origin}${next}`);
+  const response = NextResponse.redirect(`${origin}${next}`);
+  clearNextCookie(response);
+  return response;
 }

@@ -14,11 +14,20 @@ project_id = "vigil-studios"
 [auth]
 # Used as the redirect allow-list and to build the URLs in auth emails.
 site_url = "https://www.vigilstudios.co"
+# Wildcards: the app passes its own /auth/confirm as the redirect target and
+# the allow-list must match it exactly (query strings included), or Supabase
+# silently falls back to site_url.
 additional_redirect_urls = [
-  "https://www.vigilstudios.co/auth/callback",
-  "https://www.vigilstudios.co/auth/confirm",
-  "http://localhost:3000/auth/callback",
-  "http://localhost:3000/auth/confirm",
-  "http://127.0.0.1:3000/auth/callback",
-  "http://127.0.0.1:3000/auth/confirm",
+  "https://www.vigilstudios.co/**",
+  "http://localhost:3000/**",
+  "http://127.0.0.1:3000/**",
 ]
+
+# Custom email templates are not available on the free tier with the default
+# email provider (config push returns 400). Once custom SMTP or a paid plan is
+# in place, uncomment this: the link then lands on the app's /auth/confirm,
+# which verifies on a POST that inbox link scanners never trigger, and works
+# in any browser rather than only the one that requested it.
+# [auth.email.template.magic_link]
+# subject = "Sign in to Vigil"
+# content_path = "./supabase/templates/magic_link.html"
