@@ -33,6 +33,7 @@ production deploys only from `main`.
 
 | File | Contents |
 | --- | --- |
+| `20260913000000_retire_legacy_portal.sql` | Renames the June prototype's `profiles/clients/projects/project_phase_progress/onboarding_steps/project_files` to `legacy_*`, enables RLS on them, drops the prototype's `auth.users` trigger. Conditional; no-op on a fresh project |
 | `20260913000001_foundation.sql` | `vigil` schema, `set_updated_at`, all enums, `protect_columns_from_customers` trigger |
 | `20260913000002_identity.sql` | `profiles` (+ auth.users triggers), `staff_members`, `organizations`, `organization_members` (last-owner guard), `organization_invites`, helper functions `is_staff/is_admin/org_role/is_org_member/has_org_role/shares_org_with`, `accept_invites_for_current_user`, RLS, `public.accept_pending_invites()` |
 | `20260913000003_catalog_entitlements.sql` | `plans`, `plan_prices`, `features`, `plan_features`, `subscriptions`, `entitlement_overrides`, `usage_records`, `resolve_entitlements`, RLS, seed (plan codes, feature registry, structural per-tier booleans, NULL prices), `public.resolve_entitlements()` |
@@ -44,17 +45,16 @@ production deploys only from `main`.
 
 | Check | Command | Result |
 | --- | --- | --- |
-| Migrations apply cleanly | `scripts/db-validate.sh` (PostgreSQL 14 + `supabase/test/auth-shim.sql`) | ✓ all 6 files |
-| RLS / integrity assertions | `supabase/test/rls.test.sql` | ✓ 70 assertions (anon, two tenants, member vs owner, staff vs admin, service role, invites, last-owner, column protection, cross-tenant references, entitlement resolution, job claiming) |
+| Migrations apply cleanly | `scripts/db-validate.sh` (PostgreSQL 14 + `supabase/test/auth-shim.sql`, which now mirrors the legacy prototype tables) | ✓ all 7 files |
+| RLS / integrity assertions | `supabase/test/rls.test.sql` | ✓ 75 assertions (legacy retirement, (anon, two tenants, member vs owner, staff vs admin, service role, invites, last-owner, column protection, cross-tenant references, entitlement resolution, job claiming) |
 | Unit tests | `npm test` (vitest) | ✓ 47 tests: lifecycle tables cover every enum, transitions, customer wording, entitlements, redirect safety, provider registry, null providers, job runner outcomes, slug/format helpers |
 | Typecheck | `npm run typecheck` | ✓ |
 | Lint (new code) | `npx eslint app lib/vigil components/vigil proxy.ts` | ✓ 0 errors, 0 warnings. Pre-existing marketing-section errors (9) untouched |
 | Production build | `npx next build` | ✓ 25 static + dynamic routes, proxy compiled |
 | Browser | dev server, Chrome | `/`, `/express` (six industries, template iframes 200), `/process` render as before; `/dashboard/*` → `/login?next=…`; `/login` renders at 375px; `/api/health` responds |
 
-Not verifiable locally: every `/dashboard` and `/admin` page against real
-rows, because no Supabase project exists (see risks). Their queries typecheck
-against the generated schema and their policies are exercised in SQL.
+`/dashboard` and `/admin` against real rows: see the 13 Sep evening entry
+below — the project was unpaused and the migrations are applied.
 
 ### Files worth knowing
 
@@ -117,10 +117,10 @@ Reviewed and accepted as-is:
 
 ## Unresolved risks and decisions
 
-1. **No Supabase project.** `.env.local` still points at
-   `fotqwyfoqzjmcchwjpof.supabase.co`, which no longer resolves. Nothing under
-   `/dashboard` or `/admin` can be exercised until a project exists.
-2. **Staff bootstrap** requires one row inserted with the service role (below).
+1. ~~No Supabase project.~~ The project had been **paused**, not deleted. It
+   was unpaused on 13 Sep 2026 and is linked; migrations are applied.
+2. **Staff bootstrap** requires one row inserted in the SQL editor (below)
+   after the first sign-in.
 3. **Express order → organization** bridge is not built; `projects.source_ref`
    is reserved for the leadgen order reference.
 4. **Deployment topology, domain provider, pricing, allowances, offboarding**:
@@ -138,16 +138,17 @@ Reviewed and accepted as-is:
 
 ## Bringing it up (owner steps)
 
-1. Create a Supabase project. Put its URL, publishable key and secret key in
-   `.env.local` (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
-   `SUPABASE_SECRET_KEY`). Set `NEXT_PUBLIC_APP_URL` in production.
-2. Apply the migrations:
-   ```bash
-   npx supabase@latest init && npx supabase@latest link --project-ref <ref> && npx supabase@latest db push
-   ```
-   (or paste the six files into the SQL editor in order).
-3. Add the site URL and `/auth/callback`, `/auth/confirm` to Auth → URL
-   Configuration → Redirect URLs.
+Steps 1–3 were completed on 13 Sep 2026 (see the entry below).
+
+1. ~~Create a Supabase project.~~ Project `fotqwyfoqzjmcchwjpof` is linked.
+   `.env.local` still needs `SUPABASE_SECRET_KEY` (server only) for the job
+   runner and webhooks; set `NEXT_PUBLIC_APP_URL` in production.
+2. ~~Apply the migrations.~~ Done with `npx supabase db push`. Future
+   migrations: add a file under `supabase/migrations/`, run
+   `npm run db:validate`, then `npx supabase@latest db push`.
+3. ~~Redirect URLs.~~ Applied with `npx supabase config push` from
+   `supabase/config.toml` (kept minimal on purpose: it declares only the auth
+   URLs, so a push can never overwrite storage or paid-tier settings).
 4. Sign in once at `/login` with your own email, then in the SQL editor:
    ```sql
    insert into public.staff_members (user_id, role)
@@ -158,9 +159,28 @@ Reviewed and accepted as-is:
    (Vercel Cron or any scheduler; every 1–5 minutes on a paid plan, daily on
    Hobby). With the `null` providers the queue drains harmlessly.
 7. Regenerate types after any migration:
-   `npx supabase gen types typescript --linked --schema public --schema vigil > types/database.types.ts`.
+   `npx supabase@latest gen types typescript --linked --schema public --schema vigil > types/database.types.ts` (this is now the canonical source; `scripts/db-gen-types.mjs` remains for offline work).
 
 ---
+
+## 2026-09-13 (evening) — Project revived, schema live
+
+- The Supabase project was paused, not deleted; the owner unpaused it.
+  `.env.local`'s publishable key still works.
+- The database still held the June prototype's tables with one demo
+  client/project, readable by the anon key. Added migration 0000 to rename
+  them to `legacy_*` behind RLS and drop the prototype's sign-up trigger.
+- Owner ran `supabase login`, `link` and `db push`: all seven migrations are
+  on the remote (`supabase migration list` matches). `config push` applied the
+  auth URLs, then failed on the CLI template's `[storage.vector] enabled = true`
+  (Pro-plan feature, HTTP 402). `config.toml` was reduced to the auth section;
+  `config diff` now shows only undeclared remote-only properties and
+  `config push` is a no-op.
+- `types/database.types.ts` is now generated from the linked project
+  (`gen types --linked`); the local generator stays for offline work.
+- Verified through the anon key: `legacy_*`, `projects`, `websites`,
+  `domains`, `organizations`, `plans`, `staff_members`, `provider_links` all
+  return zero rows (RLS), where the prototype tables previously returned data.
 
 ## Next phase
 

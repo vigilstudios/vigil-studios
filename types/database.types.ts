@@ -1,5 +1,6 @@
-// Generated from supabase/migrations by scripts/db-gen-types.mjs — do not edit by hand.
-// Regenerate after every migration: see docs/dashboard-v1/IMPLEMENTATION_LOG.md.
+// Generated from the linked Supabase project — do not edit by hand.
+// Regenerate after every migration:
+//   npx supabase@latest gen types typescript --linked --schema public --schema vigil > types/database.types.ts
 
 export type Json =
   | string
@@ -10,6 +11,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   public: {
     Tables: {
       audit_events: {
@@ -23,7 +29,7 @@ export type Database = {
           entity_id: string | null
           entity_type: string
           id: number
-          metadata: NonNullable<Json>
+          metadata: Json
           organization_id: string | null
         }
         Insert: {
@@ -36,7 +42,7 @@ export type Database = {
           entity_id?: string | null
           entity_type: string
           id?: never
-          metadata?: NonNullable<Json>
+          metadata?: Json
           organization_id?: string | null
         }
         Update: {
@@ -49,7 +55,7 @@ export type Database = {
           entity_id?: string | null
           entity_type?: string
           id?: never
-          metadata?: NonNullable<Json>
+          metadata?: Json
           organization_id?: string | null
         }
         Relationships: [
@@ -78,7 +84,7 @@ export type Database = {
           delivered_at: string | null
           description: string | null
           id: string
-          metadata: NonNullable<Json>
+          metadata: Json
           organization_id: string
           priority: Database["public"]["Enums"]["change_request_priority"]
           requested_by: string | null
@@ -96,7 +102,7 @@ export type Database = {
           delivered_at?: string | null
           description?: string | null
           id?: string
-          metadata?: NonNullable<Json>
+          metadata?: Json
           organization_id: string
           priority?: Database["public"]["Enums"]["change_request_priority"]
           requested_by?: string | null
@@ -114,7 +120,7 @@ export type Database = {
           delivered_at?: string | null
           description?: string | null
           id?: string
-          metadata?: NonNullable<Json>
+          metadata?: Json
           organization_id?: string
           priority?: Database["public"]["Enums"]["change_request_priority"]
           requested_by?: string | null
@@ -163,7 +169,7 @@ export type Database = {
           error: Json | null
           finished_at: string | null
           id: string
-          metadata: NonNullable<Json>
+          metadata: Json
           organization_id: string
           started_at: string | null
           status: Database["public"]["Enums"]["deployment_status"]
@@ -179,7 +185,7 @@ export type Database = {
           error?: Json | null
           finished_at?: string | null
           id?: string
-          metadata?: NonNullable<Json>
+          metadata?: Json
           organization_id: string
           started_at?: string | null
           status?: Database["public"]["Enums"]["deployment_status"]
@@ -195,7 +201,7 @@ export type Database = {
           error?: Json | null
           finished_at?: string | null
           id?: string
-          metadata?: NonNullable<Json>
+          metadata?: Json
           organization_id?: string
           started_at?: string | null
           status?: Database["public"]["Enums"]["deployment_status"]
@@ -239,16 +245,16 @@ export type Database = {
           id: string
           kind: Database["public"]["Enums"]["domain_kind"]
           last_checked_at: string | null
-          metadata: NonNullable<Json>
+          metadata: Json
           organization_id: string
-          registrant: NonNullable<Json>
+          registrant: Json
           registrar: string | null
           source: Database["public"]["Enums"]["domain_source"]
           ssl_ok: boolean | null
           status: Database["public"]["Enums"]["domain_status"]
           status_reason: string | null
           updated_at: string
-          verification: NonNullable<Json>
+          verification: Json
           verified_at: string | null
           website_id: string | null
         }
@@ -262,16 +268,16 @@ export type Database = {
           id?: string
           kind?: Database["public"]["Enums"]["domain_kind"]
           last_checked_at?: string | null
-          metadata?: NonNullable<Json>
+          metadata?: Json
           organization_id: string
-          registrant?: NonNullable<Json>
+          registrant?: Json
           registrar?: string | null
           source?: Database["public"]["Enums"]["domain_source"]
           ssl_ok?: boolean | null
           status?: Database["public"]["Enums"]["domain_status"]
           status_reason?: string | null
           updated_at?: string
-          verification?: NonNullable<Json>
+          verification?: Json
           verified_at?: string | null
           website_id?: string | null
         }
@@ -285,16 +291,16 @@ export type Database = {
           id?: string
           kind?: Database["public"]["Enums"]["domain_kind"]
           last_checked_at?: string | null
-          metadata?: NonNullable<Json>
+          metadata?: Json
           organization_id?: string
-          registrant?: NonNullable<Json>
+          registrant?: Json
           registrar?: string | null
           source?: Database["public"]["Enums"]["domain_source"]
           ssl_ok?: boolean | null
           status?: Database["public"]["Enums"]["domain_status"]
           status_reason?: string | null
           updated_at?: string
-          verification?: NonNullable<Json>
+          verification?: Json
           verified_at?: string | null
           website_id?: string | null
         }
@@ -324,7 +330,7 @@ export type Database = {
           id: string
           organization_id: string
           reason: string | null
-          value: NonNullable<Json>
+          value: Json
         }
         Insert: {
           created_at?: string
@@ -334,7 +340,7 @@ export type Database = {
           id?: string
           organization_id: string
           reason?: string | null
-          value: NonNullable<Json>
+          value: Json
         }
         Update: {
           created_at?: string
@@ -344,7 +350,7 @@ export type Database = {
           id?: string
           organization_id?: string
           reason?: string | null
-          value?: NonNullable<Json>
+          value?: Json
         }
         Relationships: [
           {
@@ -374,7 +380,7 @@ export type Database = {
         Row: {
           code: string
           created_at: string
-          default_value: NonNullable<Json>
+          default_value: Json
           description: string | null
           name: string
           updated_at: string
@@ -383,7 +389,7 @@ export type Database = {
         Insert: {
           code: string
           created_at?: string
-          default_value: NonNullable<Json>
+          default_value: Json
           description?: string | null
           name: string
           updated_at?: string
@@ -392,7 +398,7 @@ export type Database = {
         Update: {
           code?: string
           created_at?: string
-          default_value?: NonNullable<Json>
+          default_value?: Json
           description?: string | null
           name?: string
           updated_at?: string
@@ -402,11 +408,11 @@ export type Database = {
       }
       leads: {
         Row: {
-          contact: NonNullable<Json>
+          contact: Json
           created_at: string
           id: string
           message: string | null
-          metadata: NonNullable<Json>
+          metadata: Json
           organization_id: string
           received_at: string
           source: string | null
@@ -415,11 +421,11 @@ export type Database = {
           website_id: string | null
         }
         Insert: {
-          contact?: NonNullable<Json>
+          contact?: Json
           created_at?: string
           id?: string
           message?: string | null
-          metadata?: NonNullable<Json>
+          metadata?: Json
           organization_id: string
           received_at?: string
           source?: string | null
@@ -428,11 +434,11 @@ export type Database = {
           website_id?: string | null
         }
         Update: {
-          contact?: NonNullable<Json>
+          contact?: Json
           created_at?: string
           id?: string
           message?: string | null
-          metadata?: NonNullable<Json>
+          metadata?: Json
           organization_id?: string
           received_at?: string
           source?: string | null
@@ -453,6 +459,233 @@ export type Database = {
             columns: ["website_id"]
             isOneToOne: false
             referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legacy_clients: {
+        Row: {
+          company_name: string
+          contact_email: string
+          contact_name: string
+          created_at: string
+          id: string
+          profile_id: string | null
+        }
+        Insert: {
+          company_name: string
+          contact_email: string
+          contact_name: string
+          created_at?: string
+          id?: string
+          profile_id?: string | null
+        }
+        Update: {
+          company_name?: string
+          contact_email?: string
+          contact_name?: string
+          created_at?: string
+          id?: string
+          profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "legacy_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legacy_onboarding_steps: {
+        Row: {
+          completed_at: string | null
+          description: string
+          id: string
+          project_id: string
+          status: Database["public"]["Enums"]["task_status"]
+          step_order: number
+          title: string
+        }
+        Insert: {
+          completed_at?: string | null
+          description: string
+          id?: string
+          project_id: string
+          status?: Database["public"]["Enums"]["task_status"]
+          step_order: number
+          title: string
+        }
+        Update: {
+          completed_at?: string | null
+          description?: string
+          id?: string
+          project_id?: string
+          status?: Database["public"]["Enums"]["task_status"]
+          step_order?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_steps_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "legacy_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legacy_profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id: string
+          role?: Database["public"]["Enums"]["user_role"]
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+        }
+        Relationships: []
+      }
+      legacy_project_files: {
+        Row: {
+          category: Database["public"]["Enums"]["file_category"]
+          created_at: string
+          file_name: string
+          file_path: string
+          id: string
+          project_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["file_category"]
+          created_at?: string
+          file_name: string
+          file_path: string
+          id?: string
+          project_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["file_category"]
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          id?: string
+          project_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "legacy_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_files_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "legacy_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legacy_project_phase_progress: {
+        Row: {
+          id: string
+          phase: Database["public"]["Enums"]["project_phase"]
+          progress: number
+          project_id: string
+        }
+        Insert: {
+          id?: string
+          phase: Database["public"]["Enums"]["project_phase"]
+          progress?: number
+          project_id: string
+        }
+        Update: {
+          id?: string
+          phase?: Database["public"]["Enums"]["project_phase"]
+          progress?: number
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_phase_progress_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "legacy_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legacy_projects: {
+        Row: {
+          client_id: string
+          created_at: string
+          current_phase: Database["public"]["Enums"]["project_phase"]
+          domain: string | null
+          hosting_provider: string | null
+          id: string
+          launch_window: string | null
+          live_url: string | null
+          next_step_description: string
+          next_step_title: string
+          package_name: string
+          project_name: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          current_phase?: Database["public"]["Enums"]["project_phase"]
+          domain?: string | null
+          hosting_provider?: string | null
+          id?: string
+          launch_window?: string | null
+          live_url?: string | null
+          next_step_description?: string
+          next_step_title?: string
+          package_name: string
+          project_name: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          current_phase?: Database["public"]["Enums"]["project_phase"]
+          domain?: string | null
+          hosting_provider?: string | null
+          id?: string
+          launch_window?: string | null
+          live_url?: string | null
+          next_step_description?: string
+          next_step_title?: string
+          package_name?: string
+          project_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "legacy_clients"
             referencedColumns: ["id"]
           },
         ]
@@ -623,7 +856,7 @@ export type Database = {
       }
       organizations: {
         Row: {
-          address: NonNullable<Json>
+          address: Json
           billing_email: string | null
           created_at: string
           created_by: string | null
@@ -639,7 +872,7 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
-          address?: NonNullable<Json>
+          address?: Json
           billing_email?: string | null
           created_at?: string
           created_by?: string | null
@@ -655,7 +888,7 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
-          address?: NonNullable<Json>
+          address?: Json
           billing_email?: string | null
           created_at?: string
           created_by?: string | null
@@ -685,19 +918,19 @@ export type Database = {
           feature_code: string
           plan_id: string
           updated_at: string
-          value: NonNullable<Json>
+          value: Json
         }
         Insert: {
           feature_code: string
           plan_id: string
           updated_at?: string
-          value: NonNullable<Json>
+          value: Json
         }
         Update: {
           feature_code?: string
           plan_id?: string
           updated_at?: string
-          value?: NonNullable<Json>
+          value?: Json
         }
         Relationships: [
           {
@@ -825,7 +1058,7 @@ export type Database = {
       }
       projects: {
         Row: {
-          brief: NonNullable<Json>
+          brief: Json
           closed_at: string | null
           created_at: string
           created_by: string | null
@@ -841,7 +1074,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          brief?: NonNullable<Json>
+          brief?: Json
           closed_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -857,7 +1090,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          brief?: NonNullable<Json>
+          brief?: Json
           closed_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -896,7 +1129,7 @@ export type Database = {
           entity_type: string
           external_id: string
           id: string
-          metadata: NonNullable<Json>
+          metadata: Json
           provider: Database["public"]["Enums"]["provider"]
           resource_kind: string
           updated_at: string
@@ -907,7 +1140,7 @@ export type Database = {
           entity_type: string
           external_id: string
           id?: string
-          metadata?: NonNullable<Json>
+          metadata?: Json
           provider: Database["public"]["Enums"]["provider"]
           resource_kind: string
           updated_at?: string
@@ -918,7 +1151,7 @@ export type Database = {
           entity_type?: string
           external_id?: string
           id?: string
-          metadata?: NonNullable<Json>
+          metadata?: Json
           provider?: Database["public"]["Enums"]["provider"]
           resource_kind?: string
           updated_at?: string
@@ -940,7 +1173,7 @@ export type Database = {
           locked_by: string | null
           max_attempts: number
           organization_id: string | null
-          payload: NonNullable<Json>
+          payload: Json
           result: Json | null
           scheduled_for: string
           started_at: string | null
@@ -962,7 +1195,7 @@ export type Database = {
           locked_by?: string | null
           max_attempts?: number
           organization_id?: string | null
-          payload?: NonNullable<Json>
+          payload?: Json
           result?: Json | null
           scheduled_for?: string
           started_at?: string | null
@@ -984,7 +1217,7 @@ export type Database = {
           locked_by?: string | null
           max_attempts?: number
           organization_id?: string | null
-          payload?: NonNullable<Json>
+          payload?: Json
           result?: Json | null
           scheduled_for?: string
           started_at?: string | null
@@ -1068,7 +1301,7 @@ export type Database = {
           current_period_start: string | null
           ended_at: string | null
           id: string
-          metadata: NonNullable<Json>
+          metadata: Json
           organization_id: string
           plan_id: string
           plan_price_id: string | null
@@ -1085,7 +1318,7 @@ export type Database = {
           current_period_start?: string | null
           ended_at?: string | null
           id?: string
-          metadata?: NonNullable<Json>
+          metadata?: Json
           organization_id: string
           plan_id: string
           plan_price_id?: string | null
@@ -1102,7 +1335,7 @@ export type Database = {
           current_period_start?: string | null
           ended_at?: string | null
           id?: string
-          metadata?: NonNullable<Json>
+          metadata?: Json
           organization_id?: string
           plan_id?: string
           plan_price_id?: string | null
@@ -1211,21 +1444,21 @@ export type Database = {
           created_at: string
           enabled: boolean
           organization_id: string
-          settings: NonNullable<Json>
+          settings: Json
           updated_at: string
         }
         Insert: {
           created_at?: string
           enabled?: boolean
           organization_id: string
-          settings?: NonNullable<Json>
+          settings?: Json
           updated_at?: string
         }
         Update: {
           created_at?: string
           enabled?: boolean
           organization_id?: string
-          settings?: NonNullable<Json>
+          settings?: Json
           updated_at?: string
         }
         Relationships: [
@@ -1244,7 +1477,7 @@ export type Database = {
           event_id: string
           event_type: string
           id: string
-          payload: NonNullable<Json>
+          payload: Json
           processed_at: string | null
           provider: Database["public"]["Enums"]["provider"]
           received_at: string
@@ -1255,7 +1488,7 @@ export type Database = {
           event_id: string
           event_type: string
           id?: string
-          payload: NonNullable<Json>
+          payload: Json
           processed_at?: string | null
           provider: Database["public"]["Enums"]["provider"]
           received_at?: string
@@ -1266,7 +1499,7 @@ export type Database = {
           event_id?: string
           event_type?: string
           id?: string
-          payload?: NonNullable<Json>
+          payload?: Json
           processed_at?: string | null
           provider?: Database["public"]["Enums"]["provider"]
           received_at?: string
@@ -1285,7 +1518,7 @@ export type Database = {
           last_deployed_at: string | null
           last_health_at: string | null
           live_url: string | null
-          metadata: NonNullable<Json>
+          metadata: Json
           name: string
           organization_id: string
           preview_url: string | null
@@ -1307,7 +1540,7 @@ export type Database = {
           last_deployed_at?: string | null
           last_health_at?: string | null
           live_url?: string | null
-          metadata?: NonNullable<Json>
+          metadata?: Json
           name: string
           organization_id: string
           preview_url?: string | null
@@ -1329,7 +1562,7 @@ export type Database = {
           last_deployed_at?: string | null
           last_health_at?: string | null
           live_url?: string | null
-          metadata?: NonNullable<Json>
+          metadata?: Json
           name?: string
           organization_id?: string
           preview_url?: string | null
@@ -1370,10 +1603,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      accept_pending_invites: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      accept_pending_invites: { Args: never; Returns: number }
       claim_jobs: {
         Args: { p_lease_seconds?: number; p_limit?: number; p_worker: string }
         Returns: {
@@ -1390,7 +1620,7 @@ export type Database = {
           locked_by: string | null
           max_attempts: number
           organization_id: string | null
-          payload: NonNullable<Json>
+          payload: Json
           result: Json | null
           scheduled_for: string
           started_at: string | null
@@ -1452,12 +1682,20 @@ export type Database = {
         | "expired"
         | "released"
       feature_value_kind: "boolean" | "limit" | "text"
+      file_category: "brand_asset" | "document" | "content" | "deliverable"
       job_status: "queued" | "running" | "succeeded" | "failed" | "canceled"
       lead_status: "new" | "contacted" | "qualified" | "won" | "lost" | "spam"
       membership_status: "active" | "suspended"
       org_role: "owner" | "manager" | "member"
       organization_status: "active" | "suspended" | "offboarding" | "closed"
       project_kind: "express" | "professional" | "custom"
+      project_phase:
+        | "onboarding"
+        | "design"
+        | "development"
+        | "review"
+        | "launch"
+        | "maintenance"
       project_status:
         | "draft"
         | "intake"
@@ -1477,6 +1715,8 @@ export type Database = {
         | "unpaid"
         | "paused"
         | "canceled"
+      task_status: "not_started" | "in_progress" | "completed"
+      user_role: "admin" | "client"
       webhook_status: "received" | "processed" | "failed" | "ignored"
       website_status:
         | "provisioning"
@@ -1499,10 +1739,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      accept_invites_for_current_user: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      accept_invites_for_current_user: { Args: never; Returns: number }
       claim_jobs: {
         Args: { p_lease_seconds?: number; p_limit?: number; p_worker: string }
         Returns: Database["public"]["Tables"]["provisioning_jobs"]["Row"][]
@@ -1520,9 +1757,9 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_admin: { Args: Record<PropertyKey, never>; Returns: boolean }
+      is_admin: { Args: never; Returns: boolean }
       is_org_member: { Args: { p_org: string }; Returns: boolean }
-      is_staff: { Args: Record<PropertyKey, never>; Returns: boolean }
+      is_staff: { Args: never; Returns: boolean }
       log_audit_event: {
         Args: {
           p_action: string
@@ -1706,12 +1943,21 @@ export const Constants = {
         "released",
       ],
       feature_value_kind: ["boolean", "limit", "text"],
+      file_category: ["brand_asset", "document", "content", "deliverable"],
       job_status: ["queued", "running", "succeeded", "failed", "canceled"],
       lead_status: ["new", "contacted", "qualified", "won", "lost", "spam"],
       membership_status: ["active", "suspended"],
       org_role: ["owner", "manager", "member"],
       organization_status: ["active", "suspended", "offboarding", "closed"],
       project_kind: ["express", "professional", "custom"],
+      project_phase: [
+        "onboarding",
+        "design",
+        "development",
+        "review",
+        "launch",
+        "maintenance",
+      ],
       project_status: [
         "draft",
         "intake",
@@ -1733,6 +1979,8 @@ export const Constants = {
         "paused",
         "canceled",
       ],
+      task_status: ["not_started", "in_progress", "completed"],
+      user_role: ["admin", "client"],
       webhook_status: ["received", "processed", "failed", "ignored"],
       website_status: [
         "provisioning",
