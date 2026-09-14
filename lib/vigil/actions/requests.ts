@@ -7,10 +7,9 @@ import { logAuditEvent } from "@/lib/vigil/audit";
 import { ForbiddenError, ValidationError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
 import { requireOrgContextOrThrow } from "@/lib/vigil/auth/session";
 import { FEATURES, resolveEntitlements } from "@/lib/vigil/entitlements";
-import { ATTACHMENTS_BUCKET, attachmentPath, validateAttachments } from "@/lib/vigil/attachments";
-import { randomUUID } from "node:crypto";
+import { ATTACHMENTS_BUCKET, validateAttachments } from "@/lib/vigil/attachments";
 
-export type RequestState = ActionResult<{ id: string; attached: number; failed: string[] }> | null;
+export type RequestState = ActionResult<{ id: string }> | null;
 
 const schema = z.object({
   title: z.string().trim().min(3, "Say a little more about the change.").max(200, "Keep the title under 200 characters."),
@@ -30,22 +29,13 @@ export async function createChangeRequest(_prev: RequestState, formData: FormDat
     const ent = await resolveEntitlements(ctx.organization.id);
     if (!ent.enabled(FEATURES.requests)) throw new ForbiddenError("Website updates are not included in your current plan.");
 
-    const fields = Object.fromEntries([...formData.entries()].filter(([k]) => k !== "attachments"));
-    const parsed = schema.safeParse(fields);
+    const parsed = schema.safeParse(Object.fromEntries(formData));
     if (!parsed.success) {
       const issues: Record<string, string[]> = {};
       for (const i of parsed.error.issues) (issues[i.path.join(".") || "_"] ??= []).push(i.message);
       throw new ValidationError("Check the highlighted fields.", issues);
     }
     const v = parsed.data;
-
-    // Files are validated before the request row exists, so a bad upload
-    // never leaves a half-made request behind.
-    const files = formData.getAll("attachments").filter((f): f is File => f instanceof File && f.size > 0);
-    const problems = validateAttachments(files);
-    if (problems.length > 0) {
-      throw new ValidationError(problems.map((p) => (p.name === "*" ? p.reason : `${p.name}: ${p.reason}`)).join(" "), { attachments: problems.map((p) => p.reason) });
-    }
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -64,47 +54,73 @@ export async function createChangeRequest(_prev: RequestState, formData: FormDat
       .single();
     if (error) throw error;
 
-    // Upload under the user's own session: storage RLS only allows the
-    // organization's folder, and the row's check constraint agrees.
-    const failed: string[] = [];
-    let attached = 0;
-    for (const file of files) {
-      const path = attachmentPath(ctx.organization.id, data.id, file.type, randomUUID());
-      const { error: uploadError } = await supabase.storage.from(ATTACHMENTS_BUCKET).upload(path, file, { contentType: file.type, upsert: false });
-      if (uploadError) {
-        console.error("attachment upload failed:", uploadError.message);
-        failed.push(file.name);
-        continue;
-      }
-      const { error: rowError } = await supabase.from("change_request_attachments").insert({
-        organization_id: ctx.organization.id,
-        change_request_id: data.id,
-        bucket_id: ATTACHMENTS_BUCKET,
-        object_path: path,
-        file_name: file.name.slice(0, 200),
-        content_type: file.type,
-        size_bytes: file.size,
-        uploaded_by: ctx.user.id,
-      });
-      if (rowError) {
-        console.error("attachment row failed:", rowError.message);
-        await supabase.storage.from(ATTACHMENTS_BUCKET).remove([path]);
-        failed.push(file.name);
-        continue;
-      }
-      attached += 1;
-    }
-
     await logAuditEvent(supabase, {
       action: "change_request.submitted",
       entityType: "change_request",
       entityId: data.id,
       organizationId: ctx.organization.id,
-      after: { title: v.title, priority: v.priority, attachments: attached },
+      after: { title: v.title, priority: v.priority },
     });
 
     revalidatePath("/dashboard/requests");
-    return { ok: true, data: { id: data.id, attached, failed } };
+    return { ok: true, data: { id: data.id } };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
+export type UploadedFile = { path: string; name: string; type: string; size: number };
+
+/**
+ * Record files the browser uploaded straight to Storage (Vercel caps request
+ * bodies, so bytes never pass through the server). The path must sit under
+ * this organization's folder and the request must be this organization's —
+ * both are enforced again by the table's check constraint and trigger.
+ */
+export async function attachUploadedFiles(requestId: string, uploaded: UploadedFile[]): Promise<ActionResult<{ attached: number; failed: string[] }>> {
+  try {
+    const ctx = await requireOrgContextOrThrow();
+    const problems = validateAttachments(uploaded);
+    if (problems.length > 0) throw new ValidationError(problems.map((p) => (p.name === "*" ? p.reason : `${p.name}: ${p.reason}`)).join(" "));
+
+    const supabase = await createClient();
+    const failed: string[] = [];
+    let attached = 0;
+    for (const f of uploaded) {
+      if (!f.path.startsWith(`${ctx.organization.id}/${requestId}/`)) {
+        failed.push(f.name);
+        continue;
+      }
+      const { error } = await supabase.from("change_request_attachments").insert({
+        organization_id: ctx.organization.id,
+        change_request_id: requestId,
+        bucket_id: ATTACHMENTS_BUCKET,
+        object_path: f.path,
+        file_name: f.name.slice(0, 200),
+        content_type: f.type,
+        size_bytes: f.size,
+        uploaded_by: ctx.user.id,
+      });
+      if (error) {
+        console.error("attachment row failed:", error.message);
+        await supabase.storage.from(ATTACHMENTS_BUCKET).remove([f.path]);
+        failed.push(f.name);
+        continue;
+      }
+      attached += 1;
+    }
+
+    if (attached > 0) {
+      await logAuditEvent(supabase, {
+        action: "change_request.attachments_added",
+        entityType: "change_request",
+        entityId: requestId,
+        organizationId: ctx.organization.id,
+        after: { attachments: attached },
+      });
+    }
+    revalidatePath("/dashboard/requests");
+    return { ok: true, data: { attached, failed } };
   } catch (error) {
     return toActionError(error);
   }

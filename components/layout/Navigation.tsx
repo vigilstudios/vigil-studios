@@ -137,6 +137,12 @@ export function Navigation() {
               </a>
             ))}
           </div>
+          <Link
+            href="/login"
+            className="h-14 flex items-center justify-center rounded-[1.25rem] border border-[color:var(--border)] bg-[color:var(--bg-surface)]/90 px-5 text-sm font-medium text-[color:var(--text-secondary)] backdrop-blur-xl transition-colors hover:text-[color:var(--text-primary)]"
+          >
+            Sign in
+          </Link>
           <CalendlyPopup className="btn-primary h-14 flex items-center justify-center rounded-[1.25rem]">
             Book a Call
           </CalendlyPopup>
@@ -180,6 +186,13 @@ export function Navigation() {
                   {item.label}
                 </a>
               ))}
+              <Link
+                href="/login"
+                onClick={() => setIsOpen(false)}
+                className="btn-secondary h-14 flex items-center justify-center rounded-[1.25rem]"
+              >
+                Sign in
+              </Link>
               <CalendlyPopup className="btn-primary h-14 flex items-center justify-center rounded-[1.25rem]">
                 Book a Call
               </CalendlyPopup>

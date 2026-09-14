@@ -59,7 +59,7 @@ export default async function RequestsPage() {
 
       <div className="grid gap-4 lg:grid-cols-12">
         <Panel className="lg:col-span-5" title="New request">
-          <NewRequestForm websites={websites.map((w) => ({ id: w.id, name: w.name }))} />
+          <NewRequestForm websites={websites.map((w) => ({ id: w.id, name: w.name }))} organizationId={ctx.organization.id} />
         </Panel>
 
         <Panel className="lg:col-span-7" title={`Your requests${requests.length ? ` · ${requests.length}` : ""}`} padded={false}>
