@@ -1,6 +1,11 @@
 # Handoff context — Vigil Dashboard V1 → first customer
 
 **Written:** 14 Sep 2026, mid-task. The previous session ran out of context.
+**Updated:** 14 Sep 2026 (evening) — the onboarding, Buy button, billing
+portal, repository export and tests are built and committed on the branch
+(see the last entry in `IMPLEMENTATION_LOG.md`). What remains is the Stripe
+test-mode run and the merge. Section 3 still lists what the owner must
+supply; section 2's "Not built yet" list is done except item 6.
 **Read first:** `ARCHITECTURE.md`, `IMPLEMENTATION_LOG.md` (same folder), the
 master product doc `../../../vigil-leadgen/VIGIL_STUDIOS_MASTER_ARCHITECTURE.md`,
 and the repo `CLAUDE.md`.

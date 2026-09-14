@@ -326,3 +326,115 @@ Per master architecture §13, after locking the product catalog:
    website, keyed on `projects.source_ref`.
 5. **Requests allowances** — `usage_records` against
    `requests.monthly_allowance` once the numbers are approved.
+
+## 2026-09-14 — Virtue-guided onboarding, Buy button, billing portal, export from repository_ref
+
+Resumed from `HANDOFF-CONTEXT.md`. `npm run check` was green at the start
+(59 tests, 94 RLS assertions) on a recreated scratch Postgres; `main` had
+not moved. Commits `aea8681 … 6aa4a9a`.
+
+### VirtueOrb (`components/vigil/VirtueOrb.tsx`, `virtue-orb.css`)
+
+CSS-only glass sphere with a green atmosphere: layered radial/conic
+gradients, blur, rim and specular highlight; `idle` breathes, `working`
+swirls faster, `done` settles. Sizes `sm` (24px, inline; also the Virtue nav
+icon), `md` (56px, step headers), `lg` (120px, welcome / success). Colour
+comes from `--accent`, glass tint per theme, motion off under
+`prefers-reduced-motion`. Reused later as the face of the real Virtue.
+
+### Onboarding (`/dashboard/onboarding`)
+
+- **Brief** (`lib/vigil/onboarding/brief.ts`): one JSON document in
+  `projects.brief` with `basics`, `offerings`, `about`, `brand`, `domain`,
+  `progress` and a reserved `scope` (staff-written agreed scope). Every step
+  validates only its own section; `parseBrief` never throws.
+- **Wizard** (`app/(vigil)/dashboard/onboarding/*`): welcome → business
+  basics (hours day-by-day / same every day / by appointment) → what you
+  offer (services / menu / products, repeatable rows, optional sections) →
+  about → brand and photos → domain → review and send. Progress bar,
+  Virtue's line at the top of each step (`virtue-copy.ts`), autosave 700 ms
+  after each change (`useAutosave`, also flushes on unmount), "Saved"
+  indicator, `?step=` resume, back / "Do this later" on every screen.
+  Mobile-first: min-44px targets, single column at 375px.
+- **Uploads**: browser-direct to the `project-assets` bucket at
+  `<org>/<project>/<uuid>.<ext>`, rows in `project_assets` (kinds logo /
+  photo / document, captions). Migration **0009** (pushed) lets members
+  update caption/kind only; RLS test added.
+- **Domain step**: *Yes, I own one* → hostname → registrar guessed from the
+  apex's public nameservers (`services/dns.ts` → `domain-guides.ts`
+  suffix table), confirmable in a select → `domains` row (customer_owned,
+  pending, attached to the project's website) → numbered walkthrough per
+  registrar (`lib/vigil/domain-guides.ts`: sign-in URL, DNS menu path,
+  field names, before-notes, the records with copy buttons, conflicts,
+  propagation note, help link) → "I've added the records" → `verifying`,
+  `domain.verify` job (50 attempts) plus an inline check, page polls every
+  20 s; "Prefer we do it?" records `delegate` for the staff email. *No, I
+  need one* → up to three preferred names, registrant-ownership promise.
+  *Not sure* → one paragraph, then the same two paths. The same
+  `components/vigil/DomainGuide.tsx` renders on `/dashboard/domain`, so
+  "later" is never a dead end. Records come from
+  `domains.verification.required_records` when a provider supplied them,
+  else the platform targets `VIGIL_DNS_APEX_A` / `VIGIL_DNS_CNAME_TARGET`
+  (`requiredRecords`); `beginDomainVerification` stores those when no
+  provider site exists yet and `verifyDomain` checks public DNS directly in
+  that case (job re-checks every 6 h until a site exists).
+- **Send**: `intake_completed_at`, audit `project.intake_completed`, staff
+  email with the domain answer and file count, project `intake →
+  in_progress` when the service role is available. Afterwards the wizard
+  shows Virtue's "what happens next" (response window from
+  `NEXT_PUBLIC_ONBOARDING_RESPONSE_WINDOW`) and a read-only "What you sent".
+- **Entry points**: first sign-in → Overview redirects into the wizard while
+  the newest intake/draft project has no `intake_completed_at`, unless the
+  `vigil-onboarding-later` cookie (set by `/dashboard/onboarding/later`, 7
+  days) is present; the Overview then shows the `OnboardingCard` (progress
+  checklist, Continue) and, after sending, the "I've handed your details to
+  the team" card. Sidebar gets a "Getting set up" item (orb icon) while
+  onboarding is due. `/checkout/success` speaks as Virtue with the orb.
+- **Admin**: the customer page shows the brief read-only
+  (`components/vigil/BriefSummary.tsx`) with 30-minute signed links to the
+  uploads, and the organization's orders.
+
+### Buy button, billing portal, export
+
+- `components/express/ExpressCatalogue.tsx` (Codex-owned; the single agreed
+  edit): "Enquire" → `Buy · $<EXPRESS_PRICE>` linking to
+  `/checkout?template=<slug>`.
+- `/dashboard/billing` "Manage billing" (owner/manager, shown only when the
+  organization has a linked provider customer): `openBillingPortal` →
+  `createPortalSession` → redirect; audited.
+- `lib/vigil/services/export.ts`: `repositorySource` reads
+  `websites.repository_ref` under `VIGIL_CLIENTS_ROOT` (locally `..`, i.e.
+  `Websites/clients/<org-slug>/`): `site/**` (required), `content/**`,
+  project README. Falls back to the template capture. Paths under the root
+  are joined without `path.join(x, "literal")` because Turbopack's file
+  tracer otherwise pulled the whole workspace into the route's output.
+
+### Checks
+
+| Check | Result |
+| --- | --- |
+| `npm run check` | 84 unit tests, 98 RLS assertions, typecheck clean |
+| `npx eslint app/(vigil) lib/vigil components/vigil app/api proxy.ts` | clean |
+| `npx next build` | clean, no tracer warning |
+| Browser (Chrome, signed in as admin viewing Marlow & Fen) | Whole wizard at desktop: autosave, offerings rows, a real PNG upload to Storage (thumbnail after reload), registrar detected as Cloudflare for `vigilstudios.co`, full guide with copy buttons, review, send → staff email dry-run, Overview card, admin brief with file link. 375px via iframes: welcome, basics, offerings, brand, domain question, domain guide, review, sent state, billing. Light theme checked. |
+
+Test data left in the demo tenant on purpose: Marlow & Fen's brief is sent
+(status still `intake` locally because no service key), a `vigilstudios.co`
+domain row (pending, no records stored), one photo asset, a cancelled
+project "Mobile onboarding check" with its website archived.
+
+New tests: `orders.test.ts` (startCheckout, completeCheckout,
+provisionOrder idempotency with an extended `FakeAdmin`), `stripe.test.ts`
+(`parseWebhook` with `generateTestHeaderString`), `onboarding.test.ts`,
+`dns.test.ts`, repository export.
+
+### Not done in this session
+
+- Stripe test-mode end-to-end: needs `SUPABASE_SECRET_KEY`,
+  `BILLING_PROVIDER=stripe`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
+  (`stripe listen --forward-to 127.0.0.1:3000/api/webhooks/stripe`) and
+  approved prices + "Sync prices" on `/admin/plans`. Then: catalogue Buy →
+  `/checkout` → Stripe → `/checkout/success` → welcome email → `/auth/confirm`
+  → wizard. Merge to `main` after that run.
+- Friends-and-family discounts and the custom-scope UI (backlog in the
+  handoff) — `brief.scope` is reserved for the latter.
