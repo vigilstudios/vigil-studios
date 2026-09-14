@@ -300,6 +300,35 @@ export async function addDomainForOrganization(orgId: string, formData: FormData
   }
 }
 
+/** Attach a domain to one of its organization's websites (or detach with ""). */
+export async function attachDomainToWebsite(domainId: string, websiteId: string): Promise<ActionResult> {
+  try {
+    await requireStaffOrThrow();
+    const supabase = await createClient();
+    const { data: domain, error } = await supabase.from("domains").select("id, organization_id, website_id").eq("id", domainId).maybeSingle();
+    if (error) throw error;
+    if (!domain) throw new NotFoundError();
+    const { error: updateError } = await supabase
+      .from("domains")
+      .update({ website_id: websiteId || null })
+      .eq("id", domainId);
+    if (updateError) throw updateError; // the same-organization trigger refuses a foreign website
+    await logAuditEvent(supabase, {
+      action: "domain.attached",
+      entityType: "domain",
+      entityId: domainId,
+      organizationId: domain.organization_id,
+      before: { website_id: domain.website_id },
+      after: { website_id: websiteId || null },
+    });
+    revalidatePath(`/admin/organizations/${domain.organization_id}`);
+    revalidatePath("/admin/domains");
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
 export async function setDomainStatus(domainId: string, next: string, reason?: string): Promise<ActionResult> {
   try {
     await requireStaffOrThrow();

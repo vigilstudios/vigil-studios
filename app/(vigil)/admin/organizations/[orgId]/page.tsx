@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ActionButton, ActionForm, TransitionSelect } from "@/components/vigil/ActionControls";
+import { ActionButton, ActionForm, SelectApply, TransitionSelect } from "@/components/vigil/ActionControls";
 import { Card, DefinitionList, PageHeader, StatusPill, Table, inputClass, tdClass, thClass } from "@/components/vigil/ui";
 import {
   addDomainForOrganization,
+  attachDomainToWebsite,
   createProject,
   createSubscription,
   inviteToOrganization,
@@ -184,6 +185,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
             <tr>
               <th className={thClass}>Hostname</th>
               <th className={thClass}>Source</th>
+              <th className={thClass}>Website</th>
               <th className={thClass}>Status</th>
               <th className={thClass}>Transition</th>
             </tr>
@@ -193,6 +195,14 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
               <tr key={d.id}>
                 <td className={tdClass}>{d.hostname}</td>
                 <td className={tdClass}>{titleCase(d.source)}</td>
+                <td className={tdClass}>
+                  <SelectApply
+                    placeholder="Not attached"
+                    current={d.website_id}
+                    options={websites.map((w) => ({ value: w.id, label: w.name }))}
+                    action={attachDomainToWebsite.bind(null, d.id)}
+                  />
+                </td>
                 <td className={tdClass}>{titleCase(d.status)}{d.status_reason ? <div className="text-xs text-[color:var(--text-secondary)]">{d.status_reason}</div> : null}</td>
                 <td className={tdClass}>
                   <TransitionSelect current={d.status} options={domainTransitions[d.status]} action={setDomainStatus.bind(null, d.id)} withReason />
@@ -201,12 +211,13 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
             ))}
             {domains.length === 0 ? (
               <tr>
-                <td className={tdClass} colSpan={4}>No domains.</td>
+                <td className={tdClass} colSpan={5}>No domains.</td>
               </tr>
             ) : null}
           </tbody>
         </Table>
-        <ActionForm action={addDomainForOrganization.bind(null, org.id)} submitLabel="Add domain" className="mt-4 grid gap-2 sm:grid-cols-3">
+        {/* Keyed on the website list: an uncontrolled select keeps its first default, so remount when websites change. */}
+        <ActionForm key={`domains-${websites.map((w) => w.id).join(",")}`} action={addDomainForOrganization.bind(null, org.id)} submitLabel="Add domain" className="mt-4 grid gap-2 sm:grid-cols-3">
           <input name="hostname" placeholder="example.com" className={inputClass} required />
           <select name="website_id" className={inputClass} defaultValue={websites[0]?.id ?? ""}>
             <option value="">No website</option>
@@ -241,7 +252,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
             ))}
             {subscriptions.length === 0 ? <li className="py-2 text-[color:var(--text-secondary)]">No subscriptions.</li> : null}
           </ul>
-          <ActionForm action={createSubscription.bind(null, org.id)} submitLabel="Add subscription" className="mt-3 grid gap-2 sm:grid-cols-3">
+          <ActionForm key={`subs-${websites.map((w) => w.id).join(",")}`} action={createSubscription.bind(null, org.id)} submitLabel="Add subscription" className="mt-3 grid gap-2 sm:grid-cols-3">
             <select name="plan_id" className={inputClass} required defaultValue="">
               <option value="" disabled>Plan…</option>
               {catalog.plans.map((p) => (

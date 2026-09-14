@@ -174,3 +174,58 @@ export function ActionForm({
     </form>
   );
 }
+
+export function SelectApply({
+  options,
+  action,
+  placeholder,
+  current,
+}: {
+  options: { value: string; label: string }[];
+  action: (value: string) => Promise<ActionResult<unknown>>;
+  placeholder: string;
+  current?: string | null;
+}) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const [value, setValue] = useState<string>(current ?? "");
+  const [error, setError] = useState<string | null>(null);
+  const dirty = value !== (current ?? "");
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <select
+        aria-label={placeholder}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        disabled={pending}
+        className="rounded-md border border-[color:var(--border)] bg-transparent px-2 py-1 text-xs"
+      >
+        <option value="">{placeholder}</option>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      {dirty ? (
+        <button
+          type="button"
+          disabled={pending}
+          className="btn-secondary !px-3 !py-1 text-xs"
+          onClick={() => {
+            setError(null);
+            start(async () => {
+              const res = await action(value);
+              if (!res.ok) setError(res.error);
+              else router.refresh();
+            });
+          }}
+        >
+          Apply
+        </button>
+      ) : null}
+      {error ? <span className="text-xs text-[#ef4444]">{error}</span> : null}
+    </div>
+  );
+}

@@ -10,7 +10,8 @@ export function Logo({ className }: { className?: string }) {
         alt="Vigil"
         width={32}
         height={32}
-        className="h-8 w-auto [html[data-theme=light]_&]:hidden"
+        className="[html[data-theme=light]_&]:hidden"
+        style={{ height: "2rem", width: "auto" }}
         priority
       />
       <Image
@@ -18,7 +19,8 @@ export function Logo({ className }: { className?: string }) {
         alt="Vigil"
         width={32}
         height={32}
-        className="hidden h-8 w-auto [html[data-theme=light]_&]:inline"
+        className="hidden [html[data-theme=light]_&]:inline"
+        style={{ height: "2rem", width: "auto" }}
         priority
       />
     </span>

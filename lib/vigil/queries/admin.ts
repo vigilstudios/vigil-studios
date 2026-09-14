@@ -106,7 +106,7 @@ export const listDomains = cache(async () => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("domains")
-    .select("id, hostname, status, source, dns_ok, ssl_ok, expires_at, last_checked_at, status_reason, organization:organizations(id, name), website:websites(id, name)")
+    .select("id, hostname, status, source, dns_ok, ssl_ok, expires_at, last_checked_at, status_reason, organization:organizations(id, name), website:websites!domains_website_id_fkey(id, name)")
     .order("updated_at", { ascending: false })
     .limit(300);
   if (error) throw error;
