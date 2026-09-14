@@ -19,7 +19,7 @@ export function Card({
   return (
     <Tag
       className={clsx(
-        "rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-5 sm:p-6",
+        "rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-4",
         className
       )}
     >
@@ -40,16 +40,16 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
+    <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
         {eyebrow ? (
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--accent)]">
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--accent)]">
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{title}</h1>
+        <h1 className="text-lg font-semibold tracking-tight sm:text-xl">{title}</h1>
         {description ? (
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)]">{description}</p>
+          <p className="mt-1 max-w-2xl text-[13px] leading-5 text-[color:var(--text-secondary)]">{description}</p>
         ) : null}
       </div>
       {actions ? <div className="flex shrink-0 gap-2">{actions}</div> : null}
@@ -91,8 +91,8 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-[color:var(--border)] p-8 text-center">
-      <h3 className="text-base font-semibold">{title}</h3>
+    <div className="rounded-xl border border-dashed border-[color:var(--border)] p-6 text-center">
+      <h3 className="text-sm font-semibold">{title}</h3>
       {description ? (
         <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[color:var(--text-secondary)]">{description}</p>
       ) : null}
@@ -103,8 +103,8 @@ export function EmptyState({
 
 export function Stat({ label, value, hint }: { label: string; value: ReactNode; hint?: ReactNode }) {
   return (
-    <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--text-secondary)]">{label}</p>
+    <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-4">
+      <p className="text-[11px] font-medium uppercase tracking-wide text-[color:var(--text-secondary)]">{label}</p>
       <p className="mt-1 text-2xl font-semibold tracking-tight">{value}</p>
       {hint ? <p className="mt-1 text-xs text-[color:var(--text-secondary)]">{hint}</p> : null}
     </div>
@@ -146,9 +146,9 @@ export function ButtonLink({
 }
 
 export const inputClass =
-  "w-full rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-primary)] px-3.5 py-2.5 text-sm text-[color:var(--text-primary)] placeholder:text-[color:var(--text-secondary)] focus:border-[color:var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_35%,transparent)]";
+  "w-full rounded-md border border-[color:var(--border)] bg-[color:var(--bg-primary)] px-3 py-2 text-[13px] text-[color:var(--text-primary)] placeholder:text-[color:var(--text-secondary)] focus:border-[color:var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_35%,transparent)]";
 
-export const labelClass = "mb-1.5 block text-sm font-medium";
+export const labelClass = "mb-1 block text-xs font-medium text-[color:var(--text-secondary)]";
 
 export function FormError({ message }: { message?: string | null }) {
   if (!message) return null;
@@ -171,11 +171,11 @@ export function FormSuccess({ message }: { message?: string | null }) {
 export function Table({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div className={clsx("overflow-x-auto rounded-xl border border-[color:var(--border)]", className)}>
-      <table className="w-full min-w-[40rem] text-sm">{children}</table>
+      <table className="w-full min-w-[40rem] text-[13px]">{children}</table>
     </div>
   );
 }
 
 export const thClass =
-  "bg-[color:var(--bg-surface-soft)] px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-[color:var(--text-secondary)]";
-export const tdClass = "border-t border-[color:var(--border)] px-4 py-3 align-top";
+  "bg-[color:var(--bg-surface-soft)] px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-[color:var(--text-secondary)]";
+export const tdClass = "border-t border-[color:var(--border)] px-3 py-2.5 align-top";

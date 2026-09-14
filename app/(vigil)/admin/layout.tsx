@@ -1,38 +1,44 @@
-import Link from "next/link";
-import { Shell } from "@/components/vigil/Shell";
-import { SignOutButton } from "@/components/vigil/SignOutButton";
-import type { NavItem } from "@/components/vigil/ShellNav";
+import { AccountBlock } from "@/components/vigil/AccountBlock";
+import { AppShell } from "@/components/vigil/AppShell";
+import type { NavGroup } from "@/components/vigil/nav";
 import { requireStaff } from "@/lib/vigil/auth/session";
 
 /** Vigil Admin chrome. Staff only; admin-only screens check again themselves. */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const staff = await requireStaff("/admin");
-  const items: NavItem[] = [
-    { href: "/admin", label: "Overview", exact: true },
-    { href: "/admin/organizations", label: "Customers" },
-    { href: "/admin/websites", label: "Websites" },
-    { href: "/admin/domains", label: "Domains" },
-    { href: "/admin/subscriptions", label: "Subscriptions" },
-    { href: "/admin/requests", label: "Requests" },
-    { href: "/admin/jobs", label: "Jobs" },
-    { href: "/admin/audit", label: "Audit log" },
-    { href: "/admin/plans", label: "Plans & staff", locked: staff.staffRole !== "admin" },
+  const groups: NavGroup[] = [
+    {
+      items: [
+        { href: "/admin", label: "Overview", icon: "overview", exact: true },
+        { href: "/admin/organizations", label: "Customers", icon: "customers" },
+        { href: "/admin/websites", label: "Websites", icon: "websites" },
+        { href: "/admin/domains", label: "Domains", icon: "domains" },
+        { href: "/admin/subscriptions", label: "Subscriptions", icon: "subscriptions" },
+        { href: "/admin/requests", label: "Requests", icon: "requests" },
+      ],
+    },
+    {
+      label: "Operations",
+      items: [
+        { href: "/admin/jobs", label: "Jobs", icon: "jobs" },
+        { href: "/admin/audit", label: "Audit log", icon: "audit" },
+        { href: "/admin/plans", label: "Plans & staff", icon: "plans", locked: staff.staffRole !== "admin" },
+      ],
+    },
   ];
   return (
-    <Shell
-      items={items}
+    <AppShell
+      groups={groups}
       homeHref="/admin"
-      title={<span>Vigil Admin · {staff.profile.full_name ?? staff.profile.email}</span>}
-      headerRight={
-        <div className="flex items-center gap-3 text-sm">
-          <Link href="/dashboard" className="hidden text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)] sm:inline">
-            Client view
-          </Link>
-          <SignOutButton />
+      workspace={
+        <div className="min-w-0">
+          <div className="truncate text-[13px] font-semibold">Vigil Admin</div>
+          <div className="text-[10px] uppercase tracking-wide text-[color:var(--text-secondary)]">{staff.staffRole}</div>
         </div>
       }
+      account={<AccountBlock name={staff.profile.full_name} email={staff.profile.email} crossLink={{ href: "/dashboard", label: "Client view" }} />}
     >
       {children}
-    </Shell>
+    </AppShell>
   );
 }
