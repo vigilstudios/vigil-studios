@@ -68,7 +68,7 @@ export default async function PricingPage() {
             <p className="mt-4 max-w-2xl text-base leading-7 text-[color:var(--text-secondary)]">Basic keeps the site online. Care means you never touch it. Growth and Priority add Virtue, who works your leads and reviews for you. Change plans any time.</p>
           </div>
           <div className="mt-10 flex flex-col items-center">
-            <PricingTable plans={plans} />
+            <PricingTable plans={plans} bullets={6} />
           </div>
           <p className="mx-auto mt-8 max-w-2xl text-center text-xs leading-5 text-[color:var(--text-secondary)]">
             Prices in USD. Annual and three-year plans are paid up front. Change-request allowances and Virtue usage limits are set per plan and shown in your dashboard. Cancel at any time; hosting ends at the close of the period and you keep your site and domain.
