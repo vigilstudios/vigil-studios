@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { CalendlyPopup } from "@/components/CalendlyModal";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -89,13 +88,10 @@ export function Navigation() {
   }, []);
 
   const navItems = [
-    { href: "/#services", label: "Services" },
-    { href: "/#process", label: "Process" },
-    { href: "/#pricing", label: "Pricing" },
-    // Replaces the old Projects link. The portfolio section still says
-    // "launching soon"; the Express catalogue is finished work somebody can
-    // actually look at, which is what that nav slot was there to offer.
+    { href: "/products", label: "Products" },
     { href: "/express", label: "Vigil Express" },
+    { href: "/virtue", label: "Virtue" },
+    { href: "/pricing", label: "Pricing" },
     { href: "/#contact", label: "Contact" },
   ];
 
@@ -143,9 +139,9 @@ export function Navigation() {
           >
             Sign in
           </Link>
-          <CalendlyPopup className="btn-primary h-14 flex items-center justify-center rounded-[1.25rem]">
-            Book a Call
-          </CalendlyPopup>
+          <Link href="/express" className="btn-primary h-14 flex items-center justify-center rounded-[1.25rem]">
+            Get started
+          </Link>
         </div>
 
         {/* Mobile Menu Button */}
@@ -193,9 +189,9 @@ export function Navigation() {
               >
                 Sign in
               </Link>
-              <CalendlyPopup className="btn-primary h-14 flex items-center justify-center rounded-[1.25rem]">
-                Book a Call
-              </CalendlyPopup>
+              <Link href="/express" className="btn-primary h-14 flex items-center justify-center rounded-[1.25rem]">
+                Get started
+              </Link>
             </div>
           </motion.div>
         )}

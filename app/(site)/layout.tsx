@@ -3,7 +3,6 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Space_Grotesk, Inter } from "next/font/google";
 import "@/app/globals.css";
-import ProgressNav from "@/components/layout/ProgressNav";
 import { Navigation } from "@/components/layout/Navigation";
 import {
   SITE_DESCRIPTION,
@@ -33,12 +32,12 @@ export const metadata: Metadata = {
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
   keywords: [
-    "web design",
-    "web development",
-    "Long Island web developer",
-    "New York web developer",
-    "custom websites",
-    "SEO services",
+    "small business website",
+    "managed website",
+    "website hosting and updates",
+    "Vigil Express",
+    "New York web design",
+    "AI employee for small business",
   ],
   openGraph: {
     title: SITE_TITLE,
@@ -89,7 +88,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebSite",
               name: SITE_NAME,
-              alternateName: "Vigil Studios Web Development",
+              alternateName: "Vigil",
               url: SITE_URL,
             }),
           }}
@@ -97,8 +96,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans">
         <Navigation />
-        <ProgressNav />
-        <main id="site-root" className="h-screen overflow-y-auto md:snap-y md:snap-proximity">
+        <main id="site-root" className="h-screen overflow-y-auto">
           {children}
         </main>
         <Analytics />

@@ -1,27 +1,25 @@
 import { Footer } from "@/components/layout/Footer";
-import { AnimatedGridBackground } from "@/components/ui/AnimatedGridBackground";
 import { HeroSection } from "@/sections/HeroSection";
-import { ServicesSection } from "@/sections/ServicesSection";
-import { PortfolioSection } from "@/sections/PortfolioSection";
-import { ProcessSection } from "@/sections/ProcessSection";
-import { CtaBandSection } from "@/sections/CtaBandSection";
+import { PillarsSection } from "@/sections/PillarsSection";
+import { HowItWorksSection } from "@/sections/HowItWorksSection";
+import { IndustriesSection } from "@/sections/IndustriesSection";
 import { WhyVigilSection } from "@/sections/WhyVigilSection";
 import { PricingSection } from "@/sections/PricingSection";
 import { FAQSection } from "@/sections/FAQSection";
+import { GetStartedSection } from "@/sections/GetStartedSection";
 import { ContactSection } from "@/sections/ContactSection";
 
 export default function Home() {
   return (
     <>
-      <AnimatedGridBackground />
       <HeroSection />
-      <ServicesSection />
-      <ProcessSection />
-      <CtaBandSection />
-      <PricingSection />
+      <PillarsSection />
+      <HowItWorksSection />
+      <IndustriesSection />
       <WhyVigilSection />
-      <PortfolioSection />
+      <PricingSection />
       <FAQSection />
+      <GetStartedSection />
       <ContactSection />
       <Footer />
     </>

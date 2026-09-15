@@ -9,10 +9,10 @@ export const SITE_URL = "https://www.vigilstudios.co";
 
 export const SITE_NAME = "Vigil Studios";
 
-export const SITE_TITLE = "Vigil Studios | Web Development Agency";
+export const SITE_TITLE = "Vigil Studios | You run the business. Vigil runs the digital side of it.";
 
 export const SITE_DESCRIPTION =
-  "Custom-coded websites built for speed, search visibility, and measurable growth. No templates. No compromises.";
+  "Vigil builds your website, then keeps it online, updated and working for you. Vigil Express templates from $599, a Vigil plan that runs the site, and Virtue, the AI employee inside it.";
 
 /** Absolute URL for `path`, e.g. url("/process"). */
 export function url(path = "/"): string {

@@ -20,6 +20,10 @@
 
     --accent: #10d45a;
     --accent-hover: #0ab247;
+    /* Secondary accents, used sparingly (badges, one card in a row, the hero field). Green leads. */
+    --accent-2: #8b8cff;   /* violet */
+    --accent-3: #f2b950;   /* amber */
+    --accent-4: #34d4c6;   /* teal */
 
     --border: rgba(255, 255, 255, 0.08);
     --nav-bg: rgba(10, 10, 10, 0.24);
@@ -53,6 +57,9 @@
 
     --accent: #1e8846;
     --accent-hover: #15803d;
+    --accent-2: #5b5fd6;
+    --accent-3: #b4781a;
+    --accent-4: #12867c;
 
     --border: rgba(17, 24, 39, 0.08);
     --nav-bg: rgba(255, 255, 255, 0.16);

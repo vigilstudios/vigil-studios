@@ -1,109 +1,38 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { FAQ_ITEMS } from "@/lib/constants";
+import { clsx } from "clsx";
 import { ChevronDown } from "lucide-react";
-import { SectionHeader } from "@/components/ui/SectionHeader";
+import { Container, Section, SectionIntro } from "@/components/site/primitives";
+import { FAQ } from "@/lib/site-copy";
 
 export function FAQSection() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.05,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  };
-
+  const [open, setOpen] = useState<number | null>(0);
   return (
-    <section className="section-padding section-alt relative overflow-hidden">
-      <div className="container-wide">
-        <SectionHeader
-          eyebrow="FAQ"
-          title="Frequently Asked Questions"
-          subtitle="Get answers to common questions about our services"
-          align="center"
-        />
-
-        {/* FAQ List */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="max-w-3xl mx-auto space-y-4"
-        >
-          {FAQ_ITEMS.map((item, index) => (
-            <motion.div key={index} variants={itemVariants}>
-              <button
-                onClick={() =>
-                  setOpenIndex(openIndex === index ? null : index)
-                }
-                className="w-full glass p-4 rounded-2xl text-left hover:border-[color:var(--accent)]/50 transition-all duration-300 md:p-6"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <h3 className="text-lg font-bold text-[color:var(--text-primary)]">
-                    {item.question}
-                  </h3>
-                  <ChevronDown
-                    size={20}
-                    className={`text-[color:var(--accent)] flex-shrink-0 transition-transform duration-300 ${
-                      openIndex === index ? "rotate-180" : ""
-                    }`}
-                  />
-                </div>
-
-                {/* Answer */}
-                <AnimatePresence>
-                  {openIndex === index && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="overflow-hidden"
-                    >
-                      <p className="text-[color:var(--text-secondary)] pt-4 mt-4 border-t border-[color:var(--border)]">
-                        {item.answer}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </button>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          viewport={{ once: true }}
-          className="text-center mt-16"
-        >
-          <p className="text-[color:var(--text-secondary)] mb-6">
-            Can't find what you're looking for?
-          </p>
-          <a href="#contact" className="btn-primary inline-flex">
-            Get in Touch
-          </a>
-        </motion.div>
-      </div>
-    </section>
+    <Section id="faq" alt>
+      <Container>
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:gap-16">
+          <SectionIntro eyebrow="Questions" title="The things people ask before they buy." lead="Straight answers. If yours is not here, email hello@vigilstudios.co and a person replies." />
+          <ul className="divide-y divide-[color:var(--border)] rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)]">
+            {FAQ.map((item, i) => {
+              const isOpen = open === i;
+              return (
+                <li key={item.q}>
+                  <button type="button" onClick={() => setOpen(isOpen ? null : i)} aria-expanded={isOpen} className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-[15px] font-medium">
+                    {item.q}
+                    <ChevronDown className={clsx("h-4 w-4 shrink-0 text-[color:var(--text-secondary)] transition-transform", isOpen && "rotate-180")} />
+                  </button>
+                  <div className={clsx("grid transition-[grid-template-rows] duration-300", isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]")}>
+                    <div className="overflow-hidden">
+                      <p className="px-5 pb-5 text-sm leading-6 text-[color:var(--text-secondary)]">{item.a}</p>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </Container>
+    </Section>
   );
 }

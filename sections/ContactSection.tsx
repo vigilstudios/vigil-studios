@@ -7,7 +7,7 @@ import { AmbientGlow } from "@/components/ui/AmbientGlow";
 
 export function ContactSection() {
   return (
-    <section id="contact" className="section-padding relative overflow-hidden">
+    <section id="contact" className="relative overflow-hidden py-16 sm:py-24">
       <AmbientGlow className="-bottom-40 left-1/4" size={700} opacity={0.26} />
 
       <div className="container-wide relative z-10">
@@ -26,13 +26,12 @@ export function ContactSection() {
               </span>
             </div>
 
-            <h2 className="mb-6 text-4xl font-bold text-[color:var(--text-primary)] md:text-5xl">
-              Let's Work Together
+            <h2 className="mb-6 text-3xl font-semibold tracking-tight text-[color:var(--text-primary)] sm:text-4xl">
+              Talk to a person.
             </h2>
 
-            <p className="mb-8 text-lg text-[color:var(--text-secondary)]">
-              Ready to take your online presence to the next level? Schedule a
-              free strategy call and let’s map out the best path forward.
+            <p className="mb-8 text-base leading-7 text-[color:var(--text-secondary)] sm:text-lg">
+              Not sure which build or plan fits, or you need something custom? Write to us or book fifteen minutes. No pitch, just answers.
             </p>
 
             <div className="space-y-6">
@@ -95,29 +94,27 @@ export function ContactSection() {
             viewport={{ once: true }}
             className="glass flex flex-col justify-center rounded-2xl p-5 lg:p-12"
           >
-            <h3 className="mb-4 text-2xl font-bold text-[color:var(--text-primary)]">
-              Ready to start?
+            <h3 className="mb-4 text-2xl font-semibold tracking-tight text-[color:var(--text-primary)]">
+              Fifteen minutes with a person
             </h3>
 
             <p className="mb-8 text-[color:var(--text-secondary)]">
-              Book a free strategy call and we’ll talk through your goals,
-              timeline, budget, and the best path forward for your website.
+              Bring your questions about the build, the plan, your domain or a custom idea. We will tell you plainly what fits.
             </p>
 
             <CalendlyPopup className="btn-primary mb-4 w-full">
-              Book a Free Strategy Call
+              Book a call
             </CalendlyPopup>
 
             <a
               href="mailto:hello@vigilstudios.co"
               className="inline-flex w-full items-center justify-center rounded-lg border border-[color:var(--border)] px-5 py-3 text-[color:var(--text-primary)] transition-colors hover:border-[color:var(--accent)] hover:text-[color:var(--accent)]"
             >
-              Email Us Instead
+              Email us instead
             </a>
 
             <p className="mt-6 text-center text-xs text-[color:var(--text-secondary)]">
-              Prefer not to book yet? Send a quick email and we’ll respond
-              within 24 hours.
+              Prefer email? We reply within one business day.
             </p>
           </motion.div>
         </div>
