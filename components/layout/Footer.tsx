@@ -20,6 +20,7 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
       { label: "How it works", href: "/#how-it-works" },
       { label: "Questions", href: "/#faq" },
       { label: "Contact", href: "/#get-started" },
+      { label: "Service agreement", href: "/terms" },
     ],
   },
   {

@@ -643,3 +643,18 @@ not paid" and a validation failure is never retried.
 - Sales-tax copy removed from the marketing site at the owner's request
   (FAQ, pricing page lead, home pricing footnote).
 
+## 2026-09-15 — Cron, terms, refund note (before the first real purchase)
+
+- `vercel.json` cron: `/api/jobs/run?limit=50` daily at 09:00 UTC (the team
+  is on Hobby, where daily is the ceiling). `CRON_SECRET` set as a sensitive
+  production var; the route accepts it or `VIGIL_JOBS_SECRET`.
+- `/terms` — the service agreement in the product's voice, written by
+  Claude from the master doc's ownership/offboarding rules and the site's
+  existing promises, plus the owner's refund rule (build fee refundable
+  until work starts, none after; plan periods already started are not
+  refunded). Flagged for a lawyer's review before relying on it. Linked
+  from the footer and the sitemap.
+- Production env: `NEXT_PUBLIC_TERMS_URL=https://www.vigilstudios.co/terms`,
+  `NEXT_PUBLIC_REFUND_NOTE` = the one-sentence refund rule shown under the
+  checkout checkbox. Both baked in at build time.
+
