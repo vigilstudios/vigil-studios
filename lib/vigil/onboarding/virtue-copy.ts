@@ -58,6 +58,16 @@ export function virtueLine(step: StepKey, ctx: { firstName?: string | null; busi
   }
 }
 
+/** Spoken by the centred Virtue the first time the customer reaches the dashboard. */
+export function welcomeSpeech(ctx: { firstName?: string | null; businessName: string }): { text: string; emphasis?: boolean }[] {
+  const name = ctx.firstName ? `, ${ctx.firstName}` : "";
+  return [
+    { text: `Hello${name}. I'm Virtue.`, emphasis: true },
+    { text: `This is your dashboard. From here you'll see your website, your domain and your plan, and I'll be around whenever you need me.` },
+    { text: `First, I'd like to learn about ${ctx.businessName} so the team can start building. It takes about ten minutes and saves as you go.` },
+  ];
+}
+
 export const RESPONSE_WINDOW = process.env.NEXT_PUBLIC_ONBOARDING_RESPONSE_WINDOW ?? "two business days";
 
 export const AFTER_SEND: VirtueLine = {

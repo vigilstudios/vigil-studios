@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { ButtonLink, EmptyState } from "@/components/vigil/ui";
 import { Checklist, Meter, Panel, StatusLine, Stepper, Timeline } from "@/components/vigil/widgets";
 import { SiteFrame } from "@/components/vigil/SiteFrame";
 import { OnboardingCard } from "@/components/vigil/OnboardingCard";
+import { VirtueWelcome } from "@/components/vigil/VirtueWelcome";
+import { welcomeSpeech } from "@/lib/vigil/onboarding/virtue-copy";
 import { PasswordForm } from "@/components/vigil/PasswordForm";
 import { hasPassword } from "@/lib/vigil/auth/password";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
@@ -24,12 +25,13 @@ export default async function OverviewPage() {
   const ctx = await requireOrgContext("/dashboard");
   const orgId = ctx.organization.id;
 
-  // First sign-in after a purchase lands in the guided onboarding, until the
-  // customer sends the brief or chooses "Do this later".
+  // First arrival after a purchase: Virtue welcomes them over the dimmed
+  // dashboard until they begin or choose to look around first.
   const onboarding = await getOnboardingProject(orgId);
-  if (needsOnboarding(onboarding?.project)) {
+  let welcome = false;
+  if (needsOnboarding(onboarding?.project) && onboarding?.brief.progress.lastStep === "welcome") {
     const skipped = (await cookies()).get(ONBOARDING_SKIP_COOKIE)?.value === "1";
-    if (!skipped) redirect("/dashboard/onboarding");
+    welcome = !skipped;
   }
   const [websites, domains, subscription, projects, activity, ent] = await Promise.all([
     getOrgWebsites(orgId),
@@ -70,6 +72,7 @@ export default async function OverviewPage() {
 
   return (
     <div className="space-y-4">
+      {welcome && onboarding ? <VirtueWelcome projectId={onboarding.project.id} lines={welcomeSpeech({ firstName, businessName: onboarding.brief.basics?.businessName || ctx.organization.name })} /> : null}
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--accent)]">{ctx.organization.name}</p>
         <h1 className="text-lg font-semibold tracking-tight sm:text-xl">{firstName ? `Hello, ${firstName}` : "Overview"}</h1>

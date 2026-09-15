@@ -548,3 +548,38 @@ success page reads it and, when the email did not go out, says so and makes
 Supabase mails itself) the primary button — offered as a secondary link
 even when the email was sent. "Resend" reports a failure instead of
 claiming success. Owner action: verify the domain in Resend.
+
+## 2026-09-15 — Virtue redesign: shader orb, speech, journey
+
+Owner direction: the onboarding must feel alive with Virtue; no single box
+of steps; Virtue centred and speaking; the dashboard dimmed behind her on
+first arrival; steps fixed on the left of the forms.
+
+- **Orb** — `components/ui/orb.tsx` is the owner-supplied react-three-fiber
+  shader orb, adapted: noise texture at `/public/virtue/perlin.png` (no
+  third-party CDN), four-stop colour ramp with Vigil's greens
+  (`VIRTUE_COLORS`, `VIRTUE_RAMP_ENDS`) so the orb is green in both themes,
+  theme inversion off, `still` mode (one frame) for reduced motion, geometry
+  filling its circle. `VirtueOrb` keeps its API (sizes xs/sm/md/lg/xl;
+  states idle / thinking / listening / talking, with `working` and `done`
+  kept as aliases) and renders a `<div>` — never inside a `<p>`. The CSS orb
+  is gone. three / fiber / drei were already dependencies.
+- **Speech** — `components/vigil/VirtueSpeech.tsx` streams words one after
+  another and reports start/stop; `useSpeaking` maps that onto the orb's
+  `talking` state. Instant under prefers-reduced-motion.
+- **After checkout** — `/checkout/success` is a centred stage: xl orb, the
+  spoken greeting and one instruction (open the email / sign in with a
+  link), actions fade in after the words. `CheckoutShell` gained `centered`.
+- **First dashboard arrival** — `VirtueWelcome`: dimmed, blurred dashboard
+  behind a centred speaking Virtue with "Let's begin" (→ basics) and "Look
+  around the dashboard first" (session cookie; `?clear=1` on the later route
+  brings her back). Shown while the brief's last step is `welcome`; the old
+  redirect is gone. Copy in `welcomeSpeech`.
+- **Getting set up** — no card. Desktop: a sticky left rail (Virtue speaking
+  the step intro, numbered vertical steps with completion ticks, step count,
+  save state, Virtue note) beside the form. Phones: Virtue on top, the step
+  strip sticks to the top while the form scrolls. The welcome step is
+  retired (`WelcomeStep.tsx` removed); the sent state is Virtue centred.
+- Verified in the in-app browser (Chrome throttles animation and timers in
+  a hidden window, which made the orb look black there): success page,
+  welcome overlay, wizard at desktop and 375px, sticky strip, orb states.

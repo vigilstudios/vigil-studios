@@ -5,18 +5,26 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { clsx } from "clsx";
 import { ArrowLeft, ArrowRight, Check, Copy } from "lucide-react";
 import { VirtueOrb, type VirtueOrbState } from "@/components/vigil/VirtueOrb";
+import { VirtueSpeech } from "@/components/vigil/VirtueSpeech";
 import { inputClass, labelClass } from "@/components/vigil/ui";
 import { ONBOARDING_LATER_HREF } from "@/lib/vigil/onboarding/constants";
 import type { VirtueLine } from "@/lib/vigil/onboarding/virtue-copy";
 
-/** Virtue's line at the top of a step: orb + title + body. */
-export function VirtueSays({ line, state = "idle", size = "md" }: { line: VirtueLine; state?: VirtueOrbState; size?: "md" | "lg" }) {
+/** Virtue's line for a step: the orb speaks it, word by word, then settles. */
+export function VirtueSays({ line, state = "idle", size = "md", onSpeaking }: { line: VirtueLine; state?: VirtueOrbState; size?: "md" | "lg"; onSpeaking?: (speaking: boolean) => void }) {
+  const [speaking, setSpeaking] = useState(false);
+  const orbState: VirtueOrbState = speaking ? "talking" : state;
   return (
     <div className={clsx("flex gap-3", size === "lg" ? "flex-col items-center text-center sm:flex-row sm:items-start sm:text-left" : "items-start")}>
-      <VirtueOrb size={size} state={state} className="mt-0.5" />
-      <div className="min-w-0">
-        <h1 className={clsx("font-semibold tracking-tight", size === "lg" ? "text-xl sm:text-2xl" : "text-base sm:text-lg")}>{line.title}</h1>
-        <p className="mt-1 text-[13px] leading-6 text-[color:var(--text-secondary)] sm:text-sm">{line.body}</p>
+      <VirtueOrb size={size} state={orbState} className="mt-0.5" />
+      <div className="min-w-0 flex-1">
+        <VirtueSpeech
+          align="left"
+          size={size === "lg" ? "hero" : "compact"}
+          lines={[{ text: line.title, emphasis: true }, { text: line.body }]}
+          onStart={() => { setSpeaking(true); onSpeaking?.(true); }}
+          onDone={() => { setSpeaking(false); onSpeaking?.(false); }}
+        />
       </div>
     </div>
   );
@@ -28,23 +36,6 @@ export function VirtueAside({ children, state = "idle" }: { children: ReactNode;
     <div className="flex items-start gap-2 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] px-3 py-2.5 text-[13px] leading-5">
       <VirtueOrb size="sm" state={state} label="" className="mt-0.5" />
       <div className="min-w-0 text-[color:var(--text-primary)]">{children}</div>
-    </div>
-  );
-}
-
-export function ProgressBar({ current, total, label }: { current: number; total: number; label: string }) {
-  const pct = Math.round((current / total) * 100);
-  return (
-    <div>
-      <div className="flex items-center justify-between text-[11px] text-[color:var(--text-secondary)]">
-        <span>
-          Step {current} of {total}
-        </span>
-        <span>{label}</span>
-      </div>
-      <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-[color:var(--track)]" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={current} aria-label="Onboarding progress">
-        <div className="h-full rounded-full bg-[color:var(--accent)] transition-[width] duration-300" style={{ width: `${pct}%` }} />
-      </div>
     </div>
   );
 }

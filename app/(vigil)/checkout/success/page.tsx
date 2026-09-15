@@ -44,7 +44,7 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
   const welcomeSent: boolean | null = welcome ? Boolean(welcome.sent) : null;
 
   return (
-    <CheckoutShell title={status === "pending" ? "Finishing your payment…" : "Welcome to Vigil"}>
+    <CheckoutShell centered>
       <SuccessPanel orderId={order.id} email={order.email} status={status} businessName={order.business_name} emailSent={welcomeSent} />
     </CheckoutShell>
   );

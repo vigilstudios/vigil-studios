@@ -31,7 +31,7 @@ import { SIDEBAR_COOKIE, type NavGroup, type NavIcon, type NavItem } from "./nav
 
 /** Virtue's nav icon is the orb itself, sized like the other glyphs. */
 function VirtueNavIcon({ className }: { className?: string }) {
-  return <VirtueOrb size="sm" label="" className={clsx(className, "!h-4 !w-4")} />;
+  return <VirtueOrb size="xs" label="" className={className} />;
 }
 
 const icons: Record<NavIcon, React.ComponentType<{ className?: string }>> = {
