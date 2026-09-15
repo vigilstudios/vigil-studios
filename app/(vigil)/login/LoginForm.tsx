@@ -9,9 +9,10 @@ import { FormError, FormSuccess, inputClass, labelClass } from "@/components/vig
  * link is the fallback for first sign-ins, forgotten passwords and new
  * devices; it never needs to be the everyday path.
  */
-export function LoginForm({ next, initialError }: { next: string; initialError: string | null }) {
-  const [mode, setMode] = useState<"password" | "link">("password");
-  const [email, setEmail] = useState("");
+export function LoginForm({ next, initialError, initialEmail = "" }: { next: string; initialError: string | null; initialEmail?: string }) {
+  // Arriving with an email (from the checkout success page) means "send me a link".
+  const [mode, setMode] = useState<"password" | "link">(initialEmail ? "link" : "password");
+  const [email, setEmail] = useState(initialEmail);
   const [linkState, linkAction, linkPending] = useActionState<SignInState, FormData>(signInWithEmail, null);
   const [pwState, pwAction, pwPending] = useActionState<PasswordSignInState, FormData>(signInWithPassword, null);
 

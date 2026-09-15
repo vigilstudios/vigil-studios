@@ -39,9 +39,13 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
     }
   }
 
+  const { data: latest } = await admin.from("orders").select("metadata").eq("id", order.id).single();
+  const welcome = (latest?.metadata as { welcome_email?: { sent?: boolean } } | null)?.welcome_email;
+  const welcomeSent: boolean | null = welcome ? Boolean(welcome.sent) : null;
+
   return (
     <CheckoutShell title={status === "pending" ? "Finishing your payment…" : "Welcome to Vigil"}>
-      <SuccessPanel orderId={order.id} email={order.email} status={status} businessName={order.business_name} />
+      <SuccessPanel orderId={order.id} email={order.email} status={status} businessName={order.business_name} emailSent={welcomeSent} />
     </CheckoutShell>
   );
 }

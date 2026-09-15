@@ -15,7 +15,7 @@ const errorMessages: Record<string, string> = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string; error?: string }>;
+  searchParams: Promise<{ next?: string; error?: string; email?: string }>;
 }) {
   const params = await searchParams;
   const next = safeNextPath(params.next);
@@ -35,7 +35,7 @@ export default async function LoginPage({
         </div>
 
         <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-6">
-          <LoginForm next={next} initialError={error} />
+          <LoginForm next={next} initialError={error} initialEmail={params.email ?? ""} />
         </div>
 
         <p className="mt-6 text-center text-xs text-[color:var(--text-secondary)]">

@@ -258,8 +258,11 @@ export async function provisionOrder(admin: DbClient, orderId: string, provider:
     p_after: { business_name: order.business_name, plan_id: order.plan_id, project_kind: order.project_kind },
   });
 
-  // 6. Welcome email with a sign-in link. Failures here never undo the account.
-  await sendWelcome(order.email, order.business_name, appUrl).catch((err) => console.error("welcome email failed:", err));
+  // 6. Welcome email with a sign-in link. Failures here never undo the
+  //    account; the outcome is kept on the order so the success page can
+  //    offer the sign-in page instead of a promise that will not arrive.
+  const welcome = await sendWelcome(order.email, order.business_name, appUrl).catch((err) => ({ sent: false, error: err instanceof Error ? err.message : String(err) }));
+  await admin.from("orders").update({ metadata: { ...(order.metadata as Record<string, unknown> | null), welcome_email: { sent: welcome.sent, error: welcome.error ?? null, at: new Date().toISOString() } } as unknown as Json }).eq("id", orderId);
   await sendEmail({
     to: staffNotificationAddress(),
     subject: `New customer: ${order.business_name}`,
@@ -295,10 +298,10 @@ export async function signInLinkFor(email: string, appUrl: string): Promise<stri
   return `${appUrl}/auth/confirm?token_hash=${encodeURIComponent(res.data.properties.hashed_token)}&type=${type}`;
 }
 
-export async function sendWelcome(email: string, businessName: string, appUrl: string): Promise<void> {
+export async function sendWelcome(email: string, businessName: string, appUrl: string): Promise<{ sent: boolean; error?: string }> {
   const link = await signInLinkFor(email, appUrl).catch(() => null);
   const cta = link ?? `${appUrl}/login`;
-  await sendEmail({
+  return sendEmail({
     to: email,
     subject: `Welcome to Vigil — let's build ${businessName}`,
     text: `Thanks for choosing Vigil Studios. Your account is ready.\n\nSign in here to tell us about ${businessName} so we can start building:\n${cta}\n\nThe link signs you in directly; no password needed.`,

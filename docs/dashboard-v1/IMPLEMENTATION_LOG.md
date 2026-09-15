@@ -535,3 +535,16 @@ and a later test-mode sync from a laptop would have repointed production.
   mode stamp and stopped matching; stamped them `test` and removed 14 dead
   ids from an earlier provider run; `recordPriceLink` now also sweeps
   unstamped links on sync.
+
+## 2026-09-15 — Welcome email failure is visible and survivable
+
+Owner's first self-run walkthrough: payment and provisioning worked, no
+welcome email. Resend refused the send ("vigilstudios.co domain is not
+verified") and `sendEmail` returned `{ sent: false }` without a trace.
+Now: every failed send is logged with recipient and subject; `provisionOrder`
+records `metadata.welcome_email = { sent, error, at }` on the order; the
+success page reads it and, when the email did not go out, says so and makes
+"Sign in with a link" (→ `/login?email=…&next=/dashboard/onboarding`, which
+Supabase mails itself) the primary button — offered as a secondary link
+even when the email was sent. "Resend" reports a failure instead of
+claiming success. Owner action: verify the domain in Resend.

@@ -87,7 +87,8 @@ export async function resendWelcome(orderId: string): Promise<ActionResult> {
     const admin = createAdminClient();
     const { data: order } = await admin.from("orders").select("email, business_name, status").eq("id", orderId).maybeSingle();
     if (!order || (order.status !== "paid" && order.status !== "provisioned")) throw new ValidationError("This order is not ready yet.");
-    await sendWelcome(order.email, order.business_name, await appUrl());
+    const res = await sendWelcome(order.email, order.business_name, await appUrl());
+    if (!res.sent) throw new ValidationError("We could not send the email right now. Use “Sign in with a link” below instead.");
     return { ok: true, data: undefined };
   } catch (error) {
     return toActionError(error);

@@ -21,10 +21,15 @@ export async function sendEmail(message: EmailMessage): Promise<{ sent: boolean;
   try {
     const resend = new Resend(key);
     const { data, error } = await resend.emails.send({ from: FROM, to: message.to, reply_to: REPLY_TO, subject: message.subject, html: message.html, text: message.text });
-    if (error) return { sent: false, error: error.message };
+    if (error) {
+      console.error(`[email] send failed to=${message.to} subject=${JSON.stringify(message.subject)}: ${error.message}`);
+      return { sent: false, error: error.message };
+    }
     return { sent: true, id: data?.id };
   } catch (err) {
-    return { sent: false, error: err instanceof Error ? err.message : String(err) };
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[email] send threw to=${message.to} subject=${JSON.stringify(message.subject)}: ${msg}`);
+    return { sent: false, error: msg };
   }
 }
 
