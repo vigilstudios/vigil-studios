@@ -13,13 +13,21 @@ export const HERO = {
   secondary: { label: "See how it works", href: "#how-it-works" },
 };
 
+/** The Products menu, in the order a customer buys them: build, plan, upgrade; the catalogue last. */
+export const PRODUCT_LINKS = [
+  { label: "Websites", blurb: "Express, Professional, Custom: pick where you are starting", href: "/products/websites" },
+  { label: "Vigil", blurb: "The platform under every website: hosting, domain, updates, plans", href: "/products/vigil" },
+  { label: "Virtue", blurb: "The AI employee inside it", href: "/products/virtue" },
+  { label: "Express Catalogue", blurb: "Finished templates by industry, ready to buy", href: "/express" },
+];
+
 export const PILLARS = [
   {
     key: "websites",
     tone: "accent" as const,
     title: "A website built for you",
     body: "Express when you are just getting online, Professional when you are established, Custom when you have something bigger in mind. Built by people, not generated.",
-    href: "/products#websites",
+    href: "/products/websites",
     cta: "Websites",
   },
   {
@@ -27,7 +35,7 @@ export const PILLARS = [
     tone: "teal" as const,
     title: "Vigil keeps it running",
     body: "Hosting, domain, security, updates and a dashboard that says plainly what is live, what is connected and what is next. You ask; we handle it.",
-    href: "/products#vigil",
+    href: "/products/vigil",
     cta: "The Vigil platform",
   },
   {
@@ -35,7 +43,7 @@ export const PILLARS = [
     tone: "violet" as const,
     title: "Virtue works inside it",
     body: "Virtue sets every customer up. On Growth and Priority she keeps going: following up leads, texting back missed calls, asking for reviews.",
-    href: "/virtue",
+    href: "/products/virtue",
     cta: "Meet Virtue",
   },
 ];
@@ -107,6 +115,49 @@ export const GET_STARTED = {
   email: "hello@vigilstudios.co",
   emailLabel: "Email us",
   note: "Fifteen minutes with a person, no pitch. Email gets a reply within one business day.",
+};
+
+/** /products/websites: what each build is for. Names and prices stay in build_prices; this page points at /pricing for numbers. */
+export const WEBSITES_PAGE = {
+  title: "Three ways to get a website from Vigil.",
+  lead: "Every one is built by a person from what you tell Virtue, runs on the Vigil platform, and is yours to keep. Which one you start with depends on where your business is today.",
+  packages: {
+    express: {
+      stage: "Just getting online",
+      tone: "accent" as const,
+      what: "A finished, single-page website for your industry, made yours with your words, photos and colours. You see the whole example site before you buy, and a person builds yours from it in one to two business days.",
+      goodFor: ["Opening soon and need to be findable", "A Facebook page or a listing, but no website", "Replacing a do-it-yourself builder site", "One location and one clear next step: call, book or visit"],
+      notFor: "More than a page of content, a custom look, or anything a customer has to log in to.",
+      timeline: "First look within two business days; one revision round.",
+      cta: { label: "Browse the templates", href: "/express" },
+    },
+    professional: {
+      stage: "Established and growing",
+      tone: "teal" as const,
+      what: "A multi-page website designed around your business rather than a template: your services, your locations, your people, with room for a blog and the pages that help customers find you.",
+      goodFor: ["More than one service line or location", "A look that is yours, not a template's", "Content that keeps growing: news, guides, longer pages", "Search matters for how customers find you"],
+      notFor: "Ordering, booking systems, portals or integrations; those are a Custom build.",
+      timeline: "Scoped with you in a short call; two revision rounds.",
+      cta: { label: "Talk to us about Professional", href: "#get-started" },
+    },
+    custom: {
+      stage: "Something bigger in mind",
+      tone: "violet" as const,
+      what: "Anything with a scope: a booking or ordering system, a customer portal, a shop, an integration with the tools you already use. Quoted after a short call, built on the same Vigil platform.",
+      goodFor: ["Online ordering, booking or scheduling", "A members area or customer portal", "E-commerce", "Connecting the website to the systems you already run"],
+      notFor: "A first website; start with Express or Professional and grow into this.",
+      timeline: "Timeline and revisions agreed in the scope.",
+      cta: { label: "Book a call", href: "#get-started" },
+    },
+  },
+  glance: [
+    { label: "Pages", express: "One", professional: "Several", custom: "As scoped" },
+    { label: "Design", express: "Industry template, made yours", professional: "Custom", custom: "Custom" },
+    { label: "First look", express: "1–2 business days", professional: "Agreed in the call", custom: "Agreed in the scope" },
+    { label: "Revision rounds", express: "One", professional: "Two", custom: "As scoped" },
+    { label: "How you start", express: "Pick a template, check out", professional: "Short call, then a checkout link", custom: "Short call, then a quote" },
+  ],
+  platformNote: "Every Vigil website, whichever build, comes with the Vigil platform underneath: hosting, domain, security, updates and a dashboard that says plainly what is live. You choose how much we take off your plate with a plan.",
 };
 
 export const FAQ = [

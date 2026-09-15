@@ -33,9 +33,9 @@ export default async function ProductsPage() {
         <Container>
           <SectionIntro eyebrow="Products" title="A website to start with. A platform that keeps it running. An employee inside it." lead="Three parts, one relationship. This page walks through each one and what it costs." />
           <div className="mt-8 flex flex-wrap gap-2">
-            <a href="#websites" className="btn-secondary min-h-10 !px-4 !py-1.5 text-sm">Websites</a>
-            <a href="#vigil" className="btn-secondary min-h-10 !px-4 !py-1.5 text-sm">The Vigil platform</a>
-            <Link href="/virtue" className="btn-secondary min-h-10 !px-4 !py-1.5 text-sm">Virtue <ArrowUpRight className="ml-1 h-3.5 w-3.5" /></Link>
+            <Link href="/products/websites" className="btn-secondary min-h-10 !px-4 !py-1.5 text-sm">Websites <ArrowUpRight className="ml-1 h-3.5 w-3.5" /></Link>
+            <Link href="/products/vigil" className="btn-secondary min-h-10 !px-4 !py-1.5 text-sm">The Vigil platform <ArrowUpRight className="ml-1 h-3.5 w-3.5" /></Link>
+            <Link href="/products/virtue" className="btn-secondary min-h-10 !px-4 !py-1.5 text-sm">Virtue <ArrowUpRight className="ml-1 h-3.5 w-3.5" /></Link>
           </div>
         </Container>
       </Section>
@@ -117,7 +117,7 @@ export default async function ProductsPage() {
               <h2 className="text-2xl font-semibold tracking-tight">The employee who lives in your dashboard.</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)]">Today Virtue sets up every customer. On Growth and Priority she keeps working after launch: leads, missed calls, reviews. See what she does now and what is coming.</p>
             </div>
-            <Link href="/virtue" className="btn-primary min-h-11 shrink-0 !px-5 !py-2 text-sm font-semibold">Meet Virtue <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+            <Link href="/products/virtue" className="btn-primary min-h-11 shrink-0 !px-5 !py-2 text-sm font-semibold">Meet Virtue <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
           </div>
         </Container>
       </Section>

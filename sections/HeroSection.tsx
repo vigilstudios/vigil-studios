@@ -33,7 +33,7 @@ export function HeroSection() {
       <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-28 sm:px-6 sm:pt-32 lg:px-8">
         <motion.div variants={sequence} initial="hidden" animate="visible" className="max-w-4xl">
           <motion.div variants={item}>
-            <Link href="/virtue" className="group inline-flex items-center gap-2 rounded-full border border-[color:var(--border)] bg-[color:var(--bg-primary)]/40 py-1.5 pl-1.5 pr-3.5 text-[12px] font-medium text-[color:var(--text-primary)] backdrop-blur-md transition-colors hover:bg-[color:var(--bg-primary)]/60">
+            <Link href="/products/virtue" className="group inline-flex items-center gap-2 rounded-full border border-[color:var(--border)] bg-[color:var(--bg-primary)]/40 py-1.5 pl-1.5 pr-3.5 text-[12px] font-medium text-[color:var(--text-primary)] backdrop-blur-md transition-colors hover:bg-[color:var(--bg-primary)]/60">
               <VirtueOrb size="sm" label="" />
               <span>Virtue sets up every customer</span>
               <ArrowRight className="h-3.5 w-3.5 opacity-60 transition-transform group-hover:translate-x-0.5" />

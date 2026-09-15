@@ -19,11 +19,12 @@ export function VirtueHero() {
       <div className="mx-auto flex max-w-3xl flex-col items-center px-4 text-center sm:px-6">
         <VirtueOrb size="xl" state={speech.speaking ? "talking" : "idle"} />
         <div className="mt-8 min-h-[8rem] w-full">
+          {/* One paragraph under the greeting, in the primary text colour: the secondary grey the product uses disappears into the field. */}
           <VirtueSpeech
+            className="[&>p]:text-[color:var(--text-primary)] [&>p:not(:first-child)]:opacity-85 [&>p:not(:first-child)]:sm:text-lg [&>p:not(:first-child)]:sm:leading-8"
             lines={[
               { text: "Hello. I'm Virtue.", emphasis: true },
-              { text: "I work inside Vigil. Today I set up every customer: your sign-in, your business details, your photos and your domain, then I hand it all to the team." },
-              { text: "Soon, on Growth and Priority, I keep going after launch: following up leads, texting back missed calls, asking happy customers for reviews." },
+              { text: "I work inside Vigil. Today I set up every customer, from sign-in to domain, and hand it all to the team. Soon, on Growth and Priority, I keep going after launch: following up leads, texting back missed calls, asking happy customers for reviews." },
             ]}
             onStart={speech.onStart}
             onDone={() => { speech.onDone(); setSpoken(true); }}

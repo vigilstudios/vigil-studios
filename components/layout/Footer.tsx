@@ -7,10 +7,10 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
   {
     title: "Products",
     links: [
-      { label: "Websites", href: "/products#websites" },
+      { label: "Websites", href: "/products/websites" },
       { label: "Vigil Express catalogue", href: "/express" },
-      { label: "The Vigil platform", href: "/products#vigil" },
-      { label: "Virtue", href: "/virtue" },
+      { label: "Vigil", href: "/products/vigil" },
+      { label: "Virtue", href: "/products/virtue" },
     ],
   },
   {

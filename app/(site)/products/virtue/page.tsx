@@ -9,7 +9,7 @@ import { VirtueHero } from "./VirtueHero";
 export const metadata: Metadata = {
   title: "Virtue | Vigil Studios",
   description: "Virtue is the AI employee inside Vigil. She sets up every customer today; on Growth and Priority she will follow up leads, text back missed calls and ask for reviews.",
-  alternates: { canonical: "/virtue" },
+  alternates: { canonical: "/products/virtue" },
 };
 
 const TODAY = [

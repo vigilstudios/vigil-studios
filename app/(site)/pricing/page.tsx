@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowRight, Check } from "lucide-react";
 import { Footer } from "@/components/layout/Footer";
-import { Chip, Container, Eyebrow, Section, SectionIntro } from "@/components/site/primitives";
+import { BuildCards } from "@/components/site/BuildCards";
+import { Container, Eyebrow, Section, SectionIntro } from "@/components/site/primitives";
 import { PricingTable } from "@/components/site/PricingTable";
 import { FAQSection } from "@/sections/FAQSection";
 import { GetStartedSection } from "@/sections/GetStartedSection";
-import { BUILD_COPY } from "@/lib/site-copy";
-import { formatMoney } from "@/lib/vigil/format";
 import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
 
 export const metadata: Metadata = {
@@ -26,37 +23,10 @@ export default async function PricingPage() {
         </Container>
       </Section>
 
-      <Section className="pt-0" id="builds">
+      <Section className="scroll-mt-28 pt-0" id="builds">
         <Container>
           <Eyebrow>1 · The build, paid once</Eyebrow>
-          <div className="grid gap-4 md:grid-cols-3">
-            {builds.map((b) => {
-              const copy = BUILD_COPY[b.kind];
-              const tone = b.kind === "express" ? "accent" : b.kind === "professional" ? "teal" : "violet";
-              return (
-                <div key={b.kind} className="flex flex-col rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-6">
-                  <div className="flex items-start justify-between gap-2">
-                    <h2 className="text-xl font-semibold tracking-tight">{b.name}</h2>
-                    <Chip tone={tone}>{b.kind === "express" ? "Fastest" : b.kind === "professional" ? "Multi-page" : "Scoped"}</Chip>
-                  </div>
-                  <p className="mt-1 text-sm text-[color:var(--text-secondary)]">{copy?.tagline ?? b.description}</p>
-                  <p className="mt-5 text-3xl font-semibold tracking-tight">{b.amountCents != null ? formatMoney(b.amountCents, b.currency).replace(/\.00$/, "") : "Quoted"}<span className="text-sm font-normal text-[color:var(--text-secondary)]"> {b.amountCents != null ? "once" : "after a short call"}</span></p>
-                  <ul className="mt-5 space-y-2 text-sm text-[color:var(--text-secondary)]">
-                    {(copy?.bullets ?? []).map((x) => (
-                      <li key={x} className="flex items-start gap-2"><Check className="mt-1 h-3.5 w-3.5 shrink-0 text-[color:var(--accent)]" /> {x}</li>
-                    ))}
-                  </ul>
-                  <div className="mt-auto pt-6">
-                    {b.kind === "express" ? (
-                      <Link href="/express" className="btn-primary inline-flex min-h-11 !px-4 !py-2 text-sm font-semibold">Choose a template <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
-                    ) : (
-                      <Link href="/#get-started" className="btn-secondary inline-flex min-h-11 !px-4 !py-2 text-sm">Talk to us</Link>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <BuildCards builds={builds} bullets={7} />
         </Container>
       </Section>
 

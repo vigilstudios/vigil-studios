@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { ProductsMenu } from "@/components/layout/ProductsMenu";
+import { PRODUCT_LINKS } from "@/lib/site-copy";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -88,9 +90,6 @@ export function Navigation() {
   }, []);
 
   const navItems = [
-    { href: "/products", label: "Products" },
-    { href: "/express", label: "Vigil Express" },
-    { href: "/virtue", label: "Virtue" },
     { href: "/pricing", label: "Pricing" },
     { href: "/#get-started", label: "Contact" },
   ];
@@ -122,15 +121,16 @@ export function Navigation() {
           <div className="h-14 w-14 rounded-[1.25rem] border border-[color:var(--border)] bg-[color:var(--bg-surface)]/90 backdrop-blur-xl flex items-center justify-center">
             <ThemeToggle />
           </div>
-          <div className="md:flex items-center gap-6 h-14 rounded-[1.25rem] border border-[color:var(--border)] bg-[color:var(--bg-surface)]/90 backdrop-blur-xl px-4 shadow-[0_24px_80px_-48px_rgba(0,0,0,0.45)]">
+          <div className="md:flex items-center gap-6 h-14 rounded-[1.25rem] border border-[color:var(--border)] bg-[color:var(--bg-surface)]/90 backdrop-blur-xl px-5 shadow-[0_24px_80px_-48px_rgba(0,0,0,0.45)]">
+            <ProductsMenu />
             {navItems.map((item) => (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
                 className="text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)] transition-colors text-sm font-medium"
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
           </div>
           <Link
@@ -172,15 +172,30 @@ export function Navigation() {
             className="md:hidden bg-[color:var(--bg-secondary)] border-b border-[color:var(--border)]"
           >
             <div className="container-wide py-6 flex flex-col gap-4">
+              <div>
+                <Link href="/products" onClick={() => setIsOpen(false)} className="text-[color:var(--text-primary)] hover:text-[color:var(--accent)] transition-colors font-medium">
+                  Products
+                </Link>
+                <ul className="mt-2 flex flex-col gap-1 border-l border-[color:var(--border)] pl-4">
+                  {PRODUCT_LINKS.map((item) => (
+                    <li key={item.href}>
+                      <Link href={item.href} onClick={() => setIsOpen(false)} className="flex flex-col py-1.5">
+                        <span className="text-sm font-medium text-[color:var(--text-primary)]">{item.label}</span>
+                        <span className="text-[12px] text-[color:var(--text-secondary)]">{item.blurb}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
               {navItems.map((item) => (
-                <a
+                <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setIsOpen(false)}
                   className="text-[color:var(--text-primary)] hover:text-[color:var(--accent)] transition-colors font-medium"
                 >
                   {item.label}
-                </a>
+                </Link>
               ))}
               <Link
                 href="/login"
