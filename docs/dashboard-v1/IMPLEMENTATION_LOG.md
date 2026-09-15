@@ -707,3 +707,28 @@ fail silently.
   refunds/cancellations beyond the subscription snapshot, and Resend
   actually delivering (the domain check is on the Resend side).
 
+## 2026-09-15 — First live purchase (fifty cents), email fix, cleanup
+
+- Owner ran a live purchase on www.vigilstudios.co with the single-use
+  `FIFTYCENTS` code (coupon `LIVE_TEST_50C`, 99.92% off the first
+  invoice): $0.50 charged, `checkout.session.completed` arrived through the
+  live webhook and provisioned the account, subscription linked from
+  Stripe's snapshot. Transactions are ready.
+- Welcome email failed on that run: production had `EMAIL_FROM`,
+  `EMAIL_REPLY_TO` and `STAFF_NOTIFY_EMAIL` set to empty strings, which
+  `??` kept, so Resend rejected the sender. `||` now treats empty as unset
+  and the production values are set. Reconciliation's welcome retry then
+  sent it (`welcomeResent`), the first proof of production email.
+- Cleanup: Stripe subscriptions cancelled (live `sub_1UG3d6…`, test
+  `sub_1UG0jO…`); organizations Penny Check and Check 1 deleted with
+  cascades, their orders, provider links, jobs and the two auth users
+  (`belierjavier@vigilstudios.email`, `hello@vigilstudios.co`, neither
+  staff). Marlow & Fen and the admin account remain. The $0.50 live charge
+  (`ch_3UG3d3Bq4c89LxhO1YvXWZaU`) is the owner's to refund in Stripe.
+- Not built (owner asked, then the live test took priority): cross-device
+  sign-in handoff after the welcome email — the tab that paid signing in
+  when the link is opened on another device. Design agreed: handoff row +
+  cookie from the checkout browser, row id on the welcome link, one-time
+  grant claimed by the polling tab; the login-page link cannot use it
+  until login emails move off Supabase's template.
+
