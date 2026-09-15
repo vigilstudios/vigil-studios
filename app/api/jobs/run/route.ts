@@ -10,12 +10,14 @@ export const dynamic = "force-dynamic";
  * (POST). Authenticated with a bearer secret; there is no session here.
  */
 function authorized(request: NextRequest): boolean {
-  const secret = process.env.VIGIL_JOBS_SECRET || process.env.CRON_SECRET;
-  if (!secret) return false;
-  const header = request.headers.get("authorization") ?? "";
-  const expected = Buffer.from(`Bearer ${secret}`);
-  const actual = Buffer.from(header);
-  return expected.length === actual.length && timingSafeEqual(expected, actual);
+  // Vercel Cron sends CRON_SECRET; staff tooling sends VIGIL_JOBS_SECRET. Either opens the door.
+  const secrets = [process.env.VIGIL_JOBS_SECRET, process.env.CRON_SECRET].filter((s): s is string => Boolean(s));
+  if (secrets.length === 0) return false;
+  const actual = Buffer.from(request.headers.get("authorization") ?? "");
+  return secrets.some((secret) => {
+    const expected = Buffer.from(`Bearer ${secret}`);
+    return expected.length === actual.length && timingSafeEqual(expected, actual);
+  });
 }
 
 async function handle(request: NextRequest) {
