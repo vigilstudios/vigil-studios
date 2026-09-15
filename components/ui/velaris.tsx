@@ -8,7 +8,8 @@ import { clsx } from "clsx";
  * glow and film grain (owner-supplied component, 21st.dev). Kept faithful to
  * the original shader; additions are only about the page around it: pause
  * when scrolled out of view, a single still frame under
- * prefers-reduced-motion, and a capped device pixel ratio.
+ * prefers-reduced-motion, a capped device pixel ratio, palette changes
+ * applied in place, and a lost context restored instead of left blank.
  */
 const vertexShaderGLSL = `
 attribute vec2 position;
@@ -108,18 +109,79 @@ function hexToRgb(hex: string): [number, number, number] {
   return [parseInt(h.slice(0, 2), 16) / 255, parseInt(h.slice(2, 4), 16) / 255, parseInt(h.slice(4, 6), 16) / 255];
 }
 
+type GlState = {
+  gl: WebGLRenderingContext;
+  lose: WEBGL_lose_context | null;
+  locs: { res: WebGLUniformLocation | null; time: WebGLUniformLocation | null; grain: WebGLUniformLocation | null; colors: WebGLUniformLocation | null; bg: WebGLUniformLocation | null } | null;
+  /** Deferred loseContext() from the last cleanup; cancelled if the same canvas mounts again. */
+  pendingLose: number;
+};
+
 const Velaris = ({ bg = "#000000", colors = DEFAULT_COLORS, speed = 2.0, grain = 0.3, height = "100vh", className, children }: VelarisProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const colorsKey = colors.join(",");
+
+  // A canvas only ever has one WebGL context: once it is lost, getContext()
+  // keeps handing back the dead one. So the context lives in a ref for the
+  // life of the canvas, palette changes update its uniforms in place, and
+  // the deliberate loseContext() on unmount is deferred a tick so a remount
+  // of the same canvas (StrictMode) can cancel it.
+  const stateRef = useRef<GlState | null>(null);
+  const paletteRef = useRef({ bg, colorsKey, grain, speed });
+  const applyRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
 
-    const gl = canvas.getContext("webgl", { antialias: false, powerPreference: "low-power" });
-    if (!gl) return;
+    let st = stateRef.current;
+    if (st) {
+      clearTimeout(st.pendingLose);
+      st.pendingLose = 0;
+    } else {
+      const gl = canvas.getContext("webgl", { antialias: false, powerPreference: "low-power" });
+      if (!gl) return;
+      st = { gl, lose: gl.getExtension("WEBGL_lose_context"), locs: null, pendingLose: 0 };
+      stateRef.current = st;
+    }
+    const { gl } = st;
+
+    let raf = 0;
+    let visible = true;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const render = (t: number) => {
+      raf = 0;
+      if (!st.locs || gl.isContextLost()) return;
+      gl.uniform1f(st.locs.time, t * 0.001 * paletteRef.current.speed);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      if (visible && !reduce.matches) raf = requestAnimationFrame(render);
+    };
+    const kick = () => {
+      if (!raf) raf = requestAnimationFrame(render);
+    };
+
+    const resize = () => {
+      if (!st.locs) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      canvas.width = Math.max(1, Math.floor(container.clientWidth * dpr));
+      canvas.height = Math.max(1, Math.floor(container.clientHeight * dpr));
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.uniform2f(st.locs.res, canvas.width, canvas.height);
+    };
+
+    // Colours and grain do not change per frame; set them when they change.
+    const applyPalette = () => {
+      if (!st.locs) return;
+      const p = paletteRef.current;
+      gl.uniform1f(st.locs.grain, p.grain);
+      gl.uniform3f(st.locs.bg, ...hexToRgb(p.bg));
+      gl.uniform3fv(st.locs.colors, new Float32Array(p.colorsKey.split(",").slice(0, 4).flatMap(hexToRgb)));
+      kick();
+    };
+    applyRef.current = applyPalette;
 
     const createShader = (type: number, src: string) => {
       const s = gl.createShader(type)!;
@@ -128,55 +190,54 @@ const Velaris = ({ bg = "#000000", colors = DEFAULT_COLORS, speed = 2.0, grain =
       return s;
     };
 
-    const program = gl.createProgram()!;
-    gl.attachShader(program, createShader(gl.VERTEX_SHADER, vertexShaderGLSL));
-    gl.attachShader(program, createShader(gl.FRAGMENT_SHADER, fragmentShaderGLSL));
-    gl.linkProgram(program);
-    gl.useProgram(program);
+    // Everything that lives on the context: once per context, and again
+    // after the browser restores a lost one.
+    const setup = () => {
+      const program = gl.createProgram()!;
+      gl.attachShader(program, createShader(gl.VERTEX_SHADER, vertexShaderGLSL));
+      gl.attachShader(program, createShader(gl.FRAGMENT_SHADER, fragmentShaderGLSL));
+      gl.linkProgram(program);
+      gl.useProgram(program);
 
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
 
-    const pos = gl.getAttribLocation(program, "position");
-    gl.enableVertexAttribArray(pos);
-    gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+      const pos = gl.getAttribLocation(program, "position");
+      gl.enableVertexAttribArray(pos);
+      gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
 
-    const locs = {
-      res: gl.getUniformLocation(program, "u_resolution"),
-      time: gl.getUniformLocation(program, "u_time"),
-      grain: gl.getUniformLocation(program, "u_grain"),
-      colors: gl.getUniformLocation(program, "u_colors"),
-      bg: gl.getUniformLocation(program, "u_bg"),
+      st.locs = {
+        res: gl.getUniformLocation(program, "u_resolution"),
+        time: gl.getUniformLocation(program, "u_time"),
+        grain: gl.getUniformLocation(program, "u_grain"),
+        colors: gl.getUniformLocation(program, "u_colors"),
+        bg: gl.getUniformLocation(program, "u_bg"),
+      };
+      applyPalette();
+      resize();
+      kick();
     };
 
-    // Colours and grain do not change per frame; set them once.
-    gl.uniform1f(locs.grain, grain);
-    gl.uniform3f(locs.bg, ...hexToRgb(bg));
-    gl.uniform3fv(locs.colors, new Float32Array(colorsKey.split(",").slice(0, 4).flatMap(hexToRgb)));
-
-    const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      canvas.width = Math.max(1, Math.floor(container.clientWidth * dpr));
-      canvas.height = Math.max(1, Math.floor(container.clientHeight * dpr));
-      gl.viewport(0, 0, canvas.width, canvas.height);
-      gl.uniform2f(locs.res, canvas.width, canvas.height);
-    };
-    resize();
-
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let raf = 0;
-    let visible = true;
-    const render = (t: number) => {
+    const onLost = (e: Event) => {
+      // Let the browser hand the context back when it can (it will not
+      // unless the loss event is cancelled).
+      e.preventDefault();
+      if (raf) cancelAnimationFrame(raf);
       raf = 0;
-      gl.uniform1f(locs.time, t * 0.001 * speed);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      if (visible && !reduce.matches) raf = requestAnimationFrame(render);
+      st.locs = null;
     };
-    const kick = () => {
-      if (!raf) raf = requestAnimationFrame(render);
-    };
-    kick();
+    const onRestored = () => setup();
+    canvas.addEventListener("webglcontextlost", onLost);
+    canvas.addEventListener("webglcontextrestored", onRestored);
+
+    if (st.locs && !gl.isContextLost()) {
+      applyPalette();
+      resize();
+      kick();
+    } else if (!gl.isContextLost()) {
+      setup();
+    }
 
     const ro = new ResizeObserver(() => {
       resize();
@@ -194,10 +255,21 @@ const Velaris = ({ bg = "#000000", colors = DEFAULT_COLORS, speed = 2.0, grain =
       ro.disconnect();
       io.disconnect();
       reduce.removeEventListener("change", kick);
+      canvas.removeEventListener("webglcontextlost", onLost);
+      canvas.removeEventListener("webglcontextrestored", onRestored);
       if (raf) cancelAnimationFrame(raf);
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
+      applyRef.current = null;
+      st.pendingLose = window.setTimeout(() => {
+        if (!gl.isContextLost()) st.lose?.loseContext();
+        if (stateRef.current === st) stateRef.current = null;
+      }, 0);
     };
-  }, [bg, colorsKey, speed, grain]);
+  }, []);
+
+  useEffect(() => {
+    paletteRef.current = { bg, colorsKey, grain, speed };
+    applyRef.current?.();
+  }, [bg, colorsKey, grain, speed]);
 
   return (
     <div ref={containerRef} style={{ height }} className={clsx("relative w-full overflow-hidden", className)}>
