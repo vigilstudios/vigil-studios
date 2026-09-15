@@ -7,8 +7,9 @@ import { Resend } from "resend";
  * logged instead of sent, so development never emails a real customer and
  * the calling code does not need to care.
  */
-const FROM = process.env.EMAIL_FROM ?? "Vigil Studios <hello@vigilstudios.co>";
-const REPLY_TO = process.env.EMAIL_REPLY_TO ?? "hello@vigilstudios.co";
+// An empty value counts as unset: a blank EMAIL_FROM in production made Resend reject every send.
+const FROM = process.env.EMAIL_FROM || "Vigil Studios <hello@vigilstudios.co>";
+const REPLY_TO = process.env.EMAIL_REPLY_TO || "hello@vigilstudios.co";
 
 export type EmailMessage = { to: string; subject: string; html: string; text: string };
 
@@ -34,7 +35,7 @@ export async function sendEmail(message: EmailMessage): Promise<{ sent: boolean;
 }
 
 export function staffNotificationAddress(): string {
-  return process.env.STAFF_NOTIFY_EMAIL ?? "hello@vigilstudios.co";
+  return process.env.STAFF_NOTIFY_EMAIL || "hello@vigilstudios.co";
 }
 
 /** Plain, calm HTML wrapper shared by every message. */
