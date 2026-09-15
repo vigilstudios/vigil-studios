@@ -112,6 +112,9 @@ export async function startCheckout(admin: DbClient, req: CheckoutRequest, provi
     cancelUrl: `${req.appUrl}/checkout/${await tokenFor(admin, orderId)}?canceled=1`,
     reference: { order_id: orderId, plan_code: plan.code, billing_period: period.key, project_kind: req.projectKind, template_slug: req.templateSlug ?? "" },
     collectTax: process.env.STRIPE_TAX === "true",
+    // Stripe's "Add promotion code" field. Codes only exist if staff create
+    // them (friends and family, a live test); CHECKOUT_PROMOTION_CODES=false hides it.
+    allowPromotionCodes: process.env.CHECKOUT_PROMOTION_CODES !== "false",
     });
   } catch (err) {
     // A self-serve order with no payment page is dead; staff links stay pending for a retry.

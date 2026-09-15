@@ -56,6 +56,7 @@ describe("startCheckout", () => {
     expect(input.lineItems).toEqual([{ priceExternalId: "price_ext_care" }, { priceExternalId: "price_ext_build" }]);
     expect(input.successUrl).toBe(`https://app.test/checkout/success?order=${order.id}`);
     expect(input.reference).toMatchObject({ order_id: order.id, plan_code: "care", project_kind: "express", template_slug: "restaurant" });
+    expect(input.allowPromotionCodes).toBe(true);
 
     const link = fake.rows("provider_links").find((l) => l.resource_kind === "checkout_session");
     expect(link).toMatchObject({ entity_type: "order", entity_id: order.id });
