@@ -160,6 +160,26 @@ export const WEBSITES_PAGE = {
   platformNote: "Every Vigil website, whichever build, comes with the Vigil platform underneath: hosting, domain, security, updates and a dashboard that says plainly what is live. You choose how much we take off your plate with a plan.",
 };
 
+/** /products/vigil: the dashboard tour (screenshots in public/site/dashboard, captured by scripts/capture-dashboard.mjs). */
+export const DASHBOARD_TOUR = [
+  { key: "overview", path: "/dashboard", title: "Overview", caption: "Hello, then three plain statuses: Website, Domain, Subscription. If something needs you, it says so in a sentence." },
+  { key: "website", path: "/dashboard/website", title: "Website", caption: "What is live, a preview at desktop and phone size, and a download of your site whenever you want it." },
+  { key: "domain", path: "/dashboard/domain", title: "Domain", caption: "Your domain stays yours. Virtue works out where it is managed, shows the exact records with copy buttons, and Vigil checks until it connects." },
+  { key: "requests", path: "/dashboard/requests", title: "Requests", caption: "On Care and up: say what to change, in a sentence or with a photo. A person makes the change and you watch the progress here." },
+  { key: "billing", path: "/dashboard/billing", title: "Billing", caption: "One plan, one receipt. Invoices, your card and the period you chose, in a portal you do not have to think about." },
+];
+
+export const VIGIL_PAGE = {
+  title: "The platform under every website.",
+  lead: "Vigil is the dashboard you sign into and the team behind it. It hosts your website, keeps the domain connected and the certificate current, applies updates, takes your requests and sends one receipt. You see outcomes in plain words, never a hosting console.",
+  experience: [
+    { title: "You sign in, you do not configure", body: "There are no settings to get wrong. Every page tells you what is true right now and, if something needs you, what to do next." },
+    { title: "You ask, a person does it", body: "Changes are a request, not a project. Say it in a sentence, attach a photo if it helps, and watch it move to done." },
+    { title: "Virtue is already inside", body: "She set you up on day one and stays in the dashboard. On Growth and Priority she keeps working: leads, missed calls, reviews." },
+    { title: "You can always leave", body: "Your site's code and content are yours; download them from the dashboard any time. Your domain never leaves your name." },
+  ],
+};
+
 export const FAQ = [
   { q: "Do I own my website?", a: "Yes. The site-specific code, content and assets built for you are yours under the service agreement. Vigil's platform, shared templates and Virtue stay ours; your site does not depend on them to exist." },
   { q: "What happens if I cancel?", a: "Hosting and the dashboard end at the close of your billing period. You get a clean export of your site and keep your domain. No lock-in, no ransom." },

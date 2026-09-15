@@ -105,6 +105,32 @@ Approved with minor fixes, then fast-forwarded to `main` (vigilstudios.co).
   nested `AnimatePresence`.
 - Plan card buttons sit at the bottom of every card.
 
+## 2026-09-15 — Products menu and the three product pages
+
+- **Nav**: Products ▾ · Pricing · Contact. `components/layout/ProductsMenu.tsx`
+  (hover, chevron for keyboards, Escape / outside click close; items and
+  descriptors in `PRODUCT_LINKS`): Websites, Vigil, Virtue, Express
+  Catalogue. Mobile menu shows the same group. "Products" links to the
+  unchanged `/products` overview.
+- **`/products/websites`** — each build: what it is, who it is for, what it
+  is not for, what is included, how you start; industries on Express; an
+  at-a-glance table. Prices deliberately live on `/pricing`
+  (`WEBSITES_PAGE` in site-copy).
+- **`/products/vigil`** — the real customer dashboard: `DashboardShowcase`
+  (pick a page → screenshot in a browser frame, one-line caption; dark and
+  light captures follow the site theme), four "what it is like" points,
+  the outcomes list, the four plans with "from $/month", Virtue band.
+  Screenshots: `public/site/dashboard/<page>-<theme>.webp`, captured by
+  `scripts/capture-dashboard.mjs` (opens a Chrome you sign into; tidies the
+  DOM — no dev badge, no staff chrome, account shown as "Owner, Marlow &
+  Fen" — then captures at 1280×800). Re-run with `PROFILE_DIR` pointing at
+  the previous profile to skip the sign-in.
+- **`/products/virtue`** — moved from `/virtue` (301 in `next.config.ts`);
+  one paragraph under the greeting, primary text colour.
+- Pricing page build cards use `BuildCards` (float-in, hover lift);
+  `#builds` / `#plans` anchors clear the fixed nav. Sitemap lists the new
+  routes.
+
 ## Handoff for the next session (15 Sep 2026)
 
 - Branch **`claude/site-redesign`**, merged to `main` on 15 Sep 2026 (the

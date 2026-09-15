@@ -30,7 +30,7 @@ export default async function PricingPage() {
         </Container>
       </Section>
 
-      <Section alt id="plans">
+      <Section alt id="plans" className="scroll-mt-28">
         <Container>
           <div className="flex flex-col items-center text-center">
             <Eyebrow>2 · The Vigil plan, ongoing</Eyebrow>
