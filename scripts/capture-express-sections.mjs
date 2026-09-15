@@ -122,7 +122,8 @@ function connect(url) {
       if (msg.id && pending.has(msg.id)) {
         const { res, rej } = pending.get(msg.id);
         pending.delete(msg.id);
-        msg.error ? rej(new Error(msg.error.message)) : res(msg.result);
+        if (msg.error) rej(new Error(msg.error.message));
+        else res(msg.result);
       } else if (msg.method && waiters.has(msg.method)) {
         waiters.get(msg.method)(msg.params);
         waiters.delete(msg.method);
