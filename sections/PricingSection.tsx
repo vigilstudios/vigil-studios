@@ -10,7 +10,7 @@ export async function PricingSection() {
   const { plans, builds } = await getPublicPricing();
   const express = builds.find((b) => b.kind === "express");
   return (
-    <Section id="pricing">
+    <Section id="pricing" fill>
       <Container>
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-16">
           <div>

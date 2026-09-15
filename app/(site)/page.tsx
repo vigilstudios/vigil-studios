@@ -7,7 +7,6 @@ import { WhyVigilSection } from "@/sections/WhyVigilSection";
 import { PricingSection } from "@/sections/PricingSection";
 import { FAQSection } from "@/sections/FAQSection";
 import { GetStartedSection } from "@/sections/GetStartedSection";
-import { ContactSection } from "@/sections/ContactSection";
 
 export default function Home() {
   return (
@@ -20,7 +19,6 @@ export default function Home() {
       <PricingSection />
       <FAQSection />
       <GetStartedSection />
-      <ContactSection />
       <Footer />
     </>
   );

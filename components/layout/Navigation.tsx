@@ -92,7 +92,7 @@ export function Navigation() {
     { href: "/express", label: "Vigil Express" },
     { href: "/virtue", label: "Virtue" },
     { href: "/pricing", label: "Pricing" },
-    { href: "/#contact", label: "Contact" },
+    { href: "/#get-started", label: "Contact" },
   ];
 
   return (

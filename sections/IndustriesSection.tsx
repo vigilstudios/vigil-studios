@@ -6,7 +6,7 @@ import { EXPRESS_TEMPLATES } from "@/lib/constants";
 /** The catalogue's industries; each card is a real template, not a stock photo. */
 export function IndustriesSection() {
   return (
-    <Section id="industries">
+    <Section id="industries" fill>
       <Container>
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <SectionIntro eyebrow="Vigil Express" title="Made for your kind of business." lead="Each template is a finished example site for one industry. See the whole thing before you buy." />

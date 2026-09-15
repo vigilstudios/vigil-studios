@@ -11,11 +11,11 @@ export function Container({ children, className, narrow }: { children: ReactNode
   return <div className={clsx("mx-auto w-full px-4 sm:px-6 lg:px-8", narrow ? "max-w-3xl" : "max-w-6xl", className)}>{children}</div>;
 }
 
+/** Section label, flush with the heading below it. */
 export function Eyebrow({ children, tone = "accent" }: { children: ReactNode; tone?: "accent" | "violet" | "amber" | "teal" | "muted" }) {
   const color = { accent: "var(--accent)", violet: "var(--accent-2)", amber: "var(--accent-3)", teal: "var(--accent-4)", muted: "var(--text-secondary)" }[tone];
   return (
-    <p className="mb-3 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color }}>
-      <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} aria-hidden />
+    <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color }}>
       {children}
     </p>
   );
@@ -31,9 +31,14 @@ export function SectionIntro({ eyebrow, tone, title, lead, align = "left", class
   );
 }
 
-export function Section({ children, className, id, alt }: { children: ReactNode; className?: string; id?: string; alt?: boolean }) {
+/**
+ * `fill` sections (the home page) each take a full viewport with their
+ * content centred, so the page reads as a sequence of rooms rather than one
+ * long column; the desktop scroll snap in globals.css lands on each one.
+ */
+export function Section({ children, className, id, alt, fill }: { children: ReactNode; className?: string; id?: string; alt?: boolean; fill?: boolean }) {
   return (
-    <section id={id} className={clsx("relative py-16 sm:py-24", alt && "border-y border-[color:var(--border)] bg-[color:var(--bg-section-alt)]", className)}>
+    <section id={id} className={clsx("relative", fill ? "flex flex-col justify-center py-24 sm:py-28 md:min-h-[100svh] lg:py-32" : "py-16 sm:py-24", alt && "border-y border-[color:var(--border)] bg-[color:var(--bg-section-alt)]", className)}>
       {children}
     </section>
   );

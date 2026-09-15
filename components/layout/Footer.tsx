@@ -19,7 +19,7 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
       { label: "Pricing", href: "/pricing" },
       { label: "How it works", href: "/#how-it-works" },
       { label: "Questions", href: "/#faq" },
-      { label: "Contact", href: "/#contact" },
+      { label: "Contact", href: "/#get-started" },
     ],
   },
   {

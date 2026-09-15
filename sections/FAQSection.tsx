@@ -4,15 +4,19 @@ import { useState } from "react";
 import { clsx } from "clsx";
 import { ChevronDown } from "lucide-react";
 import { Container, Section, SectionIntro } from "@/components/site/primitives";
+import { Reveal } from "@/components/site/Reveal";
 import { FAQ } from "@/lib/site-copy";
 
 export function FAQSection() {
   const [open, setOpen] = useState<number | null>(0);
   return (
-    <Section id="faq" alt>
+    <Section id="faq" alt fill>
       <Container>
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:gap-16">
-          <SectionIntro eyebrow="Questions" title="The things people ask before they buy." lead="Straight answers. If yours is not here, email hello@vigilstudios.co and a person replies." />
+          <Reveal>
+            <SectionIntro eyebrow="Questions" title="The things people ask before they buy." lead="Straight answers. If yours is not here, email hello@vigilstudios.co and a person replies." />
+          </Reveal>
+          <Reveal delay={0.1}>
           <ul className="divide-y divide-[color:var(--border)] rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)]">
             {FAQ.map((item, i) => {
               const isOpen = open === i;
@@ -31,6 +35,7 @@ export function FAQSection() {
               );
             })}
           </ul>
+          </Reveal>
         </div>
       </Container>
     </Section>

@@ -18,7 +18,7 @@ export const PILLARS = [
     key: "websites",
     tone: "accent" as const,
     title: "A website built for you",
-    body: "Pick a Vigil Express template for your industry and it is live in days, or go Professional or Custom for something bigger. Built by people, not generated.",
+    body: "Express when you are just getting online, Professional when you are established, Custom when you have something bigger in mind. Built by people, not generated.",
     href: "/products#websites",
     cta: "Websites",
   },
@@ -41,9 +41,9 @@ export const PILLARS = [
 ];
 
 export const HOW_IT_WORKS = [
-  { n: 1, title: "Choose and pay", body: "Pick the template made for your industry, choose a plan, pay once on a secure Stripe checkout. Your account exists the moment it clears." },
+  { n: 1, title: "Choose your website", body: "Express if you are just getting online, Professional when you are established, Custom when you have something bigger in mind. Express and Professional check out online with the plan you pick; Custom starts with a short call." },
   { n: 2, title: "Virtue asks about your business", body: "About ten minutes: your hours, what you offer, your story, photos and your domain. It saves as you go; she walks you through the domain step at your registrar." },
-  { n: 3, title: "We build", body: "A person builds your site from what you told Virtue. You get a first look within two business days." },
+  { n: 3, title: "We build", body: "A person builds your site from what you told Virtue. Express gets a first look within two business days; Professional and Custom follow the timeline agreed with you." },
   { n: 4, title: "You review", body: "Say what to change. One revision round is included on Express, two on Professional; Custom is agreed in the scope." },
   { n: 5, title: "Live, and looked after", body: "Your site goes live on your domain with SSL and monitoring. From then on Vigil hosts it, updates it and reports on it. Cancel any time and take your site with you." },
 ];
@@ -84,6 +84,16 @@ export const BUILD_COPY: Record<string, { tagline: string; bullets: string[] }> 
   express: { tagline: "Pick a template, live in days.", bullets: ["Single-page site from an industry template", "Your words, photos and colours", "Mobile responsive", "Tap-to-call and email contact", "Basic SEO", "One to two business days", "One design direction, one revision round"] },
   professional: { tagline: "Multi-page, designed around you.", bullets: ["Multi-page website", "Custom design", "Advanced SEO", "Analytics setup", "Blog support", "One design direction, two revision rounds"] },
   custom: { tagline: "Anything with a scope.", bullets: ["Web apps, portals, e-commerce, integrations", "Quoted after a short call", "The same Vigil platform underneath", "You own the site-specific code"] },
+};
+
+export const GET_STARTED = {
+  title: "Ready when you are.",
+  lead: "Whether you need your first website, a bigger one, or something built to a scope, the next step is the same size: pick a starting point, or talk to a person first.",
+  primary: { label: "Find your starting point", href: "#start" },
+  call: "Book a call",
+  email: "hello@vigilstudios.co",
+  emailLabel: "Email us",
+  note: "Fifteen minutes with a person, no pitch. Email gets a reply within one business day.",
 };
 
 export const FAQ = [

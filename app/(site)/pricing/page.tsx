@@ -50,7 +50,7 @@ export default async function PricingPage() {
                     {b.kind === "express" ? (
                       <Link href="/express" className="btn-primary inline-flex min-h-11 !px-4 !py-2 text-sm font-semibold">Choose a template <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
                     ) : (
-                      <Link href="/#contact" className="btn-secondary inline-flex min-h-11 !px-4 !py-2 text-sm">Talk to us</Link>
+                      <Link href="/#get-started" className="btn-secondary inline-flex min-h-11 !px-4 !py-2 text-sm">Talk to us</Link>
                     )}
                   </div>
                 </div>
