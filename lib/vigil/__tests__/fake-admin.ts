@@ -34,6 +34,7 @@ export class FakeAdmin {
     const uniqueKeys: Record<string, string[][]> = {
       provisioning_jobs: [["idempotency_key"]],
       provider_links: [["provider", "resource_kind", "external_id"]],
+      webhook_events: [["provider", "event_id"]],
       domains: [["hostname"]],
       organizations: [["slug"]],
     };
@@ -41,6 +42,7 @@ export class FakeAdmin {
     const defaults: Record<string, () => Row> = {
       provisioning_jobs: () => ({ attempts: 0, status: "queued" }),
       orders: () => ({ status: "pending", checkout_token: `tok_${++this.seq}`, metadata: {}, currency: "usd" }),
+      webhook_events: () => ({ status: "received", received_at: new Date().toISOString() }),
       projects: () => ({ status: "draft", brief: {} }),
       websites: () => ({ status: "provisioning" }),
       domains: () => ({ status: "pending" }),
@@ -75,7 +77,19 @@ export class FakeAdmin {
         return builder;
       },
       gt(col: string, val: string) {
-        filters.push((r) => String(r[col]) > val);
+        filters.push((r) => r[col] != null && String(r[col]) > val);
+        return builder;
+      },
+      gte(col: string, val: string) {
+        filters.push((r) => r[col] != null && String(r[col]) >= val);
+        return builder;
+      },
+      lt(col: string, val: string) {
+        filters.push((r) => r[col] != null && String(r[col]) < val);
+        return builder;
+      },
+      lte(col: string, val: string) {
+        filters.push((r) => r[col] != null && String(r[col]) <= val);
         return builder;
       },
       not(col: string, op: string, val: string) {
@@ -176,6 +190,8 @@ export class FakeAdmin {
     }
     if (name === "log_audit_event") {
       this.audit.push({ ...args });
+      // Also visible as a row, the way reconciliation reads it back.
+      this.rows("audit_events").push({ id: ++this.seq, action: args.p_action, entity_type: args.p_entity_type, entity_id: args.p_entity_id ?? null, organization_id: args.p_org ?? null, after: args.p_after ?? null, created_at: new Date().toISOString() });
       return { data: null, error: null };
     }
     return { data: null, error: { message: `unknown rpc ${name}` } };

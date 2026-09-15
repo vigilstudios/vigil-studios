@@ -2,23 +2,10 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { z } from "zod";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 import { ProviderNotConfiguredError, ValidationError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
+import { checkoutIssues, checkoutSchema } from "@/lib/vigil/checkout-schema";
 import { sendWelcome, startCheckout } from "@/lib/vigil/services/orders";
-
-const schema = z.object({
-  email: z.string().trim().email("Enter the email you want to use to sign in."),
-  contact_name: z.string().trim().max(120).optional().or(z.literal("")),
-  business_name: z.string().trim().min(2, "Enter your business name.").max(120),
-  plan_code: z.string().trim().min(1, "Choose a plan."),
-  billing_period: z.enum(["month", "year", "year3"]).default("month"),
-  project_kind: z.enum(["express", "professional", "custom"]).default("express"),
-  template_slug: z.string().trim().max(80).optional().or(z.literal("")),
-  order_id: z.string().uuid().optional().or(z.literal("")),
-  checkout_token: z.string().trim().optional().or(z.literal("")),
-  agree: z.string().optional(),
-});
 
 async function appUrl(): Promise<string> {
   const configured = process.env.NEXT_PUBLIC_APP_URL;
@@ -39,12 +26,8 @@ export async function beginCheckout(_prev: CheckoutState, formData: FormData): P
   let url: string | null = null;
   try {
     if (!hasAdminClient()) throw new ProviderNotConfiguredError("Checkout");
-    const parsed = schema.safeParse(Object.fromEntries(formData));
-    if (!parsed.success) {
-      const issues: Record<string, string[]> = {};
-      for (const i of parsed.error.issues) (issues[i.path.join(".") || "_"] ??= []).push(i.message);
-      throw new ValidationError("Check the highlighted fields.", issues);
-    }
+    const parsed = checkoutSchema.safeParse(Object.fromEntries(formData));
+    if (!parsed.success) throw new ValidationError("Check the highlighted fields.", checkoutIssues(parsed.error));
     const v = parsed.data;
     if (v.agree !== "on") throw new ValidationError("Please accept the service agreement to continue.", { agree: ["Required"] });
 

@@ -5,28 +5,18 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { useSiteTheme } from "@/components/ui/useSiteTheme";
 import { ProductsMenu } from "@/components/layout/ProductsMenu";
 import { PRODUCT_LINKS } from "@/lib/site-copy";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const theme = useSiteTheme();
 
   const containerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const rootTheme =
-      document.documentElement.dataset.theme === "light" ? "light" : "dark";
-    setTheme(rootTheme);
-
-    const handleThemeChange = (event: Event) => {
-      const nextTheme = (event as CustomEvent<string>).detail as
-        | "dark"
-        | "light";
-      setTheme(nextTheme);
-    };
-
     let attachedToWindow = false;
     let observer: MutationObserver | null = null;
 
@@ -72,10 +62,7 @@ export function Navigation() {
       observer.observe(document.body, { childList: true, subtree: true });
     }
 
-    window.addEventListener("site-theme-change", handleThemeChange);
-
     return () => {
-      window.removeEventListener("site-theme-change", handleThemeChange);
       if (observer) {
         observer.disconnect();
         observer = null;

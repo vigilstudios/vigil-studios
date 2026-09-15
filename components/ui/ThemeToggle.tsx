@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Moon, Sun } from "lucide-react";
+import { useSiteTheme } from "./useSiteTheme";
 
 const themes = {
     dark: {
@@ -32,7 +33,8 @@ const themes = {
     },
   };
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  // Mirrors data-theme on <html>; applyTheme writes it, the store reads it back.
+  const theme = useSiteTheme();
 
   const applyTheme = (selectedTheme: "dark" | "light") => {
     const root = document.documentElement;
@@ -53,10 +55,8 @@ export function ThemeToggle() {
       | null;
 
     if (savedTheme) {
-      setTheme(savedTheme);
       applyTheme(savedTheme);
     } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
-      setTheme("light");
       applyTheme("light");
     } else {
       applyTheme("dark");
@@ -65,7 +65,6 @@ export function ThemeToggle() {
 
   const toggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";
-    setTheme(nextTheme);
     applyTheme(nextTheme);
     window.localStorage.setItem("site-theme", nextTheme);
   };

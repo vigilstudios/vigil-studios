@@ -658,3 +658,52 @@ not paid" and a validation failure is never retried.
   `NEXT_PUBLIC_REFUND_NOTE` = the one-sentence refund rule shown under the
   checkout checkbox. Both baked in at build time.
 
+## 2026-09-15 — Guardrails around the transactional path
+
+Owner's ask after the stuck-success-page bug: tests, checks and
+reconciliation wherever the purchase → account → onboarding path could
+fail silently.
+
+- **`settleOrder`** (`lib/vigil/services/settle.ts`): one idempotent
+  function that takes an order from wherever it is (pending → ask the
+  provider; paid → (re)queue provisioning and run it) and reports the
+  state. The success page is now three lines around it; reconciliation
+  uses it too.
+- **`receiveBillingEvent` / `handleBillingEvent`**
+  (`lib/vigil/services/webhook.ts`): the inbox and the handling moved out
+  of the route so they can be tested. Invoice events now report
+  "unattributed" like subscription events do.
+- **Reconciliation** (`lib/vigil/services/reconcile.ts`), run by
+  `/api/jobs/run` after draining the queue (`?reconcile=0` skips): paid and
+  unprovisioned for 10 min → provision again, and if still stuck email
+  staff (once per day per order, remembered in `orders.metadata.reconcile`);
+  pending with a session for over an hour → ask the provider once: paid
+  completes and provisions, expired marks the order `expired`; provisioned
+  with a failed welcome email → one more send, then staff; brief sent
+  without a `project.intake_notified` audit row (submitIntake writes one on
+  a successful send) → the staff notification again, floored at the day
+  the record started existing so old briefs are not re-sent.
+- **Alerts**: any job that fails for good (non-retryable or exhausted)
+  emails staff with what it means ("a paid order could not be
+  provisioned…") and where to retry it.
+- **Null provider** gave a checkout and its subscription different customer
+  ids, so the "subscription from the provider's snapshot" path had never run
+  in tests; fixed, and the orders test now asserts the linked subscription.
+- **Tests** 93 → 123: checkout form schema; settleOrder (pending→provisioned,
+  failed job re-queued, no-op, unpaid, queue-only); webhook (records +
+  provisions, duplicate acknowledged, session-link lookup, re-queues a
+  failed job, unpaid ignored, subscription update / unattributed, handler
+  failure → inbox failed + rethrow); reconciliation (each branch, the daily
+  alert window, welcome retry then alert, intake re-notification and its
+  floor); billing snapshots (create + link, update, refuse to guess);
+  completeCheckout edges; provisioning resumes half-done work; job failure
+  alerts (and none for a scheduled retry).
+- **CI** (`.github/workflows/ci.yml`): typecheck, lint, tests and a
+  no-secrets `next build` on every push and PR. The three pre-existing
+  setState-in-effect lint errors are fixed: theme now comes from a
+  `data-theme` store (`components/ui/useSiteTheme.ts`) in ThemeToggle and
+  Navigation; CalendlyModal uses `useHydrated()`.
+- Not covered, still: a live Stripe run (manual, the owner's next step),
+  refunds/cancellations beyond the subscription snapshot, and Resend
+  actually delivering (the domain check is on the Resend side).
+

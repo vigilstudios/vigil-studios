@@ -125,7 +125,10 @@ describe("completeCheckout + provisionOrder", () => {
     expect(project).toMatchObject({ organization_id: org.id, kind: "express", status: "intake", template_slug: "restaurant", source_ref: `order:${orderId}` });
     expect(fake.rows("websites")[0]).toMatchObject({ organization_id: org.id, project_id: project.id, template_slug: "restaurant" });
     const sub = fake.rows("subscriptions")[0];
-    expect(sub).toMatchObject({ organization_id: org.id, plan_id: PLAN, status: "active" });
+    expect(sub).toMatchObject({ organization_id: org.id, plan_id: PLAN, plan_price_id: PRICE, status: "active" });
+    // From the provider's snapshot, not the manual fallback: it carries a period and a link.
+    expect(sub.current_period_end).toBeTruthy();
+    expect(fake.rows("provider_links").find((l) => l.resource_kind === "subscription")?.entity_id).toBe(sub.id);
     const customer = fake.rows("provider_links").find((l) => l.resource_kind === "customer" && l.entity_type === "organization");
     expect(customer?.entity_id).toBe(org.id);
     expect(fake.rows("orders")[0]).toMatchObject({ status: "provisioned", organization_id: org.id, project_id: project.id, subscription_id: sub.id });
@@ -152,5 +155,45 @@ describe("completeCheckout + provisionOrder", () => {
     expect(fake.rows("organizations").map((o) => o.slug)).toEqual(["cigar-lounge", "cigar-lounge-2"]);
     // No checkout session on a staff-paid order: a manual active subscription is created.
     expect(fake.rows("subscriptions")[0]).toMatchObject({ plan_id: PLAN, status: "active" });
+  });
+
+  it("completeCheckout leaves unpaid, already-paid and unknown orders alone", async () => {
+    const fake = seed();
+    const provider = new NullBillingProvider();
+    const { orderId } = await startCheckout(fake.asClient(), { email: "a@b.c", businessName: "Shop", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, provider);
+    const sessionId = (fake.rows("orders")[0].metadata as { checkout_session: string }).checkout_session;
+    const checkout = (await provider.getCheckoutSession(sessionId))!;
+
+    expect((await completeCheckout(fake.asClient(), orderId, { ...checkout, paymentStatus: "unpaid" }, provider)).status).toBe("pending");
+    await expect(completeCheckout(fake.asClient(), "ord_ghost", checkout, provider)).rejects.toThrow(/not found/);
+
+    const paid = await completeCheckout(fake.asClient(), orderId, checkout, provider);
+    expect(paid.status).toBe("paid");
+    expect(paid.paid_at).toBeTruthy();
+    // A later "paid" for the same order changes nothing, and a refunded one is never revived.
+    fake.rows("orders")[0].status = "refunded";
+    expect((await completeCheckout(fake.asClient(), orderId, checkout, provider)).status).toBe("refunded");
+  });
+
+  it("resumes a half-finished provisioning without duplicating what already exists", async () => {
+    const fake = seed();
+    const provider = new NullBillingProvider();
+    const { orderId } = await startCheckout(fake.asClient(), { email: "owner@bakery.test", businessName: "Bakery", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, provider);
+    const sessionId = (fake.rows("orders")[0].metadata as { checkout_session: string }).checkout_session;
+    await completeCheckout(fake.asClient(), orderId, (await provider.getCheckoutSession(sessionId))!, provider);
+
+    // A previous attempt got as far as the organization and the invite, then died.
+    fake.rows("organizations").push({ id: "org_half", name: "Bakery", slug: "bakery", billing_email: "owner@bakery.test" });
+    fake.rows("organization_invites").push({ id: "inv_half", organization_id: "org_half", email: "owner@bakery.test", role: "owner", revoked_at: null });
+    fake.rows("orders")[0].organization_id = "org_half";
+
+    const res = await provisionOrder(fake.asClient(), orderId, provider, "https://app.test");
+    expect(res).toEqual({ organizationId: "org_half", alreadyProvisioned: false });
+    expect(fake.rows("organizations")).toHaveLength(1);
+    expect(fake.rows("organization_invites")).toHaveLength(1);
+    expect(fake.rows("projects")).toHaveLength(1);
+    expect(fake.rows("websites")).toHaveLength(1);
+    expect(fake.rows("subscriptions")).toHaveLength(1);
+    expect(fake.rows("orders")[0]).toMatchObject({ status: "provisioned", organization_id: "org_half" });
   });
 });

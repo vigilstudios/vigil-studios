@@ -1,7 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ProviderError, ProviderNotConfiguredError } from "../auth/errors";
+import { sendEmail } from "../email";
 import { backoffSeconds, classifyFailure, enqueueJob, registerJobHandler, RetryLater, runDueJobs } from "../jobs";
 import { FakeAdmin } from "./fake-admin";
+
+vi.mock("../email", async (importOriginal) => ({ ...(await importOriginal<typeof import("../email")>()), sendEmail: vi.fn(async () => ({ sent: true, id: "em_1" })) }));
+const sent = vi.mocked(sendEmail);
+vi.spyOn(console, "error").mockImplementation(() => undefined);
+beforeEach(() => sent.mockClear());
 
 describe("backoffSeconds", () => {
   it("doubles from 30s and caps at an hour", () => {
@@ -102,6 +108,31 @@ describe("runDueJobs", () => {
     expect(row.attempts).toBe(1);
     expect(new Date(String(row.scheduled_for)).getTime()).toBeGreaterThanOrEqual(before + 30_000);
     expect((row.error as { code: string }).code).toBe("unknown");
+  });
+
+  it("emails staff once a job will not run again, saying what it means for the customer", async () => {
+    registerJobHandler("order.provision", async () => {
+      throw new ProviderError("stripe", "customer deleted", { retryable: false });
+    });
+    const fake = new FakeAdmin({ provisioning_jobs: [seedJob({ kind: "order.provision", payload: { order_id: "ord_9" } })] });
+    await runDueJobs(fake.asClient(), { worker: "w" });
+    expect(fake.rows("provisioning_jobs")[0].status).toBe("failed");
+    expect(sent).toHaveBeenCalledTimes(1);
+    const mail = sent.mock.calls[0][0];
+    expect(mail.subject).toBe("Needs attention: order.provision failed");
+    expect(mail.text).toMatch(/paid and has no account yet/);
+    expect(mail.text).toMatch(/ord_9/);
+    expect(mail.text).toMatch(/customer deleted/);
+  });
+
+  it("does not email for a retry that is still scheduled", async () => {
+    registerJobHandler("test.flaky", async () => {
+      throw new Error("socket hang up");
+    });
+    const fake = new FakeAdmin({ provisioning_jobs: [seedJob({ kind: "test.flaky" })] });
+    await runDueJobs(fake.asClient(), { worker: "w" });
+    expect(fake.rows("provisioning_jobs")[0].status).toBe("queued");
+    expect(sent).not.toHaveBeenCalled();
   });
 
   it("fails permanently once attempts are exhausted", async () => {

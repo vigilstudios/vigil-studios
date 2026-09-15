@@ -318,12 +318,17 @@ export async function submitIntake(projectId: string): Promise<ActionResult<{ co
           : "Domain: not decided yet";
     const { count: assetCount } = await supabase.from("project_assets").select("id", { count: "exact", head: true }).eq("project_id", projectId);
     const text = `${brief.basics.businessName} finished onboarding for "${project.name}".\n\n${domainLine}\nFiles uploaded: ${assetCount ?? 0}\n\nReview: ${appUrl}/admin/organizations/${ctx.organization.id}`;
-    await sendEmail({
+    // The notification is what starts the build. If it fails, nothing is
+    // recorded and the reconciliation pass sends it again.
+    const notified = await sendEmail({
       to: staffNotificationAddress(),
       subject: `Onboarding complete: ${brief.basics.businessName}`,
       text,
       html: layout(`Onboarding complete: ${brief.basics.businessName}`, `<p>${escapeHtml(domainLine)}</p><p>Files uploaded: ${assetCount ?? 0}</p>${button(`${appUrl}/admin/organizations/${ctx.organization.id}`, "Open in Vigil Admin")}`),
-    }).catch(() => undefined);
+    }).catch(() => ({ sent: false }));
+    if (notified.sent) {
+      await logAuditEvent(supabase, { action: "project.intake_notified", entityType: "project", entityId: projectId, organizationId: ctx.organization.id, after: { via: "submit" } }).catch(() => undefined);
+    }
 
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/onboarding");

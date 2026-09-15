@@ -1,4 +1,5 @@
 import { ProviderError, ProviderNotConfiguredError, isVigilError } from "@/lib/vigil/auth/errors";
+import { escapeHtml, layout, sendEmail, staffNotificationAddress } from "@/lib/vigil/email";
 import type { DbClient, ProvisioningJob } from "@/lib/vigil/types";
 import type { Json } from "@/types/database.types";
 import { deployWebsite, provisionWebsite } from "./services/deployment";
@@ -256,6 +257,25 @@ async function runOne(admin: DbClient, job: ProvisioningJob): Promise<JobOutcome
       .from("provisioning_jobs")
       .update({ status: "failed", error: errorJson, finished_at: finishedAt, locked_by: null, locked_at: null })
       .eq("id", job.id);
+    await notifyPermanentFailure(job, failure.message, exhausted).catch(() => undefined);
     return { id: job.id, kind: job.kind, status: "failed", error: failure.message };
   }
+}
+
+/**
+ * A job that will not run again on its own is a person's problem now. One
+ * email to the staff address, with enough to act on; never throws.
+ */
+export async function notifyPermanentFailure(job: Pick<ProvisioningJob, "id" | "kind" | "attempts" | "organization_id" | "website_id" | "domain_id" | "payload">, message: string, exhausted: boolean): Promise<void> {
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "https://www.vigilstudios.co").replace(/\/$/, "");
+  const orderId = (job.payload as { order_id?: string } | null)?.order_id;
+  const what = job.kind === JOB_KINDS.orderProvision ? "A paid order could not be provisioned: the customer has paid and has no account yet." : `${job.kind} stopped.`;
+  const why = exhausted ? `Gave up after ${job.attempts} attempts. Last error: ${message}` : `Not retryable: ${message}`;
+  const where = orderId ? `${appUrl}/admin/orders` : job.organization_id ? `${appUrl}/admin/organizations/${job.organization_id}` : `${appUrl}/admin/jobs`;
+  await sendEmail({
+    to: staffNotificationAddress(),
+    subject: `Needs attention: ${job.kind} failed`,
+    text: `${what}\n\n${why}\n\nJob ${job.id}${orderId ? `, order ${orderId}` : ""}. Retry it from ${appUrl}/admin/jobs once the cause is fixed.\n${where}`,
+    html: layout(`Needs attention: ${escapeHtml(job.kind)} failed`, `<p>${escapeHtml(what)}</p><p>${escapeHtml(why)}</p><p style="color:#666;font-size:13px">Job ${escapeHtml(job.id)}${orderId ? `, order ${escapeHtml(orderId)}` : ""}. Retry it from <a href="${appUrl}/admin/jobs">Jobs</a> once the cause is fixed.</p>`),
+  });
 }

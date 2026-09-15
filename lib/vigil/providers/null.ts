@@ -42,11 +42,13 @@ export class NullBillingProvider implements BillingProvider {
   async createCheckoutSession(input: BillingCheckoutInput) {
     const externalId = nextId("cs_null");
     const subscriptionExternalId = input.mode === "subscription" ? nextId("sub_null") : null;
+    // One customer id for the checkout and its subscription, as a real provider would report.
+    const customerExternalId = input.customerExternalId ?? nextId("cus_null");
     this.checkouts.set(externalId, {
       externalId,
       status: "complete",
       paymentStatus: "paid",
-      customerExternalId: input.customerExternalId ?? nextId("cus_null"),
+      customerExternalId,
       customerEmail: input.customerEmail ?? null,
       subscriptionExternalId,
       amountTotalCents: null,
@@ -56,7 +58,7 @@ export class NullBillingProvider implements BillingProvider {
     if (subscriptionExternalId) {
       this.subs.set(subscriptionExternalId, {
         externalId: subscriptionExternalId,
-        customerExternalId: input.customerExternalId ?? "cus_null",
+        customerExternalId,
         priceExternalId: (() => { const first = input.lineItems[0]; return first && "priceExternalId" in first ? first.priceExternalId : null; })(),
         status: "active",
         currentPeriodStart: nowIso(),

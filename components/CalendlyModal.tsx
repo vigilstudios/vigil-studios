@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useHydrated } from "@/components/ui/useSiteTheme";
 import { createPortal } from "react-dom";
 import { InlineWidget } from "react-calendly";
 import { X } from "lucide-react";
@@ -20,12 +21,10 @@ export function CalendlyPopup({
   style,
 }: CalendlyPopupProps) {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useHydrated();
   const [calendlyUrl, setCalendlyUrl] = useState(BASE_URL);
 
   useEffect(() => {
-    setMounted(true);
-
     const updateCalendlyTheme = () => {
       const styles = getComputedStyle(document.documentElement);
 
