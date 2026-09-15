@@ -142,13 +142,17 @@ export const getOrgContext = cache(async (): Promise<OrgContext | null> => {
   }
 
   // Staff may open any organization they can see, acting with owner-level
-  // UI affordances; RLS still decides what actually succeeds.
-  if (viewer.staffRole && preferred) {
+  // UI affordances; RLS still decides what actually succeeds. A stale cookie
+  // (the organization was deleted) or no cookie falls back to the first
+  // customer, so "Client view" always opens something.
+  if (viewer.staffRole) {
     const supabase = await createClient();
-    const { data } = await supabase.from("organizations").select("*").eq("id", preferred).maybeSingle();
-    if (data) {
-      return { ...viewer, organization: data, role: "owner", isImpersonating: true };
+    if (preferred) {
+      const { data } = await supabase.from("organizations").select("*").eq("id", preferred).maybeSingle();
+      if (data) return { ...viewer, organization: data, role: "owner", isImpersonating: true };
     }
+    const { data: first } = await supabase.from("organizations").select("*").order("created_at", { ascending: true }).limit(1).maybeSingle();
+    if (first) return { ...viewer, organization: first, role: "owner", isImpersonating: true };
   }
 
   return null;
