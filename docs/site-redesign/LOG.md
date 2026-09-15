@@ -34,3 +34,25 @@ branch so the live site is untouched until the owner approves.
   hero, `ProgressNav`. Site title/description/keywords updated.
 - Verified locally: home, pricing, products, virtue at desktop; home and
   pricing at 375px; typecheck, lint (new files), tests, `next build` clean.
+
+## Handoff for the next session (15 Sep 2026)
+
+- Branch **`claude/site-redesign`** (pushed; `main` still serves the old site).
+  Preview: `https://vigil-studios-git-claude-site-redesign-belierjaviers-projects.vercel.app`
+  (Vercel SSO-protected; the owner signs in). Locally: `npm run dev` on the
+  branch, `http://127.0.0.1:3000`.
+- Files: hero `sections/HeroSection.tsx` (Velaris: `components/ui/velaris.tsx`
+  + `components/site/VelarisBackground.tsx`, palettes at the top of the
+  latter); sections in `sections/*` (Pillars, HowItWorks, Industries,
+  WhyVigil, Pricing, FAQ, GetStarted, Contact); pages `app/(site)/{pricing,
+  products,virtue}`; shared bits `components/site/primitives.tsx`,
+  `components/site/PricingTable.tsx`; copy `lib/site-copy.ts`; prices
+  `lib/vigil/queries/public-pricing.ts` (never hard-code); tokens
+  `--accent-2/3/4` in `app/globals.css`.
+- Do not touch: `app/(vigil)`, `lib/vigil` (except queries above),
+  `components/express/*`, `EXPRESS_TEMPLATES`.
+- Approval flow: iterate on the branch → owner approves → fast-forward
+  `main` (`git checkout main && git merge --ff-only claude/site-redesign &&
+  git push`) → Vercel deploys vigilstudios.co.
+- Chrome MCP tab renders but throttles animation when the window is hidden;
+  use the in-app Browser pane (must be visible) for orb/Velaris checks.
