@@ -9,8 +9,8 @@ export const HERO = {
   eyebrow: "Websites, hosting, updates, leads and follow-up. One platform, one team.",
   title: TAGLINE,
   lead: "Vigil builds your website, then keeps it running, updated and working for you. No builders to learn, no settings to babysit, and Virtue, our AI employee, guides you from the first minute.",
-  primary: { label: "Choose a template", href: "/express" },
-  secondary: { label: "See pricing", href: "/pricing" },
+  primary: { label: "Find your starting point", href: "#start" },
+  secondary: { label: "See how it works", href: "#how-it-works" },
 };
 
 export const PILLARS = [
@@ -41,7 +41,7 @@ export const PILLARS = [
 ];
 
 export const HOW_IT_WORKS = [
-  { n: 1, title: "Choose your website", body: "Express if you are just getting online, Professional when you are established, Custom when you have something bigger in mind. Express and Professional check out online with the plan you pick; Custom starts with a short call." },
+  { n: 1, title: "Choose your website", body: "Express if you are just getting online, Professional when you are established, Custom when you have something bigger in mind. Express checks out online with the plan you pick; Professional and Custom start with a short call and a checkout link made for you." },
   { n: 2, title: "Virtue asks about your business", body: "About ten minutes: your hours, what you offer, your story, photos and your domain. It saves as you go; she walks you through the domain step at your registrar." },
   { n: 3, title: "We build", body: "A person builds your site from what you told Virtue. Express gets a first look within two business days; Professional and Custom follow the timeline agreed with you." },
   { n: 4, title: "You review", body: "Say what to change. One revision round is included on Express, two on Professional; Custom is agreed in the scope." },
@@ -84,6 +84,19 @@ export const BUILD_COPY: Record<string, { tagline: string; bullets: string[] }> 
   express: { tagline: "Pick a template, live in days.", bullets: ["Single-page site from an industry template", "Your words, photos and colours", "Mobile responsive", "Tap-to-call and email contact", "Basic SEO", "One to two business days", "One design direction, one revision round"] },
   professional: { tagline: "Multi-page, designed around you.", bullets: ["Multi-page website", "Custom design", "Advanced SEO", "Analytics setup", "Blog support", "One design direction, two revision rounds"] },
   custom: { tagline: "Anything with a scope.", bullets: ["Web apps, portals, e-commerce, integrations", "Quoted after a short call", "The same Vigil platform underneath", "You own the site-specific code"] },
+};
+
+/** "Start where you are": one card per build, keyed by build_prices.kind. Names and prices come from the database. */
+export const START = {
+  eyebrow: "Start where you are",
+  title: "Every business starts somewhere. Pick the website that fits today.",
+  lead: "Just opening, established, or building something bigger: there is a Vigil website for each stage, all on the same platform, with Virtue.",
+  stages: {
+    express: { stage: "Just getting online", tone: "accent" as const, body: "A finished template for your industry, made yours in one to two business days.", bullets: ["Single-page site from an industry template", "Your words, photos and colours", "Live in one to two business days"], cta: { label: "Choose a template", href: "/express" }, primary: true },
+    professional: { stage: "Established and growing", tone: "teal" as const, body: "Multi-page and designed around your business, with room for everything you have to say.", bullets: ["Multi-page website, custom design", "Advanced SEO and analytics setup", "Blog support, two revision rounds"], cta: { label: "Talk to us", href: "#get-started" }, primary: false },
+    custom: { stage: "Something bigger in mind", tone: "violet" as const, body: "A portal, a shop, a booking system, an integration: anything with a scope.", bullets: ["Web apps, portals, e-commerce, integrations", "Scoped and quoted after a short call", "You own the site-specific code"], cta: { label: "Book a call", href: "#get-started" }, primary: false },
+  },
+  note: "Not sure? Start with Express. Moving up later is a conversation, not a migration.",
 };
 
 export const GET_STARTED = {

@@ -38,7 +38,7 @@ export function SectionIntro({ eyebrow, tone, title, lead, align = "left", class
  */
 export function Section({ children, className, id, alt, fill }: { children: ReactNode; className?: string; id?: string; alt?: boolean; fill?: boolean }) {
   return (
-    <section id={id} className={clsx("relative", fill ? "flex flex-col justify-center py-24 sm:py-28 md:min-h-[100svh] lg:py-32" : "py-16 sm:py-24", alt && "border-y border-[color:var(--border)] bg-[color:var(--bg-section-alt)]", className)}>
+    <section id={id} className={clsx("relative", fill ? "flex flex-col justify-center py-20 md:min-h-[100svh] md:py-24" : "py-16 sm:py-24", alt && "border-y border-[color:var(--border)] bg-[color:var(--bg-section-alt)]", className)}>
       {children}
     </section>
   );

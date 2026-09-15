@@ -20,9 +20,9 @@ export function HowItWorksSection() {
                   <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[color:var(--accent-4)] bg-[color:var(--bg-primary)] text-[11px] font-semibold text-[color:var(--accent-4)]">{step.n}</span>
                   {i < last ? <span className="mt-2 w-px flex-1" style={{ background: "color-mix(in srgb, var(--accent-4) 35%, transparent)" }} aria-hidden /> : null}
                 </div>
-                <div className={i < last ? "pb-9" : undefined}>
+                <div className={i < last ? "pb-7" : undefined}>
                   <h3 className="text-lg font-semibold tracking-tight">{step.title}</h3>
-                  <p className="mt-2 max-w-xl text-[15px] leading-7 text-[color:var(--text-secondary)]">{step.body}</p>
+                  <p className="mt-1.5 max-w-xl text-[14px] leading-6 text-[color:var(--text-secondary)]">{step.body}</p>
                 </div>
               </RevealItem>
             ))}

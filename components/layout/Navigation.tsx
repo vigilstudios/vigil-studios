@@ -139,7 +139,7 @@ export function Navigation() {
           >
             Sign in
           </Link>
-          <Link href="/express" className="btn-primary h-14 flex items-center justify-center rounded-[1.25rem]">
+          <Link href="/#start" className="btn-primary h-14 flex items-center justify-center rounded-[1.25rem]">
             Get started
           </Link>
         </div>
@@ -189,7 +189,7 @@ export function Navigation() {
               >
                 Sign in
               </Link>
-              <Link href="/express" className="btn-primary h-14 flex items-center justify-center rounded-[1.25rem]">
+              <Link href="/#start" onClick={() => setIsOpen(false)} className="btn-primary h-14 flex items-center justify-center rounded-[1.25rem]">
                 Get started
               </Link>
             </div>

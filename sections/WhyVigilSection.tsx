@@ -10,7 +10,7 @@ export function WhyVigilSection() {
         <Reveal>
           <SectionIntro eyebrow="Why not a builder" tone="amber" title="Builders sell tools. Vigil takes responsibility." lead="A site builder hands you software and wishes you luck. Vigil delivers the website and then operates it, so the technical side is never your job." align="center" />
         </Reveal>
-        <Reveal delay={0.1} className="mx-auto mt-12 max-w-4xl overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)]">
+        <Reveal delay={0.1} className="mx-auto mt-10 max-w-4xl overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)]">
           <div className="grid grid-cols-[1fr_1.2fr_1.2fr] bg-[color:var(--bg-surface-soft)] text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--text-secondary)]">
             <div className="px-4 py-3" />
             <div className="px-4 py-3">A site builder</div>
@@ -18,9 +18,9 @@ export function WhyVigilSection() {
           </div>
           {COMPARISON.map((row) => (
             <div key={row.dimension} className="grid grid-cols-[1fr_1.2fr_1.2fr] border-t border-[color:var(--border)] text-sm">
-              <div className="px-4 py-4 font-medium">{row.dimension}</div>
-              <div className="px-4 py-4 text-[color:var(--text-secondary)]">{row.builder}</div>
-              <div className="px-4 py-4">{row.vigil}</div>
+              <div className="px-4 py-3.5 font-medium">{row.dimension}</div>
+              <div className="px-4 py-3.5 text-[color:var(--text-secondary)]">{row.builder}</div>
+              <div className="px-4 py-3.5">{row.vigil}</div>
             </div>
           ))}
         </Reveal>

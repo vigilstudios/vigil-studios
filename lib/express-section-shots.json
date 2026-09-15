@@ -1,0 +1,127 @@
+[
+  {
+    "src": "/express-templates/sections/restaurant-1.webp",
+    "slug": "restaurant",
+    "section": "hero"
+  },
+  {
+    "src": "/express-templates/sections/restaurant-2.webp",
+    "slug": "restaurant",
+    "section": "menu"
+  },
+  {
+    "src": "/express-templates/sections/restaurant-3.webp",
+    "slug": "restaurant",
+    "section": "story"
+  },
+  {
+    "src": "/express-templates/sections/restaurant-4.webp",
+    "slug": "restaurant",
+    "section": "journal"
+  },
+  {
+    "src": "/express-templates/sections/restaurant-5.webp",
+    "slug": "restaurant",
+    "section": "reviews"
+  },
+  {
+    "src": "/express-templates/sections/restaurant-6.webp",
+    "slug": "restaurant",
+    "section": "reserve"
+  },
+  {
+    "src": "/express-templates/sections/retail-1.webp",
+    "slug": "retail",
+    "section": "hero"
+  },
+  {
+    "src": "/express-templates/sections/retail-2.webp",
+    "slug": "retail",
+    "section": "collections"
+  },
+  {
+    "src": "/express-templates/sections/retail-3.webp",
+    "slug": "retail",
+    "section": "edit"
+  },
+  {
+    "src": "/express-templates/sections/retail-4.webp",
+    "slug": "retail",
+    "section": "story"
+  },
+  {
+    "src": "/express-templates/sections/retail-5.webp",
+    "slug": "retail",
+    "section": "reviews"
+  },
+  {
+    "src": "/express-templates/sections/retail-6.webp",
+    "slug": "retail",
+    "section": "visit"
+  },
+  {
+    "src": "/express-templates/sections/salon-spa-1.webp",
+    "slug": "salon-spa",
+    "section": "hero"
+  },
+  {
+    "src": "/express-templates/sections/salon-spa-2.webp",
+    "slug": "salon-spa",
+    "section": "services"
+  },
+  {
+    "src": "/express-templates/sections/salon-spa-3.webp",
+    "slug": "salon-spa",
+    "section": "story"
+  },
+  {
+    "src": "/express-templates/sections/salon-spa-4.webp",
+    "slug": "salon-spa",
+    "section": "team"
+  },
+  {
+    "src": "/express-templates/sections/salon-spa-5.webp",
+    "slug": "salon-spa",
+    "section": "gallery"
+  },
+  {
+    "src": "/express-templates/sections/salon-spa-6.webp",
+    "slug": "salon-spa",
+    "section": "reviews"
+  },
+  {
+    "src": "/express-templates/sections/salon-spa-7.webp",
+    "slug": "salon-spa",
+    "section": "book"
+  },
+  {
+    "src": "/express-templates/sections/auto-services-1.webp",
+    "slug": "auto-services",
+    "section": "hero"
+  },
+  {
+    "src": "/express-templates/sections/auto-services-2.webp",
+    "slug": "auto-services",
+    "section": "services"
+  },
+  {
+    "src": "/express-templates/sections/auto-services-3.webp",
+    "slug": "auto-services",
+    "section": "inspection"
+  },
+  {
+    "src": "/express-templates/sections/auto-services-4.webp",
+    "slug": "auto-services",
+    "section": "gallery"
+  },
+  {
+    "src": "/express-templates/sections/auto-services-5.webp",
+    "slug": "auto-services",
+    "section": "reviews"
+  },
+  {
+    "src": "/express-templates/sections/auto-services-6.webp",
+    "slug": "auto-services",
+    "section": "appointment"
+  }
+]

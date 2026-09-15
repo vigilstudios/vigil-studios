@@ -13,7 +13,7 @@ import { GET_STARTED } from "@/lib/site-copy";
  */
 export function GetStartedSection() {
   return (
-    <section id="get-started" className="relative isolate flex flex-col justify-center overflow-hidden py-24 sm:py-28 md:min-h-[100svh] lg:py-32">
+    <section id="get-started" className="relative isolate flex flex-col justify-center overflow-hidden py-20 md:min-h-[100svh] md:py-24">
       <VelarisBackground className="absolute inset-0 -z-10 h-full w-full" grain={0.04} />
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-32 bg-[linear-gradient(to_bottom,var(--bg-section-alt),transparent)]" aria-hidden />
       <div className="mx-auto flex w-full max-w-3xl flex-col items-center px-4 text-center sm:px-6">

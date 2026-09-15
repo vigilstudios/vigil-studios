@@ -2,7 +2,7 @@ import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/sections/HeroSection";
 import { PillarsSection } from "@/sections/PillarsSection";
 import { HowItWorksSection } from "@/sections/HowItWorksSection";
-import { IndustriesSection } from "@/sections/IndustriesSection";
+import { StartSection } from "@/sections/StartSection";
 import { WhyVigilSection } from "@/sections/WhyVigilSection";
 import { PricingSection } from "@/sections/PricingSection";
 import { FAQSection } from "@/sections/FAQSection";
@@ -14,7 +14,7 @@ export default function Home() {
       <HeroSection />
       <PillarsSection />
       <HowItWorksSection />
-      <IndustriesSection />
+      <StartSection />
       <WhyVigilSection />
       <PricingSection />
       <FAQSection />
