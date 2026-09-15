@@ -7,12 +7,15 @@ import { MIN_PASSWORD_LENGTH } from "@/lib/vigil/auth/password";
 import { FormError, FormSuccess, inputClass, labelClass } from "./ui";
 
 /** Set or change the signed-in person's password. */
-export function PasswordForm({ hasPassword, compact }: { hasPassword: boolean; compact?: boolean }) {
+export function PasswordForm({ hasPassword, compact, onSaved }: { hasPassword: boolean; compact?: boolean; onSaved?: () => void }) {
   const router = useRouter();
   const [state, action, pending] = useActionState<PasswordState, FormData>(
     async (prev, fd) => {
       const res = await setPassword(prev, fd);
-      if (res?.ok) router.refresh();
+      if (res?.ok) {
+        onSaved?.();
+        router.refresh();
+      }
       return res;
     },
     null

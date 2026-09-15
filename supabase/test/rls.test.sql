@@ -330,6 +330,15 @@ begin
   perform test.login('00000000-0000-0000-0000-00000000000b');
   perform test.ok(test.count('select 1 from public.project_assets') = 0, 'bob: cannot see org A''s assets');
   perform test.logout();
+
+  -- Removing a whole organization (service role) cascades through its owner.
+  perform test.login_service();
+  insert into public.organizations (id, name, slug) values ('10000000-0000-0000-0000-00000000000d', 'Doomed', 'doomed');
+  insert into public.organization_members (organization_id, user_id, role, status)
+    values ('10000000-0000-0000-0000-00000000000d', '00000000-0000-0000-0000-00000000000a', 'owner', 'active');
+  delete from public.organizations where id = '10000000-0000-0000-0000-00000000000d';
+  perform test.ok(test.count('select 1 from public.organization_members where organization_id = ''10000000-0000-0000-0000-00000000000d''') = 0, 'service: deleting an organization removes its last owner too');
+  perform test.logout();
 end $$;
 
 -- --------------------------------------------------------------------------

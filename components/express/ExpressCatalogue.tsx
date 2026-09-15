@@ -8,6 +8,8 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUpRight,
+  Hammer,
+  Lock,
   Monitor,
   Smartphone,
 } from "lucide-react";
@@ -33,9 +35,9 @@ function groupTemplates(): IndustryGroup[] {
   }, []);
 }
 
-const INDUSTRIES = groupTemplates().sort((a, b) =>
-  a.industry.localeCompare(b.industry)
-);
+// Catalogue order is the order in EXPRESS_TEMPLATES (finished templates
+// first, ones under construction last).
+const INDUSTRIES = groupTemplates();
 const MOBILE_VIEWPORT_QUERY = "(max-width: 767px)";
 const slideVariants = {
   enter: (direction: number) => ({
@@ -173,7 +175,7 @@ export function ExpressCatalogue() {
       <div className={styles.shell}>
         <header className={styles.header}>
           <div className={styles.heading}>
-            <p>Express Sites</p>
+            <p>Vigil Express</p>
             <h1 id="catalogue-title">Choose your starting point.</h1>
           </div>
 
@@ -330,12 +332,27 @@ export function ExpressCatalogue() {
                     </span>
                   </div>
                   <div className={styles.viewport}>
-                    <iframe
-                      src={href}
-                      title={`${active.industry}, ${active.variant} preview`}
-                      tabIndex={-1}
-                      loading="eager"
-                    />
+                    {active.status === "coming" ? (
+                      <div className={styles.construction} role="status">
+                        <span className={styles.constructionBadge}>
+                          <Hammer size={14} />
+                          Under construction
+                        </span>
+                        <h3>{active.industry} is being built.</h3>
+                        <p>
+                          This template is not ready to preview or buy yet. Check
+                          back soon, or ask us about a custom build for your
+                          business today.
+                        </p>
+                      </div>
+                    ) : (
+                      <iframe
+                        src={href}
+                        title={`${active.industry}, ${active.variant} preview`}
+                        tabIndex={-1}
+                        loading="eager"
+                      />
+                    )}
                   </div>
                 </motion.div>
 
@@ -358,13 +375,28 @@ export function ExpressCatalogue() {
                 </div>
 
                 <div className={styles.actions}>
-                  <a href={href} target="_blank" rel="noopener noreferrer">
-                    View
-                    <ArrowUpRight size={17} />
-                  </a>
-                  <Link href={`/checkout?template=${active.slug}`} className={styles.enquire}>
-                    Buy · ${EXPRESS_PRICE}
-                  </Link>
+                  {active.status === "coming" ? (
+                    <>
+                      <span className={styles.locked} aria-disabled="true">
+                        <Lock size={15} />
+                        View
+                      </span>
+                      <span className={`${styles.locked} ${styles.enquire}`} aria-disabled="true">
+                        <Lock size={15} />
+                        Coming soon
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <a href={href} target="_blank" rel="noopener noreferrer">
+                        View
+                        <ArrowUpRight size={17} />
+                      </a>
+                      <Link href={`/checkout?template=${active.slug}`} className={styles.enquire}>
+                        Buy · ${EXPRESS_PRICE}
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </motion.div>

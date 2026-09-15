@@ -101,7 +101,8 @@ async function priceLinkFor(db: DbClient, provider: BillingProvider, entityType:
     .eq("entity_id", entityId)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  const match = (data ?? []).find((l) => (linkMode(l) ?? null) === (provider.mode ?? null));
+  // A provider without modes (the in-memory one) takes whatever is there.
+  const match = provider.mode ? (data ?? []).find((l) => linkMode(l) === provider.mode) : (data ?? [])[0];
   return match?.external_id ?? null;
 }
 

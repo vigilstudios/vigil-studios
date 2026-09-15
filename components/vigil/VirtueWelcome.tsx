@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { markStep } from "@/lib/vigil/actions/onboarding";
 import { ONBOARDING_LATER_HREF } from "@/lib/vigil/onboarding/constants";
 import type { SpeechLine } from "./VirtueSpeech";
+import { PasswordForm } from "./PasswordForm";
 import { VirtueOrb } from "./VirtueOrb";
 import { VirtueSpeech, useSpeaking } from "./VirtueSpeech";
 
@@ -15,10 +16,16 @@ import { VirtueSpeech, useSpeaking } from "./VirtueSpeech";
  * Virtue is centred and speaks, then offers to begin. "Look around first"
  * lifts the overlay for a week (the same cookie as "Do this later").
  */
-export function VirtueWelcome({ projectId, lines }: { projectId: string; lines: SpeechLine[] }) {
+export function VirtueWelcome({ projectId, lines, linesAfterPassword, passwordLines, needsPassword }: { projectId: string; lines: SpeechLine[]; /** The welcome when it follows the password step. */ linesAfterPassword: SpeechLine[]; /** Spoken before the password form when the account has none yet. */ passwordLines: SpeechLine[]; needsPassword: boolean }) {
   const router = useRouter();
   const speech = useSpeaking();
   const [spoken, setSpoken] = useState(false);
+  // Stage 1 (when needed): choose a password. Stage 2: the welcome and "Let's begin".
+  // Decided once on mount so a refresh after saving the password does not restart the words.
+  const [askedPassword] = useState(needsPassword);
+  const [stage, setStage] = useState<"password" | "welcome">(needsPassword ? "password" : "welcome");
+  const welcomeLines = askedPassword ? linesAfterPassword : lines;
+  const [passwordDone, setPasswordDone] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [pending, start] = useTransition();
@@ -50,9 +57,18 @@ export function VirtueWelcome({ projectId, lines }: { projectId: string; lines: 
       <div className="flex w-full max-w-xl flex-col items-center">
         <VirtueOrb size="xl" state={speech.speaking ? "talking" : "idle"} />
         <div className="mt-8 min-h-[7rem] w-full">
-          <VirtueSpeech lines={lines} onStart={speech.onStart} onDone={() => { speech.onDone(); setSpoken(true); }} />
+          <VirtueSpeech key={stage} lines={stage === "password" ? passwordLines : welcomeLines} onStart={speech.onStart} onDone={() => { speech.onDone(); setSpoken(true); }} />
         </div>
-        <div className={clsx("mt-8 flex w-full flex-col items-center gap-3 transition-opacity duration-700 sm:flex-row sm:justify-center", spoken ? "opacity-100" : "pointer-events-none opacity-0")} aria-hidden={!spoken}>
+        {stage === "password" ? (
+          <div className={clsx("mt-6 w-full max-w-md transition-opacity duration-700", spoken ? "opacity-100" : "pointer-events-none opacity-0")} aria-hidden={!spoken}>
+            {passwordDone ? (
+              <p className="text-center text-sm text-[color:var(--text-secondary)]">Saved.</p>
+            ) : (
+              <PasswordForm hasPassword={false} compact onSaved={() => { setPasswordDone(true); window.setTimeout(() => { setSpoken(false); setStage("welcome"); }, 600); }} />
+            )}
+          </div>
+        ) : null}
+        <div className={clsx("mt-8 flex w-full flex-col items-center gap-3 transition-opacity duration-700 sm:flex-row sm:justify-center", spoken && stage === "welcome" ? "opacity-100" : "pointer-events-none opacity-0")} aria-hidden={!(spoken && stage === "welcome")}>
           <button type="button" onClick={begin} disabled={pending} className="btn-primary min-h-12 w-full !px-6 text-sm sm:w-auto">
             Let&apos;s begin <ArrowRight className="ml-2 h-4 w-4" />
           </button>

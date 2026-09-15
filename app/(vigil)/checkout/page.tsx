@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: "Checkout", robots: { index: false } 
 export default async function CheckoutPage({ searchParams }: { searchParams: Promise<{ template?: string; client_reference_id?: string; canceled?: string; plan?: string; period?: string }> }) {
   const params = await searchParams;
   const slug = params.template ?? params.client_reference_id ?? null;
-  const template = slug ? EXPRESS_TEMPLATES.find((t) => t.slug === slug) ?? null : null;
+  const template = slug ? EXPRESS_TEMPLATES.find((t) => t.slug === slug && t.status === "available") ?? null : null;
   const catalog = await getCheckoutCatalog();
   const build = catalog.builds.find((b) => b.kind === "express") ?? null;
 

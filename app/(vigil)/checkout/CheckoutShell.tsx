@@ -9,9 +9,8 @@ export function CheckoutShell({ title, subtitle, children, centered }: { title?:
       <div className="vigil-frame flex min-h-screen flex-col bg-[color:var(--bg-primary)] text-[13px] text-[color:var(--text-primary)]">
         <header className="border-b border-[color:var(--border)]">
           <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
-            <Link href="/" aria-label="Vigil Studios home" className="flex items-center gap-2">
+            <Link href="/" aria-label="Vigil home" className="flex items-center">
               <Logo size="sm" />
-              <span className="text-sm font-semibold">Vigil Studios</span>
             </Link>
             <Link href="/login" className="text-xs text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">Already a customer? Sign in</Link>
           </div>

@@ -24,7 +24,7 @@ function seed() {
       { id: "build_custom", kind: "custom", name: "Custom Build", amount_cents: null, currency: "usd", is_active: true },
     ],
     provider_links: [
-      { provider: "other", resource_kind: "price", external_id: "price_ext_care", entity_type: "plan_price", entity_id: PRICE },
+      { provider: "other", resource_kind: "price", external_id: "price_ext_care", entity_type: "plan_price", entity_id: PRICE, metadata: { mode: "test" } },
       { provider: "other", resource_kind: "price", external_id: "price_ext_build", entity_type: "build_price", entity_id: BUILD },
       { provider: "other", resource_kind: "price", external_id: "price_ext_care_3y", entity_type: "plan_price", entity_id: "price_care_year3" },
     ],
@@ -130,6 +130,10 @@ describe("completeCheckout + provisionOrder", () => {
     expect(customer?.entity_id).toBe(org.id);
     expect(fake.rows("orders")[0]).toMatchObject({ status: "provisioned", organization_id: org.id, project_id: project.id, subscription_id: sub.id });
     expect(fake.audit.find((a) => a.p_action === "order.provisioned")).toBeTruthy();
+
+    // Provisioning re-asserts the price link it saw on the subscription; the sync's stamp must survive.
+    const priceLink = fake.rows("provider_links").find((l) => l.resource_kind === "price" && l.entity_id === PRICE);
+    expect(priceLink?.metadata).toEqual({ mode: "test" });
 
     const again = await provisionOrder(fake.asClient(), orderId, provider, "https://app.test");
     expect(again).toEqual({ organizationId: org.id, alreadyProvisioned: true });

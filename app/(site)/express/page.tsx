@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ExpressCatalogue } from "@/components/express/ExpressCatalogue";
 
-const title = "Express Sites | Vigil Studios";
+const title = "Vigil Express | Vigil Studios";
 const description =
   "Fixed-price single-page websites built from a template made for your industry. See the full example before you buy, and go live in one to two business days.";
 

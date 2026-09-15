@@ -583,3 +583,31 @@ first arrival; steps fixed on the left of the forms.
 - Verified in the in-app browser (Chrome throttles animation and timers in
   a hidden window, which made the orb look black there): success page,
   welcome overlay, wizard at desktop and 375px, sticky strip, orb states.
+
+## 2026-09-15 — Go-live fixes after the owner's test runs
+
+- **Plans greyed out after a purchase** — `provisionOrder` re-linked the
+  Stripe price it saw on the subscription and the upsert wiped the link's
+  `metadata.mode` stamp, so the plan stopped matching the test key.
+  `upsertProviderLink` now writes metadata only when given; provisioning
+  passes the provider mode; the three wiped links were re-stamped. Test.
+- **Welcome email** — still Resend "domain not verified"; nothing to do in
+  code (Virtue already offers the sign-in link).
+- **Password first** — the welcome overlay opens with Virtue asking for a
+  password (compact form) when the account has none, then "Thank you.
+  Welcome to Vigil." and Let's begin. The Overview card only shows on
+  later visits.
+- Wizard centred (`max-w-5xl`) on wide screens; journey pages show the
+  logo alone.
+- **Vigil Express** — the tier, nav item, page title, catalogue heading,
+  admin copy and the build price row (migration 0011) now say "Vigil
+  Express". Catalogue order: Restaurant and cafe, Retail and boutique, Salon
+  and spa, Auto shop, then Home services and Medical and dental marked
+  `status: "coming"` — an "Under construction" panel in the preview (theme
+  tokens, so it flips with light/dark), View and Buy locked, and
+  `/checkout` ignores those slugs. `lib/constants.ts` and
+  `components/express/*` edited at the owner's explicit request.
+- **Test data removed** from the live project: four purchase-test
+  organizations (with cascades), six orders, their storage files, provider
+  links and auth users. Migration 0012 lets an organization delete cascade
+  past the last-owner guard (RLS test). Marlow & Fen stays as the demo.

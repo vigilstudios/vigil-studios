@@ -7,7 +7,7 @@ import { Checklist, Meter, Panel, StatusLine, Stepper, Timeline } from "@/compon
 import { SiteFrame } from "@/components/vigil/SiteFrame";
 import { OnboardingCard } from "@/components/vigil/OnboardingCard";
 import { VirtueWelcome } from "@/components/vigil/VirtueWelcome";
-import { welcomeSpeech } from "@/lib/vigil/onboarding/virtue-copy";
+import { passwordSpeech, welcomeSpeech } from "@/lib/vigil/onboarding/virtue-copy";
 import { PasswordForm } from "@/components/vigil/PasswordForm";
 import { hasPassword } from "@/lib/vigil/auth/password";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
@@ -72,14 +72,22 @@ export default async function OverviewPage() {
 
   return (
     <div className="space-y-4">
-      {welcome && onboarding ? <VirtueWelcome projectId={onboarding.project.id} lines={welcomeSpeech({ firstName, businessName: onboarding.brief.basics?.businessName || ctx.organization.name })} /> : null}
+      {welcome && onboarding ? (
+        <VirtueWelcome
+          projectId={onboarding.project.id}
+          needsPassword={!hasPassword(ctx.user) && !ctx.isImpersonating}
+          passwordLines={passwordSpeech({ firstName })}
+          lines={welcomeSpeech({ firstName, businessName: onboarding.brief.basics?.businessName || ctx.organization.name })}
+          linesAfterPassword={welcomeSpeech({ firstName, businessName: onboarding.brief.basics?.businessName || ctx.organization.name, afterPassword: true })}
+        />
+      ) : null}
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--accent)]">{ctx.organization.name}</p>
         <h1 className="text-lg font-semibold tracking-tight sm:text-xl">{firstName ? `Hello, ${firstName}` : "Overview"}</h1>
         <p className="mt-0.5 text-xs text-[color:var(--text-secondary)]">Everything Vigil is running for your business, at a glance.</p>
       </div>
 
-      {!hasPassword(ctx.user) && !ctx.isImpersonating ? (
+      {!hasPassword(ctx.user) && !ctx.isImpersonating && !welcome ? (
         <section className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-4">
           <p className="text-[13px] font-semibold">Set a password for next time</p>
           <p className="mt-1 text-xs text-[color:var(--text-secondary)]">You signed in with an email link. With a password you can sign in straight away on any device; the link stays available as a backup.</p>

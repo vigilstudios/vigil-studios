@@ -29,7 +29,7 @@ export default async function OrdersPage() {
       <PageHeader title="Orders" description="Every purchase intent: self-serve from the catalogue or a link you sent. Paid orders provision themselves; anything stuck can be pushed through here." />
 
       <Panel title="Send a checkout link">
-        <p className="text-xs text-[color:var(--text-secondary)]">For customers who did not buy from the catalogue — a custom build, a Professional site, or an Express site you scoped on a call. They pay on the link; the account provisions itself.</p>
+        <p className="text-xs text-[color:var(--text-secondary)]">For customers who did not buy from the catalogue — a custom build, a Professional site, or a Vigil Express site you scoped on a call. They pay on the link; the account provisions itself.</p>
         <NewOrderForm plans={plans ?? []} templates={EXPRESS_TEMPLATES.map((t) => ({ slug: t.slug, name: t.industry }))} />
       </Panel>
 

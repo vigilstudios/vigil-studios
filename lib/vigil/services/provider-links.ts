@@ -19,6 +19,9 @@ export async function upsertProviderLink(
     metadata?: Record<string, Json>;
   }
 ): Promise<void> {
+  // Metadata is only written when given, so a re-link (provisioning
+  // re-asserting a price it saw on a subscription) keeps existing stamps
+  // such as the Stripe mode.
   const { error } = await admin.from("provider_links").upsert(
     {
       provider: link.provider,
@@ -26,7 +29,7 @@ export async function upsertProviderLink(
       external_id: link.externalId,
       entity_type: link.entityType,
       entity_id: link.entityId,
-      metadata: link.metadata ?? {},
+      ...(link.metadata ? { metadata: link.metadata } : {}),
     },
     { onConflict: "provider,resource_kind,external_id" }
   );

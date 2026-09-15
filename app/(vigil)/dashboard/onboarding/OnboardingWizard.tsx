@@ -124,7 +124,7 @@ export function OnboardingWizard(props: WizardProps) {
   );
 
   return (
-    <div className="lg:grid lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-10">
+    <div className="mx-auto w-full max-w-5xl lg:grid lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-12">
       {/* Virtue and the journey: a fixed rail on the left on desktop; on phones the
           step strip sticks to the top of the scrolling form. */}
       <aside className="lg:sticky lg:top-0 lg:self-start">
@@ -152,7 +152,7 @@ export function OnboardingWizard(props: WizardProps) {
           </div>
         </nav>
         <h1 className="mt-5 text-lg font-semibold tracking-tight sm:text-xl lg:mt-0">{STEP_TITLES[step]}</h1>
-        <div className="mt-5 max-w-2xl">
+        <div className="mt-5 max-w-3xl">
           {step === "basics" ? (
             <BasicsStep key="basics" initial={brief.basics} businessName={businessName} save={(d, c) => saveSection("basics", d, c)} onSaveState={setSaveState} onBack={() => router.push("/dashboard")} onNext={() => go(next("basics"))} />
           ) : step === "offerings" ? (

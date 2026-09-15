@@ -226,7 +226,7 @@ export async function provisionOrder(admin: DbClient, orderId: string, provider:
         if (snapshot) {
           // Ensure the price link points at the plan price the buyer chose so attribution works.
           if (snapshot.priceExternalId && order.plan_price_id) {
-            await upsertProviderLink(admin, { provider: providerName, resourceKind: "price", externalId: snapshot.priceExternalId, entityType: "plan_price", entityId: order.plan_price_id });
+            await upsertProviderLink(admin, { provider: providerName, resourceKind: "price", externalId: snapshot.priceExternalId, entityType: "plan_price", entityId: order.plan_price_id, metadata: provider.mode ? { mode: provider.mode } : undefined });
           }
           const applied = await applySubscriptionSnapshot(admin, snapshot, provider);
           linked = applied.subscriptionId;
