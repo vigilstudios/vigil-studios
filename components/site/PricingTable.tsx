@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { clsx } from "clsx";
-import { motion } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
 import { BILLING_PERIODS, savingsPercent, type BillingPeriodKey } from "@/lib/vigil/billing-periods";
 import { formatMoney } from "@/lib/vigil/format";
@@ -12,7 +11,8 @@ import { PLAN_COPY } from "@/lib/site-copy";
 import { VirtueOrb } from "@/components/vigil/VirtueOrb";
 import { FlipNumber } from "./FlipNumber";
 import { Chip } from "./primitives";
-import { cardVariants, gridVariants } from "./pricing-motion";
+import { Card, CardRow } from "./Cards";
+import { SegmentedControl } from "./SegmentedControl";
 
 const money = (cents: number, currency: string) => formatMoney(cents, currency).replace(/\.00$/, "");
 
@@ -35,25 +35,29 @@ export function PricingTable({ plans, planHref = "/express", bullets = 3 }: { pl
     <div>
       {periods.length > 1 ? (
         <div className="flex justify-center">
-          <div className="inline-flex rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-1" role="radiogroup" aria-label="Billing period">
-            {periods.map((per) => {
+          <SegmentedControl
+            role="radiogroup"
+            label="Billing period"
+            value={periodKey}
+            onChange={setPeriodKey}
+            options={periods.map((per) => {
               const active = per.key === periodKey;
               const save = Math.max(0, ...plans.map((p) => savingsPercent(p.prices[per.key] ?? 0, per.months, p.prices.month ?? null) ?? 0));
-              return (
-                <button key={per.key} type="button" role="radio" aria-checked={active} onClick={() => setPeriodKey(per.key)} className={clsx("relative min-h-10 rounded-lg px-4 text-sm font-medium transition-colors", active ? "text-[color:var(--bg-primary)]" : "text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]")}>
-                  {active ? <motion.span layoutId="period-pill" className="absolute inset-0 rounded-lg bg-[color:var(--accent)]" transition={{ type: "spring", stiffness: 400, damping: 34 }} /> : null}
-                  <span className="relative">
+              return {
+                key: per.key,
+                label: (
+                  <span className="inline-flex items-center justify-center whitespace-nowrap">
                     {per.label}
                     {save > 0 ? <span className={clsx("ml-2 rounded-full px-1.5 py-0.5 text-[10px] font-semibold transition-colors", active ? "bg-black/15" : "bg-[color:var(--accent)]/15 text-[color:var(--accent)]")}>save {save}%</span> : null}
                   </span>
-                </button>
-              );
+                ),
+              };
             })}
-          </div>
+          />
         </div>
       ) : null}
 
-      <motion.div variants={gridVariants} initial="hidden" animate="visible" className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <CardRow className="mt-8 md:grid-cols-2 xl:grid-cols-4">
         {plans.map((p) => {
           const cents = p.prices[periodKey];
           const copy = PLAN_COPY[p.code];
@@ -61,7 +65,7 @@ export function PricingTable({ plans, planHref = "/express", bullets = 3 }: { pl
           const save = cents != null ? savingsPercent(cents, period.months, p.prices.month ?? null) : null;
           const featured = p.code === highlight;
           return (
-            <motion.div key={p.code} variants={cardVariants} whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 24 }} className={clsx("relative flex flex-col rounded-2xl border p-5 lg:p-6", featured ? "border-[color:var(--accent)] bg-[color:var(--accent)]/6 shadow-[0_0_0_1px_var(--accent),0_24px_60px_-40px_var(--accent)]" : "border-[color:var(--border)] bg-[color:var(--bg-surface)]")}>
+            <Card key={p.code} className={clsx("relative flex flex-col rounded-2xl border p-5 lg:p-6", featured ? "border-[color:var(--accent)] bg-[color:var(--accent)]/6 shadow-[0_0_0_1px_var(--accent),0_24px_60px_-40px_var(--accent)]" : "border-[color:var(--border)] bg-[color:var(--bg-surface)]")}>
               <div className="flex items-start justify-between gap-2">
                 <div>
                   {featured ? <div className="mb-2"><Chip tone="accent">Most chosen</Chip></div> : null}
@@ -90,13 +94,15 @@ export function PricingTable({ plans, planHref = "/express", bullets = 3 }: { pl
                   </li>
                 ))}
               </ul>
-              <Link href={`${planHref}${planHref.includes("?") ? "&" : "?"}plan=${p.code}&period=${periodKey}`} className={clsx("mt-auto inline-flex min-h-11 items-center justify-center rounded-lg pt-0 text-sm font-semibold transition-colors", featured ? "btn-primary !mt-6 !px-4 !py-2" : "btn-secondary !mt-6 !px-4 !py-2")}>
-                Choose {p.name.replace(/^Vigil /, "")} <ArrowRight className="ml-1.5 h-4 w-4" />
-              </Link>
-            </motion.div>
+              <div className="mt-auto pt-6">
+                <Link href={`${planHref}${planHref.includes("?") ? "&" : "?"}plan=${p.code}&period=${periodKey}`} className={clsx("inline-flex min-h-11 w-full items-center justify-center rounded-lg text-sm font-semibold transition-colors", featured ? "btn-primary !px-4 !py-2" : "btn-secondary !px-4 !py-2")}>
+                  Choose {p.name.replace(/^Vigil /, "")} <ArrowRight className="ml-1.5 h-4 w-4" />
+                </Link>
+              </div>
+            </Card>
           );
         })}
-      </motion.div>
+      </CardRow>
     </div>
   );
 }

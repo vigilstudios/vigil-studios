@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import { Chip, Container, Eyebrow, Section, SectionIntro } from "@/components/site/primitives";
-import { Reveal, RevealGroup, RevealItem } from "@/components/site/Reveal";
+import { Card, CardRow } from "@/components/site/Cards";
+import { Reveal } from "@/components/site/Reveal";
 import { StartMarquee } from "@/components/site/StartMarquee";
 import { EXPRESS_TEMPLATES } from "@/lib/constants";
 import shots from "@/lib/express-section-shots.json";
@@ -25,11 +26,11 @@ export async function StartSection() {
         <Reveal>
           <SectionIntro align="center" eyebrow={START.eyebrow} title={START.title} lead={START.lead} />
         </Reveal>
-        <RevealGroup className="mt-8 grid gap-4 md:grid-cols-3">
+        <CardRow className="mt-8 md:grid-cols-3">
           {builds.map((b) => {
             const stage = START.stages[b.kind];
             return (
-              <RevealItem key={b.kind}>
+              <Card key={b.kind}>
                 <div className="flex h-full flex-col rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-primary)]/85 p-5 backdrop-blur-md lg:p-6 transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-[color:var(--text-secondary)]/40">
                   <Eyebrow tone={stage.tone}>{stage.stage}</Eyebrow>
                   <h3 className="text-xl font-semibold tracking-tight">{b.name}</h3>
@@ -59,10 +60,10 @@ export async function StartSection() {
                     </Link>
                   </div>
                 </div>
-              </RevealItem>
+              </Card>
             );
           })}
-        </RevealGroup>
+        </CardRow>
         <Reveal delay={0.2}>
           <p className="mx-auto mt-6 max-w-2xl text-center text-sm leading-6 text-[color:var(--text-secondary)]">{START.note}</p>
         </Reveal>

@@ -1,13 +1,14 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 /**
  * A price that rolls to its new value like a counter: each digit sits on a
  * strip of 0–9 and slides to the new figure; separators and new digits fade
- * in from the right so "$99" → "$2,670" reads as one motion. Slots are keyed
- * from the right so the ones, tens and hundreds keep their identity as the
- * number grows. The whole value is exposed to assistive tech as one label.
+ * in so "$99" → "$2,670" reads as one motion. Slots are keyed from the right
+ * so the ones, tens and hundreds keep their identity as the number grows.
+ * No AnimatePresence here on purpose: a nested one stalls the tab panels'
+ * exit in PricingTabs. The whole value is exposed as one label.
  */
 const DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -20,16 +21,14 @@ export function FlipNumber({ value, className }: { value: string; className?: st
     <span className={className} role="text" aria-label={value}>
       <span className="inline-flex overflow-hidden align-baseline" aria-hidden>
         {prefix ? <span className="inline-block">{prefix}</span> : null}
-        <AnimatePresence initial={false} mode="popLayout">
-          {chars.map((ch, i) => {
-            const key = chars.length - i; // position from the right
-            return (
-              <motion.span key={key} layout="position" initial={still ? false : { opacity: 0, width: 0 }} animate={{ opacity: 1, width: "auto" }} exit={{ opacity: 0, width: 0 }} transition={{ duration: 0.25 }} className="inline-block overflow-hidden">
-                {/\d/.test(ch) ? <Digit digit={Number(ch)} still={!!still} /> : <span className="inline-block">{ch}</span>}
-              </motion.span>
-            );
-          })}
-        </AnimatePresence>
+        {chars.map((ch, i) => {
+          const key = chars.length - i; // position from the right
+          return (
+            <motion.span key={key} initial={still ? false : { opacity: 0, width: 0 }} animate={{ opacity: 1, width: "auto" }} transition={{ duration: 0.25 }} className="inline-block overflow-hidden">
+              {/\d/.test(ch) ? <Digit digit={Number(ch)} still={!!still} /> : <span className="inline-block">{ch}</span>}
+            </motion.span>
+          );
+        })}
       </span>
     </span>
   );

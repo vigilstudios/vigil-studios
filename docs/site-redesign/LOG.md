@@ -86,9 +86,29 @@ are next.
   typecheck, tests (91), `next build` clean. `Navigation.tsx` has a
   pre-existing lint error (setState in effect) left alone.
 
+## 2026-09-15 — Owner's fixes, then live
+
+Approved with minor fixes, then fast-forwarded to `main` (vigilstudios.co).
+
+- Hero copy is *You run the business. Vigil runs the online presence.*
+  (`TAGLINE`, site title too); each sentence stays on one line from `lg`,
+  and the headline, lead and buttons arrive in that order.
+- One card system (`components/site/Cards.tsx`: `CardRow`, `Card`) for
+  Pillars, Start, builds and plans: cards float in one after another as the
+  row scrolls into view and lift on hover; below `md` every row scrolls
+  sideways with snap points instead of stacking.
+- Pricing tabs bug: after a period change, switching back to Websites left
+  the old panel invisible and never mounted the new one. Cause: the period
+  toggle's `layoutId` pill inside the exiting `AnimatePresence` panel.
+  `SegmentedControl` now slides one pill by index (no `layoutId`) and is
+  used for both the tabs and the period toggle. `FlipNumber` also lost its
+  nested `AnimatePresence`.
+- Plan card buttons sit at the bottom of every card.
+
 ## Handoff for the next session (15 Sep 2026)
 
-- Branch **`claude/site-redesign`** (pushed; `main` still serves the old site).
+- Branch **`claude/site-redesign`**, merged to `main` on 15 Sep 2026 (the
+  home page is live); keep iterating on the branch and fast-forward again.
   Preview: `https://vigil-studios-git-claude-site-redesign-belierjaviers-projects.vercel.app`
   (Vercel SSO-protected; the owner signs in). Locally: `npm run dev` on the
   branch, `http://127.0.0.1:3000`.

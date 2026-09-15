@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, Globe, MonitorSmartphone } from "lucide-react";
 import { Chip, Container, Eyebrow, Section, SectionIntro } from "@/components/site/primitives";
-import { Reveal, RevealGroup, RevealItem } from "@/components/site/Reveal";
+import { Card, CardRow } from "@/components/site/Cards";
+import { Reveal } from "@/components/site/Reveal";
 import { VirtueOrb } from "@/components/vigil/VirtueOrb";
 import { PILLARS } from "@/lib/site-copy";
 
@@ -15,12 +16,12 @@ export function PillarsSection() {
         <Reveal>
           <SectionIntro eyebrow="What you get" title="Three things, one relationship." lead="A website to start with, a platform that keeps it running, and an AI employee who works inside it. You deal with Vigil; Vigil deals with everything underneath." />
         </Reveal>
-        <RevealGroup className="mt-12 grid gap-4 md:grid-cols-3 lg:mt-16">
+        <CardRow className="mt-12 md:grid-cols-3 lg:mt-16">
           {PILLARS.map((p, i) => {
             const color = toneColor[p.tone];
             return (
-              <RevealItem key={p.key}>
-                <Link href={p.href} className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-6 transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-[color:var(--text-secondary)]/40 lg:p-7">
+              <Card key={p.key}>
+                <Link href={p.href} className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-6 transition-colors hover:border-[color:var(--text-secondary)]/40 lg:p-7">
                   <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full opacity-30 blur-3xl" style={{ background: color }} aria-hidden />
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-primary)]/60">
                     {p.key === "virtue" ? <VirtueOrb size="sm" label="" /> : p.key === "websites" ? <MonitorSmartphone className="h-5 w-5" style={{ color }} /> : <Globe className="h-5 w-5" style={{ color }} />}
@@ -35,10 +36,10 @@ export function PillarsSection() {
                   </span>
                   {p.key === "virtue" ? <div className="absolute right-5 top-5"><Chip tone="violet">Growth · Priority</Chip></div> : null}
                 </Link>
-              </RevealItem>
+              </Card>
             );
           })}
-        </RevealGroup>
+        </CardRow>
       </Container>
     </Section>
   );

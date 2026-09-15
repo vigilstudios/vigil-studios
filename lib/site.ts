@@ -9,7 +9,7 @@ export const SITE_URL = "https://www.vigilstudios.co";
 
 export const SITE_NAME = "Vigil Studios";
 
-export const SITE_TITLE = "Vigil Studios | You run the business. Vigil runs the digital side of it.";
+export const SITE_TITLE = "Vigil Studios | You run the business. Vigil runs the online presence.";
 
 export const SITE_DESCRIPTION =
   "Vigil builds your website, then keeps it online, updated and working for you. Vigil Express templates from $599, a Vigil plan that runs the site, and Virtue, the AI employee inside it.";

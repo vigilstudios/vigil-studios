@@ -3,7 +3,7 @@
  * the database and lib/constants). One place to tune the voice: plain, warm,
  * no exclamation marks.
  */
-export const TAGLINE = "You run the business. Vigil runs the digital side of it.";
+export const TAGLINE = "You run the business. Vigil runs the online presence.";
 
 export const HERO = {
   eyebrow: "Websites, hosting, updates, leads and follow-up. One platform, one team.",

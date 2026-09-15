@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { PublicBuild, PublicPlan } from "@/lib/vigil/queries/public-pricing";
 import { BuildCards } from "./BuildCards";
 import { PricingTable } from "./PricingTable";
+import { SegmentedControl } from "./SegmentedControl";
 
 type Tab = "websites" | "subscriptions";
 
@@ -24,29 +25,21 @@ export function PricingTabs({ plans, builds }: { plans: PublicPlan[]; builds: Pu
   return (
     <div>
       <div className="flex justify-center">
-        <div className="inline-flex rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-1.5" role="tablist" aria-label="What you pay for">
-          {tabs.map((t) => {
-            const active = t.key === tab;
-            return (
-              <motion.button
-                key={t.key}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => setTab(t.key)}
-                whileHover={{ scale: active ? 1 : 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                className={clsx("relative min-h-12 rounded-xl px-6 text-sm font-semibold transition-colors", active ? "text-[color:var(--bg-primary)]" : "text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]")}
-              >
-                {active ? <motion.span layoutId="pricing-tab-pill" className="absolute inset-0 rounded-xl bg-[color:var(--accent)]" transition={{ type: "spring", stiffness: 380, damping: 32 }} /> : null}
-                <span className="relative flex flex-col items-center leading-tight">
-                  {t.label}
-                  <span className={clsx("text-[10px] font-medium tracking-wide", active ? "opacity-75" : "opacity-60")}>{t.hint}</span>
-                </span>
-              </motion.button>
-            );
-          })}
-        </div>
+        <SegmentedControl
+          size="lg"
+          label="What you pay for"
+          value={tab}
+          onChange={setTab}
+          options={tabs.map((t) => ({
+            key: t.key,
+            label: (
+              <span className="flex flex-col items-center leading-tight">
+                {t.label}
+                <span className={clsx("text-[10px] font-medium tracking-wide", t.key === tab ? "opacity-75" : "opacity-60")}>{t.hint}</span>
+              </span>
+            ),
+          }))}
+        />
       </div>
 
       <div className="relative mt-8">
