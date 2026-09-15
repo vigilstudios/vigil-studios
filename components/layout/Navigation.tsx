@@ -109,6 +109,9 @@ export function Navigation() {
             <ThemeToggle />
           </div>
           <div className="md:flex items-center gap-6 h-14 rounded-[1.25rem] border border-[color:var(--border)] bg-[color:var(--bg-surface)]/90 backdrop-blur-xl px-5 shadow-[0_24px_80px_-48px_rgba(0,0,0,0.45)]">
+            <Link href="/" className="text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)] transition-colors text-sm font-medium">
+              Home
+            </Link>
             <ProductsMenu />
             {navItems.map((item) => (
               <Link
@@ -159,6 +162,9 @@ export function Navigation() {
             className="md:hidden bg-[color:var(--bg-secondary)] border-b border-[color:var(--border)]"
           >
             <div className="container-wide py-6 flex flex-col gap-4">
+              <Link href="/" onClick={() => setIsOpen(false)} className="text-[color:var(--text-primary)] hover:text-[color:var(--accent)] transition-colors font-medium">
+                Home
+              </Link>
               <div>
                 <Link href="/products" onClick={() => setIsOpen(false)} className="text-[color:var(--text-primary)] hover:text-[color:var(--accent)] transition-colors font-medium">
                   Products
