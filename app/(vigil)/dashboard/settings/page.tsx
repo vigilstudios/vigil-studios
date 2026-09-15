@@ -5,6 +5,8 @@ import { formatDate, titleCase } from "@/lib/vigil/format";
 import { getOrgInvites, getOrgMembers } from "@/lib/vigil/queries/dashboard";
 import { InviteForm, MemberActions, InviteActions } from "./MembersClient";
 import { ProfileForm } from "./ProfileForm";
+import { PasswordForm } from "@/components/vigil/PasswordForm";
+import { hasPassword } from "@/lib/vigil/auth/password";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -24,6 +26,15 @@ export default async function SettingsPage() {
       <Card>
         <h2 className="text-base font-semibold">Business profile</h2>
         <ProfileForm organization={ctx.organization} readOnly={!canManage} />
+      </Card>
+
+      <Card className="mt-4">
+        <h2 className="text-base font-semibold">Your sign-in</h2>
+        <p className="mt-1 text-sm text-[color:var(--text-secondary)]">
+          Signed in as <b className="text-[color:var(--text-primary)]">{ctx.profile.email}</b>.{" "}
+          {hasPassword(ctx.user) ? "You sign in with a password; a one-time email link always works as a backup." : "Set a password so you can sign in without waiting for an email link."}
+        </p>
+        <PasswordForm hasPassword={hasPassword(ctx.user)} />
       </Card>
 
       <Card className="mt-4">

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "./errors";
 import { NEXT_COOKIE, nextCookieOptions } from "./next-cookie";
+import { MIN_PASSWORD_LENGTH } from "./password";
 import { isPlausibleEmail, normalizeEmail, safeNextPath } from "./redirects";
 
 async function siteOrigin(): Promise<string> {
@@ -59,6 +60,47 @@ export async function signInWithEmail(_prev: SignInState, formData: FormData): P
   }
 
   return { ok: true, data: { email } };
+}
+
+export type PasswordSignInState = ActionResult<undefined> | null;
+
+/**
+ * Password sign-in for people who set one. Wrong credentials and "no
+ * password yet" look the same to a caller (Supabase does not distinguish),
+ * so the message points to the link as the way in either way.
+ */
+export async function signInWithPassword(_prev: PasswordSignInState, formData: FormData): Promise<PasswordSignInState> {
+  const email = normalizeEmail(String(formData.get("email") ?? ""));
+  const password = String(formData.get("password") ?? "");
+  const next = safeNextPath(String(formData.get("next") ?? ""));
+  if (!isPlausibleEmail(email)) return { ok: false, error: "Enter the email address you use with Vigil Studios.", code: "validation" };
+  if (!password) return { ok: false, error: "Enter your password, or email yourself a sign-in link.", code: "validation" };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    return { ok: false, error: "That email and password do not match. If you have not set a password yet, email yourself a sign-in link and set one in Settings.", code: "auth" };
+  }
+  await supabase.rpc("accept_pending_invites").then(({ error: e }) => e && console.error("accept_pending_invites failed:", e.message));
+  redirect(next);
+}
+
+export type PasswordState = ActionResult<undefined> | null;
+
+/** Set or change the signed-in user's password. Marks the account so prompts stop. */
+export async function setPassword(_prev: PasswordState, formData: FormData): Promise<PasswordState> {
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+  if (password.length < MIN_PASSWORD_LENGTH) return { ok: false, error: `Use at least ${MIN_PASSWORD_LENGTH} characters.`, code: "validation", issues: { password: ["Too short"] } };
+  if (password !== confirm) return { ok: false, error: "The two passwords do not match.", code: "validation", issues: { confirm: ["Does not match"] } };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password, data: { has_password: true } });
+  if (error) {
+    console.error("updateUser(password) failed:", error.message);
+    return { ok: false, error: error.message.includes("different") ? "Choose a password you have not used here before." : "We could not save that password. Please try again.", code: "auth" };
+  }
+  return { ok: true, data: undefined };
 }
 
 export async function signOut(): Promise<void> {

@@ -8,11 +8,13 @@ import { formatRelative, humanizeAction, titleCase } from "@/lib/vigil/format";
 import { auditTone } from "@/lib/vigil/presenters";
 import { getBillingProvider, readProviderConfig } from "@/lib/vigil/providers/registry";
 import { adminCounts, attentionItems, jobStatusCounts, listAudit } from "@/lib/vigil/queries/admin";
+import { PasswordForm } from "@/components/vigil/PasswordForm";
+import { hasPassword } from "@/lib/vigil/auth/password";
 
 export const metadata: Metadata = { title: "Admin" };
 
 export default async function AdminOverviewPage() {
-  await requireStaff("/admin");
+  const staff = await requireStaff("/admin");
   const [counts, jobs, attention, audit] = await Promise.all([adminCounts(), jobStatusCounts(), attentionItems(), listAudit()]);
   const providers = readProviderConfig();
   const billingMode = getBillingProvider().mode ?? null;
@@ -28,6 +30,13 @@ export default async function AdminOverviewPage() {
         <h1 className="text-lg font-semibold tracking-tight sm:text-xl">Overview</h1>
         <p className="mt-0.5 text-xs text-[color:var(--text-secondary)]">What needs a human today, and how the platform is wired.</p>
       </div>
+
+      {!hasPassword(staff.user) ? (
+        <Panel title="Set a password for next time">
+          <p className="mb-3 text-xs text-[color:var(--text-secondary)]">You signed in with an email link. With a password you can sign in straight away; the link stays available as a backup. Change it later under Plans &amp; staff.</p>
+          <PasswordForm hasPassword={false} compact />
+        </Panel>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <KpiTile label="Customers" value={counts.organizations} hint={<Link href="/admin/organizations" className="underline">All customers</Link>} />

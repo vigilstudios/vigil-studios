@@ -515,3 +515,23 @@ and a later test-mode sync from a laptop would have repointed production.
   only that mode's link.
 - Admin overview and Plans show "stripe (test mode)" / "(live mode)", and a
   price id from the other mode is flagged "re-sync". Test added.
+
+## 2026-09-15 — Password sign-in; price links after the live sync
+
+- Owner feedback: an email link on every sign-in is too much. Sessions
+  already persist 400 days per browser (`@supabase/ssr` default), so the pain
+  is new devices and sign-outs. Added **password sign-in** alongside the
+  link (D14 allowed this without schema changes): `/login` asks for email +
+  password with "No password yet, or forgot it? Email me a sign-in link"
+  underneath; `setPassword` (Settings → "Your sign-in", Plans & staff for
+  staff) calls `auth.updateUser({ password, data: { has_password: true } })`;
+  the client Overview and the admin Overview show a set-a-password card
+  until it is set. Forgot password = email link, then set a new one.
+  Verified live: wrong password message, password sign-in for the
+  provisioned test buyer straight into the Virtue wizard, set-password from
+  the Overview, sign-out.
+- First live sync done by the owner on www.vigilstudios.co: 14 live prices.
+  Production `/checkout` is on. The laptop's older test links carried no
+  mode stamp and stopped matching; stamped them `test` and removed 14 dead
+  ids from an earlier provider run; `recordPriceLink` now also sweeps
+  unstamped links on sync.

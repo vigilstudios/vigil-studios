@@ -30,7 +30,7 @@ export default async function LoginPage({
           </Link>
           <h1 className="mt-6 text-2xl font-semibold tracking-tight">Sign in to Vigil</h1>
           <p className="mt-2 text-sm text-[color:var(--text-secondary)]">
-            Enter your email and we will send you a sign-in link. No password needed.
+            Sign in with your password, or have a one-time link emailed to you.
           </p>
         </div>
 

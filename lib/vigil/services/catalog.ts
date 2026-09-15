@@ -84,9 +84,10 @@ function linkMode(row: { metadata: unknown }): string | null {
 async function recordPriceLink(db: DbClient, provider: BillingProvider, entityType: "plan_price" | "build_price", entityId: string, externalId: string): Promise<void> {
   const providerName = providerEnum(provider.name);
   await upsertProviderLink(db, { provider: providerName, resourceKind: "price", externalId, entityType, entityId, metadata: modeMeta(provider) });
-  // Drop this mode's previous id for the same row (a price change made a new provider price).
+  // Drop this mode's previous id for the same row (a price change made a new
+  // provider price), and links stamped with no mode at all (pre-mode syncs).
   const { data: others } = await db.from("provider_links").select("id, external_id, metadata").eq("provider", providerName).eq("resource_kind", "price").eq("entity_type", entityType).eq("entity_id", entityId);
-  const stale = (others ?? []).filter((l) => l.external_id !== externalId && (linkMode(l) ?? null) === (provider.mode ?? null));
+  const stale = (others ?? []).filter((l) => l.external_id !== externalId && (linkMode(l) === null || linkMode(l) === (provider.mode ?? null)));
   for (const l of stale) await db.from("provider_links").delete().eq("id", l.id);
 }
 

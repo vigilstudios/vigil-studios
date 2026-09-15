@@ -4,6 +4,8 @@ import { Card, PageHeader, Table, inputClass, labelClass, tdClass, thClass } fro
 import { grantStaff, revokeStaff, updatePlan } from "@/lib/vigil/actions/admin";
 import { syncPrices, updateBuildPrice } from "@/lib/vigil/actions/admin-orders";
 import { BILLING_PERIODS, type BillingPeriod } from "@/lib/vigil/billing-periods";
+import { PasswordForm } from "@/components/vigil/PasswordForm";
+import { hasPassword } from "@/lib/vigil/auth/password";
 import { getBillingProvider, readProviderConfig } from "@/lib/vigil/providers/registry";
 import { formatMoney } from "@/lib/vigil/format";
 import { requireAdmin } from "@/lib/vigil/auth/session";
@@ -167,6 +169,12 @@ export default async function PlansPage() {
             <option value="admin">Admin</option>
           </select>
         </ActionForm>
+      </Card>
+
+      <Card className="mt-4">
+        <h2 className="text-base font-semibold">Your sign-in</h2>
+        <p className="mt-1 text-xs text-[color:var(--text-secondary)]">{hasPassword(admin.user) ? "You sign in with a password; a one-time email link always works as a backup." : "Set a password so you can sign in without waiting for an email link."}</p>
+        <PasswordForm hasPassword={hasPassword(admin.user)} />
       </Card>
     </div>
   );

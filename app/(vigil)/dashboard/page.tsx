@@ -7,6 +7,8 @@ import { ButtonLink, EmptyState } from "@/components/vigil/ui";
 import { Checklist, Meter, Panel, StatusLine, Stepper, Timeline } from "@/components/vigil/widgets";
 import { SiteFrame } from "@/components/vigil/SiteFrame";
 import { OnboardingCard } from "@/components/vigil/OnboardingCard";
+import { PasswordForm } from "@/components/vigil/PasswordForm";
+import { hasPassword } from "@/lib/vigil/auth/password";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
 import { FEATURES, resolveEntitlements } from "@/lib/vigil/entitlements";
 import { formatDate, formatRelative, humanizeAction, titleCase } from "@/lib/vigil/format";
@@ -73,6 +75,16 @@ export default async function OverviewPage() {
         <h1 className="text-lg font-semibold tracking-tight sm:text-xl">{firstName ? `Hello, ${firstName}` : "Overview"}</h1>
         <p className="mt-0.5 text-xs text-[color:var(--text-secondary)]">Everything Vigil is running for your business, at a glance.</p>
       </div>
+
+      {!hasPassword(ctx.user) && !ctx.isImpersonating ? (
+        <section className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-4">
+          <p className="text-[13px] font-semibold">Set a password for next time</p>
+          <p className="mt-1 text-xs text-[color:var(--text-secondary)]">You signed in with an email link. With a password you can sign in straight away on any device; the link stays available as a backup.</p>
+          <div className="mt-3">
+            <PasswordForm hasPassword={false} compact />
+          </div>
+        </section>
+      ) : null}
 
       {onboarding && (needsOnboarding(onboarding.project) || onboarding.project.intake_completed_at) ? (
         <OnboardingCard brief={onboarding.brief} completedAt={onboarding.project.intake_completed_at} businessName={onboarding.brief.basics?.businessName || ctx.organization.name} />
