@@ -32,8 +32,11 @@ Non-negotiables:
    constants. The two-part model (build + Vigil plan) is stated plainly.
 4. **Do not touch** `app/(vigil)`, `lib/vigil`, `supabase/`, `proxy.ts`,
    `components/vigil` (read/reuse only), the Express template HTML, or the
-   leadgen repo. The catalogue component is yours; keep its Buy → `/checkout`
-   link and the "coming" template lock.
+   leadgen repo. **Do not modify the Vigil Express catalogue** (`/express`,
+   `components/express/*`, `EXPRESS_TEMPLATES`) — it is approved and
+   finished; only the shared nav/footer around it changes. Scope is the home
+   page and sections, the new pages (Products ×3, Solutions, Pricing, About),
+   navigation and footer.
 5. **No invented social proof**: no fake customers, testimonials, logos or
    metrics. No stock photography of people. Real product screenshots only.
 6. **Voice:** calm, plain, no exclamation marks, no "seamless / elevate /

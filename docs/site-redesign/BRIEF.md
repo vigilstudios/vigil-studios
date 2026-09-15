@@ -86,7 +86,7 @@ link; *Get started* → `/express`.
 | Route | Page | Status |
 |---|---|---|
 | `/` | Home | rebuild |
-| `/express` | Vigil Express catalogue | exists (`components/express/*`, Astra's); restyle the surrounding page only if the new system needs it |
+| `/express` | Vigil Express catalogue | **keep exactly as it is** — the owner approved it. Do not redesign, restyle or move `components/express/*` or `app/(site)/express`; only the shared nav/footer around it changes |
 | `/products/websites` | Websites: Express / Professional / Custom | new |
 | `/products/vigil` | The Vigil platform | new |
 | `/products/virtue` | Virtue — what it does at launch and what is coming | new |
@@ -220,6 +220,12 @@ are (NYC). No stock team photos, no invented history.
 
 ## 9. Out of scope
 
-Checkout, dashboard, onboarding, admin, emails, the Express templates
-themselves, the leadgen pipeline. New product claims. Fake customers, logos,
-testimonials or metrics.
+**The Vigil Express catalogue** (`/express`, `components/express/*`,
+`lib/constants.ts` → `EXPRESS_TEMPLATES`) — approved and finished; it stays
+as it is. Checkout, dashboard, onboarding, admin, emails, the Express
+templates themselves, the leadgen pipeline. New product claims. Fake
+customers, logos, testimonials or metrics.
+
+Scope is: the home page and its sections, the new pages (Products ×3,
+Solutions, Pricing, About), the shared navigation and footer, and the
+marketing constants those pages use.
