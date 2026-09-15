@@ -1,4 +1,5 @@
 import { Footer } from "@/components/layout/Footer";
+import { SnapSections } from "@/components/site/SnapSections";
 import { HeroSection } from "@/sections/HeroSection";
 import { PillarsSection } from "@/sections/PillarsSection";
 import { HowItWorksSection } from "@/sections/HowItWorksSection";
@@ -11,6 +12,7 @@ import { GetStartedSection } from "@/sections/GetStartedSection";
 export default function Home() {
   return (
     <>
+      <SnapSections />
       <HeroSection />
       <PillarsSection />
       <HowItWorksSection />

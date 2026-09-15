@@ -116,15 +116,19 @@ Approved with minor fixes, then fast-forwarded to `main` (vigilstudios.co).
   is not for, what is included, how you start; industries on Express; an
   at-a-glance table. Prices deliberately live on `/pricing`
   (`WEBSITES_PAGE` in site-copy).
-- **`/products/vigil`** — the real customer dashboard: `DashboardShowcase`
-  (pick a page → screenshot in a browser frame, one-line caption; dark and
-  light captures follow the site theme), four "what it is like" points,
-  the outcomes list, the four plans with "from $/month", Virtue band.
-  Screenshots: `public/site/dashboard/<page>-<theme>.webp`, captured by
-  `scripts/capture-dashboard.mjs` (opens a Chrome you sign into; tidies the
-  DOM — no dev badge, no staff chrome, account shown as "Owner, Marlow &
-  Fen" — then captures at 1280×800). Re-run with `PROFILE_DIR` pointing at
-  the previous profile to skip the sign-in.
+- **`/products/vigil`** — the landing section is the words plus one crisp
+  dashboard: `components/site/DashboardMock.tsx` renders the Overview with
+  the product's own widgets (`components/vigil/widgets.tsx`, `vigil.css`)
+  for the demo tenant in a live state, scaled to the container, cropped
+  like a window with a fade. (A first cut used real screenshots behind
+  tabs; the owner found the resolution poor, so those and the capture
+  script were removed.) Then four "what it is like" points, the outcomes
+  list, the four plans with "from $/month", Virtue band.
+- **Scroll snap is home-only** now: `SnapSections` adds `.snap-sections` to
+  `#site-root` on the home page; `globals.css` only snaps under that class.
+  Inner pages have sections of any height and a mandatory snap skipped
+  content there. If a `globals.css` edit does not show up, clear
+  `.next/dev` (Turbopack's persistent cache served a stale chunk twice).
 - **`/products/virtue`** — moved from `/virtue` (301 in `next.config.ts`);
   one paragraph under the greeting, primary text colour.
 - Pricing page build cards use `BuildCards` (float-in, hover lift);
@@ -133,8 +137,10 @@ Approved with minor fixes, then fast-forwarded to `main` (vigilstudios.co).
 
 ## Handoff for the next session (15 Sep 2026)
 
-- Branch **`claude/site-redesign`**, merged to `main` on 15 Sep 2026 (the
-  home page is live); keep iterating on the branch and fast-forward again.
+- Branch **`claude/site-redesign`**, fast-forwarded to `main` on 15 Sep
+  2026 (home, products menu, three product pages, pricing all live); the
+  owner will return for small edits. Keep iterating on the branch and
+  fast-forward again.
   Preview: `https://vigil-studios-git-claude-site-redesign-belierjaviers-projects.vercel.app`
   (Vercel SSO-protected; the owner signs in). Locally: `npm run dev` on the
   branch, `http://127.0.0.1:3000`.

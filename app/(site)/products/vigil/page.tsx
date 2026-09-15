@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, CreditCard, Globe, Lock, MonitorSmartphone, RefreshCw, Shield } from "lucide-react";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardRow } from "@/components/site/Cards";
-import { DashboardShowcase } from "@/components/site/DashboardShowcase";
+import { DashboardMock } from "@/components/site/DashboardMock";
 import { Chip, Container, Eyebrow, Section, SectionIntro } from "@/components/site/primitives";
 import { Reveal } from "@/components/site/Reveal";
 import { VirtueOrb } from "@/components/vigil/VirtueOrb";
@@ -32,21 +32,24 @@ export default async function VigilPage() {
   const { plans } = await getPublicPricing();
   return (
     <>
-      <Section className="pt-32 sm:pt-40">
+      {/* Landing: the words, then the dashboard itself, cropped like a window onto the product. */}
+      <section className="relative overflow-hidden pt-32 sm:pt-40">
         <Container>
           <Reveal>
             <SectionIntro eyebrow="Vigil" tone="teal" title={VIGIL_PAGE.title} lead={VIGIL_PAGE.lead} />
           </Reveal>
-        </Container>
-      </Section>
-
-      <Section className="pt-0" id="dashboard">
-        <Container>
-          <Reveal>
-            <DashboardShowcase />
+          <Reveal delay={0.1} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Link href={VIGIL_PAGE.primary.href} className="btn-primary min-h-12 !px-6 text-sm font-semibold">{VIGIL_PAGE.primary.label} <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            <Link href={VIGIL_PAGE.secondary.href} className="btn-secondary min-h-12 !px-6 text-sm font-medium">{VIGIL_PAGE.secondary.label}</Link>
+          </Reveal>
+          <Reveal delay={0.2} className="relative mt-14 sm:mt-20">
+            <div className="overflow-hidden rounded-t-2xl border border-b-0 border-[color:var(--border)] bg-[color:var(--bg-primary)] shadow-[0_-20px_80px_-40px_rgba(0,0,0,0.6)]">
+              <DashboardMock className="max-h-[520px]" />
+            </div>
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-[linear-gradient(to_bottom,transparent,var(--bg-section-alt))]" aria-hidden />
           </Reveal>
         </Container>
-      </Section>
+      </section>
 
       <Section alt id="experience">
         <Container>

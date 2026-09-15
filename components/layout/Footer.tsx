@@ -34,7 +34,7 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
 export function Footer() {
   const year = new Date().getFullYear();
   return (
-    <footer className="border-t border-[color:var(--border)] bg-[color:var(--bg-secondary)] md:snap-end">
+    <footer className="border-t border-[color:var(--border)] bg-[color:var(--bg-secondary)]">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>

@@ -237,28 +237,29 @@
   }
 }
 
-/* Scroll snap: disable on mobile and only enable on desktop */
+/*
+ * Scroll snap: only where every section is a full viewport (the home page
+ * adds .snap-sections to #site-root), and only on desktop. Inner pages have
+ * sections of any height, where a mandatory snap skips content.
+ */
 main#site-root {
-  scroll-snap-type: none !important;
+  scroll-snap-type: none;
   scroll-behavior: auto;
 }
 
-@media (max-width: 767px) {
-  main#site-root > section {
-    scroll-snap-align: none !important;
-    scroll-snap-stop: normal !important;
-  }
-}
-
 @media (min-width: 768px) {
-  main#site-root {
-    scroll-snap-type: y mandatory !important;
+  main#site-root.snap-sections {
+    scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
   }
 
-  main#site-root > section {
+  main#site-root.snap-sections > section {
     scroll-snap-align: start;
     scroll-snap-stop: always;
+  }
+
+  main#site-root.snap-sections > footer {
+    scroll-snap-align: end;
   }
 }
 
