@@ -247,9 +247,10 @@ the adapter sees a provider object. Errors are `ProviderError` with a
 (`BILLING_PROVIDER`, `DEPLOYMENT_PROVIDER`, `DOMAIN_PROVIDER`), defaulting to
 `null` so the app boots with no credentials.
 
-Deployment topology (separate Vercel project per site vs multi-tenant) is
-**not** decided here. `websites.hosting_mode` is a nullable text column so both
-can coexist during evaluation.
+Deployment topology is now **one private GitHub repository and one dedicated
+Vercel project per customer website**. `site/` is the Vercel project root;
+provider ids stay in `provider_links`, while `websites.repository_ref` is the
+human-readable `github:<owner>/<repo>` reference.
 
 ---
 

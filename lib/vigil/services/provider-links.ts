@@ -52,6 +52,22 @@ export async function findExternalId(
   return data?.external_id ?? null;
 }
 
+export async function findProviderLink(
+  admin: DbClient,
+  query: { provider: Provider; resourceKind: string; entityType: LinkEntityType; entityId: string }
+): Promise<{ external_id: string; metadata: Json } | null> {
+  const { data, error } = await admin
+    .from("provider_links")
+    .select("external_id, metadata")
+    .eq("provider", query.provider)
+    .eq("resource_kind", query.resourceKind)
+    .eq("entity_type", query.entityType)
+    .eq("entity_id", query.entityId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
 export async function findEntityByExternalId(
   admin: DbClient,
   query: { provider: Provider; resourceKind: string; externalId: string }

@@ -57,7 +57,8 @@ describe("receiveBillingEvent", () => {
     expect(again).toEqual({ duplicate: true });
     expect(fake.rows("webhook_events")).toHaveLength(1);
     expect(fake.rows("organizations")).toHaveLength(1);
-    expect(fake.rows("provisioning_jobs")).toHaveLength(1);
+    expect(fake.rows("provisioning_jobs")).toHaveLength(2);
+    expect(fake.rows("provisioning_jobs").map((job) => job.kind)).toEqual(["order.provision", "website.repository"]);
   });
 
   it("finds the order through the session link when the reference is missing, and ignores unknown sessions", async () => {

@@ -252,7 +252,7 @@ export async function updateWebsiteFields(websiteId: string, formData: FormData)
   }
 }
 
-export async function enqueueWebsiteJob(websiteId: string, kind: "website.provision" | "website.deploy"): Promise<ActionResult<{ jobId: string }>> {
+export async function enqueueWebsiteJob(websiteId: string, kind: "website.repository" | "website.provision" | "website.deploy"): Promise<ActionResult<{ jobId: string }>> {
   try {
     const staff = await requireStaffOrThrow();
     const supabase = await createClient();
@@ -261,8 +261,12 @@ export async function enqueueWebsiteJob(websiteId: string, kind: "website.provis
     if (!site) throw new NotFoundError();
     // Provisioning is once per site; a deploy can be re-queued, but a double
     // click inside the same minute collapses into one job.
-    const key = kind === JOB_KINDS.websiteProvision ? `website.provision:${websiteId}` : `website.deploy:${websiteId}:${minuteBucket()}`;
-    const job = await enqueueJob(supabase, { kind, idempotencyKey: key, organizationId: site.organization_id, websiteId, createdBy: staff.user.id });
+    const key = kind === JOB_KINDS.websiteRepository
+      ? `website.repository:${websiteId}`
+      : kind === JOB_KINDS.websiteProvision
+        ? `website.provision:${websiteId}`
+        : `website.deploy:${websiteId}:${minuteBucket()}`;
+    const job = await enqueueJob(supabase, { kind, idempotencyKey: key, organizationId: site.organization_id, websiteId, createdBy: staff.user.id, requeueFailed: true });
     revalidatePath(`/admin/websites/${websiteId}`);
     revalidatePath("/admin/jobs");
     return { ok: true, data: { jobId: job.id } };

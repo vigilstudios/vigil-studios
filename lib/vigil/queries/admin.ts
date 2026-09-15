@@ -96,7 +96,7 @@ export const getWebsiteDetail = cache(async (websiteId: string) => {
     supabase.from("websites").select("*, organization:organizations(id, name), project:projects(id, name, status)").eq("id", websiteId).maybeSingle(),
     supabase.from("deployments").select("*").eq("website_id", websiteId).order("created_at", { ascending: false }).limit(20),
     supabase.from("domains").select("*").eq("website_id", websiteId),
-    supabase.from("provider_links").select("provider, resource_kind, external_id, created_at").eq("entity_type", "website").eq("entity_id", websiteId),
+    supabase.from("provider_links").select("provider, resource_kind, external_id, metadata, created_at").eq("entity_type", "website").eq("entity_id", websiteId),
     supabase.from("provisioning_jobs").select("id, kind, status, attempts, max_attempts, error, scheduled_for, updated_at").eq("website_id", websiteId).order("created_at", { ascending: false }).limit(20),
   ]);
   for (const r of [site, deployments, domains, links, jobs]) if (r.error) throw r.error;

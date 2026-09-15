@@ -124,7 +124,8 @@ describe("completeCheckout + provisionOrder", () => {
     expect(fake.rows("organization_invites")[0]).toMatchObject({ organization_id: org.id, email: "owner@lounge.com", role: "owner" });
     const project = fake.rows("projects")[0];
     expect(project).toMatchObject({ organization_id: org.id, kind: "express", status: "intake", template_slug: "restaurant", source_ref: `order:${orderId}` });
-    expect(fake.rows("websites")[0]).toMatchObject({ organization_id: org.id, project_id: project.id, template_slug: "restaurant" });
+    const site = fake.rows("websites")[0];
+    expect(site).toMatchObject({ organization_id: org.id, project_id: project.id, template_slug: "restaurant" });
     const sub = fake.rows("subscriptions")[0];
     expect(sub).toMatchObject({ organization_id: org.id, plan_id: PLAN, plan_price_id: PRICE, status: "active" });
     // From the provider's snapshot, not the manual fallback: it carries a period and a link.
@@ -140,7 +141,7 @@ describe("completeCheckout + provisionOrder", () => {
     expect(priceLink?.metadata).toEqual({ mode: "test" });
 
     const again = await provisionOrder(fake.asClient(), orderId, provider, "https://app.test");
-    expect(again).toEqual({ organizationId: org.id, alreadyProvisioned: true });
+    expect(again).toEqual({ organizationId: org.id, websiteId: site.id, alreadyProvisioned: true });
     expect(fake.rows("organizations")).toHaveLength(1);
     expect(fake.rows("projects")).toHaveLength(1);
     expect(fake.rows("subscriptions")).toHaveLength(1);
@@ -189,7 +190,7 @@ describe("completeCheckout + provisionOrder", () => {
     fake.rows("orders")[0].organization_id = "org_half";
 
     const res = await provisionOrder(fake.asClient(), orderId, provider, "https://app.test");
-    expect(res).toEqual({ organizationId: "org_half", alreadyProvisioned: false });
+    expect(res).toEqual({ organizationId: "org_half", websiteId: fake.rows("websites")[0].id, alreadyProvisioned: false });
     expect(fake.rows("organizations")).toHaveLength(1);
     expect(fake.rows("organization_invites")).toHaveLength(1);
     expect(fake.rows("projects")).toHaveLength(1);

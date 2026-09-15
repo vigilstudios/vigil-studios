@@ -117,6 +117,9 @@ export async function verifyDomain(
       .from("domains")
       .update({ status: "connected", dns_ok: true, ssl_ok: true, verified_at: now, connected_at: now, last_checked_at: now, status_reason: null })
       .eq("id", domainId);
+    if (domain.website_id) {
+      await admin.from("websites").update({ primary_domain_id: domain.id, live_url: `https://${domain.hostname}` }).eq("id", domain.website_id);
+    }
   } else if (!connected) {
     await admin
       .from("domains")

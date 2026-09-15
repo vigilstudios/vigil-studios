@@ -51,8 +51,9 @@ describe("settleOrder", () => {
     const res = await settleOrder(fake.asClient(), orderId, { worker: "test" });
     expect(res.status).toBe("provisioned");
     expect(res.actions).toEqual(["queued"]);
-    expect(fake.rows("provisioning_jobs")).toHaveLength(1);
+    expect(fake.rows("provisioning_jobs")).toHaveLength(2);
     expect(fake.rows("provisioning_jobs")[0]).toMatchObject({ id: "j_failed", status: "succeeded", attempts: 2 });
+    expect(fake.rows("provisioning_jobs")[1]).toMatchObject({ kind: "website.repository", status: "queued" });
   });
 
   it("is a no-op on an order that is already provisioned, and reports the state of anything else", async () => {

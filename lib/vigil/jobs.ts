@@ -2,9 +2,10 @@ import { ProviderError, ProviderNotConfiguredError, isVigilError } from "@/lib/v
 import { escapeHtml, layout, sendEmail, staffNotificationAddress } from "@/lib/vigil/email";
 import type { DbClient, ProvisioningJob } from "@/lib/vigil/types";
 import type { Json } from "@/types/database.types";
-import { deployWebsite, provisionWebsite } from "./services/deployment";
+import { deployWebsite, provisionWebsite, syncDeployment } from "./services/deployment";
 import { beginDomainVerification, verifyDomain } from "./services/domain";
 import { provisionOrder } from "./services/orders";
+import { provisionWebsiteRepository } from "./services/repository";
 
 /**
  * Durable, idempotent background work (master architecture §9).
@@ -17,6 +18,8 @@ import { provisionOrder } from "./services/orders";
 export const JOB_KINDS = {
   websiteProvision: "website.provision",
   websiteDeploy: "website.deploy",
+  websiteRepository: "website.repository",
+  deploymentSync: "website.deployment.sync",
   domainConnect: "domain.connect",
   domainVerify: "domain.verify",
   orderProvision: "order.provision",
@@ -46,12 +49,39 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
   },
   [JOB_KINDS.websiteDeploy]: async ({ admin, job }) => {
     if (!job.website_id) throw new Error("website.deploy requires website_id");
+    // Covers older/manual websites and a deploy clicked while the automatic
+    // post-purchase repository job is still queued.
+    await provisionWebsiteRepository(admin, job.website_id);
     const payload = (job.payload ?? {}) as { environment?: "production" | "preview" };
     const result = await deployWebsite(admin, job.website_id, {
       environment: payload.environment ?? "production",
       triggeredBy: job.created_by,
     });
+    if (result.status === "queued" || result.status === "building") {
+      await enqueueJob(admin, {
+        kind: JOB_KINDS.deploymentSync,
+        idempotencyKey: `website.deployment.sync:${result.deploymentId}`,
+        organizationId: job.organization_id,
+        websiteId: job.website_id,
+        payload: { deployment_id: result.deploymentId },
+        scheduledFor: new Date(Date.now() + 15_000),
+        maxAttempts: 40,
+        createdBy: job.created_by,
+      });
+    }
     return { deployment_id: result.deploymentId };
+  },
+  [JOB_KINDS.websiteRepository]: async ({ admin, job }) => {
+    if (!job.website_id) throw new Error("website.repository requires website_id");
+    const result = await provisionWebsiteRepository(admin, job.website_id);
+    return { repository_id: result.repositoryId, repository: result.fullName, created: result.created };
+  },
+  [JOB_KINDS.deploymentSync]: async ({ admin, job }) => {
+    const deploymentId = (job.payload as { deployment_id?: string } | null)?.deployment_id;
+    if (!deploymentId) throw new Error("website.deployment.sync requires payload.deployment_id");
+    const result = await syncDeployment(admin, deploymentId);
+    if (result.pending) throw new RetryLater(`Deployment is ${result.status}.`, 15);
+    return { deployment_id: deploymentId, status: result.status };
   },
   [JOB_KINDS.domainConnect]: async ({ admin, job }) => {
     if (!job.domain_id) throw new Error("domain.connect requires domain_id");
@@ -61,7 +91,16 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
     const payload = (job.payload ?? {}) as { order_id?: string };
     if (!payload.order_id) throw new Error("order.provision requires payload.order_id");
     const result = await provisionOrder(admin, payload.order_id);
-    return { organization_id: result.organizationId, already_provisioned: result.alreadyProvisioned };
+    await enqueueJob(admin, {
+      kind: JOB_KINDS.websiteRepository,
+      idempotencyKey: `website.repository:${result.websiteId}`,
+      organizationId: result.organizationId,
+      websiteId: result.websiteId,
+      maxAttempts: 8,
+      createdBy: job.created_by,
+      requeueFailed: true,
+    });
+    return { organization_id: result.organizationId, website_id: result.websiteId, already_provisioned: result.alreadyProvisioned };
   },
   [JOB_KINDS.domainVerify]: async ({ admin, job }) => {
     if (!job.domain_id) throw new Error("domain.verify requires domain_id");

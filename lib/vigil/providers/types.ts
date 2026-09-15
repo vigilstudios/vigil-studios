@@ -135,6 +135,10 @@ export type ProvisionSiteInput = {
   templateSlug: string | null;
   /** Undecided topology: 'dedicated' | 'shared' | null. Adapters may ignore. */
   hostingMode: string | null;
+  /** GitHub owner/repository connected to this dedicated site. */
+  repositoryFullName?: string | null;
+  /** GitHub's numeric repository id, used when deploying a git ref. */
+  repositoryId?: number | null;
 };
 
 export type DeploymentSnapshot = {
@@ -158,7 +162,7 @@ export type DomainConfigSnapshot = {
 export interface DeploymentProvider {
   readonly name: ProviderName;
   provisionSite(input: ProvisionSiteInput): Promise<{ externalId: string; previewUrl: string | null }>;
-  triggerDeployment(siteExternalId: string, input: { environment: "production" | "preview"; ref?: string }): Promise<DeploymentSnapshot>;
+  triggerDeployment(siteExternalId: string, input: { environment: "production" | "preview"; ref?: string; repositoryId?: number | null }): Promise<DeploymentSnapshot>;
   getDeployment(externalId: string): Promise<DeploymentSnapshot | null>;
   addDomain(siteExternalId: string, hostname: string): Promise<DomainConfigSnapshot>;
   removeDomain(siteExternalId: string, hostname: string): Promise<void>;

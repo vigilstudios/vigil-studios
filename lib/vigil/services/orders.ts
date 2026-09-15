@@ -165,11 +165,15 @@ export async function completeCheckout(admin: DbClient, orderId: string, checkou
  * Turn a paid order into a working account. Every step checks for its own
  * prior result, so a retried job or a second webhook delivery is harmless.
  */
-export async function provisionOrder(admin: DbClient, orderId: string, provider: BillingProvider = getBillingProvider(), appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.vigilstudios.co"): Promise<{ organizationId: string; alreadyProvisioned: boolean }> {
+export async function provisionOrder(admin: DbClient, orderId: string, provider: BillingProvider = getBillingProvider(), appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.vigilstudios.co"): Promise<{ organizationId: string; websiteId: string; alreadyProvisioned: boolean }> {
   const { data: order, error } = await admin.from("orders").select("*").eq("id", orderId).maybeSingle();
   if (error) throw error;
   if (!order) throw new NotFoundError(`Order ${orderId} not found.`);
-  if (order.status === "provisioned" && order.organization_id) return { organizationId: order.organization_id, alreadyProvisioned: true };
+  if (order.status === "provisioned" && order.organization_id && order.project_id) {
+    const { data: provisionedSite, error: siteLookupError } = await admin.from("websites").select("id").eq("project_id", order.project_id).single();
+    if (siteLookupError) throw siteLookupError;
+    return { organizationId: order.organization_id, websiteId: provisionedSite.id, alreadyProvisioned: true };
+  }
   if (order.status !== "paid") throw new ValidationError(`Order ${orderId} is ${order.status}, not paid.`);
 
   const providerName = providerEnum(provider.name);
@@ -207,10 +211,11 @@ export async function provisionOrder(admin: DbClient, orderId: string, provider:
     projectId = project.id;
     await admin.from("orders").update({ project_id: projectId }).eq("id", orderId);
   }
-  const { data: site } = await admin.from("websites").select("id").eq("project_id", projectId).maybeSingle();
+  let { data: site } = await admin.from("websites").select("id").eq("project_id", projectId).maybeSingle();
   if (!site) {
-    const { error: siteError } = await admin.from("websites").insert({ organization_id: organizationId, project_id: projectId, name: `${order.business_name} website`, template_slug: order.template_slug });
+    const { data: createdSite, error: siteError } = await admin.from("websites").insert({ organization_id: organizationId, project_id: projectId, name: `${order.business_name} website`, template_slug: order.template_slug, hosting_mode: "dedicated" }).select("id").single();
     if (siteError) throw siteError;
+    site = createdSite;
   }
 
   // 4. Subscription: from the provider's checkout session when we have one,
@@ -273,7 +278,7 @@ export async function provisionOrder(admin: DbClient, orderId: string, provider:
     html: layout(`New customer: ${order.business_name}`, `<p>${escapeHtml(order.email)} purchased a ${escapeHtml(order.project_kind)} site${order.template_slug ? ` on the <b>${escapeHtml(order.template_slug)}</b> template` : ""}.</p>${button(`${appUrl}/admin/organizations/${organizationId}`, "Open in Vigil Admin")}`),
   }).catch(() => undefined);
 
-  return { organizationId, alreadyProvisioned: false };
+  return { organizationId, websiteId: site.id, alreadyProvisioned: false };
 }
 
 async function uniqueSlug(admin: DbClient, base: string): Promise<string> {

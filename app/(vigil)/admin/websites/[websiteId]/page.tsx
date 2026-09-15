@@ -17,6 +17,8 @@ export default async function WebsiteDetailPage({ params }: { params: Promise<{ 
   const detail = await getWebsiteDetail(websiteId);
   if (!detail) notFound();
   const { website: w, deployments, domains, links, jobs } = detail;
+  const repository = links.find((link) => link.resource_kind === "repository");
+  const repositoryUrl = (repository?.metadata as { html_url?: string } | undefined)?.html_url;
 
   return (
     <div>
@@ -39,17 +41,17 @@ export default async function WebsiteDetailPage({ params }: { params: Promise<{ 
           <div className="mt-3">
             <TransitionSelect current={w.status} options={websiteTransitions[w.status]} action={setWebsiteStatus.bind(null, w.id)} withReason />
           </div>
-          <h3 className="mt-5 text-sm font-semibold">Provisioning</h3>
-          <p className="mt-1 text-xs text-[color:var(--text-secondary)]">Queues work for the deployment provider. Idempotent: provisioning runs once per site, deploys run on demand.</p>
+          <h3 className="mt-5 text-sm font-semibold">Repository &amp; publishing</h3>
+          <p className="mt-1 text-xs text-[color:var(--text-secondary)]">The private customer repository is created once. Deploy live publishes the latest main branch to Vercel and connects any attached domain.</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            <ActionButton action={enqueueWebsiteJob.bind(null, w.id, "website.provision")}>Queue provision</ActionButton>
-            <ActionButton action={enqueueWebsiteJob.bind(null, w.id, "website.deploy")}>Queue deploy</ActionButton>
+            {repositoryUrl ? <a className="btn-secondary text-sm !px-3 !py-1.5" href={repositoryUrl} target="_blank" rel="noreferrer">Open repository</a> : <ActionButton action={enqueueWebsiteJob.bind(null, w.id, "website.repository")}>Create repository</ActionButton>}
+            <ActionButton variant="primary" action={enqueueWebsiteJob.bind(null, w.id, "website.deploy")} confirmText="Deploy the latest main branch to the live site?">Deploy live</ActionButton>
           </div>
           <h3 className="mt-5 text-sm font-semibold">Provider links</h3>
           <ul className="mt-1 text-xs">
             {links.map((l) => (
               <li key={`${l.provider}:${l.resource_kind}:${l.external_id}`} className="font-mono">
-                {l.provider}/{l.resource_kind}: {l.external_id}
+                {l.provider}/{l.resource_kind}: {(l.metadata as { full_name?: string } | null)?.full_name ?? l.external_id}
               </li>
             ))}
             {links.length === 0 ? <li className="text-[color:var(--text-secondary)]">None yet.</li> : null}

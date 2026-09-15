@@ -1,6 +1,7 @@
 import { NullBillingProvider, NullDeploymentProvider, NullDomainProvider } from "./null";
 import { StripeBillingProvider } from "./stripe";
 import { CloudflareDomainProviderStub, StripeBillingProviderStub, VercelDeploymentProviderStub } from "./stubs";
+import { VercelDeploymentProvider } from "./vercel";
 import type { BillingProvider, DeploymentProvider, DomainProvider } from "./types";
 
 /**
@@ -41,7 +42,7 @@ export function createDeploymentProvider(name: string): DeploymentProvider {
     case "null":
       return new NullDeploymentProvider();
     case "vercel":
-      return new VercelDeploymentProviderStub();
+      return process.env.VERCEL_TOKEN ? new VercelDeploymentProvider(process.env.VERCEL_TOKEN) : new VercelDeploymentProviderStub();
     default:
       throw new Error(`Unknown DEPLOYMENT_PROVIDER "${name}" (expected null | vercel).`);
   }

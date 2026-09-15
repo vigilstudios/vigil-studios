@@ -5,6 +5,37 @@ production deploys only from `main`.
 
 ---
 
+## 2026-09-15 — Automatic customer repositories and Vercel publishing
+
+- Paid-order provisioning now queues an idempotent `website.repository` job.
+  It creates one private GitHub repository per website and seeds `site/` with
+  the purchased Express template (or a safe custom-build starter), plus
+  `content/`, a README, and a gitignore. Existing files are never overwritten
+  on retry.
+- Repository ids remain in `provider_links`; `websites.repository_ref` uses
+  `github:<owner>/<repo>`. Customer site exports now read the current site and
+  content directly from that private repository in production.
+- Added the real Vercel deployment adapter. It creates one dedicated Vercel
+  project per website, connects the private GitHub repository with `site/` as
+  the root, and deploys the latest `main` branch from the admin website page.
+- Deployments are asynchronous. `website.deployment.sync` polls Vercel through
+  the durable job runner and updates the deployment/website only when Vercel
+  reaches a terminal state.
+- `vercel.json` now drains jobs every minute (without running the heavier order
+  reconciliation); the existing daily run still reconciles billing. This
+  schedule requires a Vercel plan that supports per-minute cron jobs.
+- A successful production deployment attaches every active website domain.
+  Verified DNS/SSL promotes the custom hostname to `websites.live_url`; pending
+  domains retain Vercel's exact verification records for the onboarding guide.
+- Production configuration: `GITHUB_TOKEN`, `GITHUB_OWNER`, optional
+  `GITHUB_OWNER_TYPE`/`GITHUB_REPOSITORY_PREFIX`, `VERCEL_TOKEN`, optional
+  `VERCEL_TEAM_ID`, `CRON_SECRET`, and `DEPLOYMENT_PROVIDER=vercel`. Vercel's GitHub
+  integration must have access to the private repositories under that owner.
+- Verification: TypeScript, focused ESLint, and 127 unit tests pass, including
+  request-shape/idempotency coverage for both provider adapters.
+
+---
+
 ## 2026-09-13 — Foundation built
 
 ### Decisions taken (see ARCHITECTURE.md §2 for the full table)
@@ -731,4 +762,3 @@ fail silently.
   cookie from the checkout browser, row id on the welcome link, one-time
   grant claimed by the polling tab; the login-page link cannot use it
   until login emails move off Supabase's template.
-

@@ -3,7 +3,7 @@ import { assertTransition, websiteTransitions } from "@/lib/vigil/lifecycle";
 import { getDeploymentProvider } from "@/lib/vigil/providers/registry";
 import type { DeploymentProvider } from "@/lib/vigil/providers/types";
 import { NotFoundError } from "@/lib/vigil/auth/errors";
-import { findExternalId, providerEnum, upsertProviderLink } from "./provider-links";
+import { findExternalId, findProviderLink, providerEnum, upsertProviderLink } from "./provider-links";
 
 /**
  * DeploymentService: Vigil Website -> DeploymentProvider.
@@ -30,12 +30,21 @@ export async function provisionWebsite(
   });
 
   if (!siteExternalId) {
+    const repository = await findProviderLink(admin, {
+      provider: "other",
+      resourceKind: "repository",
+      entityType: "website",
+      entityId: websiteId,
+    });
+    const repositoryMetadata = repository?.metadata as { full_name?: string } | undefined;
     const result = await provider.provisionSite({
       websiteId,
       organizationId: website.organization_id,
       name: `vigil-${website.id.slice(0, 8)}`,
       templateSlug: website.template_slug,
       hostingMode: website.hosting_mode,
+      repositoryFullName: repositoryMetadata?.full_name ?? null,
+      repositoryId: repository ? Number(repository.external_id) : null,
     });
     siteExternalId = result.externalId;
     await upsertProviderLink(admin, {
@@ -67,11 +76,21 @@ export async function deployWebsite(
   websiteId: string,
   options: { environment?: "production" | "preview"; triggeredBy?: string | null } = {},
   provider: DeploymentProvider = getDeploymentProvider()
-): Promise<{ deploymentId: string }> {
+): Promise<{ deploymentId: string; status: string }> {
   const environment = options.environment ?? "production";
   const { siteExternalId, organizationId } = await provisionWebsite(admin, websiteId, provider);
 
-  const snapshot = await provider.triggerDeployment(siteExternalId, { environment });
+  const repository = await findProviderLink(admin, {
+    provider: "other",
+    resourceKind: "repository",
+    entityType: "website",
+    entityId: websiteId,
+  });
+  const snapshot = await provider.triggerDeployment(siteExternalId, {
+    environment,
+    ref: "main",
+    repositoryId: repository ? Number(repository.external_id) : null,
+  });
   const providerName = providerEnum(provider.name);
 
   const { data: deployment, error } = await admin
@@ -116,5 +135,62 @@ export async function deployWebsite(
       .eq("id", websiteId);
   }
 
-  return { deploymentId: deployment.id };
+  if (environment === "production" && snapshot.status === "ready") {
+    await attachWebsiteDomains(admin, websiteId, siteExternalId, provider);
+  }
+
+  return { deploymentId: deployment.id, status: snapshot.status };
+}
+
+/** Poll a provider deployment and reflect its terminal state in Vigil. */
+export async function syncDeployment(
+  admin: DbClient,
+  deploymentId: string,
+  provider: DeploymentProvider = getDeploymentProvider()
+): Promise<{ status: string; pending: boolean }> {
+  const { data: deployment, error } = await admin.from("deployments").select("*").eq("id", deploymentId).maybeSingle();
+  if (error) throw error;
+  if (!deployment) throw new NotFoundError(`Deployment ${deploymentId} not found.`);
+  const externalId = await findExternalId(admin, {
+    provider: providerEnum(provider.name), resourceKind: "deployment", entityType: "deployment", entityId: deploymentId,
+  });
+  if (!externalId) throw new NotFoundError("The provider deployment link is missing.");
+  const snapshot = await provider.getDeployment(externalId);
+  if (!snapshot) throw new NotFoundError(`Provider deployment ${externalId} not found.`);
+  await admin.from("deployments").update({
+    status: snapshot.status,
+    url: snapshot.url,
+    started_at: snapshot.createdAt,
+    finished_at: snapshot.readyAt,
+    error: snapshot.error,
+  }).eq("id", deploymentId);
+
+  if (snapshot.status === "ready" && deployment.environment === "production") {
+    const { siteExternalId } = await provisionWebsite(admin, deployment.website_id, provider);
+    await admin.from("websites").update({ status: "live", live_url: snapshot.url, last_deployed_at: snapshot.readyAt ?? new Date().toISOString(), status_reason: null }).eq("id", deployment.website_id);
+    await attachWebsiteDomains(admin, deployment.website_id, siteExternalId, provider);
+  } else if (snapshot.status === "error") {
+    await admin.from("websites").update({ status_reason: snapshot.error?.message ?? "The last publish did not complete." }).eq("id", deployment.website_id);
+  }
+  return { status: snapshot.status, pending: snapshot.status === "queued" || snapshot.status === "building" };
+}
+
+async function attachWebsiteDomains(admin: DbClient, websiteId: string, siteExternalId: string, provider: DeploymentProvider): Promise<void> {
+  const { data: domains, error } = await admin.from("domains").select("id, hostname, status").eq("website_id", websiteId).neq("status", "released");
+  if (error) throw error;
+  for (const domain of domains ?? []) {
+    const config = await provider.addDomain(siteExternalId, domain.hostname);
+    const connected = config.verified && config.sslReady && !config.misconfigured;
+    await admin.from("domains").update({
+      status: connected ? "connected" : domain.status === "pending" ? "verifying" : domain.status,
+      verification: { required_records: config.requiredRecords },
+      dns_ok: config.verified,
+      ssl_ok: config.sslReady,
+      last_checked_at: new Date().toISOString(),
+      ...(connected ? { verified_at: new Date().toISOString(), connected_at: new Date().toISOString(), status_reason: null } : {}),
+    }).eq("id", domain.id);
+    if (connected) {
+      await admin.from("websites").update({ primary_domain_id: domain.id, live_url: `https://${domain.hostname}` }).eq("id", websiteId);
+    }
+  }
 }

@@ -4,6 +4,7 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import JSZip from "jszip";
 import { EXPRESS_TEMPLATES } from "@/lib/constants";
+import { GitHubRepositoryProvider } from "@/lib/vigil/providers/github";
 import type { Website } from "@/lib/vigil/types";
 
 /**
@@ -25,6 +26,17 @@ export interface SiteSource {
 }
 
 const templateSlugs = new Set(EXPRESS_TEMPLATES.map((t) => t.slug));
+
+/** Current customer-owned source in GitHub, used in production exports. */
+export const githubRepositorySource: SiteSource = {
+  name: "github-repository",
+  async collect(website) {
+    const ref = website.repository_ref?.trim();
+    if (!ref?.startsWith("github:")) return null;
+    const files = await new GitHubRepositoryProvider().collectSiteFiles(ref.slice("github:".length));
+    return files.length > 0 ? files : null;
+  },
+};
 
 /** The current published Express build: the self-contained HTML page. */
 export const expressTemplateSource: SiteSource = {
@@ -119,7 +131,7 @@ async function isFile(p: string): Promise<boolean> {
 }
 
 /** Order matters: the customer's own folder wins over the template capture. */
-const sources: SiteSource[] = [repositorySource, expressTemplateSource];
+const sources: SiteSource[] = [githubRepositorySource, repositorySource, expressTemplateSource];
 
 export class ExportUnavailableError extends Error {
   constructor(message: string) {
