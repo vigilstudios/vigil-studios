@@ -27,16 +27,17 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
     if (sessionRef) {
       const checkout = await getBillingProvider().getCheckoutSession(sessionRef).catch(() => null);
       if (checkout && (checkout.paymentStatus === "paid" || checkout.paymentStatus === "no_payment_required")) {
-        const updated = await completeCheckout(admin, order.id, checkout);
-        status = updated.status;
-        if (status === "paid") {
-          await enqueueJob(admin, { kind: JOB_KINDS.orderProvision, idempotencyKey: `order.provision:${order.id}`, payload: { order_id: order.id }, maxAttempts: 8 });
-          await runDueJobs(admin, { worker: "success-page", limit: 3 }).catch(() => undefined);
-          const { data: again } = await admin.from("orders").select("status").eq("id", order.id).single();
-          status = again?.status ?? status;
-        }
+        status = (await completeCheckout(admin, order.id, checkout)).status;
       }
     }
+  }
+  if (status === "paid") {
+    // Paid but not yet provisioned: whether the webhook has not arrived, or an
+    // earlier attempt failed, (re)queue the job and run it now. Idempotent.
+    await enqueueJob(admin, { kind: JOB_KINDS.orderProvision, idempotencyKey: `order.provision:${order.id}`, payload: { order_id: order.id }, maxAttempts: 8, requeueFailed: true });
+    await runDueJobs(admin, { worker: "success-page", limit: 3 }).catch(() => undefined);
+    const { data: again } = await admin.from("orders").select("status").eq("id", order.id).single();
+    status = again?.status ?? status;
   }
 
   const { data: latest } = await admin.from("orders").select("metadata").eq("id", order.id).single();

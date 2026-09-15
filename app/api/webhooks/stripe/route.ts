@@ -64,7 +64,7 @@ async function handle(admin: DbClient, event: BillingEvent, providerName: Return
       if (!orderId || !event.checkout) return "ignored";
       const order = await completeCheckout(admin, orderId, event.checkout);
       if (order.status !== "paid") return `order ${order.status}`;
-      await enqueueJob(admin, { kind: JOB_KINDS.orderProvision, idempotencyKey: `order.provision:${orderId}`, payload: { order_id: orderId }, maxAttempts: 8 });
+      await enqueueJob(admin, { kind: JOB_KINDS.orderProvision, idempotencyKey: `order.provision:${orderId}`, payload: { order_id: orderId }, maxAttempts: 8, requeueFailed: true });
       // Provision now in the common case; the job stays as the retry path.
       await runDueJobs(admin, { worker: "webhook", limit: 3 });
       return "provisioning";

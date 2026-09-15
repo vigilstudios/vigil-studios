@@ -17,6 +17,13 @@ export function createAdminClient() {
   }
   return createSupabaseClient<Database>(url, secretKey, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    // Every read hits the database. Next.js memoizes identical GET fetches
+    // within one server-component render, so a read → update → read of the
+    // same row in a page (the checkout success fallback: completeCheckout
+    // then provisionOrder) returned the stale row and provisioning failed
+    // with "order is pending, not paid". A fresh AbortController signal per
+    // call opts out of that memoization; no-store keeps the Data Cache out.
+    global: { fetch: (input, init) => fetch(input, { ...init, cache: "no-store", signal: new AbortController().signal }) },
   });
 }
 

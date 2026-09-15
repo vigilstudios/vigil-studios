@@ -19,7 +19,7 @@ export async function PricingSection() {
         </Reveal>
         <Reveal delay={0.2}>
           <p className="mt-8 text-center text-xs text-[color:var(--text-secondary)]">
-            Every Vigil website needs a plan; Basic is the floor. Sales tax is added at checkout.{" "}
+            Every Vigil website needs a plan; Basic is the floor.{" "}
             <Link href="/pricing" className="inline-flex items-center gap-1 font-medium text-[color:var(--accent)]">
               Full pricing and what is included <ArrowRight className="h-3.5 w-3.5" />
             </Link>

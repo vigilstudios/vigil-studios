@@ -180,5 +180,4 @@ export const FAQ = [
   { q: "How fast is an Express site?", a: "A first look within two business days of finishing onboarding; live shortly after your review." },
   { q: "What does Virtue actually do today?", a: "She runs onboarding for every customer: sets up your sign-in, collects your business details, photos and domain, and hands them to the team. Lead follow-up, missed-call text-back and reviews are coming to Growth and Priority." },
   { q: "Why do I need a plan as well as the build?", a: "The build pays for the work. The plan pays for the site to stay online, secure, updated and supported, month after month. Every Vigil-hosted site needs one; Basic is the floor." },
-  { q: "Is sales tax included?", a: "Sales tax is calculated and added at checkout where it applies." },
 ];

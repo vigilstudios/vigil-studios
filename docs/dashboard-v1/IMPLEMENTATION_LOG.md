@@ -611,3 +611,35 @@ first arrival; steps fixed on the left of the forms.
   organizations (with cascades), six orders, their storage files, provider
   links and auth users. Migration 0012 lets an organization delete cascade
   past the last-owner guard (RLS test). Marlow & Fen stays as the demo.
+
+## 2026-09-15 — Success-page provisioning stuck on "give me a moment"
+
+The owner's test purchase (test mode, on the local dev server, so no
+webhook could arrive) sat on the success page forever. The order was
+`paid`, but the provision job had failed once with "Order … is pending,
+not paid" and a validation failure is never retried.
+
+- **Cause: Next.js request memoization.** Inside one server-component
+  render, identical GET `fetch`es are deduped. The success page's fallback
+  calls `completeCheckout` (read order, update to paid) and then
+  `provisionOrder` (read order again with the identical query) — the second
+  read returned the memoized, pre-update row. Route Handlers are not
+  memoized, which is why the webhook path had always worked. The fallback
+  matters in production too: the success redirect often beats the webhook.
+- **Fix.** The service-role client (`lib/supabase/admin.ts`) now passes a
+  fresh `AbortController` signal and `cache: "no-store"` to every fetch,
+  which opts out of memoization and the Data Cache. `enqueueJob` takes
+  `requeueFailed`; the webhook and the success page use it for
+  `order.provision`, so a failed job no longer blocks a later trigger. The
+  success page (re)queues and runs provisioning for any `paid` order it
+  sees, not only one it just completed. Job failures are logged and a
+  thrown plain object is described by its `message` (was "[object
+  Object]"). Tests for the requeue and the message.
+- Recovery: reloading the stuck success page provisioned the order and sent
+  the welcome email. One stray failure record ("[object Object]", attempt
+  2) appeared on the job ~30 s after the successful run with no second
+  provisioning; source not identified from the dev logs — the new logging
+  is there for the next occurrence.
+- Sales-tax copy removed from the marketing site at the owner's request
+  (FAQ, pricing page lead, home pricing footnote).
+

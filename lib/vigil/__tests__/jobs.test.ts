@@ -20,6 +20,9 @@ describe("classifyFailure", () => {
     expect(classifyFailure(new ProviderError("vercel", "rate limited", { retryable: true })).retryable).toBe(true);
     expect(classifyFailure(new ProviderError("vercel", "bad request", { retryable: false })).retryable).toBe(false);
   });
+  it("describes a thrown plain object by its message", () => {
+    expect(classifyFailure({ code: "23505", message: "duplicate key" }).message).toBe("duplicate key");
+  });
   it("retries unknown errors and RetryLater with its delay", () => {
     expect(classifyFailure(new Error("socket hang up")).retryable).toBe(true);
     const later = classifyFailure(new RetryLater("dns pending", 900));
@@ -36,6 +39,24 @@ describe("enqueueJob", () => {
     expect(a.created).toBe(true);
     expect(b.created).toBe(false);
     expect(b.id).toBe(a.id);
+    expect(fake.rows("provisioning_jobs")).toHaveLength(1);
+  });
+
+  it("leaves a failed job alone unless asked to requeue it", async () => {
+    const fake = new FakeAdmin();
+    const a = await enqueueJob(fake.asClient(), { kind: "order.provision", idempotencyKey: "order.provision:o1" });
+    fake.rows("provisioning_jobs")[0].status = "failed";
+    fake.rows("provisioning_jobs")[0].finished_at = new Date().toISOString();
+
+    const b = await enqueueJob(fake.asClient(), { kind: "order.provision", idempotencyKey: "order.provision:o1" });
+    expect(b).toEqual({ id: a.id, created: false });
+    expect(fake.rows("provisioning_jobs")[0].status).toBe("failed");
+
+    const c = await enqueueJob(fake.asClient(), { kind: "order.provision", idempotencyKey: "order.provision:o1", requeueFailed: true });
+    expect(c).toEqual({ id: a.id, created: false });
+    const row = fake.rows("provisioning_jobs")[0];
+    expect(row.status).toBe("queued");
+    expect(row.finished_at).toBeNull();
     expect(fake.rows("provisioning_jobs")).toHaveLength(1);
   });
 });

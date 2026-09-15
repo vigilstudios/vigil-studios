@@ -19,7 +19,7 @@ export default async function PricingPage() {
     <>
       <Section className="pt-32 sm:pt-40">
         <Container>
-          <SectionIntro eyebrow="Pricing" title="Two parts. No surprises." lead="You pay once for the website, then a Vigil plan keeps it online, secure, updated and supported. Every Vigil-hosted site needs a plan; Basic is the floor. Sales tax is calculated at checkout." />
+          <SectionIntro eyebrow="Pricing" title="Two parts. No surprises." lead="You pay once for the website, then a Vigil plan keeps it online, secure, updated and supported. Every Vigil-hosted site needs a plan; Basic is the floor." />
         </Container>
       </Section>
 

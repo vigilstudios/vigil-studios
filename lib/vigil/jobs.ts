@@ -103,6 +103,13 @@ export type EnqueueInput = {
   scheduledFor?: Date;
   maxAttempts?: number;
   createdBy?: string | null;
+  /**
+   * If the job already exists and has failed or been cancelled, queue it
+   * again now instead of returning it as is. For work whose trigger can
+   * recur (a webhook redelivered, a success page revisited) a permanently
+   * failed row must not block the retry the new trigger asks for.
+   */
+  requeueFailed?: boolean;
 };
 
 /** Insert or return the existing job for the idempotency key. */
@@ -112,11 +119,21 @@ export async function enqueueJob(
 ): Promise<{ id: string; created: boolean }> {
   const { data: existing, error: lookupError } = await admin
     .from("provisioning_jobs")
-    .select("id")
+    .select("id, status")
     .eq("idempotency_key", input.idempotencyKey)
     .maybeSingle();
   if (lookupError) throw lookupError;
-  if (existing) return { id: existing.id, created: false };
+  if (existing) {
+    if (input.requeueFailed && (existing.status === "failed" || existing.status === "canceled")) {
+      const { error: requeueError } = await admin
+        .from("provisioning_jobs")
+        .update({ status: "queued", scheduled_for: (input.scheduledFor ?? new Date()).toISOString(), locked_by: null, locked_at: null, finished_at: null })
+        .eq("id", existing.id)
+        .in("status", ["failed", "canceled"]);
+      if (requeueError) throw requeueError;
+    }
+    return { id: existing.id, created: false };
+  }
 
   const { data, error } = await admin
     .from("provisioning_jobs")
@@ -174,9 +191,11 @@ export function classifyFailure(error: unknown): { retryable: boolean; delaySeco
   if (isVigilError(error)) {
     return { retryable: false, delaySeconds: null, message: error.message, code: error.code };
   }
-  const message = error instanceof Error ? error.message : String(error);
   // Unknown failures are retried: a transient network error looks the same
-  // as a bug, and attempts are bounded.
+  // as a bug, and attempts are bounded. Plain objects with a message (a
+  // PostgREST error thrown as is) are described rather than "[object Object]".
+  const message =
+    error instanceof Error ? error.message : typeof error === "object" && error && "message" in error ? String((error as { message: unknown }).message) : String(error);
   return { retryable: true, delaySeconds: null, message, code: "unknown" };
 }
 
@@ -219,6 +238,7 @@ async function runOne(admin: DbClient, job: ProvisioningJob): Promise<JobOutcome
     return { id: job.id, kind: job.kind, status: "succeeded" };
   } catch (err) {
     const failure = classifyFailure(err);
+    console.error(`[jobs] ${job.kind} ${job.id} attempt ${job.attempts} failed:`, err);
     const exhausted = job.attempts >= job.max_attempts;
     const errorJson = { code: failure.code, message: failure.message, attempt: job.attempts };
 
