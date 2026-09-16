@@ -45,6 +45,15 @@ export class VercelDeploymentProvider implements DeploymentProvider {
       }) as { id?: string; name?: string };
     }
     if (!project.id) throw new ProviderError("vercel", "Vercel returned an incomplete project.");
+    // Customer review links must open for customers who are not members of
+    // the Vigil Vercel team. New projects can inherit team-level Vercel
+    // Authentication, so explicitly make each dedicated customer site public.
+    // Preview deployment URLs remain unindexed by Vercel and are only shared
+    // through the authenticated Vigil dashboard.
+    await this.api(`/v9/projects/${encodeURIComponent(project.id)}`, {
+      method: "PATCH",
+      body: { ssoProtection: null },
+    });
     return { externalId: project.id, previewUrl: project.name ? `https://${project.name}.vercel.app` : null };
   }
 

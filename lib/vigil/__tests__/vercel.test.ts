@@ -5,13 +5,31 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 
 describe("VercelDeploymentProvider", () => {
   it("creates a dedicated project connected to the private GitHub repository", async () => {
-    const request = vi.fn().mockResolvedValueOnce(json({}, 404)).mockResolvedValueOnce(json({ id: "prj_1", name: "vigil-acme" }));
+    const request = vi.fn()
+      .mockResolvedValueOnce(json({}, 404))
+      .mockResolvedValueOnce(json({ id: "prj_1", name: "vigil-acme" }))
+      .mockResolvedValueOnce(json({ id: "prj_1", name: "vigil-acme", ssoProtection: null }));
     const provider = new VercelDeploymentProvider("vc_token", "team_1", request);
     const result = await provider.provisionSite({ websiteId: "w", organizationId: "o", name: "vigil-acme", templateSlug: "restaurant", hostingMode: "dedicated", repositoryFullName: "vigil/client-acme", repositoryId: 42 });
     expect(result).toEqual({ externalId: "prj_1", previewUrl: "https://vigil-acme.vercel.app" });
     const url = request.mock.calls[1][0] as URL;
     expect(url.toString()).toContain("/v11/projects?teamId=team_1");
     expect(JSON.parse(request.mock.calls[1][1].body)).toMatchObject({ rootDirectory: "site", gitRepository: { type: "github", repo: "vigil/client-acme" } });
+    expect((request.mock.calls[2][0] as URL).pathname).toBe("/v9/projects/prj_1");
+    expect(request.mock.calls[2][1].method).toBe("PATCH");
+    expect(JSON.parse(request.mock.calls[2][1].body)).toEqual({ ssoProtection: null });
+  });
+
+  it("removes inherited Vercel authentication from an existing customer project", async () => {
+    const request = vi.fn()
+      .mockResolvedValueOnce(json({ id: "prj_1", name: "vigil-acme", ssoProtection: { deploymentType: "all_except_custom_domains" } }))
+      .mockResolvedValueOnce(json({ id: "prj_1", name: "vigil-acme", ssoProtection: null }));
+    const provider = new VercelDeploymentProvider("vc_token", "team_1", request);
+
+    await provider.provisionSite({ websiteId: "w", organizationId: "o", name: "vigil-acme", templateSlug: null, hostingMode: "dedicated", repositoryFullName: "vigil/client-acme", repositoryId: 42 });
+
+    expect((request.mock.calls[1][0] as URL).pathname).toBe("/v9/projects/prj_1");
+    expect(JSON.parse(request.mock.calls[1][1].body)).toEqual({ ssoProtection: null });
   });
 
   it("deploys main to production and normalizes asynchronous states", async () => {

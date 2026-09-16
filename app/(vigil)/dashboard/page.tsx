@@ -55,7 +55,7 @@ export default async function OverviewPage() {
 
   const websiteStatus = website ? describeWebsiteStatus(website.status) : null;
   const displayedWebsiteStatus = website?.preview_url && !website.live_url
-    ? { label: "Preview ready", tone: "good" as const, hint: "Your private build preview is ready to view." }
+    ? { label: "Preview ready", tone: "good" as const, hint: "Your shareable build preview is ready to view." }
     : websiteStatus;
   const domainStatus = domain ? describeDomainStatus(domain.status) : null;
   const subStatus = subscription ? describeSubscriptionStatus(subscription.status) : null;

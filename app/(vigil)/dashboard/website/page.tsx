@@ -61,7 +61,7 @@ export default async function WebsitePage() {
         websites.map(async (site) => {
           const lifecycleStatus = describeWebsiteStatus(site.status);
           const status = !site.live_url && site.preview_url
-            ? { label: "Preview ready", tone: "good" as const, hint: "Your private build preview is ready to view." }
+            ? { label: "Preview ready", tone: "good" as const, hint: "Your shareable build preview is ready to view." }
             : lifecycleStatus;
           const deployments = await getRecentDeployments(site.id);
           const lastPublish = deployments.find((d) => d.environment === "production" && d.status === "ready") ?? null;
