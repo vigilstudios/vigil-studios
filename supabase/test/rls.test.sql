@@ -572,4 +572,81 @@ begin
   perform test.logout();
 end $$;
 
+-- --------------------------------------------------------------------------
+-- Customer retirement: admin-only, atomic restoration and complete purge.
+-- --------------------------------------------------------------------------
+do $$
+declare
+  v_org constant uuid := '10000000-0000-0000-0000-00000000000f';
+  v_project uuid;
+  v_website uuid;
+  v_subscription uuid;
+  v_order uuid;
+  v_round uuid;
+begin
+  perform test.login_service();
+  insert into public.organizations (id, slug, name, status) values (v_org, 'purge-test', 'Purge Test', 'active');
+  insert into public.projects (organization_id, name, kind, status)
+    values (v_org, 'Professional purge test', 'professional', 'review') returning id into v_project;
+  insert into public.websites (organization_id, project_id, name, status, repository_ref)
+    values (v_org, v_project, 'Purge website', 'live', 'github:vigil/purge-test') returning id into v_website;
+  insert into public.subscriptions (organization_id, website_id, plan_id, status)
+    values (v_org, v_website, (select id from public.plans limit 1), 'active') returning id into v_subscription;
+  insert into public.orders (organization_id, project_id, subscription_id, email, business_name, status)
+    values (v_org, v_project, v_subscription, 'purge@example.com', 'Purge Test', 'paid') returning id into v_order;
+  insert into public.provider_links (provider, resource_kind, external_id, entity_type, entity_id)
+    values
+      ('stripe', 'subscription', 'sub_purge', 'subscription', v_subscription),
+      ('vercel', 'site', 'prj_purge', 'website', v_website),
+      ('other', 'repository', '42', 'website', v_website);
+  select id into v_round from public.project_review_rounds where project_id = v_project and round_number = 1;
+  insert into public.project_review_submissions (organization_id, project_id, round_id, version, preview_url)
+    values (v_org, v_project, v_round, 1, 'https://purge-preview.example.com');
+  perform test.logout();
+
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  perform test.fails(
+    'select vigil.archive_organization(''' || v_org || ''', ''00000000-0000-0000-0000-00000000000a'')',
+    'member: cannot archive a customer');
+  perform test.logout();
+
+  perform test.login_service();
+  perform test.fails(
+    'select vigil.purge_organization(''' || v_org || ''', ''{}'', ''{}'', null)',
+    'service: an active customer cannot be permanently purged');
+  perform vigil.archive_organization(v_org, '00000000-0000-0000-0000-00000000000d');
+  perform test.ok((select archived_at is not null and status = 'closed' from public.organizations where id = v_org),
+    'archive: organization is closed and timestamped');
+  perform test.ok((select status from public.subscriptions where id = v_subscription) = 'canceled',
+    'archive: subscription row is canceled');
+  perform test.ok((select status from public.projects where id = v_project) = 'cancelled'
+    and (select status from public.websites where id = v_website) = 'archived',
+    'archive: project and website are retired');
+  perform test.ok((select status from public.orders where id = v_order) = 'expired',
+    'archive: paid but unprovisioned orders cannot run later');
+
+  perform vigil.restore_organization(v_org, '00000000-0000-0000-0000-00000000000d');
+  perform test.ok((select archived_at is null and status = 'active' from public.organizations where id = v_org),
+    'restore: organization status is restored');
+  perform test.ok((select status from public.projects where id = v_project) = 'review'
+    and (select status from public.websites where id = v_website) = 'live',
+    'restore: project and website states are restored');
+  perform test.ok((select status from public.subscriptions where id = v_subscription) = 'canceled',
+    'restore: billing remains canceled and requires an explicit new subscription');
+
+  perform vigil.archive_organization(v_org, '00000000-0000-0000-0000-00000000000d');
+  perform vigil.purge_organization(v_org, '{"reason":"test"}', '{"providers":"clean"}', '00000000-0000-0000-0000-00000000000d');
+  perform test.ok(test.count('select 1 from public.organizations where id = ''' || v_org || '''') = 0
+    and test.count('select 1 from public.projects where organization_id = ''' || v_org || '''') = 0
+    and test.count('select 1 from public.websites where organization_id = ''' || v_org || '''') = 0
+    and test.count('select 1 from public.subscriptions where organization_id = ''' || v_org || '''') = 0
+    and test.count('select 1 from public.orders where id = ''' || v_order || '''') = 0,
+    'purge: customer, projects, websites, subscriptions and orders are removed');
+  perform test.ok(test.count('select 1 from public.provider_links where external_id in (''sub_purge'', ''prj_purge'', ''42'')') = 0,
+    'purge: provider links are removed');
+  perform test.ok(test.count('select 1 from public.customer_deletion_log where former_organization_id = ''' || v_org || '''') = 1,
+    'purge: one minimal deletion ledger remains');
+  perform test.logout();
+end $$;
+
 drop schema test cascade;

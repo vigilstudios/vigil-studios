@@ -1126,6 +1126,7 @@ export type Database = {
       organizations: {
         Row: {
           address: Json
+          archive_snapshot: Json | null
           archived_at: string | null
           billing_email: string | null
           created_at: string
@@ -1143,6 +1144,7 @@ export type Database = {
         }
         Insert: {
           address?: Json
+          archive_snapshot?: Json | null
           archived_at?: string | null
           billing_email?: string | null
           created_at?: string
@@ -1160,6 +1162,7 @@ export type Database = {
         }
         Update: {
           address?: Json
+          archive_snapshot?: Json | null
           archived_at?: string | null
           billing_email?: string | null
           created_at?: string
@@ -2382,6 +2385,10 @@ export type Database = {
     }
     Functions: {
       accept_invites_for_current_user: { Args: never; Returns: number }
+      archive_organization: {
+        Args: { p_actor_id: string; p_organization_id: string }
+        Returns: undefined
+      }
       claim_jobs: {
         Args: { p_lease_seconds?: number; p_limit?: number; p_worker: string }
         Returns: Database["public"]["Tables"]["provisioning_jobs"]["Row"][]
@@ -2446,6 +2453,10 @@ export type Database = {
           source: string
           value: Json
         }[]
+      }
+      restore_organization: {
+        Args: { p_actor_id: string; p_organization_id: string }
+        Returns: undefined
       }
       shares_org_with: { Args: { p_user: string }; Returns: boolean }
     }

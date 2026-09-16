@@ -432,7 +432,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
           {org.archived_at ? (
             <>
               <p className="mt-1 text-sm text-[color:var(--text-secondary)]">
-                Archived {formatDateTime(org.archived_at)}. This customer is hidden from active dashboards and its subscriptions were cancelled.
+                Archived {formatDateTime(org.archived_at)}. This customer is hidden from active dashboards and its subscriptions were cancelled. Restoring reopens the customer, projects, and websites, but billing stays cancelled until you create a new subscription.
               </p>
               <div className="mt-3 flex flex-wrap gap-3">
                 <ActionButton action={restoreOrganization.bind(null, org.id)}>Restore customer</ActionButton>

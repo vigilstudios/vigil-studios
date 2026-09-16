@@ -4,12 +4,43 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { ValidationError, NotFoundError } from "@/lib/vigil/auth/errors";
 import { GitHubRepositoryProvider } from "@/lib/vigil/providers/github";
 import { getBillingProvider, getDeploymentProvider } from "@/lib/vigil/providers/registry";
+import type { BillingProvider, DeploymentProvider } from "@/lib/vigil/providers/types";
+import type { AdminSupabaseClient } from "@/lib/supabase/admin";
 
 const cancellableStatuses = ["incomplete", "trialing", "active", "past_due", "unpaid", "paused"] as const;
 const cancellable = new Set<string>(cancellableStatuses);
 
-export async function archiveCustomer(organizationId: string, actorId: string) {
-  const admin = createAdminClient();
+type RetirementDependencies = {
+  admin?: AdminSupabaseClient;
+  billing?: BillingProvider;
+  deployment?: DeploymentProvider;
+  github?: Pick<GitHubRepositoryProvider, "deleteRepository">;
+};
+
+type SubscriptionForCancellation = { id: string; status: string };
+type SubscriptionLink = { entity_id: string; external_id: string; metadata: unknown };
+
+export async function cancelRemoteSubscriptions(
+  subscriptions: SubscriptionForCancellation[],
+  links: SubscriptionLink[],
+  provider: BillingProvider
+) {
+  for (const subscription of subscriptions) {
+    if (!cancellable.has(subscription.status)) continue;
+    const link = links.find((candidate) => candidate.entity_id === subscription.id && (!(candidate.metadata as { mode?: string } | null)?.mode || (candidate.metadata as { mode?: string }).mode === provider.mode));
+    if (!link) {
+      const hasAnotherMode = links.some((candidate) => candidate.entity_id === subscription.id);
+      if (hasAnotherMode) throw new ValidationError(`Subscription ${subscription.id} belongs to a different Stripe mode. Cancel it from the matching environment before archiving.`);
+      continue;
+    }
+    const remote = await provider.getSubscription(link.external_id);
+    if (!remote) throw new ValidationError(`Stripe subscription ${link.external_id} could not be verified. The customer was not archived.`);
+    if (remote.status !== "canceled") await provider.cancelSubscription(link.external_id, { atPeriodEnd: false });
+  }
+}
+
+export async function archiveCustomer(organizationId: string, actorId: string, dependencies: RetirementDependencies = {}) {
+  const admin = dependencies.admin ?? createAdminClient();
   const { data: org, error } = await admin.from("organizations").select("id, name, archived_at, subscriptions(id, status)").eq("id", organizationId).maybeSingle();
   if (error) throw error;
   if (!org) throw new NotFoundError("Customer not found.");
@@ -21,34 +52,21 @@ export async function archiveCustomer(organizationId: string, actorId: string) {
     ? await admin.from("provider_links").select("entity_id, external_id, metadata").eq("provider", "stripe").eq("resource_kind", "subscription").in("entity_id", ids)
     : { data: [], error: null };
   if (linksError) throw linksError;
-  const provider = getBillingProvider();
-  for (const subscription of subscriptions) {
-    if (!cancellable.has(subscription.status)) continue;
-    const link = links?.find((candidate) => candidate.entity_id === subscription.id && (!(candidate.metadata as { mode?: string } | null)?.mode || (candidate.metadata as { mode?: string }).mode === provider.mode));
-    if (link) await provider.cancelSubscription(link.external_id, { atPeriodEnd: false });
-  }
+  const provider = dependencies.billing ?? getBillingProvider();
+  await cancelRemoteSubscriptions(subscriptions, links ?? [], provider);
 
-  const now = new Date().toISOString();
-  const updates = await Promise.all([
-    admin.from("subscriptions").update({ status: "canceled", canceled_at: now, cancel_at_period_end: false }).eq("organization_id", organizationId).in("status", cancellableStatuses),
-    admin.from("websites").update({ status: "archived", status_reason: "Customer archived" }).eq("organization_id", organizationId),
-    admin.from("projects").update({ status: "cancelled" }).eq("organization_id", organizationId).in("status", ["draft", "intake", "in_progress", "review", "approved"]),
-    admin.from("organizations").update({ status: "closed", archived_at: now }).eq("id", organizationId),
-  ]);
-  const failed = updates.find((result) => result.error);
-  if (failed?.error) throw failed.error;
-  await admin.rpc("log_audit_event", { p_action: "organization.archived", p_entity_type: "organization", p_entity_id: organizationId, p_org: organizationId, p_before: null, p_after: { archived_at: now }, p_metadata: {}, p_actor_kind: "staff" });
+  const { error: archiveError } = await admin.schema("vigil").rpc("archive_organization", { p_organization_id: organizationId, p_actor_id: actorId });
+  if (archiveError) throw archiveError;
 }
 
-export async function restoreCustomer(organizationId: string) {
-  const admin = createAdminClient();
-  const { data, error } = await admin.from("organizations").update({ status: "active", archived_at: null }).eq("id", organizationId).not("archived_at", "is", null).select("id").maybeSingle();
+export async function restoreCustomer(organizationId: string, actorId: string, dependencies: RetirementDependencies = {}) {
+  const admin = dependencies.admin ?? createAdminClient();
+  const { error } = await admin.schema("vigil").rpc("restore_organization", { p_organization_id: organizationId, p_actor_id: actorId });
   if (error) throw error;
-  if (!data) throw new ValidationError("This customer is not archived.");
 }
 
-export async function permanentlyDeleteCustomer(organizationId: string, actorId: string) {
-  const admin = createAdminClient();
+export async function permanentlyDeleteCustomer(organizationId: string, actorId: string, dependencies: RetirementDependencies = {}) {
+  const admin = dependencies.admin ?? createAdminClient();
   const { data: org, error } = await admin.from("organizations").select("id, name, slug, billing_email, archived_at, projects(id, name, kind), websites(id, name, repository_ref), subscriptions(id, status), organization_members(user_id, role)").eq("id", organizationId).maybeSingle();
   if (error) throw error;
   if (!org) throw new NotFoundError("Customer not found.");
@@ -61,8 +79,11 @@ export async function permanentlyDeleteCustomer(organizationId: string, actorId:
   if (linksError) throw linksError;
 
   const deleted = { vercelProjects: [] as string[], githubRepositories: [] as string[], storageObjects: 0 };
-  const deployment = getDeploymentProvider();
-  const github = new GitHubRepositoryProvider();
+  const deployment = dependencies.deployment ?? getDeploymentProvider();
+  const github = dependencies.github ?? new GitHubRepositoryProvider();
+  if (links?.some((link) => link.provider === "vercel" && link.resource_kind === "site") && deployment.name !== "vercel") {
+    throw new ValidationError("Vercel cleanup is not configured. No customer data was deleted.");
+  }
   for (const website of org.websites) {
     const site = links?.find((link) => link.entity_id === website.id && link.provider === "vercel" && link.resource_kind === "site");
     if (site) {
@@ -70,7 +91,7 @@ export async function permanentlyDeleteCustomer(organizationId: string, actorId:
       deleted.vercelProjects.push(site.external_id);
     }
     const repository = links?.find((link) => link.entity_id === website.id && link.resource_kind === "repository");
-    const fullName = (repository?.metadata as { full_name?: string } | null)?.full_name ?? website.repository_ref?.replace(/^github:/, "");
+    const fullName = (repository?.metadata as { full_name?: string } | null)?.full_name ?? (website.repository_ref?.startsWith("github:") ? website.repository_ref.slice("github:".length) : undefined);
     if (fullName) {
       await github.deleteRepository(fullName);
       deleted.githubRepositories.push(fullName);

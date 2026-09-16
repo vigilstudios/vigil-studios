@@ -50,4 +50,14 @@ describe("VercelDeploymentProvider", () => {
     expect((request.mock.calls[1][0] as URL).pathname).toBe("/v9/projects/prj_1/domains/example.com/verify");
     expect(request.mock.calls[1][1].method).toBe("POST");
   });
+
+  it("deletes the exact Vercel project and is retry-safe after it is gone", async () => {
+    const request = vi.fn().mockResolvedValueOnce(new Response(null, { status: 204 })).mockResolvedValueOnce(json({}, 404));
+    const provider = new VercelDeploymentProvider("vc_token", "team_1", request);
+    await provider.deleteSite("prj_1");
+    await provider.deleteSite("prj_1");
+    expect((request.mock.calls[0][0] as URL).pathname).toBe("/v9/projects/prj_1");
+    expect((request.mock.calls[0][0] as URL).searchParams.get("teamId")).toBe("team_1");
+    expect(request.mock.calls[0][1].method).toBe("DELETE");
+  });
 });

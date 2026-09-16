@@ -122,8 +122,8 @@ export async function archiveOrganization(orgId: string): Promise<ActionResult> 
 
 export async function restoreOrganization(orgId: string): Promise<ActionResult> {
   try {
-    await requireAdminOrThrow();
-    await restoreCustomer(orgId);
+    const staff = await requireAdminOrThrow();
+    await restoreCustomer(orgId, staff.user.id);
     revalidatePath("/admin/organizations");
     revalidatePath(`/admin/organizations/${orgId}`);
     return { ok: true, data: undefined };

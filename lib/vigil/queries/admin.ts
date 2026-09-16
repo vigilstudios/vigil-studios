@@ -9,8 +9,8 @@ export const adminCounts = cache(async () => {
   const supabase = await createClient();
   const head = { count: "exact" as const, head: true };
   const results = await Promise.all([
-    supabase.from("organizations").select("*", head),
-    supabase.from("websites").select("*", head),
+    supabase.from("organizations").select("*", head).is("archived_at", null),
+    supabase.from("websites").select("*", head).neq("status", "archived"),
     supabase.from("websites").select("*", head).eq("status", "live"),
     supabase.from("domains").select("*", head).in("status", ["pending", "verifying", "error", "expired"]),
     supabase.from("subscriptions").select("*", head).in("status", ["past_due", "unpaid"]),
@@ -84,7 +84,8 @@ export const listWebsites = cache(async () => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("websites")
-    .select("id, name, status, live_url, template_slug, last_deployed_at, updated_at, organization:organizations(id, name)")
+    .select("id, name, status, live_url, template_slug, last_deployed_at, updated_at, organization:organizations!inner(id, name, archived_at)")
+    .is("organization.archived_at", null)
     .order("updated_at", { ascending: false })
     .limit(200);
   if (error) throw error;
@@ -109,7 +110,8 @@ export const listDomains = cache(async () => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("domains")
-    .select("id, hostname, status, source, registrar, metadata, dns_ok, ssl_ok, expires_at, last_checked_at, status_reason, organization:organizations(id, name), website:websites!domains_website_id_fkey(id, name)")
+    .select("id, hostname, status, source, registrar, metadata, dns_ok, ssl_ok, expires_at, last_checked_at, status_reason, organization:organizations!inner(id, name, archived_at), website:websites!domains_website_id_fkey(id, name)")
+    .is("organization.archived_at", null)
     .order("updated_at", { ascending: false })
     .limit(300);
   if (error) throw error;
@@ -120,7 +122,8 @@ export const listSubscriptions = cache(async () => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("subscriptions")
-    .select("id, status, current_period_end, cancel_at_period_end, created_at, organization:organizations(id, name), plan:plans(code, name), price:plan_prices(amount_cents, currency, interval, interval_count)")
+    .select("id, status, current_period_end, cancel_at_period_end, created_at, organization:organizations!inner(id, name, archived_at), plan:plans(code, name), price:plan_prices(amount_cents, currency, interval, interval_count)")
+    .is("organization.archived_at", null)
     .order("created_at", { ascending: false })
     .limit(300);
   if (error) throw error;
@@ -131,7 +134,8 @@ export const listChangeRequests = cache(async () => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("change_requests")
-    .select("id, title, description, status, priority, submitted_at, created_at, organization:organizations(id, name), website:websites(id, name), requester:profiles!change_requests_requested_by_fkey(full_name, email), attachments:change_request_attachments(id, file_name, content_type, size_bytes, object_path, bucket_id)")
+    .select("id, title, description, status, priority, submitted_at, created_at, organization:organizations!inner(id, name, archived_at), website:websites(id, name), requester:profiles!change_requests_requested_by_fkey(full_name, email), attachments:change_request_attachments(id, file_name, content_type, size_bytes, object_path, bucket_id)")
+    .is("organization.archived_at", null)
     .order("created_at", { ascending: false })
     .limit(300);
   if (error) throw error;
