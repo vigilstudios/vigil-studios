@@ -10,6 +10,7 @@ import { button, escapeHtml, layout, sendEmail, staffNotificationAddress } from 
 import { enqueueJob, JOB_KINDS } from "@/lib/vigil/jobs";
 import { assertTransition, domainTransitions, projectTransitions } from "@/lib/vigil/lifecycle";
 import { REGISTRAR_GUIDES } from "@/lib/vigil/domain-guides";
+import { domainKind } from "@/lib/vigil/domains";
 import { domainSchema, parseBrief, SECTION_SCHEMAS, STEP_KEYS, type Brief, type RegistrarKey, type SectionKey, type StepKey } from "@/lib/vigil/onboarding/brief";
 import { PROJECT_ASSETS_BUCKET, validateAssets, type AssetKind } from "@/lib/vigil/onboarding/assets";
 import { detectRegistrar, requiredRecords, type DnsRecord } from "@/lib/vigil/services/dns";
@@ -175,6 +176,8 @@ export type DomainSetup = {
   records: DnsRecord[];
   dnsOk: boolean | null;
   statusReason: string | null;
+  /** DNS changes stay locked until the domain is attached to a deployed site. */
+  cutoverReady: boolean;
 };
 
 /**
@@ -189,6 +192,9 @@ export async function startOnboardingDomain(projectId: string, input: { hostname
     const { supabase, brief } = await loadProject(ctx, projectId);
     const hostname = normalizeHostname(input.hostname);
     if (!hostname) throw new ValidationError("Enter a domain like yourbusiness.com.", { hostname: ["Invalid domain"] });
+    let registrar: RegistrarKey | null = input.registrar;
+    if (!registrar) registrar = (await detectRegistrar(hostname)).registrar;
+    registrar ??= "other";
 
     const { data: website } = await supabase.from("websites").select("id").eq("project_id", projectId).maybeSingle();
 
@@ -202,9 +208,10 @@ export async function startOnboardingDomain(projectId: string, input: { hostname
           organization_id: ctx.organization.id,
           website_id: website?.id ?? null,
           hostname,
-          kind: hostname.split(".").length > 2 ? "subdomain" : "apex",
+          kind: domainKind(hostname),
           source: "customer_owned",
           status: "pending",
+          registrar,
         })
         .select("id")
         .single();
@@ -216,13 +223,12 @@ export async function startOnboardingDomain(projectId: string, input: { hostname
       await logAuditEvent(supabase, { action: "domain.connect_started", entityType: "domain", entityId: domainId, organizationId: ctx.organization.id, after: { hostname, website_id: website?.id ?? null, via: "onboarding" } });
     }
 
-    let registrar: RegistrarKey | null = input.registrar;
-    if (!registrar) registrar = (await detectRegistrar(hostname)).registrar;
-    registrar ??= "other";
-
     // Work out the records now so the guide is complete on the next screen.
     if (hasAdminClient()) {
       const admin = createAdminClient();
+      if (existing) {
+        await admin.from("domains").update({ registrar, website_id: website?.id ?? null }).eq("id", domainId);
+      }
       try {
         await beginDomainVerification(admin, domainId);
       } catch (err) {
@@ -245,7 +251,8 @@ async function domainSetup(supabase: Awaited<ReturnType<typeof createClient>>, d
   const { data: domain, error } = await supabase.from("domains").select("id, hostname, status, verification, dns_ok, status_reason").eq("id", domainId).single();
   if (error) throw error;
   const records = requiredRecords(domain.hostname, domain.verification);
-  return { domainId: domain.id, hostname: domain.hostname, status: domain.status, registrar, records, dnsOk: domain.dns_ok, statusReason: domain.status_reason };
+  const source = (domain.verification as { source?: string } | null)?.source;
+  return { domainId: domain.id, hostname: domain.hostname, status: domain.status, registrar, records, dnsOk: domain.dns_ok, statusReason: domain.status_reason, cutoverReady: source === "provider" || domain.status === "connected" };
 }
 
 /** Re-read the domain's state (the wizard polls this while "Checking…"). */
@@ -307,6 +314,37 @@ export async function submitIntake(projectId: string): Promise<ActionResult<{ co
       const admin = createAdminClient();
       assertTransition(projectTransitions, "intake", "in_progress", "project");
       await admin.from("projects").update({ status: "in_progress" }).eq("id", projectId).eq("status", "intake");
+    }
+
+    if (hasAdminClient() && brief.domain?.answer === "own" && brief.domain.domainId) {
+      const admin = createAdminClient();
+      const { data: domain } = await admin.from("domains").select("metadata, status_reason").eq("id", brief.domain.domainId).maybeSingle();
+      if (domain) {
+        const metadata = domain.metadata && typeof domain.metadata === "object" && !Array.isArray(domain.metadata)
+          ? domain.metadata as Record<string, Json | undefined>
+          : {};
+        const assistanceRequestedAt = brief.domain.delegate ? completedAt : null;
+        await admin.from("domains").update({
+          registrar: brief.domain.registrar,
+          metadata: {
+            ...metadata,
+            onboarding_delegate: brief.domain.delegate,
+            assistance_requested_at: assistanceRequestedAt,
+          },
+          ...(brief.domain.delegate
+            ? { status_reason: "Assisted DNS cutover requested. Contact the customer before making any DNS changes." }
+            : {}),
+        }).eq("id", brief.domain.domainId);
+        if (brief.domain.delegate) {
+          await logAuditEvent(supabase, {
+            action: "domain.assistance_requested",
+            entityType: "domain",
+            entityId: brief.domain.domainId,
+            organizationId: ctx.organization.id,
+            after: { registrar: brief.domain.registrar, requested_at: completedAt },
+          });
+        }
+      }
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.vigilstudios.co";

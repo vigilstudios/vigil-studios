@@ -201,8 +201,13 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
           <tbody>
             {domains.map((d) => (
               <tr key={d.id}>
-                <td className={tdClass}>{d.hostname}</td>
-                <td className={tdClass}>{titleCase(d.source)}</td>
+                <td className={tdClass}>
+                  {d.hostname}
+                  {(d.metadata as { onboarding_delegate?: boolean } | null)?.onboarding_delegate ? (
+                    <div className="text-xs font-medium text-[color:var(--status-warn)]">Assisted cutover requested</div>
+                  ) : null}
+                </td>
+                <td className={tdClass}>{titleCase(d.source)}{d.registrar ? ` · ${titleCase(d.registrar)}` : ""}</td>
                 <td className={tdClass}>
                   <SelectApply
                     placeholder="Not attached"

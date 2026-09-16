@@ -54,7 +54,15 @@ export default async function DomainPage() {
                 {domain.status !== "connected" && domain.source === "customer_owned" ? (
                   <div className="mt-4 rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-4">
                     <DomainGuidePanel
-                      domain={{ domainId: domain.id, hostname: domain.hostname, status: domain.status, records, dnsOk: domain.dns_ok, statusReason: domain.status_reason }}
+                      domain={{
+                        domainId: domain.id,
+                        hostname: domain.hostname,
+                        status: domain.status,
+                        records,
+                        dnsOk: domain.dns_ok,
+                        statusReason: domain.status_reason,
+                        cutoverReady: (domain.verification as { source?: string } | null)?.source === "provider",
+                      }}
                       initialRegistrar={briefDomain?.domainId === domain.id && briefDomain.registrar ? briefDomain.registrar : "other"}
                       canManage={canManage}
                     />

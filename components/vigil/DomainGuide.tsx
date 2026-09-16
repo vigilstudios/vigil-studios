@@ -18,6 +18,7 @@ export type GuideDomain = {
   records: { type: string; name: string; value: string }[];
   dnsOk: boolean | null;
   statusReason: string | null;
+  cutoverReady: boolean;
 };
 
 /**
@@ -48,7 +49,7 @@ export function DomainGuide({
   const status = describeDomainStatus(domain.status as DomainStatus);
   const connected = domain.status === "connected";
   const verifying = domain.status === "verifying";
-  const apex = domain.hostname.split(".").length === 2;
+  const apex = domain.records.some((record) => record.name === "@" || record.name === domain.hostname);
   const records = domain.records.map((r) => ({ ...r, displayName: r.name === "@" || r.name === domain.hostname ? guide.apexName : r.name }));
 
   return (
@@ -74,12 +75,17 @@ export function DomainGuide({
             </label>
           ) : null}
 
-          {records.length === 0 ? (
+          {!domain.cutoverReady ? (
             <div className="flex items-start gap-2 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] px-3 py-2.5 text-[13px]">
               <VirtueOrb size="sm" state="working" label="" className="mt-0.5" />
               <p>
-                I&apos;m preparing the exact records for {domain.hostname}. I&apos;ll email you the moment they are ready (usually the same day), and they will also appear on your Domain page. Nothing to do right now.
+                Your domain is recorded. <b>Do not change its DNS yet.</b> Your current website and email stay untouched while Vigil prepares the replacement site. The exact cutover records will unlock here when the new site is deployed and ready.
               </p>
+            </div>
+          ) : records.length === 0 ? (
+            <div className="flex items-start gap-2 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] px-3 py-2.5 text-[13px]">
+              <VirtueOrb size="sm" state="working" label="" className="mt-0.5" />
+              <p>I&apos;m preparing the exact records for {domain.hostname}. Nothing to change yet.</p>
             </div>
           ) : (
             <ol className="space-y-3 text-[13px]">
@@ -125,6 +131,9 @@ export function DomainGuide({
               </Step>
               <Step n={4} title="Remove anything that clashes">
                 <p className="text-[color:var(--text-secondary)]">{guide.conflicts}</p>
+                <p className="mt-1 font-medium text-[color:var(--status-warn)]">
+                  Only replace conflicting A, AAAA, or CNAME records for the website host shown above. Keep all MX, TXT, CAA, and email records, and do not change nameservers or transfer the domain.
+                </p>
               </Step>
               <Step n={5} title="Save, then tell me">
                 <p className="text-[color:var(--text-secondary)]">{guide.after ?? "Changes can take up to 48 hours to spread across the internet."} I keep checking and email you when it connects.</p>
@@ -137,7 +146,7 @@ export function DomainGuide({
             </ol>
           )}
 
-          {records.length > 0 && onConfirm ? (
+          {domain.cutoverReady && records.length > 0 && onConfirm ? (
             <div className="flex flex-wrap items-center gap-3">
               <button type="button" onClick={onConfirm} disabled={confirming || checking || verifying} className="btn-primary min-h-11 !px-5 !py-2.5 text-sm disabled:opacity-60">
                 {confirming ? "Checking…" : verifying ? "Checking…" : "I've added the records"}

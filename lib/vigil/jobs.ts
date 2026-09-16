@@ -69,6 +69,17 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
         createdBy: job.created_by,
       });
     }
+    for (const domainId of result.domainIds) {
+      await enqueueJob(admin, {
+        kind: JOB_KINDS.domainVerify,
+        idempotencyKey: `domain.verify:${domainId}:deployment:${result.deploymentId}`,
+        organizationId: job.organization_id,
+        websiteId: job.website_id,
+        domainId,
+        maxAttempts: 50,
+        createdBy: job.created_by,
+      });
+    }
     return { deployment_id: result.deploymentId };
   },
   [JOB_KINDS.websiteRepository]: async ({ admin, job }) => {
@@ -81,6 +92,18 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
     if (!deploymentId) throw new Error("website.deployment.sync requires payload.deployment_id");
     const result = await syncDeployment(admin, deploymentId);
     if (result.pending) throw new RetryLater(`Deployment is ${result.status}.`, 15);
+    for (const domainId of result.domainIds) {
+      await enqueueJob(admin, {
+        kind: JOB_KINDS.domainVerify,
+        idempotencyKey: `domain.verify:${domainId}:deployment:${deploymentId}`,
+        organizationId: job.organization_id,
+        websiteId: job.website_id,
+        domainId,
+        maxAttempts: 50,
+        createdBy: job.created_by,
+        requeueFailed: true,
+      });
+    }
     return { deployment_id: deploymentId, status: result.status };
   },
   [JOB_KINDS.domainConnect]: async ({ admin, job }) => {

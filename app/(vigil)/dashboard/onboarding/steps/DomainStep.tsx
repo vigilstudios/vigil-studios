@@ -208,7 +208,7 @@ export function DomainStep({ initial, projectId, businessName, domain, onDomain,
             <Toggle id="delegate" checked={data.delegate} onChange={(v) => set("delegate", v)} label="Prefer we do it? Ask Vigil to make these changes for you" />
             {data.delegate ? (
               <p className="mt-1 text-[11px] leading-5 text-[color:var(--text-secondary)]">
-                Noted. After you send the brief, the team will reply with how to give Vigil temporary access at {REGISTRAR_GUIDES[registrar ?? "other"].name} (most registrars have a &ldquo;delegate&rdquo; or &ldquo;account access&rdquo; option, so you never share your password). We make the change, then remove our access.
+                Noted. After you send the brief, the team will reply with instructions for temporary delegated access at {REGISTRAR_GUIDES[registrar ?? "other"].name}. Never send us your password or a domain transfer code. We will preserve your email records, make the website cutover only when the new site is ready, then remove our access.
               </p>
             ) : null}
           </div>

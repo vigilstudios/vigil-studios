@@ -4,6 +4,7 @@ import { getDeploymentProvider } from "@/lib/vigil/providers/registry";
 import type { DeploymentProvider } from "@/lib/vigil/providers/types";
 import { NotFoundError } from "@/lib/vigil/auth/errors";
 import { findExternalId, findProviderLink, providerEnum, upsertProviderLink } from "./provider-links";
+import { beginDomainVerification } from "./domain";
 
 /**
  * DeploymentService: Vigil Website -> DeploymentProvider.
@@ -76,7 +77,7 @@ export async function deployWebsite(
   websiteId: string,
   options: { environment?: "production" | "preview"; triggeredBy?: string | null } = {},
   provider: DeploymentProvider = getDeploymentProvider()
-): Promise<{ deploymentId: string; status: string }> {
+): Promise<{ deploymentId: string; status: string; domainIds: string[] }> {
   const environment = options.environment ?? "production";
   const { siteExternalId, organizationId } = await provisionWebsite(admin, websiteId, provider);
 
@@ -136,11 +137,11 @@ export async function deployWebsite(
       .eq("id", websiteId);
   }
 
-  if (environment === "production" && snapshot.status === "ready") {
-    await attachWebsiteDomains(admin, websiteId, siteExternalId, provider);
-  }
+  const domainIds = environment === "production" && snapshot.status === "ready"
+    ? await attachWebsiteDomains(admin, websiteId, provider)
+    : [];
 
-  return { deploymentId: deployment.id, status: snapshot.status };
+  return { deploymentId: deployment.id, status: snapshot.status, domainIds };
 }
 
 /** Poll a provider deployment and reflect its terminal state in Vigil. */
@@ -148,7 +149,7 @@ export async function syncDeployment(
   admin: DbClient,
   deploymentId: string,
   provider: DeploymentProvider = getDeploymentProvider()
-): Promise<{ status: string; pending: boolean }> {
+): Promise<{ status: string; pending: boolean; domainIds: string[] }> {
   const { data: deployment, error } = await admin.from("deployments").select("*").eq("id", deploymentId).maybeSingle();
   if (error) throw error;
   if (!deployment) throw new NotFoundError(`Deployment ${deploymentId} not found.`);
@@ -166,33 +167,23 @@ export async function syncDeployment(
     error: snapshot.error,
   }).eq("id", deploymentId);
 
+  let domainIds: string[] = [];
   if (snapshot.status === "ready" && deployment.environment === "production") {
-    const { siteExternalId } = await provisionWebsite(admin, deployment.website_id, provider);
+    await provisionWebsite(admin, deployment.website_id, provider);
     const { data: website } = await admin.from("websites").select("preview_url").eq("id", deployment.website_id).single();
     await admin.from("websites").update({ status: "live", live_url: website?.preview_url ?? snapshot.url, last_deployed_at: snapshot.readyAt ?? new Date().toISOString(), status_reason: null }).eq("id", deployment.website_id);
-    await attachWebsiteDomains(admin, deployment.website_id, siteExternalId, provider);
+    domainIds = await attachWebsiteDomains(admin, deployment.website_id, provider);
   } else if (snapshot.status === "error") {
     await admin.from("websites").update({ status_reason: snapshot.error?.message ?? "The last publish did not complete." }).eq("id", deployment.website_id);
   }
-  return { status: snapshot.status, pending: snapshot.status === "queued" || snapshot.status === "building" };
+  return { status: snapshot.status, pending: snapshot.status === "queued" || snapshot.status === "building", domainIds };
 }
 
-async function attachWebsiteDomains(admin: DbClient, websiteId: string, siteExternalId: string, provider: DeploymentProvider): Promise<void> {
-  const { data: domains, error } = await admin.from("domains").select("id, hostname, status").eq("website_id", websiteId).neq("status", "released");
+async function attachWebsiteDomains(admin: DbClient, websiteId: string, provider: DeploymentProvider): Promise<string[]> {
+  const { data: domains, error } = await admin.from("domains").select("id").eq("website_id", websiteId).neq("status", "released");
   if (error) throw error;
   for (const domain of domains ?? []) {
-    const config = await provider.addDomain(siteExternalId, domain.hostname);
-    const connected = config.verified && config.sslReady && !config.misconfigured;
-    await admin.from("domains").update({
-      status: connected ? "connected" : domain.status === "pending" ? "verifying" : domain.status,
-      verification: { required_records: config.requiredRecords },
-      dns_ok: config.verified,
-      ssl_ok: config.sslReady,
-      last_checked_at: new Date().toISOString(),
-      ...(connected ? { verified_at: new Date().toISOString(), connected_at: new Date().toISOString(), status_reason: null } : {}),
-    }).eq("id", domain.id);
-    if (connected) {
-      await admin.from("websites").update({ primary_domain_id: domain.id, live_url: `https://${domain.hostname}` }).eq("id", websiteId);
-    }
+    await beginDomainVerification(admin, domain.id, provider);
   }
+  return (domains ?? []).map((domain) => domain.id);
 }

@@ -7,6 +7,7 @@ import { logAuditEvent } from "@/lib/vigil/audit";
 import { ValidationError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
 import { assertOrgRole, requireOrgContextOrThrow } from "@/lib/vigil/auth/session";
 import { enqueueJob, JOB_KINDS } from "@/lib/vigil/jobs";
+import { domainKind } from "@/lib/vigil/domains";
 import { beginDomainVerification, normalizeHostname } from "@/lib/vigil/services/domain";
 
 export type DomainState = ActionResult<{ domainId: string }> | null;
@@ -32,7 +33,7 @@ export async function startDomainConnection(_prev: DomainState, formData: FormDa
         organization_id: ctx.organization.id,
         website_id: websiteId,
         hostname,
-        kind: hostname.split(".").length > 2 ? "subdomain" : "apex",
+        kind: domainKind(hostname),
         source: "customer_owned",
         status: "pending",
       })

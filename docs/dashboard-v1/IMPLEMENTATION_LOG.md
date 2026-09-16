@@ -762,3 +762,28 @@ fail silently.
   cookie from the checkout browser, row id on the welcome link, one-time
   grant claimed by the polling tab; the login-page link cannot use it
   until login emails move off Supabase's template.
+
+## 2026-09-15 — Safe custom-domain cutover
+
+- Onboarding can collect an existing domain immediately, but it no longer
+  invites a customer to change DNS before the replacement site has a real
+  Vercel project. Planned records remain internal; the customer sees a clear
+  no-action-yet state so their current website and email stay untouched.
+- A ready production deployment attaches both the apex and `www`, makes
+  `www` canonical, and applies a permanent 308 redirect from the apex in
+  line with Vercel's recommendation. Explicit subdomains remain unchanged.
+- Deployment completion now always enqueues a deployment-specific domain
+  verification job. Verification covers every managed hostname, asks Vercel
+  to re-check pending ownership challenges, waits for DNS plus SSL, and only
+  then promotes the custom canonical URL to `websites.live_url`.
+- Registrar and assisted-cutover requests are persisted on the domain row.
+  Staff sees an "Assisted cutover requested" flag in both domain admin views;
+  customer guidance says never to send passwords or transfer codes and to
+  preserve MX, TXT, CAA, and email records.
+- Domain classification and registrar lookup now use the public suffix list,
+  so country-code domains such as `example.co.uk` are treated as apex domains
+  instead of being mistaken for subdomains.
+- Added provider and service coverage for redirect configuration, pending
+  Vercel ownership verification, pre-deployment cutover gating, dual-host
+  attachment, and canonical URL promotion. Full check: 135 tests, typecheck,
+  and database/RLS validation pass.

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { ProviderError } from "@/lib/vigil/auth/errors";
+import { domainKind, relativeDnsName } from "@/lib/vigil/domains";
 import type { DeploymentProvider, DeploymentSnapshot, DomainConfigSnapshot, ProvisionSiteInput } from "./types";
 
 type VercelDeployment = {
@@ -67,16 +68,32 @@ export class VercelDeploymentProvider implements DeploymentProvider {
     return deployment ? normalizeDeployment(deployment) : null;
   }
 
-  async addDomain(siteExternalId: string, hostname: string) {
+  async addDomain(
+    siteExternalId: string,
+    hostname: string,
+    options: { redirect?: string; redirectStatusCode?: 301 | 302 | 307 | 308 } = {}
+  ) {
     let domain: VercelProjectDomain;
     try {
-      domain = await this.api(`/v10/projects/${encodeURIComponent(siteExternalId)}/domains`, { method: "POST", body: { name: hostname } }) as VercelProjectDomain;
+      domain = await this.api(`/v10/projects/${encodeURIComponent(siteExternalId)}/domains`, {
+        method: "POST",
+        body: { name: hostname, ...options },
+      }) as VercelProjectDomain;
     } catch (error) {
       // Adding a domain already attached to this project returns 400. Read it
       // back so retries remain idempotent; a genuine error still surfaces.
       const existing = await this.getProjectDomain(siteExternalId, hostname).catch(() => null);
       if (!existing) throw error;
       domain = existing;
+    }
+    // POST is idempotent only for a new domain. Re-apply redirect settings on
+    // retries so an existing apex cannot silently lose its canonical redirect.
+    if (options.redirect) {
+      const updated = await this.api(`/v9/projects/${encodeURIComponent(siteExternalId)}/domains/${encodeURIComponent(hostname)}`, {
+        method: "PATCH",
+        body: options,
+      }) as VercelProjectDomain;
+      domain = { ...domain, ...updated, verification: updated.verification ?? domain.verification };
     }
     return this.domainSnapshot(domain);
   }
@@ -86,7 +103,18 @@ export class VercelDeploymentProvider implements DeploymentProvider {
   }
 
   async getDomainConfig(siteExternalId: string, hostname: string) {
-    const domain = await this.getProjectDomain(siteExternalId, hostname);
+    let domain = await this.getProjectDomain(siteExternalId, hostname);
+    if (!domain.verified) {
+      try {
+        domain = await this.api(`/v9/projects/${encodeURIComponent(siteExternalId)}/domains/${encodeURIComponent(hostname)}/verify`, {
+          method: "POST",
+        }) as VercelProjectDomain;
+      } catch (error) {
+        // A 400 means the ownership/DNS challenge has not propagated yet.
+        // Preserve its required record and let the durable verify job retry.
+        if (!(error instanceof ProviderError) || error.status !== 400) throw error;
+      }
+    }
     const config = await this.api(`/v6/domains/${encodeURIComponent(hostname)}/config`, { allowNotFound: true }) as { misconfigured?: boolean } | null;
     const snapshot = this.domainSnapshot(domain);
     return { ...snapshot, misconfigured: config?.misconfigured ?? !domain.verified, sslReady: domain.verified && !(config?.misconfigured ?? true) };
@@ -108,9 +136,9 @@ export class VercelDeploymentProvider implements DeploymentProvider {
       }
     }
     if (records.length === 0) {
-      const subdomain = domain.name.split(".").length > 2;
+      const subdomain = domainKind(domain.name) === "subdomain";
       records.push(subdomain
-        ? { type: "CNAME", name: domain.name.split(".")[0], value: process.env.VIGIL_DNS_CNAME_TARGET || "cname.vercel-dns-0.com" }
+        ? { type: "CNAME", name: relativeDnsName(domain.name), value: process.env.VIGIL_DNS_CNAME_TARGET || "cname.vercel-dns-0.com" }
         : { type: "A", name: "@", value: process.env.VIGIL_DNS_APEX_A || "76.76.21.21" });
     }
     return { hostname: domain.name, requiredRecords: records, verified: domain.verified, misconfigured: !domain.verified, sslReady: false };

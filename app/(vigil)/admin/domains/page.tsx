@@ -34,7 +34,12 @@ export default async function DomainsPage() {
             <tr key={d.id}>
               <td className={tdClass}>
                 <div className="font-medium">{d.hostname}</div>
-                <div className="text-xs text-[color:var(--text-secondary)]">{titleCase(d.source)}{d.website ? ` · ${d.website.name}` : ""}</div>
+                <div className="text-xs text-[color:var(--text-secondary)]">
+                  {titleCase(d.source)}{d.registrar ? ` · ${titleCase(d.registrar)}` : ""}{d.website ? ` · ${d.website.name}` : ""}
+                </div>
+                {(d.metadata as { onboarding_delegate?: boolean } | null)?.onboarding_delegate ? (
+                  <div className="mt-1 text-xs font-medium text-[color:var(--status-warn)]">Assisted cutover requested</div>
+                ) : null}
               </td>
               <td className={tdClass}><Link href={`/admin/organizations/${d.organization?.id}`} className="underline">{d.organization?.name}</Link></td>
               <td className={tdClass}>

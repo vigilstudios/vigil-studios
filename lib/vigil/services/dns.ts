@@ -2,6 +2,7 @@ import "server-only";
 
 import { promises as dns } from "node:dns";
 import { registrarFromNameservers } from "@/lib/vigil/domain-guides";
+import { domainKind, registrableDomain, relativeDnsName } from "@/lib/vigil/domains";
 import type { RegistrarKey } from "@/lib/vigil/onboarding/brief";
 
 export type DnsRecord = { type: string; name: string; value: string };
@@ -18,16 +19,15 @@ export function platformDnsRecords(hostname: string): DnsRecord[] {
   const apexA = process.env.VIGIL_DNS_APEX_A?.trim();
   const cname = process.env.VIGIL_DNS_CNAME_TARGET?.trim();
   if (!apexA && !cname) return [];
-  const parts = hostname.split(".");
-  const isApex = parts.length === 2;
+  const isApex = domainKind(hostname) === "apex";
   const records: DnsRecord[] = [];
   if (isApex) {
     if (apexA) records.push({ type: "A", name: "@", value: apexA });
     if (cname) records.push({ type: "CNAME", name: "www", value: cname });
   } else if (cname) {
-    records.push({ type: "CNAME", name: parts[0], value: cname });
+    records.push({ type: "CNAME", name: relativeDnsName(hostname), value: cname });
   } else if (apexA) {
-    records.push({ type: "A", name: parts[0], value: apexA });
+    records.push({ type: "A", name: relativeDnsName(hostname), value: apexA });
   }
   return records;
 }
@@ -94,7 +94,7 @@ export async function checkDnsRecords(hostname: string, records: DnsRecord[], re
 
 /** Which registrar's default nameservers the domain uses, when it is one we know. */
 export async function detectRegistrar(hostname: string, resolver: NsResolver = dns): Promise<{ registrar: RegistrarKey | null; nameservers: string[] }> {
-  const apex = hostname.split(".").slice(-2).join(".");
+  const apex = registrableDomain(hostname);
   try {
     const nameservers = await resolver.resolveNs(apex);
     return { registrar: registrarFromNameservers(nameservers), nameservers };

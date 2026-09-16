@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { checkDnsRecords, detectRegistrar, platformDnsRecords, requiredRecords } from "../services/dns";
+import { managedDomainConfigs } from "../services/domain";
 
 const env = { ...process.env };
 afterEach(() => {
@@ -20,6 +21,10 @@ describe("platformDnsRecords", () => {
       { type: "CNAME", name: "www", value: "cname.vercel-dns.com" },
     ]);
     expect(platformDnsRecords("shop.example.com")).toEqual([{ type: "CNAME", name: "shop", value: "cname.vercel-dns.com" }]);
+    expect(platformDnsRecords("example.co.uk")).toEqual([
+      { type: "A", name: "@", value: "76.76.21.21" },
+      { type: "CNAME", name: "www", value: "cname.vercel-dns.com" },
+    ]);
   });
   it("prefers records stored on the domain row", () => {
     process.env.VIGIL_DNS_APEX_A = "1.1.1.1";
@@ -56,7 +61,24 @@ describe("detectRegistrar", () => {
     const r = await detectRegistrar("www.example.com", { resolveNs: async (h) => { seen.push(h); return ["ns1.domaincontrol.com"]; } });
     expect(seen).toEqual(["example.com"]);
     expect(r.registrar).toBe("godaddy");
+    await detectRegistrar("shop.example.co.uk", { resolveNs: async (h) => { seen.push(h); return []; } });
+    expect(seen.at(-1)).toBe("example.co.uk");
     const miss = await detectRegistrar("nx.example", { resolveNs: async () => Promise.reject(new Error("ENOTFOUND")) });
     expect(miss).toEqual({ registrar: null, nameservers: [] });
+  });
+});
+
+describe("managedDomainConfigs", () => {
+  it("uses www as canonical for an apex and redirects the bare domain", () => {
+    expect(managedDomainConfigs("example.com", "apex")).toEqual([
+      { hostname: "www.example.com", canonicalHostname: "www.example.com" },
+      { hostname: "example.com", canonicalHostname: "www.example.com", redirectTo: "www.example.com" },
+    ]);
+  });
+
+  it("leaves a customer-supplied subdomain unchanged", () => {
+    expect(managedDomainConfigs("shop.example.com", "subdomain")).toEqual([
+      { hostname: "shop.example.com", canonicalHostname: "shop.example.com" },
+    ]);
   });
 });

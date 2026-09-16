@@ -22,4 +22,32 @@ describe("VercelDeploymentProvider", () => {
     expect(result.url).toBe("https://vigil-acme.vercel.app");
     expect(JSON.parse(request.mock.calls[0][1].body)).toMatchObject({ project: "prj_1", target: "production", gitSource: { type: "github", repoId: 42, ref: "main" } });
   });
+
+  it("creates and reapplies a permanent domain redirect", async () => {
+    const request = vi.fn()
+      .mockResolvedValueOnce(json({ name: "example.com", verified: true }))
+      .mockResolvedValueOnce(json({ name: "example.com", verified: true, redirect: "www.example.com", redirectStatusCode: 308 }));
+    const provider = new VercelDeploymentProvider("vc_token", "team_1", request);
+    await provider.addDomain("prj_1", "example.com", { redirect: "www.example.com", redirectStatusCode: 308 });
+
+    expect(request).toHaveBeenCalledTimes(2);
+    expect((request.mock.calls[0][0] as URL).pathname).toBe("/v10/projects/prj_1/domains");
+    expect(JSON.parse(request.mock.calls[0][1].body)).toEqual({ name: "example.com", redirect: "www.example.com", redirectStatusCode: 308 });
+    expect((request.mock.calls[1][0] as URL).pathname).toBe("/v9/projects/prj_1/domains/example.com");
+    expect(request.mock.calls[1][1].method).toBe("PATCH");
+  });
+
+  it("asks Vercel to verify an ownership challenge and keeps polling when DNS is pending", async () => {
+    const request = vi.fn()
+      .mockResolvedValueOnce(json({ name: "example.com", verified: false, verification: [{ type: "TXT", domain: "_vercel.example.com", value: "vc-domain-verify=abc" }] }))
+      .mockResolvedValueOnce(json({ error: { message: "Domain verification failed" } }, 400))
+      .mockResolvedValueOnce(json({ misconfigured: true }));
+    const provider = new VercelDeploymentProvider("vc_token", "", request);
+    const config = await provider.getDomainConfig("prj_1", "example.com");
+
+    expect(config.verified).toBe(false);
+    expect(config.requiredRecords).toContainEqual({ type: "TXT", name: "_vercel.example.com", value: "vc-domain-verify=abc" });
+    expect((request.mock.calls[1][0] as URL).pathname).toBe("/v9/projects/prj_1/domains/example.com/verify");
+    expect(request.mock.calls[1][1].method).toBe("POST");
+  });
 });

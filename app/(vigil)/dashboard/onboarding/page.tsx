@@ -32,6 +32,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
         records: requiredRecords(domainRow.hostname, domainRow.verification),
         dnsOk: domainRow.dns_ok,
         statusReason: domainRow.status_reason,
+        cutoverReady: (domainRow.verification as { source?: string } | null)?.source === "provider" || domainRow.status === "connected",
       }
     : null;
 

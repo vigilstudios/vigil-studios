@@ -6,6 +6,47 @@ import { NotFoundError } from "@/lib/vigil/auth/errors";
 import { checkDnsRecords, platformDnsRecords, type DnsRecord } from "./dns";
 import { findExternalId, providerEnum } from "./provider-links";
 
+export type ManagedDomainConfig = {
+  hostname: string;
+  canonicalHostname: string;
+  redirectTo?: string;
+};
+
+/**
+ * Vercel recommends www as the canonical host for an apex domain. We attach
+ * both so either address works, and permanently redirect the apex to www.
+ * An explicitly supplied subdomain is left alone.
+ */
+export function managedDomainConfigs(hostname: string, kind: "apex" | "subdomain"): ManagedDomainConfig[] {
+  if (kind !== "apex") return [{ hostname, canonicalHostname: hostname }];
+  const canonicalHostname = `www.${hostname}`;
+  return [
+    { hostname: canonicalHostname, canonicalHostname },
+    { hostname, canonicalHostname, redirectTo: canonicalHostname },
+  ];
+}
+
+function uniqueRecords(configs: Awaited<ReturnType<DeploymentProvider["getDomainConfig"]>>[]): DnsRecord[] {
+  const seen = new Set<string>();
+  return configs.flatMap((config) => config.requiredRecords).filter((record) => {
+    const key = `${record.type}:${record.name}:${record.value}`.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+async function addManagedDomains(provider: DeploymentProvider, siteExternalId: string, hostname: string, kind: "apex" | "subdomain") {
+  const plan = managedDomainConfigs(hostname, kind);
+  const configs = [];
+  for (const item of plan) {
+    configs.push(await provider.addDomain(siteExternalId, item.hostname, item.redirectTo
+      ? { redirect: item.redirectTo, redirectStatusCode: 308 }
+      : undefined));
+  }
+  return { plan, configs };
+}
+
 /**
  * DomainService: guided connection for a customer-owned domain (Flow B).
  * Registration through a DomainProvider (Flow A) is a later phase; the
@@ -38,14 +79,16 @@ export async function beginDomainVerification(
     entityId: domain.website_id,
   });
   if (!siteExternalId) {
-    // No provider site yet (the build has not been published). The platform's
-    // standard records are still known, so the customer can do their part now;
-    // the provider's exact values replace them when the site exists.
+    // Keep the expected records for staff planning, but mark them as planned.
+    // The customer UI will not offer a cutover until a real provider site exists.
     const records = platformDnsRecords(domain.hostname);
     if (records.length > 0) {
       await admin
         .from("domains")
-        .update({ verification: { required_records: records, source: "platform" }, status_reason: null })
+        .update({
+          verification: { required_records: records, source: "platform" },
+          status_reason: "Your domain is recorded. Keep the current DNS unchanged until your new site is ready for cutover.",
+        })
         .eq("id", domainId);
     } else {
       await admin.from("domains").update({ status_reason: "The website is still being set up." }).eq("id", domainId);
@@ -53,16 +96,19 @@ export async function beginDomainVerification(
     return;
   }
 
-  const config = await provider.addDomain(siteExternalId, domain.hostname);
-  if (domain.status === "pending") assertTransition(domainTransitions, domain.status, "verifying", "domain");
+  const { plan, configs } = await addManagedDomains(provider, siteExternalId, domain.hostname, domain.kind);
+  const dnsOk = configs.every((config) => config.verified);
+  const sslOk = configs.every((config) => config.sslReady && !config.misconfigured);
+  const nextStatus = domain.status === "connected" || domain.status === "verifying" ? domain.status : "verifying";
+  if (nextStatus !== domain.status) assertTransition(domainTransitions, domain.status, nextStatus, "domain");
 
   const { error: updateError } = await admin
     .from("domains")
     .update({
-      status: domain.status === "pending" ? "verifying" : domain.status,
-      verification: { required_records: config.requiredRecords },
-      dns_ok: config.verified,
-      ssl_ok: config.sslReady,
+      status: nextStatus,
+      verification: { required_records: uniqueRecords(configs), source: "provider", hostnames: plan.map((item) => item.hostname), canonical_hostname: plan[0].canonicalHostname },
+      dns_ok: dnsOk,
+      ssl_ok: sslOk,
       last_checked_at: new Date().toISOString(),
       status_reason: null,
     })
@@ -107,27 +153,35 @@ export async function verifyDomain(
     return { connected: false, reason: "no_site", dnsOk };
   }
 
-  const config = await provider.getDomainConfig(siteExternalId, domain.hostname);
-  const connected = config.verified && config.sslReady && !config.misconfigured;
+  const plan = managedDomainConfigs(domain.hostname, domain.kind);
+  const configs = await Promise.all(plan.map((item) => provider.getDomainConfig(siteExternalId, item.hostname)));
+  const dnsOk = configs.every((config) => config.verified);
+  const sslOk = configs.every((config) => config.sslReady && !config.misconfigured);
+  const connected = dnsOk && sslOk;
   const now = new Date().toISOString();
 
   if (connected && domain.status !== "connected") {
+    if (domain.status !== "verifying") {
+      assertTransition(domainTransitions, domain.status, "verifying", "domain");
+      await admin.from("domains").update({ status: "verifying" }).eq("id", domainId).eq("status", domain.status);
+      domain.status = "verifying";
+    }
     assertTransition(domainTransitions, domain.status, "connected", "domain");
     await admin
       .from("domains")
       .update({ status: "connected", dns_ok: true, ssl_ok: true, verified_at: now, connected_at: now, last_checked_at: now, status_reason: null })
       .eq("id", domainId);
     if (domain.website_id) {
-      await admin.from("websites").update({ primary_domain_id: domain.id, live_url: `https://${domain.hostname}` }).eq("id", domain.website_id);
+      await admin.from("websites").update({ primary_domain_id: domain.id, live_url: `https://${plan[0].canonicalHostname}` }).eq("id", domain.website_id);
     }
   } else if (!connected) {
     await admin
       .from("domains")
       .update({
-        dns_ok: config.verified,
-        ssl_ok: config.sslReady,
+        dns_ok: dnsOk,
+        ssl_ok: sslOk,
         last_checked_at: now,
-        verification: { required_records: config.requiredRecords },
+        verification: { required_records: uniqueRecords(configs), source: "provider", hostnames: plan.map((item) => item.hostname), canonical_hostname: plan[0].canonicalHostname },
       })
       .eq("id", domainId);
   }

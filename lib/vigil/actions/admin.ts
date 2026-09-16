@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/vigil/audit";
 import { BILLING_PERIODS } from "@/lib/vigil/billing-periods";
+import { domainKind } from "@/lib/vigil/domains";
 import { ForbiddenError, NotFoundError, ValidationError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
 import { normalizeEmail } from "@/lib/vigil/auth/redirects";
 import { ACTIVE_ORG_COOKIE, requireAdminOrThrow, requireStaffOrThrow } from "@/lib/vigil/auth/session";
@@ -289,7 +290,7 @@ export async function addDomainForOrganization(orgId: string, formData: FormData
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("domains")
-      .insert({ organization_id: orgId, website_id: websiteId, hostname, kind: hostname.split(".").length > 2 ? "subdomain" : "apex", source: source as "customer_owned" | "purchased_via_vigil" | "vigil_managed" })
+      .insert({ organization_id: orgId, website_id: websiteId, hostname, kind: domainKind(hostname), source: source as "customer_owned" | "purchased_via_vigil" | "vigil_managed" })
       .select("id")
       .single();
     if (error) {

@@ -164,7 +164,11 @@ export interface DeploymentProvider {
   provisionSite(input: ProvisionSiteInput): Promise<{ externalId: string; previewUrl: string | null }>;
   triggerDeployment(siteExternalId: string, input: { environment: "production" | "preview"; ref?: string; repositoryId?: number | null }): Promise<DeploymentSnapshot>;
   getDeployment(externalId: string): Promise<DeploymentSnapshot | null>;
-  addDomain(siteExternalId: string, hostname: string): Promise<DomainConfigSnapshot>;
+  addDomain(
+    siteExternalId: string,
+    hostname: string,
+    options?: { redirect?: string; redirectStatusCode?: 301 | 302 | 307 | 308 }
+  ): Promise<DomainConfigSnapshot>;
   removeDomain(siteExternalId: string, hostname: string): Promise<void>;
   getDomainConfig(siteExternalId: string, hostname: string): Promise<DomainConfigSnapshot>;
   deleteSite(siteExternalId: string): Promise<void>;
