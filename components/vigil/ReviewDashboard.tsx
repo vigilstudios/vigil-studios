@@ -232,7 +232,7 @@ export function ReviewDashboard({ review, organizationId, actions }: ReviewDashb
         </section>
       ) : null}
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(18rem,0.75fr)]">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,2.4fr)_minmax(13rem,0.55fr)]">
         <PreviewPanel review={review} previewUrl={previewUrl} currentRound={currentRound} currentVersion={currentVersion} />
         <RoundSummary review={review} currentRound={currentRound} complete={reviewComplete} />
       </div>
@@ -296,7 +296,7 @@ function PreviewPanel({ review, previewUrl, currentRound, currentVersion }: { re
   return (
     <Panel title="Current preview" action={currentRound ? <StatusPill tone={reviewStatus(currentRound.status).tone}>{currentRound.title}</StatusPill> : undefined}>
       {previewUrl ? (
-        <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(13rem,0.34fr)] lg:items-start">
+        <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,3.46fr)_minmax(11rem,1fr)] lg:items-start">
           <ScaledPreview
             src={previewUrl}
             title={`${review?.projectName ?? "Website"} desktop preview`}
@@ -365,7 +365,7 @@ function ScaledPreview({ src, title, label, viewportWidth, viewportHeight, mobil
         <span>{label}</span>
         <span className="font-normal normal-case tracking-normal">{viewportWidth} × {viewportHeight}</span>
       </figcaption>
-      <div className={`overflow-hidden border border-[color:var(--border)] bg-white shadow-sm ${mobile ? "rounded-[1.5rem] border-[6px] border-[color:var(--text-primary)]" : "rounded-lg"}`}>
+      <div className={`overflow-hidden border border-[color:var(--border)] bg-white shadow-sm ${mobile ? "rounded-[1.5rem] ring-4 ring-[color:var(--text-primary)]" : "rounded-lg"}`}>
         <div ref={hostRef} className="relative w-full overflow-hidden" style={{ height: displayHeight || undefined, aspectRatio: hostWidth ? undefined : `${viewportWidth} / ${viewportHeight}` }}>
           {scale > 0 ? (
             <iframe
