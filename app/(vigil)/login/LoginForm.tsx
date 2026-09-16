@@ -11,7 +11,7 @@ import { FormError, FormSuccess, inputClass, labelClass } from "@/components/vig
  */
 export function LoginForm({ next, initialError, initialEmail = "" }: { next: string; initialError: string | null; initialEmail?: string }) {
   // Arriving with an email (from the checkout success page) means "send me a link".
-  const [mode, setMode] = useState<"password" | "link">(initialEmail ? "link" : "password");
+  const [mode, setMode] = useState<"password" | "link">(initialEmail || initialError ? "link" : "password");
   const [email, setEmail] = useState(initialEmail);
   const [linkState, linkAction, linkPending] = useActionState<SignInState, FormData>(signInWithEmail, null);
   const [pwState, pwAction, pwPending] = useActionState<PasswordSignInState, FormData>(signInWithPassword, null);

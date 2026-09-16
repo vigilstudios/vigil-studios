@@ -74,10 +74,18 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+  let { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+  // Welcome emails created before the generated-link fix labelled new-user
+  // `signup` tokens as `magiclink`. Keep those already-sent links usable.
+  if (error && type === "magiclink") {
+    ({ error } = await supabase.auth.verifyOtp({ type: "signup", token_hash: tokenHash }));
+  }
   if (error) {
     console.error("verifyOtp failed:", error.message);
-    return NextResponse.redirect(`${origin}/login?error=link_expired`, { status: 303 });
+    const login = new URL("/login", origin);
+    login.searchParams.set("error", "link_expired");
+    login.searchParams.set("next", next);
+    return NextResponse.redirect(login, { status: 303 });
   }
 
   const { error: inviteError } = await supabase.rpc("accept_pending_invites");

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { generatedConfirmationUrl } from "@/lib/vigil/auth/generated-link";
 import { NotFoundError, ProviderNotConfiguredError, ValidationError } from "@/lib/vigil/auth/errors";
 import { button, escapeHtml, layout, sendEmail, staffNotificationAddress } from "@/lib/vigil/email";
 import { billingPeriodByKey, type BillingPeriodKey } from "@/lib/vigil/billing-periods";
@@ -9,6 +10,7 @@ import { getBillingProvider } from "@/lib/vigil/providers/registry";
 import type { BillingCheckoutSnapshot, BillingProvider, CheckoutLineItem } from "@/lib/vigil/providers/types";
 import type { DbClient, Tables } from "@/lib/vigil/types";
 import type { Json } from "@/types/database.types";
+import { ONBOARDING_WELCOME_HREF } from "@/lib/vigil/onboarding/constants";
 import { buildPriceExternalId, planPriceExternalId } from "./catalog";
 import { applySubscriptionSnapshot } from "./billing";
 import { providerEnum, upsertProviderLink } from "./provider-links";
@@ -302,8 +304,7 @@ export async function signInLinkFor(email: string, appUrl: string): Promise<stri
     res = await auth.generateLink({ type: "invite", email, options: { redirectTo } });
   }
   if (res.error || !res.data?.properties?.hashed_token) return null;
-  const type = res.data.properties.verification_type === "invite" ? "invite" : "magiclink";
-  return `${appUrl}/auth/confirm?token_hash=${encodeURIComponent(res.data.properties.hashed_token)}&type=${type}&next=${encodeURIComponent("/dashboard")}`;
+  return generatedConfirmationUrl(appUrl, res.data.properties, ONBOARDING_WELCOME_HREF);
 }
 
 export async function sendWelcome(email: string, businessName: string, appUrl: string): Promise<{ sent: boolean; error?: string }> {
