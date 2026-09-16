@@ -58,7 +58,7 @@ export function SuccessPanel({ orderId, email, status, businessName, emailSent }
           </Link>
         ) : (
           <>
-            <p className="text-xs text-[color:var(--text-secondary)]">Check {email} — and the spam folder, just in case.</p>
+            <p className="text-xs text-[color:var(--text-secondary)]">Check {email}, and the spam folder just in case.</p>
             <div className="flex flex-wrap items-center justify-center gap-3">
               <button
                 type="button"

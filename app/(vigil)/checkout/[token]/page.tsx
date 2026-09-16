@@ -26,7 +26,7 @@ export default async function TokenCheckoutPage({ params, searchParams }: { para
   if (order.status !== "pending") {
     return (
       <CheckoutShell title="This order is already complete">
-        <p className="text-sm text-[color:var(--text-secondary)]">Thanks — payment for {order.business_name} has been received. <Link href="/login" className="underline">Sign in</Link> to continue your onboarding.</p>
+        <p className="text-sm text-[color:var(--text-secondary)]">Thanks, payment for {order.business_name} has been received. <Link href="/login" className="underline">Sign in</Link> to continue your onboarding.</p>
       </CheckoutShell>
     );
   }
@@ -39,7 +39,7 @@ export default async function TokenCheckoutPage({ params, searchParams }: { para
   return (
     <CheckoutShell
       title={`Let's build ${order.business_name}`}
-      subtitle="Vigil Studios prepared this order for you. Check the plan, confirm your details, and pay securely — your dashboard is ready the moment it goes through."
+      subtitle="Vigil Studios prepared this order for you. Check the plan, confirm your details, and pay securely. Your dashboard is ready the moment it goes through."
     >
       {canceled ? (
         <p className="mb-4 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface)] px-3 py-2 text-xs text-[color:var(--text-secondary)]">Payment was cancelled. Nothing was charged; you can try again below.</p>

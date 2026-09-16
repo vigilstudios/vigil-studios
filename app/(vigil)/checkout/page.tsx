@@ -24,7 +24,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
   return (
     <CheckoutShell
       title={projectKind === "professional" ? "Your Professional website" : template ? `Your ${template.industry} website` : "Start your Vigil website"}
-      subtitle={projectKind === "professional" ? "Up to eight fully custom primary pages, then a Vigil plan that hosts, secures and operates the site. After payment, book a kickoff call with our team or continue with Virtue's guided brief." : "One payment for the build, then a Vigil plan that hosts, secures and operates it — monthly, yearly or for three years. You'll be in your dashboard in a minute."}
+      subtitle={projectKind === "professional" ? "Up to eight fully custom primary pages, then a Vigil plan that hosts, secures and operates the site. After payment, book a kickoff call with our team or continue with Virtue's guided brief." : "One payment for the build, then a Vigil plan that hosts, secures and operates it monthly, yearly or for three years. You'll be in your dashboard in a minute."}
     >
       {params.canceled ? (
         <p className="mb-4 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface)] px-3 py-2 text-xs text-[color:var(--text-secondary)]">Payment was cancelled. Nothing was charged; pick up where you left off below.</p>

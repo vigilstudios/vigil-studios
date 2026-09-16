@@ -62,7 +62,7 @@ export default async function OrganizationsPage({ searchParams }: { searchParams
                   <td className={tdClass}>
                     {o.websites.length} ({o.websites.filter((w) => w.status === "live").length} live)
                   </td>
-                  <td className={tdClass}>{sub?.plan?.name ?? "—"}</td>
+                  <td className={tdClass}>{sub?.plan?.name ?? "No plan"}</td>
                   <td className={tdClass}>{formatDate(o.created_at)}</td>
                 </tr>
               );

@@ -58,9 +58,9 @@ export default async function BillingPage() {
                 label: "Price",
                 value: subscription.price ? describePrice(subscription.price, formatMoney) : "Set by agreement",
               },
-              { label: "Current period", value: subscription.current_period_end ? `Renews ${formatDate(subscription.current_period_end)}` : "—" },
+              { label: "Current period", value: subscription.current_period_end ? `Renews ${formatDate(subscription.current_period_end)}` : "Not available" },
               { label: "Cancels at period end", value: subscription.cancel_at_period_end ? "Yes" : "No" },
-              { label: "Trial ends", value: subscription.trial_end ? formatDate(subscription.trial_end) : "—" },
+              { label: "Trial ends", value: subscription.trial_end ? formatDate(subscription.trial_end) : "Not applicable" },
             ]}
           />
           {portalAvailable && canManage ? (
@@ -85,7 +85,7 @@ export default async function BillingPage() {
           items={(features ?? []).map((f) => {
             const e = ent.byCode.get(f.code);
             let value: string;
-            if (f.value_kind === "boolean") value = e?.value === true ? "Included" : "—";
+            if (f.value_kind === "boolean") value = e?.value === true ? "Included" : "Not included";
             else if (f.value_kind === "limit") value = typeof e?.value === "number" ? String(e.value) : "To be confirmed";
             else value = typeof e?.value === "string" ? titleCase(e.value) : "To be confirmed";
             return { label: f.name, value };

@@ -33,7 +33,7 @@ export default async function PlansPage() {
     const l = catalog.priceLinks.find((x) => x.entity_type === entityType && x.entity_id === entityId);
     if (!l) return null;
     const mode = (l.metadata as { mode?: string } | null)?.mode;
-    return mode && mode !== billingMode ? `${l.external_id} (${mode} mode — re-sync)` : l.external_id;
+    return mode && mode !== billingMode ? `${l.external_id} (${mode} mode; re-sync)` : l.external_id;
   };
   const billing = readProviderConfig().billing;
   const billingMode = getBillingProvider().mode ?? null;
@@ -75,7 +75,7 @@ export default async function PlansPage() {
                     <code className="text-[11px] text-[color:var(--text-secondary)]">{linkFor("build_price", b.id) ?? "not synced"}</code>
                   </ActionForm>
                 </td>
-                <td className={tdClass}>{b.amount_cents !== null ? formatMoney(b.amount_cents, b.currency) : "—"}</td>
+                <td className={tdClass}>{b.amount_cents !== null ? formatMoney(b.amount_cents, b.currency) : "Not set"}</td>
               </tr>
             ))}
           </tbody>
@@ -157,7 +157,7 @@ export default async function PlansPage() {
         <ul className="mt-2 divide-y divide-[color:var(--border)] text-sm">
           {(staff ?? []).map((s) => (
             <li key={s.user_id} className="flex items-center justify-between gap-2 py-2">
-              <span>{s.profile?.full_name ?? "—"} <span className="text-[color:var(--text-secondary)]">· {s.profile?.email} · {s.role}</span></span>
+              <span>{s.profile?.full_name ?? "Not provided"} <span className="text-[color:var(--text-secondary)]">· {s.profile?.email} · {s.role}</span></span>
               {s.user_id !== admin.user.id ? <ActionButton variant="danger" action={revokeStaff.bind(null, s.user_id)} confirmText="Remove staff access?">Revoke</ActionButton> : <span className="text-xs text-[color:var(--text-secondary)]">you</span>}
             </li>
           ))}

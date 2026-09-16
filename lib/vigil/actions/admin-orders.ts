@@ -93,7 +93,7 @@ export async function createCheckoutLink(_prev: CreateOrderState, formData: Form
       const res = await sendEmail({
         to: email,
         subject: `Your Vigil Studios order for ${v.business_name}`,
-        text: `Hi${v.contact_name ? ` ${v.contact_name}` : ""},\n\nHere is your secure checkout for ${v.business_name}: ${url}\n\nIt covers the website build and your ${plan.name} plan. The moment payment goes through, your Vigil dashboard is ready and a short onboarding tells us everything we need to start.\n\n— Vigil Studios`,
+        text: `Hi${v.contact_name ? ` ${v.contact_name}` : ""},\n\nHere is your secure checkout for ${v.business_name}: ${url}\n\nIt covers the website build and your ${plan.name} plan. The moment payment goes through, your Vigil dashboard is ready and a short onboarding tells us everything we need to start.\n\nVigil Studios`,
         html: layout(
           `Your order for ${v.business_name}`,
           `<p>Hi${v.contact_name ? ` ${escapeHtml(v.contact_name)}` : ""},</p><p>Here is your secure checkout for <b>${escapeHtml(v.business_name)}</b>. It covers the website build and your <b>${escapeHtml(plan.name)}</b> plan.</p>${button(url, "Review and pay securely")}<p>The moment payment goes through, your Vigil dashboard is ready and a short onboarding tells us everything we need to start building.</p>`

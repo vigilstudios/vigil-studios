@@ -139,7 +139,7 @@ export default async function OverviewPage() {
             </div>
             <div>
               <dt className="text-[color:var(--text-secondary)]">Last published</dt>
-              <dd className="font-medium">{lastPublish ? formatRelative(lastPublish.finished_at ?? lastPublish.created_at) : "—"}</dd>
+              <dd className="font-medium">{lastPublish ? formatRelative(lastPublish.finished_at ?? lastPublish.created_at) : "Not yet"}</dd>
             </div>
           </dl>
         </Panel>
@@ -304,7 +304,7 @@ export default async function OverviewPage() {
 function professionalReviewStatus(review: ProjectReviews | null): CustomerStatus | null {
   if (!review?.rounds.length || review.rounds.every((round) => round.status === "pending")) return null;
   if (review.rounds.length === 2 && review.rounds.every((round) => round.status === "approved")) {
-    return { label: "Review complete — both rounds approved", tone: "good", hint: "Your site is cleared for its production launch." };
+    return { label: "Review complete: both rounds approved", tone: "good", hint: "Your site is cleared for its production launch." };
   }
 
   const round = review.rounds.find((candidate) => candidate.status !== "approved");
@@ -313,14 +313,14 @@ function professionalReviewStatus(review: ProjectReviews | null): CustomerStatus
   const prefix = `Round ${round.number}: ${name}`;
   switch (round.status) {
     case "awaiting_feedback":
-      return { label: `${prefix} — ready for your review`, tone: "warn" };
+      return { label: `${prefix}: ready for your review`, tone: "warn" };
     case "changes_requested":
-      return { label: `${prefix} — changes requested`, tone: "info", hint: "Your consolidated notes are with the Vigil team." };
+      return { label: `${prefix}: changes requested`, tone: "info", hint: "Your consolidated notes are with the Vigil team." };
     case "revision_in_progress":
-      return { label: `${prefix} — revisions in progress`, tone: "info" };
+      return { label: `${prefix}: revisions in progress`, tone: "info" };
     case "pending":
-      return { label: `${prefix} — being prepared`, tone: "info" };
+      return { label: `${prefix}: being prepared`, tone: "info" };
     case "approved":
-      return { label: `${prefix} — approved`, tone: "good" };
+      return { label: `${prefix}: approved`, tone: "good" };
   }
 }

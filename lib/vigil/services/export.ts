@@ -188,14 +188,14 @@ export async function buildSiteExport(website: Website, ctx: ExportContext): Pro
 }
 
 function readme(website: Website, ctx: ExportContext, exportedAt: Date, files: SiteFile[]): string {
-  return `# ${website.name} — site export
+  return `# ${website.name}: site export
 
 Exported ${exportedAt.toUTCString()} for ${ctx.organizationName} by ${ctx.exportedBy}.
 
 ## What is in this archive
 
 ${files.map((f) => `- \`${f.path}\``).join("\n")}
-- \`manifest.json\` — what was exported and when
+- \`manifest.json\`: what was exported and when
 
 \`site/\` is your website as it is built and published: static files you can
 host anywhere. Open \`site/index.html\` in a browser to check it. \`content/\`
@@ -204,7 +204,7 @@ host anywhere. Open \`site/index.html\` in a browser to check it. \`content/\`
 ## What you own
 
 Under your service agreement with Vigil Studios you own the site-specific
-source code, content and assets produced for your project — that is what
+source code, content and assets produced for your project. That is what
 this archive contains. It does not include Vigil platform code, the shared
 template system as a reusable whole, deployment automation, provider
 credentials, or other Vigil intellectual property. Your domain is yours and

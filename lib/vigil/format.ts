@@ -1,22 +1,22 @@
 /** Small, locale-stable formatters shared by both dashboards. */
 export function formatDate(value: string | null | undefined, options: Intl.DateTimeFormatOptions = {}): string {
-  if (!value) return "—";
+  if (!value) return "Not available";
   const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "Not available";
   return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", ...options });
 }
 
 export function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "—";
+  if (!value) return "Not available";
   const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "Not available";
   return d.toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
 export function formatRelative(value: string | null | undefined): string {
-  if (!value) return "—";
+  if (!value) return "Not available";
   const then = new Date(value).getTime();
-  if (Number.isNaN(then)) return "—";
+  if (Number.isNaN(then)) return "Not available";
   const diff = Date.now() - then;
   const minutes = Math.round(diff / 60_000);
   if (Math.abs(minutes) < 1) return "just now";

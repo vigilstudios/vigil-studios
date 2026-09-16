@@ -70,7 +70,7 @@ export function BriefSummary({ brief, projectKind = "express", assets, domain, o
           <Row label="Function notes" value={strategy?.featureNotes} multiline />
           <Row label="Content" value={strategy?.contentStatus ? CONTENT_LABELS[strategy.contentStatus] : undefined} />
           {(strategy?.references ?? []).filter((reference) => reference.url || reference.notes).map((reference, index) => (
-            <Row key={`${reference.url}-${index}`} label={`Reference ${index + 1}`} value={[reference.url, reference.notes].filter(Boolean).join(" — ")} multiline />
+            <Row key={`${reference.url}-${index}`} label={`Reference ${index + 1}`} value={[reference.url, reference.notes].filter(Boolean).join(": ")} multiline />
           ))}
           <Row label="Final approver" value={[strategy?.approver.name, strategy?.approver.email].filter(Boolean).join(" · ")} />
           <Row label="Target timing" value={strategy?.targetLaunch} />
@@ -88,7 +88,7 @@ export function BriefSummary({ brief, projectKind = "express", assets, domain, o
                 <li key={it.id} className="flex justify-between gap-3 text-[13px]">
                   <span className="min-w-0">
                     {it.name}
-                    {it.description ? <span className="text-[color:var(--text-secondary)]"> — {it.description}</span> : null}
+                    {it.description ? <span className="text-[color:var(--text-secondary)]">: {it.description}</span> : null}
                   </span>
                   {it.price ? <span className="shrink-0 text-[color:var(--text-secondary)]">{it.price}</span> : null}
                 </li>
@@ -135,7 +135,7 @@ export function BriefSummary({ brief, projectKind = "express", assets, domain, o
           </>
         ) : null}
         {d?.answer === "need" ? <Row label="Preferred names" value={d.preferredNames.filter(Boolean).join(", ") || "None given"} /> : null}
-        {d?.answer === "unsure" ? <Row label="Answer" value="Not sure yet — the team will help" /> : null}
+        {d?.answer === "unsure" ? <Row label="Answer" value="Not sure yet. The team will help." /> : null}
       </Section>
 
     </div>

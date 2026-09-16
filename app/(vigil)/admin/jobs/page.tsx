@@ -48,7 +48,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
                 {j.error ? <div className="mt-1 max-w-xs text-xs text-[#ef4444]">{(j.error as { message?: string }).message}</div> : null}
                 {j.locked_by ? <div className="text-xs text-[color:var(--text-secondary)]">lock: {j.locked_by}</div> : null}
               </td>
-              <td className={tdClass}>{j.organization ? <Link href={`/admin/organizations/${j.organization.id}`} className="underline">{j.organization.name}</Link> : "—"}</td>
+              <td className={tdClass}>{j.organization ? <Link href={`/admin/organizations/${j.organization.id}`} className="underline">{j.organization.name}</Link> : "Unknown"}</td>
               <td className={tdClass}><StatusPill tone={tone(j.status)}>{j.status}</StatusPill></td>
               <td className={tdClass}>{j.attempts}/{j.max_attempts}</td>
               <td className={tdClass}>

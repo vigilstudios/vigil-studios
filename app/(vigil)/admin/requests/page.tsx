@@ -37,7 +37,7 @@ export default async function RequestsAdminPage() {
             <tr key={r.id}>
               <td className={tdClass}>
                 <div className="font-medium">{r.title}</div>
-                <div className="text-xs text-[color:var(--text-secondary)]">{r.requester?.full_name ?? r.requester?.email ?? "—"}{r.website ? ` · ${r.website.name}` : ""}</div>
+                <div className="text-xs text-[color:var(--text-secondary)]">{r.requester?.full_name ?? r.requester?.email ?? "Unknown requester"}{r.website ? ` · ${r.website.name}` : ""}</div>
                 {r.description ? <p className="mt-1 max-w-md whitespace-pre-wrap text-xs text-[color:var(--text-secondary)]">{r.description}</p> : null}
                 {signed[i].length > 0 ? (
                   <div className="mt-2">

@@ -62,7 +62,7 @@ export function BasicsStep({ initial, businessName, save, onSaveState, onBack, o
       </div>
 
       <fieldset>
-        <legend className="mb-1 block text-xs font-medium text-[color:var(--text-secondary)]">Address <span className="font-normal opacity-70">(optional — leave blank if you have no public location)</span></legend>
+        <legend className="mb-1 block text-xs font-medium text-[color:var(--text-secondary)]">Address <span className="font-normal opacity-70">(optional; leave blank if you have no public location)</span></legend>
         <div className="grid gap-3">
           <TextInput aria-label="Street address" placeholder="Street address" value={data.address.line1} onChange={(e) => setAddress("line1", e.target.value)} autoComplete="address-line1" />
           <TextInput aria-label="Suite, unit" placeholder="Suite, unit (optional)" value={data.address.line2} onChange={(e) => setAddress("line2", e.target.value)} autoComplete="address-line2" />

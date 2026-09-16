@@ -117,7 +117,7 @@ export default async function WebsiteDetailPage({ params }: { params: Promise<{ 
               <tr key={d.id}>
                 <td className={tdClass}>{d.hostname}</td>
                 <td className={tdClass}>{titleCase(d.status)}</td>
-                <td className={tdClass}>{d.dns_ok == null ? "—" : d.dns_ok ? "ok" : "bad"} / {d.ssl_ok ? "ok" : "—"}</td>
+                <td className={tdClass}>{d.dns_ok == null ? "Not checked" : d.dns_ok ? "ok" : "bad"} / {d.ssl_ok ? "ok" : "Not checked"}</td>
                 <td className={tdClass}>
                   <div className="flex gap-2">
                     <ActionButton action={enqueueDomainJob.bind(null, d.id, "domain.connect")}>Queue connect</ActionButton>

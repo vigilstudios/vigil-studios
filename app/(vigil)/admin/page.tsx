@@ -56,19 +56,19 @@ export default async function AdminOverviewPage() {
           ) : (
             <ul className="divide-y divide-[color:var(--border)]">
               {attention.jobs.map((j) => (
-                <AttentionRow key={`j${j.id}`} tone="bad" href="/admin/jobs?status=failed" title={`Job failed · ${j.kind}`} meta={`${j.organization?.name ?? "—"} · ${(j.error as { message?: string } | null)?.message ?? "no message"}`} when={j.updated_at} />
+                <AttentionRow key={`j${j.id}`} tone="bad" href="/admin/jobs?status=failed" title={`Job failed · ${j.kind}`} meta={`${j.organization?.name ?? "Unknown customer"} · ${(j.error as { message?: string } | null)?.message ?? "no message"}`} when={j.updated_at} />
               ))}
               {attention.websites.map((w) => (
-                <AttentionRow key={`w${w.id}`} tone="bad" href={`/admin/websites/${w.id}`} title={`Website ${titleCase(w.status)} · ${w.name}`} meta={`${w.organization?.name ?? "—"}${w.status_reason ? ` · ${w.status_reason}` : ""}`} when={w.updated_at} />
+                <AttentionRow key={`w${w.id}`} tone="bad" href={`/admin/websites/${w.id}`} title={`Website ${titleCase(w.status)} · ${w.name}`} meta={`${w.organization?.name ?? "Unknown customer"}${w.status_reason ? ` · ${w.status_reason}` : ""}`} when={w.updated_at} />
               ))}
               {attention.domains.map((d) => (
-                <AttentionRow key={`d${d.id}`} tone="warn" href="/admin/domains" title={`Domain ${titleCase(d.status)} · ${d.hostname}`} meta={`${d.organization?.name ?? "—"}${d.status_reason ? ` · ${d.status_reason}` : ""}`} when={d.updated_at} />
+                <AttentionRow key={`d${d.id}`} tone="warn" href="/admin/domains" title={`Domain ${titleCase(d.status)} · ${d.hostname}`} meta={`${d.organization?.name ?? "Unknown customer"}${d.status_reason ? ` · ${d.status_reason}` : ""}`} when={d.updated_at} />
               ))}
               {attention.subscriptions.map((s) => (
-                <AttentionRow key={`s${s.id}`} tone="warn" href="/admin/subscriptions" title={`Subscription ${titleCase(s.status)} · ${s.plan?.name ?? ""}`} meta={s.organization?.name ?? "—"} when={s.updated_at} />
+                <AttentionRow key={`s${s.id}`} tone="warn" href="/admin/subscriptions" title={`Subscription ${titleCase(s.status)} · ${s.plan?.name ?? ""}`} meta={s.organization?.name ?? "Unknown customer"} when={s.updated_at} />
               ))}
               {attention.requests.map((r) => (
-                <AttentionRow key={`r${r.id}`} tone="info" href="/admin/requests" title={`New request · ${r.title}`} meta={r.organization?.name ?? "—"} when={r.submitted_at} />
+                <AttentionRow key={`r${r.id}`} tone="info" href="/admin/requests" title={`New request · ${r.title}`} meta={r.organization?.name ?? "Unknown customer"} when={r.submitted_at} />
               ))}
             </ul>
           )}

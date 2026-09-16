@@ -36,7 +36,7 @@ export default async function WebsitesPage() {
                 <Link href={`/admin/organizations/${w.organization?.id}`} className="underline">{w.organization?.name}</Link>
               </td>
               <td className={tdClass}><StatusPill tone={tone(w.status)}>{titleCase(w.status)}</StatusPill></td>
-              <td className={tdClass}>{w.live_url ?? "—"}</td>
+              <td className={tdClass}>{w.live_url ?? "Not set"}</td>
               <td className={tdClass}>{formatRelative(w.updated_at)}</td>
             </tr>
           ))}

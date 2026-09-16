@@ -68,9 +68,9 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
           </div>
           <DefinitionList
             items={[
-              { label: "Legal name", value: org.legal_name ?? "—" },
-              { label: "Billing email", value: org.billing_email ?? "—" },
-              { label: "Phone", value: org.phone ?? "—" },
+              { label: "Legal name", value: org.legal_name ?? "Not provided" },
+              { label: "Billing email", value: org.billing_email ?? "Not provided" },
+              { label: "Phone", value: org.phone ?? "Not provided" },
               { label: "Time zone", value: org.timezone },
             ]}
           />
@@ -91,7 +91,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
             {members.map((m) => (
               <li key={m.user_id} className="flex items-center justify-between py-2">
                 <span>
-                  {m.profile?.full_name ?? "—"} <span className="text-[color:var(--text-secondary)]">· {m.profile?.email}</span>
+                  {m.profile?.full_name ?? "Not provided"} <span className="text-[color:var(--text-secondary)]">· {m.profile?.email}</span>
                 </span>
                 <span className="text-xs">{titleCase(m.role)}</span>
               </li>
@@ -136,7 +136,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                   <TransitionSelect current={p.status} options={projectTransitions[p.status]} action={setProjectStatus.bind(null, p.id)} />
                 </td>
                 <td className={tdClass}>
-                  {p.kind === "professional" ? <Link href={`/admin/reviews/${p.id}`} className="underline">Workspace</Link> : "—"}
+                  {p.kind === "professional" ? <Link href={`/admin/reviews/${p.id}`} className="underline">Workspace</Link> : "Not applicable"}
                 </td>
               </tr>
             ))}
@@ -163,7 +163,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                   <Link href={`/admin/websites/${w.id}`} className="underline">{w.name}</Link>
                 </td>
                 <td className={tdClass}>{titleCase(w.status)}</td>
-                <td className={tdClass}>{w.live_url ?? "—"}</td>
+                <td className={tdClass}>{w.live_url ?? "Not set"}</td>
                 <td className={tdClass}>
                   <TransitionSelect current={w.status} options={websiteTransitions[w.status]} action={setWebsiteStatus.bind(null, w.id)} withReason />
                 </td>
@@ -340,7 +340,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
               {briefAssets.map((a) => (
                 <li key={a.id}>
                   <a href={a.url ?? "#"} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-md border border-[color:var(--border)] px-2 py-1 text-xs hover:border-[color:var(--accent)]">
-                    <span className="uppercase text-[10px] text-[color:var(--text-secondary)]">{a.kind}</span> {a.file_name}{a.caption ? ` — ${a.caption}` : ""}
+                    <span className="uppercase text-[10px] text-[color:var(--text-secondary)]">{a.kind}</span> {a.file_name}{a.caption ? `: ${a.caption}` : ""}
                   </a>
                 </li>
               ))}
@@ -373,10 +373,10 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                 <tr key={o.id}>
                   <td className={tdClass}>{formatDateTime(o.created_at)}</td>
                   <td className={tdClass}>{titleCase(o.project_kind)}{o.template_slug ? ` · ${o.template_slug}` : ""}</td>
-                  <td className={tdClass}>{o.plan?.name ?? "—"}{o.plan_amount_cents != null ? ` · ${describePrice({ amount_cents: o.plan_amount_cents, currency: o.currency, interval: o.price?.interval ?? "month", interval_count: o.price?.interval_count ?? 1 }, formatMoney)}` : ""}</td>
+                  <td className={tdClass}>{o.plan?.name ?? "No plan"}{o.plan_amount_cents != null ? ` · ${describePrice({ amount_cents: o.plan_amount_cents, currency: o.currency, interval: o.price?.interval ?? "month", interval_count: o.price?.interval_count ?? 1 }, formatMoney)}` : ""}</td>
                   <td className={tdClass}>{o.build_amount_cents != null ? formatMoney(o.build_amount_cents, o.currency) : "Quoted"}</td>
                   <td className={tdClass}><StatusPill tone={o.status === "provisioned" ? "good" : o.status === "paid" ? "info" : o.status === "pending" ? "warn" : "neutral"}>{titleCase(o.status)}</StatusPill></td>
-                  <td className={tdClass}>{o.paid_at ? formatDateTime(o.paid_at) : "—"}</td>
+                  <td className={tdClass}>{o.paid_at ? formatDateTime(o.paid_at) : "Not paid"}</td>
                 </tr>
               ))}
             </tbody>

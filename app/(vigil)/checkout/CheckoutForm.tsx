@@ -102,7 +102,7 @@ export function CheckoutForm(p: CheckoutFormProps) {
                       {x.tagline ? <p className="text-xs text-[color:var(--text-secondary)]">{x.tagline}</p> : null}
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="text-sm font-semibold">{xp ? formatMoney(xp.amountCents, x.currency) : "—"}<span className="text-xs font-normal text-[color:var(--text-secondary)]">{xp ? (period.key === "month" ? "/mo" : ` ${period.every}`) : ""}</span></p>
+                      <p className="text-sm font-semibold">{xp ? formatMoney(xp.amountCents, x.currency) : "Unavailable"}<span className="text-xs font-normal text-[color:var(--text-secondary)]">{xp ? (period.key === "month" ? "/mo" : ` ${period.every}`) : ""}</span></p>
                       {xp && period.months > 1 ? <p className="text-[11px] text-[color:var(--text-secondary)]">{formatMoney(Math.round(xp.amountCents / period.months), x.currency)}/mo{xSave ? ` · save ${xSave}%` : ""}</p> : null}
                     </div>
                   </div>
@@ -166,7 +166,7 @@ export function CheckoutForm(p: CheckoutFormProps) {
           ) : null}
           <div className="flex justify-between gap-3">
             <dt className="text-[color:var(--text-secondary)]">{plan ? `${plan.name} · ${period.label.toLowerCase()}` : "Vigil plan"}</dt>
-            <dd className="font-medium">{price && plan ? formatMoney(price.amountCents, plan.currency) : "—"}</dd>
+            <dd className="font-medium">{price && plan ? formatMoney(price.amountCents, plan.currency) : "Unavailable"}</dd>
           </div>
           <div className="flex justify-between gap-3 border-t border-[color:var(--border)] pt-2 text-base">
             <dt className="font-semibold">Due today</dt>

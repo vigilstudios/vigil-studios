@@ -378,7 +378,7 @@ function RoundSummary({ review, currentRound, complete }: { review: CustomerRevi
           <StatusLine tone={reviewStatus(currentRound.status).tone} label={reviewStatus(currentRound.status).label} hint={statusHint(currentRound.status)} />
           <dl className="divide-y divide-[color:var(--border)] border-y border-[color:var(--border)] text-xs">
             <div className="flex items-center justify-between gap-3 py-2.5"><dt className="text-[color:var(--text-secondary)]">Current version</dt><dd className="font-medium">{currentRound.currentVersion ? `Version ${currentRound.currentVersion.versionNumber}` : "Not posted"}</dd></div>
-            <div className="flex items-center justify-between gap-3 py-2.5"><dt className="text-[color:var(--text-secondary)]">Versions in this round</dt><dd className="font-medium">{currentRound.versions.length || "—"}</dd></div>
+            <div className="flex items-center justify-between gap-3 py-2.5"><dt className="text-[color:var(--text-secondary)]">Versions in this round</dt><dd className="font-medium">{currentRound.versions.length || "None"}</dd></div>
             <div className="flex items-center justify-between gap-3 py-2.5"><dt className="text-[color:var(--text-secondary)]">Review allowance</dt><dd className="font-medium">Two rounds included</dd></div>
           </dl>
           {currentRound.versions.length > 1 ? (

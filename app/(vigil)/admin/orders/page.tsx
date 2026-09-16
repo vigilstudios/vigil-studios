@@ -54,7 +54,7 @@ export default async function OrdersPage() {
               </td>
               <td className={tdClass}>
                 <div>{titleCase(o.project_kind)}{o.template_slug ? ` · ${o.template_slug}` : ""}</div>
-                <div className="text-xs text-[color:var(--text-secondary)]">{o.plan?.name ?? "—"}</div>
+                <div className="text-xs text-[color:var(--text-secondary)]">{o.plan?.name ?? "No plan"}</div>
                 {o.status === "pending" && appUrl ? (
                   <code className="mt-1 block max-w-[18rem] truncate text-[10px] text-[color:var(--text-secondary)]" title={`${appUrl}/checkout/${o.checkout_token}`}>{`${appUrl}/checkout/${o.checkout_token}`}</code>
                 ) : null}

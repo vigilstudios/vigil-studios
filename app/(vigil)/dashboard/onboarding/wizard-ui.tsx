@@ -45,7 +45,7 @@ export type SaveState = "idle" | "saving" | "saved" | "error";
 export function SaveIndicator({ state }: { state: SaveState }) {
   return (
     <span className="text-[11px] text-[color:var(--text-secondary)]" aria-live="polite">
-      {state === "saving" ? "Saving…" : state === "saved" ? "Saved" : state === "error" ? "Could not save — check your connection" : ""}
+      {state === "saving" ? "Saving…" : state === "saved" ? "Saved" : state === "error" ? "Could not save. Check your connection." : ""}
     </span>
   );
 }

@@ -100,7 +100,7 @@ export async function startCheckout(admin: DbClient, req: CheckoutRequest, provi
 
   const lineItems: CheckoutLineItem[] = [{ priceExternalId: planExternal }];
   if (buildExternal) lineItems.push({ priceExternalId: buildExternal });
-  else if (buildAmount !== null && buildAmount > 0) lineItems.push({ adHoc: { name: `${build.name} — ${req.businessName.trim()}`, description: "One-time website build", amountCents: buildAmount, currency: planPrice.currency } });
+  else if (buildAmount !== null && buildAmount > 0) lineItems.push({ adHoc: { name: `${build.name}: ${req.businessName.trim()}`, description: "One-time website build", amountCents: buildAmount, currency: planPrice.currency } });
 
   let session: { url: string; externalId: string };
   try {
@@ -311,7 +311,7 @@ export async function sendWelcome(email: string, businessName: string, appUrl: s
   const cta = link ?? `${appUrl}/login`;
   return sendEmail({
     to: email,
-    subject: `Welcome to Vigil — let's build ${businessName}`,
+    subject: `Welcome to Vigil: let's build ${businessName}`,
     text: `Thanks for choosing Vigil Studios. Your account is ready.\n\nSign in here to tell us about ${businessName} so we can start building:\n${cta}\n\nThe link signs you in directly; no password needed.`,
     html: layout(
       `Welcome to Vigil`,

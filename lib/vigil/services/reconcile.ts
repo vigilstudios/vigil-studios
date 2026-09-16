@@ -146,7 +146,7 @@ export async function reconcileOrders(admin: DbClient, options: ReconcileOptions
 
   // 5. One email for everything that still needs a person.
   if (toAlert.length > 0) {
-    const lines = toAlert.map((o) => `${o.business_name} <${o.email}> — order ${o.id}${o.paid_at ? `, paid ${o.paid_at}` : ", welcome email failed"}`);
+    const lines = toAlert.map((o) => `${o.business_name} <${o.email}>: order ${o.id}${o.paid_at ? `, paid ${o.paid_at}` : ", welcome email failed"}`);
     const res = await sendEmail({
       to: staffNotificationAddress(),
       subject: `Needs attention: ${toAlert.length} order${toAlert.length === 1 ? "" : "s"} need a person`,

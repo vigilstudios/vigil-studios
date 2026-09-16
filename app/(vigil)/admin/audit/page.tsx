@@ -38,10 +38,10 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
                 <div className="text-xs text-[color:var(--text-secondary)]">{e.entity_type}{e.entity_id ? ` ${e.entity_id.slice(0, 8)}` : ""}</div>
               </td>
               <td className={tdClass}>
-                <div>{e.actor?.full_name ?? e.actor?.email ?? "—"}</div>
+                <div>{e.actor?.full_name ?? e.actor?.email ?? "System"}</div>
                 <div className="text-xs text-[color:var(--text-secondary)]">{e.actor_kind}</div>
               </td>
-              <td className={tdClass}>{e.organization ? <Link href={`/admin/organizations/${e.organization.id}`} className="underline">{e.organization.name}</Link> : "—"}</td>
+              <td className={tdClass}>{e.organization ? <Link href={`/admin/organizations/${e.organization.id}`} className="underline">{e.organization.name}</Link> : "System"}</td>
               <td className={tdClass}>
                 <pre className="max-w-md overflow-x-auto whitespace-pre-wrap text-xs text-[color:var(--text-secondary)]">
                   {e.before ? `− ${JSON.stringify(e.before)}\n` : ""}

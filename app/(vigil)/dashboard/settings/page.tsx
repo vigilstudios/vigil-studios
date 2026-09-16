@@ -56,7 +56,7 @@ export default async function SettingsPage() {
               {members.map((m) => (
                 <tr key={m.user_id}>
                   <td className={tdClass}>
-                    <div className="font-medium">{m.profile?.full_name ?? "—"}</div>
+                    <div className="font-medium">{m.profile?.full_name ?? "Not provided"}</div>
                     <div className="text-xs text-[color:var(--text-secondary)]">{m.profile?.email}</div>
                   </td>
                   <td className={tdClass}>{titleCase(m.role)}</td>

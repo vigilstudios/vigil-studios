@@ -350,7 +350,7 @@ export async function submitIntake(projectId: string): Promise<ActionResult<{ co
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.vigilstudios.co";
     const domainLine =
       brief.domain?.answer === "own"
-        ? `Owns ${brief.domain.hostname} (${REGISTRAR_GUIDES[brief.domain.registrar ?? "other"].name})${brief.domain.delegate ? " — asked Vigil to make the DNS changes" : ""}${brief.domain.later ? " — will connect it later" : ""}`
+        ? `Owns ${brief.domain.hostname} (${REGISTRAR_GUIDES[brief.domain.registrar ?? "other"].name})${brief.domain.delegate ? "; asked Vigil to make the DNS changes" : ""}${brief.domain.later ? "; will connect it later" : ""}`
         : brief.domain?.answer === "need"
           ? `Needs a domain. Preferred: ${brief.domain.preferredNames.filter(Boolean).join(", ") || "none given"}`
           : "Domain: not decided yet";

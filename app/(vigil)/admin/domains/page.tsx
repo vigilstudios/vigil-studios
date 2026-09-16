@@ -46,7 +46,7 @@ export default async function DomainsPage() {
                 <StatusPill tone={tone(d.status)}>{titleCase(d.status)}</StatusPill>
                 {d.status_reason ? <div className="mt-1 text-xs text-[color:var(--text-secondary)]">{d.status_reason}</div> : null}
               </td>
-              <td className={tdClass}>{d.expires_at ? formatDate(d.expires_at) : "—"}</td>
+              <td className={tdClass}>{d.expires_at ? formatDate(d.expires_at) : "Not available"}</td>
               <td className={tdClass}>{formatRelative(d.last_checked_at)}</td>
               <td className={tdClass}>
                 <div className="flex flex-col gap-2">

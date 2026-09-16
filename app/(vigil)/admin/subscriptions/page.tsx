@@ -35,7 +35,7 @@ export default async function SubscriptionsPage() {
             <tr key={s.id}>
               <td className={tdClass}><Link href={`/admin/organizations/${s.organization?.id}`} className="underline">{s.organization?.name}</Link></td>
               <td className={tdClass}>{s.plan?.name}</td>
-              <td className={tdClass}>{s.price ? describePrice(s.price, formatMoney) : "—"}</td>
+              <td className={tdClass}>{s.price ? describePrice(s.price, formatMoney) : "Not set"}</td>
               <td className={tdClass}>
                 <StatusPill tone={tone(s.status)}>{titleCase(s.status)}</StatusPill>
                 {s.cancel_at_period_end ? <div className="text-xs text-[color:var(--text-secondary)]">cancels at period end</div> : null}
