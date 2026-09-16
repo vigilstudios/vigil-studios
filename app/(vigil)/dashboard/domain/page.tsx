@@ -32,6 +32,14 @@ export default async function DomainPage() {
             const reachable = (domain.verification as { connection_reachable?: boolean } | null)?.connection_reachable ?? null;
             const status = describeDomainStatus(domain.status, { dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable });
             const records = requiredRecords(domain.hostname, domain.verification);
+            const linkedWebsite = websites.find((website) => website.id === domain.website_id);
+            // Older previews were deployed before preview completion attached
+            // the domain to the provider. Do not keep those customers locked
+            // out of the DNS guide when the site is visibly ready to review.
+            const cutoverReady =
+              (domain.verification as { source?: string } | null)?.source === "provider" ||
+              domain.status === "connected" ||
+              Boolean(linkedWebsite?.preview_url);
             return (
               <Card key={domain.id}>
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -66,7 +74,7 @@ export default async function DomainPage() {
                         sslOk: domain.ssl_ok,
                         reachable,
                         statusReason: domain.status_reason,
-                        cutoverReady: (domain.verification as { source?: string } | null)?.source === "provider",
+                        cutoverReady,
                       }}
                       initialRegistrar={briefDomain?.domainId === domain.id && briefDomain.registrar ? briefDomain.registrar : "other"}
                       canManage={canManage}

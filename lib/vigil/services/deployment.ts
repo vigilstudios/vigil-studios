@@ -145,9 +145,15 @@ export async function deployWebsite(
       .eq("id", websiteId);
   }
 
-  const domainIds = environment === "production" && snapshot.status === "ready"
+  // A ready preview is the point at which the customer can safely prepare
+  // DNS. Attach the domain now so the dashboard receives the provider's exact
+  // records instead of waiting until the production launch.
+  const attachedDomainIds = snapshot.status === "ready"
     ? await attachWebsiteDomains(admin, websiteId, provider)
     : [];
+  // DNS instructions are prepared for previews, but background verification
+  // begins after the customer confirms that they changed the records.
+  const domainIds = environment === "production" ? attachedDomainIds : [];
 
   return { deploymentId: deployment.id, status: snapshot.status, domainIds };
 }
@@ -187,6 +193,10 @@ export async function syncDeployment(
     domainIds = await attachWebsiteDomains(admin, deployment.website_id, provider);
   } else if (snapshot.status === "error") {
     await admin.from("websites").update({ status_reason: snapshot.error?.message ?? "The last publish did not complete." }).eq("id", deployment.website_id);
+  }
+  if (snapshot.status === "ready") {
+    const attachedDomainIds = await attachWebsiteDomains(admin, deployment.website_id, provider);
+    if (deployment.environment === "production") domainIds = attachedDomainIds;
   }
   return { status: snapshot.status, pending: snapshot.status === "queued" || snapshot.status === "building", domainIds };
 }

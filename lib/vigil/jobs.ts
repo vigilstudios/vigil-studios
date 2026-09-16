@@ -3,6 +3,7 @@ import { escapeHtml, layout, sendEmail, staffNotificationAddress } from "@/lib/v
 import type { DbClient, ProvisioningJob } from "@/lib/vigil/types";
 import type { Json } from "@/types/database.types";
 import { deployWebsite, provisionWebsite, syncDeployment } from "./services/deployment";
+import { notifyCustomerDeployment } from "./services/deployment-notifications";
 import { beginDomainVerification, verifyDomain } from "./services/domain";
 import { provisionOrder } from "./services/orders";
 import { provisionWebsiteRepository } from "./services/repository";
@@ -20,6 +21,7 @@ export const JOB_KINDS = {
   websiteDeploy: "website.deploy",
   websiteRepository: "website.repository",
   deploymentSync: "website.deployment.sync",
+  deploymentNotify: "website.deployment.notify",
   domainConnect: "domain.connect",
   domainVerify: "domain.verify",
   orderProvision: "order.provision",
@@ -80,6 +82,9 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
         createdBy: job.created_by,
       });
     }
+    if (result.status === "ready") {
+      await enqueueDeploymentNotification(admin, job, result.deploymentId);
+    }
     return { deployment_id: result.deploymentId };
   },
   [JOB_KINDS.websiteRepository]: async ({ admin, job }) => {
@@ -104,7 +109,15 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
         requeueFailed: true,
       });
     }
+    if (result.status === "ready") {
+      await enqueueDeploymentNotification(admin, job, deploymentId);
+    }
     return { deployment_id: deploymentId, status: result.status };
+  },
+  [JOB_KINDS.deploymentNotify]: async ({ admin, job }) => {
+    const deploymentId = (job.payload as { deployment_id?: string } | null)?.deployment_id;
+    if (!deploymentId) throw new Error("website.deployment.notify requires payload.deployment_id");
+    return notifyCustomerDeployment(admin, deploymentId);
   },
   [JOB_KINDS.domainConnect]: async ({ admin, job }) => {
     if (!job.domain_id) throw new Error("domain.connect requires domain_id");
@@ -143,6 +156,19 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
     return { connected: true };
   },
 };
+
+async function enqueueDeploymentNotification(admin: DbClient, job: ProvisioningJob, deploymentId: string): Promise<void> {
+  await enqueueJob(admin, {
+    kind: JOB_KINDS.deploymentNotify,
+    idempotencyKey: `website.deployment.notify:${deploymentId}`,
+    organizationId: job.organization_id,
+    websiteId: job.website_id,
+    payload: { deployment_id: deploymentId },
+    maxAttempts: 8,
+    createdBy: job.created_by,
+    requeueFailed: true,
+  });
+}
 
 for (const [kind, handler] of Object.entries(builtInHandlers)) {
   registerJobHandler(kind, handler);
