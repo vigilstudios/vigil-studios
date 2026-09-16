@@ -440,7 +440,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                   variant="danger"
                   action={deleteOrganizationPermanently.bind(null, org.id)}
                   redirectTo="/admin/organizations?archived=1"
-                  confirmText={`Permanently delete ${org.name}, including its GitHub repositories, Vercel projects, uploaded files, and database records? This cannot be undone.`}
+                  confirmText={`Permanently delete ${org.name}, including its GitHub repositories, Vercel projects, uploaded files, database records, and login accounts not used by another organization? This cannot be undone.`}
                 >
                   Permanently delete
                 </ActionButton>

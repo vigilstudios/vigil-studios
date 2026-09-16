@@ -78,7 +78,14 @@ export async function permanentlyDeleteCustomer(organizationId: string, actorId:
     : { data: [], error: null };
   if (linksError) throw linksError;
 
-  const deleted = { vercelProjects: [] as string[], githubRepositories: [] as string[], storageObjects: 0 };
+  const deleted = {
+    vercelProjects: [] as string[],
+    githubRepositories: [] as string[],
+    storageObjects: 0,
+    authUsersDeleted: [] as string[],
+    authUsersRetained: [] as string[],
+    authUserErrors: [] as { userId: string; message: string }[],
+  };
   const deployment = dependencies.deployment ?? getDeploymentProvider();
   const github = dependencies.github ?? new GitHubRepositoryProvider();
   if (links?.some((link) => link.provider === "vercel" && link.resource_kind === "site") && deployment.name !== "vercel") {
@@ -124,5 +131,27 @@ export async function permanentlyDeleteCustomer(organizationId: string, actorId:
   };
   const { error: purgeError } = await admin.schema("vigil").rpc("purge_organization", { p_organization_id: organizationId, p_snapshot: snapshot, p_cleanup: deleted, p_deleted_by: actorId });
   if (purgeError) throw purgeError;
+
+  // Auth users are global, not tenant-owned. Remove only identities that are
+  // now orphaned; a shared organization member or staff account must survive.
+  for (const member of org.organization_members) {
+    const [{ count: membershipCount, error: membershipError }, { data: staff, error: staffError }] = await Promise.all([
+      admin.from("organization_members").select("*", { count: "exact", head: true }).eq("user_id", member.user_id),
+      admin.from("staff_members").select("user_id").eq("user_id", member.user_id).maybeSingle(),
+    ]);
+    if (membershipError || staffError) {
+      deleted.authUserErrors.push({ userId: member.user_id, message: membershipError?.message ?? staffError?.message ?? "Could not verify account ownership." });
+      continue;
+    }
+    if ((membershipCount ?? 0) > 0 || staff) {
+      deleted.authUsersRetained.push(member.user_id);
+      continue;
+    }
+    const { error: authError } = await admin.auth.admin.deleteUser(member.user_id);
+    if (authError) deleted.authUserErrors.push({ userId: member.user_id, message: authError.message });
+    else deleted.authUsersDeleted.push(member.user_id);
+  }
+  const { error: ledgerError } = await admin.from("customer_deletion_log").update({ cleanup: deleted }).eq("former_organization_id", organizationId);
+  if (ledgerError) console.error("customer deletion ledger cleanup update failed:", ledgerError.message);
   return deleted;
 }

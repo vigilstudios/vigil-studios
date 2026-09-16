@@ -75,10 +75,11 @@ describe("customer retirement billing safety", () => {
   });
 });
 
-function resultBuilder(data: unknown) {
-  const result = { data, error: null };
+function resultBuilder(data: unknown, count: number | null = null) {
+  const result = { data, error: null, count };
   const builder = {
     select: () => builder,
+    update: () => builder,
     eq: () => builder,
     in: () => builder,
     maybeSingle: async () => result,
@@ -97,7 +98,7 @@ describe("customer permanent deletion orchestration", () => {
         { id: "website_1", name: "Site", repository_ref: "github:vigil/client-test" },
         { id: "website_2", name: "Legacy", repository_ref: "clients/legacy" },
       ],
-      subscriptions: [{ id: "sub_db", status: "canceled" }], organization_members: [],
+      subscriptions: [{ id: "sub_db", status: "canceled" }], organization_members: [{ user_id: "user_orphan", role: "owner" }],
     };
     const links = [
       { provider: "vercel", resource_kind: "site", external_id: "prj_1", entity_id: "website_1", metadata: {} },
@@ -112,10 +113,12 @@ describe("customer permanent deletion orchestration", () => {
     };
     const rpc = vi.fn(async () => { events.push("database"); return { data: null, error: null }; });
     const remove = vi.fn(async () => { events.push("storage"); return { data: [], error: null }; });
+    const deleteUser = vi.fn(async () => { events.push("auth"); return { data: {}, error: null }; });
     const admin = {
-      from: vi.fn((table: string) => resultBuilder(tables[table])),
+      from: vi.fn((table: string) => table === "organization_members" ? resultBuilder(null, 0) : table === "staff_members" ? resultBuilder(null) : resultBuilder(tables[table])),
       storage: { from: () => ({ remove }) },
       schema: () => ({ rpc }),
+      auth: { admin: { deleteUser } },
     } as unknown as AdminSupabaseClient;
     const deployment = { name: "vercel", deleteSite: vi.fn(async () => { events.push("vercel"); }) } as unknown as DeploymentProvider;
     const github = { deleteRepository: vi.fn(async () => { events.push("github"); }) };
@@ -126,8 +129,9 @@ describe("customer permanent deletion orchestration", () => {
     expect(github.deleteRepository).toHaveBeenCalledTimes(1);
     expect(github.deleteRepository).toHaveBeenCalledWith("vigil/client-test");
     expect(remove).toHaveBeenCalledWith(["org_1/project_1/logo.png"]);
+    expect(deleteUser).toHaveBeenCalledWith("user_orphan");
     expect(rpc).toHaveBeenCalledWith("purge_organization", expect.objectContaining({ p_organization_id: "org_1", p_deleted_by: "staff_1" }));
-    expect(events).toEqual(["vercel", "github", "storage", "database"]);
+    expect(events).toEqual(["vercel", "github", "storage", "database", "auth"]);
   });
 
   it("never purges database rows when an external cleanup fails", async () => {
