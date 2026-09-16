@@ -217,24 +217,9 @@ export function ReviewDashboard({ review, organizationId, actions }: ReviewDashb
 
       <RoundProgress review={review} />
 
-      {review && currentRound && (currentRound.status === "awaiting_customer" || currentRound.status === "awaiting_feedback") ? (
-        <section className="rounded-xl border border-[color:var(--accent)]/40 bg-[color-mix(in_srgb,var(--accent)_8%,var(--bg-surface))] p-4 sm:p-5" aria-labelledby="review-ready-heading">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex gap-3">
-              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[color:var(--accent)] text-[color:var(--bg-primary)]"><CheckCircle2 className="h-4 w-4" aria-hidden /></span>
-              <div>
-                <h2 id="review-ready-heading" className="text-sm font-semibold">Your review is ready</h2>
-                <p className="mt-1 text-xs leading-5 text-[color:var(--text-secondary)]">{statusHint(currentRound.status)}</p>
-              </div>
-            </div>
-            {currentVersion ? <p className="shrink-0 text-xs font-medium text-[color:var(--text-secondary)]">Version {currentVersion.versionNumber}</p> : null}
-          </div>
-        </section>
-      ) : null}
-
       <div className="grid gap-4 xl:grid-cols-[minmax(0,2.4fr)_minmax(13rem,0.55fr)]">
         <PreviewPanel review={review} previewUrl={previewUrl} currentRound={currentRound} currentVersion={currentVersion} />
-        <RoundSummary review={review} currentRound={currentRound} complete={reviewComplete} />
+        <HistoryPanel review={review} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
@@ -256,7 +241,7 @@ export function ReviewDashboard({ review, organizationId, actions }: ReviewDashb
           onFiles={(next) => setFiles((current) => [...current, ...next].slice(0, MAX_ATTACHMENTS_PER_REQUEST + 1))}
           onRemoveFile={(index) => setFiles((current) => current.filter((_, i) => i !== index))}
         />
-        <HistoryPanel review={review} />
+        <RoundSummary review={review} currentRound={currentRound} complete={reviewComplete} />
       </div>
     </div>
   );
@@ -365,7 +350,7 @@ function ScaledPreview({ src, title, label, viewportWidth, viewportHeight, mobil
         <span>{label}</span>
         <span className="font-normal normal-case tracking-normal">{viewportWidth} × {viewportHeight}</span>
       </figcaption>
-      <div className={`overflow-hidden border border-[color:var(--border)] bg-white shadow-sm ${mobile ? "rounded-[1.5rem] ring-4 ring-[color:var(--text-primary)]" : "rounded-lg"}`}>
+      <div className={`overflow-hidden border border-[color:var(--border)] bg-white shadow-sm ${mobile ? "rounded-[1.5rem]" : "rounded-lg"}`}>
         <div ref={hostRef} className="relative w-full overflow-hidden" style={{ height: displayHeight || undefined, aspectRatio: hostWidth ? undefined : `${viewportWidth} / ${viewportHeight}` }}>
           {scale > 0 ? (
             <iframe
@@ -443,17 +428,28 @@ function DecisionPanel({ formRef, review, currentRound, decision, feedback, file
   return (
     <Panel title="Your decision">
       <form ref={formRef} onSubmit={onSubmit} className="space-y-4" noValidate>
+        {canDecide ? (
+          <div className="flex items-start gap-2.5 rounded-lg border border-[color:var(--accent)]/35 bg-[color-mix(in_srgb,var(--accent)_7%,transparent)] px-3 py-2.5">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--accent)] text-[color:var(--bg-primary)]">
+              <CheckCircle2 className="h-3 w-3" aria-hidden />
+            </span>
+            <div>
+              <p className="text-xs font-semibold">Your review is ready</p>
+              <p className="mt-0.5 text-[11px] leading-4 text-[color:var(--text-secondary)]">Review the current version, then choose one clear outcome below.</p>
+            </div>
+          </div>
+        ) : null}
         <div>
           <p className="text-sm font-semibold">Does this direction feel right?</p>
           <p className="mt-1 text-xs leading-5 text-[color:var(--text-secondary)]">Choose one clear outcome. If you request changes, keep every note in one list so nothing gets lost between messages.</p>
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
-          <button type="button" disabled={!canDecide || busy} onClick={() => onDecision("approve")} className={`flex min-h-16 items-start gap-2 rounded-lg border p-3 text-left transition-colors ${decision === "approve" ? "border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]" : "border-[color:var(--border)] hover:border-[color:var(--accent)]"}`}>
-            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--accent)]" aria-hidden />
+          <button type="button" disabled={!canDecide || busy} onClick={() => onDecision("approve")} className={`flex min-h-20 items-start gap-2 rounded-lg border-2 p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none ${decision === "approve" ? "border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent)_16%,transparent)] shadow-[0_0_0_3px_color-mix(in_srgb,var(--accent)_12%,transparent)]" : "border-[color-mix(in_srgb,var(--accent)_45%,var(--border))] bg-[color-mix(in_srgb,var(--accent)_7%,transparent)] hover:border-[color:var(--accent)] hover:bg-[color-mix(in_srgb,var(--accent)_12%,transparent)]"}`}>
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--accent)_18%,transparent)]"><CheckCircle2 className="h-4 w-4 text-[color:var(--accent)]" aria-hidden /></span>
             <span><span className="block text-[13px] font-semibold">Approve</span><span className="mt-0.5 block text-[11px] text-[color:var(--text-secondary)]">This round is ready to move forward.</span></span>
           </button>
-          <button type="button" disabled={!canDecide || busy} onClick={() => onDecision("request_revisions")} className={`flex min-h-16 items-start gap-2 rounded-lg border p-3 text-left transition-colors ${decision === "request_revisions" ? "border-[color:var(--status-info)] bg-[color-mix(in_srgb,var(--status-info)_10%,transparent)]" : "border-[color:var(--border)] hover:border-[color:var(--status-info)]"}`}>
-            <RotateCcw className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--status-info)]" aria-hidden />
+          <button type="button" disabled={!canDecide || busy} onClick={() => onDecision("request_revisions")} className={`flex min-h-20 items-start gap-2 rounded-lg border-2 p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none ${decision === "request_revisions" ? "border-[color:var(--status-info)] bg-[color-mix(in_srgb,var(--status-info)_16%,transparent)] shadow-[0_0_0_3px_color-mix(in_srgb,var(--status-info)_12%,transparent)]" : "border-[color-mix(in_srgb,var(--status-info)_45%,var(--border))] bg-[color-mix(in_srgb,var(--status-info)_7%,transparent)] hover:border-[color:var(--status-info)] hover:bg-[color-mix(in_srgb,var(--status-info)_12%,transparent)]"}`}>
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--status-info)_18%,transparent)]"><RotateCcw className="h-4 w-4 text-[color:var(--status-info)]" aria-hidden /></span>
             <span><span className="block text-[13px] font-semibold">Request revisions</span><span className="mt-0.5 block text-[11px] text-[color:var(--text-secondary)]">Send one consolidated list of changes.</span></span>
           </button>
         </div>
