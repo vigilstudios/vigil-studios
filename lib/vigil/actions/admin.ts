@@ -22,6 +22,7 @@ import {
   websiteTransitions,
 } from "@/lib/vigil/lifecycle";
 import { normalizeHostname } from "@/lib/vigil/services/domain";
+import { sendOrganizationInvitation } from "@/lib/vigil/services/invitations";
 import { slugify } from "@/lib/vigil/format";
 import type { ChangeRequestStatus, DomainStatus, ProjectStatus, SubscriptionStatus, Updates, WebsiteStatus } from "@/lib/vigil/types";
 import { Constants } from "@/types/database.types";
@@ -81,6 +82,8 @@ export async function createOrganization(_prev: CreateOrgState, formData: FormDa
         .insert({ organization_id: data.id, email, role: "owner", invited_by: staff.user.id });
       if (inviteError) throw inviteError;
       await logAuditEvent(supabase, { action: "member.invited", entityType: "organization_invite", organizationId: data.id, after: { email, role: "owner" } });
+      const delivery = await sendOrganizationInvitation({ email, organizationName: v.name, role: "owner" }).catch((error) => ({ sent: false, error: error instanceof Error ? error.message : String(error) }));
+      if (!delivery.sent) console.error("organization owner invitation email failed:", delivery.error);
     }
 
     revalidatePath("/admin/organizations");
@@ -112,11 +115,16 @@ export async function inviteToOrganization(orgId: string, formData: FormData): P
     if (!z.string().email().safeParse(email).success) throw new ValidationError("Enter a valid email.", { email: ["Invalid"] });
     if (!["owner", "manager", "member"].includes(role)) throw new ValidationError("Unknown role.");
     const supabase = await createClient();
-    const { error } = await supabase
-      .from("organization_invites")
-      .insert({ organization_id: orgId, email, role: role as "owner" | "manager" | "member", invited_by: staff.user.id });
+    const [{ data: organization, error: organizationError }, { error }] = await Promise.all([
+      supabase.from("organizations").select("name").eq("id", orgId).maybeSingle(),
+      supabase.from("organization_invites").insert({ organization_id: orgId, email, role: role as "owner" | "manager" | "member", invited_by: staff.user.id }),
+    ]);
+    if (organizationError) throw organizationError;
+    if (!organization) throw new NotFoundError("Customer not found.");
     if (error) throw error;
     await logAuditEvent(supabase, { action: "member.invited", entityType: "organization_invite", organizationId: orgId, after: { email, role } });
+    const delivery = await sendOrganizationInvitation({ email, organizationName: organization.name, role: role as "owner" | "manager" | "member" });
+    if (!delivery.sent) throw new ValidationError(`The invitation was saved, but the email could not be sent${delivery.error ? `: ${delivery.error}` : "."}`);
     revalidatePath(`/admin/organizations/${orgId}`);
     return { ok: true, data: undefined };
   } catch (error) {

@@ -8,6 +8,7 @@ import { logAuditEvent } from "@/lib/vigil/audit";
 import { ForbiddenError, ValidationError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
 import { normalizeEmail } from "@/lib/vigil/auth/redirects";
 import { ACTIVE_ORG_COOKIE, assertOrgRole, requireOrgContextOrThrow, requireViewerOrThrow } from "@/lib/vigil/auth/session";
+import { sendOrganizationInvitation } from "@/lib/vigil/services/invitations";
 
 /** Choose which business the dashboard shows. Validated against membership. */
 export async function switchOrganization(organizationId: string): Promise<ActionResult> {
@@ -132,9 +133,13 @@ export async function inviteMember(_prev: InviteState, formData: FormData): Prom
       after: { email, role: parsed.data.role },
     });
 
-    // If that person already has an account, the invite is accepted on
-    // their next sign-in; otherwise the first sign-in creates it. Either way
-    // they use the normal magic-link flow at /login.
+    const delivery = await sendOrganizationInvitation({
+      email,
+      organizationName: ctx.organization.name,
+      role: parsed.data.role,
+    });
+    if (!delivery.sent) throw new ValidationError(`The invitation was saved, but the email could not be sent${delivery.error ? `: ${delivery.error}` : "."}`);
+
     revalidatePath("/dashboard/settings");
     return { ok: true, data: undefined };
   } catch (error) {
