@@ -34,6 +34,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
         dnsOk: domainRow.dns_ok,
         sslOk: domainRow.ssl_ok,
         reachable: (domainRow.verification as { connection_reachable?: boolean } | null)?.connection_reachable ?? null,
+        launchReady: (domainRow.verification as { launch_ready?: boolean } | null)?.launch_ready === true,
         statusReason: domainRow.status_reason,
         cutoverReady: (domainRow.verification as { source?: string } | null)?.source === "provider" || domainRow.status === "connected",
       }

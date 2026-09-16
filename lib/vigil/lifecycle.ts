@@ -129,13 +129,14 @@ export function describeWebsiteStatus(status: WebsiteStatus): CustomerStatus {
 
 export function describeDomainStatus(
   status: DomainStatus,
-  progress?: { dnsOk?: boolean | null; sslOk?: boolean | null; reachable?: boolean | null }
+  progress?: { dnsOk?: boolean | null; sslOk?: boolean | null; reachable?: boolean | null; launchReady?: boolean | null }
 ): CustomerStatus {
   switch (status) {
     case "connected":
       return { label: "Domain Connected", tone: "good" };
     case "verifying":
       if (!progress?.dnsOk) return { label: "Checking DNS", tone: "info", hint: "Changes can take up to 48 hours to propagate." };
+      if (progress.launchReady) return { label: "Ready for launch", tone: "good", hint: "DNS is configured. Your domain will activate when Vigil publishes your website." };
       if (!progress.sslOk) return { label: "Securing domain", tone: "info", hint: "DNS is correct. The secure certificate is being issued." };
       if (!progress.reachable) return { label: "Establishing connection", tone: "info", hint: "The domain is configured. We are waiting for the website to become reachable." };
       return { label: "Final connection check", tone: "info", hint: "The domain will open as soon as the final check completes." };

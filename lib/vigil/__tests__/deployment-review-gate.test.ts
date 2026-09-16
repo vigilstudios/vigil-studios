@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { assertProductionDeployAllowed, beginDomainVerification } = vi.hoisted(() => ({
+const { assertProductionDeployAllowed, beginDomainVerification, activateDomainVerification } = vi.hoisted(() => ({
   assertProductionDeployAllowed: vi.fn(),
   beginDomainVerification: vi.fn().mockResolvedValue(undefined),
+  activateDomainVerification: vi.fn(),
 }));
 vi.mock("@/lib/vigil/project-reviews", () => ({ assertProductionDeployAllowed }));
-vi.mock("../services/domain", () => ({ beginDomainVerification }));
+vi.mock("../services/domain", () => ({ beginDomainVerification, activateDomainVerification }));
 
 import { deployWebsite, syncDeployment } from "../services/deployment";
 import type { DeploymentProvider } from "../providers/types";
@@ -28,6 +29,10 @@ describe("deployment service review enforcement", () => {
   beforeEach(() => {
     assertProductionDeployAllowed.mockReset().mockResolvedValue(undefined);
     beginDomainVerification.mockClear();
+    activateDomainVerification.mockReset().mockImplementation(async (admin, domainId) => {
+      await admin.from("domains").update({ status: "connected", verification: { canonical_hostname: "example.com" } }).eq("id", domainId);
+      return { connected: true };
+    });
   });
 
   it("checks the review gate for production but leaves preview deployments available", async () => {
@@ -44,11 +49,14 @@ describe("deployment service review enforcement", () => {
     expect(beginDomainVerification).toHaveBeenCalledWith(db.asClient(), "domain_1", deploymentProvider);
     expect(preview.domainIds).toEqual([]);
 
+    Object.assign(db.rows("domains")[0], { hostname: "example.com", dns_ok: true, verification: { launch_ready: true }, status: "verifying" });
+
     vi.mocked(deploymentProvider.triggerDeployment).mockResolvedValueOnce({ externalId: "provider-production", status: "ready", url: "https://production.test", createdAt: "2026-01-01T00:02:00Z", readyAt: "2026-01-01T00:03:00Z", error: null });
     await deployWebsite(db.asClient(), "site_1", { environment: "production" }, deploymentProvider);
     expect(assertProductionDeployAllowed).toHaveBeenCalledWith(db.asClient(), "site_1");
     expect(deploymentProvider.triggerDeployment).toHaveBeenLastCalledWith("provider-site", expect.objectContaining({ environment: "production" }));
-    expect(db.rows("websites")[0].live_url).toBe("https://production.test");
+    expect(activateDomainVerification).toHaveBeenCalledWith(db.asClient(), "domain_1", deploymentProvider);
+    expect(db.rows("websites")[0]).toMatchObject({ status: "live", live_url: "https://example.com", primary_domain_id: "domain_1" });
   });
 
   it("does not let a production deployment inserted outside the normal path promote during sync", async () => {
@@ -57,5 +65,14 @@ describe("deployment service review enforcement", () => {
 
     await expect(syncDeployment(db.asClient(), "deployment_1", provider())).rejects.toThrow("Professional approvals are required");
     expect(assertProductionDeployAllowed).toHaveBeenCalledWith(db.asClient(), "site_1");
+  });
+
+  it("blocks a live deployment until customer DNS is verified for launch", async () => {
+    const db = new FakeAdmin({
+      websites: [{ id: "site_1", organization_id: "org_1", status: "building" }],
+      domains: [{ id: "domain_1", website_id: "site_1", hostname: "example.com", status: "verifying", dns_ok: false, verification: { source: "platform", launch_ready: false } }],
+    });
+
+    await expect(deployWebsite(db.asClient(), "site_1", { environment: "production" }, provider())).rejects.toThrow(/Configure and verify DNS/);
   });
 });

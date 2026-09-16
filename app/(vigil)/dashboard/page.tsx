@@ -58,7 +58,8 @@ export default async function OverviewPage() {
     ? { label: "Preview ready", tone: "good" as const, hint: "Your shareable build preview is ready to view." }
     : websiteStatus;
   const domainReachable = (domain?.verification as { connection_reachable?: boolean } | null)?.connection_reachable ?? null;
-  const domainStatus = domain ? describeDomainStatus(domain.status, { dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable: domainReachable }) : null;
+  const domainLaunchReady = (domain?.verification as { launch_ready?: boolean } | null)?.launch_ready === true;
+  const domainStatus = domain ? describeDomainStatus(domain.status, { dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable: domainReachable, launchReady: domainLaunchReady }) : null;
   const subStatus = subscription ? describeSubscriptionStatus(subscription.status) : null;
   const projectStatus = project ? describeProjectStatus(project.status) : null;
   const reviewProjectStatus = professionalReviewStatus(projectReview);

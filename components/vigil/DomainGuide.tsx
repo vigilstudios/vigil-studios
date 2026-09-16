@@ -19,6 +19,7 @@ export type GuideDomain = {
   dnsOk: boolean | null;
   sslOk: boolean | null;
   reachable: boolean | null;
+  launchReady?: boolean;
   statusReason: string | null;
   cutoverReady: boolean;
 };
@@ -48,9 +49,9 @@ export function DomainGuide({
   compact?: boolean;
 }) {
   const guide = REGISTRAR_GUIDES[registrar];
-  const status = describeDomainStatus(domain.status as DomainStatus, { dnsOk: domain.dnsOk, sslOk: domain.sslOk, reachable: domain.reachable });
+  const status = describeDomainStatus(domain.status as DomainStatus, { dnsOk: domain.dnsOk, sslOk: domain.sslOk, reachable: domain.reachable, launchReady: domain.launchReady });
   const connected = domain.status === "connected";
-  const verifying = domain.status === "verifying";
+  const verifying = domain.status === "verifying" && !domain.launchReady;
   const apex = domain.records.some((record) => record.name === "@" || record.name === domain.hostname);
   const records = domain.records.map((r) => ({ ...r, displayName: r.name === "@" || r.name === domain.hostname ? guide.apexName : r.name }));
 
@@ -150,7 +151,7 @@ export function DomainGuide({
 
           {domain.cutoverReady && records.length > 0 ? <ConnectionProgress domain={domain} /> : null}
 
-          {domain.cutoverReady && records.length > 0 && onConfirm ? (
+          {domain.cutoverReady && records.length > 0 && onConfirm && !domain.launchReady ? (
             <div className="flex flex-wrap items-center gap-3">
               <button type="button" onClick={onConfirm} disabled={confirming || checking || verifying} className="btn-primary min-h-11 !px-5 !py-2.5 text-sm disabled:opacity-60">
                 {confirming ? "Checking…" : verifying ? "Checking…" : "I've added the records"}
@@ -158,7 +159,9 @@ export function DomainGuide({
               {verifying || checking ? (
                 <span className="flex items-center gap-2 text-xs text-[color:var(--text-secondary)]">
                   <VirtueOrb size="sm" state="working" label="" />
-                  {domain.dnsOk
+                  {domain.launchReady
+                    ? "Your DNS is ready. The secure connection activates when Vigil publishes your website."
+                    : domain.dnsOk
                     ? domain.sslOk
                       ? "The secure connection is ready. Waiting for the site to answer before we open it."
                       : "Your DNS record is correct. We are creating the secure connection."
@@ -167,7 +170,7 @@ export function DomainGuide({
               ) : null}
             </div>
           ) : null}
-          {domain.statusReason && !verifying ? <p className="text-[11px] text-[color:var(--text-secondary)]">{domain.statusReason}</p> : null}
+          {domain.statusReason && (!verifying || domain.launchReady) ? <p className="text-[11px] text-[color:var(--text-secondary)]">{domain.statusReason}</p> : null}
         </>
       )}
     </div>
@@ -177,7 +180,7 @@ export function DomainGuide({
 function ConnectionProgress({ domain }: { domain: GuideDomain }) {
   const steps = [
     { label: "DNS record", done: domain.dnsOk === true, active: domain.status === "verifying" && domain.dnsOk !== true },
-    { label: "Secure connection", done: domain.sslOk === true, active: domain.dnsOk === true && domain.sslOk !== true },
+    { label: domain.launchReady ? "Secure connection at launch" : "Secure connection", done: domain.sslOk === true, active: domain.dnsOk === true && domain.sslOk !== true && !domain.launchReady },
     { label: "Site reachable", done: domain.status === "connected" && domain.reachable === true, active: domain.sslOk === true && domain.status !== "connected" },
   ];
   return (

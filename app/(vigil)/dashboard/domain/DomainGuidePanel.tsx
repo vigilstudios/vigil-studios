@@ -15,7 +15,7 @@ export function DomainGuidePanel({ domain, initialRegistrar, canManage }: { doma
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (state.status !== "verifying") return;
+    if (state.status !== "verifying" || state.launchReady) return;
     const id = window.setInterval(async () => {
       const res = await getDomainSetup(state.domainId, registrar);
       if (res.ok) {
@@ -24,7 +24,7 @@ export function DomainGuidePanel({ domain, initialRegistrar, canManage }: { doma
       }
     }, 20_000);
     return () => window.clearInterval(id);
-  }, [state.status, state.domainId, registrar, router]);
+  }, [state.status, state.launchReady, state.domainId, registrar, router]);
 
   return (
     <div className="space-y-3">

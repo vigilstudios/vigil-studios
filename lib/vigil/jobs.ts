@@ -2,7 +2,7 @@ import { ProviderError, ProviderNotConfiguredError, isVigilError } from "@/lib/v
 import { escapeHtml, layout, sendEmail, staffNotificationAddress } from "@/lib/vigil/email";
 import type { DbClient, ProvisioningJob } from "@/lib/vigil/types";
 import type { Json } from "@/types/database.types";
-import { deployWebsite, provisionWebsite, syncDeployment } from "./services/deployment";
+import { deployWebsite, finalizeWebsiteLaunch, provisionWebsite, syncDeployment } from "./services/deployment";
 import { notifyCustomerDeployment } from "./services/deployment-notifications";
 import { beginDomainVerification, verifyDomain } from "./services/domain";
 import { provisionOrder } from "./services/orders";
@@ -78,11 +78,12 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
         organizationId: job.organization_id,
         websiteId: job.website_id,
         domainId,
+        payload: { deployment_id: result.deploymentId },
         maxAttempts: 50,
         createdBy: job.created_by,
       });
     }
-    if (result.status === "ready") {
+    if (result.status === "ready" && result.customerReady) {
       await enqueueDeploymentNotification(admin, job, result.deploymentId);
     }
     return { deployment_id: result.deploymentId };
@@ -104,12 +105,13 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
         organizationId: job.organization_id,
         websiteId: job.website_id,
         domainId,
+        payload: { deployment_id: deploymentId },
         maxAttempts: 50,
         createdBy: job.created_by,
         requeueFailed: true,
       });
     }
-    if (result.status === "ready") {
+    if (result.status === "ready" && result.customerReady) {
       await enqueueDeploymentNotification(admin, job, deploymentId);
     }
     return { deployment_id: deploymentId, status: result.status };
@@ -146,12 +148,18 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
   [JOB_KINDS.domainVerify]: async ({ admin, job }) => {
     if (!job.domain_id) throw new Error("domain.verify requires domain_id");
     const result = await verifyDomain(admin, job.domain_id);
+    if (result.readyForLaunch) return { ready_for_launch: true };
     if (!result.connected) {
       // Not an error: DNS takes time. Re-check later without burning attempts.
       // With no provider site yet there is nothing to connect to, so check
       // less often; the deploy step re-queues a verify when the site exists.
       if (result.reason === "no_site") throw new RetryLater(result.dnsOk ? "DNS correct; waiting for the website" : "DNS not yet verified; no site yet", 6 * 60 * 60);
       throw new RetryLater("Domain connection is still propagating", 15 * 60);
+    }
+    const deploymentId = (job.payload as { deployment_id?: string } | null)?.deployment_id;
+    if (deploymentId && job.website_id) {
+      const launched = await finalizeWebsiteLaunch(admin, job.website_id, deploymentId);
+      if (launched) await enqueueDeploymentNotification(admin, job, deploymentId);
     }
     return { connected: true };
   },

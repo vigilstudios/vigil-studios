@@ -2,10 +2,10 @@ import type { DbClient } from "@/lib/vigil/types";
 import { assertTransition, websiteTransitions } from "@/lib/vigil/lifecycle";
 import { getDeploymentProvider } from "@/lib/vigil/providers/registry";
 import type { DeploymentProvider } from "@/lib/vigil/providers/types";
-import { NotFoundError } from "@/lib/vigil/auth/errors";
+import { NotFoundError, ValidationError } from "@/lib/vigil/auth/errors";
 import { assertProductionDeployAllowed } from "@/lib/vigil/project-reviews";
 import { findExternalId, findProviderLink, providerEnum, upsertProviderLink } from "./provider-links";
-import { beginDomainVerification } from "./domain";
+import { activateDomainVerification, beginDomainVerification } from "./domain";
 
 /**
  * DeploymentService: Vigil Website -> DeploymentProvider.
@@ -78,13 +78,16 @@ export async function deployWebsite(
   websiteId: string,
   options: { environment?: "production" | "preview"; triggeredBy?: string | null } = {},
   provider: DeploymentProvider = getDeploymentProvider()
-): Promise<{ deploymentId: string; status: string; domainIds: string[] }> {
+): Promise<{ deploymentId: string; status: string; domainIds: string[]; customerReady: boolean }> {
   const environment = options.environment ?? "production";
   // This check belongs at the service boundary so a manually inserted job,
   // retry, or future admin surface cannot bypass Professional approvals.
   // Preview builds are deliberately excluded: they are what staff use to
   // publish each version for the customer to review.
-  if (environment === "production") await assertProductionDeployAllowed(admin, websiteId);
+  if (environment === "production") {
+    await assertProductionDeployAllowed(admin, websiteId);
+    await assertDomainsReadyForLaunch(admin, websiteId);
+  }
   const { siteExternalId, organizationId } = await provisionWebsite(admin, websiteId, provider);
 
   const repository = await findProviderLink(admin, {
@@ -125,19 +128,16 @@ export async function deployWebsite(
     entityId: deployment.id,
   });
 
+  let domainIds: string[] = [];
+  let customerReady = false;
   if (snapshot.status === "ready" && environment === "preview" && snapshot.url) {
     await admin.from("websites").update({ preview_url: snapshot.url, status_reason: null }).eq("id", websiteId);
+    await prepareWebsiteDomains(admin, websiteId, provider);
+    customerReady = true;
   } else if (environment === "production" && snapshot.status === "ready") {
-    const { data: website } = await admin.from("websites").select("status").eq("id", websiteId).single();
-    const publicUrl = snapshot.url;
-    if (website && website.status !== "live" && websiteTransitions[website.status].includes("live")) {
-      await admin
-        .from("websites")
-        .update({ status: "live", live_url: publicUrl, last_deployed_at: snapshot.readyAt, status_reason: null })
-        .eq("id", websiteId);
-    } else if (website?.status === "live") {
-      await admin.from("websites").update({ live_url: publicUrl, last_deployed_at: snapshot.readyAt }).eq("id", websiteId);
-    }
+    await admin.from("websites").update({ last_deployed_at: snapshot.readyAt, status_reason: "The production build is ready. We are activating your secure domain." }).eq("id", websiteId);
+    domainIds = await activateWebsiteDomains(admin, websiteId, provider);
+    customerReady = await finalizeWebsiteLaunch(admin, websiteId, deployment.id);
   } else if (snapshot.status === "error") {
     await admin
       .from("websites")
@@ -145,17 +145,7 @@ export async function deployWebsite(
       .eq("id", websiteId);
   }
 
-  // A ready preview is the point at which the customer can safely prepare
-  // DNS. Attach the domain now so the dashboard receives the provider's exact
-  // records instead of waiting until the production launch.
-  const attachedDomainIds = snapshot.status === "ready"
-    ? await attachWebsiteDomains(admin, websiteId, provider)
-    : [];
-  // DNS instructions are prepared for previews, but background verification
-  // begins after the customer confirms that they changed the records.
-  const domainIds = environment === "production" ? attachedDomainIds : [];
-
-  return { deploymentId: deployment.id, status: snapshot.status, domainIds };
+  return { deploymentId: deployment.id, status: snapshot.status, domainIds, customerReady };
 }
 
 /** Poll a provider deployment and reflect its terminal state in Vigil. */
@@ -163,13 +153,16 @@ export async function syncDeployment(
   admin: DbClient,
   deploymentId: string,
   provider: DeploymentProvider = getDeploymentProvider()
-): Promise<{ status: string; pending: boolean; domainIds: string[] }> {
+): Promise<{ status: string; pending: boolean; domainIds: string[]; customerReady: boolean }> {
   const { data: deployment, error } = await admin.from("deployments").select("*").eq("id", deploymentId).maybeSingle();
   if (error) throw error;
   if (!deployment) throw new NotFoundError(`Deployment ${deploymentId} not found.`);
   // Keep a production deployment from being promoted by the asynchronous
   // polling path if it was created outside deployWebsite.
-  if (deployment.environment === "production") await assertProductionDeployAllowed(admin, deployment.website_id);
+  if (deployment.environment === "production") {
+    await assertProductionDeployAllowed(admin, deployment.website_id);
+    await assertDomainsReadyForLaunch(admin, deployment.website_id);
+  }
   const externalId = await findExternalId(admin, {
     provider: providerEnum(provider.name), resourceKind: "deployment", entityType: "deployment", entityId: deploymentId,
   });
@@ -185,27 +178,77 @@ export async function syncDeployment(
   }).eq("id", deploymentId);
 
   let domainIds: string[] = [];
+  let customerReady = false;
   if (snapshot.status === "ready" && deployment.environment === "preview" && snapshot.url) {
     await admin.from("websites").update({ preview_url: snapshot.url, status_reason: null }).eq("id", deployment.website_id);
+    await prepareWebsiteDomains(admin, deployment.website_id, provider);
+    customerReady = true;
   } else if (snapshot.status === "ready" && deployment.environment === "production") {
     await provisionWebsite(admin, deployment.website_id, provider);
-    await admin.from("websites").update({ status: "live", live_url: snapshot.url, last_deployed_at: snapshot.readyAt ?? new Date().toISOString(), status_reason: null }).eq("id", deployment.website_id);
-    domainIds = await attachWebsiteDomains(admin, deployment.website_id, provider);
+    await admin.from("websites").update({ last_deployed_at: snapshot.readyAt ?? new Date().toISOString(), status_reason: "The production build is ready. We are activating your secure domain." }).eq("id", deployment.website_id);
+    domainIds = await activateWebsiteDomains(admin, deployment.website_id, provider);
+    customerReady = await finalizeWebsiteLaunch(admin, deployment.website_id, deploymentId);
   } else if (snapshot.status === "error") {
     await admin.from("websites").update({ status_reason: snapshot.error?.message ?? "The last publish did not complete." }).eq("id", deployment.website_id);
   }
-  if (snapshot.status === "ready") {
-    const attachedDomainIds = await attachWebsiteDomains(admin, deployment.website_id, provider);
-    if (deployment.environment === "production") domainIds = attachedDomainIds;
-  }
-  return { status: snapshot.status, pending: snapshot.status === "queued" || snapshot.status === "building", domainIds };
+  return { status: snapshot.status, pending: snapshot.status === "queued" || snapshot.status === "building", domainIds, customerReady };
 }
 
-async function attachWebsiteDomains(admin: DbClient, websiteId: string, provider: DeploymentProvider): Promise<string[]> {
+async function assertDomainsReadyForLaunch(admin: DbClient, websiteId: string): Promise<void> {
+  const { data: domains, error } = await admin.from("domains").select("id, hostname, status, dns_ok, verification").eq("website_id", websiteId).neq("status", "released");
+  if (error) throw error;
+  const pending = (domains ?? []).filter((domain) => {
+    if (domain.status === "connected") return false;
+    const verification = domain.verification as { launch_ready?: boolean; source?: string } | null;
+    return !(domain.dns_ok && (verification?.launch_ready || verification?.source === "provider"));
+  });
+  if (pending.length > 0) {
+    throw new ValidationError(`Configure and verify DNS for ${pending.map((domain) => domain.hostname).join(", ")} before deploying live.`);
+  }
+}
+
+async function prepareWebsiteDomains(admin: DbClient, websiteId: string, provider: DeploymentProvider): Promise<void> {
+  const { data: domains, error } = await admin.from("domains").select("id").eq("website_id", websiteId).neq("status", "released");
+  if (error) throw error;
+  for (const domain of domains ?? []) await beginDomainVerification(admin, domain.id, provider);
+}
+
+async function activateWebsiteDomains(admin: DbClient, websiteId: string, provider: DeploymentProvider): Promise<string[]> {
   const { data: domains, error } = await admin.from("domains").select("id").eq("website_id", websiteId).neq("status", "released");
   if (error) throw error;
   for (const domain of domains ?? []) {
-    await beginDomainVerification(admin, domain.id, provider);
+    await activateDomainVerification(admin, domain.id, provider);
   }
   return (domains ?? []).map((domain) => domain.id);
+}
+
+/** Promote the dashboard and public URL only after every custom domain works. */
+export async function finalizeWebsiteLaunch(admin: DbClient, websiteId: string, deploymentId: string): Promise<boolean> {
+  const [{ data: website, error: websiteError }, { data: deployment, error: deploymentError }, { data: domains, error: domainsError }] = await Promise.all([
+    admin.from("websites").select("status, live_url").eq("id", websiteId).maybeSingle(),
+    admin.from("deployments").select("environment, status, url, finished_at").eq("id", deploymentId).maybeSingle(),
+    admin.from("domains").select("id, hostname, status, verification").eq("website_id", websiteId).neq("status", "released"),
+  ]);
+  if (websiteError) throw websiteError;
+  if (deploymentError) throw deploymentError;
+  if (domainsError) throw domainsError;
+  if (!website || !deployment || deployment.environment !== "production" || deployment.status !== "ready") return false;
+  if ((domains ?? []).some((domain) => domain.status !== "connected")) return false;
+
+  const primary = (domains ?? [])[0];
+  const canonical = (primary?.verification as { canonical_hostname?: string } | null)?.canonical_hostname ?? primary?.hostname;
+  const publicUrl = canonical ? `https://${canonical}` : deployment.url;
+  if (!publicUrl) return false;
+  if (website.status !== "live") {
+    assertTransition(websiteTransitions, website.status, "live", "website");
+  }
+  const { error } = await admin.from("websites").update({
+    status: "live",
+    live_url: publicUrl,
+    ...(primary ? { primary_domain_id: primary.id } : {}),
+    last_deployed_at: deployment.finished_at ?? new Date().toISOString(),
+    status_reason: null,
+  }).eq("id", websiteId);
+  if (error) throw error;
+  return true;
 }

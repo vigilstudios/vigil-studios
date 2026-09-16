@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DeploymentProvider, DomainConfigSnapshot } from "../providers/types";
 import type { DnsRecord } from "../services/dns";
-import { beginDomainVerification, verifyDomain } from "../services/domain";
+import { activateDomainVerification, beginDomainVerification, verifyDomain } from "../services/domain";
 import { FakeAdmin } from "./fake-admin";
 
 const originalEnv = { ...process.env };
@@ -45,10 +45,10 @@ describe("customer domain service", () => {
     const domain = fake.rows("domains")[0];
     expect((domain.verification as { source: string }).source).toBe("platform");
     expect(domain.status).toBe("pending");
-    expect(domain.status_reason).toMatch(/Keep the current DNS unchanged/);
+    expect(domain.status_reason).toMatch(/Add the DNS record/);
   });
 
-  it("attaches www plus apex, redirects the apex, and publishes the canonical URL after verification", async () => {
+  it("attaches www plus apex only at launch, redirects the apex, and publishes the canonical URL after verification", async () => {
     const fake = new FakeAdmin({
       domains: [{ id: "dom_1", hostname: "example.com", kind: "apex", website_id: "web_1", status: "pending" }],
       websites: [{ id: "web_1", live_url: "https://preview.vercel.app" }],
@@ -56,7 +56,7 @@ describe("customer domain service", () => {
     });
     const deployment = provider((hostname) => snapshot(hostname, true));
 
-    await beginDomainVerification(fake.asClient(), "dom_1", deployment, dnsChecks(false));
+    await activateDomainVerification(fake.asClient(), "dom_1", deployment, dnsChecks(false));
     expect(deployment.addDomain).toHaveBeenNthCalledWith(1, "prj_1", "www.example.com", undefined);
     expect(deployment.addDomain).toHaveBeenNthCalledWith(2, "prj_1", "example.com", { redirect: "www.example.com", redirectStatusCode: 308 });
     expect(fake.rows("domains")[0].status).toBe("pending");
@@ -65,29 +65,44 @@ describe("customer domain service", () => {
     const result = await verifyDomain(fake.asClient(), "dom_1", deployment, dnsChecks(true));
     expect(result.connected).toBe(true);
     expect(fake.rows("domains")[0].status).toBe("connected");
-    expect(fake.rows("websites")[0].live_url).toBe("https://www.example.com");
+    expect(fake.rows("websites")[0].live_url).toBe("https://preview.vercel.app");
   });
 
   it("does not trust provider verification when the public DNS record is absent", async () => {
+    process.env.VIGIL_DNS_CNAME_TARGET = "cname.vercel-dns.com";
     const fake = new FakeAdmin({
       domains: [{ id: "dom_1", hostname: "drytest.vigilstudios.co", kind: "subdomain", website_id: "web_1", status: "pending" }],
       websites: [{ id: "web_1", live_url: "https://preview.vercel.app", preview_url: "https://preview.vercel.app" }],
       provider_links: [{ provider: "vercel", resource_kind: "site", entity_type: "website", entity_id: "web_1", external_id: "prj_1" }],
     });
-    const deployment = provider((hostname) => ({
-      ...snapshot(hostname, true),
-      requiredRecords: [{ type: "CNAME", name: "drytest", value: "cname.vercel-dns.com" }],
-    }));
+    const deployment = provider((hostname) => snapshot(hostname, true));
 
     await beginDomainVerification(fake.asClient(), "dom_1", deployment, dnsChecks(false));
 
     expect(fake.rows("domains")[0]).toMatchObject({ status: "pending", dns_ok: false });
     expect(fake.rows("domains")[0].status_reason).toMatch(/Add the DNS record/);
+    expect(deployment.addDomain).not.toHaveBeenCalled();
+  });
+
+  it("removes an early provider association so preview DNS cannot expose the site", async () => {
+    process.env.VIGIL_DNS_CNAME_TARGET = "cname.vercel-dns.com";
+    const fake = new FakeAdmin({
+      domains: [{ id: "dom_1", hostname: "preview.example.com", kind: "subdomain", website_id: "web_1", status: "pending", verification: { source: "provider" } }],
+      websites: [{ id: "web_1", status: "building", live_url: "https://preview.example.com", preview_url: "https://preview.vercel.app", primary_domain_id: "dom_1" }],
+      provider_links: [{ provider: "vercel", resource_kind: "site", entity_type: "website", entity_id: "web_1", external_id: "prj_1" }],
+    });
+    const deployment = provider((hostname) => snapshot(hostname, false));
+
+    await beginDomainVerification(fake.asClient(), "dom_1", deployment, dnsChecks(false));
+
+    expect(deployment.removeDomain).toHaveBeenCalledWith("prj_1", "preview.example.com");
+    expect(fake.rows("domains")[0].verification).toMatchObject({ source: "platform", launch_ready: false });
+    expect(fake.rows("websites")[0]).toMatchObject({ status: "building", live_url: null, primary_domain_id: null });
   });
 
   it("keeps the provider address until the custom domain answers over HTTPS", async () => {
     const fake = new FakeAdmin({
-      domains: [{ id: "dom_1", hostname: "example.com", kind: "apex", website_id: "web_1", status: "verifying" }],
+      domains: [{ id: "dom_1", hostname: "example.com", kind: "apex", website_id: "web_1", status: "verifying", verification: { source: "provider" } }],
       websites: [{ id: "web_1", live_url: "https://preview.vercel.app", preview_url: "https://preview.vercel.app", primary_domain_id: null }],
       provider_links: [{ provider: "vercel", resource_kind: "site", entity_type: "website", entity_id: "web_1", external_id: "prj_1" }],
     });
@@ -105,7 +120,7 @@ describe("customer domain service", () => {
 
   it("withdraws a custom-domain link if the final reachability check fails", async () => {
     const fake = new FakeAdmin({
-      domains: [{ id: "dom_1", hostname: "example.com", kind: "apex", website_id: "web_1", status: "connected" }],
+      domains: [{ id: "dom_1", hostname: "example.com", kind: "apex", website_id: "web_1", status: "connected", verification: { source: "provider" } }],
       websites: [{ id: "web_1", live_url: "https://www.example.com", preview_url: "https://preview.vercel.app", primary_domain_id: "dom_1" }],
       provider_links: [{ provider: "vercel", resource_kind: "site", entity_type: "website", entity_id: "web_1", external_id: "prj_1" }],
     });

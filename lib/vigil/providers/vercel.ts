@@ -108,7 +108,7 @@ export class VercelDeploymentProvider implements DeploymentProvider {
   }
 
   async removeDomain(siteExternalId: string, hostname: string) {
-    await this.api(`/v10/projects/${encodeURIComponent(siteExternalId)}/domains/${encodeURIComponent(hostname)}`, { method: "DELETE" });
+    await this.api(`/v10/projects/${encodeURIComponent(siteExternalId)}/domains/${encodeURIComponent(hostname)}`, { method: "DELETE", allowNotFound: true });
   }
 
   async getDomainConfig(siteExternalId: string, hostname: string) {

@@ -214,6 +214,7 @@ export type DomainSetup = {
   dnsOk: boolean | null;
   sslOk: boolean | null;
   reachable: boolean | null;
+  launchReady: boolean;
   statusReason: string | null;
   /** DNS changes stay locked until the domain is attached to a deployed site. */
   cutoverReady: boolean;
@@ -292,7 +293,8 @@ async function domainSetup(supabase: Awaited<ReturnType<typeof createClient>>, d
   const records = requiredRecords(domain.hostname, domain.verification);
   const source = (domain.verification as { source?: string } | null)?.source;
   const reachable = (domain.verification as { connection_reachable?: boolean } | null)?.connection_reachable ?? null;
-  return { domainId: domain.id, hostname: domain.hostname, status: domain.status, registrar, records, dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable, statusReason: domain.status_reason, cutoverReady: source === "provider" || domain.status === "connected" };
+  const launchReady = (domain.verification as { launch_ready?: boolean } | null)?.launch_ready === true;
+  return { domainId: domain.id, hostname: domain.hostname, status: domain.status, registrar, records, dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable, launchReady, statusReason: domain.status_reason, cutoverReady: source === "provider" || domain.status === "connected" };
 }
 
 /** Re-read the domain's state (the wizard polls this while "Checking…"). */
