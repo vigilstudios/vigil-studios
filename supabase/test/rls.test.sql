@@ -606,15 +606,15 @@ begin
 
   perform test.login('00000000-0000-0000-0000-00000000000a');
   perform test.fails(
-    'select vigil.archive_organization(''' || v_org || ''', ''00000000-0000-0000-0000-00000000000a'')',
+    'select public.archive_customer(''' || v_org || ''', ''00000000-0000-0000-0000-00000000000a'')',
     'member: cannot archive a customer');
   perform test.logout();
 
   perform test.login_service();
   perform test.fails(
-    'select vigil.purge_organization(''' || v_org || ''', ''{}'', ''{}'', null)',
+    'select public.purge_customer(''' || v_org || ''', ''{}'', ''{}'', null)',
     'service: an active customer cannot be permanently purged');
-  perform vigil.archive_organization(v_org, '00000000-0000-0000-0000-00000000000d');
+  perform public.archive_customer(v_org, '00000000-0000-0000-0000-00000000000d');
   perform test.ok((select archived_at is not null and status = 'closed' from public.organizations where id = v_org),
     'archive: organization is closed and timestamped');
   perform test.ok((select status from public.subscriptions where id = v_subscription) = 'canceled',
@@ -625,7 +625,7 @@ begin
   perform test.ok((select status from public.orders where id = v_order) = 'expired',
     'archive: paid but unprovisioned orders cannot run later');
 
-  perform vigil.restore_organization(v_org, '00000000-0000-0000-0000-00000000000d');
+  perform public.restore_customer(v_org, '00000000-0000-0000-0000-00000000000d');
   perform test.ok((select archived_at is null and status = 'active' from public.organizations where id = v_org),
     'restore: organization status is restored');
   perform test.ok((select status from public.projects where id = v_project) = 'review'
@@ -634,8 +634,8 @@ begin
   perform test.ok((select status from public.subscriptions where id = v_subscription) = 'canceled',
     'restore: billing remains canceled and requires an explicit new subscription');
 
-  perform vigil.archive_organization(v_org, '00000000-0000-0000-0000-00000000000d');
-  perform vigil.purge_organization(v_org, '{"reason":"test"}', '{"providers":"clean"}', '00000000-0000-0000-0000-00000000000d');
+  perform public.archive_customer(v_org, '00000000-0000-0000-0000-00000000000d');
+  perform public.purge_customer(v_org, '{"reason":"test"}', '{"providers":"clean"}', '00000000-0000-0000-0000-00000000000d');
   perform test.ok(test.count('select 1 from public.organizations where id = ''' || v_org || '''') = 0
     and test.count('select 1 from public.projects where organization_id = ''' || v_org || '''') = 0
     and test.count('select 1 from public.websites where organization_id = ''' || v_org || '''') = 0

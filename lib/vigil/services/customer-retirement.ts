@@ -55,13 +55,13 @@ export async function archiveCustomer(organizationId: string, actorId: string, d
   const provider = dependencies.billing ?? getBillingProvider();
   await cancelRemoteSubscriptions(subscriptions, links ?? [], provider);
 
-  const { error: archiveError } = await admin.schema("vigil").rpc("archive_organization", { p_organization_id: organizationId, p_actor_id: actorId });
+  const { error: archiveError } = await admin.rpc("archive_customer", { p_organization_id: organizationId, p_actor_id: actorId });
   if (archiveError) throw archiveError;
 }
 
 export async function restoreCustomer(organizationId: string, actorId: string, dependencies: RetirementDependencies = {}) {
   const admin = dependencies.admin ?? createAdminClient();
-  const { error } = await admin.schema("vigil").rpc("restore_organization", { p_organization_id: organizationId, p_actor_id: actorId });
+  const { error } = await admin.rpc("restore_customer", { p_organization_id: organizationId, p_actor_id: actorId });
   if (error) throw error;
 }
 
@@ -129,7 +129,7 @@ export async function permanentlyDeleteCustomer(organizationId: string, actorId:
     subscriptions: org.subscriptions.map(({ id, status }) => ({ id, status })),
     members: org.organization_members.map(({ user_id, role }) => ({ user_id, role })),
   };
-  const { error: purgeError } = await admin.schema("vigil").rpc("purge_organization", { p_organization_id: organizationId, p_snapshot: snapshot, p_cleanup: deleted, p_deleted_by: actorId });
+  const { error: purgeError } = await admin.rpc("purge_customer", { p_organization_id: organizationId, p_snapshot: snapshot, p_cleanup: deleted, p_deleted_by: actorId });
   if (purgeError) throw purgeError;
 
   // Auth users are global, not tenant-owned. Remove only identities that are

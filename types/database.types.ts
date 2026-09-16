@@ -2224,6 +2224,10 @@ export type Database = {
     }
     Functions: {
       accept_pending_invites: { Args: never; Returns: number }
+      archive_customer: {
+        Args: { p_actor_id: string; p_organization_id: string }
+        Returns: undefined
+      }
       claim_jobs: {
         Args: { p_lease_seconds?: number; p_limit?: number; p_worker: string }
         Returns: {
@@ -2276,6 +2280,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      purge_customer: {
+        Args: {
+          p_cleanup: Json
+          p_deleted_by: string
+          p_organization_id: string
+          p_snapshot: Json
+        }
+        Returns: undefined
+      }
       resolve_entitlements: {
         Args: { p_org: string }
         Returns: {
@@ -2284,6 +2297,10 @@ export type Database = {
           source: string
           value: Json
         }[]
+      }
+      restore_customer: {
+        Args: { p_actor_id: string; p_organization_id: string }
+        Returns: undefined
       }
     }
     Enums: {

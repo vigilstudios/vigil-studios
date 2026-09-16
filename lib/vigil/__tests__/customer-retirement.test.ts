@@ -117,7 +117,7 @@ describe("customer permanent deletion orchestration", () => {
     const admin = {
       from: vi.fn((table: string) => table === "organization_members" ? resultBuilder(null, 0) : table === "staff_members" ? resultBuilder(null) : resultBuilder(tables[table])),
       storage: { from: () => ({ remove }) },
-      schema: () => ({ rpc }),
+      rpc,
       auth: { admin: { deleteUser } },
     } as unknown as AdminSupabaseClient;
     const deployment = { name: "vercel", deleteSite: vi.fn(async () => { events.push("vercel"); }) } as unknown as DeploymentProvider;
@@ -130,7 +130,7 @@ describe("customer permanent deletion orchestration", () => {
     expect(github.deleteRepository).toHaveBeenCalledWith("vigil/client-test");
     expect(remove).toHaveBeenCalledWith(["org_1/project_1/logo.png"]);
     expect(deleteUser).toHaveBeenCalledWith("user_orphan");
-    expect(rpc).toHaveBeenCalledWith("purge_organization", expect.objectContaining({ p_organization_id: "org_1", p_deleted_by: "staff_1" }));
+    expect(rpc).toHaveBeenCalledWith("purge_customer", expect.objectContaining({ p_organization_id: "org_1", p_deleted_by: "staff_1" }));
     expect(events).toEqual(["vercel", "github", "storage", "database", "auth"]);
   });
 
@@ -144,7 +144,7 @@ describe("customer permanent deletion orchestration", () => {
     const admin = {
       from: vi.fn((table: string) => resultBuilder(table === "organizations" ? org : table === "provider_links" ? links : [])),
       storage: { from: () => ({ remove: vi.fn() }) },
-      schema: () => ({ rpc }),
+      rpc,
     } as unknown as AdminSupabaseClient;
     const deployment = { name: "vercel", deleteSite: vi.fn().mockRejectedValue(new Error("Vercel unavailable")) } as unknown as DeploymentProvider;
 
