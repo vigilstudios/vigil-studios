@@ -303,7 +303,7 @@ export async function signInLinkFor(email: string, appUrl: string): Promise<stri
   }
   if (res.error || !res.data?.properties?.hashed_token) return null;
   const type = res.data.properties.verification_type === "invite" ? "invite" : "magiclink";
-  return `${appUrl}/auth/confirm?token_hash=${encodeURIComponent(res.data.properties.hashed_token)}&type=${type}`;
+  return `${appUrl}/auth/confirm?token_hash=${encodeURIComponent(res.data.properties.hashed_token)}&type=${type}&next=${encodeURIComponent("/dashboard")}`;
 }
 
 export async function sendWelcome(email: string, businessName: string, appUrl: string): Promise<{ sent: boolean; error?: string }> {

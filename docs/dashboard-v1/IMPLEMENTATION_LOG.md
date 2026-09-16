@@ -5,6 +5,20 @@ production deploys only from `main`.
 
 ---
 
+## 2026-09-16 — First sign-in hardening
+
+- Welcome-email tokens now land on an explicit confirmation button instead of
+  auto-submitting from the GET response. Inbox security scanners can inspect
+  the link without consuming the customer's one-time Supabase token.
+- Welcome emails and checkout fallback sign-in links now return new customers
+  to `/dashboard`, where Virtue's first-arrival greeting lives. A direct visit
+  to onboarding with a brand-new brief also redirects through that greeting;
+  choosing **Let's begin** advances the brief and opens the wizard normally.
+- Added route coverage proving the confirmation page cannot auto-submit a token
+  and still rejects malformed links.
+
+---
+
 ## 2026-09-16 — Professional direct checkout and flexible onboarding
 
 - Added a public four-step Virtue walkthrough at `/professional`. It explains

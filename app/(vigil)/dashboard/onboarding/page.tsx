@@ -18,6 +18,10 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
   const found = await getOnboardingProject(ctx.organization.id);
   if (!found) redirect("/dashboard");
   const { project, brief } = found;
+  // The dashboard owns the first-arrival Virtue greeting. Never let a direct
+  // onboarding URL silently skip it; "Let's begin" marks Basics before
+  // returning here, so the redirect only applies to a genuinely new brief.
+  if (!project.intake_completed_at && brief.progress.lastStep === "welcome") redirect("/dashboard");
   const { step: requested } = await searchParams;
   const projectSteps = stepsForProjectKind(project.kind);
   const initialStep: StepKey = requested && (projectSteps as readonly string[]).includes(requested) ? (requested as StepKey) : resumeStep(brief, project.kind);

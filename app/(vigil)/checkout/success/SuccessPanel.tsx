@@ -30,7 +30,7 @@ export function SuccessPanel({ orderId, email, status, businessName, emailSent }
 
   const ready = status === "provisioned";
   const emailFailed = ready && emailSent === false;
-  const signInHref = `/login?email=${encodeURIComponent(email)}&next=${encodeURIComponent("/dashboard/onboarding")}`;
+  const signInHref = `/login?email=${encodeURIComponent(email)}&next=${encodeURIComponent("/dashboard")}`;
 
   const lines: SpeechLine[] = !ready
     ? [{ text: "Hello. I'm Virtue.", emphasis: true }, { text: `Payment received. Give me a moment while I set up ${businessName}.` }]

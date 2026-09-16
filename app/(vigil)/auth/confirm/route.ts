@@ -3,6 +3,7 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { clearNextCookie, resolveNext } from "@/lib/vigil/auth/next-cookie";
 import { requestOrigin } from "@/lib/vigil/auth/origin";
+import { safeNextPath } from "@/lib/vigil/auth/redirects";
 
 const allowedTypes: EmailOtpType[] = ["magiclink", "email", "signup", "invite", "recovery", "email_change"];
 
@@ -10,16 +11,18 @@ const allowedTypes: EmailOtpType[] = ["magiclink", "email", "signup", "invite", 
  * Magic-link landing. The email (supabase/templates/magic_link.html) links to
  *   /auth/confirm?token_hash=…&type=magiclink
  *
- * GET renders a tiny page whose form submits itself; POST does the one-time
- * verification. Inbox link scanners fetch the GET and consume nothing, so the
- * person who actually clicks still gets a valid token. Unlike the PKCE code
- * flow this also works in a different browser from the one that asked.
+ * GET renders a tiny confirmation page; POST does the one-time verification.
+ * Requiring a deliberate button press matters: some inbox security scanners
+ * execute JavaScript, so an auto-submitting GET could consume the token before
+ * the customer opens it. Unlike the PKCE code flow this also works in a
+ * different browser from the one that asked.
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const origin = requestOrigin(request);
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type");
+  const next = searchParams.get("next");
 
   if (!tokenHash || !type || !allowedTypes.includes(type as EmailOtpType)) {
     return NextResponse.redirect(`${origin}/login?error=link_invalid`);
@@ -40,15 +43,15 @@ export async function GET(request: NextRequest) {
 </head>
 <body>
 <main>
-  <h1 style="font-size:1.25rem">Signing you in…</h1>
-  <p style="color:#a1a1aa">One moment. If nothing happens, use the button.</p>
+  <h1 style="font-size:1.25rem">Ready to sign you in</h1>
+  <p style="color:#a1a1aa">Select Continue to securely open your Vigil dashboard.</p>
   <form method="post" action="/auth/confirm" id="confirm">
     <input type="hidden" name="token_hash" value="${escapeAttr(tokenHash)}">
     <input type="hidden" name="type" value="${escapeAttr(type)}">
+    ${next ? `<input type="hidden" name="next" value="${escapeAttr(safeNextPath(next))}">` : ""}
     <button type="submit">Continue</button>
   </form>
 </main>
-<script>document.getElementById("confirm").submit();</script>
 </body>
 </html>`;
 
@@ -63,7 +66,8 @@ export async function POST(request: NextRequest) {
   const form = await request.formData();
   const tokenHash = String(form.get("token_hash") ?? "");
   const type = String(form.get("type") ?? "") as EmailOtpType;
-  const next = resolveNext(request);
+  const requestedNext = String(form.get("next") ?? "");
+  const next = requestedNext ? safeNextPath(requestedNext) : resolveNext(request);
 
   if (!tokenHash || !allowedTypes.includes(type)) {
     return NextResponse.redirect(`${origin}/login?error=link_invalid`, { status: 303 });
