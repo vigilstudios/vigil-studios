@@ -787,3 +787,6 @@ fail silently.
   Vercel ownership verification, pre-deployment cutover gating, dual-host
   attachment, and canonical URL promotion. Full check: 135 tests, typecheck,
   and database/RLS validation pass.
+- Launch audit found the deployed Next.js 16.2.9 inside the range of a newly
+  published critical middleware/proxy advisory. Upgraded Next.js and its
+  ESLint config to 16.3.5; the production dependency audit is now clean.
