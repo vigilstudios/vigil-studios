@@ -16,6 +16,7 @@ export function ActionButton({
   variant = "secondary",
   className,
   onDone,
+  redirectTo,
 }: {
   action: () => Promise<ActionResult<unknown>>;
   children: React.ReactNode;
@@ -23,6 +24,7 @@ export function ActionButton({
   variant?: "primary" | "secondary" | "link" | "danger";
   className?: string;
   onDone?: (result: ActionResult<unknown>) => void;
+  redirectTo?: string;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -47,6 +49,7 @@ export function ActionButton({
           start(async () => {
             const res = await action();
             if (!res.ok) setError(res.error);
+            else if (redirectTo) router.push(redirectTo);
             else router.refresh();
             onDone?.(res);
           });

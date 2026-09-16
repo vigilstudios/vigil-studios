@@ -8,22 +8,30 @@ import { NewOrganizationForm } from "./NewOrganizationForm";
 
 export const metadata: Metadata = { title: "Customers" };
 
-export default async function OrganizationsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+export default async function OrganizationsPage({ searchParams }: { searchParams: Promise<{ q?: string; archived?: string }> }) {
   await requireStaff("/admin/organizations");
-  const { q } = await searchParams;
-  const orgs = await listOrganizations(q);
+  const { q, archived: archivedParam } = await searchParams;
+  const archived = archivedParam === "1";
+  const orgs = await listOrganizations(q, archived);
 
   return (
     <div>
-      <PageHeader title="Customers" description="Every organization Vigil works for." />
+      <PageHeader title={archived ? "Archived customers" : "Customers"} description={archived ? "Hidden customers awaiting restoration or permanent deletion." : "Every active organization Vigil works for."} />
 
-      <Card className="mb-4">
+      <div className="mb-4">
+        <Link className="text-sm underline" href={archived ? "/admin/organizations" : "/admin/organizations?archived=1"}>
+          {archived ? "Back to active customers" : "View archived customers"}
+        </Link>
+      </div>
+
+      {!archived ? <Card className="mb-4">
         <h2 className="text-base font-semibold">New customer</h2>
         <p className="mt-1 text-xs text-[color:var(--text-secondary)]">Creates the organization and, if an owner email is given, an invitation that accepts itself on their first sign-in.</p>
         <NewOrganizationForm />
-      </Card>
+      </Card> : null}
 
       <form className="mb-3 flex gap-2" action="/admin/organizations">
+        {archived ? <input type="hidden" name="archived" value="1" /> : null}
         <input name="q" defaultValue={q ?? ""} placeholder="Search by name" className="w-full max-w-xs rounded-lg border border-[color:var(--border)] bg-transparent px-3 py-2 text-sm" />
         <button className="btn-secondary !px-3 text-sm">Search</button>
       </form>

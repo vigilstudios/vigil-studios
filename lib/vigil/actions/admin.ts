@@ -23,6 +23,7 @@ import {
 } from "@/lib/vigil/lifecycle";
 import { normalizeHostname } from "@/lib/vigil/services/domain";
 import { sendOrganizationInvitation } from "@/lib/vigil/services/invitations";
+import { archiveCustomer, permanentlyDeleteCustomer, restoreCustomer } from "@/lib/vigil/services/customer-retirement";
 import { slugify } from "@/lib/vigil/format";
 import type { ChangeRequestStatus, DomainStatus, ProjectStatus, SubscriptionStatus, Updates, WebsiteStatus } from "@/lib/vigil/types";
 import { Constants } from "@/types/database.types";
@@ -101,6 +102,41 @@ export async function setOrganizationStatus(orgId: string, status: string): Prom
     const { error } = await supabase.from("organizations").update({ status: status as "active" | "suspended" | "offboarding" | "closed" }).eq("id", orgId);
     if (error) throw error;
     revalidatePath(`/admin/organizations/${orgId}`);
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
+export async function archiveOrganization(orgId: string): Promise<ActionResult> {
+  try {
+    const staff = await requireAdminOrThrow();
+    await archiveCustomer(orgId, staff.user.id);
+    revalidatePath("/admin/organizations");
+    revalidatePath(`/admin/organizations/${orgId}`);
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
+export async function restoreOrganization(orgId: string): Promise<ActionResult> {
+  try {
+    await requireAdminOrThrow();
+    await restoreCustomer(orgId);
+    revalidatePath("/admin/organizations");
+    revalidatePath(`/admin/organizations/${orgId}`);
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
+export async function deleteOrganizationPermanently(orgId: string): Promise<ActionResult> {
+  try {
+    const staff = await requireAdminOrThrow();
+    await permanentlyDeleteCustomer(orgId, staff.user.id);
+    revalidatePath("/admin/organizations");
     return { ok: true, data: undefined };
   } catch (error) {
     return toActionError(error);

@@ -75,7 +75,7 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
 
   const memberships: Membership[] = [];
   for (const row of membershipRes.data ?? []) {
-    if (row.organization) {
+    if (row.organization && !row.organization.archived_at) {
       memberships.push({ organization: row.organization, role: row.role });
     }
   }

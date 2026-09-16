@@ -31,13 +31,14 @@ export const adminCounts = cache(async () => {
   };
 });
 
-export const listOrganizations = cache(async (search?: string) => {
+export const listOrganizations = cache(async (search?: string, archived = false) => {
   const supabase = await createClient();
   let q = supabase
     .from("organizations")
     .select("id, slug, name, status, billing_email, created_at, websites(id, status), subscriptions(id, status, plan:plans(code, name))")
     .order("created_at", { ascending: false })
     .limit(200);
+  q = archived ? q.not("archived_at", "is", null) : q.is("archived_at", null);
   if (search) q = q.ilike("name", `%${search}%`);
   const { data, error } = await q;
   if (error) throw error;

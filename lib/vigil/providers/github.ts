@@ -64,6 +64,13 @@ export class GitHubRepositoryProvider {
     }));
   }
 
+  async deleteRepository(fullName: string): Promise<void> {
+    if (!this.token) throw new ProviderNotConfiguredError("GitHub repository access");
+    if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(fullName)) throw new ProviderError("github", "The repository reference is invalid.");
+    const repoPath = fullName.split("/").map(encodeURIComponent).join("/");
+    await this.api(`/repos/${repoPath}`, { method: "DELETE", allowNotFound: true });
+  }
+
   private async getRepository(name: string): Promise<GitHubRepository | null> {
     const response = await this.api(`/repos/${encodeURIComponent(this.owner)}/${encodeURIComponent(name)}`, { allowNotFound: true });
     if (!response) return null;

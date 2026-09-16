@@ -254,6 +254,45 @@ export type Database = {
           },
         ]
       }
+      customer_deletion_log: {
+        Row: {
+          archived_at: string | null
+          billing_email: string | null
+          cleanup: Json
+          deleted_at: string
+          deleted_by: string | null
+          former_organization_id: string
+          id: string
+          organization_name: string
+          organization_slug: string
+          snapshot: Json
+        }
+        Insert: {
+          archived_at?: string | null
+          billing_email?: string | null
+          cleanup?: Json
+          deleted_at?: string
+          deleted_by?: string | null
+          former_organization_id: string
+          id?: string
+          organization_name: string
+          organization_slug: string
+          snapshot?: Json
+        }
+        Update: {
+          archived_at?: string | null
+          billing_email?: string | null
+          cleanup?: Json
+          deleted_at?: string
+          deleted_by?: string | null
+          former_organization_id?: string
+          id?: string
+          organization_name?: string
+          organization_slug?: string
+          snapshot?: Json
+        }
+        Relationships: []
+      }
       deployments: {
         Row: {
           commit_ref: string | null
@@ -1087,6 +1126,7 @@ export type Database = {
       organizations: {
         Row: {
           address: Json
+          archived_at: string | null
           billing_email: string | null
           created_at: string
           created_by: string | null
@@ -1103,6 +1143,7 @@ export type Database = {
         }
         Insert: {
           address?: Json
+          archived_at?: string | null
           billing_email?: string | null
           created_at?: string
           created_by?: string | null
@@ -1119,6 +1160,7 @@ export type Database = {
         }
         Update: {
           address?: Json
+          archived_at?: string | null
           billing_email?: string | null
           created_at?: string
           created_by?: string | null
@@ -1394,9 +1436,27 @@ export type Database = {
           uploaded_by?: string | null
         }
         Relationships: [
-          { foreignKeyName: "project_review_attachments_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },
-          { foreignKeyName: "project_review_attachments_response_id_fkey"; columns: ["response_id"]; isOneToOne: false; referencedRelation: "project_review_responses"; referencedColumns: ["id"] },
-          { foreignKeyName: "project_review_attachments_uploaded_by_fkey"; columns: ["uploaded_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+          {
+            foreignKeyName: "project_review_attachments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_review_attachments_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "project_review_responses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_review_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       project_review_responses: {
@@ -1437,11 +1497,41 @@ export type Database = {
           submission_id?: string
         }
         Relationships: [
-          { foreignKeyName: "project_review_responses_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },
-          { foreignKeyName: "project_review_responses_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] },
-          { foreignKeyName: "project_review_responses_round_id_fkey"; columns: ["round_id"]; isOneToOne: false; referencedRelation: "project_review_rounds"; referencedColumns: ["id"] },
-          { foreignKeyName: "project_review_responses_responded_by_fkey"; columns: ["responded_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
-          { foreignKeyName: "project_review_responses_submission_id_fkey"; columns: ["submission_id"]; isOneToOne: false; referencedRelation: "project_review_submissions"; referencedColumns: ["id"] },
+          {
+            foreignKeyName: "project_review_responses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_review_responses_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_review_responses_responded_by_fkey"
+            columns: ["responded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_review_responses_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "project_review_rounds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_review_responses_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: true
+            referencedRelation: "project_review_submissions"
+            referencedColumns: ["id"]
+          },
         ]
       }
       project_review_rounds: {
@@ -1482,10 +1572,34 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          { foreignKeyName: "project_review_rounds_approved_submission_fk"; columns: ["approved_submission_id"]; isOneToOne: false; referencedRelation: "project_review_submissions"; referencedColumns: ["id"] },
-          { foreignKeyName: "project_review_rounds_current_submission_fk"; columns: ["current_submission_id"]; isOneToOne: false; referencedRelation: "project_review_submissions"; referencedColumns: ["id"] },
-          { foreignKeyName: "project_review_rounds_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },
-          { foreignKeyName: "project_review_rounds_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] },
+          {
+            foreignKeyName: "project_review_rounds_approved_submission_fk"
+            columns: ["approved_submission_id"]
+            isOneToOne: false
+            referencedRelation: "project_review_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_review_rounds_current_submission_fk"
+            columns: ["current_submission_id"]
+            isOneToOne: false
+            referencedRelation: "project_review_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_review_rounds_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_review_rounds_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
         ]
       }
       project_review_submissions: {
@@ -1526,10 +1640,34 @@ export type Database = {
           version?: number
         }
         Relationships: [
-          { foreignKeyName: "project_review_submissions_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },
-          { foreignKeyName: "project_review_submissions_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] },
-          { foreignKeyName: "project_review_submissions_published_by_fkey"; columns: ["published_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
-          { foreignKeyName: "project_review_submissions_round_id_fkey"; columns: ["round_id"]; isOneToOne: false; referencedRelation: "project_review_rounds"; referencedColumns: ["id"] },
+          {
+            foreignKeyName: "project_review_submissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_review_submissions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_review_submissions_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_review_submissions_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "project_review_rounds"
+            referencedColumns: ["id"]
+          },
         ]
       }
       projects: {
@@ -2127,7 +2265,12 @@ export type Database = {
         Returns: number
       }
       notify_review_staff: {
-        Args: { p_body?: string; p_href?: string; p_round: string; p_title: string }
+        Args: {
+          p_body?: string
+          p_href?: string
+          p_round: string
+          p_title: string
+        }
         Returns: undefined
       }
       resolve_entitlements: {
@@ -2187,9 +2330,6 @@ export type Database = {
         | "review"
         | "launch"
         | "maintenance"
-      review_phase: "design_direction" | "full_site"
-      review_response_kind: "changes_requested" | "approved"
-      review_round_status: "pending" | "awaiting_feedback" | "changes_requested" | "revision_in_progress" | "approved"
       project_status:
         | "draft"
         | "intake"
@@ -2200,6 +2340,14 @@ export type Database = {
         | "closed"
         | "cancelled"
       provider: "stripe" | "vercel" | "cloudflare" | "resend" | "other"
+      review_phase: "design_direction" | "full_site"
+      review_response_kind: "changes_requested" | "approved"
+      review_round_status:
+        | "pending"
+        | "awaiting_feedback"
+        | "changes_requested"
+        | "revision_in_progress"
+        | "approved"
       staff_role: "staff" | "admin"
       subscription_status:
         | "incomplete"
@@ -2267,11 +2415,29 @@ export type Database = {
         }
         Returns: number
       }
+      notify_review_staff: {
+        Args: {
+          p_body: string
+          p_href: string
+          p_round: string
+          p_title: string
+        }
+        Returns: undefined
+      }
       org_role: {
         Args: { p_org: string }
         Returns: Database["public"]["Enums"]["org_role"]
       }
       path_organization: { Args: { p_name: string }; Returns: string }
+      purge_organization: {
+        Args: {
+          p_cleanup: Json
+          p_deleted_by: string
+          p_organization_id: string
+          p_snapshot: Json
+        }
+        Returns: undefined
+      }
       resolve_entitlements: {
         Args: { p_org: string }
         Returns: {
@@ -2473,6 +2639,15 @@ export const Constants = {
         "cancelled",
       ],
       provider: ["stripe", "vercel", "cloudflare", "resend", "other"],
+      review_phase: ["design_direction", "full_site"],
+      review_response_kind: ["changes_requested", "approved"],
+      review_round_status: [
+        "pending",
+        "awaiting_feedback",
+        "changes_requested",
+        "revision_in_progress",
+        "approved",
+      ],
       staff_role: ["staff", "admin"],
       subscription_status: [
         "incomplete",

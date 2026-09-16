@@ -5,11 +5,14 @@ import { ActionButton, ActionForm, SelectApply, TransitionSelect } from "@/compo
 import { Card, DefinitionList, PageHeader, StatusPill, Table, inputClass, tdClass, thClass } from "@/components/vigil/ui";
 import {
   addDomainForOrganization,
+  archiveOrganization,
   attachDomainToWebsite,
   createProject,
   createSubscription,
+  deleteOrganizationPermanently,
   inviteToOrganization,
   removeEntitlementOverride,
+  restoreOrganization,
   setDomainStatus,
   setEntitlementOverride,
   setOrganizationStatus,
@@ -420,6 +423,45 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
         <Card className="mt-4">
           <h2 className="text-base font-semibold">Internal notes</h2>
           <p className="mt-2 whitespace-pre-wrap text-sm">{org.notes}</p>
+        </Card>
+      ) : null}
+
+      {isAdmin ? (
+        <Card className="mt-4 border-[#ef4444]/40">
+          <h2 className="text-base font-semibold">Customer removal</h2>
+          {org.archived_at ? (
+            <>
+              <p className="mt-1 text-sm text-[color:var(--text-secondary)]">
+                Archived {formatDateTime(org.archived_at)}. This customer is hidden from active dashboards and its subscriptions were cancelled.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-3">
+                <ActionButton action={restoreOrganization.bind(null, org.id)}>Restore customer</ActionButton>
+                <ActionButton
+                  variant="danger"
+                  action={deleteOrganizationPermanently.bind(null, org.id)}
+                  redirectTo="/admin/organizations?archived=1"
+                  confirmText={`Permanently delete ${org.name}, including its GitHub repositories, Vercel projects, uploaded files, and database records? This cannot be undone.`}
+                >
+                  Permanently delete
+                </ActionButton>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="mt-1 text-sm text-[color:var(--text-secondary)]">
+                Archiving immediately cancels active subscriptions, closes the customer, and hides it from active dashboards. External sites and repositories remain until permanent deletion.
+              </p>
+              <div className="mt-3">
+                <ActionButton
+                  variant="danger"
+                  action={archiveOrganization.bind(null, org.id)}
+                  confirmText={`Archive ${org.name} and immediately cancel all active subscriptions?`}
+                >
+                  Archive customer
+                </ActionButton>
+              </div>
+            </>
+          )}
         </Card>
       ) : null}
     </div>

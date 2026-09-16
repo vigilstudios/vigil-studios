@@ -121,7 +121,7 @@ export class VercelDeploymentProvider implements DeploymentProvider {
   }
 
   async deleteSite(siteExternalId: string) {
-    await this.api(`/v9/projects/${encodeURIComponent(siteExternalId)}`, { method: "DELETE" });
+    await this.api(`/v9/projects/${encodeURIComponent(siteExternalId)}`, { method: "DELETE", allowNotFound: true });
   }
 
   private async getProjectDomain(siteExternalId: string, hostname: string): Promise<VercelProjectDomain> {
