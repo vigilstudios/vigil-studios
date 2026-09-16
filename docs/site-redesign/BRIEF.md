@@ -1,6 +1,6 @@
 # vigilstudios.co redesign — brief for Astra (Codex)
 
-**Owner:** Javier (belierjav@gmail.com). **Written:** 15 Sep 2026.
+**Owner:** Vigil Studios. **Written:** 15 Sep 2026.
 **Process:** design in Figma first → owner approves each page → implement in
 `app/(site)` → owner reviews on a Vercel preview → merge to `main`.
 **Product truth:** `../../../vigil-leadgen/VIGIL_STUDIOS_MASTER_ARCHITECTURE.md`

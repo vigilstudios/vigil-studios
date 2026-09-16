@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { briefCompletion, briefSchema, emptyBasics, parseBrief, resumeStep, SECTION_SCHEMAS, STEP_KEYS } from "../onboarding/brief";
+import { briefCompletion, briefSchema, emptyBasics, parseBrief, resumeStep, SECTION_SCHEMAS, STEP_KEYS, stepsForProjectKind } from "../onboarding/brief";
 import { assetPath, validateAssets } from "../onboarding/assets";
 import { REGISTRAR_GUIDES, REGISTRAR_OPTIONS, registrarFromNameservers } from "../domain-guides";
-import { virtueLine, STEP_TITLES } from "../onboarding/virtue-copy";
+import { afterSendLine, virtueLine, STEP_TITLES } from "../onboarding/virtue-copy";
 
 describe("brief schema", () => {
   it("reads garbage as an empty brief and keeps progress defaults", () => {
     const b = parseBrief("nope");
-    expect(b.version).toBe(1);
+    expect(b.version).toBe(3);
     expect(b.progress).toEqual({ lastStep: "welcome", completed: [] });
     expect(parseBrief(null).basics).toBeUndefined();
   });
@@ -21,10 +21,29 @@ describe("brief schema", () => {
 
   it("validates each section on its own", () => {
     expect(SECTION_SCHEMAS.basics.safeParse({ businessName: "" }).success).toBe(false);
+    expect(SECTION_SCHEMAS.kickoff.safeParse({ mode: "call", callBooked: true }).success).toBe(true);
+    expect(SECTION_SCHEMAS.strategy.safeParse({ primaryGoal: "leads", pages: ["home", "services"], features: ["contact_form"], contentStatus: "partial" }).success).toBe(true);
     expect(SECTION_SCHEMAS.offerings.safeParse({ noun: "menu", sections: [{ id: "s", name: "", items: [{ id: "i", name: "Espresso", description: "", price: "$3" }] }] }).success).toBe(true);
     expect(SECTION_SCHEMAS.brand.safeParse({ colours: { mode: "pick", primary: "not-a-colour" } }).success).toBe(false);
     expect(SECTION_SCHEMAS.domain.safeParse({ answer: "need", preferredNames: ["a.com", "b.com", "c.com", "d.com"] }).success).toBe(false);
     expect(SECTION_SCHEMAS.domain.safeParse({ answer: "own", hostname: "x.com", registrar: "godaddy" }).success).toBe(true);
+  });
+
+  it("adds kickoff and strategy only for Professional and Custom onboarding", () => {
+    expect(stepsForProjectKind("express")).not.toContain("kickoff");
+    expect(stepsForProjectKind("express")).not.toContain("strategy");
+    expect(stepsForProjectKind("professional")).toContain("kickoff");
+    expect(stepsForProjectKind("professional")).toContain("strategy");
+    expect(stepsForProjectKind("custom")).toContain("strategy");
+    const brief = briefSchema.parse({ basics: { businessName: "X" }, progress: { lastStep: "strategy", completed: ["strategy"] } });
+    expect(resumeStep(brief, "professional")).toBe("strategy");
+    expect(resumeStep(brief, "express")).toBe("basics");
+    expect(briefCompletion(brief, "professional").find((item) => item.key === "strategy")?.done).toBe(true);
+    expect(briefCompletion(brief, "professional").find((item) => item.key === "kickoff")?.done).toBe(false);
+    expect(briefCompletion(brief, "express").some((item) => item.key === "strategy")).toBe(false);
+    expect(afterSendLine("professional").body).toMatch(/confirm the site plan and timeline/i);
+    expect(afterSendLine("professional").body).not.toMatch(/first look/i);
+    expect(afterSendLine("professional", "call").title).toMatch(/kickoff/i);
   });
 
   it("resumes on the last step and reports completion per section", () => {

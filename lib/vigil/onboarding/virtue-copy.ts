@@ -1,4 +1,4 @@
-import type { StepKey } from "./brief";
+import type { ProjectKind, StepKey } from "./brief";
 
 /**
  * What Virtue says at the top of each step. One voice: short, warm, first
@@ -10,6 +10,8 @@ export type VirtueLine = { title: string; body: string };
 export const STEP_TITLES: Record<StepKey, string> = {
   welcome: "Welcome",
   basics: "Business basics",
+  kickoff: "Choose how to begin",
+  strategy: "Site goals and scope",
   offerings: "What you offer",
   about: "About you",
   brand: "Brand and photos",
@@ -29,6 +31,16 @@ export function virtueLine(step: StepKey, ctx: { firstName?: string | null; busi
       return {
         title: "Let's start with the essentials.",
         body: "How people reach you and when you're open. This goes straight onto the site, so write it the way you'd want a customer to read it.",
+      };
+    case "kickoff":
+      return {
+        title: "Choose the way you work best.",
+        body: "You can book a kickoff call with our team and finish for now, or keep going with me and build the brief at your own pace. You can also do both.",
+      };
+    case "strategy":
+      return {
+        title: "Let's shape the right site.",
+        body: "Tell me who it needs to reach, what it needs to accomplish and what visitors should be able to do. The team will use this to confirm the structure with you before design starts.",
       };
     case "offerings":
       return {
@@ -79,10 +91,22 @@ export function passwordSpeech(ctx: { firstName?: string | null }): { text: stri
 
 export const RESPONSE_WINDOW = process.env.NEXT_PUBLIC_ONBOARDING_RESPONSE_WINDOW ?? "two business days";
 
-export const AFTER_SEND: VirtueLine = {
-  title: "Sent. The team has your brief.",
-  body: `I've handed your details to the Vigil team. You'll hear from us within ${RESPONSE_WINDOW} with a first look at your site. Your dashboard shows where things are at any time.`,
-};
+export function afterSendLine(kind: ProjectKind, kickoffMode?: "guided" | "call" | "both" | null): VirtueLine {
+  return kind === "express"
+    ? {
+        title: "Sent. The team has your brief.",
+        body: `I've handed your details to the Vigil team. You'll hear from us within ${RESPONSE_WINDOW} with a first look at your site. Your dashboard shows where things are at any time.`,
+      }
+    : kickoffMode === "call"
+      ? {
+          title: "Your kickoff is set.",
+          body: "I've saved what you shared and let the Vigil team know you'll cover the rest on your kickoff call. You can see the project status from your dashboard.",
+        }
+      : {
+        title: "Sent. The team has your brief.",
+        body: `I've handed your details to the Vigil team. They'll review the goals and scope, then contact you within ${RESPONSE_WINDOW} to confirm the site plan and timeline before design starts.`,
+      };
+}
 
 /** Virtue helps everyone get set up; the AI employee is a Growth/Priority inclusion. */
 export const VIRTUE_NOTE = "Virtue helps every Vigil customer get set up. On Growth and Priority it keeps working for you after launch.";

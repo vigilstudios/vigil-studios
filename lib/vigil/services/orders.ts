@@ -165,14 +165,14 @@ export async function completeCheckout(admin: DbClient, orderId: string, checkou
  * Turn a paid order into a working account. Every step checks for its own
  * prior result, so a retried job or a second webhook delivery is harmless.
  */
-export async function provisionOrder(admin: DbClient, orderId: string, provider: BillingProvider = getBillingProvider(), appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.vigilstudios.co"): Promise<{ organizationId: string; websiteId: string; alreadyProvisioned: boolean }> {
+export async function provisionOrder(admin: DbClient, orderId: string, provider: BillingProvider = getBillingProvider(), appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.vigilstudios.co"): Promise<{ organizationId: string; websiteId: string; projectKind: CheckoutRequest["projectKind"]; alreadyProvisioned: boolean }> {
   const { data: order, error } = await admin.from("orders").select("*").eq("id", orderId).maybeSingle();
   if (error) throw error;
   if (!order) throw new NotFoundError(`Order ${orderId} not found.`);
   if (order.status === "provisioned" && order.organization_id && order.project_id) {
     const { data: provisionedSite, error: siteLookupError } = await admin.from("websites").select("id").eq("project_id", order.project_id).single();
     if (siteLookupError) throw siteLookupError;
-    return { organizationId: order.organization_id, websiteId: provisionedSite.id, alreadyProvisioned: true };
+    return { organizationId: order.organization_id, websiteId: provisionedSite.id, projectKind: order.project_kind, alreadyProvisioned: true };
   }
   if (order.status !== "paid") throw new ValidationError(`Order ${orderId} is ${order.status}, not paid.`);
 
@@ -278,7 +278,7 @@ export async function provisionOrder(admin: DbClient, orderId: string, provider:
     html: layout(`New customer: ${order.business_name}`, `<p>${escapeHtml(order.email)} purchased a ${escapeHtml(order.project_kind)} site${order.template_slug ? ` on the <b>${escapeHtml(order.template_slug)}</b> template` : ""}.</p>${button(`${appUrl}/admin/organizations/${organizationId}`, "Open in Vigil Admin")}`),
   }).catch(() => undefined);
 
-  return { organizationId, websiteId: site.id, alreadyProvisioned: false };
+  return { organizationId, websiteId: site.id, projectKind: order.project_kind, alreadyProvisioned: false };
 }
 
 async function uniqueSlug(admin: DbClient, base: string): Promise<string> {

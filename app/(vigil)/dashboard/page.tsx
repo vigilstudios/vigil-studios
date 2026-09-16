@@ -98,7 +98,7 @@ export default async function OverviewPage() {
       ) : null}
 
       {onboarding && (needsOnboarding(onboarding.project) || onboarding.project.intake_completed_at) ? (
-        <OnboardingCard brief={onboarding.brief} completedAt={onboarding.project.intake_completed_at} businessName={onboarding.brief.basics?.businessName || ctx.organization.name} />
+        <OnboardingCard brief={onboarding.brief} completedAt={onboarding.project.intake_completed_at} businessName={onboarding.brief.basics?.businessName || ctx.organization.name} projectKind={onboarding.project.kind} />
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-12">

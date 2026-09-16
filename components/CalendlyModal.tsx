@@ -10,6 +10,7 @@ type CalendlyPopupProps = {
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  onEventScheduled?: () => void;
 };
 
 const BASE_URL =
@@ -19,6 +20,7 @@ export function CalendlyPopup({
   children,
   className = "",
   style,
+  onEventScheduled,
 }: CalendlyPopupProps) {
   const [open, setOpen] = useState(false);
   const mounted = useHydrated();
@@ -72,6 +74,18 @@ export function CalendlyPopup({
       window.removeEventListener("keydown", handleEscape);
     };
   }, [open]);
+
+  useEffect(() => {
+    if (!open || !onEventScheduled) return;
+    const receive = (event: MessageEvent) => {
+      if (!event.origin.endsWith("calendly.com")) return;
+      if ((event.data as { event?: string } | null)?.event !== "calendly.event_scheduled") return;
+      onEventScheduled();
+      setOpen(false);
+    };
+    window.addEventListener("message", receive);
+    return () => window.removeEventListener("message", receive);
+  }, [open, onEventScheduled]);
 
   const modal =
     open && mounted

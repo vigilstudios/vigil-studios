@@ -27,7 +27,7 @@ import type { Json } from "@/types/database.types";
 
 async function loadProject(ctx: OrgContext, projectId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("projects").select("id, organization_id, status, brief, intake_completed_at, name").eq("id", projectId).maybeSingle();
+  const { data, error } = await supabase.from("projects").select("id, organization_id, status, brief, intake_completed_at, name, kind").eq("id", projectId).maybeSingle();
   if (error) throw error;
   if (!data || data.organization_id !== ctx.organization.id) throw new NotFoundError("That project is not in your workspace.");
   return { supabase, project: data, brief: parseBrief(data.brief) };
@@ -308,7 +308,7 @@ export async function submitIntake(projectId: string): Promise<ActionResult<{ co
     const finished = withProgress(brief, "review", true);
     const { error } = await supabase.from("projects").update({ brief: finished as unknown as Json, intake_completed_at: completedAt }).eq("id", projectId);
     if (error) throw error;
-    await logAuditEvent(supabase, { action: "project.intake_completed", entityType: "project", entityId: projectId, organizationId: ctx.organization.id, after: { business_name: brief.basics.businessName, domain: brief.domain?.answer ?? null } });
+    await logAuditEvent(supabase, { action: "project.intake_completed", entityType: "project", entityId: projectId, organizationId: ctx.organization.id, after: { business_name: brief.basics.businessName, project_kind: project.kind, domain: brief.domain?.answer ?? null } });
 
     if (hasAdminClient() && project.status === "intake") {
       const admin = createAdminClient();
@@ -355,14 +355,18 @@ export async function submitIntake(projectId: string): Promise<ActionResult<{ co
           ? `Needs a domain. Preferred: ${brief.domain.preferredNames.filter(Boolean).join(", ") || "none given"}`
           : "Domain: not decided yet";
     const { count: assetCount } = await supabase.from("project_assets").select("id", { count: "exact", head: true }).eq("project_id", projectId);
-    const text = `${brief.basics.businessName} finished onboarding for "${project.name}".\n\n${domainLine}\nFiles uploaded: ${assetCount ?? 0}\n\nReview: ${appUrl}/admin/organizations/${ctx.organization.id}`;
+    const kickoffLine = project.kind === "express" ? "" : `\nOnboarding route: ${brief.kickoff?.mode === "call" ? `kickoff call with the Vigil team${brief.kickoff.callBooked ? " (booked)" : ""}` : brief.kickoff?.mode === "both" ? "kickoff call with the Vigil team (booked) and guided brief" : "guided brief"}\n`;
+    const strategyLine = project.kind === "express"
+      ? ""
+      : `\nSite goal: ${brief.strategy?.primaryGoal ?? "not selected"}\nPages requested: ${brief.strategy?.pages.join(", ") || "not listed"}\nFunctionality: ${brief.strategy?.features.join(", ") || "not listed"}\n`;
+    const text = `${brief.basics.businessName} finished ${project.kind} onboarding for "${project.name}".\n${kickoffLine}${strategyLine}\n${domainLine}\nFiles uploaded: ${assetCount ?? 0}\n\nReview: ${appUrl}/admin/organizations/${ctx.organization.id}`;
     // The notification is what starts the build. If it fails, nothing is
     // recorded and the reconciliation pass sends it again.
     const notified = await sendEmail({
       to: staffNotificationAddress(),
-      subject: `Onboarding complete: ${brief.basics.businessName}`,
+      subject: brief.kickoff?.mode === "call" ? `Professional kickoff booked: ${brief.basics.businessName}` : `Onboarding complete: ${brief.basics.businessName}`,
       text,
-      html: layout(`Onboarding complete: ${brief.basics.businessName}`, `<p>${escapeHtml(domainLine)}</p><p>Files uploaded: ${assetCount ?? 0}</p>${button(`${appUrl}/admin/organizations/${ctx.organization.id}`, "Open in Vigil Admin")}`),
+      html: layout(`Onboarding complete: ${brief.basics.businessName}`, `<p><b>${escapeHtml(project.kind)} site</b></p>${kickoffLine ? `<p>${escapeHtml(kickoffLine).replace(/\n/g, "<br>")}</p>` : ""}${strategyLine ? `<p>${escapeHtml(strategyLine).replace(/\n/g, "<br>")}</p>` : ""}<p>${escapeHtml(domainLine)}</p><p>Files uploaded: ${assetCount ?? 0}</p>${button(`${appUrl}/admin/organizations/${ctx.organization.id}`, "Open in Vigil Admin")}`),
     }).catch(() => ({ sent: false }));
     if (notified.sent) {
       await logAuditEvent(supabase, { action: "project.intake_notified", entityType: "project", entityId: projectId, organizationId: ctx.organization.id, after: { via: "submit" } }).catch(() => undefined);

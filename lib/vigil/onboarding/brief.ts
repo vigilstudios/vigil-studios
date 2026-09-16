@@ -8,10 +8,11 @@ import { z } from "zod";
  * write (each step validates only its own section).
  */
 
-export const BRIEF_VERSION = 1;
+export const BRIEF_VERSION = 3;
 
-export const STEP_KEYS = ["welcome", "basics", "offerings", "about", "brand", "domain", "review"] as const;
+export const STEP_KEYS = ["welcome", "basics", "kickoff", "strategy", "offerings", "about", "brand", "domain", "review"] as const;
 export type StepKey = (typeof STEP_KEYS)[number];
+export type ProjectKind = "express" | "professional" | "custom";
 
 export const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 export type Day = (typeof DAYS)[number];
@@ -46,6 +47,33 @@ export const basicsSchema = z.object({
     days: z.array(hoursDaySchema).default(() => DAYS.map((day) => ({ day, closed: false, open: "", close: "" }))),
     notes: optionalText(300),
   }).default({ sameEveryDay: false, byAppointment: false, days: DAYS.map((day) => ({ day, closed: false, open: "", close: "" })), notes: "" }),
+});
+
+export const kickoffSchema = z.object({
+  mode: z.enum(["guided", "call", "both"]).nullable().default(null),
+  callBooked: z.boolean().default(false),
+});
+
+export const strategySchema = z.object({
+  primaryGoal: z.enum(["leads", "sales", "bookings", "inform", "portfolio", "other"]).nullable().default(null),
+  success: optionalText(600),
+  audience: optionalText(1000),
+  estimatedPageCount: z.number().int().min(1).max(100).nullable().default(null),
+  pages: z.array(z.enum(["home", "about", "services", "products", "menu", "portfolio", "gallery", "testimonials", "blog", "faq", "contact", "other"])).max(12).default([]),
+  otherPages: optionalText(500),
+  features: z.array(z.enum(["contact_form", "multi_step_forms", "booking", "booking_embed", "payments", "simple_payments", "maps_reviews", "analytics_tracking", "email_crm", "live_chat", "social", "cms_blog", "newsletter", "blog", "events", "gallery", "multilingual", "basic_automation", "ecommerce", "memberships", "native_booking", "custom_api", "other"])).max(23).default([]),
+  featureNotes: optionalText(1000),
+  contentStatus: z.enum(["ready", "partial", "needs_help"]).nullable().default(null),
+  references: z.array(z.object({
+    url: optionalText(300),
+    notes: optionalText(500),
+  })).max(3).default([]),
+  approver: z.object({
+    name: optionalText(120),
+    email: optionalText(160),
+  }).default({ name: "", email: "" }),
+  targetLaunch: optionalText(120),
+  notes: optionalText(1200),
 });
 
 export const offeringItemSchema = z.object({
@@ -88,7 +116,9 @@ export const brandSchema = z.object({
     yelp: optionalText(300),
     other: optionalText(300),
   }).default({ instagram: "", facebook: "", tiktok: "", google: "", yelp: "", other: "" }),
-  notes: optionalText(600),
+  direction: optionalText(1000),
+  avoid: optionalText(600),
+  notes: optionalText(1000),
 });
 
 export const REGISTRARS = [
@@ -120,6 +150,8 @@ export const domainSchema = z.object({
 export const briefSchema = z.object({
   version: z.number().default(BRIEF_VERSION),
   basics: basicsSchema.optional(),
+  kickoff: kickoffSchema.optional(),
+  strategy: strategySchema.optional(),
   offerings: offeringsSchema.optional(),
   about: aboutSchema.optional(),
   brand: brandSchema.optional(),
@@ -134,6 +166,8 @@ export const briefSchema = z.object({
 
 export type Brief = z.infer<typeof briefSchema>;
 export type Basics = z.infer<typeof basicsSchema>;
+export type Kickoff = z.infer<typeof kickoffSchema>;
+export type Strategy = z.infer<typeof strategySchema>;
 export type Offerings = z.infer<typeof offeringsSchema>;
 export type About = z.infer<typeof aboutSchema>;
 export type Brand = z.infer<typeof brandSchema>;
@@ -142,6 +176,8 @@ export type DomainAnswers = z.infer<typeof domainSchema>;
 /** Steps that persist a section; `welcome` and `review` do not. */
 export const SECTION_SCHEMAS = {
   basics: basicsSchema,
+  kickoff: kickoffSchema,
+  strategy: strategySchema,
   offerings: offeringsSchema,
   about: aboutSchema,
   brand: brandSchema,
@@ -160,22 +196,30 @@ export function emptyBasics(businessName: string): Basics {
 }
 
 /** Where the customer should land when they come back. */
-export function resumeStep(brief: Brief): StepKey {
+export function stepsForProjectKind(kind: ProjectKind): StepKey[] {
+  return STEP_KEYS.filter((step) => kind !== "express" || (step !== "kickoff" && step !== "strategy"));
+}
+
+export function resumeStep(brief: Brief, kind: ProjectKind = "express"): StepKey {
+  const steps = stepsForProjectKind(kind);
   const last = brief.progress.lastStep;
   if (last === "welcome") return "welcome";
-  const i = STEP_KEYS.indexOf(last);
-  return STEP_KEYS[Math.min(STEP_KEYS.length - 1, i)];
+  if (!steps.includes(last)) return steps[Math.min(steps.length - 1, 1)];
+  return last;
 }
 
 /** Ordered checklist for the review step and the dashboard card. */
-export function briefCompletion(brief: Brief): { key: SectionKey; label: string; done: boolean }[] {
-  return [
+export function briefCompletion(brief: Brief, kind: ProjectKind = "express"): { key: SectionKey; label: string; done: boolean }[] {
+  const items: { key: SectionKey; label: string; done: boolean }[] = [
     { key: "basics", label: "Business basics", done: Boolean(brief.basics?.businessName) },
+    { key: "kickoff", label: "How we'll begin", done: brief.kickoff?.mode != null },
+    { key: "strategy", label: "Site goals and scope", done: brief.progress.completed.includes("strategy") },
     { key: "offerings", label: "What you offer", done: (brief.offerings?.sections ?? []).some((s) => s.items.length > 0) || Boolean(brief.offerings?.notes) },
     { key: "about", label: "About you", done: Boolean(brief.about?.story || brief.about?.hero) },
     { key: "brand", label: "Brand and photos", done: brief.progress.completed.includes("brand") },
     { key: "domain", label: "Domain", done: brief.domain?.answer != null && (brief.domain.answer !== "own" || Boolean(brief.domain.hostname) || brief.domain.later) },
   ];
+  return kind === "express" ? items.filter((item) => item.key !== "kickoff" && item.key !== "strategy") : items;
 }
 
 export function stepIndex(step: StepKey): number {

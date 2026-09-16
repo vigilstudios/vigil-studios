@@ -34,7 +34,7 @@ export default async function TokenCheckoutPage({ params, searchParams }: { para
   const catalog = await getCheckoutCatalog();
   const buildRow = catalog.builds.find((b) => b.kind === order.project_kind) ?? null;
   const template = order.template_slug ? EXPRESS_TEMPLATES.find((t) => t.slug === order.template_slug) ?? null : null;
-  const buildAmount = order.project_kind === "custom" ? order.build_amount_cents : buildRow?.amount_cents ?? null;
+  const buildAmount = order.build_amount_cents ?? buildRow?.amount_cents ?? null;
 
   return (
     <CheckoutShell
@@ -49,7 +49,7 @@ export default async function TokenCheckoutPage({ params, searchParams }: { para
         build={buildRow ? { name: buildRow.name, amountCents: buildAmount, currency: order.currency } : null}
         projectKind={order.project_kind}
         templateSlug={order.template_slug}
-        templateName={template?.industry ?? (order.project_kind === "custom" ? "Custom design" : null)}
+        templateName={template?.industry ?? (order.project_kind === "professional" ? "Up to 8 custom pages" : order.project_kind === "custom" ? "Custom design" : null)}
         initial={{ email: order.email, businessName: order.business_name, contactName: order.contact_name ?? undefined, planCode: order.plan?.code }}
         locked={{ orderId: order.id, checkoutToken: token }}
         termsUrl={process.env.NEXT_PUBLIC_TERMS_URL ?? null}

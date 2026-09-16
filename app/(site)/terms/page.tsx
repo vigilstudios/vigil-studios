@@ -35,8 +35,9 @@ const SECTIONS: { title: string; body: string[] }[] = [
   {
     title: "3. How the build works",
     body: [
-      "After payment, Virtue collects the details we need (your business, what you offer, your story, brand, photos and domain). We start the build once you send that brief. An Express site gets a first look within two business days of the brief; Professional and Custom follow the timeline agreed with you.",
-      "Revisions: one round is included on Express, two on Professional; Custom builds follow their scope. A round means one consolidated list of changes. Work outside the scope of the build you bought (extra pages, new features, a redesign) is quoted separately or handled as change requests under a plan that includes them.",
+      "After payment, Virtue collects the details we need. Professional customers may instead book a kickoff call with our team, or complete the guided brief and upload layouts, inspiration and requirements. We start an Express build once its brief is sent; Professional and Custom follow the timeline confirmed after intake.",
+      "Scope and revisions: Express is one template-based page with one revision round. Professional includes up to eight primary pages with fully custom responsive design and two revision rounds. Simple utility or legal pages do not count toward the eight-page limit. Additional primary pages are quoted separately. Custom builds follow their written scope. A round means one consolidated list of changes.",
+      "Professional includes standard modern website functionality such as advanced forms, third-party booking links or embeds, simple payments, maps, reviews, analytics, conversion tracking, SEO foundations, social and marketing integrations, and CMS-driven content where appropriate. It does not include custom applications or portals, native booking infrastructure, advanced ecommerce, custom APIs, complex automation or proprietary Growth and Priority systems unless separately scoped.",
       "The site goes live on your domain once you approve it. From then on it runs under your plan.",
     ],
   },

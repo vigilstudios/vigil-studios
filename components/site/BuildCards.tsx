@@ -19,6 +19,7 @@ export function BuildCards({ builds, bullets = 4 }: { builds: PublicBuild[]; bul
       {builds.map((b) => {
         const copy = BUILD_COPY[b.kind];
         const express = b.kind === "express";
+        const professional = b.kind === "professional";
         return (
           <Card key={b.kind} className={clsx("flex flex-col rounded-2xl border p-5 lg:p-6", express ? "border-[color:var(--accent)] bg-[color:var(--accent)]/6 shadow-[0_0_0_1px_var(--accent),0_24px_60px_-40px_var(--accent)]" : "border-[color:var(--border)] bg-[color:var(--bg-surface)]")}>
             <div className="flex items-start justify-between gap-2">
@@ -40,8 +41,10 @@ export function BuildCards({ builds, bullets = 4 }: { builds: PublicBuild[]; bul
             <div className="mt-auto pt-6">
               {express ? (
                 <Link href="/express" className="btn-primary inline-flex min-h-11 w-full !px-4 !py-2 text-sm font-semibold">Choose a template <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+              ) : professional ? (
+                <Link href="/professional" className="btn-primary inline-flex min-h-11 w-full !px-4 !py-2 text-sm font-semibold">Start Professional <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
               ) : (
-                <Link href="#get-started" className="btn-secondary inline-flex min-h-11 w-full !px-4 !py-2 text-sm">Talk to us <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+                <Link href="#get-started" className="btn-secondary inline-flex min-h-11 w-full !px-4 !py-2 text-sm">Book a scope call <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
               )}
             </div>
           </Card>

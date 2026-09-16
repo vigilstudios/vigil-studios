@@ -343,7 +343,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
             </ul>
           ) : null}
           <div className="mt-3">
-            <BriefSummary brief={brief} assets={briefAssets} domain={briefDomain ? { hostname: briefDomain.hostname, status: briefDomain.status } : null} />
+            <BriefSummary brief={brief} projectKind={briefProject.kind} assets={briefAssets} domain={briefDomain ? { hostname: briefDomain.hostname, status: briefDomain.status } : null} />
           </div>
         </Card>
       ) : null}

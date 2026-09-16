@@ -94,7 +94,7 @@ export default async function WebsitesPage() {
                   ) : null}
 
                   <div className="mt-8 flex flex-wrap items-center gap-3">
-                    <Link href={pkg.cta.href} className={kind === "express" ? "btn-primary min-h-11 !px-5 !py-2 text-sm font-semibold" : "btn-secondary min-h-11 !px-5 !py-2 text-sm"}>
+                    <Link href={pkg.cta.href} className={kind === "custom" ? "btn-secondary min-h-11 !px-5 !py-2 text-sm" : "btn-primary min-h-11 !px-5 !py-2 text-sm font-semibold"}>
                       {pkg.cta.label} <ArrowRight className="ml-1.5 h-4 w-4" />
                     </Link>
                     <Link href="/pricing#builds" className="inline-flex items-center gap-1 text-sm font-medium text-[color:var(--accent)]">

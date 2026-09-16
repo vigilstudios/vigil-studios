@@ -5,6 +5,40 @@ production deploys only from `main`.
 
 ---
 
+## 2026-09-16 — Professional direct checkout and flexible onboarding
+
+- Added a public four-step Virtue walkthrough at `/professional`. It explains
+  the exact Professional scope, qualifies the customer's requirements, sends
+  standard website work to direct checkout, and routes add-ons or custom
+  application needs to a scope call with the Vigil team before payment.
+- Centralized the website-tier boundaries used by the walkthrough and aligned
+  the marketing pages, calls to action, checkout, admin order copy and service
+  agreement with the approved scope: up to eight primary pages, standard
+  integrations, simple payments/automation, and explicit custom-work limits.
+- Professional can now be purchased from the public checkout using the
+  configured build price. Staff-created links remain available for negotiated
+  or custom orders. Trusted order details are re-read on the server so hidden
+  browser fields cannot change the purchased kind, template or amount.
+- Professional and Custom onboarding now asks the customer to choose a kickoff
+  call with the Vigil team, Virtue's guided brief, or both. The expanded brief accepts
+  page and feature requirements, style direction, references, and uploaded
+  layouts, sketches, moodboards, screenshots and PDFs. Express retains its
+  shorter proven flow.
+- Customer review, admin brief, completion email, checklist and Virtue copy all
+  reflect the new route and scope. Call-only completion correctly treats the
+  scheduled kickoff as the next step.
+- Paid Professional and Custom orders provision the organization, dashboard,
+  project, website and subscription, but do not create a generic repository.
+  Staff creates the repository after reviewing the brief and choosing the
+  appropriate build foundation. Express repository creation remains automatic.
+- Added a data migration that updates the stored Professional build description
+  without changing its configured price or Stripe identifiers.
+- Verification: focused ESLint, TypeScript, the full unit-test suite, database
+  migration validation, visual walkthrough checks and the Next.js production
+  build pass.
+
+---
+
 ## 2026-09-15 — Automatic customer repositories and Vercel publishing
 
 - Paid-order provisioning now queues an idempotent `website.repository` job.

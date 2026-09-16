@@ -62,6 +62,7 @@ export default async function ProductsPage() {
           </div>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link href="/express" className="btn-primary min-h-11 !px-5 !py-2 text-sm font-semibold">See the templates <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+            <Link href="/professional" className="btn-secondary min-h-11 !px-5 !py-2 text-sm font-semibold">Start Professional <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
             <p className="text-sm text-[color:var(--text-secondary)]">
               {EXPRESS_TEMPLATES.filter((t) => t.status === "available").length} industries ready today · {EXPRESS_TEMPLATES.filter((t) => t.status === "coming").length} under construction
             </p>

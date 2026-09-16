@@ -8,12 +8,14 @@ import { Check } from "lucide-react";
 import { VirtueOrb } from "@/components/vigil/VirtueOrb";
 import { BriefSummary } from "@/components/vigil/BriefSummary";
 import { saveBriefSection, markStep, submitIntake, type DomainSetup } from "@/lib/vigil/actions/onboarding";
-import { briefCompletion, STEP_KEYS, stepIndex, type Brief, type SectionKey, type StepKey } from "@/lib/vigil/onboarding/brief";
+import { briefCompletion, stepsForProjectKind, type Brief, type ProjectKind, type SectionKey, type StepKey } from "@/lib/vigil/onboarding/brief";
 import type { SignedAsset } from "@/lib/vigil/queries/onboarding";
-import { AFTER_SEND, STEP_TITLES, VIRTUE_NOTE, virtueLine } from "@/lib/vigil/onboarding/virtue-copy";
+import { afterSendLine, STEP_TITLES, VIRTUE_NOTE, virtueLine } from "@/lib/vigil/onboarding/virtue-copy";
 import { SaveIndicator, VirtueSays, type SaveState } from "./wizard-ui";
 import { VirtueSpeech, useSpeaking } from "@/components/vigil/VirtueSpeech";
 import { BasicsStep } from "./steps/BasicsStep";
+import { KickoffStep } from "./steps/KickoffStep";
+import { StrategyStep } from "./steps/StrategyStep";
 import { OfferingsStep } from "./steps/OfferingsStep";
 import { AboutStep } from "./steps/AboutStep";
 import { BrandStep } from "./steps/BrandStep";
@@ -22,6 +24,7 @@ import { ReviewStep } from "./steps/ReviewStep";
 
 export type WizardProps = {
   projectId: string;
+  projectKind: ProjectKind;
   organizationId: string;
   businessName: string;
   firstName: string | null;
@@ -32,9 +35,6 @@ export type WizardProps = {
   completedAt: string | null;
   canManageDomain: boolean;
 };
-
-/** The steps a customer walks (welcome is spoken on the dashboard, not here). */
-const STEPS: StepKey[] = STEP_KEYS.filter((k) => k !== "welcome");
 
 export function OnboardingWizard(props: WizardProps) {
   const router = useRouter();
@@ -48,6 +48,7 @@ export function OnboardingWizard(props: WizardProps) {
   const [sending, startSending] = useTransition();
   const locked = Boolean(sentAt);
   const businessName = brief.basics?.businessName || props.businessName;
+  const steps: StepKey[] = stepsForProjectKind(props.projectKind).filter((key) => key !== "welcome") as StepKey[];
 
   const go = useCallback(
     (next: StepKey) => {
@@ -73,8 +74,8 @@ export function OnboardingWizard(props: WizardProps) {
     [props.projectId, locked]
   );
 
-  const next = (from: StepKey) => STEP_KEYS[Math.min(STEP_KEYS.length - 1, stepIndex(from) + 1)];
-  const prev = (from: StepKey) => STEPS[Math.max(0, STEPS.indexOf(from) - 1)];
+  const next = (from: StepKey) => steps[Math.min(steps.length - 1, steps.indexOf(from) + 1)];
+  const prev = (from: StepKey) => steps[Math.max(0, steps.indexOf(from) - 1)];
 
   const send = () =>
     startSending(async () => {
@@ -86,16 +87,16 @@ export function OnboardingWizard(props: WizardProps) {
       } else setSendError(res.error);
     });
 
-  if (sentAt) return <SentView brief={brief} assets={assets} domain={domain} />;
+  if (sentAt) return <SentView brief={brief} assets={assets} domain={domain} projectKind={props.projectKind} />;
 
   const line = virtueLine(step, { firstName: props.firstName, businessName, noun: brief.offerings?.noun === "menu" ? "menu items" : brief.offerings?.noun === "products" ? "products" : "services" });
-  const completion = briefCompletion(brief);
+  const completion = briefCompletion(brief, props.projectKind);
   const doneKeys = new Set(completion.filter((c) => c.done).map((c) => c.key as StepKey));
-  const currentIdx = STEPS.indexOf(step);
+  const currentIdx = steps.indexOf(step);
 
   const stepNav = (orientation: "row" | "column") => (
     <ol className={clsx("flex", orientation === "row" ? "gap-1 overflow-x-auto" : "flex-col gap-0.5")}>
-      {STEPS.map((k, i) => {
+      {steps.map((k, i) => {
         const done = doneKeys.has(k);
         const current = k === step;
         const reachable = done || i <= currentIdx || k === "review";
@@ -134,7 +135,7 @@ export function OnboardingWizard(props: WizardProps) {
         <nav aria-label="Steps" className="mt-6 hidden lg:block">
           {stepNav("column")}
           <div className="mt-2 flex items-center justify-between">
-            <span className="text-[11px] text-[color:var(--text-secondary)]">Step {currentIdx + 1} of {STEPS.length}</span>
+            <span className="text-[11px] text-[color:var(--text-secondary)]">Step {currentIdx + 1} of {steps.length}</span>
             <SaveIndicator state={saveState} />
           </div>
         </nav>
@@ -147,7 +148,7 @@ export function OnboardingWizard(props: WizardProps) {
         <nav aria-label="Steps" className="sticky top-0 z-10 -mx-3 mt-4 border-b border-[color:var(--border)] bg-[color:var(--bg-primary)]/90 px-3 py-2 backdrop-blur sm:-mx-4 sm:px-4 lg:hidden">
           {stepNav("row")}
           <div className="mt-1.5 flex items-center justify-between">
-            <span className="text-[11px] text-[color:var(--text-secondary)]">Step {currentIdx + 1} of {STEPS.length}</span>
+            <span className="text-[11px] text-[color:var(--text-secondary)]">Step {currentIdx + 1} of {steps.length}</span>
             <SaveIndicator state={saveState} />
           </div>
         </nav>
@@ -155,16 +156,20 @@ export function OnboardingWizard(props: WizardProps) {
         <div className="mt-5 max-w-3xl">
           {step === "basics" ? (
             <BasicsStep key="basics" initial={brief.basics} businessName={businessName} save={(d, c) => saveSection("basics", d, c)} onSaveState={setSaveState} onBack={() => router.push("/dashboard")} onNext={() => go(next("basics"))} />
+          ) : step === "kickoff" ? (
+            <KickoffStep key="kickoff" initial={brief.kickoff} save={(d, c) => saveSection("kickoff", d, c)} onSaveState={setSaveState} onBack={() => go(prev("kickoff"))} onNext={() => go(next("kickoff"))} onFinishWithCall={send} />
+          ) : step === "strategy" ? (
+            <StrategyStep key="strategy" initial={brief.strategy} save={(d, c) => saveSection("strategy", d, c)} onSaveState={setSaveState} onBack={() => go(prev("strategy"))} onNext={() => go(next("strategy"))} />
           ) : step === "offerings" ? (
             <OfferingsStep key="offerings" initial={brief.offerings} save={(d, c) => saveSection("offerings", d, c)} onSaveState={setSaveState} onBack={() => go(prev("offerings"))} onNext={() => go(next("offerings"))} />
           ) : step === "about" ? (
             <AboutStep key="about" initial={brief.about} businessName={businessName} save={(d, c) => saveSection("about", d, c)} onSaveState={setSaveState} onBack={() => go(prev("about"))} onNext={() => go(next("about"))} />
           ) : step === "brand" ? (
-            <BrandStep key="brand" initial={brief.brand} projectId={props.projectId} organizationId={props.organizationId} assets={assets} onAssets={setAssets} save={(d, c) => saveSection("brand", d, c)} onSaveState={setSaveState} onBack={() => go(prev("brand"))} onNext={() => go(next("brand"))} />
+            <BrandStep key="brand" initial={brief.brand} projectKind={props.projectKind} projectId={props.projectId} organizationId={props.organizationId} assets={assets} onAssets={setAssets} save={(d, c) => saveSection("brand", d, c)} onSaveState={setSaveState} onBack={() => go(prev("brand"))} onNext={() => go(next("brand"))} />
           ) : step === "domain" ? (
             <DomainStep key="domain" initial={brief.domain} projectId={props.projectId} businessName={businessName} domain={domain} onDomain={setDomain} canManage={props.canManageDomain} save={(d, c) => saveSection("domain", d, c)} onSaveState={setSaveState} onBack={() => go(prev("domain"))} onNext={() => go(next("domain"))} />
           ) : (
-            <ReviewStep key="review" brief={brief} assets={assets} domain={domain} onEdit={(s) => go(s)} onSend={send} sending={sending} error={sendError} onBack={() => go(prev("review"))} />
+            <ReviewStep key="review" brief={brief} projectKind={props.projectKind} assets={assets} domain={domain} onEdit={(s) => go(s)} onSend={send} sending={sending} error={sendError} onBack={() => go(prev("review"))} />
           )}
         </div>
       </section>
@@ -173,14 +178,15 @@ export function OnboardingWizard(props: WizardProps) {
 }
 
 /** After sending: Virtue, centred, says what happens next. */
-function SentView({ brief, assets, domain }: { brief: Brief; assets: SignedAsset[]; domain: DomainSetup | null }) {
+function SentView({ brief, assets, domain, projectKind }: { brief: Brief; assets: SignedAsset[]; domain: DomainSetup | null; projectKind: ProjectKind }) {
   const speech = useSpeaking();
   const [spoken, setSpoken] = useState(false);
+  const sentLine = afterSendLine(projectKind, brief.kickoff?.mode);
   return (
     <div className="mx-auto flex max-w-2xl flex-col items-center py-6">
       <VirtueOrb size="xl" state={speech.speaking ? "talking" : "idle"} />
       <div className="mt-8 min-h-[6rem] w-full">
-        <VirtueSpeech lines={[{ text: AFTER_SEND.title, emphasis: true }, { text: AFTER_SEND.body }]} onStart={speech.onStart} onDone={() => { speech.onDone(); setSpoken(true); }} />
+        <VirtueSpeech lines={[{ text: sentLine.title, emphasis: true }, { text: sentLine.body }]} onStart={speech.onStart} onDone={() => { speech.onDone(); setSpoken(true); }} />
       </div>
       <div className={clsx("mt-6 flex flex-wrap justify-center gap-3 transition-opacity duration-700", spoken ? "opacity-100" : "opacity-0")}>
         <Link href="/dashboard" className="btn-primary min-h-11 !px-5 !py-2.5 text-sm">Go to my dashboard</Link>
@@ -192,7 +198,7 @@ function SentView({ brief, assets, domain }: { brief: Brief; assets: SignedAsset
       <details className="mt-8 w-full rounded-xl border border-[color:var(--border)] p-4">
         <summary className="cursor-pointer text-[13px] font-semibold">What you sent</summary>
         <div className="mt-3">
-          <BriefSummary brief={brief} assets={assets} domain={domain} />
+          <BriefSummary brief={brief} projectKind={projectKind} assets={assets} domain={domain} />
         </div>
       </details>
     </div>

@@ -114,15 +114,20 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
     const payload = (job.payload ?? {}) as { order_id?: string };
     if (!payload.order_id) throw new Error("order.provision requires payload.order_id");
     const result = await provisionOrder(admin, payload.order_id);
-    await enqueueJob(admin, {
-      kind: JOB_KINDS.websiteRepository,
-      idempotencyKey: `website.repository:${result.websiteId}`,
-      organizationId: result.organizationId,
-      websiteId: result.websiteId,
-      maxAttempts: 8,
-      createdBy: job.created_by,
-      requeueFailed: true,
-    });
+    // Express has a known purchased template and can be seeded immediately.
+    // Professional/custom repos wait for staff to review scope and choose the
+    // appropriate foundation, then use the explicit admin action.
+    if (result.projectKind === "express") {
+      await enqueueJob(admin, {
+        kind: JOB_KINDS.websiteRepository,
+        idempotencyKey: `website.repository:${result.websiteId}`,
+        organizationId: result.organizationId,
+        websiteId: result.websiteId,
+        maxAttempts: 8,
+        createdBy: job.created_by,
+        requeueFailed: true,
+      });
+    }
     return { organization_id: result.organizationId, website_id: result.websiteId, already_provisioned: result.alreadyProvisioned };
   },
   [JOB_KINDS.domainVerify]: async ({ admin, job }) => {

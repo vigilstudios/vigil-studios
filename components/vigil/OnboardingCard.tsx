@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { briefCompletion, type Brief } from "@/lib/vigil/onboarding/brief";
+import { briefCompletion, type Brief, type ProjectKind } from "@/lib/vigil/onboarding/brief";
 import { RESPONSE_WINDOW } from "@/lib/vigil/onboarding/virtue-copy";
 import { formatDate } from "@/lib/vigil/format";
 import { VirtueOrb } from "./VirtueOrb";
@@ -11,7 +11,7 @@ import { Checklist } from "./widgets";
  * with what is left. After: what happens next, with the configurable
  * response window. Renders nothing when there is no project to onboard.
  */
-export function OnboardingCard({ brief, completedAt, businessName }: { brief: Brief; completedAt: string | null; businessName: string }) {
+export function OnboardingCard({ brief, completedAt, businessName, projectKind }: { brief: Brief; completedAt: string | null; businessName: string; projectKind: ProjectKind }) {
   if (completedAt) {
     return (
       <section className="flex gap-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-4">
@@ -19,7 +19,7 @@ export function OnboardingCard({ brief, completedAt, businessName }: { brief: Br
         <div className="min-w-0">
           <p className="text-[13px] font-semibold">I&apos;ve handed your details to the team.</p>
           <p className="mt-1 text-xs leading-5 text-[color:var(--text-secondary)]">
-            Sent {formatDate(completedAt)}. You&apos;ll hear from Vigil within {RESPONSE_WINDOW} with a first look at {businessName}&apos;s site. Need to add something?{" "}
+            Sent {formatDate(completedAt)}. {projectKind === "express" ? `You'll hear from Vigil within ${RESPONSE_WINDOW} with a first look at ${businessName}'s site.` : brief.kickoff?.mode === "call" ? "Your kickoff call with our team is the next step." : `Vigil will review the scope and contact you within ${RESPONSE_WINDOW} to confirm the site plan and timeline.`} Need to add something?{" "}
             <Link href="/dashboard/onboarding" className="underline underline-offset-2 hover:text-[color:var(--text-primary)]">See what you sent</Link>.
           </p>
         </div>
@@ -27,7 +27,7 @@ export function OnboardingCard({ brief, completedAt, businessName }: { brief: Br
     );
   }
 
-  const items = briefCompletion(brief);
+  const items = briefCompletion(brief, projectKind);
   const done = items.filter((i) => i.done).length;
   const started = brief.progress.lastStep !== "welcome" || done > 0;
   return (
@@ -39,7 +39,9 @@ export function OnboardingCard({ brief, completedAt, businessName }: { brief: Br
           <p className="mt-1 text-xs leading-5 text-[color:var(--text-secondary)]">
             {started
               ? `${done} of ${items.length} parts done. The team starts building once you send the brief.`
-              : `About ten minutes: the basics, what you offer, your story, photos and your domain. Everything saves as you go.`}
+              : projectKind === "express"
+                ? `About ten minutes: the basics, what you offer, your story, photos and your domain. Everything saves as you go.`
+                : `Tell us the basics, goals, pages, functionality, content, brand and domain. Everything saves as you go.`}
           </p>
         </div>
       </div>

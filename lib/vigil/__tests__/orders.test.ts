@@ -73,6 +73,16 @@ describe("startCheckout", () => {
     await expect(startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", billingPeriod: "year", appUrl: "https://app.test" }, provider)).rejects.toThrow(/annual price/);
   });
 
+  it("supports immediate Professional checkout at the catalog build price", async () => {
+    fake.rows("build_prices").push({ id: "build_professional", kind: "professional", name: "Professional Site", amount_cents: 149900, currency: "usd", is_active: true });
+    fake.rows("provider_links").push({ provider: "other", resource_kind: "price", external_id: "price_ext_professional", entity_type: "build_price", entity_id: "build_professional" });
+    const provider = new NullBillingProvider();
+    const spy = vi.spyOn(provider, "createCheckoutSession");
+    await startCheckout(fake.asClient(), { email: "owner@professional.test", businessName: "Professional Co", projectKind: "professional", planCode: "care", appUrl: "https://app.test" }, provider);
+    expect(fake.rows("orders")[0]).toMatchObject({ project_kind: "professional", build_amount_cents: 149900, template_slug: null });
+    expect(spy.mock.calls[0][0].lineItems).toEqual([{ priceExternalId: "price_ext_care" }, { priceExternalId: "price_ext_professional" }]);
+  });
+
   it("marks a self-serve order failed when the provider refuses to open a payment page", async () => {
     const provider = new NullBillingProvider();
     vi.spyOn(provider, "createCheckoutSession").mockRejectedValue(new Error("customer_update can only be used with customer"));
@@ -141,7 +151,7 @@ describe("completeCheckout + provisionOrder", () => {
     expect(priceLink?.metadata).toEqual({ mode: "test" });
 
     const again = await provisionOrder(fake.asClient(), orderId, provider, "https://app.test");
-    expect(again).toEqual({ organizationId: org.id, websiteId: site.id, alreadyProvisioned: true });
+    expect(again).toEqual({ organizationId: org.id, websiteId: site.id, projectKind: "express", alreadyProvisioned: true });
     expect(fake.rows("organizations")).toHaveLength(1);
     expect(fake.rows("projects")).toHaveLength(1);
     expect(fake.rows("subscriptions")).toHaveLength(1);
@@ -190,7 +200,7 @@ describe("completeCheckout + provisionOrder", () => {
     fake.rows("orders")[0].organization_id = "org_half";
 
     const res = await provisionOrder(fake.asClient(), orderId, provider, "https://app.test");
-    expect(res).toEqual({ organizationId: "org_half", websiteId: fake.rows("websites")[0].id, alreadyProvisioned: false });
+    expect(res).toEqual({ organizationId: "org_half", websiteId: fake.rows("websites")[0].id, projectKind: "express", alreadyProvisioned: false });
     expect(fake.rows("organizations")).toHaveLength(1);
     expect(fake.rows("organization_invites")).toHaveLength(1);
     expect(fake.rows("projects")).toHaveLength(1);

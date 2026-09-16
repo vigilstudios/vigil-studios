@@ -3,6 +3,8 @@
  * the database and lib/constants). One place to tune the voice: plain, warm,
  * no exclamation marks.
  */
+import { WEBSITE_TIERS } from "@/lib/vigil/site-tiers";
+
 export const TAGLINE = "You run the business. Vigil runs the online presence.";
 
 export const HERO = {
@@ -49,8 +51,8 @@ export const PILLARS = [
 ];
 
 export const HOW_IT_WORKS = [
-  { n: 1, title: "Choose your website", body: "Express if you are just getting online, Professional when you are established, Custom when you have something bigger in mind. Express checks out online with the plan you pick; Professional and Custom start with a short call and a checkout link made for you." },
-  { n: 2, title: "Virtue asks about your business", body: "About ten minutes: your hours, what you offer, your story, photos and your domain. It saves as you go; she walks you through the domain step at your registrar." },
+  { n: 1, title: "Choose your website", body: "Express starts with an industry template. Professional starts with a two-minute fit guide, then lets you buy online or speak with our team. Custom work starts with a scope call." },
+  { n: 2, title: "Choose how to onboard", body: "After payment, book a kickoff call with us or continue with Virtue's guided brief. Everything saves as you go, including your ideas, files and domain." },
   { n: 3, title: "We build", body: "A person builds your site from what you told Virtue. Express gets a first look within two business days; Professional and Custom follow the timeline agreed with you." },
   { n: 4, title: "You review", body: "Say what to change. One revision round is included on Express, two on Professional; Custom is agreed in the scope." },
   { n: 5, title: "Live, and looked after", body: "Your site goes live on your domain with SSL and monitoring. From then on Vigil hosts it, updates it and reports on it. Cancel any time and take your site with you." },
@@ -89,9 +91,9 @@ export const PLAN_COPY: Record<string, { headline: string; bullets: string[]; vi
 };
 
 export const BUILD_COPY: Record<string, { tagline: string; bullets: string[] }> = {
-  express: { tagline: "Pick a template, live in days.", bullets: ["Single-page site from an industry template", "Your words, photos and colours", "Mobile responsive", "Tap-to-call and email contact", "Basic SEO", "One to two business days", "One design direction, one revision round"] },
-  professional: { tagline: "Multi-page, designed around you.", bullets: ["Multi-page website", "Custom design", "Advanced SEO", "Analytics setup", "Blog support", "One design direction, two revision rounds"] },
-  custom: { tagline: "Anything with a scope.", bullets: ["Web apps, portals, e-commerce, integrations", "Quoted after a short call", "The same Vigil platform underneath", "You own the site-specific code"] },
+  express: { tagline: "Pick a template, live in days.", bullets: [...WEBSITE_TIERS.express.included, "One to two business days", "One design direction, one revision round"] },
+  professional: { tagline: "Up to 8 pages, fully custom to your business.", bullets: [...WEBSITE_TIERS.professional.included] },
+  custom: { tagline: "Complex software with a written scope.", bullets: [...WEBSITE_TIERS.custom.included, "Quoted after a scope call", "You own the site-specific code"] },
 };
 
 /** "Start where you are": one card per build, keyed by build_prices.kind. Names and prices come from the database. */
@@ -101,8 +103,8 @@ export const START = {
   lead: "Just opening, established, or building something bigger: there is a Vigil website for each stage, all on the same platform, with Virtue.",
   stages: {
     express: { stage: "Just getting online", tone: "accent" as const, body: "A finished template for your industry, made yours in one to two business days.", bullets: ["Single-page site from an industry template", "Your words, photos and colours", "Live in one to two business days"], cta: { label: "Choose a template", href: "/express" }, primary: true },
-    professional: { stage: "Established and growing", tone: "teal" as const, body: "Multi-page and designed around your business, with room for everything you have to say.", bullets: ["Multi-page website, custom design", "Advanced SEO and analytics setup", "Blog support, two revision rounds"], cta: { label: "Talk to us", href: "#get-started" }, primary: false },
-    custom: { stage: "Something bigger in mind", tone: "violet" as const, body: "A portal, a shop, a booking system, an integration: anything with a scope.", bullets: ["Web apps, portals, e-commerce, integrations", "Scoped and quoted after a short call", "You own the site-specific code"], cta: { label: "Book a call", href: "#get-started" }, primary: false },
+    professional: { stage: "Established and growing", tone: "teal" as const, body: "Up to eight fully custom pages with booking, forms, integrations, analytics and SEO foundations.", bullets: ["Up to 8 custom primary pages", "Standard booking, payment and third-party integrations", "CMS where appropriate, two revision rounds"], cta: { label: "Start Professional", href: "/professional" }, primary: false },
+    custom: { stage: "Something bigger in mind", tone: "violet" as const, body: "A portal, custom booking platform, advanced store or complex integration: anything that needs a written scope.", bullets: ["Custom apps, portals and advanced ecommerce", "Custom APIs and complex workflows", "Scoped and quoted after a short call"], cta: { label: "Book a call", href: "#get-started" }, primary: false },
   },
   note: "Not sure? Start with Express. Moving up later is a conversation, not a migration.",
 };
@@ -134,28 +136,28 @@ export const WEBSITES_PAGE = {
     professional: {
       stage: "Established and growing",
       tone: "teal" as const,
-      what: "A multi-page website designed around your business rather than a template: your services, your locations, your people, with room for a blog and the pages that help customers find you.",
-      goodFor: ["More than one service line or location", "A look that is yours, not a template's", "Content that keeps growing: news, guides, longer pages", "Search matters for how customers find you"],
-      notFor: "Ordering, booking systems, portals or integrations; those are a Custom build.",
-      timeline: "Scoped with you in a short call; two revision rounds.",
-      cta: { label: "Talk to us about Professional", href: "#get-started" },
+      what: "A fully custom website designed around your business and brand: up to eight primary pages, advanced forms, standard booking and payment integrations, analytics, SEO foundations and CMS-driven content where appropriate.",
+      goodFor: ["A custom look and content hierarchy", "Booking through Calendly, Acuity, Square, Vagaro, Fresha or similar", "Forms, simple payments, analytics, maps, reviews and marketing tools", "Blogs, portfolios, case studies, teams, services or locations"],
+      notFor: "Custom applications, customer portals, native booking platforms, advanced ecommerce, custom APIs or complex automation.",
+      timeline: "Purchase online, then book a kickoff call or complete the guided brief; two revision rounds.",
+      cta: { label: "Start Professional", href: "/professional" },
     },
     custom: {
       stage: "Something bigger in mind",
       tone: "violet" as const,
-      what: "Anything with a scope: a booking or ordering system, a customer portal, a shop, an integration with the tools you already use. Quoted after a short call, built on the same Vigil platform.",
-      goodFor: ["Online ordering, booking or scheduling", "A members area or customer portal", "E-commerce", "Connecting the website to the systems you already run"],
+      what: "Software and systems that go beyond a standard business website: native booking, customer portals, advanced ecommerce, custom APIs and complex automation. Quoted after a scope call and built on the same Vigil platform.",
+      goodFor: ["Native booking or operational workflows", "A members area, dashboard or customer portal", "Advanced ecommerce or marketplace functionality", "Custom APIs and multi-system automation"],
       notFor: "A first website; start with Express or Professional and grow into this.",
       timeline: "Timeline and revisions agreed in the scope.",
       cta: { label: "Book a call", href: "#get-started" },
     },
   },
   glance: [
-    { label: "Pages", express: "One", professional: "Several", custom: "As scoped" },
+    { label: "Pages", express: "One", professional: "Up to 8 primary pages", custom: "As scoped" },
     { label: "Design", express: "Industry template, made yours", professional: "Custom", custom: "Custom" },
-    { label: "First look", express: "1–2 business days", professional: "Agreed in the call", custom: "Agreed in the scope" },
+    { label: "First look", express: "1–2 business days", professional: "Confirmed after intake", custom: "Agreed in the scope" },
     { label: "Revision rounds", express: "One", professional: "Two", custom: "As scoped" },
-    { label: "How you start", express: "Pick a template, check out", professional: "Short call, then a checkout link", custom: "Short call, then a quote" },
+    { label: "How you start", express: "Pick a template, check out", professional: "Fit guide, then online checkout", custom: "Scope call, then a quote" },
   ],
   platformNote: "Every Vigil website, whichever build, comes with the Vigil platform underneath: hosting, domain, security, updates and a dashboard that says plainly what is live. You choose how much we take off your plate with a plan.",
 };

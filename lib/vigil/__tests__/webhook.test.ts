@@ -49,6 +49,18 @@ describe("receiveBillingEvent", () => {
     expect(fake.rows("webhook_events")[0].processed_at).toBeTruthy();
   });
 
+  it("provisions Professional access but waits for staff before creating a repository", async () => {
+    const professional = seed();
+    professional.rows("build_prices").push({ id: "build_professional", kind: "professional", name: "Professional Site", amount_cents: 149900, currency: "usd", is_active: true });
+    const provider = getBillingProvider();
+    const checkout = await startCheckout(professional.asClient(), { email: "owner@professional.test", businessName: "Professional Co", projectKind: "professional", planCode: "care", buildAmountOverrideCents: 175000, appUrl: "https://app.test" }, provider);
+    const session = (professional.rows("orders")[0].metadata as { checkout_session: string }).checkout_session;
+    await receiveBillingEvent(professional.asClient(), checkoutCompleted(checkout.orderId, session, await provider.getCheckoutSession(session)));
+    expect(professional.rows("orders")[0]).toMatchObject({ status: "provisioned", project_kind: "professional", build_amount_cents: 175000 });
+    expect(professional.rows("provisioning_jobs").map((job) => job.kind)).toEqual(["order.provision"]);
+    expect(professional.rows("websites")[0].repository_ref ?? null).toBeNull();
+  });
+
   it("acknowledges a redelivered event without running anything again", async () => {
     const snapshot = await getBillingProvider().getCheckoutSession(sessionId);
     const event = checkoutCompleted(orderId, sessionId, snapshot, "evt_once");

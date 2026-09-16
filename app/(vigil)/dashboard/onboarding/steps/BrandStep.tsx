@@ -4,14 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { ImagePlus, Trash2, Upload } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
 import { recordProjectAssets, removeProjectAsset, updateAssetCaption } from "@/lib/vigil/actions/onboarding";
-import { brandSchema, type Brand } from "@/lib/vigil/onboarding/brief";
+import { brandSchema, type Brand, type ProjectKind } from "@/lib/vigil/onboarding/brief";
 import { assetPath, IMAGE_ACCEPT, LOGO_ACCEPT, MAX_PHOTOS, PROJECT_ASSETS_BUCKET, validateAssets, type AssetKind } from "@/lib/vigil/onboarding/assets";
 import type { SignedAsset } from "@/lib/vigil/queries/onboarding";
 import { formatBytes } from "@/lib/vigil/attachments";
-import { ChoiceCards, Field, StepFooter, TextInput, useAutosave, VirtueAside, type SaveState } from "../wizard-ui";
+import { ChoiceCards, Field, StepFooter, TextArea, TextInput, useAutosave, VirtueAside, type SaveState } from "../wizard-ui";
 
 type Props = {
   initial: Brand | undefined;
+  projectKind: ProjectKind;
   projectId: string;
   organizationId: string;
   assets: SignedAsset[];
@@ -24,19 +25,21 @@ type Props = {
 
 type UploadState = { kind: AssetKind; done: number; total: number } | null;
 
-export function BrandStep({ initial, projectId, organizationId, assets, onAssets, save, onSaveState, onBack, onNext }: Props) {
+export function BrandStep({ initial, projectKind, projectId, organizationId, assets, onAssets, save, onSaveState, onBack, onNext }: Props) {
   const [data, setData] = useState<Brand>(() => initial ?? brandSchema.parse({}));
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState<UploadState>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const logoInput = useRef<HTMLInputElement | null>(null);
   const photoInput = useRef<HTMLInputElement | null>(null);
+  const inspirationInput = useRef<HTMLInputElement | null>(null);
   const { state, flush } = useAutosave(data, (v) => save(v));
   useEffect(() => onSaveState(state), [state, onSaveState]);
 
   const logos = assets.filter((a) => a.kind === "logo");
   const photos = assets.filter((a) => a.kind === "photo");
   const documents = assets.filter((a) => a.kind === "document");
+  const inspiration = assets.filter((a) => a.kind === "other");
 
   /** Browser-direct upload to Storage, then record the rows. */
   const upload = async (files: File[], kind: AssetKind) => {
@@ -170,6 +173,20 @@ export function BrandStep({ initial, projectId, organizationId, assets, onAssets
         </label>
       </section>
 
+      {projectKind !== "express" ? (
+        <section>
+          <p className="mb-1 text-xs font-medium text-[color:var(--text-secondary)]">Layouts, sketches and visual inspiration <span className="font-normal opacity-70">(optional)</span></p>
+          <p className="mb-2 text-[11px] text-[color:var(--text-secondary)]">Upload screenshots, mood boards, rough wireframes, PDFs or anything that helps explain the style and layout you have in mind. Add captions to tell us what matters.</p>
+          {inspiration.length > 0 ? (
+            <ul className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {inspiration.map((asset) => <AssetTile key={asset.id} asset={asset} onRemove={() => remove(asset)} captionable />)}
+            </ul>
+          ) : null}
+          <input ref={inspirationInput} type="file" multiple accept="application/pdf,image/png,image/jpeg,image/webp,image/gif" className="sr-only" onChange={(event) => { const files = Array.from(event.target.files ?? []); event.target.value = ""; if (files.length) void upload(files, "other"); }} />
+          <button type="button" onClick={() => inspirationInput.current?.click()} disabled={Boolean(uploading)} className="inline-flex min-h-11 items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 text-xs hover:border-[color:var(--accent)] disabled:opacity-60"><Upload className="h-4 w-4" /> Add inspiration files</button>
+        </section>
+      ) : null}
+
       {uploadError ? <p role="alert" className="text-xs text-[color:var(--status-bad)]">{uploadError}</p> : null}
       {uploading ? <VirtueAside state="working">Uploading {uploading.done} of {uploading.total}… files go straight to your private storage.</VirtueAside> : null}
 
@@ -194,8 +211,19 @@ export function BrandStep({ initial, projectId, organizationId, assets, onAssets
         </div>
       </section>
 
-      <Field id="brandNotes" label="Anything about the look you love or hate" optional hint="Sites you admire, colours to avoid, fonts you already use.">
-        <TextInput id="brandNotes" value={data.notes} onChange={(e) => set("notes", e.target.value)} maxLength={600} />
+      {projectKind !== "express" ? (
+        <>
+          <Field id="brandDirection" label="Describe the style, mood or feeling you want" optional hint="Words are enough: warm and editorial, bold and energetic, quiet luxury, playful, technical, traditional.">
+            <TextArea id="brandDirection" rows={4} value={data.direction} onChange={(event) => set("direction", event.target.value)} maxLength={1000} />
+          </Field>
+          <Field id="brandAvoid" label="Anything you want us to avoid" optional>
+            <TextArea id="brandAvoid" rows={3} value={data.avoid} onChange={(event) => set("avoid", event.target.value)} maxLength={600} />
+          </Field>
+        </>
+      ) : null}
+
+      <Field id="brandNotes" label={projectKind === "express" ? "Anything about the look you love or hate" : "Other brand or design notes"} optional hint={projectKind === "express" ? "Sites you admire, colours to avoid, fonts you already use." : undefined}>
+        <TextArea id="brandNotes" rows={3} value={data.notes} onChange={(e) => set("notes", e.target.value)} maxLength={1000} />
       </Field>
 
       <StepFooter onBack={onBack} onNext={continueNext} busy={busy || Boolean(uploading)} />

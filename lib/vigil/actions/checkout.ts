@@ -36,20 +36,26 @@ export async function beginCheckout(_prev: CheckoutState, formData: FormData): P
     // A staff-created link is bound to its token; the order id alone is not enough.
     let existingOrderId: string | null = null;
     let buildOverride: number | null = null;
+    let projectKind = v.project_kind;
+    let templateSlug = v.template_slug || null;
     if (v.order_id && v.checkout_token) {
-      const { data: order } = await admin.from("orders").select("id, status, build_amount_cents, project_kind").eq("id", v.order_id).eq("checkout_token", v.checkout_token).maybeSingle();
+      const { data: order } = await admin.from("orders").select("id, status, build_amount_cents, project_kind, template_slug").eq("id", v.order_id).eq("checkout_token", v.checkout_token).maybeSingle();
       if (!order) throw new ValidationError("This checkout link is not valid.");
       if (order.status !== "pending") throw new ValidationError("This order has already been paid.");
       existingOrderId = order.id;
-      if (order.project_kind === "custom") buildOverride = order.build_amount_cents;
+      // Commercial scope comes from the trusted staff-created order, never
+      // hidden browser fields. The customer may still choose their plan.
+      projectKind = order.project_kind;
+      templateSlug = order.template_slug;
+      buildOverride = order.build_amount_cents;
     }
 
     const result = await startCheckout(admin, {
       email: v.email,
       contactName: v.contact_name || null,
       businessName: v.business_name,
-      projectKind: v.project_kind,
-      templateSlug: v.template_slug || null,
+      projectKind,
+      templateSlug,
       planCode: v.plan_code,
       billingPeriod: v.billing_period,
       existingOrderId,

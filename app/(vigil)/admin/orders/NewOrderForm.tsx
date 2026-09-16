@@ -40,13 +40,21 @@ export function NewOrderForm({ plans, templates }: { plans: { code: string; name
         </select>
       </div>
       <div>
-        <label className={labelClass} htmlFor="o-template">Template</label>
-        <select id="o-template" name="template_slug" className={inputClass} defaultValue="" disabled={pending}>
-          <option value="">None / custom design</option>
-          {templates.map((t) => (
-            <option key={t.slug} value={t.slug}>{t.name}</option>
-          ))}
-        </select>
+        {kind === "express" ? (
+          <>
+            <label className={labelClass} htmlFor="o-template">Template</label>
+            <select id="o-template" name="template_slug" className={inputClass} defaultValue="" disabled={pending}>
+              <option value="">Choose a template</option>
+              {templates.map((t) => (
+                <option key={t.slug} value={t.slug}>{t.name}</option>
+              ))}
+            </select>
+          </>
+        ) : (
+          <div className="rounded-lg border border-[color:var(--border)] px-3 py-2 text-xs text-[color:var(--text-secondary)]">
+            {kind === "professional" ? "Up to 8 custom primary pages with standard booking and integrations. The build foundation is chosen after onboarding and scope review." : "The build foundation follows the agreed custom scope."}
+          </div>
+        )}
       </div>
       <div>
         <label className={labelClass} htmlFor="o-plan">Vigil plan</label>
@@ -57,8 +65,8 @@ export function NewOrderForm({ plans, templates }: { plans: { code: string; name
         </select>
       </div>
       <div>
-        <label className={labelClass} htmlFor="o-amount">Build amount (USD){kind === "custom" ? "" : " · override"}</label>
-        <input id="o-amount" name="build_amount" inputMode="decimal" className={inputClass} placeholder={kind === "custom" ? "e.g. 2500" : "catalog price"} disabled={pending} />
+        <label className={labelClass} htmlFor="o-amount">Build amount (USD){kind === "express" ? " · optional override" : " · agreed price"}</label>
+        <input id="o-amount" name="build_amount" inputMode="decimal" className={inputClass} placeholder={kind === "custom" ? "e.g. 2500" : kind === "professional" ? "catalog price if blank" : "catalog price"} disabled={pending} />
         {issues.build_amount ? <p className="mt-1 text-xs text-[#ef4444]">{issues.build_amount[0]}</p> : null}
       </div>
       <div className="sm:col-span-2 lg:col-span-3">
