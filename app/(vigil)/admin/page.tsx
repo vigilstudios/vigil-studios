@@ -21,7 +21,7 @@ export default async function AdminOverviewPage() {
   const serviceRole = hasAdminClient();
 
   const attentionCount =
-    attention.jobs.length + attention.domains.length + attention.websites.length + attention.subscriptions.length + attention.requests.length;
+    attention.jobs.length + attention.domains.length + attention.websites.length + attention.subscriptions.length + attention.requests.length + attention.projects.length;
 
   return (
     <div className="space-y-4">
@@ -55,6 +55,9 @@ export default async function AdminOverviewPage() {
             <StatusLine tone="good" label="Nothing waiting on a human" hint="Failed jobs, broken domains, suspended sites, unpaid subscriptions and new requests land here." />
           ) : (
             <ul className="divide-y divide-[color:var(--border)]">
+              {attention.projects.map((project) => (
+                <AttentionRow key={`p${project.id}`} tone="info" href={`/admin/organizations/${project.organization?.id}`} title={`Onboarding ready · ${project.name}`} meta={`${project.organization?.name ?? "Unknown customer"} · ${titleCase(project.kind)} site`} when={project.updated_at} />
+              ))}
               {attention.jobs.map((j) => (
                 <AttentionRow key={`j${j.id}`} tone="bad" href="/admin/jobs?status=failed" title={`Job failed · ${j.kind}`} meta={`${j.organization?.name ?? "Unknown customer"} · ${(j.error as { message?: string } | null)?.message ?? "no message"}`} when={j.updated_at} />
               ))}

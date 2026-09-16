@@ -196,15 +196,16 @@ export const jobStatusCounts = cache(async () => {
 /** Everything a human should look at, across tenants. Bounded lists; newest first. */
 export const attentionItems = cache(async () => {
   const supabase = await createClient();
-  const [jobs, domains, websites, subs, requests] = await Promise.all([
+  const [jobs, domains, websites, subs, requests, projects] = await Promise.all([
     supabase.from("provisioning_jobs").select("id, kind, error, updated_at, organization:organizations(id, name)").eq("status", "failed").order("updated_at", { ascending: false }).limit(10),
-    supabase.from("domains").select("id, hostname, status, status_reason, updated_at, organization:organizations(id, name)").in("status", ["error", "expired"]).order("updated_at", { ascending: false }).limit(10),
+    supabase.from("domains").select("id, hostname, status, status_reason, updated_at, organization:organizations(id, name)").in("status", ["pending", "verifying", "error", "expired"]).order("updated_at", { ascending: false }).limit(10),
     supabase.from("websites").select("id, name, status, status_reason, updated_at, organization:organizations(id, name)").in("status", ["error", "suspended"]).order("updated_at", { ascending: false }).limit(10),
     supabase.from("subscriptions").select("id, status, updated_at, organization:organizations(id, name), plan:plans(name)").in("status", ["past_due", "unpaid", "incomplete"]).order("updated_at", { ascending: false }).limit(10),
     supabase.from("change_requests").select("id, title, status, submitted_at, organization:organizations(id, name)").eq("status", "submitted").order("submitted_at", { ascending: true }).limit(10),
+    supabase.from("projects").select("id, name, kind, updated_at, organization:organizations(id, name)").not("intake_completed_at", "is", null).eq("status", "in_progress").order("updated_at", { ascending: false }).limit(10),
   ]);
-  for (const r of [jobs, domains, websites, subs, requests]) if (r.error) throw r.error;
-  return { jobs: jobs.data ?? [], domains: domains.data ?? [], websites: websites.data ?? [], subscriptions: subs.data ?? [], requests: requests.data ?? [] };
+  for (const r of [jobs, domains, websites, subs, requests, projects]) if (r.error) throw r.error;
+  return { jobs: jobs.data ?? [], domains: domains.data ?? [], websites: websites.data ?? [], subscriptions: subs.data ?? [], requests: requests.data ?? [], projects: projects.data ?? [] };
 });
 
 /** Unresolved workflow state used by the admin navigation attention dots. */
