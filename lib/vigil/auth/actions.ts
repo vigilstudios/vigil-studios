@@ -7,6 +7,7 @@ import type { ActionResult } from "./errors";
 import { NEXT_COOKIE, nextCookieOptions } from "./next-cookie";
 import { MIN_PASSWORD_LENGTH } from "./password";
 import { isPlausibleEmail, normalizeEmail, safeNextPath } from "./redirects";
+import { ONBOARDING_WELCOME_HREF } from "@/lib/vigil/onboarding/constants";
 
 async function siteOrigin(): Promise<string> {
   const configured = process.env.NEXT_PUBLIC_APP_URL;
@@ -25,7 +26,11 @@ export type SignInState = ActionResult<{ email: string }> | null;
  */
 export async function signInWithEmail(_prev: SignInState, formData: FormData): Promise<SignInState> {
   const email = normalizeEmail(String(formData.get("email") ?? ""));
-  const next = safeNextPath(String(formData.get("next") ?? ""));
+  const requestedNext = safeNextPath(String(formData.get("next") ?? ""));
+  // A replacement sign-in link should recreate the intended first-arrival
+  // experience. The welcome entry only clears the temporary skip cookie;
+  // completed customers continue straight to their normal dashboard.
+  const next = requestedNext === "/dashboard" ? ONBOARDING_WELCOME_HREF : requestedNext;
 
   if (!isPlausibleEmail(email)) {
     return { ok: false, error: "Enter the email address you use with Vigil Studios.", code: "validation" };
