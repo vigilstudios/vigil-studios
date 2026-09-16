@@ -1,5 +1,6 @@
 import { AccountBlock } from "@/components/vigil/AccountBlock";
 import { AppShell } from "@/components/vigil/AppShell";
+import { LiveDashboardSync } from "@/components/vigil/LiveDashboardSync";
 import { OrgSwitcher } from "@/components/vigil/OrgSwitcher";
 import type { NavGroup } from "@/components/vigil/nav";
 import { getOrgContext, requireViewer } from "@/lib/vigil/auth/session";
@@ -83,6 +84,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         />
       }
     >
+      <LiveDashboardSync scope={ctx ? { kind: "organization", organizationId: ctx.organization.id, userId: viewer.user.id } : { kind: "viewer", userId: viewer.user.id }} />
       {children}
     </AppShell>
   );

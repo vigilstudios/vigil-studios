@@ -1,5 +1,6 @@
 import { AccountBlock } from "@/components/vigil/AccountBlock";
 import { AppShell } from "@/components/vigil/AppShell";
+import { LiveDashboardSync } from "@/components/vigil/LiveDashboardSync";
 import type { NavGroup } from "@/components/vigil/nav";
 import { requireStaff } from "@/lib/vigil/auth/session";
 import { adminNavAttention } from "@/lib/vigil/queries/admin";
@@ -45,6 +46,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       }
       account={<AccountBlock name={staff.profile.full_name} email={staff.profile.email} crossLink={{ href: "/dashboard", label: "Client view" }} />}
     >
+      <LiveDashboardSync scope={{ kind: "admin" }} />
       {children}
     </AppShell>
   );
