@@ -78,6 +78,8 @@ describe("customer-facing descriptions", () => {
   it("uses the master architecture's outcome language", () => {
     expect(describeWebsiteStatus("live").label).toBe("Website Live");
     expect(describeDomainStatus("connected").label).toBe("Domain Connected");
+    expect(describeDomainStatus("verifying", { dnsOk: true, sslOk: false, reachable: false }).label).toBe("Securing domain");
+    expect(describeDomainStatus("verifying", { dnsOk: true, sslOk: true, reachable: false }).label).toBe("Establishing connection");
     expect(describeSubscriptionStatus("active").label).toBe("Subscription Active");
   });
 });

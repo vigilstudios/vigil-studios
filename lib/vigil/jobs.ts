@@ -138,7 +138,7 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
       // With no provider site yet there is nothing to connect to, so check
       // less often; the deploy step re-queues a verify when the site exists.
       if (result.reason === "no_site") throw new RetryLater(result.dnsOk ? "DNS correct; waiting for the website" : "DNS not yet verified; no site yet", 6 * 60 * 60);
-      throw new RetryLater("DNS not yet verified", 15 * 60);
+      throw new RetryLater("Domain connection is still propagating", 15 * 60);
     }
     return { connected: true };
   },

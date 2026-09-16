@@ -131,7 +131,7 @@ export function BriefSummary({ brief, projectKind = "express", assets, domain, o
               </div>
             ) : null}
             {d.delegate ? <Row label="DNS changes" value="Vigil will make them (temporary access)" /> : null}
-            {d.later ? <Row label="Records" value="To add later, from the Domain page" /> : null}
+            {d.later ? <Row label="DNS setup" value="Available from the Domain page after the preview is deployed" /> : null}
           </>
         ) : null}
         {d?.answer === "need" ? <Row label="Preferred names" value={d.preferredNames.filter(Boolean).join(", ") || "None given"} /> : null}

@@ -29,7 +29,8 @@ export default async function DomainPage() {
       ) : (
         <div className="space-y-4">
           {domains.map((domain) => {
-            const status = describeDomainStatus(domain.status);
+            const reachable = (domain.verification as { connection_reachable?: boolean } | null)?.connection_reachable ?? null;
+            const status = describeDomainStatus(domain.status, { dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable });
             const records = requiredRecords(domain.hostname, domain.verification);
             return (
               <Card key={domain.id}>
@@ -47,6 +48,7 @@ export default async function DomainPage() {
                     { label: "Owner", value: domain.source === "purchased_via_vigil" ? "You (registered through Vigil)" : "You" },
                     { label: "DNS", value: domain.dns_ok === null ? "Not checked yet" : domain.dns_ok ? "Correct" : "Needs changes" },
                     { label: "SSL", value: domain.ssl_ok ? "Active" : "Pending" },
+                    { label: "Website", value: domain.status === "connected" && reachable ? "Reachable" : domain.ssl_ok ? "Establishing connection" : "Waiting" },
                     { label: "Expires", value: domain.expires_at ? formatDate(domain.expires_at) : "Managed by your registrar" },
                     { label: "Last checked", value: formatRelative(domain.last_checked_at) },
                   ]}
@@ -54,12 +56,15 @@ export default async function DomainPage() {
                 {domain.status !== "connected" && domain.source === "customer_owned" ? (
                   <div className="mt-4 rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-4">
                     <DomainGuidePanel
+                      key={`${domain.id}:${domain.updated_at}`}
                       domain={{
                         domainId: domain.id,
                         hostname: domain.hostname,
                         status: domain.status,
                         records,
                         dnsOk: domain.dns_ok,
+                        sslOk: domain.ssl_ok,
+                        reachable,
                         statusReason: domain.status_reason,
                         cutoverReady: (domain.verification as { source?: string } | null)?.source === "provider",
                       }}

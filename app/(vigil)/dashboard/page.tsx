@@ -57,7 +57,8 @@ export default async function OverviewPage() {
   const displayedWebsiteStatus = website?.preview_url && !website.live_url
     ? { label: "Preview ready", tone: "good" as const, hint: "Your shareable build preview is ready to view." }
     : websiteStatus;
-  const domainStatus = domain ? describeDomainStatus(domain.status) : null;
+  const domainReachable = (domain?.verification as { connection_reachable?: boolean } | null)?.connection_reachable ?? null;
+  const domainStatus = domain ? describeDomainStatus(domain.status, { dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable: domainReachable }) : null;
   const subStatus = subscription ? describeSubscriptionStatus(subscription.status) : null;
   const projectStatus = project ? describeProjectStatus(project.status) : null;
   const reviewProjectStatus = professionalReviewStatus(projectReview);
@@ -170,6 +171,7 @@ export default async function OverviewPage() {
                     })),
                     { label: "DNS pointing at Vigil", tone: domain.dns_ok === null ? "neutral" : domain.dns_ok ? "good" : "warn" },
                     { label: "SSL certificate", tone: domain.ssl_ok ? "good" : domain.status === "connected" ? "warn" : "neutral" },
+                    { label: "Site reachable on your domain", tone: domain.status === "connected" && domainReachable ? "good" : domain.ssl_ok ? "info" : "neutral" },
                   ]}
                 />
               </div>

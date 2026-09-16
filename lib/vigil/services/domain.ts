@@ -3,13 +3,18 @@ import { assertTransition, domainTransitions } from "@/lib/vigil/lifecycle";
 import { getDeploymentProvider } from "@/lib/vigil/providers/registry";
 import type { DeploymentProvider } from "@/lib/vigil/providers/types";
 import { NotFoundError } from "@/lib/vigil/auth/errors";
-import { checkDnsRecords, platformDnsRecords, type DnsRecord } from "./dns";
+import { checkDnsRecords, checkHttpsReachable, platformDnsRecords, type DnsCheck, type DnsRecord } from "./dns";
 import { findExternalId, providerEnum } from "./provider-links";
 
 export type ManagedDomainConfig = {
   hostname: string;
   canonicalHostname: string;
   redirectTo?: string;
+};
+
+type ConnectionChecks = {
+  checkDns?: (hostname: string, records: DnsRecord[]) => Promise<DnsCheck[]>;
+  checkHttps?: (hostname: string) => Promise<boolean>;
 };
 
 /**
@@ -47,6 +52,46 @@ async function addManagedDomains(provider: DeploymentProvider, siteExternalId: s
   return { plan, configs };
 }
 
+function pendingReason(status: string, dnsOk: boolean, sslOk: boolean, reachable: boolean): string {
+  if (!dnsOk) {
+    return status === "verifying"
+      ? "The DNS record is not visible yet. We will keep checking automatically."
+      : "The connection details are ready. Add the DNS record below, then select I've added the records."
+  }
+  if (!sslOk) return "Your DNS record is correct. We are issuing the secure certificate now.";
+  if (!reachable) return "DNS and SSL are ready. We are waiting for the website to respond before opening the domain.";
+  return "The domain is connected.";
+}
+
+function verificationState(
+  records: DnsRecord[],
+  checks: DnsCheck[],
+  hostnames: string[],
+  canonicalHostname: string,
+  reachable: boolean
+) {
+  return {
+    required_records: records,
+    source: "provider",
+    hostnames,
+    canonical_hostname: canonicalHostname,
+    connection_reachable: reachable,
+    checks: checks.map((check) => ({ type: check.record.type, name: check.record.name, ok: check.ok, found: check.found })),
+  };
+}
+
+async function publishConnectedDomain(admin: DbClient, websiteId: string | null, domainId: string, canonicalHostname: string) {
+  if (!websiteId) return;
+  await admin.from("websites").update({ primary_domain_id: domainId, live_url: `https://${canonicalHostname}` }).eq("id", websiteId);
+}
+
+async function restoreProviderAddress(admin: DbClient, websiteId: string | null) {
+  if (!websiteId) return;
+  const { data: website } = await admin.from("websites").select("preview_url").eq("id", websiteId).maybeSingle();
+  if (!website) return;
+  await admin.from("websites").update({ primary_domain_id: null, live_url: website.preview_url ?? null }).eq("id", websiteId);
+}
+
 /**
  * DomainService: guided connection for a customer-owned domain (Flow B).
  * Registration through a DomainProvider (Flow A) is a later phase; the
@@ -62,11 +107,13 @@ export function normalizeHostname(input: string): string | null {
 export async function beginDomainVerification(
   admin: DbClient,
   domainId: string,
-  provider: DeploymentProvider = getDeploymentProvider()
+  provider: DeploymentProvider = getDeploymentProvider(),
+  connectionChecks: ConnectionChecks = {}
 ): Promise<void> {
   const { data: domain, error } = await admin.from("domains").select("*").eq("id", domainId).maybeSingle();
   if (error) throw error;
   if (!domain) throw new NotFoundError(`Domain ${domainId} not found.`);
+  if (domain.status === "released") return;
   if (!domain.website_id) {
     await admin.from("domains").update({ status_reason: "No website is attached to this domain yet." }).eq("id", domainId);
     return;
@@ -97,34 +144,60 @@ export async function beginDomainVerification(
   }
 
   const { plan, configs } = await addManagedDomains(provider, siteExternalId, domain.hostname, domain.kind);
-  const dnsOk = configs.every((config) => config.verified);
-  const sslOk = configs.every((config) => config.sslReady && !config.misconfigured);
-  const nextStatus = domain.status === "connected" || domain.status === "verifying" ? domain.status : "verifying";
-  if (nextStatus !== domain.status) assertTransition(domainTransitions, domain.status, nextStatus, "domain");
+  const records = uniqueRecords(configs);
+  const checkDns = connectionChecks.checkDns ?? checkDnsRecords;
+  const checkHttps = connectionChecks.checkHttps ?? checkHttpsReachable;
+  const publicChecks = records.length > 0 ? await checkDns(domain.hostname, records) : [];
+  const dnsOk = publicChecks.length > 0 && publicChecks.every((check) => check.ok);
+  const sslOk = dnsOk && configs.every((config) => config.sslReady && !config.misconfigured);
+  const reachable = sslOk ? await checkHttps(plan[0].canonicalHostname) : false;
+  const connected = dnsOk && sslOk && reachable;
+  const wasConnected = domain.status === "connected";
+  let nextStatus = domain.status;
+  if (connected && domain.status !== "connected") {
+    if (domain.status !== "verifying") {
+      assertTransition(domainTransitions, domain.status, "verifying", "domain");
+      nextStatus = "verifying";
+    }
+    assertTransition(domainTransitions, nextStatus, "connected", "domain");
+    nextStatus = "connected";
+  } else if (!connected && domain.status === "connected") {
+    assertTransition(domainTransitions, "connected", "verifying", "domain");
+    nextStatus = "verifying";
+  }
 
+  const now = new Date().toISOString();
+  const connectedTimestamps = connected ? { verified_at: now, connected_at: now } : {};
   const { error: updateError } = await admin
     .from("domains")
     .update({
       status: nextStatus,
-      verification: { required_records: uniqueRecords(configs), source: "provider", hostnames: plan.map((item) => item.hostname), canonical_hostname: plan[0].canonicalHostname },
+      verification: verificationState(records, publicChecks, plan.map((item) => item.hostname), plan[0].canonicalHostname, reachable),
       dns_ok: dnsOk,
       ssl_ok: sslOk,
-      last_checked_at: new Date().toISOString(),
-      status_reason: null,
+      ...connectedTimestamps,
+      last_checked_at: now,
+      status_reason: connected ? null : pendingReason(nextStatus, dnsOk, sslOk, reachable),
     })
     .eq("id", domainId);
   if (updateError) throw updateError;
+  if (connected) await publishConnectedDomain(admin, domain.website_id, domain.id, plan[0].canonicalHostname);
+  else if (wasConnected) await restoreProviderAddress(admin, domain.website_id);
 }
 
 /** Re-check DNS and SSL; move to connected when both are good. */
 export async function verifyDomain(
   admin: DbClient,
   domainId: string,
-  provider: DeploymentProvider = getDeploymentProvider()
+  provider: DeploymentProvider = getDeploymentProvider(),
+  connectionChecks: ConnectionChecks = {}
 ): Promise<{ connected: boolean; reason?: "no_site"; dnsOk?: boolean }> {
   const { data: domain, error } = await admin.from("domains").select("*").eq("id", domainId).maybeSingle();
   if (error) throw error;
   if (!domain) throw new NotFoundError(`Domain ${domainId} not found.`);
+  if (domain.status === "released") return { connected: false };
+  const checkDns = connectionChecks.checkDns ?? checkDnsRecords;
+  const checkHttps = connectionChecks.checkHttps ?? checkHttpsReachable;
 
   const siteExternalId = domain.website_id
     ? await findExternalId(admin, {
@@ -139,15 +212,16 @@ export async function verifyDomain(
     // real progress ("your records are right; the site is next").
     const records = (domain.verification as { required_records?: DnsRecord[] } | null)?.required_records ?? [];
     if (records.length === 0) return { connected: false, reason: "no_site" };
-    const checks = await checkDnsRecords(domain.hostname, records);
+    const checks = await checkDns(domain.hostname, records);
     const dnsOk = checks.every((c) => c.ok);
     await admin
       .from("domains")
       .update({
         dns_ok: dnsOk,
+        ssl_ok: false,
         last_checked_at: new Date().toISOString(),
         status_reason: dnsOk ? "Your DNS records are correct. Vigil finishes the connection when your website is published." : null,
-        verification: { ...(domain.verification as Record<string, unknown> | null), checks: checks.map((c) => ({ type: c.record.type, name: c.record.name, ok: c.ok, found: c.found })) },
+        verification: { ...(domain.verification as Record<string, unknown> | null), connection_reachable: false, checks: checks.map((c) => ({ type: c.record.type, name: c.record.name, ok: c.ok, found: c.found })) },
       })
       .eq("id", domainId);
     return { connected: false, reason: "no_site", dnsOk };
@@ -155,10 +229,15 @@ export async function verifyDomain(
 
   const plan = managedDomainConfigs(domain.hostname, domain.kind);
   const configs = await Promise.all(plan.map((item) => provider.getDomainConfig(siteExternalId, item.hostname)));
-  const dnsOk = configs.every((config) => config.verified);
-  const sslOk = configs.every((config) => config.sslReady && !config.misconfigured);
-  const connected = dnsOk && sslOk;
+  const records = uniqueRecords(configs);
+  const publicChecks = records.length > 0 ? await checkDns(domain.hostname, records) : [];
+  const dnsOk = publicChecks.length > 0 && publicChecks.every((check) => check.ok);
+  const sslOk = dnsOk && configs.every((config) => config.sslReady && !config.misconfigured);
+  const reachable = sslOk ? await checkHttps(plan[0].canonicalHostname) : false;
+  const connected = dnsOk && sslOk && reachable;
+  const wasConnected = domain.status === "connected";
   const now = new Date().toISOString();
+  const verification = verificationState(records, publicChecks, plan.map((item) => item.hostname), plan[0].canonicalHostname, reachable);
 
   if (connected && domain.status !== "connected") {
     if (domain.status !== "verifying") {
@@ -169,21 +248,33 @@ export async function verifyDomain(
     assertTransition(domainTransitions, domain.status, "connected", "domain");
     await admin
       .from("domains")
-      .update({ status: "connected", dns_ok: true, ssl_ok: true, verified_at: now, connected_at: now, last_checked_at: now, status_reason: null })
+      .update({ status: "connected", dns_ok: true, ssl_ok: true, verification, verified_at: now, connected_at: now, last_checked_at: now, status_reason: null })
       .eq("id", domainId);
-    if (domain.website_id) {
-      await admin.from("websites").update({ primary_domain_id: domain.id, live_url: `https://${plan[0].canonicalHostname}` }).eq("id", domain.website_id);
-    }
+    await publishConnectedDomain(admin, domain.website_id, domain.id, plan[0].canonicalHostname);
+  } else if (connected) {
+    await admin
+      .from("domains")
+      .update({ dns_ok: true, ssl_ok: true, verification, last_checked_at: now, status_reason: null })
+      .eq("id", domainId);
+    await publishConnectedDomain(admin, domain.website_id, domain.id, plan[0].canonicalHostname);
   } else if (!connected) {
+    let nextStatus = domain.status;
+    if (domain.status === "connected") {
+      assertTransition(domainTransitions, "connected", "verifying", "domain");
+      nextStatus = "verifying";
+    }
     await admin
       .from("domains")
       .update({
+        status: nextStatus,
         dns_ok: dnsOk,
         ssl_ok: sslOk,
         last_checked_at: now,
-        verification: { required_records: uniqueRecords(configs), source: "provider", hostnames: plan.map((item) => item.hostname), canonical_hostname: plan[0].canonicalHostname },
+        status_reason: pendingReason(nextStatus, dnsOk, sslOk, reachable),
+        verification,
       })
       .eq("id", domainId);
+    if (wasConnected) await restoreProviderAddress(admin, domain.website_id);
   }
 
   return { connected };

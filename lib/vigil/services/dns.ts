@@ -44,8 +44,9 @@ export function requiredRecords(hostname: string, verification: unknown): DnsRec
 
 function fqdn(hostname: string, name: string): string {
   if (!name || name === "@" || name === hostname) return hostname;
-  if (name.endsWith(hostname)) return name;
-  return `${name}.${hostname}`;
+  const zone = registrableDomain(hostname);
+  if (name === zone || name.endsWith(`.${zone}`)) return name.replace(/\.$/, "");
+  return `${name}.${zone}`;
 }
 
 export type DnsCheck = { record: DnsRecord; found: string[]; ok: boolean };
@@ -90,6 +91,25 @@ export async function checkDnsRecords(hostname: string, records: DnsRecord[], re
     out.push({ record, found, ok });
   }
   return out;
+}
+
+/**
+ * A provider can report DNS and certificate configuration before the public
+ * hostname is actually serving the site. Confirm the customer-facing HTTPS
+ * address answers before exposing it as connected.
+ */
+export async function checkHttpsReachable(hostname: string, request: typeof fetch = fetch): Promise<boolean> {
+  try {
+    const response = await request(`https://${hostname}`, {
+      method: "HEAD",
+      redirect: "manual",
+      cache: "no-store",
+      signal: AbortSignal.timeout(8_000),
+    });
+    return response.status >= 200 && response.status < 400;
+  } catch {
+    return false;
+  }
 }
 
 /** Which registrar's default nameservers the domain uses, when it is one we know. */

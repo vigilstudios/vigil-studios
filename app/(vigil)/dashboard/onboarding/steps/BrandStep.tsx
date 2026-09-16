@@ -167,9 +167,9 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
             ))}
           </ul>
         ) : null}
-        <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 text-xs hover:border-[color:var(--accent)]">
+        <label className="relative inline-flex min-h-11 max-w-full cursor-pointer items-center gap-2 overflow-hidden rounded-md border border-dashed border-[color:var(--border)] px-3 text-xs hover:border-[color:var(--accent)]">
           <Upload className="h-4 w-4" /> Upload a file
-          <input type="file" multiple accept="application/pdf,image/png,image/jpeg,image/webp" className="sr-only" disabled={Boolean(uploading)} onChange={(e) => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) void upload(f, "document"); }} />
+          <input aria-label="Upload menus, price lists or brochures" type="file" multiple accept="application/pdf,image/png,image/jpeg,image/webp" className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed" disabled={Boolean(uploading)} onChange={(e) => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) void upload(f, "document"); }} />
         </label>
       </section>
 

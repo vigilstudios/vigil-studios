@@ -112,7 +112,7 @@ export function DomainStep({ initial, projectId, businessName, domain, onDomain,
               else setPhase("ask");
             }}
             options={[
-              { value: "own", label: "Yes, I own one", hint: "I'll show you exactly what to change." },
+              { value: "own", label: "Yes, I own one", hint: "Save it now. DNS setup starts after your preview is ready." },
               { value: "need", label: "No, I need one", hint: "Vigil registers it, in your name." },
               { value: "unsure", label: "Not sure", hint: "Takes ten seconds to work out." },
             ]}
@@ -182,14 +182,14 @@ export function DomainStep({ initial, projectId, businessName, domain, onDomain,
               </label>
               {canManage ? (
                 <button type="button" onClick={showSteps} disabled={working === "start"} className="btn-primary min-h-11 !px-5 !py-2.5 text-sm disabled:opacity-60">
-                  {working === "start" ? "One moment…" : "Show me the steps"}
+                  {working === "start" ? "Saving…" : "Save my domain"}
                 </button>
               ) : (
                 <p className="text-xs text-[color:var(--text-secondary)]">Only the account owner or a manager can connect a domain. Ask them to sign in, or choose &ldquo;Do this later&rdquo;.</p>
               )}
             </div>
           ) : null}
-          <StepFooter onBack={() => { set("answer", null); setPhase("ask"); }} onNext={() => continueNext({ hostname: hostname.trim(), later: true })} nextLabel="Do this later" busy={busy} laterHref={null} />
+          <StepFooter onBack={() => { set("answer", null); setPhase("ask"); }} laterHref={null} />
         </div>
       ) : null}
 
@@ -215,7 +215,7 @@ export function DomainStep({ initial, projectId, businessName, domain, onDomain,
           <StepFooter
             onBack={() => setPhase("hostname")}
             onNext={() => continueNext({ later: domain.status === "pending" && !data.delegate })}
-            nextLabel={domain.status === "pending" && !data.delegate && domain.records.length > 0 ? "Continue, I'll finish this later" : "Continue"}
+            nextLabel="Continue onboarding"
             busy={busy}
             laterHref={null}
           />

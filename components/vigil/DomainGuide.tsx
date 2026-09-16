@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ExternalLink } from "lucide-react";
+import { CheckCircle2, Circle, ExternalLink, LoaderCircle } from "lucide-react";
 import { clsx } from "clsx";
 import { REGISTRAR_GUIDES, REGISTRAR_OPTIONS, RECORD_TYPE_HELP } from "@/lib/vigil/domain-guides";
 import type { RegistrarKey } from "@/lib/vigil/onboarding/brief";
@@ -17,6 +17,8 @@ export type GuideDomain = {
   status: string;
   records: { type: string; name: string; value: string }[];
   dnsOk: boolean | null;
+  sslOk: boolean | null;
+  reachable: boolean | null;
   statusReason: string | null;
   cutoverReady: boolean;
 };
@@ -46,7 +48,7 @@ export function DomainGuide({
   compact?: boolean;
 }) {
   const guide = REGISTRAR_GUIDES[registrar];
-  const status = describeDomainStatus(domain.status as DomainStatus);
+  const status = describeDomainStatus(domain.status as DomainStatus, { dnsOk: domain.dnsOk, sslOk: domain.sslOk, reachable: domain.reachable });
   const connected = domain.status === "connected";
   const verifying = domain.status === "verifying";
   const apex = domain.records.some((record) => record.name === "@" || record.name === domain.hostname);
@@ -79,7 +81,7 @@ export function DomainGuide({
             <div className="flex items-start gap-2 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] px-3 py-2.5 text-[13px]">
               <VirtueOrb size="sm" state="working" label="" className="mt-0.5" />
               <p>
-                Your domain is recorded. <b>Do not change its DNS yet.</b> Your current website and email stay untouched while Vigil prepares the replacement site. The exact cutover records will unlock here when the new site is deployed and ready.
+                Your domain is saved. <b>You do not need to change anything yet.</b> As soon as your preview is deployed, the exact DNS record will appear here and we will guide you through the connection.
               </p>
             </div>
           ) : records.length === 0 ? (
@@ -146,6 +148,8 @@ export function DomainGuide({
             </ol>
           )}
 
+          {domain.cutoverReady && records.length > 0 ? <ConnectionProgress domain={domain} /> : null}
+
           {domain.cutoverReady && records.length > 0 && onConfirm ? (
             <div className="flex flex-wrap items-center gap-3">
               <button type="button" onClick={onConfirm} disabled={confirming || checking || verifying} className="btn-primary min-h-11 !px-5 !py-2.5 text-sm disabled:opacity-60">
@@ -154,7 +158,11 @@ export function DomainGuide({
               {verifying || checking ? (
                 <span className="flex items-center gap-2 text-xs text-[color:var(--text-secondary)]">
                   <VirtueOrb size="sm" state="working" label="" />
-                  {domain.dnsOk ? "Your records are right. Finishing the connection." : "Checking… this can take up to 48 hours. I keep checking and email you when it connects."}
+                  {domain.dnsOk
+                    ? domain.sslOk
+                      ? "The secure connection is ready. Waiting for the site to answer before we open it."
+                      : "Your DNS record is correct. We are creating the secure connection."
+                    : "Checking public DNS. This can take up to 48 hours, and we will email you when it connects."}
                 </span>
               ) : null}
             </div>
@@ -162,6 +170,33 @@ export function DomainGuide({
           {domain.statusReason && !verifying ? <p className="text-[11px] text-[color:var(--text-secondary)]">{domain.statusReason}</p> : null}
         </>
       )}
+    </div>
+  );
+}
+
+function ConnectionProgress({ domain }: { domain: GuideDomain }) {
+  const steps = [
+    { label: "DNS record", done: domain.dnsOk === true, active: domain.status === "verifying" && domain.dnsOk !== true },
+    { label: "Secure connection", done: domain.sslOk === true, active: domain.dnsOk === true && domain.sslOk !== true },
+    { label: "Site reachable", done: domain.status === "connected" && domain.reachable === true, active: domain.sslOk === true && domain.status !== "connected" },
+  ];
+  return (
+    <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] px-3 py-3" aria-label="Domain connection progress">
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--text-secondary)]">Connection progress</p>
+      <ol className="grid gap-2 sm:grid-cols-3">
+        {steps.map((step) => (
+          <li key={step.label} className="flex items-center gap-2 text-xs">
+            {step.done ? (
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-[color:var(--status-good)]" aria-hidden />
+            ) : step.active ? (
+              <LoaderCircle className="h-4 w-4 shrink-0 animate-spin text-[color:var(--status-info)]" aria-hidden />
+            ) : (
+              <Circle className="h-4 w-4 shrink-0 text-[color:var(--status-neutral)]" aria-hidden />
+            )}
+            <span className={step.done ? "text-[color:var(--text-primary)]" : "text-[color:var(--text-secondary)]"}>{step.label}</span>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }

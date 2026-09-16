@@ -212,6 +212,8 @@ export type DomainSetup = {
   registrar: RegistrarKey;
   records: DnsRecord[];
   dnsOk: boolean | null;
+  sslOk: boolean | null;
+  reachable: boolean | null;
   statusReason: string | null;
   /** DNS changes stay locked until the domain is attached to a deployed site. */
   cutoverReady: boolean;
@@ -285,11 +287,12 @@ export async function startOnboardingDomain(projectId: string, input: { hostname
 }
 
 async function domainSetup(supabase: Awaited<ReturnType<typeof createClient>>, domainId: string, registrar: RegistrarKey): Promise<DomainSetup> {
-  const { data: domain, error } = await supabase.from("domains").select("id, hostname, status, verification, dns_ok, status_reason").eq("id", domainId).single();
+  const { data: domain, error } = await supabase.from("domains").select("id, hostname, status, verification, dns_ok, ssl_ok, status_reason").eq("id", domainId).single();
   if (error) throw error;
   const records = requiredRecords(domain.hostname, domain.verification);
   const source = (domain.verification as { source?: string } | null)?.source;
-  return { domainId: domain.id, hostname: domain.hostname, status: domain.status, registrar, records, dnsOk: domain.dns_ok, statusReason: domain.status_reason, cutoverReady: source === "provider" || domain.status === "connected" };
+  const reachable = (domain.verification as { connection_reachable?: boolean } | null)?.connection_reachable ?? null;
+  return { domainId: domain.id, hostname: domain.hostname, status: domain.status, registrar, records, dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable, statusReason: domain.status_reason, cutoverReady: source === "provider" || domain.status === "connected" };
 }
 
 /** Re-read the domain's state (the wizard polls this while "Checking…"). */

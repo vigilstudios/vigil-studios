@@ -191,7 +191,7 @@ function SentView({ brief, assets, domain, projectKind }: { brief: Brief; assets
       <div className={clsx("mt-6 flex flex-wrap justify-center gap-3 transition-opacity duration-700", spoken ? "opacity-100" : "opacity-0")}>
         <Link href="/dashboard" className="btn-primary min-h-11 !px-5 !py-2.5 text-sm">Go to my dashboard</Link>
         {brief.domain?.answer === "own" && domain && domain.status !== "connected" ? (
-          <Link href="/dashboard/domain" className="btn-secondary min-h-11 !px-5 !py-2.5 text-sm">Finish connecting my domain</Link>
+          <Link href="/dashboard/domain" className="btn-secondary min-h-11 !px-5 !py-2.5 text-sm">View domain status</Link>
         ) : null}
       </div>
       <p className="mt-6 max-w-sm text-center text-[11px] text-[color:var(--text-secondary)]">{VIRTUE_NOTE}</p>

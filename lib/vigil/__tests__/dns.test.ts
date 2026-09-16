@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { checkDnsRecords, detectRegistrar, platformDnsRecords, requiredRecords } from "../services/dns";
+import { checkDnsRecords, checkHttpsReachable, detectRegistrar, platformDnsRecords, requiredRecords } from "../services/dns";
 import { managedDomainConfigs } from "../services/domain";
 
 const env = { ...process.env };
@@ -52,6 +52,30 @@ describe("checkDnsRecords", () => {
       resolver
     );
     expect(out.map((c) => c.ok)).toEqual([true, true, false, true]);
+  });
+
+  it("resolves a registrar-relative subdomain record from the registrable zone", async () => {
+    const seen: string[] = [];
+    const out = await checkDnsRecords(
+      "drytest.vigilstudios.co",
+      [{ type: "CNAME", name: "drytest", value: "cname.vercel-dns.com" }],
+      {
+        resolve4: async () => [],
+        resolve6: async () => [],
+        resolveCname: async (hostname) => { seen.push(hostname); return ["cname.vercel-dns.com."]; },
+        resolveTxt: async () => [],
+      }
+    );
+    expect(seen).toEqual(["drytest.vigilstudios.co"]);
+    expect(out[0].ok).toBe(true);
+  });
+});
+
+describe("checkHttpsReachable", () => {
+  it("requires the public HTTPS address to answer without a server error", async () => {
+    expect(await checkHttpsReachable("example.com", async () => new Response(null, { status: 200 }))).toBe(true);
+    expect(await checkHttpsReachable("example.com", async () => new Response(null, { status: 503 }))).toBe(false);
+    expect(await checkHttpsReachable("example.com", async () => { throw new Error("connection refused"); })).toBe(false);
   });
 });
 

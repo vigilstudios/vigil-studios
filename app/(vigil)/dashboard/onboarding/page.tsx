@@ -32,6 +32,8 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
         registrar: brief.domain?.registrar ?? ("other" as const),
         records: requiredRecords(domainRow.hostname, domainRow.verification),
         dnsOk: domainRow.dns_ok,
+        sslOk: domainRow.ssl_ok,
+        reachable: (domainRow.verification as { connection_reachable?: boolean } | null)?.connection_reachable ?? null,
         statusReason: domainRow.status_reason,
         cutoverReady: (domainRow.verification as { source?: string } | null)?.source === "provider" || domainRow.status === "connected",
       }
