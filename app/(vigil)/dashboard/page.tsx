@@ -13,12 +13,12 @@ import { hasPassword } from "@/lib/vigil/auth/password";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
 import { FEATURES, resolveEntitlements } from "@/lib/vigil/entitlements";
 import { formatDate, formatRelative, humanizeAction, titleCase } from "@/lib/vigil/format";
-import { describeDomainStatus, describeProjectStatus, describeSubscriptionStatus, describeWebsiteStatus } from "@/lib/vigil/lifecycle";
+import { describeDomainStatus, describeProjectStatus, describeSubscriptionStatus, describeWebsiteStatus, type CustomerStatus } from "@/lib/vigil/lifecycle";
 import { auditTone, periodProgress, previewSource, projectStepIndex, projectSteps, requiredRecords, templateName } from "@/lib/vigil/presenters";
 import { getOrgDomains, getOrgProjects, getOrgSubscription, getOrgWebsites, getRecentActivity, getRecentDeployments } from "@/lib/vigil/queries/dashboard";
 import { ONBOARDING_SKIP_COOKIE } from "@/lib/vigil/onboarding/constants";
 import { getOnboardingProject, needsOnboarding } from "@/lib/vigil/queries/onboarding";
-import { getCustomerProjectReviews } from "@/lib/vigil/queries/reviews";
+import { getCustomerProjectReviews, type ProjectReviews } from "@/lib/vigil/queries/reviews";
 
 export const metadata: Metadata = { title: "Overview" };
 
@@ -56,6 +56,8 @@ export default async function OverviewPage() {
   const domainStatus = domain ? describeDomainStatus(domain.status) : null;
   const subStatus = subscription ? describeSubscriptionStatus(subscription.status) : null;
   const projectStatus = project ? describeProjectStatus(project.status) : null;
+  const reviewProjectStatus = professionalReviewStatus(projectReview);
+  const displayedProjectStatus = reviewProjectStatus ?? projectStatus;
   const step = project ? projectStepIndex(project.status) : null;
   const period = periodProgress(subscription?.current_period_start ?? null, subscription?.current_period_end ?? null);
   const records = domain ? requiredRecords(domain.verification) : [];
@@ -222,13 +224,13 @@ export default async function OverviewPage() {
         </Panel>
 
         {/* Project */}
-        {project && projectStatus && step ? (
+        {project && displayedProjectStatus && step ? (
           <Panel className="lg:col-span-7" title="Your project">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:gap-8">
-              <div className="min-w-0 xl:w-52">
+              <div className="min-w-0 xl:w-72 xl:shrink-0">
                 <p className="truncate text-base font-semibold">{project.name}</p>
                 <div className="mt-1">
-                  <StatusLine tone={step.cancelled ? "neutral" : projectStatus.tone} label={projectStatus.label} size="sm" />
+                  <StatusLine tone={step.cancelled ? "neutral" : displayedProjectStatus.tone} label={displayedProjectStatus.label} hint={displayedProjectStatus.hint} size="sm" />
                 </div>
                 {project.kind === "professional" && (hasPostedReview || project.status === "review") ? (
                   <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -242,8 +244,8 @@ export default async function OverviewPage() {
                 ) : null}
               </div>
               <div className="min-w-0 flex-1">
-                <Stepper steps={projectSteps} current={step.current} done={step.done} tone={projectStatus.tone === "warn" ? "warn" : "info"} />
-                <p className="mt-2 text-center text-[11px] text-[color:var(--text-secondary)] sm:hidden">{projectSteps[step.current]?.label ?? projectStatus.label}</p>
+                <Stepper steps={projectSteps} current={step.current} done={step.done} tone={displayedProjectStatus.tone === "warn" ? "warn" : "info"} />
+                <p className="mt-2 text-center text-[11px] text-[color:var(--text-secondary)] sm:hidden">{projectSteps[step.current]?.label ?? displayedProjectStatus.label}</p>
               </div>
             </div>
             <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-[color:var(--border)] pt-4 text-xs sm:grid-cols-4">
@@ -297,4 +299,28 @@ export default async function OverviewPage() {
       </div>
     </div>
   );
+}
+
+function professionalReviewStatus(review: ProjectReviews | null): CustomerStatus | null {
+  if (!review?.rounds.length || review.rounds.every((round) => round.status === "pending")) return null;
+  if (review.rounds.length === 2 && review.rounds.every((round) => round.status === "approved")) {
+    return { label: "Review complete — both rounds approved", tone: "good", hint: "Your site is cleared for its production launch." };
+  }
+
+  const round = review.rounds.find((candidate) => candidate.status !== "approved");
+  if (!round) return null;
+  const name = round.number === 1 ? "Design direction" : "Full-site review";
+  const prefix = `Round ${round.number}: ${name}`;
+  switch (round.status) {
+    case "awaiting_feedback":
+      return { label: `${prefix} — ready for your review`, tone: "warn" };
+    case "changes_requested":
+      return { label: `${prefix} — changes requested`, tone: "info", hint: "Your consolidated notes are with the Vigil team." };
+    case "revision_in_progress":
+      return { label: `${prefix} — revisions in progress`, tone: "info" };
+    case "pending":
+      return { label: `${prefix} — being prepared`, tone: "info" };
+    case "approved":
+      return { label: `${prefix} — approved`, tone: "good" };
+  }
 }

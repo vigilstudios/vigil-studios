@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Check, CheckCircle2, FileText, Image as ImageIcon, Paperclip, RotateCcw, UploadCloud, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
@@ -203,7 +203,7 @@ export function ReviewDashboard({ review, organizationId, actions }: ReviewDashb
   };
 
   return (
-    <div className="space-y-4">
+    <div className="max-w-full space-y-4 overflow-x-clip">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--accent)]">Professional website</p>
@@ -296,8 +296,22 @@ function PreviewPanel({ review, previewUrl, currentRound, currentVersion }: { re
   return (
     <Panel title="Current preview" action={currentRound ? <StatusPill tone={reviewStatus(currentRound.status).tone}>{currentRound.title}</StatusPill> : undefined}>
       {previewUrl ? (
-        <div className="overflow-hidden rounded-lg border border-[color:var(--border)] bg-white">
-          <iframe src={previewUrl} title={`${review?.projectName ?? "Website"} preview`} className="h-[min(62vh,42rem)] min-h-[24rem] w-full" />
+        <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(13rem,0.34fr)] lg:items-start">
+          <ScaledPreview
+            src={previewUrl}
+            title={`${review?.projectName ?? "Website"} desktop preview`}
+            label="Desktop"
+            viewportWidth={1440}
+            viewportHeight={900}
+          />
+          <ScaledPreview
+            src={previewUrl}
+            title={`${review?.projectName ?? "Website"} mobile preview`}
+            label="Mobile"
+            viewportWidth={390}
+            viewportHeight={844}
+            mobile
+          />
         </div>
       ) : (
         <div className="flex min-h-[18rem] items-center justify-center rounded-lg border border-dashed border-[color:var(--border)] px-6 text-center">
@@ -313,6 +327,57 @@ function PreviewPanel({ review, previewUrl, currentRound, currentVersion }: { re
         {currentVersion?.note ? <span className="max-w-full truncate sm:max-w-[50%]" title={currentVersion.note}>{currentVersion.note}</span> : null}
       </div>
     </Panel>
+  );
+}
+
+/**
+ * Render the page at a real device viewport and scale the result to fit the
+ * dashboard. The iframe therefore keeps the site's desktop/mobile breakpoints
+ * instead of treating the card width as the browser viewport.
+ */
+function ScaledPreview({ src, title, label, viewportWidth, viewportHeight, mobile = false }: {
+  src: string;
+  title: string;
+  label: string;
+  viewportWidth: number;
+  viewportHeight: number;
+  mobile?: boolean;
+}) {
+  const hostRef = useRef<HTMLDivElement | null>(null);
+  const [hostWidth, setHostWidth] = useState(0);
+
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    const measure = () => setHostWidth(host.clientWidth);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(host);
+    return () => observer.disconnect();
+  }, []);
+
+  const scale = hostWidth > 0 ? Math.min(1, hostWidth / viewportWidth) : 0;
+  const displayHeight = Math.round(viewportHeight * scale);
+
+  return (
+    <figure className={`min-w-0 ${mobile ? "mx-auto w-full max-w-[390px]" : "w-full"}`}>
+      <figcaption className="mb-2 flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--text-secondary)]">
+        <span>{label}</span>
+        <span className="font-normal normal-case tracking-normal">{viewportWidth} × {viewportHeight}</span>
+      </figcaption>
+      <div className={`overflow-hidden border border-[color:var(--border)] bg-white shadow-sm ${mobile ? "rounded-[1.5rem] border-[6px] border-[color:var(--text-primary)]" : "rounded-lg"}`}>
+        <div ref={hostRef} className="relative w-full overflow-hidden" style={{ height: displayHeight || undefined, aspectRatio: hostWidth ? undefined : `${viewportWidth} / ${viewportHeight}` }}>
+          {scale > 0 ? (
+            <iframe
+              src={src}
+              title={title}
+              className="absolute left-0 top-0 border-0 bg-white"
+              style={{ width: viewportWidth, height: viewportHeight, transform: `scale(${scale})`, transformOrigin: "top left" }}
+            />
+          ) : null}
+        </div>
+      </div>
+    </figure>
   );
 }
 
@@ -418,9 +483,9 @@ function ReviewAttachments({ files, problems, busy, onFiles, onRemove }: { files
         <span>Add images or PDFs <span className="opacity-70">· up to {MAX_ATTACHMENTS_PER_REQUEST}, 10 MB each</span></span>
       </label>
       <input id="review-attachments" type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif,application/pdf" className="sr-only" disabled={busy} onChange={(event) => { onFiles(Array.from(event.target.files ?? [])); event.target.value = ""; }} />
-      {files.length > 0 ? <ul className="mt-2 divide-y divide-[color:var(--border)] rounded-md border border-[color:var(--border)]">{files.map((file, index) => {
+      {files.length > 0 ? <ul className="mt-2 min-w-0 max-w-full divide-y divide-[color:var(--border)] overflow-hidden rounded-md border border-[color:var(--border)]">{files.map((file, index) => {
         const issue = problems.find((problem) => problem.name === file.name);
-        return <li key={`${file.name}-${index}`} className="flex items-center gap-3 px-3 py-1.5 text-xs">
+        return <li key={`${file.name}-${index}`} className="flex min-w-0 max-w-full items-center gap-2 px-3 py-1.5 text-xs sm:gap-3">
           {file.type.startsWith("image/") ? <ImageIcon className="h-4 w-4 shrink-0 text-[color:var(--text-secondary)]" aria-hidden /> : <FileText className="h-4 w-4 shrink-0 text-[color:var(--text-secondary)]" aria-hidden />}
           <span className="min-w-0 flex-1 truncate">{file.name}</span><span className="shrink-0 text-[color:var(--text-secondary)]">{formatBytes(file.size)}</span>
           {issue ? <span className="shrink-0 text-[#ef4444]">{issue.reason}</span> : null}

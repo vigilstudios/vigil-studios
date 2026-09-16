@@ -66,7 +66,7 @@ export function StatusLine({ tone, label, hint, size = "md" }: { tone: Tone; lab
     <div className="min-w-0">
       <div className={clsx("flex items-center gap-1.5 font-semibold", size === "lg" ? "text-base" : size === "sm" ? "text-xs" : "text-[13px]")} style={{ color: toneVar[tone] }}>
         <ToneIcon tone={tone} className={size === "lg" ? "h-5 w-5" : undefined} />
-        <span className="truncate">{label}</span>
+        <span className="min-w-0 break-words leading-snug">{label}</span>
       </div>
       {hint ? <p className="mt-0.5 text-xs text-[color:var(--text-secondary)]">{hint}</p> : null}
     </div>
