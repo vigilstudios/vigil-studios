@@ -30,10 +30,13 @@ describe("deployment service review enforcement", () => {
     await deployWebsite(db.asClient(), "site_1", { environment: "preview" }, deploymentProvider);
     expect(assertProductionDeployAllowed).not.toHaveBeenCalled();
     expect(deploymentProvider.triggerDeployment).toHaveBeenLastCalledWith("provider-site", expect.objectContaining({ environment: "preview" }));
+    expect(db.rows("websites")[0].preview_url).toBe("https://live.test");
 
+    vi.mocked(deploymentProvider.triggerDeployment).mockResolvedValueOnce({ externalId: "provider-production", status: "ready", url: "https://production.test", createdAt: "2026-01-01T00:02:00Z", readyAt: "2026-01-01T00:03:00Z", error: null });
     await deployWebsite(db.asClient(), "site_1", { environment: "production" }, deploymentProvider);
     expect(assertProductionDeployAllowed).toHaveBeenCalledWith(db.asClient(), "site_1");
     expect(deploymentProvider.triggerDeployment).toHaveBeenLastCalledWith("provider-site", expect.objectContaining({ environment: "production" }));
+    expect(db.rows("websites")[0].live_url).toBe("https://production.test");
   });
 
   it("does not let a production deployment inserted outside the normal path promote during sync", async () => {

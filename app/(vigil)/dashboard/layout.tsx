@@ -5,7 +5,7 @@ import type { NavGroup } from "@/components/vigil/nav";
 import { getOrgContext, requireViewer } from "@/lib/vigil/auth/session";
 import { FEATURES, resolveEntitlements } from "@/lib/vigil/entitlements";
 import { getOnboardingProject, needsOnboarding } from "@/lib/vigil/queries/onboarding";
-import { getOrgProjects } from "@/lib/vigil/queries/dashboard";
+import { getOrgDomains, getOrgProjects, getOrgSubscription, getOrgWebsites } from "@/lib/vigil/queries/dashboard";
 import { getCustomerProjectReviews } from "@/lib/vigil/queries/reviews";
 
 /**
@@ -18,7 +18,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   let groups: NavGroup[] = [];
   if (ctx) {
-    const [ent, onboarding, projects] = await Promise.all([resolveEntitlements(ctx.organization.id), getOnboardingProject(ctx.organization.id), getOrgProjects(ctx.organization.id)]);
+    const [ent, onboarding, projects, websites, domains, subscription] = await Promise.all([
+      resolveEntitlements(ctx.organization.id),
+      getOnboardingProject(ctx.organization.id),
+      getOrgProjects(ctx.organization.id),
+      getOrgWebsites(ctx.organization.id),
+      getOrgDomains(ctx.organization.id),
+      getOrgSubscription(ctx.organization.id),
+    ]);
     // Build reviews belong to the Professional project, independently of the
     // ongoing Requests entitlement. Keep the nav quiet until the project is
     // in a state where a customer can reasonably expect a review surface.
@@ -28,15 +35,21 @@ export default async function DashboardLayout({ children }: { children: React.Re
       projectReviews?.rounds.some((round) => round.status !== "pending") ||
       projects.some((project) => project.kind === "professional" && project.status === "review")
     );
+    const onboardingNeedsAttention = needsOnboarding(onboarding?.project);
+    const websiteNeedsAttention = websites.some((site) => ["error", "suspended"].includes(site.status) || Boolean(site.preview_url && !site.live_url));
+    const reviewNeedsAttention = Boolean(projectReviews?.rounds.some((round) => round.status === "awaiting_feedback"));
+    const domainNeedsAttention = domains.some((domain) => ["pending", "verifying", "error", "expired"].includes(domain.status));
+    const subscriptionNeedsAttention = Boolean(subscription && ["past_due", "unpaid", "incomplete"].includes(subscription.status));
+    const anythingNeedsAttention = onboardingNeedsAttention || websiteNeedsAttention || reviewNeedsAttention || domainNeedsAttention || subscriptionNeedsAttention;
     groups = [
       {
         items: [
-          ...(needsOnboarding(onboarding?.project) ? [{ href: "/dashboard/onboarding", label: "Getting set up", icon: "virtue" as const }] : []),
-          { href: "/dashboard", label: "Overview", icon: "overview", exact: true },
-          { href: "/dashboard/website", label: "Website", icon: "website" },
-          ...(reviewRelevant ? [{ href: "/dashboard/review", label: "Design review", icon: "review" as const }] : []),
-          { href: "/dashboard/domain", label: "Domain", icon: "domain" },
-          { href: "/dashboard/billing", label: "Subscription", icon: "billing" },
+          ...(onboardingNeedsAttention ? [{ href: "/dashboard/onboarding", label: "Getting set up", icon: "virtue" as const, attention: true }] : []),
+          { href: "/dashboard", label: "Overview", icon: "overview", exact: true, attention: anythingNeedsAttention },
+          { href: "/dashboard/website", label: "Website", icon: "website", attention: websiteNeedsAttention },
+          ...(reviewRelevant ? [{ href: "/dashboard/review", label: "Design review", icon: "review" as const, attention: reviewNeedsAttention }] : []),
+          { href: "/dashboard/domain", label: "Domain", icon: "domain", attention: domainNeedsAttention },
+          { href: "/dashboard/billing", label: "Subscription", icon: "billing", attention: subscriptionNeedsAttention },
           { href: "/dashboard/requests", label: "Requests", icon: "requests", locked: !ent.enabled(FEATURES.requests) },
         ],
       },

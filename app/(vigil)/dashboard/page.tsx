@@ -7,6 +7,7 @@ import { Checklist, Meter, Panel, StatusLine, Stepper, Timeline } from "@/compon
 import { SiteFrame } from "@/components/vigil/SiteFrame";
 import { OnboardingCard } from "@/components/vigil/OnboardingCard";
 import { VirtueWelcome } from "@/components/vigil/VirtueWelcome";
+import { DeploymentStatusRefresh } from "@/components/vigil/DeploymentStatusRefresh";
 import { passwordSpeech, welcomeSpeech } from "@/lib/vigil/onboarding/virtue-copy";
 import { PasswordForm } from "@/components/vigil/PasswordForm";
 import { hasPassword } from "@/lib/vigil/auth/password";
@@ -53,6 +54,9 @@ export default async function OverviewPage() {
   const reviewReady = Boolean(projectReview?.rounds.some((round) => round.status === "awaiting_feedback"));
 
   const websiteStatus = website ? describeWebsiteStatus(website.status) : null;
+  const displayedWebsiteStatus = website?.preview_url && !website.live_url
+    ? { label: "Preview ready", tone: "good" as const, hint: "Your private build preview is ready to view." }
+    : websiteStatus;
   const domainStatus = domain ? describeDomainStatus(domain.status) : null;
   const subStatus = subscription ? describeSubscriptionStatus(subscription.status) : null;
   const projectStatus = project ? describeProjectStatus(project.status) : null;
@@ -78,6 +82,7 @@ export default async function OverviewPage() {
 
   return (
     <div className="space-y-4">
+      <DeploymentStatusRefresh active={Boolean(website && ["provisioning", "building"].includes(website.status))} />
       {welcome && onboarding ? (
         <VirtueWelcome
           projectId={onboarding.project.id}
@@ -121,21 +126,21 @@ export default async function OverviewPage() {
             <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">Showing the template your site is built from; your content replaces this as the build progresses.</p>
           ) : null}
           <div className="mt-3 flex items-start justify-between gap-3">
-            {websiteStatus ? (
-              <StatusLine tone={websiteStatus.tone} label={websiteStatus.label} hint={website?.status_reason ?? websiteStatus.hint} />
+            {displayedWebsiteStatus ? (
+              <StatusLine tone={displayedWebsiteStatus.tone} label={displayedWebsiteStatus.label} hint={website?.status_reason ?? displayedWebsiteStatus.hint} />
             ) : (
               <StatusLine tone="info" label="In production" hint="Your website appears here once it is published." />
             )}
-            {website?.live_url ? (
-              <a href={website.live_url} target="_blank" rel="noreferrer" className="btn-secondary !px-2.5 !py-1 shrink-0 text-xs">
-                Open site <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
+            {website?.live_url || website?.preview_url ? (
+              <a href={website.live_url ?? website.preview_url ?? "#"} target="_blank" rel="noreferrer" className="btn-secondary !px-2.5 !py-1 shrink-0 text-xs">
+                {website.live_url ? "Open site" : "Open preview"} <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
               </a>
             ) : null}
           </div>
           <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
             <div>
-              <dt className="text-[color:var(--text-secondary)]">Address</dt>
-              <dd className="truncate font-medium">{website?.live_url ? website.live_url.replace(/^https?:\/\//, "") : "Not published yet"}</dd>
+              <dt className="text-[color:var(--text-secondary)]">{website?.live_url ? "Address" : website?.preview_url ? "Preview address" : "Address"}</dt>
+              <dd className="truncate font-medium">{website?.live_url ? website.live_url.replace(/^https?:\/\//, "") : website?.preview_url ? website.preview_url.replace(/^https?:\/\//, "") : "Not published yet"}</dd>
             </div>
             <div>
               <dt className="text-[color:var(--text-secondary)]">Last published</dt>

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Calendar, FileCode2, Globe, HeartPulse, PenLine, ShieldCheck } from "lucide-react";
+import { ArrowUpRight, Calendar, FileCode2, Globe, HeartPulse, MonitorSmartphone, PenLine, ShieldCheck } from "lucide-react";
 import { AttributeWidget, WidgetLink } from "@/components/vigil/AttributeWidget";
 import { DownloadSiteButton } from "@/components/vigil/DownloadSiteButton";
+import { DeploymentStatusRefresh } from "@/components/vigil/DeploymentStatusRefresh";
 import { SiteFrame } from "@/components/vigil/SiteFrame";
 import { EmptyState, StatusPill } from "@/components/vigil/ui";
 import { Panel, StatusLine, Stepper } from "@/components/vigil/widgets";
@@ -54,10 +55,14 @@ export default async function WebsitePage() {
 
   return (
     <div className="space-y-4">
+      <DeploymentStatusRefresh active={websites.some((site) => ["provisioning", "building"].includes(site.status))} />
       <Header canRequest={canRequest} reviewAvailable={reviewAvailable} />
       {await Promise.all(
         websites.map(async (site) => {
-          const status = describeWebsiteStatus(site.status);
+          const lifecycleStatus = describeWebsiteStatus(site.status);
+          const status = !site.live_url && site.preview_url
+            ? { label: "Preview ready", tone: "good" as const, hint: "Your private build preview is ready to view." }
+            : lifecycleStatus;
           const deployments = await getRecentDeployments(site.id);
           const lastPublish = deployments.find((d) => d.environment === "production" && d.status === "ready") ?? null;
           const project = projects.find((p) => p.id === site.project_id) ?? null;
@@ -73,9 +78,9 @@ export default async function WebsitePage() {
                 action={
                   <div className="flex items-center gap-2">
                     <StatusPill tone={status.tone}>{status.label}</StatusPill>
-                    {site.live_url ? (
-                      <a href={site.live_url} target="_blank" rel="noreferrer" className="btn-secondary !px-2.5 !py-1 text-xs">
-                        Open site <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
+                    {site.live_url || site.preview_url ? (
+                      <a href={site.live_url ?? site.preview_url ?? "#"} target="_blank" rel="noreferrer" className="btn-secondary !px-2.5 !py-1 text-xs">
+                        {site.live_url ? "Open site" : "Open preview"} <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
                       </a>
                     ) : null}
                   </div>
@@ -92,7 +97,11 @@ export default async function WebsitePage() {
                       <SiteFrame src={preview.src} address={preview.address} title={`${site.name} preview`} />
                     </div>
                     <p className="mt-2 text-center text-[11px] text-[color:var(--text-secondary)]">
-                      {preview.kind === "template" ? "The template your site is built from; your content replaces this as the build progresses." : "Live view of your published site."}
+                      {preview.kind === "template"
+                        ? "The template your site is built from; your content replaces this as the build progresses."
+                        : site.live_url
+                          ? "Live view of your published site."
+                          : "Preview of your current build. This is not the public live address yet."}
                     </p>
                   </>
                 ) : (
@@ -102,6 +111,16 @@ export default async function WebsitePage() {
 
               {/* Attribute widgets — each its own card */}
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {!site.live_url && site.preview_url ? (
+                  <AttributeWidget
+                    icon={<MonitorPreviewIcon />}
+                    label="Preview address"
+                    value={site.preview_url.replace(/^https?:\/\//, "")}
+                    tone="good"
+                    hint="Your private build preview is ready to view"
+                    action={<WidgetLink href={site.preview_url} external>Open preview</WidgetLink>}
+                  />
+                ) : null}
                 <AttributeWidget
                   icon={<Globe className="h-4 w-4" />}
                   label="Live address"
@@ -153,6 +172,10 @@ export default async function WebsitePage() {
       )}
     </div>
   );
+}
+
+function MonitorPreviewIcon() {
+  return <MonitorSmartphone className="h-4 w-4" />;
 }
 
 function PreviewWidget({ src, address, title, note }: { src: string; address: string; title: string; note: string }) {

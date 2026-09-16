@@ -125,9 +125,11 @@ export async function deployWebsite(
     entityId: deployment.id,
   });
 
-  if (environment === "production" && snapshot.status === "ready") {
-    const { data: website } = await admin.from("websites").select("status, preview_url").eq("id", websiteId).single();
-    const publicUrl = website?.preview_url ?? snapshot.url;
+  if (snapshot.status === "ready" && environment === "preview" && snapshot.url) {
+    await admin.from("websites").update({ preview_url: snapshot.url, status_reason: null }).eq("id", websiteId);
+  } else if (environment === "production" && snapshot.status === "ready") {
+    const { data: website } = await admin.from("websites").select("status").eq("id", websiteId).single();
+    const publicUrl = snapshot.url;
     if (website && website.status !== "live" && websiteTransitions[website.status].includes("live")) {
       await admin
         .from("websites")
@@ -177,10 +179,11 @@ export async function syncDeployment(
   }).eq("id", deploymentId);
 
   let domainIds: string[] = [];
-  if (snapshot.status === "ready" && deployment.environment === "production") {
+  if (snapshot.status === "ready" && deployment.environment === "preview" && snapshot.url) {
+    await admin.from("websites").update({ preview_url: snapshot.url, status_reason: null }).eq("id", deployment.website_id);
+  } else if (snapshot.status === "ready" && deployment.environment === "production") {
     await provisionWebsite(admin, deployment.website_id, provider);
-    const { data: website } = await admin.from("websites").select("preview_url").eq("id", deployment.website_id).single();
-    await admin.from("websites").update({ status: "live", live_url: website?.preview_url ?? snapshot.url, last_deployed_at: snapshot.readyAt ?? new Date().toISOString(), status_reason: null }).eq("id", deployment.website_id);
+    await admin.from("websites").update({ status: "live", live_url: snapshot.url, last_deployed_at: snapshot.readyAt ?? new Date().toISOString(), status_reason: null }).eq("id", deployment.website_id);
     domainIds = await attachWebsiteDomains(admin, deployment.website_id, provider);
   } else if (snapshot.status === "error") {
     await admin.from("websites").update({ status_reason: snapshot.error?.message ?? "The last publish did not complete." }).eq("id", deployment.website_id);

@@ -44,6 +44,29 @@ function withProgress(brief: Brief, step: StepKey, completed?: boolean): Brief {
   return { ...brief, progress: { lastStep: step, completed: STEP_KEYS.filter((k) => done.has(k)) } };
 }
 
+const STEP_EMAIL_LABELS: Record<SectionKey, string> = {
+  basics: "Business basics",
+  kickoff: "How we'll begin",
+  strategy: "Site goals and scope",
+  offerings: "What you offer",
+  about: "About you",
+  brand: "Brand and photos",
+  domain: "Domain",
+};
+
+async function notifyStaffOfCompletedStep(ctx: OrgContext, project: { id: string; name: string; kind: string }, section: SectionKey): Promise<void> {
+  const label = STEP_EMAIL_LABELS[section];
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.vigilstudios.co";
+  const adminUrl = `${appUrl}/admin/organizations/${ctx.organization.id}`;
+  const subject = `Onboarding step completed: ${label} · ${ctx.organization.name}`;
+  await sendEmail({
+    to: staffNotificationAddress(),
+    subject,
+    text: `${ctx.organization.name} completed “${label}” for the ${project.kind} project “${project.name}”.\n\nReview progress: ${adminUrl}`,
+    html: layout(subject, `<p><b>${escapeHtml(ctx.organization.name)}</b> completed <b>${escapeHtml(label)}</b> for the ${escapeHtml(project.kind)} project “${escapeHtml(project.name)}”.</p>${button(adminUrl, "Review onboarding progress")}`),
+  });
+}
+
 /** Autosave one section. Called on every change (debounced client-side). */
 export async function saveBriefSection(projectId: string, section: SectionKey, data: unknown, completed = false): Promise<ActionResult<{ brief: Brief }>> {
   try {
@@ -57,8 +80,22 @@ export async function saveBriefSection(projectId: string, section: SectionKey, d
       for (const i of parsed.error.issues) (issues[i.path.join(".") || "_"] ??= []).push(i.message);
       throw new ValidationError("Check the highlighted fields.", issues);
     }
+    const newlyCompleted = completed && !brief.progress.completed.includes(section);
     const next = withProgress({ ...brief, [section]: parsed.data }, section, completed);
     await writeBrief(supabase, projectId, next);
+    if (newlyCompleted) {
+      await logAuditEvent(supabase, {
+        action: "project.onboarding_step_completed",
+        entityType: "project",
+        entityId: projectId,
+        organizationId: ctx.organization.id,
+        after: { step: section, label: STEP_EMAIL_LABELS[section] },
+      }).catch(() => undefined);
+      await notifyStaffOfCompletedStep(ctx, project, section).catch((error) => {
+        console.error("onboarding step notification failed:", error);
+      });
+      revalidatePath(`/admin/organizations/${ctx.organization.id}`);
+    }
     return { ok: true, data: { brief: next } };
   } catch (error) {
     return toActionError(error);

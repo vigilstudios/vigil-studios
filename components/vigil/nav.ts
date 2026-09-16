@@ -32,6 +32,8 @@ export type NavItem = {
   locked?: boolean;
   /** Small trailing tag such as "Soon". */
   badge?: string;
+  /** Unresolved work exists in this section. */
+  attention?: boolean;
 };
 
 export type NavGroup = {

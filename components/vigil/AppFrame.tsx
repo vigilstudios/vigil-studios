@@ -227,7 +227,7 @@ function NavLink({ item, active, collapsed }: { item: NavItem; active: boolean; 
       aria-current={active ? "page" : undefined}
       title={collapsed ? item.label : undefined}
       className={clsx(
-        "group flex h-10 items-center rounded-md text-[13px] font-medium transition-colors md:h-9",
+        "group relative flex h-10 items-center rounded-md text-[13px] font-medium transition-colors md:h-9",
         collapsed ? "justify-center px-0" : "gap-2.5 px-2",
         active
           ? "bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] text-[color:var(--accent)]"
@@ -236,9 +236,11 @@ function NavLink({ item, active, collapsed }: { item: NavItem; active: boolean; 
       )}
     >
       <Icon className="h-4 w-4 shrink-0" />
+      {collapsed && item.attention ? <span className="absolute right-2 top-1.5 h-2 w-2 rounded-full bg-[color:var(--accent)] ring-2 ring-[color:var(--bg-secondary)]" aria-label="Needs attention" /> : null}
       {!collapsed ? (
         <>
           <span className="min-w-0 flex-1 truncate">{item.label}</span>
+          {item.attention ? <span className="h-2 w-2 shrink-0 rounded-full bg-[color:var(--accent)]" aria-label="Needs attention" title="Needs attention" /> : null}
           {item.locked ? <Lock className="h-3 w-3 shrink-0 opacity-70" aria-label="Not included in your plan" /> : null}
           {item.badge ? (
             <span className="rounded-full bg-[color:var(--bg-surface-soft)] px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-[color:var(--text-secondary)]">{item.badge}</span>

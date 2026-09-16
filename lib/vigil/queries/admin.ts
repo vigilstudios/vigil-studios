@@ -206,3 +206,28 @@ export const attentionItems = cache(async () => {
   for (const r of [jobs, domains, websites, subs, requests]) if (r.error) throw r.error;
   return { jobs: jobs.data ?? [], domains: domains.data ?? [], websites: websites.data ?? [], subscriptions: subs.data ?? [], requests: requests.data ?? [] };
 });
+
+/** Unresolved workflow state used by the admin navigation attention dots. */
+export const adminNavAttention = cache(async () => {
+  const supabase = await createClient();
+  const count = { count: "exact" as const, head: true };
+  const [orders, customers, websites, domains, subscriptions, requests, jobs] = await Promise.all([
+    supabase.from("orders").select("id", count).in("status", ["paid", "failed"]),
+    supabase.from("projects").select("id", count).not("intake_completed_at", "is", null).eq("status", "in_progress"),
+    supabase.from("websites").select("id", count).in("status", ["error", "suspended"]),
+    supabase.from("domains").select("id", count).in("status", ["pending", "verifying", "error", "expired"]),
+    supabase.from("subscriptions").select("id", count).in("status", ["past_due", "unpaid", "incomplete"]),
+    supabase.from("change_requests").select("id", count).eq("status", "submitted"),
+    supabase.from("provisioning_jobs").select("id", count).eq("status", "failed"),
+  ]);
+  for (const result of [orders, customers, websites, domains, subscriptions, requests, jobs]) if (result.error) throw result.error;
+  return {
+    orders: Boolean(orders.count),
+    customers: Boolean(customers.count),
+    websites: Boolean(websites.count),
+    domains: Boolean(domains.count),
+    subscriptions: Boolean(subscriptions.count),
+    requests: Boolean(requests.count),
+    jobs: Boolean(jobs.count),
+  };
+});

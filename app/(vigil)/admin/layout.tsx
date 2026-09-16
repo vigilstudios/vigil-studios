@@ -2,27 +2,32 @@ import { AccountBlock } from "@/components/vigil/AccountBlock";
 import { AppShell } from "@/components/vigil/AppShell";
 import type { NavGroup } from "@/components/vigil/nav";
 import { requireStaff } from "@/lib/vigil/auth/session";
+import { adminNavAttention } from "@/lib/vigil/queries/admin";
+import { listStaffReviewQueue } from "@/lib/vigil/queries/reviews";
 
 /** Vigil Admin chrome. Staff only; admin-only screens check again themselves. */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const staff = await requireStaff("/admin");
+  const [attention, reviewQueue] = await Promise.all([adminNavAttention(), listStaffReviewQueue()]);
+  const reviewsNeedAttention = reviewQueue.some((item) => item.status === "changes_requested");
+  const anythingNeedsAttention = Object.values(attention).some(Boolean) || reviewsNeedAttention;
   const groups: NavGroup[] = [
     {
       items: [
-        { href: "/admin", label: "Overview", icon: "overview", exact: true },
-        { href: "/admin/orders", label: "Orders", icon: "billing" },
-        { href: "/admin/organizations", label: "Customers", icon: "customers" },
-        { href: "/admin/websites", label: "Websites", icon: "websites" },
-        { href: "/admin/reviews", label: "Reviews", icon: "requests" },
-        { href: "/admin/domains", label: "Domains", icon: "domains" },
-        { href: "/admin/subscriptions", label: "Subscriptions", icon: "subscriptions" },
-        { href: "/admin/requests", label: "Requests", icon: "requests" },
+        { href: "/admin", label: "Overview", icon: "overview", exact: true, attention: anythingNeedsAttention },
+        { href: "/admin/orders", label: "Orders", icon: "billing", attention: attention.orders },
+        { href: "/admin/organizations", label: "Customers", icon: "customers", attention: attention.customers },
+        { href: "/admin/websites", label: "Websites", icon: "websites", attention: attention.websites },
+        { href: "/admin/reviews", label: "Reviews", icon: "requests", attention: reviewsNeedAttention },
+        { href: "/admin/domains", label: "Domains", icon: "domains", attention: attention.domains },
+        { href: "/admin/subscriptions", label: "Subscriptions", icon: "subscriptions", attention: attention.subscriptions },
+        { href: "/admin/requests", label: "Requests", icon: "requests", attention: attention.requests },
       ],
     },
     {
       label: "Operations",
       items: [
-        { href: "/admin/jobs", label: "Jobs", icon: "jobs" },
+        { href: "/admin/jobs", label: "Jobs", icon: "jobs", attention: attention.jobs },
         { href: "/admin/audit", label: "Audit log", icon: "audit" },
         { href: "/admin/plans", label: "Plans & staff", icon: "plans", locked: staff.staffRole !== "admin" },
       ],
