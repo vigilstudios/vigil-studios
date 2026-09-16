@@ -222,7 +222,7 @@ export function ReviewDashboard({ review, organizationId, actions }: ReviewDashb
         <HistoryPanel review={review} />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
         <DecisionPanel
           formRef={formRef}
           review={review}
