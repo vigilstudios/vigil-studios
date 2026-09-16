@@ -253,7 +253,11 @@ export async function updateWebsiteFields(websiteId: string, formData: FormData)
   }
 }
 
-export async function enqueueWebsiteJob(websiteId: string, kind: "website.repository" | "website.provision" | "website.deploy"): Promise<ActionResult<{ jobId: string }>> {
+export async function enqueueWebsiteJob(
+  websiteId: string,
+  kind: "website.repository" | "website.provision" | "website.deploy",
+  environment: "production" | "preview" = "production"
+): Promise<ActionResult<{ jobId: string }>> {
   try {
     const staff = await requireStaffOrThrow();
     const supabase = await createClient();
@@ -266,8 +270,16 @@ export async function enqueueWebsiteJob(websiteId: string, kind: "website.reposi
       ? `website.repository:${websiteId}`
       : kind === JOB_KINDS.websiteProvision
         ? `website.provision:${websiteId}`
-        : `website.deploy:${websiteId}:${minuteBucket()}`;
-    const job = await enqueueJob(supabase, { kind, idempotencyKey: key, organizationId: site.organization_id, websiteId, createdBy: staff.user.id, requeueFailed: true });
+        : `website.deploy:${websiteId}:${environment}:${minuteBucket()}`;
+    const job = await enqueueJob(supabase, {
+      kind,
+      idempotencyKey: key,
+      organizationId: site.organization_id,
+      websiteId,
+      payload: kind === JOB_KINDS.websiteDeploy ? { environment } : undefined,
+      createdBy: staff.user.id,
+      requeueFailed: true,
+    });
     revalidatePath(`/admin/websites/${websiteId}`);
     revalidatePath("/admin/jobs");
     return { ok: true, data: { jobId: job.id } };

@@ -838,3 +838,27 @@ fail silently.
 - Launch audit found the deployed Next.js 16.2.9 inside the range of a newly
   published critical middleware/proxy advisory. Upgraded Next.js and its
   ESLint config to 16.3.5; the production dependency audit is now clean.
+
+## 2026-09-16 — Professional design review and launch gate
+
+- Every Professional project now receives exactly two included build-review
+  rounds: Design direction, then Full-site review. The database enforces the
+  order, immutable version history, one response per current version, and an
+  explicit customer approval or consolidated change list.
+- Customers review responsive preview URLs inside `/dashboard/review`, attach
+  images or PDFs to consolidated feedback, compare version history, and keep
+  access regardless of their post-launch Requests entitlement.
+- Staff gets `/admin/reviews` plus a project workspace for publishing preview
+  versions, reading feedback and signed attachments, and starting revision
+  work. A revised version stays within the same included round.
+- Review attachments live in a private, organization-scoped Storage bucket.
+  Review publication and customer responses create in-app notifications and
+  audit records.
+- Professional production deploys are blocked at the deployment service and
+  asynchronous sync boundaries until both current versions are explicitly
+  approved. Preview deploys remain available throughout review; Express and
+  Custom deploy behavior is unchanged.
+- Added unit coverage for the review contract, attachment rules, and deploy
+  gate, plus end-to-end migration/RLS assertions. Full check: 152 tests,
+  typecheck, database/RLS validation, lint (one pre-existing image warning),
+  and production build pass.

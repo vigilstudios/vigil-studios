@@ -18,6 +18,7 @@ import { auditTone, periodProgress, previewSource, projectStepIndex, projectStep
 import { getOrgDomains, getOrgProjects, getOrgSubscription, getOrgWebsites, getRecentActivity, getRecentDeployments } from "@/lib/vigil/queries/dashboard";
 import { ONBOARDING_SKIP_COOKIE } from "@/lib/vigil/onboarding/constants";
 import { getOnboardingProject, needsOnboarding } from "@/lib/vigil/queries/onboarding";
+import { getCustomerProjectReviews } from "@/lib/vigil/queries/reviews";
 
 export const metadata: Metadata = { title: "Overview" };
 
@@ -47,6 +48,9 @@ export default async function OverviewPage() {
   const lastPublish = deployments[0] ?? null;
   const domain = domains.find((d) => d.id === website?.primary_domain_id) ?? domains.find((d) => d.website_id === website?.id) ?? domains[0] ?? null;
   const project = projects.find((p) => !["closed", "cancelled"].includes(p.status)) ?? projects[0] ?? null;
+  const projectReview = project?.kind === "professional" ? await getCustomerProjectReviews(project.id) : null;
+  const hasPostedReview = Boolean(projectReview?.rounds.some((round) => round.status !== "pending"));
+  const reviewReady = Boolean(projectReview?.rounds.some((round) => round.status === "awaiting_feedback"));
 
   const websiteStatus = website ? describeWebsiteStatus(website.status) : null;
   const domainStatus = domain ? describeDomainStatus(domain.status) : null;
@@ -226,7 +230,14 @@ export default async function OverviewPage() {
                 <div className="mt-1">
                   <StatusLine tone={step.cancelled ? "neutral" : projectStatus.tone} label={projectStatus.label} size="sm" />
                 </div>
-                {project.status === "review" ? (
+                {project.kind === "professional" && (hasPostedReview || project.status === "review") ? (
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <p className="text-xs text-[color:var(--text-secondary)]">
+                      {reviewReady ? "Your Professional build is ready for review." : "Your Professional review history and latest version are here."}
+                    </p>
+                    <Link href="/dashboard/review" className="btn-primary !px-2.5 !py-1 text-xs">{reviewReady ? "Open design review" : "View design review"}</Link>
+                  </div>
+                ) : project.status === "review" ? (
                   <p className="mt-2 text-xs text-[color:var(--text-secondary)]">Reply to your project email with changes or your approval.</p>
                 ) : null}
               </div>

@@ -12,6 +12,7 @@ import { formatDate, formatRelative } from "@/lib/vigil/format";
 import { describeProjectStatus, describeWebsiteStatus } from "@/lib/vigil/lifecycle";
 import { previewSource, projectStepIndex, projectSteps } from "@/lib/vigil/presenters";
 import { getOrgProjects, getOrgWebsites, getRecentDeployments } from "@/lib/vigil/queries/dashboard";
+import { getCustomerProjectReviews } from "@/lib/vigil/queries/reviews";
 
 export const metadata: Metadata = { title: "Website" };
 
@@ -24,6 +25,8 @@ export default async function WebsitePage() {
   ]);
   const canRequest = ent.enabled(FEATURES.requests);
   const canExport = ctx.role === "owner" || ctx.role === "manager" || ctx.isImpersonating;
+  const reviewData = await Promise.all(projects.filter((project) => project.kind === "professional").map((project) => getCustomerProjectReviews(project.id)));
+  const reviewAvailable = projects.some((project) => project.kind === "professional" && project.status === "review") || reviewData.some((review) => review?.rounds.some((round) => round.status !== "pending"));
 
   if (websites.length === 0) {
     const project = projects[0] ?? null;
@@ -31,7 +34,7 @@ export default async function WebsitePage() {
     const preview = previewSource(null, project?.template_slug ?? null);
     return (
       <div className="space-y-4">
-        <Header canRequest={canRequest} />
+        <Header canRequest={canRequest} reviewAvailable={reviewAvailable} />
         {project && step ? (
           <>
             <Panel title={project.name} action={<StatusPill tone={describeProjectStatus(project.status).tone}>{describeProjectStatus(project.status).label}</StatusPill>}>
@@ -51,7 +54,7 @@ export default async function WebsitePage() {
 
   return (
     <div className="space-y-4">
-      <Header canRequest={canRequest} />
+      <Header canRequest={canRequest} reviewAvailable={reviewAvailable} />
       {await Promise.all(
         websites.map(async (site) => {
           const status = describeWebsiteStatus(site.status);
@@ -163,17 +166,20 @@ function PreviewWidget({ src, address, title, note }: { src: string; address: st
   );
 }
 
-function Header({ canRequest }: { canRequest: boolean }) {
+function Header({ canRequest, reviewAvailable }: { canRequest: boolean; reviewAvailable: boolean }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div>
         <h1 className="text-lg font-semibold tracking-tight sm:text-xl">Website</h1>
         <p className="mt-0.5 text-xs text-[color:var(--text-secondary)]">Status of the website Vigil hosts and operates for you.</p>
       </div>
-      <Link href="/dashboard/requests" className="btn-primary !px-3 !py-2 text-xs">
-        <PenLine className="mr-1.5 h-3.5 w-3.5" />
-        {canRequest ? "Request a change" : "Website changes"}
-      </Link>
+      <div className="flex flex-wrap gap-2">
+        {reviewAvailable ? <Link href="/dashboard/review" className="btn-primary !px-3 !py-2 text-xs">Open design review</Link> : null}
+        <Link href="/dashboard/requests" className="btn-primary !px-3 !py-2 text-xs">
+          <PenLine className="mr-1.5 h-3.5 w-3.5" />
+          {canRequest ? "Request a change" : "Website changes"}
+        </Link>
+      </div>
     </div>
   );
 }

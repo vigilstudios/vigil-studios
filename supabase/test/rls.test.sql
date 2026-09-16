@@ -495,6 +495,70 @@ begin
 end $$;
 
 -- --------------------------------------------------------------------------
+-- Professional reviews: fixed included rounds, strict sequence, current-only
+-- customer response and tenant-scoped private feedback attachments.
+-- --------------------------------------------------------------------------
+do $$
+declare v_project uuid; v_round_1 uuid; v_round_2 uuid; v_submission uuid; v_response uuid;
+begin
+  perform test.login_service();
+  insert into public.projects (organization_id, name, kind, status)
+    values ('10000000-0000-0000-0000-00000000000a', 'Professional review test', 'professional', 'in_progress')
+    returning id into v_project;
+  perform test.ok(
+    test.count('select 1 from public.project_review_rounds where project_id = ''' || v_project || '''') = 2,
+    'professional: exactly two included review rounds are seeded');
+  select id into v_round_1 from public.project_review_rounds where project_id = v_project and round_number = 1;
+  select id into v_round_2 from public.project_review_rounds where project_id = v_project and round_number = 2;
+  perform test.logout();
+
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  perform test.ok(test.count('select 1 from public.project_review_rounds where project_id = ''' || v_project || '''') = 2,
+    'alice: reads her Professional review rounds');
+  perform test.fails(
+    'insert into public.project_review_submissions (organization_id, project_id, round_id, version, preview_url) values (''10000000-0000-0000-0000-00000000000a'', ''' || v_project || ''', ''' || v_round_1 || ''', 1, ''https://preview.example.com'')',
+    'alice: cannot publish a review submission');
+  perform test.fails(
+    'insert into public.project_review_responses (organization_id, project_id, round_id, submission_id, kind) values (''10000000-0000-0000-0000-00000000000a'', ''' || v_project || ''', ''' || v_round_1 || ''', gen_random_uuid(), ''approved'')',
+    'alice: cannot answer a non-current submission');
+  perform test.logout();
+
+  perform test.login('00000000-0000-0000-0000-00000000000c');
+  perform test.fails(
+    'insert into public.project_review_submissions (organization_id, project_id, round_id, version, preview_url) values (''10000000-0000-0000-0000-00000000000a'', ''' || v_project || ''', ''' || v_round_2 || ''', 1, ''https://full.example.com'')',
+    'staff: round two cannot be published before round one approval');
+  insert into public.project_review_submissions (organization_id, project_id, round_id, version, preview_url)
+    values ('10000000-0000-0000-0000-00000000000a', v_project, v_round_1, 1, 'https://design.example.com') returning id into v_submission;
+  perform test.ok((select status from public.project_review_rounds where id = v_round_1) = 'awaiting_feedback',
+    'staff: publishing makes round one await customer feedback');
+  perform test.logout();
+
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  insert into public.project_review_responses (organization_id, project_id, round_id, submission_id, kind, feedback)
+    values ('10000000-0000-0000-0000-00000000000a', v_project, v_round_1, v_submission, 'changes_requested', 'Please revise the headline.')
+    returning id into v_response;
+  perform test.ok((select status from public.project_review_rounds where id = v_round_1) = 'changes_requested',
+    'alice: a consolidated response updates the round state');
+  perform test.fails(
+    'insert into public.project_review_responses (organization_id, project_id, round_id, submission_id, kind) values (''10000000-0000-0000-0000-00000000000a'', ''' || v_project || ''', ''' || v_round_1 || ''', ''' || v_submission || ''', ''approved'')',
+    'alice: cannot add a second response to the same version');
+  insert into storage.objects (bucket_id, name, owner)
+    values ('review-attachments', '10000000-0000-0000-0000-00000000000a/' || v_response || '/feedback.png', '00000000-0000-0000-0000-00000000000a');
+  insert into public.project_review_attachments (organization_id, response_id, object_path, file_name, content_type, size_bytes)
+    values ('10000000-0000-0000-0000-00000000000a', v_response, '10000000-0000-0000-0000-00000000000a/' || v_response || '/feedback.png', 'feedback.png', 'image/png', 42);
+  perform test.ok(test.count('select 1 from public.project_review_attachments where response_id = ''' || v_response || '''') = 1,
+    'alice: can record an attachment on her consolidated changes');
+  perform test.logout();
+
+  perform test.login('00000000-0000-0000-0000-00000000000e');
+  perform test.ok(test.count('select 1 from public.project_review_rounds where project_id = ''' || v_project || '''') = 0,
+    'eve: cannot see another organization review workflow');
+  perform test.ok(test.count('select 1 from public.project_review_attachments where response_id = ''' || v_response || '''') = 0,
+    'eve: cannot see another organization review attachments');
+  perform test.logout();
+end $$;
+
+-- --------------------------------------------------------------------------
 -- Deployments inherit organization from the website
 -- --------------------------------------------------------------------------
 do $$

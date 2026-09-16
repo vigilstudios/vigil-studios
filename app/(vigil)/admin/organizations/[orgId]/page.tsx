@@ -123,6 +123,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
               <th className={thClass}>Kind</th>
               <th className={thClass}>Status</th>
               <th className={thClass}>Transition</th>
+              <th className={thClass}>Review</th>
             </tr>
           </thead>
           <tbody>
@@ -134,11 +135,14 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                 <td className={tdClass}>
                   <TransitionSelect current={p.status} options={projectTransitions[p.status]} action={setProjectStatus.bind(null, p.id)} />
                 </td>
+                <td className={tdClass}>
+                  {p.kind === "professional" ? <Link href={`/admin/reviews/${p.id}`} className="underline">Workspace</Link> : "—"}
+                </td>
               </tr>
             ))}
             {projects.length === 0 ? (
               <tr>
-                <td className={tdClass} colSpan={4}>No projects.</td>
+                <td className={tdClass} colSpan={5}>No projects.</td>
               </tr>
             ) : null}
           </tbody>

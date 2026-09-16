@@ -93,7 +93,7 @@ export const listWebsites = cache(async () => {
 export const getWebsiteDetail = cache(async (websiteId: string) => {
   const supabase = await createClient();
   const [site, deployments, domains, links, jobs] = await Promise.all([
-    supabase.from("websites").select("*, organization:organizations(id, name), project:projects(id, name, status)").eq("id", websiteId).maybeSingle(),
+    supabase.from("websites").select("*, organization:organizations(id, name), project:projects(id, name, kind, status)").eq("id", websiteId).maybeSingle(),
     supabase.from("deployments").select("*").eq("website_id", websiteId).order("created_at", { ascending: false }).limit(20),
     supabase.from("domains").select("*").eq("website_id", websiteId),
     supabase.from("provider_links").select("provider, resource_kind, external_id, metadata, created_at").eq("entity_type", "website").eq("entity_id", websiteId),

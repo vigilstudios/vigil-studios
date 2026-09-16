@@ -1356,6 +1356,182 @@ export type Database = {
           },
         ]
       }
+      project_review_attachments: {
+        Row: {
+          bucket_id: string
+          content_type: string
+          created_at: string
+          file_name: string
+          id: string
+          object_path: string
+          organization_id: string
+          response_id: string
+          size_bytes: number
+          uploaded_by: string | null
+        }
+        Insert: {
+          bucket_id?: string
+          content_type: string
+          created_at?: string
+          file_name: string
+          id?: string
+          object_path: string
+          organization_id: string
+          response_id: string
+          size_bytes: number
+          uploaded_by?: string | null
+        }
+        Update: {
+          bucket_id?: string
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          id?: string
+          object_path?: string
+          organization_id?: string
+          response_id?: string
+          size_bytes?: number
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          { foreignKeyName: "project_review_attachments_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_review_attachments_response_id_fkey"; columns: ["response_id"]; isOneToOne: false; referencedRelation: "project_review_responses"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_review_attachments_uploaded_by_fkey"; columns: ["uploaded_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+        ]
+      }
+      project_review_responses: {
+        Row: {
+          created_at: string
+          feedback: string | null
+          id: string
+          kind: Database["public"]["Enums"]["review_response_kind"]
+          organization_id: string
+          project_id: string
+          responded_at: string
+          responded_by: string | null
+          round_id: string
+          submission_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["review_response_kind"]
+          organization_id: string
+          project_id: string
+          responded_at?: string
+          responded_by?: string | null
+          round_id: string
+          submission_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["review_response_kind"]
+          organization_id?: string
+          project_id?: string
+          responded_at?: string
+          responded_by?: string | null
+          round_id?: string
+          submission_id?: string
+        }
+        Relationships: [
+          { foreignKeyName: "project_review_responses_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_review_responses_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_review_responses_round_id_fkey"; columns: ["round_id"]; isOneToOne: false; referencedRelation: "project_review_rounds"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_review_responses_responded_by_fkey"; columns: ["responded_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_review_responses_submission_id_fkey"; columns: ["submission_id"]; isOneToOne: false; referencedRelation: "project_review_submissions"; referencedColumns: ["id"] },
+        ]
+      }
+      project_review_rounds: {
+        Row: {
+          approved_submission_id: string | null
+          created_at: string
+          current_submission_id: string | null
+          id: string
+          organization_id: string
+          phase: Database["public"]["Enums"]["review_phase"]
+          project_id: string
+          round_number: number
+          status: Database["public"]["Enums"]["review_round_status"]
+          updated_at: string
+        }
+        Insert: {
+          approved_submission_id?: string | null
+          created_at?: string
+          current_submission_id?: string | null
+          id?: string
+          organization_id: string
+          phase: Database["public"]["Enums"]["review_phase"]
+          project_id: string
+          round_number: number
+          status?: Database["public"]["Enums"]["review_round_status"]
+          updated_at?: string
+        }
+        Update: {
+          approved_submission_id?: string | null
+          created_at?: string
+          current_submission_id?: string | null
+          id?: string
+          organization_id?: string
+          phase?: Database["public"]["Enums"]["review_phase"]
+          project_id?: string
+          round_number?: number
+          status?: Database["public"]["Enums"]["review_round_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "project_review_rounds_approved_submission_fk"; columns: ["approved_submission_id"]; isOneToOne: false; referencedRelation: "project_review_submissions"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_review_rounds_current_submission_fk"; columns: ["current_submission_id"]; isOneToOne: false; referencedRelation: "project_review_submissions"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_review_rounds_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_review_rounds_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] },
+        ]
+      }
+      project_review_submissions: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          preview_url: string
+          project_id: string
+          published_at: string
+          published_by: string | null
+          round_id: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          preview_url: string
+          project_id: string
+          published_at?: string
+          published_by?: string | null
+          round_id: string
+          version: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          preview_url?: string
+          project_id?: string
+          published_at?: string
+          published_by?: string | null
+          round_id?: string
+          version?: number
+        }
+        Relationships: [
+          { foreignKeyName: "project_review_submissions_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_review_submissions_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_review_submissions_published_by_fkey"; columns: ["published_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_review_submissions_round_id_fkey"; columns: ["round_id"]; isOneToOne: false; referencedRelation: "project_review_rounds"; referencedColumns: ["id"] },
+        ]
+      }
       projects: {
         Row: {
           brief: Json
@@ -1950,6 +2126,10 @@ export type Database = {
         }
         Returns: number
       }
+      notify_review_staff: {
+        Args: { p_body?: string; p_href?: string; p_round: string; p_title: string }
+        Returns: undefined
+      }
       resolve_entitlements: {
         Args: { p_org: string }
         Returns: {
@@ -2007,6 +2187,9 @@ export type Database = {
         | "review"
         | "launch"
         | "maintenance"
+      review_phase: "design_direction" | "full_site"
+      review_response_kind: "changes_requested" | "approved"
+      review_round_status: "pending" | "awaiting_feedback" | "changes_requested" | "revision_in_progress" | "approved"
       project_status:
         | "draft"
         | "intake"

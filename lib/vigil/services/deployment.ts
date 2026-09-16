@@ -3,6 +3,7 @@ import { assertTransition, websiteTransitions } from "@/lib/vigil/lifecycle";
 import { getDeploymentProvider } from "@/lib/vigil/providers/registry";
 import type { DeploymentProvider } from "@/lib/vigil/providers/types";
 import { NotFoundError } from "@/lib/vigil/auth/errors";
+import { assertProductionDeployAllowed } from "@/lib/vigil/project-reviews";
 import { findExternalId, findProviderLink, providerEnum, upsertProviderLink } from "./provider-links";
 import { beginDomainVerification } from "./domain";
 
@@ -79,6 +80,11 @@ export async function deployWebsite(
   provider: DeploymentProvider = getDeploymentProvider()
 ): Promise<{ deploymentId: string; status: string; domainIds: string[] }> {
   const environment = options.environment ?? "production";
+  // This check belongs at the service boundary so a manually inserted job,
+  // retry, or future admin surface cannot bypass Professional approvals.
+  // Preview builds are deliberately excluded: they are what staff use to
+  // publish each version for the customer to review.
+  if (environment === "production") await assertProductionDeployAllowed(admin, websiteId);
   const { siteExternalId, organizationId } = await provisionWebsite(admin, websiteId, provider);
 
   const repository = await findProviderLink(admin, {
@@ -153,6 +159,9 @@ export async function syncDeployment(
   const { data: deployment, error } = await admin.from("deployments").select("*").eq("id", deploymentId).maybeSingle();
   if (error) throw error;
   if (!deployment) throw new NotFoundError(`Deployment ${deploymentId} not found.`);
+  // Keep a production deployment from being promoted by the asynchronous
+  // polling path if it was created outside deployWebsite.
+  if (deployment.environment === "production") await assertProductionDeployAllowed(admin, deployment.website_id);
   const externalId = await findExternalId(admin, {
     provider: providerEnum(provider.name), resourceKind: "deployment", entityType: "deployment", entityId: deploymentId,
   });

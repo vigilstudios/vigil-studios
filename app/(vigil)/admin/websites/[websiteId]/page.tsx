@@ -45,6 +45,8 @@ export default async function WebsiteDetailPage({ params }: { params: Promise<{ 
           <p className="mt-1 text-xs text-[color:var(--text-secondary)]">The private customer repository is created once. Deploy live publishes the latest main branch to Vercel and connects any attached domain.</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {repositoryUrl ? <a className="btn-secondary text-sm !px-3 !py-1.5" href={repositoryUrl} target="_blank" rel="noreferrer">Open repository</a> : <ActionButton action={enqueueWebsiteJob.bind(null, w.id, "website.repository")}>Create repository</ActionButton>}
+            {w.project?.kind === "professional" ? <Link className="btn-secondary text-sm !px-3 !py-1.5" href={`/admin/reviews/${w.project.id}`}>Open review workspace</Link> : null}
+            <ActionButton action={enqueueWebsiteJob.bind(null, w.id, "website.deploy", "preview")}>Deploy preview</ActionButton>
             <ActionButton variant="primary" action={enqueueWebsiteJob.bind(null, w.id, "website.deploy")} confirmText="Deploy the latest main branch to the live site?">Deploy live</ActionButton>
           </div>
           <h3 className="mt-5 text-sm font-semibold">Provider links</h3>

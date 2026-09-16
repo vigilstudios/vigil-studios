@@ -10,6 +10,7 @@ export type NavIcon =
   | "domain"
   | "billing"
   | "requests"
+  | "review"
   | "leads"
   | "insights"
   | "virtue"
