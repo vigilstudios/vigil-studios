@@ -8,6 +8,9 @@
 }
 :root {
   --nav-height: 80px;
+  --dock-height: 0px;
+  --hero-top-gap: 16px;
+  --viewport-height: 100vh;
   --gutter: 24px;
 }
 html {
@@ -316,16 +319,20 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .skip:focus {
   top: 16px;
 }
-/* Wide photographic hero. Mobile deliberately has one action, per Figma. */
+/* Fill the visible viewport up to the mobile dock; the photo meets the facts
+   band directly. Min-height still lets unusually long owner copy grow. */
+@supports (height: 100dvh) {
+  :root { --viewport-height: 100dvh; }
+}
 .hero {
-  padding: calc(var(--nav-height) + 16px) var(--gutter) 40px;
+  padding: calc(var(--nav-height) + var(--hero-top-gap)) var(--gutter) 0;
 }
 .hero-frame {
   position: relative;
   isolation: isolate;
   overflow: clip;
-  border-radius: 12px;
-  min-height: 620px;
+  border-radius: 12px 12px 0 0;
+  min-height: calc(var(--viewport-height) - var(--nav-height) - var(--hero-top-gap) - var(--dock-height));
   display: flex;
   align-items: center;
 }
@@ -750,6 +757,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 @media (min-width: 800px) {
   :root {
     --nav-height: 102px;
+    --hero-top-gap: 24px;
     --gutter: clamp(24px,4.444444vw,64px);
   }
   h1 {
@@ -783,12 +791,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   .enhanced .nav-toggle, .mobile-nav, .enhanced .mobile-dock {
     display: none;
   }
-  .hero {
-    padding: calc(var(--nav-height) + 24px) var(--gutter) 64px;
-  }
   .hero-frame {
-    min-height: 662px;
-    border-radius: 16px;
+    border-radius: 16px 16px 0 0;
   }
   .hero-shade {
     background: linear-gradient(to right,rgba(9,26,26,.91) 0%,rgba(9,26,26,.78) 50%,rgba(9,26,26,.20) 100%);
@@ -930,6 +934,11 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   .provider-identity {
     gap: 12px;
   }
+}
+/* Keep the sample action above the dock on shorter phone screens. */
+@media (max-width: 799px) and (max-height: 699px) {
+  .hero-copy { padding-block: 24px; gap: 16px; }
+  .hero-copy h1 { font-size: 40px; line-height: 44px; }
 }
 /* Long owner text may wrap, but must never widen the viewport. */
 .hero-copy, .care-card, .provider-copy, .patients-intro, .qa, .location-copy, .request-copy, .footer {
@@ -1159,6 +1168,13 @@ starts here.</h2><p class="intro" data-reveal>Leave a few details and the office
   // The appointment dock stays within reach until the request area is on
   // screen, then gets out of the way rather than sitting over the form.
   const dock = $('.mobile-dock'), requestSection = $('#request');
+  if (dock) {
+    // Measure the real dock, including safe-area padding and wrapped labels.
+    // Transforms used to hide it must not change the hero's reserved space.
+    const measureDock = () => document.documentElement.style.setProperty('--dock-height', `${dock.offsetHeight}px`);
+    measureDock();
+    new ResizeObserver(measureDock).observe(dock, {box: 'border-box'});
+  }
   if (dock && requestSection) {
     new IntersectionObserver(entries => entries.forEach(e => {
       dock.classList.toggle('is-hidden', e.isIntersecting);
