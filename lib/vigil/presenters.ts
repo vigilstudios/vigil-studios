@@ -24,6 +24,22 @@ export function projectStepIndex(status: ProjectStatus): { current: number; done
   return { current: i, done: status === "launched", cancelled: false };
 }
 
+/**
+ * Customer-facing fallback when an older row missed an automatic lifecycle
+ * update. Reliable delivery events always outrank an earlier stored stage.
+ */
+export function effectiveProjectStatus(
+  stored: ProjectStatus,
+  signals: { intakeCompleted?: boolean; previewReady?: boolean; websiteLive?: boolean }
+): ProjectStatus {
+  if (stored === "closed" || stored === "cancelled") return stored;
+  if (signals.websiteLive) return "launched";
+  const storedIndex = projectSteps.findIndex((step) => step.key === stored);
+  const minimum = signals.previewReady ? "review" : signals.intakeCompleted ? "in_progress" : stored;
+  const minimumIndex = projectSteps.findIndex((step) => step.key === minimum);
+  return minimumIndex > storedIndex ? minimum : stored;
+}
+
 /** Where we are in the billing period, for the subscription meter. */
 export function periodProgress(start: string | null, end: string | null, now = Date.now()): { elapsed: number; total: number; daysLeft: number | null } {
   if (!start || !end) return { elapsed: 0, total: 0, daysLeft: null };

@@ -37,7 +37,8 @@ describe("deployment service review enforcement", () => {
 
   it("checks the review gate for production but leaves preview deployments available", async () => {
     const db = new FakeAdmin({
-      websites: [{ id: "site_1", organization_id: "org_1", status: "building", template_slug: null, hosting_mode: null, preview_url: null }],
+      projects: [{ id: "project_1", status: "in_progress", launched_at: null }],
+      websites: [{ id: "site_1", organization_id: "org_1", project_id: "project_1", status: "building", template_slug: null, hosting_mode: null, preview_url: null }],
       domains: [{ id: "domain_1", organization_id: "org_1", website_id: "site_1", status: "pending" }],
     });
     const deploymentProvider = provider();
@@ -46,6 +47,7 @@ describe("deployment service review enforcement", () => {
     expect(assertProductionDeployAllowed).not.toHaveBeenCalled();
     expect(deploymentProvider.triggerDeployment).toHaveBeenLastCalledWith("provider-site", expect.objectContaining({ environment: "preview" }));
     expect(db.rows("websites")[0].preview_url).toBe("https://live.test");
+    expect(db.rows("projects")[0].status).toBe("review");
     expect(beginDomainVerification).toHaveBeenCalledWith(db.asClient(), "domain_1", deploymentProvider);
     expect(preview.domainIds).toEqual([]);
 
@@ -57,6 +59,7 @@ describe("deployment service review enforcement", () => {
     expect(deploymentProvider.triggerDeployment).toHaveBeenLastCalledWith("provider-site", expect.objectContaining({ environment: "production" }));
     expect(activateDomainVerification).toHaveBeenCalledWith(db.asClient(), "domain_1", deploymentProvider);
     expect(db.rows("websites")[0]).toMatchObject({ status: "live", live_url: "https://example.com", primary_domain_id: "domain_1" });
+    expect(db.rows("projects")[0]).toMatchObject({ status: "launched", launched_at: "2026-01-01T00:03:00Z" });
   });
 
   it("does not let a production deployment inserted outside the normal path promote during sync", async () => {

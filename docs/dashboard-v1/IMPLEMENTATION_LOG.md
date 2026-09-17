@@ -873,3 +873,9 @@ fail silently.
 
 - Replaced the free-text template slug fields on customer project creation and website editing with dropdowns sourced from the finished entries in `EXPRESS_TEMPLATES`. Each option shows its slug and industry; catalogue entries marked coming soon are not assignable.
 - Admin project, website, and checkout-link actions now reject template slugs outside the available inventory. A regression test prevents free-text template slug inputs from returning to admin pages.
+
+## 2026-09-17 — Automatic customer project progress
+
+- Project progress now follows authoritative delivery events: admin-created work begins at intake, completed onboarding starts the build, a ready preview starts review, Professional revision work returns to build, final approval marks the project approved, and a live website marks it launched with a launch timestamp.
+- Database triggers make the synchronization apply to every code path, deployment services advance through valid intermediate states, and the customer dashboard derives a truthful minimum stage from completed milestones as a final safeguard.
+- Migration `0019` backfills existing rows, including websites that were already live while their linked project remained in draft or intake. Manual admin transitions remain available for exceptional workflows.

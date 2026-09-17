@@ -8,7 +8,7 @@ import { ForbiddenError, NotFoundError, ValidationError, toActionError, type Act
 import { assertOrgRole, requireOrgContextOrThrow, type OrgContext } from "@/lib/vigil/auth/session";
 import { button, escapeHtml, layout, sendEmail, staffNotificationAddress } from "@/lib/vigil/email";
 import { enqueueJob, JOB_KINDS } from "@/lib/vigil/jobs";
-import { assertTransition, domainTransitions, projectTransitions } from "@/lib/vigil/lifecycle";
+import { assertTransition, domainTransitions } from "@/lib/vigil/lifecycle";
 import { REGISTRAR_GUIDES } from "@/lib/vigil/domain-guides";
 import { domainKind } from "@/lib/vigil/domains";
 import { domainSchema, parseBrief, SECTION_SCHEMAS, STEP_KEYS, type Brief, type RegistrarKey, type SectionKey, type StepKey } from "@/lib/vigil/onboarding/brief";
@@ -352,10 +352,9 @@ export async function submitIntake(projectId: string): Promise<ActionResult<{ co
     if (error) throw error;
     await logAuditEvent(supabase, { action: "project.intake_completed", entityType: "project", entityId: projectId, organizationId: ctx.organization.id, after: { business_name: brief.basics.businessName, project_kind: project.kind, domain: brief.domain?.answer ?? null } });
 
-    if (hasAdminClient() && project.status === "intake") {
+    if (hasAdminClient() && (project.status === "draft" || project.status === "intake")) {
       const admin = createAdminClient();
-      assertTransition(projectTransitions, "intake", "in_progress", "project");
-      await admin.from("projects").update({ status: "in_progress" }).eq("id", projectId).eq("status", "intake");
+      await admin.from("projects").update({ status: "in_progress" }).eq("id", projectId).in("status", ["draft", "intake"]);
     }
 
     if (hasAdminClient() && brief.domain?.answer === "own" && brief.domain.domainId) {

@@ -628,9 +628,9 @@ begin
   perform public.restore_customer(v_org, '00000000-0000-0000-0000-00000000000d');
   perform test.ok((select archived_at is null and status = 'active' from public.organizations where id = v_org),
     'restore: organization status is restored');
-  perform test.ok((select status from public.projects where id = v_project) = 'review'
+  perform test.ok((select status from public.projects where id = v_project) = 'launched'
     and (select status from public.websites where id = v_website) = 'live',
-    'restore: project and website states are restored');
+    'restore: live website restores the project at launched');
   perform test.ok((select status from public.subscriptions where id = v_subscription) = 'canceled',
     'restore: billing remains canceled and requires an explicit new subscription');
 
@@ -646,6 +646,57 @@ begin
     'purge: provider links are removed');
   perform test.ok(test.count('select 1 from public.customer_deletion_log where former_organization_id = ''' || v_org || '''') = 1,
     'purge: one minimal deletion ledger remains');
+  perform test.logout();
+end $$;
+
+-- --------------------------------------------------------------------------
+-- Project lifecycle follows completed intake, preview, review and launch.
+-- --------------------------------------------------------------------------
+do $$
+declare
+  v_org uuid;
+  v_project uuid;
+  v_website uuid;
+  v_round_one uuid;
+  v_round_two uuid;
+begin
+  perform test.login_service();
+  insert into public.organizations (slug, name) values ('automatic-status-test', 'Automatic Status Test') returning id into v_org;
+  insert into public.projects (organization_id, name, kind, status)
+    values (v_org, 'Automatic Express', 'express', 'draft') returning id into v_project;
+  insert into public.websites (organization_id, project_id, name)
+    values (v_org, v_project, 'Automatic Express') returning id into v_website;
+
+  update public.projects set intake_completed_at = now() where id = v_project;
+  perform test.ok((select status from public.projects where id = v_project) = 'in_progress',
+    'automatic lifecycle: completed intake starts the build');
+
+  insert into public.deployments (organization_id, website_id, environment, status, url)
+    values (v_org, v_website, 'preview', 'ready', 'https://preview.example.com');
+  perform test.ok((select status from public.projects where id = v_project) = 'review',
+    'automatic lifecycle: ready preview starts review');
+
+  update public.websites set status = 'live', live_url = 'https://example.com' where id = v_website;
+  perform test.ok((select status from public.projects where id = v_project) = 'launched'
+    and (select launched_at is not null from public.projects where id = v_project),
+    'automatic lifecycle: live website launches the project');
+
+  insert into public.projects (organization_id, name, kind, status)
+    values (v_org, 'Automatic Professional', 'professional', 'in_progress') returning id into v_project;
+  select id into v_round_one from public.project_review_rounds where project_id = v_project and round_number = 1;
+  select id into v_round_two from public.project_review_rounds where project_id = v_project and round_number = 2;
+  update public.project_review_rounds set status = 'awaiting_feedback' where id = v_round_one;
+  perform test.ok((select status from public.projects where id = v_project) = 'review',
+    'automatic lifecycle: published review starts customer review');
+  update public.project_review_rounds set status = 'approved' where id = v_round_one;
+  perform test.ok((select status from public.projects where id = v_project) = 'in_progress',
+    'automatic lifecycle: first approval returns to the full build');
+  update public.project_review_rounds set status = 'awaiting_feedback' where id = v_round_two;
+  update public.project_review_rounds set status = 'approved' where id = v_round_two;
+  perform test.ok((select status from public.projects where id = v_project) = 'approved',
+    'automatic lifecycle: final approval approves the project');
+
+  delete from public.organizations where id = v_org;
   perform test.logout();
 end $$;
 

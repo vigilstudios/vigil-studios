@@ -15,7 +15,7 @@ import { requireOrgContext } from "@/lib/vigil/auth/session";
 import { FEATURES, resolveEntitlements } from "@/lib/vigil/entitlements";
 import { formatDate, formatRelative, humanizeAction, titleCase } from "@/lib/vigil/format";
 import { describeDomainStatus, describeProjectStatus, describeSubscriptionStatus, describeWebsiteStatus, type CustomerStatus } from "@/lib/vigil/lifecycle";
-import { auditTone, periodProgress, previewSource, projectStepIndex, projectSteps, requiredRecords, templateName } from "@/lib/vigil/presenters";
+import { auditTone, effectiveProjectStatus, periodProgress, previewSource, projectStepIndex, projectSteps, requiredRecords, templateName } from "@/lib/vigil/presenters";
 import { getOrgDomains, getOrgProjects, getOrgSubscription, getOrgWebsites, getRecentActivity, getRecentDeployments } from "@/lib/vigil/queries/dashboard";
 import { ONBOARDING_SKIP_COOKIE } from "@/lib/vigil/onboarding/constants";
 import { getOnboardingProject, needsOnboarding } from "@/lib/vigil/queries/onboarding";
@@ -61,10 +61,15 @@ export default async function OverviewPage() {
   const domainLaunchReady = (domain?.verification as { launch_ready?: boolean } | null)?.launch_ready === true;
   const domainStatus = domain ? describeDomainStatus(domain.status, { dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable: domainReachable, launchReady: domainLaunchReady }) : null;
   const subStatus = subscription ? describeSubscriptionStatus(subscription.status) : null;
-  const projectStatus = project ? describeProjectStatus(project.status) : null;
-  const reviewProjectStatus = professionalReviewStatus(projectReview);
+  const effectiveStatus = project ? effectiveProjectStatus(project.status, {
+    intakeCompleted: Boolean(project.intake_completed_at),
+    previewReady: Boolean(lastPublish?.environment === "preview" && lastPublish.status === "ready"),
+    websiteLive: Boolean(website?.status === "live" && website.live_url),
+  }) : null;
+  const projectStatus = effectiveStatus ? describeProjectStatus(effectiveStatus) : null;
+  const reviewProjectStatus = effectiveStatus === "launched" ? null : professionalReviewStatus(projectReview);
   const displayedProjectStatus = reviewProjectStatus ?? projectStatus;
-  const step = project ? projectStepIndex(project.status) : null;
+  const step = effectiveStatus ? projectStepIndex(effectiveStatus) : null;
   const period = periodProgress(subscription?.current_period_start ?? null, subscription?.current_period_end ?? null);
   const records = domain ? requiredRecords(domain.verification) : [];
   const preview = previewSource(website, project?.template_slug ?? null);
@@ -240,14 +245,14 @@ export default async function OverviewPage() {
                 <div className="mt-1">
                   <StatusLine tone={step.cancelled ? "neutral" : displayedProjectStatus.tone} label={displayedProjectStatus.label} hint={displayedProjectStatus.hint} size="sm" />
                 </div>
-                {project.kind === "professional" && (hasPostedReview || project.status === "review") ? (
+                {project.kind === "professional" && (hasPostedReview || effectiveStatus === "review") ? (
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <p className="text-xs text-[color:var(--text-secondary)]">
                       {reviewReady ? "Your Professional build is ready for review." : "Your Professional review history and latest version are here."}
                     </p>
                     <Link href="/dashboard/review" className="btn-primary !px-2.5 !py-1 text-xs">{reviewReady ? "Open design review" : "View design review"}</Link>
                   </div>
-                ) : project.status === "review" ? (
+                ) : effectiveStatus === "review" ? (
                   <p className="mt-2 text-xs text-[color:var(--text-secondary)]">Reply to your project email with changes or your approval.</p>
                 ) : null}
               </div>

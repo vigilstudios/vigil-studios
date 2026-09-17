@@ -6,6 +6,7 @@ import { NotFoundError, ValidationError } from "@/lib/vigil/auth/errors";
 import { assertProductionDeployAllowed } from "@/lib/vigil/project-reviews";
 import { findExternalId, findProviderLink, providerEnum, upsertProviderLink } from "./provider-links";
 import { activateDomainVerification, beginDomainVerification } from "./domain";
+import { advanceWebsiteProjectStatus } from "./project-status";
 
 /**
  * DeploymentService: Vigil Website -> DeploymentProvider.
@@ -132,6 +133,7 @@ export async function deployWebsite(
   let customerReady = false;
   if (snapshot.status === "ready" && environment === "preview" && snapshot.url) {
     await admin.from("websites").update({ preview_url: snapshot.url, status_reason: null }).eq("id", websiteId);
+    await advanceWebsiteProjectStatus(admin, websiteId, "review", snapshot.readyAt ?? new Date().toISOString());
     await prepareWebsiteDomains(admin, websiteId, provider);
     customerReady = true;
   } else if (environment === "production" && snapshot.status === "ready") {
@@ -181,6 +183,7 @@ export async function syncDeployment(
   let customerReady = false;
   if (snapshot.status === "ready" && deployment.environment === "preview" && snapshot.url) {
     await admin.from("websites").update({ preview_url: snapshot.url, status_reason: null }).eq("id", deployment.website_id);
+    await advanceWebsiteProjectStatus(admin, deployment.website_id, "review", snapshot.readyAt ?? new Date().toISOString());
     await prepareWebsiteDomains(admin, deployment.website_id, provider);
     customerReady = true;
   } else if (snapshot.status === "ready" && deployment.environment === "production") {
@@ -250,5 +253,6 @@ export async function finalizeWebsiteLaunch(admin: DbClient, websiteId: string, 
     status_reason: null,
   }).eq("id", websiteId);
   if (error) throw error;
+  await advanceWebsiteProjectStatus(admin, websiteId, "launched", deployment.finished_at ?? new Date().toISOString());
   return true;
 }

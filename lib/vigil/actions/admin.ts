@@ -204,7 +204,7 @@ export async function createProject(orgId: string, formData: FormData): Promise<
     const supabase = await createClient();
     const { data: project, error } = await supabase
       .from("projects")
-      .insert({ organization_id: orgId, name: v.name, kind: v.kind, template_slug: v.template_slug || null, created_by: staff.user.id })
+      .insert({ organization_id: orgId, name: v.name, kind: v.kind, status: "intake", template_slug: v.template_slug || null, created_by: staff.user.id })
       .select("id")
       .single();
     if (error) throw error;
