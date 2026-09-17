@@ -35,6 +35,16 @@ export const EXPRESS_TEMPLATES: {
     status: "available",
   },
   {
+    slug: "home-services",
+    variant: "Variant 1",
+    industry: "Home services",
+    example: "Fieldwork Home Services",
+    description:
+      "Warm and architectural, with clear services, project imagery, local coverage, and a straightforward estimate request.",
+    accent: "#eab65b",
+    status: "available",
+  },
+  {
     slug: "retail",
     variant: "Variant 1",
     industry: "Retail and boutique",
@@ -72,16 +82,6 @@ export const EXPRESS_TEMPLATES: {
     description:
       "Editorial and motion-rich, with a transparent brake inspection, service ledger, and a review rail that stays alive.",
     accent: "#dcf763",
-    status: "available",
-  },
-  {
-    slug: "home-services",
-    variant: "Variant 1",
-    industry: "Home services",
-    example: "Fieldwork Home Services",
-    description:
-      "Warm and architectural, with clear services, project imagery, local coverage, and a straightforward estimate request.",
-    accent: "#eab65b",
     status: "available",
   },
 ];
