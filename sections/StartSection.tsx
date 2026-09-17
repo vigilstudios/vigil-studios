@@ -55,7 +55,7 @@ export async function StartSection() {
                     </div>
                   ) : null}
                   <div className="mt-auto pt-5">
-                    <Link href={stage.cta.href} className={stage.primary ? "btn-primary inline-flex min-h-11 w-full !px-4 !py-2 text-sm font-semibold" : "btn-secondary inline-flex min-h-11 w-full !px-4 !py-2 text-sm"}>
+                    <Link href={stage.cta.href} className="btn-primary inline-flex min-h-11 w-full !px-4 !py-2 text-sm font-semibold">
                       {stage.cta.label} <ArrowRight className="ml-1.5 h-4 w-4" />
                     </Link>
                   </div>
