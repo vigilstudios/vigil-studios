@@ -28,6 +28,8 @@ import { slugify } from "@/lib/vigil/format";
 import type { ChangeRequestStatus, DomainStatus, ProjectStatus, SubscriptionStatus, Updates, WebsiteStatus } from "@/lib/vigil/types";
 import { Constants } from "@/types/database.types";
 import { isAvailableExpressTemplateSlug } from "@/lib/constants";
+import { assertProductionDeployAllowed } from "@/lib/vigil/project-reviews";
+import { assertWebsiteRepositoryReady } from "@/lib/vigil/services/repository";
 
 /**
  * Staff operations. Every action re-verifies staff (or admin) membership,
@@ -317,6 +319,10 @@ export async function enqueueWebsiteJob(
     const { data: site, error } = await supabase.from("websites").select("id, organization_id").eq("id", websiteId).maybeSingle();
     if (error) throw error;
     if (!site) throw new NotFoundError();
+    if (kind === JOB_KINDS.websiteDeploy) {
+      await assertWebsiteRepositoryReady(supabase, websiteId);
+      if (environment === "production") await assertProductionDeployAllowed(supabase, websiteId);
+    }
     // Provisioning is once per site; a deploy can be re-queued, but a double
     // click inside the same minute collapses into one job.
     const key = kind === JOB_KINDS.websiteRepository

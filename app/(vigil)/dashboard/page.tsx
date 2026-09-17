@@ -115,7 +115,7 @@ export default async function OverviewPage() {
         </section>
       ) : null}
 
-      {onboarding && (needsOnboarding(onboarding.project) || onboarding.project.intake_completed_at) ? (
+      {onboarding && needsOnboarding(onboarding.project) ? (
         <OnboardingCard brief={onboarding.brief} completedAt={onboarding.project.intake_completed_at} businessName={onboarding.brief.basics?.businessName || ctx.organization.name} projectKind={onboarding.project.kind} />
       ) : null}
 

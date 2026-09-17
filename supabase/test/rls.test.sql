@@ -559,6 +559,46 @@ begin
 end $$;
 
 -- --------------------------------------------------------------------------
+-- Express projects: one full-site round and one included revision request
+-- --------------------------------------------------------------------------
+do $$
+declare v_project uuid; v_round uuid; v_one uuid; v_two uuid;
+begin
+  perform test.login_service();
+  insert into public.projects (organization_id, name, kind, status)
+    values ('10000000-0000-0000-0000-00000000000a', 'Express review test', 'express', 'in_progress')
+    returning id into v_project;
+  select id into v_round from public.project_review_rounds where project_id = v_project;
+  perform test.ok(
+    test.count('select 1 from public.project_review_rounds where project_id = ''' || v_project || ''' and round_number = 1 and phase = ''full_site''') = 1,
+    'express: exactly one Full-site review round is seeded');
+  insert into public.project_review_submissions (organization_id, project_id, round_id, version, preview_url)
+    values ('10000000-0000-0000-0000-00000000000a', v_project, v_round, 1, 'https://express-v1.example.com') returning id into v_one;
+  perform test.logout();
+
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  insert into public.project_review_responses (organization_id, project_id, round_id, submission_id, kind, feedback)
+    values ('10000000-0000-0000-0000-00000000000a', v_project, v_round, v_one, 'changes_requested', 'Please adjust the heading.');
+  perform test.logout();
+
+  perform test.login_service();
+  update public.project_review_rounds set status = 'revision_in_progress' where id = v_round;
+  insert into public.project_review_submissions (organization_id, project_id, round_id, version, preview_url)
+    values ('10000000-0000-0000-0000-00000000000a', v_project, v_round, 2, 'https://express-v2.example.com') returning id into v_two;
+  perform test.logout();
+
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  perform test.fails(
+    'insert into public.project_review_responses (organization_id, project_id, round_id, submission_id, kind, feedback) values (''10000000-0000-0000-0000-00000000000a'', ''' || v_project || ''', ''' || v_round || ''', ''' || v_two || ''', ''changes_requested'', ''Another change'')',
+    'express: a second request for changes is refused');
+  insert into public.project_review_responses (organization_id, project_id, round_id, submission_id, kind)
+    values ('10000000-0000-0000-0000-00000000000a', v_project, v_round, v_two, 'approved');
+  perform test.ok((select status from public.project_review_rounds where id = v_round) = 'approved',
+    'express: the revised preview can be approved');
+  perform test.logout();
+end $$;
+
+-- --------------------------------------------------------------------------
 -- Deployments inherit organization from the website
 -- --------------------------------------------------------------------------
 do $$

@@ -56,7 +56,9 @@ export async function notifyCustomerDeployment(
   const websiteMetadata = (website.metadata as Record<string, unknown> | null) ?? {};
   const priorNotifications = (websiteMetadata.customer_notifications as Record<string, unknown> | undefined) ?? {};
   const lifecycleMarker = isPreview ? priorNotifications.preview_ready_at : priorNotifications.site_live_at;
-  if (lifecycleMarker) return { sent: true, alreadySent: true };
+  // Every revised preview is a new customer decision point. Production is a
+  // one-time lifecycle event, but preview notifications are per deployment.
+  if (lifecycleMarker && !isPreview) return { sent: true, alreadySent: true };
   const publicUrl = (isPreview ? website.preview_url : website.live_url) || deployment.url;
   if (!publicUrl) throw new ValidationError("The completed deployment has no customer URL.");
 

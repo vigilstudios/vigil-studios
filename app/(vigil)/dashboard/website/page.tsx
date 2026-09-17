@@ -4,6 +4,7 @@ import { ArrowUpRight, Calendar, FileCode2, Globe, HeartPulse, MonitorSmartphone
 import { AttributeWidget, WidgetLink } from "@/components/vigil/AttributeWidget";
 import { DownloadSiteButton } from "@/components/vigil/DownloadSiteButton";
 import { DeploymentStatusRefresh } from "@/components/vigil/DeploymentStatusRefresh";
+import { ExpressPreviewDecision } from "@/components/vigil/ExpressPreviewDecision";
 import { SiteFrame } from "@/components/vigil/SiteFrame";
 import { EmptyState, StatusPill } from "@/components/vigil/ui";
 import { Panel, StatusLine, Stepper } from "@/components/vigil/widgets";
@@ -12,7 +13,7 @@ import { FEATURES, resolveEntitlements } from "@/lib/vigil/entitlements";
 import { formatDate, formatRelative } from "@/lib/vigil/format";
 import { describeProjectStatus, describeWebsiteStatus } from "@/lib/vigil/lifecycle";
 import { previewSource, projectStepIndex, projectSteps } from "@/lib/vigil/presenters";
-import { getOrgProjects, getOrgWebsites, getRecentDeployments } from "@/lib/vigil/queries/dashboard";
+import { getCustomerExpressPreviewReview, getOrgProjects, getOrgWebsites, getRecentDeployments } from "@/lib/vigil/queries/dashboard";
 import { getCustomerProjectReviews } from "@/lib/vigil/queries/reviews";
 
 export const metadata: Metadata = { title: "Website" };
@@ -66,6 +67,7 @@ export default async function WebsitePage() {
           const deployments = await getRecentDeployments(site.id);
           const lastPublish = deployments.find((d) => d.environment === "production" && d.status === "ready") ?? null;
           const project = projects.find((p) => p.id === site.project_id) ?? null;
+          const expressReview = project?.kind === "express" ? await getCustomerExpressPreviewReview(site.id) : null;
           const preview = previewSource(site, project?.template_slug ?? null);
           const isLive = site.status === "live";
           const exportable = site.export_eligible && site.code_ownership === "customer_owned";
@@ -108,6 +110,8 @@ export default async function WebsitePage() {
                   <p className="text-xs text-[color:var(--text-secondary)]">A preview appears once your site is being built.</p>
                 )}
               </Panel>
+
+              {site.preview_url && expressReview ? <ExpressPreviewDecision websiteId={site.id} review={expressReview} /> : null}
 
               {/* Attribute widgets — each its own card */}
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

@@ -2,6 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { getExpressPreviewReview } from "@/lib/vigil/express-preview-review";
 
 /**
  * Read-side loaders for the client dashboard. All run under RLS as the
@@ -69,6 +70,11 @@ export const getRecentDeployments = cache(async (websiteId: string, limit = 5) =
   return data;
 });
 
+export const getCustomerExpressPreviewReview = cache(async (websiteId: string) => {
+  const supabase = await createClient();
+  return getExpressPreviewReview(supabase, websiteId);
+});
+
 export const getRecentActivity = cache(async (organizationId: string, limit = 8) => {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -90,6 +96,21 @@ export const getOrgMembers = cache(async (organizationId: string) => {
     .order("created_at", { ascending: true });
   if (error) throw error;
   return data;
+});
+
+export const getUnreadNotifications = cache(async (userId: string, organizationId?: string) => {
+  const supabase = await createClient();
+  let query = supabase
+    .from("notifications")
+    .select("id, title, body, href, kind, organization_id, created_at")
+    .eq("user_id", userId)
+    .is("read_at", null)
+    .order("created_at", { ascending: false })
+    .limit(20);
+  if (organizationId) query = query.eq("organization_id", organizationId);
+  const { data, error } = await query;
+  if (error) throw error;
+  return data ?? [];
 });
 
 export const getOrgInvites = cache(async (organizationId: string) => {

@@ -287,7 +287,7 @@ export async function listStaffReviewQueue(): Promise<StaffReviewQueueItem[]> {
   const projectIds = [...new Set(rounds.map((round) => round.project_id))];
   const organizationIds = [...new Set(rounds.map((round) => round.organization_id))];
   const [projectsResult, organizationsResult, submissionsResult, responsesResult] = await Promise.all([
-    supabase.from("projects").select("id, name").in("id", projectIds),
+    supabase.from("projects").select("id, name, kind").in("id", projectIds),
     supabase.from("organizations").select("id, name").in("id", organizationIds),
     supabase.from("project_review_submissions").select("id, version, preview_url, published_at").in("id", rounds.map((round) => round.current_submission_id).filter(Boolean) as string[]),
     supabase.from("project_review_responses").select("submission_id, responded_at").in("round_id", rounds.map((round) => round.id)),
@@ -297,7 +297,7 @@ export async function listStaffReviewQueue(): Promise<StaffReviewQueueItem[]> {
   const organizations = new Map((organizationsResult.data ?? []).map((organization) => [organization.id, organization]));
   const submissions = new Map((submissionsResult.data ?? []).map((submission) => [submission.id, submission]));
   const responseBySubmission = new Map((responsesResult.data ?? []).map((response) => [response.submission_id, response]));
-  return rounds.map((round) => {
+  return rounds.filter((round) => projects.get(round.project_id)?.kind === "professional").map((round) => {
     const submission = round.current_submission_id ? submissions.get(round.current_submission_id) : null;
     return {
       projectId: round.project_id,

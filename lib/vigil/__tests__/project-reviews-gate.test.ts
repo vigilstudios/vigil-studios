@@ -25,9 +25,14 @@ function reviewGateClient(fixture: GateFixture): DbClient {
   } as unknown as DbClient;
 }
 
-describe("Professional production deployment gate", () => {
-  it("does not gate Express or Custom projects", async () => {
+describe("customer production deployment gate", () => {
+  it("requires one current Express preview approval and does not gate Custom projects", async () => {
     await expect(getReviewDeployReadiness(reviewGateClient({ project: { id: "express-project", kind: "express" } }), "site_1"))
+      .resolves.toMatchObject({ allowed: false, missingRounds: [1] });
+    await expect(getReviewDeployReadiness(reviewGateClient({
+      project: { id: "express-project", kind: "express" },
+      rounds: [{ round_number: 1, status: "approved", current_submission_id: "v2", approved_submission_id: "v2" }],
+    }), "site_1"))
       .resolves.toMatchObject({ allowed: true, missingRounds: [] });
     await expect(getReviewDeployReadiness(reviewGateClient({ project: { id: "custom-project", kind: "custom" } }), "site_2"))
       .resolves.toMatchObject({ allowed: true, missingRounds: [] });

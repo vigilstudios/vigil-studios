@@ -9,6 +9,9 @@ import { formatDateTime, titleCase } from "@/lib/vigil/format";
 import { websiteTransitions } from "@/lib/vigil/lifecycle";
 import { getWebsiteDetail } from "@/lib/vigil/queries/admin";
 import { AVAILABLE_EXPRESS_TEMPLATES } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/server";
+import { getExpressPreviewReview } from "@/lib/vigil/express-preview-review";
+import { getReviewDeployReadiness } from "@/lib/vigil/project-reviews";
 
 export const metadata: Metadata = { title: "Website" };
 
@@ -20,6 +23,13 @@ export default async function WebsiteDetailPage({ params }: { params: Promise<{ 
   const { website: w, deployments, domains, links, jobs } = detail;
   const repository = links.find((link) => link.resource_kind === "repository");
   const repositoryUrl = (repository?.metadata as { html_url?: string } | undefined)?.html_url;
+  const supabase = await createClient();
+  const [launchReadiness, expressReview] = await Promise.all([
+    getReviewDeployReadiness(supabase, w.id),
+    w.project?.kind === "express" ? getExpressPreviewReview(supabase, w.id) : Promise.resolve(null),
+  ]);
+  const previewDisabledReason = repositoryUrl ? undefined : "Create the repository first.";
+  const liveDisabledReason = !repositoryUrl ? "Create the repository first." : !launchReadiness.allowed ? launchReadiness.reason ?? "Customer approval is required." : undefined;
 
   return (
     <div>
@@ -47,9 +57,19 @@ export default async function WebsiteDetailPage({ params }: { params: Promise<{ 
           <div className="mt-2 flex flex-wrap gap-2">
             {repositoryUrl ? <a className="btn-secondary text-sm !px-3 !py-1.5" href={repositoryUrl} target="_blank" rel="noreferrer">Open repository</a> : <ActionButton action={enqueueWebsiteJob.bind(null, w.id, "website.repository")}>Create repository</ActionButton>}
             {w.project?.kind === "professional" ? <Link className="btn-secondary text-sm !px-3 !py-1.5" href={`/admin/reviews/${w.project.id}`}>Open review workspace</Link> : null}
-            <ActionButton action={enqueueWebsiteJob.bind(null, w.id, "website.deploy", "preview")}>Deploy preview</ActionButton>
-            <ActionButton variant="primary" action={enqueueWebsiteJob.bind(null, w.id, "website.deploy")} confirmText="Deploy the latest main branch to the live site?">Deploy live</ActionButton>
+            <ActionButton className="w-36 justify-center" disabled={!repositoryUrl} disabledReason={previewDisabledReason} action={enqueueWebsiteJob.bind(null, w.id, "website.deploy", "preview")}>Deploy preview</ActionButton>
+            <ActionButton className="w-36 justify-center" disabled={Boolean(liveDisabledReason)} disabledReason={liveDisabledReason} variant="primary" action={enqueueWebsiteJob.bind(null, w.id, "website.deploy")} confirmText="Deploy the latest main branch to the live site?">Deploy live</ActionButton>
           </div>
+          {expressReview ? (
+            <div className="mt-4 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-3 text-sm">
+              <p className="font-semibold">Express customer review</p>
+              <p className="mt-1 text-xs text-[color:var(--text-secondary)]">
+                {expressReview.status === "awaiting_feedback" ? "Waiting for the customer to approve the preview or use their included revision." : expressReview.status === "approved" ? "The customer approved the latest preview. Live deployment is unlocked." : expressReview.status === "changes_requested" ? "The customer requested their included revision. Update the repository, then deploy a new preview." : expressReview.status === "revision_in_progress" ? "Revision work is in progress." : "Deploy a preview to start customer review."}
+              </p>
+              {expressReview.feedback ? <p className="mt-2 whitespace-pre-wrap rounded-md bg-[color:var(--bg-primary)] p-2 text-xs"><span className="font-semibold">Customer request:</span> {expressReview.feedback}</p> : null}
+              <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">Revision used: {expressReview.changesUsed} of 1</p>
+            </div>
+          ) : null}
           <h3 className="mt-5 text-sm font-semibold">Provider links</h3>
           <ul className="mt-1 text-xs">
             {links.map((l) => (

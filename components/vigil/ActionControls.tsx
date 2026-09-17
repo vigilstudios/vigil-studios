@@ -17,6 +17,8 @@ export function ActionButton({
   className,
   onDone,
   redirectTo,
+  disabled = false,
+  disabledReason,
 }: {
   action: () => Promise<ActionResult<unknown>>;
   children: React.ReactNode;
@@ -25,6 +27,8 @@ export function ActionButton({
   className?: string;
   onDone?: (result: ActionResult<unknown>) => void;
   redirectTo?: string;
+  disabled?: boolean;
+  disabledReason?: string;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -38,10 +42,10 @@ export function ActionButton({
           ? "text-xs text-[#ef4444] underline"
           : "text-xs text-[color:var(--text-secondary)] underline hover:text-[color:var(--text-primary)]";
   return (
-    <span className="inline-flex flex-col items-start gap-1">
+    <span className="inline-flex flex-col items-start gap-1" title={disabled ? disabledReason : undefined}>
       <button
         type="button"
-        disabled={pending}
+        disabled={pending || disabled}
         className={clsx(base, className)}
         onClick={() => {
           if (confirmText && !confirm(confirmText)) return;
@@ -57,6 +61,7 @@ export function ActionButton({
       >
         {pending ? "…" : children}
       </button>
+      {disabled && disabledReason ? <span className="max-w-52 text-[11px] leading-4 text-[color:var(--text-secondary)]">{disabledReason}</span> : null}
       {error ? <span className="text-xs text-[#ef4444]">{error}</span> : null}
     </span>
   );

@@ -3,22 +3,24 @@ import { AppShell } from "@/components/vigil/AppShell";
 import { LiveDashboardSync } from "@/components/vigil/LiveDashboardSync";
 import type { NavGroup } from "@/components/vigil/nav";
 import { requireStaff } from "@/lib/vigil/auth/session";
-import { adminNavAttention } from "@/lib/vigil/queries/admin";
+import { adminNavAttention, attentionItems, expressReviewAttentionItems } from "@/lib/vigil/queries/admin";
 import { listStaffReviewQueue } from "@/lib/vigil/queries/reviews";
+import { FloatingAttentionCenter, type AttentionItem } from "@/components/vigil/FloatingAttentionCenter";
+import { getUnreadNotifications } from "@/lib/vigil/queries/dashboard";
 
 /** Vigil Admin chrome. Staff only; admin-only screens check again themselves. */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const staff = await requireStaff("/admin");
-  const [attention, reviewQueue] = await Promise.all([adminNavAttention(), listStaffReviewQueue()]);
+  const [attention, reviewQueue, expressReviews, details, notifications] = await Promise.all([adminNavAttention(), listStaffReviewQueue(), expressReviewAttentionItems(), attentionItems(), getUnreadNotifications(staff.user.id)]);
   const reviewsNeedAttention = reviewQueue.some((item) => item.status === "changes_requested");
-  const anythingNeedsAttention = Object.values(attention).some(Boolean) || reviewsNeedAttention;
+  const anythingNeedsAttention = Object.values(attention).some(Boolean) || reviewsNeedAttention || expressReviews.length > 0;
   const groups: NavGroup[] = [
     {
       items: [
         { href: "/admin", label: "Overview", icon: "overview", exact: true, attention: anythingNeedsAttention },
         { href: "/admin/orders", label: "Orders", icon: "billing", attention: attention.orders },
         { href: "/admin/organizations", label: "Customers", icon: "customers", attention: attention.customers },
-        { href: "/admin/websites", label: "Websites", icon: "websites", attention: attention.websites },
+        { href: "/admin/websites", label: "Websites", icon: "websites", attention: attention.websites || expressReviews.length > 0 },
         { href: "/admin/reviews", label: "Reviews", icon: "requests", attention: reviewsNeedAttention },
         { href: "/admin/domains", label: "Domains", icon: "domains", attention: attention.domains },
         { href: "/admin/subscriptions", label: "Subscriptions", icon: "subscriptions", attention: attention.subscriptions },
@@ -34,6 +36,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       ],
     },
   ];
+  const floatingItems: AttentionItem[] = [
+    ...expressReviews.map((item) => ({ key: `express-review:${item.roundId}`, title: `${item.organizationName} requested changes`, body: `${item.projectName} is waiting for its included Express revision.`, href: item.websiteId ? `/admin/websites/${item.websiteId}` : "/admin/websites" })),
+    ...reviewQueue.filter((item) => item.status === "changes_requested").map((item) => ({ key: `review:${item.roundId}`, title: `${item.organizationName} requested changes`, body: `${item.projectName} is waiting for the team to begin the revision.`, href: `/admin/reviews/${item.projectId}` })),
+    ...details.projects.map((project) => ({ key: `project:${project.id}`, title: `${project.organization?.name ?? "Customer"} finished onboarding`, body: `${project.name} is ready for the team to review.`, href: `/admin/organizations/${project.organization?.id}` })),
+    ...details.requests.map((request) => ({ key: `request:${request.id}`, title: `${request.organization?.name ?? "Customer"} submitted a request`, body: request.title, href: "/admin/requests" })),
+    ...details.jobs.map((job) => ({ key: `job:${job.id}`, title: "A background job failed", body: `${job.organization?.name ?? "Customer"}: ${job.kind}`, href: "/admin/jobs" })),
+    ...details.domains.map((domain) => ({ key: `domain:${domain.id}`, title: `${domain.hostname} needs attention`, body: `${domain.organization?.name ?? "Customer"} domain status is ${domain.status}.`, href: "/admin/domains" })),
+    ...details.websites.map((website) => ({ key: `website:${website.id}`, title: `${website.name} needs attention`, body: website.status_reason || `Website status is ${website.status}.`, href: `/admin/websites/${website.id}` })),
+    ...notifications.map((notification) => ({ key: `notification:${notification.id}`, notificationId: notification.id, title: notification.title, body: notification.body || "Open this update for details.", href: notification.href || "/admin" })),
+  ];
   return (
     <AppShell
       groups={groups}
@@ -48,6 +60,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     >
       <LiveDashboardSync scope={{ kind: "admin" }} />
       {children}
+      <FloatingAttentionCenter portal="admin" items={floatingItems} />
     </AppShell>
   );
 }

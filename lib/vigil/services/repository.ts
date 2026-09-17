@@ -11,6 +11,16 @@ import { findProviderLink, upsertProviderLink } from "./provider-links";
 
 const templateSlugs = new Set(EXPRESS_TEMPLATES.map((template) => template.slug));
 
+export async function assertWebsiteRepositoryReady(admin: DbClient, websiteId: string): Promise<void> {
+  const repository = await findProviderLink(admin, {
+    provider: "other",
+    resourceKind: "repository",
+    entityType: "website",
+    entityId: websiteId,
+  });
+  if (!repository) throw new ValidationError("Create the customer repository before deploying a preview or live site.");
+}
+
 /** Create (or recover) the private customer repository and seed its site. */
 export async function provisionWebsiteRepository(
   admin: DbClient,

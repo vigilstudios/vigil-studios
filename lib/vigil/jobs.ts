@@ -51,9 +51,6 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
   },
   [JOB_KINDS.websiteDeploy]: async ({ admin, job }) => {
     if (!job.website_id) throw new Error("website.deploy requires website_id");
-    // Covers older/manual websites and a deploy clicked while the automatic
-    // post-purchase repository job is still queued.
-    await provisionWebsiteRepository(admin, job.website_id);
     const payload = (job.payload ?? {}) as { environment?: "production" | "preview" };
     const result = await deployWebsite(admin, job.website_id, {
       environment: payload.environment ?? "production",

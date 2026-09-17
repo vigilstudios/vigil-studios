@@ -8,6 +8,9 @@ import { FEATURES, resolveEntitlements } from "@/lib/vigil/entitlements";
 import { getOnboardingProject, needsOnboarding } from "@/lib/vigil/queries/onboarding";
 import { getOrgDomains, getOrgProjects, getOrgSubscription, getOrgWebsites } from "@/lib/vigil/queries/dashboard";
 import { getCustomerProjectReviews } from "@/lib/vigil/queries/reviews";
+import { FloatingAttentionCenter, type AttentionItem } from "@/components/vigil/FloatingAttentionCenter";
+import { getCustomerExpressPreviewReview } from "@/lib/vigil/queries/dashboard";
+import { getUnreadNotifications } from "@/lib/vigil/queries/dashboard";
 
 /**
  * Client dashboard chrome. Requires a signed-in user; pages decide whether
@@ -18,6 +21,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const ctx = await getOrgContext();
 
   let groups: NavGroup[] = [];
+  let floatingItems: AttentionItem[] = [];
   if (ctx) {
     const [ent, onboarding, projects, websites, domains, subscription] = await Promise.all([
       resolveEntitlements(ctx.organization.id),
@@ -32,16 +36,35 @@ export default async function DashboardLayout({ children }: { children: React.Re
     // in a state where a customer can reasonably expect a review surface.
     const professionalProject = projects.find((project) => project.kind === "professional" && !["closed", "cancelled"].includes(project.status));
     const projectReviews = professionalProject ? await getCustomerProjectReviews(professionalProject.id) : null;
+    const expressWebsite = websites.find((site) => projects.find((project) => project.id === site.project_id)?.kind === "express");
+    const [expressReview, notifications] = await Promise.all([
+      expressWebsite ? getCustomerExpressPreviewReview(expressWebsite.id) : Promise.resolve(null),
+      getUnreadNotifications(viewer.user.id, ctx.organization.id),
+    ]);
     const reviewRelevant = Boolean(
       projectReviews?.rounds.some((round) => round.status !== "pending") ||
       projects.some((project) => project.kind === "professional" && project.status === "review")
     );
     const onboardingNeedsAttention = needsOnboarding(onboarding?.project);
-    const websiteNeedsAttention = websites.some((site) => ["error", "suspended"].includes(site.status) || Boolean(site.preview_url && !site.live_url));
+    const expressReviewNeedsAttention = expressReview?.status === "awaiting_feedback";
+    const websiteNeedsAttention = websites.some((site) => ["error", "suspended"].includes(site.status)) || expressReviewNeedsAttention;
     const reviewNeedsAttention = Boolean(projectReviews?.rounds.some((round) => round.status === "awaiting_feedback"));
     const domainNeedsAttention = domains.some((domain) => ["pending", "verifying", "error", "expired"].includes(domain.status));
     const subscriptionNeedsAttention = Boolean(subscription && ["past_due", "unpaid", "incomplete"].includes(subscription.status));
     const anythingNeedsAttention = onboardingNeedsAttention || websiteNeedsAttention || reviewNeedsAttention || domainNeedsAttention || subscriptionNeedsAttention;
+    const derived: AttentionItem[] = [
+      ...(onboardingNeedsAttention ? [{ key: "onboarding", title: "Finish setting up", body: "Complete and send your project details so the team can begin.", href: "/dashboard/onboarding" }] : []),
+      ...(expressReviewNeedsAttention ? [{ key: "express-review", title: "Your website preview is ready", body: "Approve the preview or send your included request for changes.", href: "/dashboard/website" }] : []),
+      ...(reviewNeedsAttention ? [{ key: "professional-review", title: "A design review is waiting", body: "Review the current version and send one clear decision.", href: "/dashboard/review" }] : []),
+      ...(domainNeedsAttention ? [{ key: "domain", title: "Your domain needs attention", body: "Check the DNS instructions and current connection status.", href: "/dashboard/domain" }] : []),
+      ...(subscriptionNeedsAttention ? [{ key: "billing", title: "Your subscription needs attention", body: "Open billing to review the current payment status.", href: "/dashboard/billing" }] : []),
+    ];
+    floatingItems = [
+      ...derived,
+      ...notifications
+        .filter((notification) => !derived.some((item) => item.href === (notification.href || "/dashboard")))
+        .map((notification) => ({ key: `notification:${notification.id}`, notificationId: notification.id, title: notification.title, body: notification.body || "Open this update for details.", href: notification.href || "/dashboard" })),
+    ];
     groups = [
       {
         items: [
@@ -86,6 +109,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     >
       <LiveDashboardSync scope={ctx ? { kind: "organization", organizationId: ctx.organization.id, userId: viewer.user.id } : { kind: "viewer", userId: viewer.user.id }} />
       {children}
+      {ctx ? <FloatingAttentionCenter portal="customer" items={floatingItems} /> : null}
     </AppShell>
   );
 }

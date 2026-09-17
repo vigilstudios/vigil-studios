@@ -55,8 +55,8 @@ export type ReviewDeployReadiness = {
 };
 
 /**
- * Production deploys must not bypass the two explicit Professional approvals.
- * Express/custom sites have no included review gate and therefore pass.
+ * Production deploys must not bypass customer approval. Professional requires
+ * both included rounds; Express requires its one full-site preview approval.
  */
 export async function getReviewDeployReadiness(admin: DbClient, websiteId: string): Promise<ReviewDeployReadiness> {
   const { data: website, error: websiteError } = await admin
@@ -66,7 +66,7 @@ export async function getReviewDeployReadiness(admin: DbClient, websiteId: strin
     .maybeSingle();
   if (websiteError) throw websiteError;
   const project = website?.project as { id: string; kind: string } | null;
-  if (!project || project.kind !== "professional") return { allowed: true, reason: null, projectId: project?.id ?? null, missingRounds: [] };
+  if (!project || !["professional", "express"].includes(project.kind)) return { allowed: true, reason: null, projectId: project?.id ?? null, missingRounds: [] };
 
   const { data: rounds, error } = await admin
     .from("project_review_rounds")
@@ -78,10 +78,15 @@ export async function getReviewDeployReadiness(admin: DbClient, websiteId: strin
       .filter((round) => round.status === "approved" && round.current_submission_id && round.current_submission_id === round.approved_submission_id)
       .map((round) => round.round_number)
   );
-  const missingRounds = PROFESSIONAL_REVIEW_ROUNDS.map((round) => round.number).filter((number) => !approved.has(number));
+  const requiredRounds = project.kind === "express" ? [1 as const] : PROFESSIONAL_REVIEW_ROUNDS.map((round) => round.number);
+  const missingRounds = requiredRounds.filter((number) => !approved.has(number));
   return {
     allowed: missingRounds.length === 0,
-    reason: missingRounds.length ? `Professional project requires approval for review round${missingRounds.length === 1 ? "" : "s"} ${missingRounds.join(" and ")}.` : null,
+    reason: missingRounds.length
+      ? project.kind === "express"
+        ? "The customer must approve the latest Express preview before it can be deployed live."
+        : `Professional project requires approval for review round${missingRounds.length === 1 ? "" : "s"} ${missingRounds.join(" and ")}.`
+      : null,
     projectId: project.id,
     missingRounds,
   };

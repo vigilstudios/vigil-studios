@@ -26,6 +26,12 @@ function provider(): DeploymentProvider {
 }
 
 describe("deployment service review enforcement", () => {
+  it("blocks preview and production deployments until a repository exists", async () => {
+    const db = new FakeAdmin({ websites: [{ id: "site_1", organization_id: "org_1", status: "building" }] });
+    await expect(deployWebsite(db.asClient(), "site_1", { environment: "preview" }, provider())).rejects.toThrow(/Create the customer repository/);
+    await expect(deployWebsite(db.asClient(), "site_1", { environment: "production" }, provider())).rejects.toThrow(/Create the customer repository/);
+  });
+
   beforeEach(() => {
     assertProductionDeployAllowed.mockReset().mockResolvedValue(undefined);
     beginDomainVerification.mockClear();
@@ -40,6 +46,7 @@ describe("deployment service review enforcement", () => {
       projects: [{ id: "project_1", status: "in_progress", launched_at: null }],
       websites: [{ id: "site_1", organization_id: "org_1", project_id: "project_1", status: "building", template_slug: null, hosting_mode: null, preview_url: null }],
       domains: [{ id: "domain_1", organization_id: "org_1", website_id: "site_1", status: "pending" }],
+      provider_links: [{ id: "repo_link", provider: "other", resource_kind: "repository", entity_type: "website", entity_id: "site_1", external_id: "123", metadata: { full_name: "vigil/site" } }],
     });
     const deploymentProvider = provider();
 
@@ -74,6 +81,7 @@ describe("deployment service review enforcement", () => {
     const db = new FakeAdmin({
       websites: [{ id: "site_1", organization_id: "org_1", status: "building" }],
       domains: [{ id: "domain_1", website_id: "site_1", hostname: "example.com", status: "verifying", dns_ok: false, verification: { source: "platform", launch_ready: false } }],
+      provider_links: [{ id: "repo_link", provider: "other", resource_kind: "repository", entity_type: "website", entity_id: "site_1", external_id: "123", metadata: { full_name: "vigil/site" } }],
     });
 
     await expect(deployWebsite(db.asClient(), "site_1", { environment: "production" }, provider())).rejects.toThrow(/Configure and verify DNS/);

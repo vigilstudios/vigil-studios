@@ -237,3 +237,36 @@ export const adminNavAttention = cache(async () => {
     jobs: Boolean(jobs.count),
   };
 });
+
+/** Express revision requests remain actionable until a revised preview is published. */
+export const expressReviewAttentionItems = cache(async () => {
+  const supabase = await createClient();
+  const { data: rounds, error } = await supabase
+    .from("project_review_rounds")
+    .select("id, project_id, project:projects!inner(id, name, kind, organization_id)")
+    .eq("status", "changes_requested")
+    .eq("project.kind", "express")
+    .order("updated_at", { ascending: false })
+    .limit(20);
+  if (error) throw error;
+  if (!rounds?.length) return [];
+  const projects = rounds.map((round) => round.project as { id: string; name: string; kind: string; organization_id: string });
+  const [organizations, websites] = await Promise.all([
+    supabase.from("organizations").select("id, name").in("id", projects.map((project) => project.organization_id)),
+    supabase.from("websites").select("id, project_id").in("project_id", projects.map((project) => project.id)),
+  ]);
+  if (organizations.error) throw organizations.error;
+  if (websites.error) throw websites.error;
+  const organizationById = new Map((organizations.data ?? []).map((organization) => [organization.id, organization.name]));
+  const websiteByProject = new Map((websites.data ?? []).map((website) => [website.project_id, website.id]));
+  return rounds.map((round) => {
+    const project = round.project as { id: string; name: string; kind: string; organization_id: string };
+    return {
+      roundId: round.id,
+      projectId: project.id,
+      projectName: project.name,
+      organizationName: organizationById.get(project.organization_id) ?? "Customer",
+      websiteId: websiteByProject.get(project.id) ?? null,
+    };
+  });
+});
