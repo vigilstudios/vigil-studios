@@ -3,8 +3,16 @@ import { briefCompletion, briefSchema, emptyBasics, parseBrief, resumeStep, SECT
 import { assetPath, validateAssets } from "../onboarding/assets";
 import { REGISTRAR_GUIDES, REGISTRAR_OPTIONS, registrarFromNameservers } from "../domain-guides";
 import { afterSendLine, virtueLine, STEP_TITLES } from "../onboarding/virtue-copy";
+import { welcomeWasDeferred } from "../onboarding/constants";
 
 describe("brief schema", () => {
+  it("defers Virtue only for the project that chose to look around", () => {
+    expect(welcomeWasDeferred("project-a", "project-a")).toBe(true);
+    expect(welcomeWasDeferred("project-a", "project-b")).toBe(false);
+    expect(welcomeWasDeferred("1", "project-a")).toBe(false);
+    expect(welcomeWasDeferred(undefined, "project-a")).toBe(false);
+  });
+
   it("reads garbage as an empty brief and keeps progress defaults", () => {
     const b = parseBrief("nope");
     expect(b.version).toBe(3);

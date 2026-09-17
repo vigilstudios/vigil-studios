@@ -17,7 +17,7 @@ import { formatDate, formatRelative, humanizeAction, titleCase } from "@/lib/vig
 import { describeDomainStatus, describeProjectStatus, describeSubscriptionStatus, describeWebsiteStatus, type CustomerStatus } from "@/lib/vigil/lifecycle";
 import { auditTone, effectiveProjectStatus, periodProgress, previewSource, projectStepIndex, projectSteps, requiredRecords, templateName } from "@/lib/vigil/presenters";
 import { getOrgDomains, getOrgProjects, getOrgSubscription, getOrgWebsites, getRecentActivity, getRecentDeployments } from "@/lib/vigil/queries/dashboard";
-import { ONBOARDING_SKIP_COOKIE } from "@/lib/vigil/onboarding/constants";
+import { ONBOARDING_SKIP_COOKIE, welcomeWasDeferred } from "@/lib/vigil/onboarding/constants";
 import { getOnboardingProject, needsOnboarding } from "@/lib/vigil/queries/onboarding";
 import { getCustomerProjectReviews, type ProjectReviews } from "@/lib/vigil/queries/reviews";
 
@@ -32,7 +32,8 @@ export default async function OverviewPage() {
   const onboarding = await getOnboardingProject(orgId);
   let welcome = false;
   if (needsOnboarding(onboarding?.project) && onboarding?.brief.progress.lastStep === "welcome") {
-    const skipped = (await cookies()).get(ONBOARDING_SKIP_COOKIE)?.value === "1";
+    const deferredProject = (await cookies()).get(ONBOARDING_SKIP_COOKIE)?.value;
+    const skipped = welcomeWasDeferred(deferredProject, onboarding.project.id);
     welcome = !skipped;
   }
   const [websites, domains, subscription, projects, activity, ent] = await Promise.all([

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useSyncExternalStore, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { clsx } from "clsx";
 import { ArrowRight } from "lucide-react";
@@ -14,10 +15,11 @@ import { VirtueSpeech, useSpeaking } from "./VirtueSpeech";
 /**
  * First arrival on the dashboard: everything behind is dimmed and blurred,
  * Virtue is centred and speaks, then offers to begin. "Look around first"
- * lifts the overlay for a week (the same cookie as "Do this later").
+ * lifts the overlay for this project (the same cookie as "Do this later").
  */
 export function VirtueWelcome({ projectId, lines, linesAfterPassword, passwordLines, needsPassword }: { projectId: string; lines: SpeechLine[]; /** The welcome when it follows the password step. */ linesAfterPassword: SpeechLine[]; /** Spoken before the password form when the account has none yet. */ passwordLines: SpeechLine[]; needsPassword: boolean }) {
   const router = useRouter();
+  const portalHost = useSyncExternalStore(noop, getBody, getServerBody);
   const speech = useSpeaking();
   const [spoken, setSpoken] = useState(false);
   // Stage 1 (when needed): choose a password. Stage 2: the welcome and "Let's begin".
@@ -40,43 +42,50 @@ export function VirtueWelcome({ projectId, lines, linesAfterPassword, passwordLi
   const later = () =>
     start(async () => {
       setLeaving(true);
-      await fetch(ONBOARDING_LATER_HREF, { method: "GET", redirect: "manual" }).catch(() => undefined);
+      await fetch(`${ONBOARDING_LATER_HREF}?project=${encodeURIComponent(projectId)}`, { method: "GET", redirect: "manual" }).catch(() => undefined);
       window.setTimeout(() => setHidden(true), 350);
       router.refresh();
     });
 
-  if (hidden) return null;
+  if (hidden || !portalHost) return null;
 
-  return (
+  return createPortal(
     <div
-      className={clsx("fixed inset-0 z-40 flex items-center justify-center bg-[color:var(--bg-primary)]/70 px-4 backdrop-blur-md transition-opacity duration-500", leaving ? "opacity-0" : "opacity-100")}
+      className={clsx("fixed inset-0 z-[70] h-dvh min-h-[100svh] w-screen overflow-y-auto overscroll-contain bg-[color:var(--bg-primary)]/70 backdrop-blur-md transition-opacity duration-500", leaving ? "opacity-0" : "opacity-100")}
       role="dialog"
       aria-modal="true"
       aria-label="Welcome from Virtue"
     >
-      <div className="flex w-full max-w-xl flex-col items-center">
-        <VirtueOrb size="xl" state={speech.speaking ? "talking" : "idle"} />
-        <div className="mt-8 min-h-[7rem] w-full">
-          <VirtueSpeech key={stage} lines={stage === "password" ? passwordLines : welcomeLines} onStart={speech.onStart} onDone={() => { speech.onDone(); setSpoken(true); }} />
-        </div>
-        {stage === "password" ? (
-          <div className={clsx("mt-6 w-full max-w-md transition-opacity duration-700", spoken ? "opacity-100" : "pointer-events-none opacity-0")} aria-hidden={!spoken}>
-            {passwordDone ? (
-              <p className="text-center text-sm text-[color:var(--text-secondary)]">Saved.</p>
-            ) : (
-              <PasswordForm hasPassword={false} compact onSaved={() => { setPasswordDone(true); window.setTimeout(() => { setSpoken(false); setStage("welcome"); }, 600); }} />
-            )}
+      <div className="flex min-h-full w-full items-center justify-center px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <div className="flex w-full max-w-xl flex-col items-center">
+          <VirtueOrb size="xl" state={speech.speaking ? "talking" : "idle"} />
+          <div className="mt-8 min-h-[7rem] w-full">
+            <VirtueSpeech key={stage} lines={stage === "password" ? passwordLines : welcomeLines} onStart={speech.onStart} onDone={() => { speech.onDone(); setSpoken(true); }} />
           </div>
-        ) : null}
-        <div className={clsx("mt-8 flex w-full flex-col items-center gap-3 transition-opacity duration-700 sm:flex-row sm:justify-center", spoken && stage === "welcome" ? "opacity-100" : "pointer-events-none opacity-0")} aria-hidden={!(spoken && stage === "welcome")}>
-          <button type="button" onClick={begin} disabled={pending} className="btn-primary min-h-12 w-full !px-6 text-sm sm:w-auto">
-            Let&apos;s begin <ArrowRight className="ml-2 h-4 w-4" />
-          </button>
-          <button type="button" onClick={later} disabled={pending} className="min-h-12 text-sm text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">
-            Look around the dashboard first
-          </button>
+          {stage === "password" ? (
+            <div className={clsx("mt-6 w-full max-w-md transition-opacity duration-700", spoken ? "opacity-100" : "pointer-events-none opacity-0")} aria-hidden={!spoken}>
+              {passwordDone ? (
+                <p className="text-center text-sm text-[color:var(--text-secondary)]">Saved.</p>
+              ) : (
+                <PasswordForm hasPassword={false} compact onSaved={() => { setPasswordDone(true); window.setTimeout(() => { setSpoken(false); setStage("welcome"); }, 600); }} />
+              )}
+            </div>
+          ) : null}
+          <div className={clsx("mt-8 flex w-full flex-col items-center gap-3 transition-opacity duration-700 sm:flex-row sm:justify-center", spoken && stage === "welcome" ? "opacity-100" : "pointer-events-none opacity-0")} aria-hidden={!(spoken && stage === "welcome")}>
+            <button type="button" onClick={begin} disabled={pending} className="btn-primary min-h-12 w-full !px-6 text-sm sm:w-auto">
+              Let&apos;s begin <ArrowRight className="ml-2 h-4 w-4" />
+            </button>
+            <button type="button" onClick={later} disabled={pending} className="min-h-12 text-sm text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">
+              Look around the dashboard first
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </div>,
+    portalHost
   );
 }
+
+const noop = () => () => {};
+const getBody = () => document.body;
+const getServerBody = () => null;
