@@ -23,7 +23,9 @@ const WIDTH = 1280;
 const CLIP_H = 960; // 4:3 at 1280 wide
 const SCALE = 0.6; // → 768×576 files
 const MIN_SECTION_H = 480;
-const SLUGS = ["restaurant", "retail", "salon-spa", "auto-services"];
+// Every template the catalogue sells: read from lib/constants.ts so a new
+// vertical is picked up without editing this script.
+const SLUGS = await availableSlugs();
 const OUT_DIR = path.resolve("public/express-templates/sections");
 
 async function main() {
@@ -78,6 +80,18 @@ async function main() {
   } finally {
     chrome.kill();
   }
+}
+
+async function availableSlugs() {
+  const src = await import("node:fs/promises").then((fs) => fs.readFile(path.resolve("lib/constants.ts"), "utf8"));
+  const out = [];
+  for (const block of src.split(/\n\s*\{\s*\n/).slice(1)) {
+    const slug = block.match(/slug:\s*"([^"]+)"/)?.[1];
+    const status = block.match(/status:\s*"([^"]+)"/)?.[1];
+    if (slug && status === "available") out.push(slug);
+  }
+  if (out.length === 0) throw new Error("No available templates found in lib/constants.ts");
+  return out;
 }
 
 async function waitForTarget() {

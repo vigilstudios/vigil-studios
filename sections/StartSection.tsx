@@ -20,13 +20,13 @@ export async function StartSection() {
   const available = EXPRESS_TEMPLATES.filter((t) => t.status === "available").map((t) => t.industry);
   const coming = EXPRESS_TEMPLATES.filter((t) => t.status === "coming").length;
   return (
-    <Section id="start" fill className="isolate overflow-hidden">
+    <Section id="start" fill className="isolate overflow-hidden md:py-20!">
       <StartMarquee images={shots.map((s) => s.src)} />
       <Container>
         <Reveal>
           <SectionIntro align="center" eyebrow={START.eyebrow} title={START.title} lead={START.lead} />
         </Reveal>
-        <CardRow className="mt-8 md:grid-cols-3">
+        <CardRow className="mt-6 md:grid-cols-3">
           {builds.map((b) => {
             const stage = START.stages[b.kind];
             return (
@@ -65,7 +65,7 @@ export async function StartSection() {
           })}
         </CardRow>
         <Reveal delay={0.2}>
-          <p className="mx-auto mt-6 max-w-2xl text-center text-sm leading-6 text-[color:var(--text-secondary)]">{START.note}</p>
+          <p className="mx-auto mt-5 max-w-2xl text-center text-sm leading-6 text-[color:var(--text-secondary)]">{START.note}</p>
         </Reveal>
       </Container>
     </Section>

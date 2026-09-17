@@ -30,6 +30,36 @@
     "section": "reserve"
   },
   {
+    "src": "/express-templates/sections/home-services-1.webp",
+    "slug": "home-services",
+    "section": "hero"
+  },
+  {
+    "src": "/express-templates/sections/home-services-2.webp",
+    "slug": "home-services",
+    "section": "services"
+  },
+  {
+    "src": "/express-templates/sections/home-services-3.webp",
+    "slug": "home-services",
+    "section": "projects"
+  },
+  {
+    "src": "/express-templates/sections/home-services-4.webp",
+    "slug": "home-services",
+    "section": "process"
+  },
+  {
+    "src": "/express-templates/sections/home-services-5.webp",
+    "slug": "home-services",
+    "section": "area"
+  },
+  {
+    "src": "/express-templates/sections/home-services-6.webp",
+    "slug": "home-services",
+    "section": "request"
+  },
+  {
     "src": "/express-templates/sections/retail-1.webp",
     "slug": "retail",
     "section": "hero"
@@ -58,6 +88,41 @@
     "src": "/express-templates/sections/retail-6.webp",
     "slug": "retail",
     "section": "visit"
+  },
+  {
+    "src": "/express-templates/sections/medical-1.webp",
+    "slug": "medical",
+    "section": "hero"
+  },
+  {
+    "src": "/express-templates/sections/medical-2.webp",
+    "slug": "medical",
+    "section": "care"
+  },
+  {
+    "src": "/express-templates/sections/medical-3.webp",
+    "slug": "medical",
+    "section": "practice"
+  },
+  {
+    "src": "/express-templates/sections/medical-4.webp",
+    "slug": "medical",
+    "section": "team"
+  },
+  {
+    "src": "/express-templates/sections/medical-5.webp",
+    "slug": "medical",
+    "section": "patients"
+  },
+  {
+    "src": "/express-templates/sections/medical-6.webp",
+    "slug": "medical",
+    "section": "visit"
+  },
+  {
+    "src": "/express-templates/sections/medical-7.webp",
+    "slug": "medical",
+    "section": "request"
   },
   {
     "src": "/express-templates/sections/salon-spa-1.webp",
