@@ -203,3 +203,10 @@ https://claude.ai/artifact/FJ2XS1r7x912SUR6JburyP, approved, and shipped:
   hairline) the moment the next section reaches it; on inner pages after
   50 px. Phone bar is 44 px. The scroll label's bob animates `translate`,
   not `transform`, so it no longer fights Tailwind's centring.
+- Follow-up: a sticky hero must not be a snap area (its box moves with the
+  scroll, so Chrome treated "where it is now" as the snap point and refused
+  to scroll back up). A zero-height marker before it is the page's first
+  snap point and the hero sets `scroll-snap-align: none`. `main` is
+  `h-dvh` instead of `h-screen`, so on phones the document is never taller
+  than the visible viewport and the browser bar can no longer scroll the
+  page under the hero. Corner brackets are hidden below `md`.

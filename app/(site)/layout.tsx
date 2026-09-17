@@ -103,7 +103,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans">
         <Navigation />
-        <main id="site-root" className="h-screen overflow-y-auto">
+        <main id="site-root" className="h-dvh overflow-y-auto">
           {children}
         </main>
         <Analytics />
