@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Footer } from "@/components/layout/Footer";
-import { BuildCards } from "@/components/site/BuildCards";
-import { Container, Eyebrow, Section, SectionIntro } from "@/components/site/primitives";
-import { PricingTable } from "@/components/site/PricingTable";
+import { Container, Section, SectionIntro } from "@/components/site/primitives";
+import { PricingTabs, type PricingTab } from "@/components/site/PricingTabs";
+import { Reveal } from "@/components/site/Reveal";
 import { FAQSection } from "@/sections/FAQSection";
 import { GetStartedSection } from "@/sections/GetStartedSection";
 import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
@@ -13,36 +13,25 @@ export const metadata: Metadata = {
   alternates: { canonical: "/pricing" },
 };
 
-export default async function PricingPage() {
-  const { plans, builds } = await getPublicPricing();
+export default async function PricingPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const [{ plans, builds }, params] = await Promise.all([getPublicPricing(), searchParams]);
+  const initialTab: PricingTab = params.tab === "subscriptions" ? "subscriptions" : "websites";
   return (
     <>
-      <Section className="pt-32 sm:pt-40">
+      {/* The whole price in one room: Websites (paid once) and Subscriptions (ongoing), one tab at a time. */}
+      <Section id="pricing" fill className="md:py-20!">
         <Container>
-          <SectionIntro eyebrow="Pricing" title="Two parts. No surprises." lead="You pay once for the website, then a Vigil plan keeps it online, secure, updated and supported. Every Vigil-hosted site needs a plan; Basic is the floor." />
-        </Container>
-      </Section>
-
-      <Section className="scroll-mt-28 pt-0" id="builds">
-        <Container>
-          <Eyebrow>1 · The build, paid once</Eyebrow>
-          <BuildCards builds={builds} bullets={7} />
-        </Container>
-      </Section>
-
-      <Section alt id="plans" className="scroll-mt-28">
-        <Container>
-          <div className="flex flex-col items-center text-center">
-            <Eyebrow>2 · The Vigil plan, ongoing</Eyebrow>
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Pick how much we take off your plate.</h2>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-[color:var(--text-secondary)]">Basic keeps the site online. Care means you never touch it. Growth and Priority add Virtue, who works your leads and reviews for you. Change plans any time.</p>
-          </div>
-          <div className="mt-10 flex flex-col items-center">
-            <PricingTable plans={plans} bullets={6} />
-          </div>
-          <p className="mx-auto mt-8 max-w-2xl text-center text-xs leading-5 text-[color:var(--text-secondary)]">
-            Prices in USD. Annual and three-year plans are paid up front. Change-request allowances and Virtue usage limits are set per plan and shown in your dashboard. Cancel at any time; hosting ends at the close of the period and you keep your site and domain.
-          </p>
+          <Reveal>
+            <SectionIntro align="center" eyebrow="Pricing" title="One payment to build. One plan to keep it running." />
+          </Reveal>
+          <Reveal delay={0.1} className="mt-8">
+            <PricingTabs plans={plans} builds={builds} initialTab={initialTab} />
+          </Reveal>
+          <Reveal delay={0.2}>
+            <p className="mx-auto mt-5 max-w-5xl text-center text-xs leading-5 text-[color:var(--text-secondary)]">
+              Every Vigil website needs a plan; Basic is the floor. Prices in USD; annual and three-year plans are paid up front. Cancel any time; your site and domain stay yours.
+            </p>
+          </Reveal>
         </Container>
       </Section>
 

@@ -113,7 +113,7 @@ export default async function VigilPage() {
             })}
           </CardRow>
           <Reveal delay={0.1}>
-            <Link href="/pricing#plans" className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-[color:var(--accent)]">Full pricing, periods and what is included <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/pricing?tab=subscriptions" className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-[color:var(--accent)]">Full pricing, periods and what is included <ArrowRight className="h-4 w-4" /></Link>
           </Reveal>
         </Container>
       </Section>

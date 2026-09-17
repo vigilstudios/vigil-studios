@@ -97,7 +97,7 @@ export default async function WebsitesPage() {
                     <Link href={pkg.cta.href} className={kind === "custom" ? "btn-secondary min-h-11 !px-5 !py-2 text-sm" : "btn-primary min-h-11 !px-5 !py-2 text-sm font-semibold"}>
                       {pkg.cta.label} <ArrowRight className="ml-1.5 h-4 w-4" />
                     </Link>
-                    <Link href="/pricing#builds" className="inline-flex items-center gap-1 text-sm font-medium text-[color:var(--accent)]">
+                    <Link href="/pricing" className="inline-flex items-center gap-1 text-sm font-medium text-[color:var(--accent)]">
                       See the price <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>

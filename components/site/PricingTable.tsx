@@ -57,7 +57,7 @@ export function PricingTable({ plans, planHref = "/express", bullets = 3 }: { pl
         </div>
       ) : null}
 
-      <CardRow className="mt-8 md:grid-cols-2 xl:grid-cols-4">
+      <CardRow className="mt-6 md:grid-cols-2 xl:grid-cols-4">
         {plans.map((p) => {
           const cents = p.prices[periodKey];
           const copy = PLAN_COPY[p.code];

@@ -20,8 +20,10 @@ const tabs: { key: Tab; label: string; hint: string }[] = [
  * the Vigil plan (ongoing). The active tab's pill slides between the
  * buttons and the panels cross-fade.
  */
-export function PricingTabs({ plans, builds }: { plans: PublicPlan[]; builds: PublicBuild[] }) {
-  const [tab, setTab] = useState<Tab>("websites");
+export type PricingTab = Tab;
+
+export function PricingTabs({ plans, builds, initialTab = "websites" }: { plans: PublicPlan[]; builds: PublicBuild[]; initialTab?: Tab }) {
+  const [tab, setTab] = useState<Tab>(initialTab);
   return (
     <div>
       <div className="flex justify-center">
@@ -42,7 +44,7 @@ export function PricingTabs({ plans, builds }: { plans: PublicPlan[]; builds: Pu
         />
       </div>
 
-      <div className="relative mt-8">
+      <div className="relative mt-6">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div key={tab} role="tabpanel" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}>
             {tab === "websites" ? <BuildCards builds={builds} /> : <PricingTable plans={plans} />}

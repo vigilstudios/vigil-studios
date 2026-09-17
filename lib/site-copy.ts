@@ -166,7 +166,7 @@ export const VIGIL_PAGE = {
   title: "The platform under every website.",
   lead: "Vigil is the dashboard you sign into and the team behind it. It hosts your website, keeps the domain connected and the certificate current, applies updates, takes your requests and sends one receipt. You see outcomes in plain words, never a hosting console.",
   primary: { label: "Find your starting point", href: "/#start" },
-  secondary: { label: "See the plans", href: "/pricing#plans" },
+  secondary: { label: "See the plans", href: "/pricing?tab=subscriptions" },
   experience: [
     { title: "You sign in, you do not configure", body: "There are no settings to get wrong. Every page tells you what is true right now and, if something needs you, what to do next." },
     { title: "You ask, a person does it", body: "Changes are a request, not a project. Say it in a sentence, attach a photo if it helps, and watch it move to done." },
