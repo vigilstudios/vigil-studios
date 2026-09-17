@@ -16,6 +16,7 @@ export default async function DomainPage() {
   const [domains, websites, onboarding] = await Promise.all([getOrgDomains(ctx.organization.id), getOrgWebsites(ctx.organization.id), getOnboardingProject(ctx.organization.id)]);
   const canManage = ctx.role === "owner" || ctx.role === "manager" || ctx.isImpersonating;
   const briefDomain = onboarding?.brief.domain ?? null;
+  const hasConnectedDomain = domains.some((domain) => domain.status === "connected");
 
   return (
     <div>
@@ -89,7 +90,7 @@ export default async function DomainPage() {
         </div>
       )}
 
-      {canManage ? (
+      {canManage && !hasConnectedDomain ? (
         <Card className="mt-6">
           <h2 className="text-base font-semibold">Connect a domain you already own</h2>
           <p className="mt-1 text-sm text-[color:var(--text-secondary)]">
