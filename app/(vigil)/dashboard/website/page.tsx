@@ -111,7 +111,7 @@ export default async function WebsitePage() {
                 )}
               </Panel>
 
-              {site.preview_url && expressReview ? <ExpressPreviewDecision websiteId={site.id} review={expressReview} /> : null}
+              {site.status !== "live" && !site.live_url && site.preview_url && expressReview ? <ExpressPreviewDecision websiteId={site.id} review={expressReview} /> : null}
 
               {/* Attribute widgets — each its own card */}
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
