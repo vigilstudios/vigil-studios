@@ -46,7 +46,7 @@ export function ActionButton({
       <button
         type="button"
         disabled={pending || disabled}
-        className={clsx(base, className)}
+        className={clsx(base, "disabled:cursor-not-allowed disabled:opacity-45", className)}
         onClick={() => {
           if (confirmText && !confirm(confirmText)) return;
           setError(null);
