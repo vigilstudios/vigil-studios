@@ -27,6 +27,7 @@ import { archiveCustomer, permanentlyDeleteCustomer, restoreCustomer } from "@/l
 import { slugify } from "@/lib/vigil/format";
 import type { ChangeRequestStatus, DomainStatus, ProjectStatus, SubscriptionStatus, Updates, WebsiteStatus } from "@/lib/vigil/types";
 import { Constants } from "@/types/database.types";
+import { isAvailableExpressTemplateSlug } from "@/lib/constants";
 
 /**
  * Staff operations. Every action re-verifies staff (or admin) membership,
@@ -35,6 +36,14 @@ import { Constants } from "@/types/database.types";
  */
 
 const minuteBucket = () => Math.floor(Date.now() / 60_000).toString(36);
+
+const templateSlugSchema = z
+  .string()
+  .trim()
+  .max(80)
+  .optional()
+  .or(z.literal(""))
+  .refine((slug) => !slug || isAvailableExpressTemplateSlug(slug), "Choose an available template from the list.");
 
 function issuesOf(error: z.ZodError): Record<string, string[]> {
   const out: Record<string, string[]> = {};
@@ -182,7 +191,7 @@ export async function viewAsOrganization(orgId: string): Promise<void> {
 const createProjectSchema = z.object({
   name: z.string().trim().min(2).max(120),
   kind: z.enum(["express", "professional", "custom"]),
-  template_slug: z.string().trim().max(80).optional().or(z.literal("")),
+  template_slug: templateSlugSchema,
   create_website: z.string().optional(),
 });
 
@@ -266,7 +275,7 @@ export async function updateWebsiteFields(websiteId: string, formData: FormData)
       name: z.string().trim().min(1).max(120),
       live_url: z.string().trim().url().optional().or(z.literal("")),
       preview_url: z.string().trim().url().optional().or(z.literal("")),
-      template_slug: z.string().trim().max(80).optional().or(z.literal("")),
+      template_slug: templateSlugSchema,
       hosting_mode: z.string().trim().max(40).optional().or(z.literal("")),
       repository_ref: z.string().trim().max(200).optional().or(z.literal("")),
       code_ownership: z.enum(["customer_owned", "vigil_owned"]),

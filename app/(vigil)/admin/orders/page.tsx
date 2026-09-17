@@ -8,7 +8,7 @@ import { requireStaff } from "@/lib/vigil/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatMoney, titleCase } from "@/lib/vigil/format";
 import { describePrice } from "@/lib/vigil/billing-periods";
-import { EXPRESS_TEMPLATES } from "@/lib/constants";
+import { AVAILABLE_EXPRESS_TEMPLATES } from "@/lib/constants";
 import { NewOrderForm } from "./NewOrderForm";
 
 export const metadata: Metadata = { title: "Orders" };
@@ -30,7 +30,7 @@ export default async function OrdersPage() {
 
       <Panel title="Send a checkout link">
         <p className="text-xs text-[color:var(--text-secondary)]">Create a private checkout for a custom quote, a Professional customer who prefers a prepared order, or an Express site scoped on a call. They pay on the link; the account provisions itself.</p>
-        <NewOrderForm plans={plans ?? []} templates={EXPRESS_TEMPLATES.map((t) => ({ slug: t.slug, name: t.industry }))} />
+        <NewOrderForm plans={plans ?? []} templates={AVAILABLE_EXPRESS_TEMPLATES.map((t) => ({ slug: t.slug, name: t.industry }))} />
       </Panel>
 
       <Table>

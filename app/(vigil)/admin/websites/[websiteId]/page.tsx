@@ -8,6 +8,7 @@ import { requireStaff } from "@/lib/vigil/auth/session";
 import { formatDateTime, titleCase } from "@/lib/vigil/format";
 import { websiteTransitions } from "@/lib/vigil/lifecycle";
 import { getWebsiteDetail } from "@/lib/vigil/queries/admin";
+import { AVAILABLE_EXPRESS_TEMPLATES } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Website" };
 
@@ -77,7 +78,14 @@ export default async function WebsiteDetailPage({ params }: { params: Promise<{ 
             </div>
             <div>
               <label className={labelClass} htmlFor="template_slug">Template slug</label>
-              <input id="template_slug" name="template_slug" defaultValue={w.template_slug ?? ""} className={inputClass} />
+              <select id="template_slug" name="template_slug" defaultValue={w.template_slug ?? ""} className={inputClass}>
+                <option value="">No template</option>
+                {AVAILABLE_EXPRESS_TEMPLATES.map((template) => (
+                  <option key={template.slug} value={template.slug}>
+                    {template.slug} · {template.industry}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className={labelClass} htmlFor="hosting_mode">Hosting mode</label>

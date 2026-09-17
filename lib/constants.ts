@@ -86,3 +86,10 @@ export const EXPRESS_TEMPLATES: {
   },
 ];
 
+export const AVAILABLE_EXPRESS_TEMPLATES = EXPRESS_TEMPLATES.filter((template) => template.status === "available");
+const availableExpressTemplateSlugs = new Set(AVAILABLE_EXPRESS_TEMPLATES.map((template) => template.slug));
+
+/** True when a slug belongs to a finished, assignable Express template. */
+export function isAvailableExpressTemplateSlug(slug: string): boolean {
+  return availableExpressTemplateSlugs.has(slug);
+}

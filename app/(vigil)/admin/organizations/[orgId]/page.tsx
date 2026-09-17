@@ -30,6 +30,7 @@ import { getProjectAssets } from "@/lib/vigil/queries/onboarding";
 import { parseBrief } from "@/lib/vigil/onboarding/brief";
 import { BriefSummary } from "@/components/vigil/BriefSummary";
 import { Constants } from "@/types/database.types";
+import { AVAILABLE_EXPRESS_TEMPLATES } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Customer" };
 
@@ -186,7 +187,14 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
             <option value="professional">Professional</option>
             <option value="custom">Custom</option>
           </select>
-          <input name="template_slug" placeholder="Template slug (Express)" className={inputClass} />
+          <select name="template_slug" aria-label="Template slug" className={inputClass} defaultValue="">
+            <option value="">No template</option>
+            {AVAILABLE_EXPRESS_TEMPLATES.map((template) => (
+              <option key={template.slug} value={template.slug}>
+                {template.slug} · {template.industry}
+              </option>
+            ))}
+          </select>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" name="create_website" defaultChecked /> Also create website
           </label>

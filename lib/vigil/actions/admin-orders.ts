@@ -12,6 +12,7 @@ import { requireAdminOrThrow, requireStaffOrThrow } from "@/lib/vigil/auth/sessi
 import { button, escapeHtml, layout, sendEmail } from "@/lib/vigil/email";
 import { enqueueJob, JOB_KINDS, runDueJobs } from "@/lib/vigil/jobs";
 import { syncCatalogToProvider, type SyncReport } from "@/lib/vigil/services/catalog";
+import { isAvailableExpressTemplateSlug } from "@/lib/constants";
 
 async function appUrl(): Promise<string> {
   const configured = process.env.NEXT_PUBLIC_APP_URL;
@@ -27,7 +28,7 @@ const createOrderSchema = z.object({
   email: z.string().trim().email("Enter the customer's email."),
   contact_name: z.string().trim().max(120).optional().or(z.literal("")),
   project_kind: z.enum(["express", "professional", "custom"]),
-  template_slug: z.string().trim().max(80).optional().or(z.literal("")),
+  template_slug: z.string().trim().max(80).optional().or(z.literal("")).refine((slug) => !slug || isAvailableExpressTemplateSlug(slug), "Choose an available template from the list."),
   plan_code: z.string().trim().min(1, "Choose a plan."),
   build_amount: z.string().trim().optional().or(z.literal("")),
   notes: z.string().trim().max(2000).optional().or(z.literal("")),

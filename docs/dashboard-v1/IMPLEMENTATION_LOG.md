@@ -868,3 +868,8 @@ fail silently.
 - Replaced every customer-facing native file picker with one bounded `FileUploadButton`. The native control is now absolutely positioned inside a `relative`, `overflow-hidden` upload boundary, preventing browser focus from extending the dashboard's vertical scroll area.
 - The shared control covers onboarding logos, photos, menus and inspiration, Professional review references, and request attachments.
 - Added a source-level regression test that fails when a raw file input is introduced anywhere under `app` or `components`; future upload areas must use the shared bounded control.
+
+## 2026-09-16 — Canonical admin template selection
+
+- Replaced the free-text template slug fields on customer project creation and website editing with dropdowns sourced from the finished entries in `EXPRESS_TEMPLATES`. Each option shows its slug and industry; catalogue entries marked coming soon are not assignable.
+- Admin project, website, and checkout-link actions now reject template slugs outside the available inventory. A regression test prevents free-text template slug inputs from returning to admin pages.
