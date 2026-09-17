@@ -1,71 +1,50 @@
-"use client";
-
 import Link from "next/link";
-import { motion, type Variants } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { VelarisBackground } from "@/components/site/VelarisBackground";
-import { VirtueOrb } from "@/components/vigil/VirtueOrb";
+import { CalendlyPopup } from "@/components/CalendlyModal";
+import { HeroNotes } from "@/components/site/hero/HeroNotes";
+import { WireMark } from "@/components/site/hero/WireMark";
 import { HERO } from "@/lib/site-copy";
 
 /**
- * The hero is the one place the site is allowed to be atmospheric: the
- * Velaris-style field fills the viewport, the words sit in the clear
- * centre, and Virtue is present as herself. The copy arrives in order:
- * headline, then the sentence under it, then the buttons.
+ * The hero: black, a grid of small Vigil stars, the V* in the middle as a
+ * slowly turning wireframe, and notifications around it that arrive as
+ * problems and leave handled. The words sit under the mark; the mark and
+ * the notes lean with the pointer. The corner brackets and the mono labels
+ * are the same HUD language as the navigation.
  */
-const sequence: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } },
-};
-
-const item: Variants = {
-  hidden: { opacity: 0, y: 18 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
-};
+const corner = "pointer-events-none absolute z-[4] h-[18px] w-[18px] border-[rgba(245,245,243,0.35)]";
 
 export function HeroSection() {
   return (
-    <section className="relative isolate flex min-h-[100svh] items-center overflow-hidden">
-      <VelarisBackground className="absolute inset-0 -z-10 h-full w-full" />
-      {/* Fade into the page so the next section does not feel like a cut. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-40 bg-[linear-gradient(to_bottom,transparent,var(--bg-primary))]" aria-hidden />
+    <section className="relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-[#0a0a0a] text-[#f5f5f3]">
+      <div className="hero-grid absolute inset-0" aria-hidden />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_55%_at_50%_45%,rgba(10,10,10,0)_0%,rgba(10,10,10,0.55)_100%)]" aria-hidden />
+      <WireMark className="absolute inset-0 block h-full w-full" />
+      <HeroNotes />
 
-      <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-28 sm:px-6 sm:pt-32 lg:px-8">
-        <motion.div variants={sequence} initial="hidden" animate="visible" className="max-w-4xl">
-          <motion.div variants={item}>
-            <Link href="/products/virtue" className="group inline-flex items-center gap-2 rounded-full border border-[color:var(--border)] bg-[color:var(--bg-primary)]/40 py-1.5 pl-1.5 pr-3.5 text-[12px] font-medium text-[color:var(--text-primary)] backdrop-blur-md transition-colors hover:bg-[color:var(--bg-primary)]/60">
-              <VirtueOrb size="sm" label="" />
-              <span>Virtue sets up every customer</span>
-              <ArrowRight className="h-3.5 w-3.5 opacity-60 transition-transform group-hover:translate-x-0.5" />
-            </Link>
-            {/* Two sentences, each kept on one line from `lg` up; a phone wraps them naturally. */}
-            <h1 className="mt-7 font-[family-name:var(--font-space-grotesk)] text-[2.6rem] font-semibold leading-[1.06] tracking-[-0.02em] text-[color:var(--text-primary)] sm:text-5xl lg:text-6xl xl:text-[4.25rem]">
-              {HERO.title.split(/(?<=\.)\s+/).map((sentence) => (
-                <span key={sentence} className="lg:block lg:whitespace-nowrap">
-                  {sentence}{" "}
-                </span>
-              ))}
-            </h1>
-          </motion.div>
+      <span className={`${corner} left-4 top-4 border-l border-t`} aria-hidden />
+      <span className={`${corner} right-4 top-4 border-r border-t`} aria-hidden />
+      <span className={`${corner} bottom-4 left-4 border-b border-l`} aria-hidden />
+      <span className={`${corner} bottom-4 right-4 border-b border-r`} aria-hidden />
 
-          <motion.p variants={item} className="mt-6 max-w-xl text-base leading-7 text-[color:var(--text-primary)] opacity-80 sm:text-lg sm:leading-8">
-            {HERO.lead}
-          </motion.p>
-
-          <motion.div variants={item} className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Link href={HERO.primary.href} className="btn-primary min-h-12 !px-6 text-sm font-semibold">
-              {HERO.primary.label} <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-            <Link href={HERO.secondary.href} className="btn-secondary min-h-12 !px-6 text-sm font-medium">
-              {HERO.secondary.label}
-            </Link>
-          </motion.div>
-
-          <motion.p variants={item} className="mt-8 text-[12px] uppercase tracking-[0.18em] text-[color:var(--text-secondary)]">
-            {HERO.eyebrow}
-          </motion.p>
-        </motion.div>
+      <div className="absolute inset-x-0 top-[66%] z-[5] px-6 text-center md:top-[71%]">
+        <h1 className="hero-rise mx-auto max-w-4xl font-[family-name:var(--font-space-grotesk)] text-[clamp(26px,3.1vw,44px)] font-medium leading-[1.08] tracking-[-0.02em] text-balance">
+          {HERO.title}
+        </h1>
+        <p className="hero-rise mt-4 font-mono text-[10.5px] uppercase tracking-[0.16em] text-[rgba(245,245,243,0.55)] [animation-delay:120ms]">{HERO.line}</p>
+        <div className="hero-rise mt-5 flex flex-row items-center justify-center gap-2.5 [animation-delay:240ms]">
+          <Link href={HERO.primary.href} className="btn-primary h-10 !px-4 text-[13px] font-semibold sm:!px-[18px]">
+            {HERO.primary.label} <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+          </Link>
+          <CalendlyPopup className="inline-flex h-10 items-center justify-center rounded-lg border border-[color:var(--accent)] px-4 text-[13px] font-semibold text-[color:var(--accent)] transition-colors hover:bg-[rgba(16,212,90,0.1)] sm:px-[18px]">
+            {HERO.secondary.label}
+          </CalendlyPopup>
+        </div>
       </div>
+
+      <p className="hero-bob absolute bottom-[22px] left-1/2 z-[5] -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.2em] text-[rgba(245,245,243,0.55)]" aria-hidden>
+        Scroll ↓
+      </p>
     </section>
   );
 }

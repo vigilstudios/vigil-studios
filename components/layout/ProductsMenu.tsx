@@ -45,7 +45,7 @@ export function ProductsMenu() {
 
   return (
     <div ref={root} className="relative flex h-full items-center" onMouseEnter={show} onMouseLeave={hide}>
-      <Link href="/products" className="text-sm font-medium text-[color:var(--text-secondary)] transition-colors hover:text-[color:var(--text-primary)]" onFocus={show}>
+      <Link href="/products" className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:var(--text-secondary)] transition-colors hover:text-[color:var(--text-primary)]" onFocus={show}>
         Products
       </Link>
       <button
@@ -57,7 +57,7 @@ export function ProductsMenu() {
         onClick={() => setOpen((o) => !o)}
         className="ml-1 rounded-md p-0.5 text-[color:var(--text-secondary)] transition-colors hover:text-[color:var(--text-primary)]"
       >
-        <ChevronDown className={clsx("h-3.5 w-3.5 transition-transform duration-200", open && "rotate-180")} />
+        <ChevronDown className={clsx("h-3 w-3 transition-transform duration-200", open && "rotate-180")} />
       </button>
 
       <AnimatePresence>

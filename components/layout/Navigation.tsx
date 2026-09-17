@@ -4,15 +4,22 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { useSiteTheme } from "@/components/ui/useSiteTheme";
 import { ProductsMenu } from "@/components/layout/ProductsMenu";
 import { PRODUCT_LINKS } from "@/lib/site-copy";
+
+/**
+ * The top bar in the hero's HUD language: small mono labels, no logo, no
+ * chrome. Left the name, middle the pages, right the two ways in. It sits
+ * transparent over the hero and gains a fade from the page colour once the
+ * visitor has scrolled, so it stays readable over content.
+ */
+export const NAV_LABEL = "font-mono text-[10.5px] uppercase tracking-[0.16em] transition-colors";
+const quiet = `${NAV_LABEL} text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]`;
+const loud = `${NAV_LABEL} text-[color:var(--text-primary)]`;
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const theme = useSiteTheme();
 
   const containerRef = useRef<HTMLElement | null>(null);
 
@@ -76,100 +83,68 @@ export function Navigation() {
     };
   }, []);
 
-  const navItems = [
+  const pages = [
     { href: "/pricing", label: "Pricing" },
     { href: "/#get-started", label: "Contact" },
   ];
 
+  const getStarted = (
+    <span className="inline-flex items-center gap-2">
+      <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--accent)] shadow-[0_0_8px_var(--accent)]" aria-hidden />
+      Get started
+    </span>
+  );
+
   return (
-    <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isOpen
-          ? "bg-[color:var(--bg-secondary)] border-b border-[color:var(--border)]"
-          : isScrolled
-          ? "bg-[linear-gradient(0deg,transparent_0%,var(--bg-primary)_100%)] shadow-none"
-          : "bg-[linear-gradient(0deg,transparent_0%,var(--bg-primary)_100%)] shadow-none"
+    <nav
+      className={`fixed left-0 right-0 top-0 z-50 transition-colors duration-300 ${
+        isOpen ? "bg-[color:var(--bg-secondary)] border-b border-[color:var(--border)]" : isScrolled ? "bg-[linear-gradient(to_bottom,var(--nav-fade-start),transparent)]" : "bg-transparent"
       }`}
     >
-      <div className="container-wide flex items-center justify-between h-20">
-        <Link href="/" className="flex items-center gap-3 group" aria-label="Vigil Studios home">
-          <img
-            src={theme === "dark" ? "/vigil-vstar-white.svg" : "/vigil-vstar-black.svg"}
-            alt="Vigil VStar logo"
-            className="h-9 w-auto"
-          />
-          <span className="sr-only">Vigil VStar</span>
+      <div className="grid h-14 grid-cols-[1fr_auto] items-center px-5 md:h-16 md:grid-cols-[1fr_auto_1fr] md:px-10">
+        <Link href="/" className={loud} aria-label="Vigil Studios home">
+          Vigil Studios
         </Link>
 
-        {/* Desktop Floating Nav */}
-        <div className="hidden md:flex items-center gap-3">
-          <div className="h-14 w-14 rounded-[1.25rem] border border-[color:var(--border)] bg-[color:var(--bg-surface)]/90 backdrop-blur-xl flex items-center justify-center">
-            <ThemeToggle />
-          </div>
-          <div className="md:flex items-center gap-6 h-14 rounded-[1.25rem] border border-[color:var(--border)] bg-[color:var(--bg-surface)]/90 backdrop-blur-xl px-5 shadow-[0_24px_80px_-48px_rgba(0,0,0,0.45)]">
-            <Link href="/" className="text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)] transition-colors text-sm font-medium">
-              Home
+        {/* Desktop */}
+        <div className="hidden h-full items-center gap-[34px] md:flex">
+          <ProductsMenu />
+          {pages.map((item) => (
+            <Link key={item.href} href={item.href} className={quiet}>
+              {item.label}
             </Link>
-            <ProductsMenu />
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)] transition-colors text-sm font-medium"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-          <Link
-            href="/login"
-            className="h-14 flex items-center justify-center rounded-[1.25rem] border border-[color:var(--border)] bg-[color:var(--bg-surface)]/90 px-5 text-sm font-medium text-[color:var(--text-secondary)] backdrop-blur-xl transition-colors hover:text-[color:var(--text-primary)]"
-          >
+          ))}
+        </div>
+        <div className="hidden items-center justify-end gap-[30px] md:flex">
+          <Link href="/login" className={quiet}>
             Sign in
           </Link>
-          <Link href="/#start" className="btn-primary h-14 flex items-center justify-center rounded-[1.25rem]">
-            Get started
+          <Link href="/#start" className={loud}>
+            {getStarted}
           </Link>
         </div>
 
-        {/* Mobile Menu Button */}
-        <div className="flex items-center gap-3 md:hidden">
-          <div className="h-14 w-14 rounded-[1.25rem] border border-[color:var(--border)] bg-[color:var(--bg-surface)]/90 backdrop-blur-xl flex items-center justify-center">
-            <ThemeToggle />
-          </div>
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="p-2 hover:bg-[color:var(--bg-secondary)] rounded-[1.25rem] transition-colors"
-          >
-            {isOpen ? (
-              <X size={24} className="text-[color:var(--text-primary)]" />
-            ) : (
-              <Menu size={24} className="text-[color:var(--text-primary)]" />
-            )}
+        {/* Phone */}
+        <div className="flex items-center justify-end gap-4 md:hidden">
+          <Link href="/#start" className={loud} onClick={() => setIsOpen(false)}>
+            {getStarted}
+          </Link>
+          <button onClick={() => setIsOpen(!isOpen)} aria-label={isOpen ? "Close menu" : "Open menu"} aria-expanded={isOpen} className="-mr-2 rounded-lg p-2 text-[color:var(--text-primary)] transition-colors hover:bg-[color:var(--bg-surface-soft)]">
+            {isOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Phone menu */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-[color:var(--bg-secondary)] border-b border-[color:var(--border)]"
-          >
-            <div className="container-wide py-6 flex flex-col gap-4">
-              <Link href="/" onClick={() => setIsOpen(false)} className="text-[color:var(--text-primary)] hover:text-[color:var(--accent)] transition-colors font-medium">
-                Home
-              </Link>
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden border-b border-[color:var(--border)] bg-[color:var(--bg-secondary)] md:hidden">
+            <div className="flex flex-col gap-5 px-5 py-6">
               <div>
-                <Link href="/products" onClick={() => setIsOpen(false)} className="text-[color:var(--text-primary)] hover:text-[color:var(--accent)] transition-colors font-medium">
+                <Link href="/products" onClick={() => setIsOpen(false)} className={loud}>
                   Products
                 </Link>
-                <ul className="mt-2 flex flex-col gap-1 border-l border-[color:var(--border)] pl-4">
+                <ul className="mt-3 flex flex-col gap-1 border-l border-[color:var(--border)] pl-4">
                   {PRODUCT_LINKS.map((item) => (
                     <li key={item.href}>
                       <Link href={item.href} onClick={() => setIsOpen(false)} className="flex flex-col py-1.5">
@@ -180,30 +155,18 @@ export function Navigation() {
                   ))}
                 </ul>
               </div>
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className="text-[color:var(--text-primary)] hover:text-[color:var(--accent)] transition-colors font-medium"
-                >
+              {pages.map((item) => (
+                <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)} className={loud}>
                   {item.label}
                 </Link>
               ))}
-              <Link
-                href="/login"
-                onClick={() => setIsOpen(false)}
-                className="btn-secondary h-14 flex items-center justify-center rounded-[1.25rem]"
-              >
+              <Link href="/login" onClick={() => setIsOpen(false)} className={loud}>
                 Sign in
-              </Link>
-              <Link href="/#start" onClick={() => setIsOpen(false)} className="btn-primary h-14 flex items-center justify-center rounded-[1.25rem]">
-                Get started
               </Link>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.nav>
+    </nav>
   );
 }

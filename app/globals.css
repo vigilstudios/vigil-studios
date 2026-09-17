@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@theme inline {
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
 @layer base {
   :root {
     --bg-primary: #0a0a0a;
@@ -332,4 +336,135 @@ main#site-root {
     transition: filter 250ms ease;
   }
 
+}
+
+/*
+ * Home hero. Black by design whatever the theme: the star grid is the
+ * Mejias dot-grid construction (one tile scaled with the viewport, centred,
+ * about a fifth of a stop of ink) with the Vigil star in place of the dot.
+ */
+.hero-grid {
+  opacity: 0.2;
+  background-position: 50% 50%;
+  background-repeat: repeat;
+  background-size: clamp(26px, 2.3vw, 40px) auto;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'><polygon fill='%23ffffff' transform='translate(24 24) scale(0.038) translate(-468.86 -344.7)' points='488.85 412.76 448.48 412.8 449.91 377.59 419.48 396.62 399.29 361.38 430.03 344.52 399.28 328.33 419.47 292.72 449.93 312.15 448.48 276.64 488.86 276.63 487.78 311.79 517.86 292.74 538.42 328.36 507.26 344.48 538.44 361.37 517.86 396.65 487.77 377.93'/></svg>");
+}
+
+/* A notification: problem (red dot, pulsing) → handled (green dot) → crossed out → gone. */
+.hero-note {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(18, 20, 19, 0.92);
+  color: #e6ebe8;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  will-change: transform, opacity;
+  opacity: 0;
+  transition: color 250ms ease, border-color 300ms ease;
+}
+.hero-note i {
+  position: relative;
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ff6b5c;
+  box-shadow: 0 0 8px rgba(255, 107, 92, 0.7);
+  transition: background 300ms ease, box-shadow 300ms ease;
+}
+.hero-note i::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ff6b5c;
+  animation: hero-ping 1.4s ease-out infinite;
+}
+.hero-note b {
+  position: relative;
+  font-weight: 500;
+}
+.hero-note b::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: 52%;
+  height: 1.5px;
+  background: #f5f5f3;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 450ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+.hero-note.good {
+  border-color: rgba(16, 212, 90, 0.45);
+}
+.hero-note.good i {
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(16, 212, 90, 0.7);
+}
+.hero-note.good i::after {
+  display: none;
+}
+.hero-note.strike b::after {
+  transform: scaleX(1);
+}
+.hero-note.strike {
+  color: rgba(230, 235, 232, 0.55);
+}
+@keyframes hero-ping {
+  to {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+@media (max-width: 760px) {
+  .hero-note {
+    font-size: 11px;
+    padding: 6px 9px;
+  }
+}
+
+/* The words arrive in order; the scroll hint bobs until the visitor moves. */
+.hero-rise {
+  animation: hero-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.hero-bob {
+  animation: hero-bob 1.6s ease-in-out infinite;
+}
+@keyframes hero-bob {
+  50% {
+    transform: translate(-50%, 6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-note i::after,
+  .hero-rise,
+  .hero-bob {
+    animation: none;
+  }
 }

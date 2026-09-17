@@ -163,3 +163,35 @@ Approved with minor fixes, then fast-forwarded to `main` (vigilstudios.co).
   git push`) → Vercel deploys vigilstudios.co.
 - Chrome MCP tab renders but throttles animation when the window is hidden;
   use the in-app Browser pane (must be visible) for orb/Velaris checks.
+
+## 2026-09-17 — New hero and top bar (approved, live)
+
+The owner asked for a second, story-led redesign; the plan (eight scenes,
+"Night, Watch, Morning") lives at https://claude.ai/artifact/Kgs5ZmjPTcPsvsM5cqcpbZ
+and will be built scene by scene. Scene 0, the hero, was previewed at
+https://claude.ai/artifact/FJ2XS1r7x912SUR6JburyP, approved, and shipped:
+
+- **Hero** (`sections/HeroSection.tsx`): black whatever the theme, a grid of
+  small Vigil stars (`.hero-grid`, the Mejias dot-grid construction), the
+  V* in the middle as a slowly turning white wireframe
+  (`components/site/hero/WireMark.tsx`: three.js `EdgesGeometry` over an
+  `ExtrudeGeometry` of the logo's own polygons, no faces, paused off screen
+  and in hidden tabs, still frame under reduced motion, flat SVG outline
+  without WebGL), and notifications around it
+  (`components/site/hero/HeroNotes.tsx`: problem → handled → crossed out →
+  gone, 28 pairs, five at a time on desktop and three on a phone, kept off
+  the words and off the edges). Mark and notes lean with the pointer
+  through one shared smoothed cursor (`components/site/hero/cursor.ts`).
+  The words: `TAGLINE` is now *Keeping watch over your business online.*
+  (site title and footer follow); the mono line under it and two green
+  CTAs, side by side at every width. "Book a call" opens Calendly.
+- **Top bar** (`components/layout/Navigation.tsx`): the HUD look, mono
+  uppercase, no logo: Vigil Studios · Products ▾ Pricing Contact · Sign in,
+  Get started (green dot). Transparent over the hero, page-colour fade once
+  scrolled. JetBrains Mono is loaded as `--font-jetbrains-mono` and is
+  Tailwind's `font-mono`.
+- **Theme toggle removed from the bar**, and nothing else applies the theme
+  now, so the site renders the dark `:root` tokens for everyone
+  (`ThemeToggle.tsx` is kept, unused, in case it comes back somewhere).
+- Velaris stays in Get started and on /products/virtue; the hero no longer
+  uses it.

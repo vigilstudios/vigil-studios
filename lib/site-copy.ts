@@ -5,14 +5,14 @@
  */
 import { WEBSITE_TIERS } from "@/lib/vigil/site-tiers";
 
-export const TAGLINE = "You run the business. Vigil runs the online presence.";
+export const TAGLINE = "Keeping watch over your business online.";
 
+/** The hero says one thing; the mark and the notifications around it show the rest. `secondary` opens the Calendly popup. */
 export const HERO = {
-  eyebrow: "Websites, hosting, updates, leads and follow-up. One platform, one team.",
   title: TAGLINE,
-  lead: "Vigil builds your website, then keeps it running, updated and working for you. No builders to learn, no settings to babysit, and Virtue, our AI employee, guides you from the first minute.",
+  line: "Websites built for you · kept running by Vigil · grown by Virtue",
   primary: { label: "Find your starting point", href: "#start" },
-  secondary: { label: "See how it works", href: "#how-it-works" },
+  secondary: { label: "Book a call" },
 };
 
 /** The Products menu, in the order a customer buys them: build, plan, upgrade; the catalogue last. */
