@@ -32,7 +32,7 @@ export function OnboardingCard({ brief, completedAt, businessName, projectKind }
   const started = brief.progress.lastStep !== "welcome" || done > 0;
   return (
     <section className="rounded-xl border border-[color:var(--accent)]/40 bg-[color-mix(in_srgb,var(--accent)_6%,var(--bg-surface))] p-4">
-      <div className="flex gap-3">
+      <div className="flex items-center gap-3">
         <VirtueOrb size="md" state="idle" className="shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="text-[13px] font-semibold">{started ? "Let's finish setting up." : "Let me get you set up."}</p>
@@ -44,15 +44,15 @@ export function OnboardingCard({ brief, completedAt, businessName, projectKind }
                 : `Tell us the basics, goals, pages, functionality, content, brand and domain. Everything saves as you go.`}
           </p>
         </div>
+        <Link href="/dashboard/onboarding" className="btn-primary ml-auto min-h-11 shrink-0 !px-5 !py-2.5 text-sm">
+          {started ? "Continue" : "Start"} <ArrowRight className="ml-1.5 h-4 w-4" />
+        </Link>
       </div>
       {started ? (
         <div className="mt-3">
           <Checklist items={items.map((i) => ({ label: i.label, tone: i.done ? "good" : "neutral" }))} />
         </div>
       ) : null}
-      <Link href="/dashboard/onboarding" className="btn-primary mt-4 min-h-11 w-full !px-5 !py-2.5 text-sm sm:w-auto">
-        {started ? "Continue" : "Start"} <ArrowRight className="ml-1.5 h-4 w-4" />
-      </Link>
     </section>
   );
 }
