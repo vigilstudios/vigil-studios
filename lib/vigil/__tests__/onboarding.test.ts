@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { briefCompletion, briefSchema, emptyBasics, parseBrief, resumeStep, SECTION_SCHEMAS, STEP_KEYS, stepsForProjectKind } from "../onboarding/brief";
 import { assetPath, validateAssets } from "../onboarding/assets";
 import { REGISTRAR_GUIDES, REGISTRAR_OPTIONS, registrarFromNameservers } from "../domain-guides";
-import { afterSendLine, virtueLine, STEP_TITLES } from "../onboarding/virtue-copy";
+import { afterSendLine, virtueLine, welcomeSpeech, STEP_TITLES } from "../onboarding/virtue-copy";
 import { welcomeWasDeferred } from "../onboarding/constants";
 
 describe("brief schema", () => {
@@ -74,6 +74,11 @@ describe("brief schema", () => {
       expect(line.body).not.toMatch(/!/);
       expect(STEP_TITLES[step]).toBeTruthy();
     }
+  });
+
+  it("keeps the first dashboard welcome to one spoken paragraph", () => {
+    expect(welcomeSpeech({ firstName: "Ana", businessName: "Marlow & Fen" })).toHaveLength(1);
+    expect(welcomeSpeech({ firstName: "Ana", businessName: "Marlow & Fen", afterPassword: true })).toHaveLength(1);
   });
 });
 

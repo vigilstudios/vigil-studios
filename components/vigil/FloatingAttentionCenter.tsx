@@ -90,7 +90,7 @@ export function FloatingAttentionCenter({ portal, items }: { portal: "customer" 
       <div className="flex items-center gap-2">
         {hidden ? <button type="button" onClick={showVirtue} className="inline-flex h-10 items-center gap-2 rounded-full border border-[color:var(--border)] bg-[color:var(--bg-primary)] px-3 shadow-lg"><Bell className="h-4 w-4" /> <span className="text-xs">{visibleItems.length || "Alerts"}</span></button> : null}
         {!hidden ? (
-          <button type="button" onClick={() => setOpen((value) => !value)} className="relative rounded-full bg-[color:var(--bg-primary)] p-1 shadow-xl" aria-label="Open Virtue notifications" aria-expanded={open}>
+          <button type="button" onClick={() => setOpen((value) => !value)} className="relative rounded-full bg-[color:var(--bg-primary)] p-1 shadow-xl" aria-label="Open Virtue notifications" aria-expanded={open} data-virtue-dock={portal}>
             <VirtueOrb size="md" state={visibleItems.length ? "working" : "idle"} label="" />
             {visibleItems.length ? <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[color:var(--accent)] px-1 text-[10px] font-bold text-black">{visibleItems.length}</span> : null}
           </button>

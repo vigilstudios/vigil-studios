@@ -73,10 +73,9 @@ export function virtueLine(step: StepKey, ctx: { firstName?: string | null; busi
 /** Spoken by the centred Virtue the first time the customer reaches the dashboard. */
 export function welcomeSpeech(ctx: { firstName?: string | null; businessName: string; afterPassword?: boolean }): { text: string; emphasis?: boolean }[] {
   const name = ctx.firstName ? `, ${ctx.firstName}` : "";
+  const greeting = ctx.afterPassword ? "Thank you. Welcome to Vigil." : `Hello${name}. I'm Virtue.`;
   return [
-    { text: ctx.afterPassword ? "Thank you. Welcome to Vigil." : `Hello${name}. I'm Virtue.`, emphasis: true },
-    { text: `This is your dashboard. From here you'll see your website, your domain and your plan, and I'll be around whenever you need me.` },
-    { text: `First, I'd like to learn about ${ctx.businessName} so the team can start building. It takes about ten minutes and saves as you go.` },
+    { text: `${greeting} This is your dashboard, where you'll see your website, domain and plan, and I'll be around whenever you need me. First, I'd like to learn about ${ctx.businessName} so the team can start building; it takes about ten minutes and saves as you go.` },
   ];
 }
 
