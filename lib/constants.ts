@@ -78,11 +78,11 @@ export const EXPRESS_TEMPLATES: {
     slug: "medical",
     variant: "Variant 1",
     industry: "Medical and dental",
-    example: "Trelawn Dental Practice",
+    example: "Harbor Health",
     description:
-      "Calm and restrained. What the practice offers, written plainly, with no prices and no claims about outcomes.",
-    accent: "#2f8f9d",
-    status: "coming",
+      "Calm and restrained. A wide reception photograph, care written plainly, your team, and what to expect before a visit — with no prices and no claims about outcomes.",
+    accent: "#173e40",
+    status: "available",
   },
 ];
 
