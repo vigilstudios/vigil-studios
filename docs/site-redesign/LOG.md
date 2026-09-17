@@ -195,3 +195,11 @@ https://claude.ai/artifact/FJ2XS1r7x912SUR6JburyP, approved, and shipped:
   (`ThemeToggle.tsx` is kept, unused, in case it comes back somewhere).
 - Velaris stays in Get started and on /products/virtue; the hero no longer
   uses it.
+- Later the same day: the hero is `sticky top-0 z-0`, so the page scrolls up
+  over it (every later section is opaque and `z-[1]`, via the `Section`
+  primitive, `GetStartedSection` and the footer); its canvas and notes
+  pause once fully covered (`components/site/hero/covered.ts`). The bar is
+  transparent over the hero and turns solid (page colour at 92 %, blur,
+  hairline) the moment the next section reaches it; on inner pages after
+  50 px. Phone bar is 44 px. The scroll label's bob animates `translate`,
+  not `transform`, so it no longer fights Tailwind's centring.

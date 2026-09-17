@@ -3,12 +3,13 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { cursor, startCursor, tickCursor } from "./cursor";
+import { watchCovered } from "./covered";
 
 /**
  * The V* mark in three dimensions, drawn as edges only: the V and the
  * eight-point star straight from the logo's SVG, extruded, no faces. It
  * turns once every ~29 s with a slow nod, leans toward the pointer, and
- * pauses when the hero is off screen or the tab is hidden. Under reduced
+ * pauses when the hero is covered by the page, off screen or in a hidden tab. Under reduced
  * motion it renders one still frame; without WebGL the flat outline shows.
  */
 const V: [number, number][] = [[292.1, 130.44], [339.48, 0.04], [471.68, 0], [296.29, 420.45], [174.58, 420.45], [0.5, 0.5], [132.86, 0.03], [180.42, 132.1], [236.17, 274.69]];
@@ -79,11 +80,11 @@ export function WireMark({ className }: { className?: string }) {
     };
     fit();
 
-    let raf = 0, visible = true, hidden = document.hidden;
+    let raf = 0, visible = true, hidden = document.hidden, covered = false;
     const t0 = performance.now();
     const frame = (now: number) => {
       raf = 0;
-      if (!visible || hidden) return;
+      if (!visible || hidden || covered) return;
       tickCursor(now);
       const t = (now - t0) / 1000;
       group.rotation.y = (reduced ? -0.4 : t * 0.22) + cursor.x * 0.22; // one turn every ~29 s, plus a lean toward the pointer
@@ -111,12 +112,17 @@ export function WireMark({ className }: { className?: string }) {
       loop();
     });
     ro.observe(canvas);
+    const unwatch = watchCovered(canvas, (c) => {
+      covered = c;
+      if (!c) loop();
+    });
     loop();
 
     return () => {
       cancelAnimationFrame(raf);
       io.disconnect();
       ro.disconnect();
+      unwatch();
       document.removeEventListener("visibilitychange", onVisibility);
       geometries.forEach((g) => g.dispose());
       material.dispose();

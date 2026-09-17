@@ -454,11 +454,12 @@ main#site-root {
   }
 }
 .hero-bob {
+  translate: -50% 0;
   animation: hero-bob 1.6s ease-in-out infinite;
 }
 @keyframes hero-bob {
   50% {
-    transform: translate(-50%, 6px);
+    translate: -50% 6px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

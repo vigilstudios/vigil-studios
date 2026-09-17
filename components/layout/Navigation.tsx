@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProductsMenu } from "@/components/layout/ProductsMenu";
@@ -10,8 +11,9 @@ import { PRODUCT_LINKS } from "@/lib/site-copy";
 /**
  * The top bar in the hero's HUD language: small mono labels, no logo, no
  * chrome. Left the name, middle the pages, right the two ways in. It sits
- * transparent over the hero and gains a fade from the page colour once the
- * visitor has scrolled, so it stays readable over content.
+ * transparent over the hero and turns solid the moment the page's content
+ * reaches it (on the home page that is a full hero later; elsewhere a few
+ * pixels in), so the labels never get lost in what scrolls under them.
  */
 export const NAV_LABEL = "font-mono text-[10.5px] uppercase tracking-[0.16em] transition-colors";
 const quiet = `${NAV_LABEL} text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]`;
@@ -20,68 +22,33 @@ const loud = `${NAV_LABEL} text-[color:var(--text-primary)]`;
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const home = usePathname() === "/";
 
-  const containerRef = useRef<HTMLElement | null>(null);
+  const navRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    let attachedToWindow = false;
-    let observer: MutationObserver | null = null;
-
+    // The page scrolls inside the layout's <main>, not the window.
+    const container = document.getElementById("site-root");
+    const target: HTMLElement | Window = container ?? window;
     const handleScroll = () => {
-      const scrollTop = containerRef.current ? containerRef.current.scrollTop : window.scrollY;
-      setIsScrolled(scrollTop > 50);
-    };
-
-    const attachToContainer = (el: HTMLElement) => {
-      if (containerRef.current === el) return;
-      // detach any previous window listener
-      if (attachedToWindow) {
-        window.removeEventListener("scroll", handleScroll);
-        attachedToWindow = false;
+      const scrollTop = container ? container.scrollTop : window.scrollY;
+      if (!home) {
+        setIsScrolled(scrollTop > 50);
+        return;
       }
-      containerRef.current = el;
-      el.addEventListener("scroll", handleScroll);
-      // run once to initialize state
-      handleScroll();
+      // Home: the first section is the sticky hero; the bar stays clear until the next section reaches it.
+      const hero = (container ?? document).querySelector("main > section") as HTMLElement | null;
+      const navHeight = navRef.current?.offsetHeight ?? 64;
+      setIsScrolled(scrollTop >= (hero?.clientHeight ?? window.innerHeight) - navHeight);
     };
-
-    // initial attempt to find container
-    const initial = document.getElementById("site-root") as HTMLElement | null;
-    if (initial) {
-      attachToContainer(initial);
-    } else {
-      // fallback to window while waiting for main to mount
-      window.addEventListener("scroll", handleScroll);
-      attachedToWindow = true;
-
-      // observe DOM for insertion of #site-root
-      observer = new MutationObserver(() => {
-        const found = document.getElementById("site-root") as HTMLElement | null;
-        if (found) {
-          attachToContainer(found);
-          if (observer) {
-            observer.disconnect();
-            observer = null;
-          }
-        }
-      });
-
-      observer.observe(document.body, { childList: true, subtree: true });
-    }
-
+    target.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
+    handleScroll();
     return () => {
-      if (observer) {
-        observer.disconnect();
-        observer = null;
-      }
-      if (containerRef.current) {
-        containerRef.current.removeEventListener("scroll", handleScroll);
-      }
-      if (attachedToWindow) {
-        window.removeEventListener("scroll", handleScroll);
-      }
+      target.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
     };
-  }, []);
+  }, [home]);
 
   const pages = [
     { href: "/pricing", label: "Pricing" },
@@ -97,11 +64,16 @@ export function Navigation() {
 
   return (
     <nav
-      className={`fixed left-0 right-0 top-0 z-50 transition-colors duration-300 ${
-        isOpen ? "bg-[color:var(--bg-secondary)] border-b border-[color:var(--border)]" : isScrolled ? "bg-[linear-gradient(to_bottom,var(--nav-fade-start),transparent)]" : "bg-transparent"
+      ref={navRef}
+      className={`fixed left-0 right-0 top-0 z-50 border-b transition-colors duration-300 ${
+        isOpen
+          ? "border-[color:var(--border)] bg-[color:var(--bg-secondary)]"
+          : isScrolled
+            ? "border-[color:var(--border)] bg-[color:color-mix(in_srgb,var(--bg-primary)_92%,transparent)] backdrop-blur-md"
+            : "border-transparent bg-transparent"
       }`}
     >
-      <div className="grid h-14 grid-cols-[1fr_auto] items-center px-5 md:h-16 md:grid-cols-[1fr_auto_1fr] md:px-10">
+      <div className="grid h-11 grid-cols-[1fr_auto] items-center px-5 md:h-16 md:grid-cols-[1fr_auto_1fr] md:px-10">
         <Link href="/" className={loud} aria-label="Vigil Studios home">
           Vigil Studios
         </Link>
@@ -129,8 +101,8 @@ export function Navigation() {
           <Link href="/#start" className={loud} onClick={() => setIsOpen(false)}>
             {getStarted}
           </Link>
-          <button onClick={() => setIsOpen(!isOpen)} aria-label={isOpen ? "Close menu" : "Open menu"} aria-expanded={isOpen} className="-mr-2 rounded-lg p-2 text-[color:var(--text-primary)] transition-colors hover:bg-[color:var(--bg-surface-soft)]">
-            {isOpen ? <X size={20} /> : <Menu size={20} />}
+          <button onClick={() => setIsOpen(!isOpen)} aria-label={isOpen ? "Close menu" : "Open menu"} aria-expanded={isOpen} className="-mr-2 rounded-lg p-1.5 text-[color:var(--text-primary)] transition-colors hover:bg-[color:var(--bg-surface-soft)]">
+            {isOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
       </div>

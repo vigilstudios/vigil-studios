@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { cursor, startCursor, tickCursor } from "./cursor";
+import { watchCovered } from "./covered";
 
 /**
  * Notifications floating around the mark. Each one arrives as a problem
@@ -106,11 +107,11 @@ export function HeroNotes() {
       while (slots.length > n) slots.pop()!.el?.remove();
     };
 
-    let raf = 0, visible = true, hidden = document.hidden;
+    let raf = 0, visible = true, hidden = document.hidden, covered = false;
     const start = performance.now();
     const frame = (now: number) => {
       raf = 0;
-      if (!visible || hidden) return;
+      if (!visible || hidden || covered) return;
       tickCursor(now);
       const t = (now - start) / 1000;
       ensure(t);
@@ -152,11 +153,16 @@ export function HeroNotes() {
       if (!hidden) loop();
     };
     document.addEventListener("visibilitychange", onVisibility);
+    const unwatch = watchCovered(host, (c) => {
+      covered = c;
+      if (!c) loop();
+    });
     loop();
 
     return () => {
       cancelAnimationFrame(raf);
       io.disconnect();
+      unwatch();
       document.removeEventListener("visibilitychange", onVisibility);
       host.replaceChildren();
     };
