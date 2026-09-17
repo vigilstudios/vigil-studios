@@ -66,7 +66,7 @@ export default async function WebsiteDetailPage({ params }: { params: Promise<{ 
               <p className="mt-1 text-xs text-[color:var(--text-secondary)]">
                 {expressReview.status === "awaiting_feedback" ? "Waiting for the customer to approve the preview or use their included revision." : expressReview.status === "approved" ? "The customer approved the latest preview. Live deployment is unlocked." : expressReview.status === "changes_requested" ? "The customer requested their included revision. Update the repository, then deploy a new preview." : expressReview.status === "revision_in_progress" ? "Revision work is in progress." : "Deploy a preview to start customer review."}
               </p>
-              {expressReview.feedback ? <p className="mt-2 whitespace-pre-wrap rounded-md bg-[color:var(--bg-primary)] p-2 text-xs"><span className="font-semibold">Customer request:</span> {expressReview.feedback}</p> : null}
+              {expressReview.status === "changes_requested" && expressReview.feedback ? <p className="mt-2 whitespace-pre-wrap rounded-md bg-[color:var(--bg-primary)] p-2 text-xs"><span className="font-semibold">Customer request:</span> {expressReview.feedback}</p> : null}
               <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">Revision used: {expressReview.changesUsed} of 1</p>
             </div>
           ) : null}
