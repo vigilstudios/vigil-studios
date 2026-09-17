@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/browser";
 import { attachUploadedFiles, createChangeRequest } from "@/lib/vigil/actions/requests";
 import { ACCEPT_ATTRIBUTE, ATTACHMENTS_BUCKET, MAX_ATTACHMENTS_PER_REQUEST, attachmentPath, formatBytes, validateAttachments } from "@/lib/vigil/attachments";
 import { FormError, FormSuccess, inputClass, labelClass } from "@/components/vigil/ui";
+import { FileUploadButton } from "@/components/vigil/FileUploadButton";
 
 type Phase = "idle" | "creating" | "uploading" | "recording";
 
@@ -128,28 +129,20 @@ export function NewRequestForm({ websites, organizationId }: { websites: { id: s
 
       <div>
         <span className={labelClass}>Attachments</span>
-        <label
-          htmlFor="attachments"
-          className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 py-2.5 text-xs text-[color:var(--text-secondary)] hover:border-[color:var(--accent)] hover:text-[color:var(--text-primary)]"
+        <FileUploadButton
+          id="attachments"
+          ariaLabel="Add request images or PDFs"
+          accept={ACCEPT_ATTRIBUTE}
+          multiple
+          disabled={busy}
+          onFiles={(selected) => setFiles((prev) => [...prev, ...selected].slice(0, MAX_ATTACHMENTS_PER_REQUEST + 1))}
+          className="flex w-full min-w-0 items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 py-2.5 text-xs text-[color:var(--text-secondary)] hover:border-[color:var(--accent)] hover:text-[color:var(--text-primary)]"
         >
           <Paperclip className="h-4 w-4" />
           <span>
             Add images or PDFs <span className="opacity-70">· up to {MAX_ATTACHMENTS_PER_REQUEST} files, 10 MB each</span>
           </span>
-        </label>
-        {/* Not part of the posted form data: files go straight to Storage after the request exists. */}
-        <input
-          id="attachments"
-          type="file"
-          multiple
-          accept={ACCEPT_ATTRIBUTE}
-          className="sr-only"
-          disabled={busy}
-          onChange={(e) => {
-            setFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])].slice(0, MAX_ATTACHMENTS_PER_REQUEST + 1));
-            e.target.value = "";
-          }}
-        />
+        </FileUploadButton>
         {files.length > 0 ? (
           <ul className="mt-2 divide-y divide-[color:var(--border)] rounded-md border border-[color:var(--border)]">
             {files.map((f, i) => {

@@ -8,6 +8,7 @@ import { formatBytes, validateAttachments, ALLOWED_ATTACHMENT_TYPES, MAX_ATTACHM
 import { formatDate, formatRelative } from "@/lib/vigil/format";
 import { FormError, FormSuccess, inputClass, labelClass, StatusPill, type Tone } from "@/components/vigil/ui";
 import { Panel, StatusLine, Timeline } from "@/components/vigil/widgets";
+import { FileUploadButton } from "@/components/vigil/FileUploadButton";
 import {
   EMPTY_REVIEW_ROUNDS,
   REVIEW_ROUNDS,
@@ -474,13 +475,10 @@ function ReviewAttachments({ files, problems, busy, onFiles, onRemove }: { files
   return (
     <div>
       <span className={labelClass}>Optional references</span>
-      <div className="relative min-w-0 max-w-full">
-        <label htmlFor="review-attachments" className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 py-2.5 text-xs text-[color:var(--text-secondary)] hover:border-[color:var(--accent)] hover:text-[color:var(--text-primary)]">
-          <Paperclip className="h-4 w-4" aria-hidden />
-          <span>Add images or PDFs <span className="opacity-70">· up to {MAX_ATTACHMENTS_PER_REQUEST}, 10 MB each</span></span>
-        </label>
-        <input id="review-attachments" type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif,application/pdf" className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed" disabled={busy} onChange={(event) => { onFiles(Array.from(event.target.files ?? [])); event.target.value = ""; }} />
-      </div>
+      <FileUploadButton id="review-attachments" ariaLabel="Add review images or PDFs" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf" multiple disabled={busy} onFiles={onFiles} className="flex w-full min-w-0 items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 py-2.5 text-xs text-[color:var(--text-secondary)] hover:border-[color:var(--accent)] hover:text-[color:var(--text-primary)]">
+        <Paperclip className="h-4 w-4" aria-hidden />
+        <span>Add images or PDFs <span className="opacity-70">· up to {MAX_ATTACHMENTS_PER_REQUEST}, 10 MB each</span></span>
+      </FileUploadButton>
       {files.length > 0 ? <ul className="mt-2 min-w-0 max-w-full divide-y divide-[color:var(--border)] overflow-hidden rounded-md border border-[color:var(--border)]">{files.map((file, index) => {
         const issue = problems.find((problem) => problem.name === file.name);
         return <li key={`${file.name}-${index}`} className="flex min-w-0 max-w-full items-center gap-2 px-3 py-1.5 text-xs sm:gap-3">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { ImagePlus, Trash2, Upload } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
 import { recordProjectAssets, removeProjectAsset, updateAssetCaption } from "@/lib/vigil/actions/onboarding";
@@ -8,6 +8,7 @@ import { brandSchema, type Brand, type ProjectKind } from "@/lib/vigil/onboardin
 import { assetPath, IMAGE_ACCEPT, LOGO_ACCEPT, MAX_PHOTOS, PROJECT_ASSETS_BUCKET, validateAssets, type AssetKind } from "@/lib/vigil/onboarding/assets";
 import type { SignedAsset } from "@/lib/vigil/queries/onboarding";
 import { formatBytes } from "@/lib/vigil/attachments";
+import { FileUploadButton } from "@/components/vigil/FileUploadButton";
 import { ChoiceCards, Field, StepFooter, TextArea, TextInput, useAutosave, VirtueAside, type SaveState } from "../wizard-ui";
 
 type Props = {
@@ -30,9 +31,6 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState<UploadState>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const logoInput = useRef<HTMLInputElement | null>(null);
-  const photoInput = useRef<HTMLInputElement | null>(null);
-  const inspirationInput = useRef<HTMLInputElement | null>(null);
   const { state, flush } = useAutosave(data, (v) => save(v));
   useEffect(() => onSaveState(state), [state, onSaveState]);
 
@@ -107,10 +105,9 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
             ))}
           </ul>
         ) : null}
-        <input ref={logoInput} type="file" accept={LOGO_ACCEPT} className="sr-only" onChange={(e) => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) void upload(f, "logo"); }} />
-        <button type="button" onClick={() => logoInput.current?.click()} disabled={Boolean(uploading)} className="inline-flex min-h-11 items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 text-xs hover:border-[color:var(--accent)] disabled:opacity-60">
+        <FileUploadButton ariaLabel="Upload your logo" accept={LOGO_ACCEPT} disabled={Boolean(uploading)} onFiles={(files) => void upload(files, "logo")} className="min-h-11 items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 text-xs hover:border-[color:var(--accent)]">
           <Upload className="h-4 w-4" /> {logos.length ? "Add another version" : "Upload your logo"} <span className="opacity-70">· PNG, SVG, JPEG or PDF</span>
-        </button>
+        </FileUploadButton>
         {logos.length === 0 ? <p className="mt-1 text-[11px] text-[color:var(--text-secondary)]">No logo yet? Skip this; the team can propose a simple wordmark.</p> : null}
       </section>
 
@@ -151,10 +148,9 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
             ))}
           </ul>
         ) : null}
-        <input ref={photoInput} type="file" multiple accept={IMAGE_ACCEPT} className="sr-only" onChange={(e) => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) void upload(f, "photo"); }} />
-        <button type="button" onClick={() => photoInput.current?.click()} disabled={Boolean(uploading)} className="inline-flex min-h-11 items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 text-xs hover:border-[color:var(--accent)] disabled:opacity-60">
+        <FileUploadButton ariaLabel="Add photos" accept={IMAGE_ACCEPT} multiple disabled={Boolean(uploading)} onFiles={(files) => void upload(files, "photo")} className="min-h-11 items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 text-xs hover:border-[color:var(--accent)]">
           <ImagePlus className="h-4 w-4" /> {uploading?.kind === "photo" ? `Uploading ${Math.min(uploading.done + 1, uploading.total)} of ${uploading.total}…` : "Add photos"}
-        </button>
+        </FileUploadButton>
       </section>
 
       {/* Documents */}
@@ -167,10 +163,9 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
             ))}
           </ul>
         ) : null}
-        <label className="relative inline-flex min-h-11 max-w-full cursor-pointer items-center gap-2 overflow-hidden rounded-md border border-dashed border-[color:var(--border)] px-3 text-xs hover:border-[color:var(--accent)]">
+        <FileUploadButton ariaLabel="Upload menus, price lists or brochures" accept="application/pdf,image/png,image/jpeg,image/webp" multiple disabled={Boolean(uploading)} onFiles={(files) => void upload(files, "document")} className="min-h-11 items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 text-xs hover:border-[color:var(--accent)]">
           <Upload className="h-4 w-4" /> Upload a file
-          <input aria-label="Upload menus, price lists or brochures" type="file" multiple accept="application/pdf,image/png,image/jpeg,image/webp" className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed" disabled={Boolean(uploading)} onChange={(e) => { const f = Array.from(e.target.files ?? []); e.target.value = ""; if (f.length) void upload(f, "document"); }} />
-        </label>
+        </FileUploadButton>
       </section>
 
       {projectKind !== "express" ? (
@@ -182,8 +177,7 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
               {inspiration.map((asset) => <AssetTile key={asset.id} asset={asset} onRemove={() => remove(asset)} captionable />)}
             </ul>
           ) : null}
-          <input ref={inspirationInput} type="file" multiple accept="application/pdf,image/png,image/jpeg,image/webp,image/gif" className="sr-only" onChange={(event) => { const files = Array.from(event.target.files ?? []); event.target.value = ""; if (files.length) void upload(files, "other"); }} />
-          <button type="button" onClick={() => inspirationInput.current?.click()} disabled={Boolean(uploading)} className="inline-flex min-h-11 items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 text-xs hover:border-[color:var(--accent)] disabled:opacity-60"><Upload className="h-4 w-4" /> Add inspiration files</button>
+          <FileUploadButton ariaLabel="Add inspiration files" accept="application/pdf,image/png,image/jpeg,image/webp,image/gif" multiple disabled={Boolean(uploading)} onFiles={(files) => void upload(files, "other")} className="min-h-11 items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 text-xs hover:border-[color:var(--accent)]"><Upload className="h-4 w-4" /> Add inspiration files</FileUploadButton>
         </section>
       ) : null}
 

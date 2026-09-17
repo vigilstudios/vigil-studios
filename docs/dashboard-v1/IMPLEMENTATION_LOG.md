@@ -862,3 +862,9 @@ fail silently.
   gate, plus end-to-end migration/RLS assertions. Full check: 152 tests,
   typecheck, database/RLS validation, lint (one pre-existing image warning),
   and production build pass.
+
+## 2026-09-16 — Overflow-safe file upload controls
+
+- Replaced every customer-facing native file picker with one bounded `FileUploadButton`. The native control is now absolutely positioned inside a `relative`, `overflow-hidden` upload boundary, preventing browser focus from extending the dashboard's vertical scroll area.
+- The shared control covers onboarding logos, photos, menus and inspiration, Professional review references, and request attachments.
+- Added a source-level regression test that fails when a raw file input is introduced anywhere under `app` or `components`; future upload areas must use the shared bounded control.
