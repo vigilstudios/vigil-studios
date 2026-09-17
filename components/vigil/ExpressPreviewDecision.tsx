@@ -12,13 +12,18 @@ export function ExpressPreviewDecision({ websiteId, review }: { websiteId: strin
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const canRequestChanges = review.changesRemaining > 0;
 
   const run = (action: () => ReturnType<typeof approveExpressPreview>) => {
     setError(null);
     startTransition(async () => {
       const result = await action();
       if (!result.ok) setError(result.error);
-      else router.refresh();
+      else {
+        setShowFeedback(false);
+        setFeedback("");
+        router.refresh();
+      }
     });
   };
 
@@ -55,19 +60,21 @@ export function ExpressPreviewDecision({ websiteId, review }: { websiteId: strin
         <div className="min-w-0 flex-1">
           <p className="font-semibold">Your preview is ready for a decision</p>
           <p className="mt-1 text-xs leading-5 text-[color:var(--text-secondary)]">
-            Review the desktop and mobile preview above. Approve it to unlock launch, or send one consolidated request for changes. Express includes one revision round.
+            {canRequestChanges
+              ? "Review the desktop and mobile preview above. Approve it to unlock launch, or send one consolidated request for changes. Express includes one revision round."
+              : "Review the revised desktop and mobile preview above. If it includes the changes you requested, approve it to unlock launch."}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button type="button" disabled={pending} onClick={() => run(() => approveExpressPreview(websiteId))} className="btn-primary min-h-10 text-sm">
               Approve preview
             </button>
-            {review.changesRemaining > 0 ? (
+            {canRequestChanges ? (
               <button type="button" disabled={pending} onClick={() => setShowFeedback((value) => !value)} className="btn-secondary min-h-10 text-sm">
                 Request changes
               </button>
             ) : null}
           </div>
-          {showFeedback ? (
+          {showFeedback && canRequestChanges ? (
             <div className="mt-3">
               <label htmlFor={`express-feedback-${websiteId}`} className="text-xs font-medium">Your consolidated changes</label>
               <textarea
