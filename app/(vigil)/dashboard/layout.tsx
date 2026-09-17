@@ -11,6 +11,7 @@ import { getCustomerProjectReviews } from "@/lib/vigil/queries/reviews";
 import { FloatingAttentionCenter, type AttentionItem } from "@/components/vigil/FloatingAttentionCenter";
 import { getCustomerExpressPreviewReview } from "@/lib/vigil/queries/dashboard";
 import { getUnreadNotifications } from "@/lib/vigil/queries/dashboard";
+import { customerDomainNeedsAttention } from "@/lib/vigil/attention";
 
 /**
  * Client dashboard chrome. Requires a signed-in user; pages decide whether
@@ -49,7 +50,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     const expressReviewNeedsAttention = expressReview?.status === "awaiting_feedback";
     const websiteNeedsAttention = websites.some((site) => ["error", "suspended"].includes(site.status)) || expressReviewNeedsAttention;
     const reviewNeedsAttention = Boolean(projectReviews?.rounds.some((round) => round.status === "awaiting_feedback"));
-    const domainNeedsAttention = domains.some((domain) => ["pending", "verifying", "error", "expired"].includes(domain.status));
+    const domainNeedsAttention = customerDomainNeedsAttention(domains, websites);
     const subscriptionNeedsAttention = Boolean(subscription && ["past_due", "unpaid", "incomplete"].includes(subscription.status));
     const anythingNeedsAttention = onboardingNeedsAttention || websiteNeedsAttention || reviewNeedsAttention || domainNeedsAttention || subscriptionNeedsAttention;
     const derived: AttentionItem[] = [
