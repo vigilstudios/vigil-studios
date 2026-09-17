@@ -45,6 +45,16 @@ export const EXPRESS_TEMPLATES: {
     status: "available",
   },
   {
+    slug: "medical",
+    variant: "Variant 1",
+    industry: "Medical and dental",
+    example: "Harbor Health",
+    description:
+      "Calm and restrained. A wide reception photograph, care written plainly, your team, and what to expect before a visit — with no prices and no claims about outcomes.",
+    accent: "#173e40",
+    status: "available",
+  },
+  {
     slug: "salon-spa",
     variant: "Variant 1",
     industry: "Salon and spa",
@@ -73,16 +83,6 @@ export const EXPRESS_TEMPLATES: {
       "Trade-forward and direct. Services with prices, recent work, and a call button that follows you down the page.",
     accent: "#f15e18",
     status: "coming",
-  },
-  {
-    slug: "medical",
-    variant: "Variant 1",
-    industry: "Medical and dental",
-    example: "Harbor Health",
-    description:
-      "Calm and restrained. A wide reception photograph, care written plainly, your team, and what to expect before a visit — with no prices and no claims about outcomes.",
-    accent: "#173e40",
-    status: "available",
   },
 ];
 
