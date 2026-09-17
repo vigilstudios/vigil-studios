@@ -78,11 +78,11 @@ export const EXPRESS_TEMPLATES: {
     slug: "home-services",
     variant: "Variant 1",
     industry: "Home services",
-    example: "Northgate Plumbing & Heating",
+    example: "Fieldwork Home Services",
     description:
-      "Trade-forward and direct. Services with prices, recent work, and a call button that follows you down the page.",
-    accent: "#f15e18",
-    status: "coming",
+      "Warm and architectural, with clear services, project imagery, local coverage, and a straightforward estimate request.",
+    accent: "#eab65b",
+    status: "available",
   },
 ];
 
