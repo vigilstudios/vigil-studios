@@ -285,3 +285,54 @@ built and shipped with the Cloudflare email fix.
   "No builders to learn · no settings to babysit · someone always watching".
   The `alt` sections lost their top/bottom hairlines (the line between
   "Why not a builder" and the FAQ).
+
+## 2026-09-18 — The close is fixed, the CTA works, the finale holds (live)
+
+- **The hero's CTA was broken on production.** "Find your starting point"
+  (`#start`) smooth-scrolled through the story; the moment the story was
+  complete snapping resumed mid-animation and Chrome snapped to the nearest
+  snap position, the story's end marker, so the visitor landed on the
+  finale of "How it works" instead of on "Start where you are". In-page
+  jumps on the home page are now instant (`scroll-behavior: auto`; the
+  `.snap-sections` rule no longer sets `smooth`), a capture-phase click
+  listener in `StoryStage` pauses snapping before any `#` link jumps (so a
+  jump into the story, e.g. the footer's "How it works", is not snapped to
+  an end), and the story's start is a snap position of its own (a 1 px
+  marker with `scroll-snap-align: start`) so a scroll to the top lands on
+  the hero. `#how-it-works` is now a marker inside the story's travel at
+  the start of the filmstrip, not the pinned layer (which sat at the
+  stage's top and scrolled nowhere useful). Upward keyboard scrolling at
+  the story's end pauses snapping too, like the wheel and touch already did.
+- **Finale hold.** The story section is three viewports taller than its
+  travel: after the zoom finishes there is a full viewport of scroll in
+  which nothing moves (`p` is clamped at 1), then "Start where you are"
+  slides over. The end marker (`scroll-snap-align: end`,
+  `scroll-snap-stop: always`) sits two viewports above the section's
+  bottom, so a scroll that ends anywhere in the hold snaps back to the
+  finale, invisibly, and a fling has a full extra viewport to clear before
+  Start is the nearer snap position. `.story` is 1060svh / 1120svh.
+- **"Ready when you are" is fixed like the hero.** The stage is pulled up
+  under the FAQ (`-mt-[100svh]`, `sticky top-0 z-0`) and sticks as soon as
+  its top meets the viewport, so the FAQ scrolls off it like a curtain and
+  the grid, mark and notes are already in place. A viewport-tall hold
+  follows it (fully revealed, before the footer arrives); that hold carries
+  the anchor `id="get-started"` and the snap position, so Contact links
+  land on the whole stage and the stage's own snap is off. The footer
+  still scrolls over it. On a phone the three buttons are "Find your
+  starting point" full width with "Book a call" and "Email us" side by
+  side beneath it.
+- **Footer** in the HUD language: black, mono uppercase headings and
+  bottom row, `Vigil Studios*`, the tagline in Space Grotesk, a green dot
+  "Keeping watch · New York", the email link; no orb.
+- **Notification dots** on the hero were all green: `spawn` destructured
+  `const [bad, good] = next()`, shadowing the `good` prop, so every note
+  got the `good` class on arrival. Problems now arrive red (broken,
+  down, missed leads) or amber (`warn`: renewals, updates, housekeeping,
+  money) and turn green when handled; `PAIRS` carries the tone.
+- **Phone timing** for "How it works": scene windows follow the station
+  (start 0.09 before it is centred, 0.15 long, so a scene finishes just
+  past centre instead of off screen) and the line is paced to reach each
+  node as its scene begins (`WIN_START`, `WIN_LEN`, `LINE_A`, `LINE_B` in
+  `layout()`). Desktop timing is unchanged.
+- Dropped "Websites from $599, once" from the good-news notes (prices are
+  never hard-coded); it reads "The build is paid once, not rented".

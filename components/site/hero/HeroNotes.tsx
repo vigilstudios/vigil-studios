@@ -7,31 +7,33 @@ import { PHASE, rng, subscribeStory } from "@/components/site/story/progress";
 
 /**
  * Notifications floating around the mark. Each one arrives as a problem
- * with a pulsing red dot, holds, turns into what Vigil did about it (green
- * dot), holds, gets crossed out, and goes; a new one appears somewhere
- * else. Five at a time on desktop, three on a phone. They keep out of the
- * headline zone, off the edges, and away from each other, and they drift
- * against the pointer at their own depths. Plain DOM inside a ref: nothing
- * here re-renders React.
+ * with a pulsing dot (red when something is broken or a lead is waiting,
+ * amber when something needs attention), holds, turns into what Vigil did
+ * about it (green dot), holds, gets crossed out, and goes; a new one
+ * appears somewhere else. Five at a time on desktop, three on a phone.
+ * They keep out of the headline zone, off the edges, and away from each
+ * other, and they drift against the pointer at their own depths. Plain DOM
+ * inside a ref: nothing here re-renders React.
  */
-const PAIRS: [string, string][] = [
-  ["SSL certificate expires in 3 days", "SSL renewed for a year"],
+type Pair = [problem: string, handled: string, tone?: "warn"];
+const PAIRS: Pair[] = [
+  ["SSL certificate expires in 3 days", "SSL renewed for a year", "warn"],
   ["Is the site down?", "Up · checked 2 minutes ago"],
-  ["Update 14 plugins", "Updates applied overnight"],
-  ["Domain renewal · $19.99", "Domain renewed, in your name"],
+  ["Update 14 plugins", "Updates applied overnight", "warn"],
+  ["Domain renewal · $19.99", "Domain renewed, in your name", "warn"],
   ["Contact form not sending", "Form fixed · 3 leads delivered"],
   ["Missed call (2)", "Virtue texted them back"],
   ["Backup failed", "Backup verified"],
-  ["PageSpeed 41", "PageSpeed 96"],
+  ["PageSpeed 41", "PageSpeed 96", "warn"],
   ["Publish failed", "Live at 9:02 AM"],
   ["Layout shifted on iPhone", "Fixed on every phone"],
   ["Booking widget broken", "Bookings running again"],
-  ["Add a meta description", "SEO basics done"],
-  ["Change Saturday hours", "Hours updated"],
-  ["Image too large", "Images optimised"],
-  ["Invoice #1042 overdue", "Paid · receipt sent"],
+  ["Add a meta description", "SEO basics done", "warn"],
+  ["Change Saturday hours", "Hours updated", "warn"],
+  ["Image too large", "Images optimised", "warn"],
+  ["Invoice #1042 overdue", "Paid · receipt sent", "warn"],
   ["New quote request · Maria R.", "Virtue followed up · 3 min"],
-  ["Google Business · verify", "Listing verified"],
+  ["Google Business · verify", "Listing verified", "warn"],
   ["404 · /services", "Redirect in place"],
   ["New lead · Priya S. · quote form", "Virtue replied in 2 min · booked"],
   ["Missed call · 6:48 PM", "Virtue texted back · appointment set"],
@@ -39,10 +41,10 @@ const PAIRS: [string, string][] = [
   ["3 leads waiting since Friday", "All 3 followed up · 1 booked"],
   ["Voicemail (4)", "Callbacks scheduled by Virtue"],
   ["Quote request · no reply in 2 days", "Quote sent · follow-up Tuesday"],
-  ["No reviews this month", "New 5-star review · Daniel K."],
-  ["Website visits down 18%", 'Ranking for "dentist near me"'],
-  ["Newsletter overdue", "Monthly update sent to 312 customers"],
-  ["Google listing out of date", "Hours, photos and offers refreshed"],
+  ["No reviews this month", "New 5-star review · Daniel K.", "warn"],
+  ["Website visits down 18%", 'Ranking for "dentist near me"', "warn"],
+  ["Newsletter overdue", "Monthly update sent to 312 customers", "warn"],
+  ["Google listing out of date", "Hours, photos and offers refreshed", "warn"],
 ];
 
 /** Lifecycle, in seconds. */
@@ -73,7 +75,7 @@ export function HeroNotes({ good = false, items, avoid, count }: { good?: boolea
     const phone = () => host.clientWidth < 760;
     const slots: Slot[] = [];
     let deck: number[] = [];
-    const pool: [string, string][] = goodItems ? goodItems.map((t) => [t, t]) : PAIRS;
+    const pool: Pair[] = goodItems ? goodItems.map((t) => [t, t]) : PAIRS;
     const next = () => {
       if (!deck.length) deck = pool.map((_, i) => i).sort(() => Math.random() - 0.5);
       return pool[deck.pop()!];
@@ -99,7 +101,7 @@ export function HeroNotes({ good = false, items, avoid, count }: { good?: boolea
       return { x, y };
     };
     const spawn = (slot: Slot, t: number) => {
-      const [bad, good] = next();
+      const [problem, handled, tone] = next();
       // try a few spots and keep the one farthest from the notes already on screen
       let p = place(), best = -1;
       for (let i = 0; i < 10; i++) {
@@ -109,14 +111,14 @@ export function HeroNotes({ good = false, items, avoid, count }: { good?: boolea
         if (d > 220) break;
       }
       const el = document.createElement("div");
-      el.className = good ? "hero-note good" : "hero-note";
+      el.className = good ? "hero-note good" : tone === "warn" ? "hero-note warn" : "hero-note";
       el.innerHTML = `<i></i><b></b>`;
-      el.querySelector("b")!.textContent = bad;
+      el.querySelector("b")!.textContent = problem;
       host.appendChild(el);
       // keep the whole note on screen (a phone is narrower than the ellipse plus a note)
       const hw = el.offsetWidth / 2 + 12;
       p.x = Math.min(Math.max(p.x, hw), host.clientWidth - hw);
-      Object.assign(slot, { el, bad, good, t0: t, x: p.x, y: p.y, dx: rnd(-6, 6), dy: rnd(-4, 4), ph: rnd(0, 6.28), par: rnd(10, 26), hw, flipped: false, struck: false });
+      Object.assign(slot, { el, bad: problem, good: handled, t0: t, x: p.x, y: p.y, dx: rnd(-6, 6), dy: rnd(-4, 4), ph: rnd(0, 6.28), par: rnd(10, 26), hw, flipped: false, struck: false });
       el.style.transform = `translate(${p.x}px,${p.y}px) translate(-50%,-50%) scale(.6)`;
     };
     const ensure = (t: number) => {
@@ -140,7 +142,7 @@ export function HeroNotes({ good = false, items, avoid, count }: { good?: boolea
         }
         const a = t - s.t0, el = s.el;
         // State changes are keyed on elapsed time, not on which frame happens to run, so a throttled tab never skips one.
-        if (!good && a >= T.pop + T.bad && !s.flipped) { s.flipped = true; el.classList.add("good"); el.querySelector("b")!.textContent = s.good; }
+        if (!good && a >= T.pop + T.bad && !s.flipped) { s.flipped = true; el.classList.remove("warn"); el.classList.add("good"); el.querySelector("b")!.textContent = s.good; }
         if (!good && a >= T.pop + T.bad + T.flip + T.good && !s.struck) { s.struck = true; el.classList.add("strike"); }
         let scale = 1, opacity = 1, k = 0;
         const holdEnd = good ? T.pop + 3.4 : T.pop + T.bad + T.flip + T.good + T.strike + T.hold;

@@ -97,10 +97,16 @@ export function HowItWorksSection() {
 
     // Geometry follows the viewport: station spacing, the node's height, the line through the nodes.
     let GAP = 520, NODE_Y = 278, TRACK_H = 520, ZOOM = 0.38;
+    // Scene windows on the film's 0–0.9 track: on a wide screen a scene starts as its station comes in from the
+    // right; on a phone the station has to be nearly centred before its scene starts, and it finishes just past
+    // centre, or it would play off screen. The line is paced so it reaches each node as its scene begins.
+    let WIN_START = (i: number) => i * 0.175, WIN_LEN = 0.2, LINE_A = 0.1, LINE_B = 1.143;
     const layout = () => {
       const phone = window.innerWidth < 768;
       GAP = phone ? Math.min(360, Math.round(window.innerWidth * 0.94)) : 520;
       NODE_Y = phone ? 212 : 278; TRACK_H = phone ? 400 : 520; ZOOM = phone ? 0.14 : 0.38;
+      if (phone) { WIN_START = (i) => Math.max(0, i * 0.225 - 0.09); WIN_LEN = 0.15; LINE_A = 0.18; LINE_B = 0.889; }
+      else { WIN_START = (i) => i * 0.175; WIN_LEN = 0.2; LINE_A = 0.1; LINE_B = 1.143; }
       const width = phone ? GAP - 24 : GAP - 80, total = 5 * GAP;
       track.style.width = `${total}px`;
       lineSvg.setAttribute("viewBox", `0 0 ${total} ${TRACK_H}`); lineSvg.style.width = `${total}px`;
@@ -209,7 +215,7 @@ export function HowItWorksSection() {
       const ravel = rng(p, PHASE.ravel[0], PHASE.ravel[1]), pf = rng(p, PHASE.film[0], PHASE.film[1]);
       trackwrap.style.opacity = String(ravel);
       track.style.transform = `translateX(${window.innerWidth / 2 - GAP / 2 - (4 * GAP * Math.min(pf, 0.9)) / 0.9}px)`;
-      const drawn = clamp(ravel * 0.1 + pf * 1.143, 0, 1);
+      const drawn = clamp(ravel * LINE_A + pf * LINE_B, 0, 1);
       lineDraw.style.strokeDashoffset = String(1 - drawn);
       const z = ease.io(rng(pf, 0.84, 1));
       stations.forEach((st, i) => {
@@ -218,7 +224,7 @@ export function HowItWorksSection() {
           lit[i] = on; st.classList.toggle("on", on);
           const pulse = st.querySelector<HTMLElement>(".hiw-pulse")!; pulse.classList.remove("go"); if (on && !reduced) { void pulse.offsetWidth; pulse.classList.add("go"); }
         }
-        renderStation(i, clamp((pf - i * 0.175) / 0.2, 0, 1), st);
+        renderStation(i, clamp((pf - WIN_START(i)) / WIN_LEN, 0, 1), st);
         const last = i === 4; st.style.transform = `scale(${last ? 1 + ZOOM * z : 1 - 0.22 * z})`; st.style.opacity = String(last ? 1 : 1 - 0.7 * z);
       });
       lineSvg.style.opacity = String(1 - 0.6 * z);
@@ -238,7 +244,7 @@ export function HowItWorksSection() {
   }, []);
 
   return (
-    <div ref={root} id="how-it-works" className="hiw absolute inset-0 z-[1] text-[#f5f5f3] opacity-0" style={{ pointerEvents: "none" }}>
+    <div ref={root} className="hiw absolute inset-0 z-[1] text-[#f5f5f3] opacity-0" style={{ pointerEvents: "none" }}>
       <div className="hiw-head">
         <p className="hiw-eyebrow story-typing-pending" data-text={HOW_IT_WORKS_HEAD.eyebrow}>{HOW_IT_WORKS_HEAD.eyebrow}</p>
         <h2 className="story-typing-pending" data-text={HOW_IT_WORKS_HEAD.title}>{HOW_IT_WORKS_HEAD.title}</h2>

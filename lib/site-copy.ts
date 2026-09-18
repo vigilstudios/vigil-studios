@@ -133,7 +133,7 @@ export const GET_STARTED = {
     "A person replies within one business day",
     "SSL, backups and updates on every plan",
     "Virtue sets up every customer",
-    "Websites from $599, once",
+    "The build is paid once, not rented",
     "No builders, no plugins, nothing to learn",
     "Export your site whenever you like",
     "One team, one dashboard, one receipt",

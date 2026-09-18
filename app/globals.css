@@ -245,6 +245,11 @@
  * Scroll snap: only where every section is a full viewport (the home page
  * adds .snap-sections to #site-root), and only on desktop. Inner pages have
  * sections of any height, where a mandatory snap skips content.
+ *
+ * In-page jumps (the hero's "Find your starting point", Contact in the
+ * navigation) are instant, not smooth: a smooth scroll through the story
+ * stage gets caught by the snap position at the story's end the moment
+ * snapping resumes, and lands on the finale instead of the target.
  */
 main#site-root {
   scroll-snap-type: none;
@@ -254,7 +259,6 @@ main#site-root {
 @media (min-width: 768px) {
   main#site-root.snap-sections {
     scroll-snap-type: y mandatory;
-    scroll-behavior: smooth;
   }
 
   main#site-root.snap-sections > section {
@@ -410,6 +414,13 @@ main#site-root {
   transform-origin: left center;
   transition: transform 450ms cubic-bezier(0.65, 0, 0.35, 1);
 }
+.hero-note.warn i,
+.hero-note.warn i::after {
+  background: #f2b950;
+}
+.hero-note.warn i {
+  box-shadow: 0 0 8px rgba(242, 185, 80, 0.7);
+}
 .hero-note.good {
   border-color: rgba(16, 212, 90, 0.45);
 }
@@ -477,12 +488,13 @@ main#site-root {
 main#site-root.snap-sections.snap-paused {
   scroll-snap-type: none;
 }
+/* travel + a viewport of hold on the finale + a viewport for the next section to slide over it */
 .story {
-  height: 860svh;
+  height: 1060svh;
 }
 @media (min-width: 768px) {
   .story {
-    height: 1020svh;
+    height: 1120svh;
   }
 }
 .story-typing-pending {
