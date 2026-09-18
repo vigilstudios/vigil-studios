@@ -4,6 +4,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "@/app/globals.css";
 import { Navigation } from "@/components/layout/Navigation";
+import { StarCursor } from "@/components/site/StarCursor";
 import {
   SITE_DESCRIPTION,
   SITE_NAME,
@@ -106,6 +107,7 @@ export default function RootLayout({
         <main id="site-root" className="h-dvh overflow-y-auto">
           {children}
         </main>
+        <StarCursor />
         <Analytics />
         <SpeedInsights/>
       </body>

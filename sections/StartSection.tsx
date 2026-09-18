@@ -1,37 +1,38 @@
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
-import { Chip, Container, Eyebrow, Section, SectionIntro } from "@/components/site/primitives";
+import { Chip, Container, Eyebrow, Section } from "@/components/site/primitives";
 import { Card, CardRow } from "@/components/site/Cards";
 import { Reveal } from "@/components/site/Reveal";
-import { StartMarquee } from "@/components/site/StartMarquee";
 import { EXPRESS_TEMPLATES } from "@/lib/constants";
-import shots from "@/lib/express-section-shots.json";
 import { START } from "@/lib/site-copy";
 import { formatMoney } from "@/lib/vigil/format";
 import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
 
 /**
  * Meet the customer where they are: the three builds as three starting
- * points, over a gallery of real Express sections. Names and prices are the
- * build_prices rows; the stage copy is START in site-copy.
+ * points on a green band. Names and prices are the build_prices rows; the
+ * stage copy is START in site-copy. The section is pulled up by a viewport
+ * so it slides over the story's finale while that stage still holds.
  */
 export async function StartSection() {
   const { builds } = await getPublicPricing();
   const available = EXPRESS_TEMPLATES.filter((t) => t.status === "available").map((t) => t.industry);
   const coming = EXPRESS_TEMPLATES.filter((t) => t.status === "coming").length;
   return (
-    <Section id="start" fill className="isolate overflow-hidden md:py-20!">
-      <StartMarquee images={shots.map((s) => s.src)} />
+    <Section id="start" fill accent className="-mt-[100svh] isolate overflow-hidden md:py-20!">
       <Container>
         <Reveal>
-          <SectionIntro align="center" eyebrow={START.eyebrow} title={START.title} lead={START.lead} />
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#062b13]">{START.eyebrow}</p>
+            <h2 className="text-3xl font-semibold tracking-tight text-[#062b13] sm:text-4xl">{START.title}</h2>
+          </div>
         </Reveal>
         <CardRow className="mt-6 md:grid-cols-3">
           {builds.map((b) => {
             const stage = START.stages[b.kind];
             return (
               <Card key={b.kind}>
-                <div className="flex h-full flex-col rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-primary)]/85 p-5 backdrop-blur-md lg:p-6 transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-[color:var(--text-secondary)]/40">
+                <div className="flex h-full flex-col rounded-2xl border border-[rgba(255,255,255,0.1)] bg-[color:var(--bg-primary)] p-5 text-[color:var(--text-primary)] lg:p-6 transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-[rgba(255,255,255,0.3)]">
                   <Eyebrow tone={stage.tone}>{stage.stage}</Eyebrow>
                   <h3 className="text-xl font-semibold tracking-tight">{b.name}</h3>
                   <p className="mt-1.5 text-[14px] leading-6 text-[color:var(--text-secondary)]">{stage.body}</p>
@@ -65,7 +66,7 @@ export async function StartSection() {
           })}
         </CardRow>
         <Reveal delay={0.2}>
-          <p className="mx-auto mt-5 max-w-2xl text-center text-sm leading-6 text-[color:var(--text-secondary)]">{START.note}</p>
+          <p className="mx-auto mt-5 max-w-2xl text-center text-sm leading-6 text-[#062b13]/80">{START.note}</p>
         </Reveal>
       </Container>
     </Section>

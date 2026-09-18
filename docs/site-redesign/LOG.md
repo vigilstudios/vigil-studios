@@ -258,3 +258,19 @@ built and shipped with the Cloudflare email fix.
   snap position the page lands on when it resumes; an upward wheel/touch
   at the story's end pauses snapping before the scroll so it never bounces.
 - Removed `PillarsSection` ("What you get"): redundant with the story.
+- Follow-up (same day): the story plays the same way on phones — the stage
+  pins at every size and the timeline's geometry (station spacing, node
+  height, the line's path) follows the viewport (`layout()` in
+  `HowItWorksSection`). Nodes light and pulse the instant the drawn line
+  reaches them (a CSS animation triggered on crossing). The finale's Live
+  pill is centred on the site; once the zoom starts, good-news chips pop in
+  and out on a ring around the site and cursors keep arriving (time-based
+  loops, stopped when the zoom releases or the tab hides); the glow behind
+  the site breathes. The story section is now two viewports taller than its
+  travel: "Start where you are" is pulled up by a viewport (`-mt-[100svh]`)
+  and slides over the finale while the stage still holds; the end marker
+  sits a viewport above the section's bottom and the nav goes solid when
+  that next section reaches it. Start is a green band (`Section accent`,
+  black heading, no lead, dark cards, no marquee). The pointer is the Vigil
+  star on fine-pointer devices (`components/site/StarCursor.tsx`): green,
+  white over links and buttons, black over green surfaces, native in text fields.

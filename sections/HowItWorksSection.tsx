@@ -10,9 +10,11 @@ import { HOW_IT_WORKS, HOW_IT_WORKS_HEAD } from "@/lib/site-copy";
  * untyped, the eyebrow, title and lead type themselves in place, then a
  * horizontal timeline ravels in: one line, five stations, each with a
  * small line-drawn scene that plays as the visitor scrolls the track
- * along. The fifth grows into the centre while the others step back.
- * Below `md` nothing pins: the stations stack under the header and each
- * scene plays as it scrolls into view.
+ * along. The fifth grows into the centre while the others step back, and
+ * from then on leads, bookings and reviews keep popping up around the
+ * live site and cursors keep arriving, the way the hero's notifications
+ * do. Same sequence at every size; the geometry (station spacing, node
+ * height) follows the viewport.
  *
  * The scenes are static SVG markup driven imperatively (stroke-dashoffset
  * and transforms) from one subscriber; React only mounts them.
@@ -42,7 +44,7 @@ const SCENES: string[] = [
     <rect class="hiw-tile" pathLength="1" x="66" y="82" width="72" height="58" rx="4"/><line class="hiw-tile" pathLength="1" x1="66" y1="98" x2="138" y2="98"/><line class="hiw-tile" pathLength="1" x1="82" y1="74" x2="82" y2="88"/><line class="hiw-tile" pathLength="1" x1="122" y1="74" x2="122" y2="88"/><circle cx="102" cy="120" r="5" fill="rgba(245,245,243,.32)"/>
     <text x="30" y="172">15 min · a person</text>
     <rect class="hiw-tile sel2" pathLength="1" x="210" y="26" width="176" height="160" rx="8"/><text x="226" y="50">Guided brief</text><text x="226" y="172">Virtue · saves as you go</text></g></svg>
-    <div class="hiw-bubble" style="left:53%;top:-8%"><span class="who">Virtue</span><span class="t"></span></div>`,
+    <div class="hiw-bubble" style="left:53%"><span class="who">Virtue</span><span class="t"></span></div>`,
   `<svg viewBox="0 0 400 210">${WIN(50, 30)}</svg>`,
   `<svg viewBox="0 0 400 210"><g>
     <rect class="hiw-tile d" pathLength="1" x="20" y="14" width="360" height="182" rx="8"/><line class="hiw-tile d" pathLength="1" x1="110" y1="14" x2="110" y2="196"/>
@@ -55,7 +57,7 @@ const SCENES: string[] = [
   `<div class="hiw-glow"></div><svg viewBox="0 0 400 210">${WIN(50, 30, "lv bright", true)}
     <g class="up" opacity="0"><rect x="64" y="124" width="118" height="42" rx="6" fill="rgba(10,10,10,.9)" stroke="rgba(16,212,90,.55)"/><text class="sm" x="72" y="138">Uptime · 99.98%</text><path class="hiw-tile spark" pathLength="1" d="M72 158 L86 156 100 158 114 155 128 158 142 157 156 158 170 156 176 158" style="stroke:#10d45a;stroke-width:1.5"/></g>
     <g class="lock" opacity="0"><rect x="333" y="37" width="9" height="8" rx="2" fill="none" stroke="#10d45a" stroke-width="1.2"/><path d="M335 37 v-3 a2.5 2.5 0 0 1 5 0 v3" fill="none" stroke="#10d45a" stroke-width="1.2"/></g></svg>
-    <span class="hiw-pill lp" style="left:30%;top:5%">Live</span>
+    <span class="hiw-pill lp">Live</span>
     <span class="hiw-cur2 c1">${CURSOR}</span><span class="hiw-cur2 c2">${CURSOR}</span><span class="hiw-cur2 c3">${CURSOR}</span>
     <span class="hiw-chip sm n" style="left:8%;top:14%"><i></i>New lead · Priya S.</span>
     <span class="hiw-chip sm n" style="left:94%;top:30%"><i></i>Booked · Tue 10:00</span>
@@ -70,6 +72,14 @@ const pop = (el: HTMLElement, u: number) => (el.style.transform = `translate(-50
 const moveCursor = (el: Element, a: number[], b: number[], u: number) => { el.setAttribute("cx", String(a[0] + (b[0] - a[0]) * u)); el.setAttribute("cy", String(a[1] + (b[1] - a[1]) * u)); };
 const ringAt = (r: Element, cx: number, cy: number, u: number) => { r.setAttribute("cx", String(cx)); r.setAttribute("cy", String(cy)); r.setAttribute("r", String(6 + 20 * u)); r.setAttribute("opacity", String(u > 0 && u < 1 ? 1 - u : 0)); };
 
+const GOOD_NEWS = ["New lead · Priya S.", "Booked · Tue 10:00", "5★ review · Daniel K.", "Visits +38% this week", "Ranking for \u201csalon near me\u201d", "Order · $180", "New lead · Marcus T.", "Booked · Thu 2:30", "5★ review · Ana P.", "Quote request · answered", "Missed call · texted back", "Newsletter · 312 opens", "Instagram DM · answered", "Repeat customer · Leo M."];
+const rnd = (a: number, b: number) => a + Math.random() * (b - a);
+/** A spot on the ring just outside the site (in % of the scene box), so a chip never sits on the page itself. */
+const ringSpot = () => {
+  if (window.innerWidth < 768) return { x: rnd(22, 78), y: Math.random() < 0.5 ? rnd(-14, -2) : rnd(102, 114) }; // a phone has no room beside the site
+  return Math.random() < 0.5 ? { x: Math.random() < 0.5 ? rnd(-14, 2) : rnd(98, 114), y: rnd(8, 92) } : { x: rnd(12, 88), y: Math.random() < 0.5 ? rnd(-12, -2) : rnd(102, 112) };
+};
+
 export function HowItWorksSection() {
   const root = useRef<HTMLDivElement>(null);
   const [orbState, setOrbState] = useState<AgentState>(null);
@@ -78,18 +88,33 @@ export function HowItWorksSection() {
     const el = root.current;
     if (!el) return;
     const head = el.querySelector<HTMLElement>(".hiw-head")!, trackwrap = el.querySelector<HTMLElement>(".hiw-trackwrap")!, track = el.querySelector<HTMLElement>(".hiw-track")!;
-    const lineDraw = el.querySelector<SVGPathElement>(".hiw-line .draw")!, lineSvg = lineDraw.parentElement as unknown as SVGElement;
+    const lineSvg = el.querySelector<SVGSVGElement>(".hiw-line")!, lineBase = lineSvg.querySelector<SVGPathElement>(".base")!, lineDraw = lineSvg.querySelector<SVGPathElement>(".draw")!;
     const stations = [...el.querySelectorAll<HTMLElement>(".hiw-station")];
     const eyebrow = new Typer(head.querySelector(".hiw-eyebrow")!), h2 = new Typer(head.querySelector("h2")!), lead = new Typer(head.querySelector(".hiw-lead")!);
-    const desktop = () => window.matchMedia("(min-width: 768px)").matches;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let orb: AgentState = null;
     const orbTo = (s: AgentState) => { if (s !== orb) { orb = s; setOrbState(s); } };
 
-    const renderStation = (i: number, q: number, st: HTMLElement, z: number) => {
+    // Geometry follows the viewport: station spacing, the node's height, the line through the nodes.
+    let GAP = 520, NODE_Y = 278, TRACK_H = 520, ZOOM = 0.38;
+    const layout = () => {
+      const phone = window.innerWidth < 768;
+      GAP = phone ? Math.min(360, Math.round(window.innerWidth * 0.94)) : 520;
+      NODE_Y = phone ? 212 : 278; TRACK_H = phone ? 400 : 520; ZOOM = phone ? 0.14 : 0.38;
+      const width = phone ? GAP - 24 : GAP - 80, total = 5 * GAP;
+      track.style.width = `${total}px`;
+      lineSvg.setAttribute("viewBox", `0 0 ${total} ${TRACK_H}`); lineSvg.style.width = `${total}px`;
+      let d = `M0 ${NODE_Y} Q${GAP * 0.25} ${NODE_Y - 14} ${GAP * 0.5} ${NODE_Y}`;
+      for (let i = 1; i < 5; i++) d += ` T${GAP * 0.5 + i * GAP} ${NODE_Y}`;
+      d += ` T${total} ${NODE_Y}`;
+      lineBase.setAttribute("d", d); lineDraw.setAttribute("d", d);
+      stations.forEach((st, i) => { st.style.left = `${GAP * 0.5 + i * GAP}px`; st.style.width = `${width}px`; st.style.marginLeft = `${-width / 2}px`; });
+    };
+    layout();
+
+    const lit = stations.map(() => false);
+    const renderStation = (i: number, q: number, st: HTMLElement) => {
       const ill = st.querySelector<HTMLElement>(".hiw-ill")!;
-      st.classList.toggle("on", q > 0.12);
-      const pulse = st.querySelector<HTMLElement>(".hiw-pulse")!, pu = rng(q, 0.1, 0.45);
-      pulse.style.opacity = String(pu > 0 && pu < 1 ? 1 - pu : 0); pulse.style.transform = `scale(${1 + 3.2 * pu})`;
       if (i === 0) {
         const pk = ill.querySelectorAll("rect.pk"), pl = ill.querySelectorAll("rect.pl");
         pk.forEach((t, k) => draw(t, ease.out(rng(q, k * 0.05, 0.22 + k * 0.05))));
@@ -124,58 +149,96 @@ export function HowItWorksSection() {
         ill.querySelectorAll(".hiw-tile.lv").forEach((t, k) => draw(t, ease.out(rng(q, k * 0.05, 0.3 + k * 0.05))));
         ill.querySelector(".wf")!.setAttribute("opacity", String(ease.out(rng(q, 0.45, 0.7))));
         ill.querySelector<HTMLElement>(".hiw-glow")!.style.opacity = String(rng(q, 0.55, 0.8));
-        ill.querySelector<HTMLElement>(".lp")!.style.transform = `scale(${Math.max(0, ease.back(rng(q, 0.6, 0.72)))})`;
+        ill.querySelector<HTMLElement>(".lp")!.style.transform = `translate(-50%,-50%) scale(${Math.max(0, ease.back(rng(q, 0.6, 0.72)))})`;
         ill.querySelector(".lock")!.setAttribute("opacity", String(rng(q, 0.66, 0.74)));
         ill.querySelector(".up")!.setAttribute("opacity", String(rng(q, 0.74, 0.82))); draw(ill.querySelector(".spark")!, rng(q, 0.8, 0.96));
-        // the crowd arrives with the zoom: cursors click, and the good news pops around the site
-        const targets = [[[104, 112], [40, 40]], [[-4, 34], [58, 62]], [[104, 2], [76, 24]]];
-        ill.querySelectorAll<HTMLElement>(".hiw-cur2").forEach((c, k) => {
-          const s = 0.04 + k * 0.14, u = ease.io(rng(z, s, s + 0.14)), [from, to] = targets[k];
-          c.style.opacity = String(rng(z, s, s + 0.03)); c.style.left = `${from[0] + (to[0] - from[0]) * u}%`; c.style.top = `${from[1] + (to[1] - from[1]) * u}%`;
-          const r = rng(z, s + 0.14, s + 0.24), cr = c.querySelector<HTMLElement>(".cr")!;
-          cr.style.opacity = String(r > 0 && r < 1 ? 1 - r : 0); cr.style.transform = `scale(${1 + 2.5 * r})`;
-        });
-        ill.querySelectorAll<HTMLElement>(".hiw-chip.n").forEach((c, k) => pop(c, ease.back(rng(z, 0.1 + k * 0.12, 0.22 + k * 0.12))));
       }
     };
 
-    const renderDesktop = (p: number) => {
+    /* ---- the finale's crowd: good news pops in and out, cursors keep arriving, for as long as the zoom holds ---- */
+    const finale = stations[4].querySelector<HTMLElement>(".hiw-ill")!;
+    const chipEls = [...finale.querySelectorAll<HTMLElement>(".hiw-chip.n")], curEls = [...finale.querySelectorAll<HTMLElement>(".hiw-cur2")];
+    type ChipFx = { phase: "in" | "hold" | "out" | "wait"; t0: number; dur: number };
+    type CurFx = { phase: "fly" | "click" | "leave" | "wait"; t0: number; dur: number; from: { x: number; y: number }; to: { x: number; y: number } };
+    const chipFx: ChipFx[] = chipEls.map((_, k) => ({ phase: "wait", t0: -1, dur: 300 + k * 260 }));
+    const curFx: CurFx[] = curEls.map((_, k) => ({ phase: "wait", t0: -1, dur: 400 + k * 700, from: { x: 0, y: 0 }, to: { x: 0, y: 0 } }));
+    const edgeSpot = () => (Math.random() < 0.5 ? { x: Math.random() < 0.5 ? -8 : 104, y: rnd(0, 100) } : { x: rnd(0, 100), y: Math.random() < 0.5 ? -10 : 110 });
+    const clickSpot = () => ({ x: rnd(22, 72), y: rnd(26, 72) });
+    let fxRaf = 0, fxOn = false;
+    const fxFrame = (now: number) => {
+      fxRaf = 0;
+      if (!fxOn) return;
+      chipFx.forEach((c, k) => {
+        if (c.t0 < 0) c.t0 = now;
+        const u = clamp((now - c.t0) / c.dur, 0, 1), elc = chipEls[k];
+        if (c.phase === "in") pop(elc, ease.back(u));
+        else if (c.phase === "out") pop(elc, 1 - ease.out(u));
+        if (u >= 1) {
+          c.t0 = now;
+          if (c.phase === "wait") { const s = ringSpot(); elc.style.left = `${s.x}%`; elc.style.top = `${s.y}%`; elc.lastChild!.textContent = GOOD_NEWS[Math.floor(Math.random() * GOOD_NEWS.length)]; c.phase = "in"; c.dur = 380; }
+          else if (c.phase === "in") { c.phase = "hold"; c.dur = rnd(1500, 2600); }
+          else if (c.phase === "hold") { c.phase = "out"; c.dur = 260; }
+          else { c.phase = "wait"; c.dur = rnd(300, 900); }
+        }
+      });
+      curFx.forEach((c, k) => {
+        if (c.t0 < 0) c.t0 = now;
+        const u = clamp((now - c.t0) / c.dur, 0, 1), elc = curEls[k], ring = elc.querySelector<HTMLElement>(".cr")!;
+        if (c.phase === "fly" || c.phase === "leave") { const m = ease.io(u); elc.style.left = `${c.from.x + (c.to.x - c.from.x) * m}%`; elc.style.top = `${c.from.y + (c.to.y - c.from.y) * m}%`; elc.style.opacity = c.phase === "fly" ? "1" : String(1 - u); }
+        if (c.phase === "click") { ring.style.opacity = String(1 - u); ring.style.transform = `scale(${1 + 2.5 * u})`; } else ring.style.opacity = "0";
+        if (u >= 1) {
+          c.t0 = now;
+          if (c.phase === "wait") { c.from = edgeSpot(); c.to = clickSpot(); elc.style.opacity = "1"; c.phase = "fly"; c.dur = rnd(650, 900); }
+          else if (c.phase === "fly") { c.phase = "click"; c.dur = 420; }
+          else if (c.phase === "click") { c.from = c.to; c.to = edgeSpot(); c.phase = "leave"; c.dur = 520; }
+          else { c.phase = "wait"; c.dur = rnd(300, 1100); }
+        }
+      });
+      fxRaf = requestAnimationFrame(fxFrame);
+    };
+    const fxStart = () => { if (!fxOn) { fxOn = true; fxRaf = requestAnimationFrame(fxFrame); } };
+    const fxStop = () => { fxOn = false; cancelAnimationFrame(fxRaf); fxRaf = 0; chipFx.forEach((c) => { c.phase = "wait"; c.t0 = -1; }); curFx.forEach((c) => { c.phase = "wait"; c.t0 = -1; }); chipEls.forEach((c) => pop(c, 0)); curEls.forEach((c) => (c.style.opacity = "0")); };
+
+    const render = (p: number) => {
       // the header types itself once the hero is clear
       const t = rng(p, PHASE.head[0], PHASE.head[1]);
       el.style.opacity = p > PHASE.head[0] - 0.02 ? "1" : "0"; el.style.pointerEvents = p > PHASE.head[0] ? "auto" : "none";
       const a = rng(t, 0, 0.14), b = rng(t, 0.12, 0.72), c = rng(t, 0.7, 1);
       eyebrow.set(eyebrow.full.length * a, a > 0 && a < 1); h2.set(h2.full.length * b, b > 0 && b < 1); lead.set(lead.full.length * c, c > 0 && c < 1);
-      // then the timeline ravels in and the visitor scrolls it along
+      // then the timeline ravels in and the visitor scrolls it along; the line reaches each node exactly as its scene begins
       const ravel = rng(p, PHASE.ravel[0], PHASE.ravel[1]), pf = rng(p, PHASE.film[0], PHASE.film[1]);
       trackwrap.style.opacity = String(ravel);
-      track.style.transform = `translateX(${window.innerWidth / 2 - 260 - (2080 * Math.min(pf, 0.9)) / 0.9}px)`;
-      lineDraw.style.strokeDashoffset = String(1 - clamp(ravel * 0.16 + (pf / 0.9) * 0.92, 0, 1));
+      track.style.transform = `translateX(${window.innerWidth / 2 - GAP / 2 - (4 * GAP * Math.min(pf, 0.9)) / 0.9}px)`;
+      const drawn = clamp(ravel * 0.1 + pf * 1.143, 0, 1);
+      lineDraw.style.strokeDashoffset = String(1 - drawn);
       const z = ease.io(rng(pf, 0.84, 1));
-      stations.forEach((st, i) => renderStation(i, clamp((pf - i * 0.175) / 0.2, 0, 1), st, z));
-      stations.forEach((st, i) => { const last = i === 4; st.style.transform = `scale(${last ? 1 + 0.38 * z : 1 - 0.22 * z})`; st.style.opacity = String(last ? 1 : 1 - 0.7 * z); });
+      stations.forEach((st, i) => {
+        const on = drawn >= (0.5 + i) / 5;
+        if (on !== lit[i]) {
+          lit[i] = on; st.classList.toggle("on", on);
+          const pulse = st.querySelector<HTMLElement>(".hiw-pulse")!; pulse.classList.remove("go"); if (on && !reduced) { void pulse.offsetWidth; pulse.classList.add("go"); }
+        }
+        renderStation(i, clamp((pf - i * 0.175) / 0.2, 0, 1), st);
+        const last = i === 4; st.style.transform = `scale(${last ? 1 + ZOOM * z : 1 - 0.22 * z})`; st.style.opacity = String(last ? 1 : 1 - 0.7 * z);
+      });
       lineSvg.style.opacity = String(1 - 0.6 * z);
       head.style.opacity = String(1 - 0.85 * z); head.style.transform = `translateY(${-24 * z}px)`;
-    };
-    const renderPhone = () => {
-      el.style.opacity = "1"; el.style.pointerEvents = "auto"; trackwrap.style.opacity = "1";
-      const r = el.getBoundingClientRect(), t = clamp((window.innerHeight * 0.9 - r.top) / (window.innerHeight * 0.5), 0, 1);
-      eyebrow.set(eyebrow.full.length * rng(t, 0, 0.2), false); h2.set(h2.full.length * rng(t, 0.15, 0.7), t > 0.15 && t < 0.7); lead.set(lead.full.length * rng(t, 0.65, 1), t > 0.65 && t < 1);
-      stations.forEach((st, i) => { const b = st.getBoundingClientRect(); renderStation(i, clamp((window.innerHeight * 0.88 - b.top) / (b.height * 0.9), 0, 1), st, 0); });
+      if (z > 0.05 && !reduced) fxStart(); else if (fxOn) fxStop();
     };
 
     let raf = 0, last = 0;
-    const paint = () => { raf = 0; if (desktop()) renderDesktop(last); else renderPhone(); };
+    const paint = () => { raf = 0; render(last); };
     const unsubscribe = subscribeStory((p) => { last = p; if (!raf) raf = requestAnimationFrame(paint); });
-    const main = document.getElementById("site-root");
-    const onScroll = () => { if (!desktop() && !raf) raf = requestAnimationFrame(paint); };
-    (main ?? window).addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    const onResize = () => { layout(); if (!raf) raf = requestAnimationFrame(paint); };
+    window.addEventListener("resize", onResize);
+    const onVisibility = () => { if (document.hidden) fxStop(); else if (!raf) raf = requestAnimationFrame(paint); };
+    document.addEventListener("visibilitychange", onVisibility);
     paint();
-    return () => { cancelAnimationFrame(raf); unsubscribe(); (main ?? window).removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
+    return () => { cancelAnimationFrame(raf); fxStop(); unsubscribe(); window.removeEventListener("resize", onResize); document.removeEventListener("visibilitychange", onVisibility); };
   }, []);
 
   return (
-    <div ref={root} id="how-it-works" className="hiw relative z-[1] text-[#f5f5f3] md:absolute md:inset-0 md:opacity-0">
+    <div ref={root} id="how-it-works" className="hiw absolute inset-0 z-[1] text-[#f5f5f3] opacity-0" style={{ pointerEvents: "none" }}>
       <div className="hiw-head">
         <p className="hiw-eyebrow story-typing-pending" data-text={HOW_IT_WORKS_HEAD.eyebrow}>{HOW_IT_WORKS_HEAD.eyebrow}</p>
         <h2 className="story-typing-pending" data-text={HOW_IT_WORKS_HEAD.title}>{HOW_IT_WORKS_HEAD.title}</h2>

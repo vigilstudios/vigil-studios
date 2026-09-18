@@ -36,10 +36,10 @@ export function Navigation() {
         setIsScrolled(scrollTop > 50);
         return;
       }
-      // Home: the first section is the sticky hero; the bar stays clear until the next section reaches it.
-      const hero = (container ?? document).querySelector("main > section") as HTMLElement | null;
+      // Home: the first section is the pinned story; the bar stays clear until the section after it reaches the bar.
+      const next = (container ?? document).querySelector("main > section + section") as HTMLElement | null;
       const navHeight = navRef.current?.offsetHeight ?? 64;
-      setIsScrolled(scrollTop >= (hero?.clientHeight ?? window.innerHeight) - navHeight);
+      setIsScrolled(next ? next.getBoundingClientRect().top <= navHeight : scrollTop > 50);
     };
     target.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll);

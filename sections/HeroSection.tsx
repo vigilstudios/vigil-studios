@@ -13,14 +13,13 @@ import { HERO } from "@/lib/site-copy";
  * wireframe, notifications around it that arrive as problems and leave
  * handled. The words type in; as the visitor scrolls they untype and the
  * mark unravels, and the second act takes over the same screen. The
- * corner brackets are the HUD language of the navigation. Below `md` the
- * hero is a normal sticky section and the next act scrolls over it.
+ * corner brackets are the HUD language of the navigation.
  */
 const corner = "pointer-events-none absolute z-[4] hidden h-[18px] w-[18px] border-[rgba(245,245,243,0.35)] md:block";
 
 export function HeroSection() {
   return (
-    <div className="hero-layer sticky top-0 isolate flex h-[100svh] flex-col overflow-hidden bg-[#0a0a0a] text-[#f5f5f3] md:absolute md:inset-0 md:h-full">
+    <div className="hero-layer absolute inset-0 isolate flex h-full flex-col overflow-hidden bg-[#0a0a0a] text-[#f5f5f3]">
       <div className="hero-grid absolute inset-0" aria-hidden />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_55%_at_50%_45%,rgba(10,10,10,0)_0%,rgba(10,10,10,0.55)_100%)]" aria-hidden />
       <WireMark className="absolute inset-0 block h-full w-full" />
