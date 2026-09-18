@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Mail } from "lucide-react";
 import { VirtueOrb } from "@/components/vigil/VirtueOrb";
+import { EmailLink } from "@/components/site/Email";
 import { TAGLINE } from "@/lib/site-copy";
 
 const columns: { title: string; links: { label: string; href: string }[] }[] = [
@@ -60,9 +60,7 @@ export function Footer() {
         </div>
         <div className="mt-12 flex flex-col gap-4 border-t border-[color:var(--border)] pt-6 text-sm text-[color:var(--text-secondary)] md:flex-row md:items-center md:justify-between">
           <p>© {year} Vigil Studios. New York.</p>
-          <a href="mailto:hello@vigilstudios.co" className="inline-flex items-center gap-2 transition-colors hover:text-[color:var(--text-primary)]">
-            <Mail size={14} /> hello@vigilstudios.co
-          </a>
+          <EmailLink className="inline-flex items-center gap-2 transition-colors hover:text-[color:var(--text-primary)]" icon="h-3.5 w-3.5" />
         </div>
       </div>
     </footer>

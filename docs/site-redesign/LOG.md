@@ -210,3 +210,21 @@ https://claude.ai/artifact/FJ2XS1r7x912SUR6JburyP, approved, and shipped:
   `h-dvh` instead of `h-screen`, so on phones the document is never taller
   than the visible viewport and the browser bar can no longer scroll the
   page under the hero. Corner brackets are hidden below `md`.
+
+## 2026-09-18 — Hydration fix: Cloudflare email obfuscation
+
+Every production page logged React #418 and client-rendered. Cause: the
+domain is proxied by Cloudflare with Email Address Obfuscation on, which
+rewrites `hello@vigilstudios.co` (text and `mailto:` hrefs) in the served
+HTML into a decoder link, so the DOM no longer matches what React
+rendered. Local production builds were clean. Fix:
+`components/site/Email.tsx` (`EmailText`, `EmailLink`) renders the address
+through `dangerouslySetInnerHTML` wrapped in Cloudflare's
+`<!--email_off-->…<!--/email_off-->` opt-out, which it skips and React never
+diffs. Used in the FAQ lead, Get started ("Email us"), the footer, the
+pricing-table fallback and both mentions on /terms. Verified on the local
+production build: the guards are in the HTML, the nav's `aria-controls`
+keeps its server id (`_R_…`) on / and /terms, no #418. The vigil app pages
+(`app/(vigil)`: login, error, checkout, welcome) still print the address
+in plain text and will keep hitting the same rewrite until they use the
+component or the Cloudflare setting is turned off.

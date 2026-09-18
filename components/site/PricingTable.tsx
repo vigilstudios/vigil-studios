@@ -13,6 +13,7 @@ import { FlipNumber } from "./FlipNumber";
 import { Chip } from "./primitives";
 import { Card, CardRow } from "./Cards";
 import { SegmentedControl } from "./SegmentedControl";
+import { EmailText } from "@/components/site/Email";
 
 const money = (cents: number, currency: string) => formatMoney(cents, currency).replace(/\.00$/, "");
 
@@ -28,7 +29,7 @@ export function PricingTable({ plans, planHref = "/express", bullets = 3 }: { pl
   const highlight = "care";
 
   if (plans.length === 0) {
-    return <p className="text-center text-sm text-[color:var(--text-secondary)]">Plan prices are being finalised. Email hello@vigilstudios.co and we will send them over.</p>;
+    return <p className="text-center text-sm text-[color:var(--text-secondary)]">Plan prices are being finalised. Email <EmailText /> and we will send them over.</p>;
   }
 
   return (

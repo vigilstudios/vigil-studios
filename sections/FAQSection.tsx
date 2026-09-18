@@ -6,6 +6,7 @@ import { ChevronDown } from "lucide-react";
 import { Container, Section, SectionIntro } from "@/components/site/primitives";
 import { Reveal } from "@/components/site/Reveal";
 import { FAQ } from "@/lib/site-copy";
+import { EmailText } from "@/components/site/Email";
 
 export function FAQSection() {
   const [open, setOpen] = useState<number | null>(0);
@@ -14,7 +15,15 @@ export function FAQSection() {
       <Container>
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:gap-16">
           <Reveal>
-            <SectionIntro eyebrow="Questions" title="The things people ask before they buy." lead="Straight answers. If yours is not here, email hello@vigilstudios.co and a person replies." />
+            <SectionIntro
+              eyebrow="Questions"
+              title="The things people ask before they buy."
+              lead={
+                <>
+                  Straight answers. If yours is not here, email <EmailText /> and a person replies.
+                </>
+              }
+            />
           </Reveal>
           <Reveal delay={0.1}>
           <ul className="divide-y divide-[color:var(--border)] rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)]">

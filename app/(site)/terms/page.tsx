@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { Footer } from "@/components/layout/Footer";
 import { Container, Section, SectionIntro } from "@/components/site/primitives";
+import { EmailText } from "@/components/site/Email";
 
 export const metadata: Metadata = {
   title: "Service agreement | Vigil Studios",
@@ -17,7 +19,7 @@ const EFFECTIVE = "15 September 2026";
  * the master architecture's ownership and offboarding rules) written once,
  * in order. Owner-supplied policy: the refund rule.
  */
-const SECTIONS: { title: string; body: string[] }[] = [
+const SECTIONS: { title: string; body: ReactNode[] }[] = [
   {
     title: "1. Who this is between",
     body: [
@@ -100,7 +102,9 @@ const SECTIONS: { title: string; body: string[] }[] = [
     title: "12. Changes and contact",
     body: [
       `This version is effective ${EFFECTIVE}. If we change these terms, we will publish the new version here and notify active customers; continuing to use the service after the date of change means you accept it. New York law applies.`,
-      "Questions about this agreement: hello@vigilstudios.co.",
+      <>
+        Questions about this agreement: <EmailText />.
+      </>,
     ],
   },
 ];
@@ -116,15 +120,15 @@ export default function TermsPage() {
               <section key={s.title} id={s.title.split(".")[0]}>
                 <h2 className="text-xl font-semibold tracking-tight">{s.title}</h2>
                 <div className="mt-3 space-y-3 text-[15px] leading-7 text-[color:var(--text-secondary)]">
-                  {s.body.map((p) => (
-                    <p key={p}>{p}</p>
+                  {s.body.map((p, i) => (
+                    <p key={i}>{p}</p>
                   ))}
                 </div>
               </section>
             ))}
           </div>
           <p className="mt-14 border-t border-[color:var(--border)] pt-6 text-sm leading-6 text-[color:var(--text-secondary)]">
-            Prices, plan inclusions and revision rounds are on the <Link href="/pricing" className="font-medium text-[color:var(--accent)]">pricing page</Link>. If anything here is unclear, ask before you buy: hello@vigilstudios.co.
+            Prices, plan inclusions and revision rounds are on the <Link href="/pricing" className="font-medium text-[color:var(--accent)]">pricing page</Link>. If anything here is unclear, ask before you buy: <EmailText />.
           </p>
         </Container>
       </Section>

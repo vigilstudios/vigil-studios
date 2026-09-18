@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { ArrowRight, Mail } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { VelarisBackground } from "@/components/site/VelarisBackground";
 import { Reveal } from "@/components/site/Reveal";
 import { VirtueOrb } from "@/components/vigil/VirtueOrb";
 import { CalendlyPopup } from "@/components/CalendlyModal";
 import { GET_STARTED } from "@/lib/site-copy";
+import { EmailLink } from "@/components/site/Email";
 
 /**
  * The close, and the contact section: the same field as the hero, Virtue,
@@ -27,9 +28,7 @@ export function GetStartedSection() {
             {GET_STARTED.primary.label} <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
           <CalendlyPopup className="btn-secondary min-h-12 !px-6 text-sm font-medium">{GET_STARTED.call}</CalendlyPopup>
-          <a href={`mailto:${GET_STARTED.email}`} className="btn-secondary min-h-12 !px-6 text-sm font-medium">
-            <Mail className="mr-2 h-4 w-4" /> {GET_STARTED.emailLabel}
-          </a>
+          <EmailLink className="btn-secondary min-h-12 !px-6 text-sm font-medium" icon="mr-2 h-4 w-4" label={GET_STARTED.emailLabel} />
         </Reveal>
         <Reveal delay={0.25}>
           <p className="mt-8 text-xs text-[color:var(--text-primary)] opacity-60">{GET_STARTED.note}</p>
