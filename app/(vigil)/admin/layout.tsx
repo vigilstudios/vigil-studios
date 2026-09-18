@@ -36,7 +36,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       ],
     },
   ];
+  // Notifications are events (a customer answered a review, a request came
+  // in) and lead; the derived reminders below describe standing state.
   const floatingItems: AttentionItem[] = [
+    ...notifications.map((notification) => ({ key: `notification:${notification.id}`, notificationId: notification.id, title: notification.title, body: notification.body || "Open this update for details.", href: notification.href || "/admin" })),
     ...expressReviews.map((item) => ({ key: `express-review:${item.roundId}`, title: `${item.organizationName} requested changes`, body: `${item.projectName} is waiting for its included Express revision.`, href: item.websiteId ? `/admin/websites/${item.websiteId}` : "/admin/websites" })),
     ...reviewQueue.filter((item) => item.status === "changes_requested").map((item) => ({ key: `review:${item.roundId}`, title: `${item.organizationName} requested changes`, body: `${item.projectName} is waiting for the team to begin the revision.`, href: `/admin/reviews/${item.projectId}` })),
     ...details.projects.map((project) => ({ key: `project:${project.id}`, title: `${project.organization?.name ?? "Customer"} finished onboarding`, body: `${project.name} is ready for the team to review.`, href: `/admin/organizations/${project.organization?.id}` })),
@@ -44,7 +47,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     ...details.jobs.map((job) => ({ key: `job:${job.id}`, title: "A background job failed", body: `${job.organization?.name ?? "Customer"}: ${job.kind}`, href: "/admin/jobs" })),
     ...details.domains.map((domain) => ({ key: `domain:${domain.id}`, title: `${domain.hostname} needs attention`, body: `${domain.organization?.name ?? "Customer"} domain status is ${domain.status}.`, href: "/admin/domains" })),
     ...details.websites.map((website) => ({ key: `website:${website.id}`, title: `${website.name} needs attention`, body: website.status_reason || `Website status is ${website.status}.`, href: `/admin/websites/${website.id}` })),
-    ...notifications.map((notification) => ({ key: `notification:${notification.id}`, notificationId: notification.id, title: notification.title, body: notification.body || "Open this update for details.", href: notification.href || "/admin" })),
   ];
   return (
     <AppShell

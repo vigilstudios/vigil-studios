@@ -2,6 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { projectAwaitingKickoff } from "@/lib/vigil/attention";
 
 /** Read-side loaders for the admin console. Staff RLS grants cross-tenant reads. */
 
@@ -209,6 +210,33 @@ export const jobStatusCounts = cache(async () => {
   return Object.fromEntries(statuses.map((s, i) => [s, results[i].error ? 0 : results[i].count ?? 0])) as Record<(typeof statuses)[number], number>;
 });
 
+/**
+ * Briefs the team has not picked up yet. Status alone is not enough: a
+ * Professional project returns to in_progress after every customer answer
+ * on a review round, which used to re-raise "finished onboarding" as if it
+ * were new (see projectAwaitingKickoff).
+ */
+export const projectsAwaitingKickoff = cache(async () => {
+  const supabase = await createClient();
+  const { data: candidates, error } = await supabase
+    .from("projects")
+    .select("id, name, kind, updated_at, organization:organizations(id, name)")
+    .not("intake_completed_at", "is", null)
+    .eq("status", "in_progress")
+    .order("updated_at", { ascending: false })
+    .limit(25);
+  if (error) throw error;
+  const ids = (candidates ?? []).map((p) => p.id);
+  if (ids.length === 0) return [];
+  const [rounds, websites] = await Promise.all([
+    supabase.from("project_review_rounds").select("project_id, status").in("project_id", ids),
+    supabase.from("websites").select("project_id, status, preview_url, live_url, last_deployed_at").in("project_id", ids),
+  ]);
+  if (rounds.error) throw rounds.error;
+  if (websites.error) throw websites.error;
+  return (candidates ?? []).filter((p) => projectAwaitingKickoff(p.id, rounds.data ?? [], websites.data ?? [])).slice(0, 10);
+});
+
 /** Everything a human should look at, across tenants. Bounded lists; newest first. */
 export const attentionItems = cache(async () => {
   const supabase = await createClient();
@@ -218,10 +246,10 @@ export const attentionItems = cache(async () => {
     supabase.from("websites").select("id, name, status, status_reason, updated_at, organization:organizations(id, name)").in("status", ["error", "suspended"]).order("updated_at", { ascending: false }).limit(10),
     supabase.from("subscriptions").select("id, status, updated_at, organization:organizations(id, name), plan:plans(name)").in("status", ["past_due", "unpaid", "incomplete"]).order("updated_at", { ascending: false }).limit(10),
     supabase.from("change_requests").select("id, title, status, submitted_at, organization:organizations(id, name)").eq("status", "submitted").order("submitted_at", { ascending: true }).limit(10),
-    supabase.from("projects").select("id, name, kind, updated_at, organization:organizations(id, name)").not("intake_completed_at", "is", null).eq("status", "in_progress").order("updated_at", { ascending: false }).limit(10),
+    projectsAwaitingKickoff(),
   ]);
-  for (const r of [jobs, domains, websites, subs, requests, projects]) if (r.error) throw r.error;
-  return { jobs: jobs.data ?? [], domains: domains.data ?? [], websites: websites.data ?? [], subscriptions: subs.data ?? [], requests: requests.data ?? [], projects: projects.data ?? [] };
+  for (const r of [jobs, domains, websites, subs, requests]) if (r.error) throw r.error;
+  return { jobs: jobs.data ?? [], domains: domains.data ?? [], websites: websites.data ?? [], subscriptions: subs.data ?? [], requests: requests.data ?? [], projects };
 });
 
 /** Unresolved workflow state used by the admin navigation attention dots. */
@@ -230,17 +258,17 @@ export const adminNavAttention = cache(async () => {
   const count = { count: "exact" as const, head: true };
   const [orders, customers, websites, domains, subscriptions, requests, jobs] = await Promise.all([
     supabase.from("orders").select("id", count).in("status", ["paid", "failed"]),
-    supabase.from("projects").select("id", count).not("intake_completed_at", "is", null).eq("status", "in_progress"),
+    projectsAwaitingKickoff(),
     supabase.from("websites").select("id", count).in("status", ["error", "suspended"]),
     supabase.from("domains").select("id", count).in("status", ["pending", "verifying", "error", "expired"]),
     supabase.from("subscriptions").select("id", count).in("status", ["past_due", "unpaid", "incomplete"]),
     supabase.from("change_requests").select("id", count).eq("status", "submitted"),
     supabase.from("provisioning_jobs").select("id", count).eq("status", "failed"),
   ]);
-  for (const result of [orders, customers, websites, domains, subscriptions, requests, jobs]) if (result.error) throw result.error;
+  for (const result of [orders, websites, domains, subscriptions, requests, jobs]) if (result.error) throw result.error;
   return {
     orders: Boolean(orders.count),
-    customers: Boolean(customers.count),
+    customers: customers.length > 0,
     websites: Boolean(websites.count),
     domains: Boolean(domains.count),
     subscriptions: Boolean(subscriptions.count),
