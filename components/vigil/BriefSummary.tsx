@@ -134,7 +134,7 @@ export function BriefSummary({ brief, projectKind = "express", assets, domain, o
             {d.later ? <Row label="DNS setup" value="Available from the Domain page after the preview is deployed" /> : null}
           </>
         ) : null}
-        {d?.answer === "need" ? <Row label="Preferred names" value={d.preferredNames.filter(Boolean).join(", ") || "None given"} /> : null}
+        {d?.answer === "need" ? <Row label="Domain" value="Buying it themselves, shown the guide" /> : null}
         {d?.answer === "unsure" ? <Row label="Answer" value="Not sure yet. The team will help." /> : null}
       </Section>
 

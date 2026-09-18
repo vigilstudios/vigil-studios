@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { CalendlyPopup } from "@/components/CalendlyModal";
 import { DomainGuide } from "@/components/vigil/DomainGuide";
 import { confirmDnsAdded, getDomainSetup, guessRegistrar, startOnboardingDomain, type DomainSetup } from "@/lib/vigil/actions/onboarding";
 import { REGISTRAR_GUIDES } from "@/lib/vigil/domain-guides";
@@ -25,7 +26,7 @@ type Phase = "ask" | "hostname" | "guide";
 /**
  * The domain step. Three answers, each ending somewhere useful:
  *   own    → hostname → registrar (guessed from nameservers) → walkthrough → "I've added the records"
- *   need   → preferred names; Vigil registers it with the customer as owner
+ *   need   → buy-it-yourself guide; "I bought it" hands straight into the own path above
  *   unsure → one paragraph, then the same two paths
  * Nothing here is a dead end; "Do this later" keeps the same guide on the Domain page.
  */
@@ -113,7 +114,7 @@ export function DomainStep({ initial, projectId, businessName, domain, onDomain,
             }}
             options={[
               { value: "own", label: "Yes, I own one", hint: "Save it now. DNS setup starts after your preview is ready." },
-              { value: "need", label: "No, I need one", hint: "Vigil registers it, in your name." },
+              { value: "need", label: "No, I need one", hint: "Takes a few minutes; we'll show you how." },
               { value: "unsure", label: "Not sure", hint: "Takes ten seconds to work out." },
             ]}
           />
@@ -138,16 +139,25 @@ export function DomainStep({ initial, projectId, businessName, domain, onDomain,
       {answered === "need" && phase === "ask" ? (
         <div className="space-y-4">
           <VirtueAside>
-            No problem. Give me two or three names you would like, best first. The Vigil team checks what is available, registers it <b>in your name</b> so it is always yours, and connects it to your site. You will see the cost before anything is charged.
+            No problem, buying one yourself is quick, and it means the domain is registered in <b>your</b> name from day one.
           </VirtueAside>
-          <div className="grid gap-3">
-            {[0, 1, 2].map((i) => (
-              <Field key={i} id={`pref-${i}`} label={i === 0 ? "First choice" : i === 1 ? "Second choice" : "Third choice"} optional={i > 0}>
-                <TextInput id={`pref-${i}`} inputMode="url" placeholder={i === 0 ? `${businessName.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 20) || "yourbusiness"}.com` : ""} value={data.preferredNames[i] ?? ""} onChange={(e) => { const names = [...data.preferredNames]; names[i] = e.target.value; set("preferredNames", names.slice(0, 3)); }} />
-              </Field>
-            ))}
+          <div className="rounded-lg border border-[color:var(--border)] p-4 text-[13px] leading-6">
+            <p className="font-semibold">How to buy a domain</p>
+            <ol className="mt-2 list-decimal space-y-1.5 pl-4 text-[color:var(--text-secondary)]">
+              <li>Pick a registrar, Namecheap or GoDaddy both work well.</li>
+              <li>Search for the name you want, like {businessName.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 16) || "yourbusiness"}.com, and buy it. Expect roughly $12&ndash;20 a year; skip the extra add-ons they try to sell you.</li>
+              <li>Come back here and enter it, we&apos;ll walk you through connecting it to your site.</li>
+            </ol>
           </div>
-          <StepFooter onBack={() => { set("answer", null); setPhase("ask"); }} onNext={() => continueNext()} nextDisabled={!data.preferredNames[0]?.trim()} busy={busy} />
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-2 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-3 text-[12px] leading-5 text-[color:var(--text-secondary)]">
+            <span>Confused, or would rather we just handle it?</span>
+            <CalendlyPopup className="btn-secondary min-h-9 !px-3 !py-1.5 text-xs">Book a call</CalendlyPopup>
+            <a href="mailto:hello@vigilstudios.co" className="underline">Email hello@vigilstudios.co</a>
+          </div>
+          <button type="button" onClick={() => { set("answer", "own"); setPhase("hostname"); }} className="btn-primary min-h-11 !px-4 !py-2 text-sm">
+            I bought it, connect it now
+          </button>
+          <StepFooter onBack={() => { set("answer", null); setPhase("ask"); }} onNext={() => continueNext()} nextLabel="I'll buy it later" busy={busy} />
         </div>
       ) : null}
 

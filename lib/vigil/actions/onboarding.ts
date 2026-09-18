@@ -393,7 +393,7 @@ export async function submitIntake(projectId: string): Promise<ActionResult<{ co
       brief.domain?.answer === "own"
         ? `Owns ${brief.domain.hostname} (${REGISTRAR_GUIDES[brief.domain.registrar ?? "other"].name})${brief.domain.delegate ? "; asked Vigil to make the DNS changes" : ""}${brief.domain.later ? "; will connect it later" : ""}`
         : brief.domain?.answer === "need"
-          ? `Needs a domain. Preferred: ${brief.domain.preferredNames.filter(Boolean).join(", ") || "none given"}`
+          ? "Needs a domain; shown the buy-it-yourself guide, will connect it once bought"
           : "Domain: not decided yet";
     const { count: assetCount } = await supabase.from("project_assets").select("id", { count: "exact", head: true }).eq("project_id", projectId);
     const kickoffLine = project.kind === "express" ? "" : `\nOnboarding route: ${brief.kickoff?.mode === "call" ? `kickoff call with the Vigil team${brief.kickoff.callBooked ? " (booked)" : ""}` : brief.kickoff?.mode === "both" ? "kickoff call with the Vigil team (booked) and guided brief" : "guided brief"}\n`;
