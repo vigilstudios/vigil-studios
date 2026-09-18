@@ -26,7 +26,7 @@ export const EXPRESS_TEMPLATES: {
 }[] = [
   {
     slug: "restaurant",
-    variant: "Variant 1",
+    variant: "Savor",
     industry: "Restaurant and cafe",
     example: "Marlow & Fen",
     description:
@@ -36,7 +36,7 @@ export const EXPRESS_TEMPLATES: {
   },
   {
     slug: "home-services",
-    variant: "Variant 1",
+    variant: "Foundation",
     industry: "Home services",
     example: "Fieldwork Home Services",
     description:
@@ -46,7 +46,7 @@ export const EXPRESS_TEMPLATES: {
   },
   {
     slug: "retail",
-    variant: "Variant 1",
+    variant: "Atelier",
     industry: "Retail and boutique",
     example: "Morrow",
     description:
@@ -56,7 +56,7 @@ export const EXPRESS_TEMPLATES: {
   },
   {
     slug: "medical",
-    variant: "Variant 1",
+    variant: "Clarity",
     industry: "Medical and dental",
     example: "Harbor Health",
     description:
@@ -66,7 +66,7 @@ export const EXPRESS_TEMPLATES: {
   },
   {
     slug: "salon-spa",
-    variant: "Variant 1",
+    variant: "Serene",
     industry: "Salon and spa",
     example: "still & form",
     description:
@@ -76,13 +76,23 @@ export const EXPRESS_TEMPLATES: {
   },
   {
     slug: "auto-services",
-    variant: "Variant 1",
+    variant: "Torque",
     industry: "Auto shop",
     example: "Torque & Theory",
     description:
       "Editorial and motion-rich, with a transparent brake inspection, service ledger, and a review rail that stays alive.",
     accent: "#dcf763",
     status: "available",
+  },
+  {
+    slug: "creator",
+    variant: "Muse",
+    industry: "Creator",
+    example: "The Muse Edit",
+    description:
+      "Editorial and expressive, with cinematic imagery, social-first storytelling, a living portfolio, and a polished home for brand partnerships.",
+    accent: "#f2b8c6",
+    status: "coming",
   },
 ];
 
