@@ -109,9 +109,12 @@ export function VirtueWelcome({ projectId, lines, linesAfterPassword, passwordLi
         animate={{ opacity: departure ? 0 : 1 }}
         transition={{ duration: departure === "dock" ? 0.85 : 0.45, delay: departure === "dock" ? 0.12 : 0 }}
       />
-      <div className="flex min-h-full w-full items-center justify-center px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+      {/* relative z-10: the backdrop above is a positioned (fixed) layer, so
+          everything here needs its own stacking level or it paints beneath
+          the dim the instant framer finishes and writes transform: none. */}
+      <div className="relative z-10 flex min-h-full w-full items-center justify-center px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
         <div className="flex w-full max-w-xl flex-col items-center">
-          <motion.div ref={orbHost} animate={orbControls} initial={{ opacity: 0 }} className="relative z-10">
+          <motion.div ref={orbHost} animate={orbControls} initial={{ opacity: 0 }} className="relative">
             <VirtueOrb size="xl" state={speech.speaking ? "talking" : "idle"} />
           </motion.div>
           <motion.div

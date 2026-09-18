@@ -33,7 +33,7 @@ const contentSecurityPolicy = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
   `connect-src 'self' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://vercel.live https://calendly.com https://api.calendly.com${supabaseHost ? ` https://${supabaseHost} wss://${supabaseHost}` : ""}`,
-  "frame-src https:",
+  "frame-src 'self' https:",
   "frame-ancestors 'self'",
   "form-action 'self' https://checkout.stripe.com https://billing.stripe.com",
   "report-uri /api/csp-report",

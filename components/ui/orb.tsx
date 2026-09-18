@@ -67,7 +67,10 @@ export function Orb({
   return (
     <div className={className ?? "relative h-full w-full"}>
       <Canvas
-        resize={{ debounce: resizeDebounce }}
+        // offsetSize: measure the layout box, not the transformed one. The
+        // welcome orb flies in scaled down; measuring its bounding rect at
+        // that moment sized the canvas at a quarter of the circle for good.
+        resize={{ debounce: resizeDebounce, offsetSize: true }}
         frameloop={still ? "demand" : "always"}
         dpr={[1, 2]}
         gl={{ alpha: true, antialias: true, premultipliedAlpha: true, powerPreference: "low-power" }}
