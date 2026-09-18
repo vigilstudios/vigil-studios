@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { cursor, startCursor, tickCursor } from "./cursor";
 import { watchCovered } from "./covered";
+import { PHASE, rng, subscribeStory } from "@/components/site/story/progress";
 
 /**
  * Notifications floating around the mark. Each one arrives as a problem
@@ -157,12 +158,17 @@ export function HeroNotes() {
       covered = c;
       if (!c) loop();
     });
+    // They fade with the hero's words as the story begins.
+    const unsubscribe = subscribeStory((p) => {
+      host.style.opacity = String(1 - rng(rng(p, PHASE.untype[0], PHASE.untype[1]), 0, 0.35));
+    });
     loop();
 
     return () => {
       cancelAnimationFrame(raf);
       io.disconnect();
       unwatch();
+      unsubscribe();
       document.removeEventListener("visibilitychange", onVisibility);
       host.replaceChildren();
     };

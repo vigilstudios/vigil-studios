@@ -1,7 +1,7 @@
 import { Footer } from "@/components/layout/Footer";
 import { SnapSections } from "@/components/site/SnapSections";
+import { StoryStage } from "@/components/site/story/StoryStage";
 import { HeroSection } from "@/sections/HeroSection";
-import { PillarsSection } from "@/sections/PillarsSection";
 import { HowItWorksSection } from "@/sections/HowItWorksSection";
 import { StartSection } from "@/sections/StartSection";
 import { WhyVigilSection } from "@/sections/WhyVigilSection";
@@ -12,9 +12,11 @@ export default function Home() {
   return (
     <>
       <SnapSections />
-      <HeroSection />
-      <PillarsSection />
-      <HowItWorksSection />
+      {/* The first two acts share one pinned stage: the hero, then "How it works" typed onto the same screen. */}
+      <StoryStage>
+        <HeroSection />
+        <HowItWorksSection />
+      </StoryStage>
       <StartSection />
       <WhyVigilSection />
       <FAQSection />

@@ -50,13 +50,20 @@ export const PILLARS = [
   },
 ];
 
+/** The five steps of "How it works", each tagged with whose step it is. The scenes that illustrate them live in sections/HowItWorksSection.tsx. */
 export const HOW_IT_WORKS = [
-  { n: 1, title: "Choose your website", body: "Express starts with an industry template. Professional starts with a two-minute fit guide, then lets you buy online or speak with our team. Custom work starts with a scope call." },
-  { n: 2, title: "Choose how to onboard", body: "After payment, book a kickoff call with us or continue with Virtue's guided brief. Everything saves as you go, including your ideas, files and domain." },
-  { n: 3, title: "We build", body: "A person builds your site from what you told Virtue. Express gets a first look within two business days; Professional and Custom follow the timeline agreed with you." },
-  { n: 4, title: "You review", body: "Say what to change. One revision round is included on Express, two on Professional; Custom is agreed in the scope." },
-  { n: 5, title: "Live, and looked after", body: "Your site goes live on your domain with SSL and monitoring. From then on Vigil hosts it, updates it and reports on it. Cancel any time and take your site with you." },
+  { n: 1, who: "Yours", title: "Choose your website and plan", body: "Express, Professional or Growth, and the plan that keeps it running. Two minutes, no builder, nothing to learn." },
+  { n: 2, who: "Yours · with Virtue", title: "Choose how to onboard", body: "A kickoff call with a person, or Virtue\u2019s guided brief. Either way, everything you tell us is saved as you go." },
+  { n: 3, who: "Ours", title: "We build", body: "A person builds your site from what you told Virtue. Express gets a first look within two business days." },
+  { n: 4, who: "Yours", title: "You review", body: "Say what to change, in a sentence, from your dashboard. One round on Express, two on Professional." },
+  { n: 5, who: "Ours · from then on", title: "Live, and growing", body: "Your site goes live on your domain. From then on Vigil keeps it running and Virtue keeps the leads coming." },
 ];
+
+export const HOW_IT_WORKS_HEAD = {
+  eyebrow: "How it works",
+  title: "From the website you choose to a site that is looked after.",
+  lead: "Five steps. Two of them are yours, Virtue is with you for both, and the last one never ends.",
+};
 
 export const COMPARISON = [
   { dimension: "Website", builder: "You build and configure it", vigil: "Built for you by a person" },

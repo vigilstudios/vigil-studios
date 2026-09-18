@@ -4,13 +4,17 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { cursor, startCursor, tickCursor } from "./cursor";
 import { watchCovered } from "./covered";
+import { PHASE, rng, subscribeStory } from "@/components/site/story/progress";
 
 /**
  * The V* mark in three dimensions, drawn as edges only: the V and the
  * eight-point star straight from the logo's SVG, extruded, no faces. It
  * turns once every ~29 s with a slow nod, leans toward the pointer, and
- * pauses when the hero is covered by the page, off screen or in a hidden tab. Under reduced
- * motion it renders one still frame; without WebGL the flat outline shows.
+ * pauses when the hero is covered by the page, off screen or in a hidden
+ * tab. As the visitor scrolls into the story it unravels: it spins loose
+ * while every edge flies off along its own line and the lines fade. Under
+ * reduced motion it renders one still frame; without WebGL the flat
+ * outline shows.
  */
 const V: [number, number][] = [[292.1, 130.44], [339.48, 0.04], [471.68, 0], [296.29, 420.45], [174.58, 420.45], [0.5, 0.5], [132.86, 0.03], [180.42, 132.1], [236.17, 274.69]];
 const STAR_POINTS = "488.85 412.76 448.48 412.8 449.91 377.59 419.48 396.62 399.29 361.38 430.03 344.52 399.28 328.33 419.47 292.72 449.93 312.15 448.48 276.64 488.86 276.63 487.78 311.79 517.86 292.74 538.42 328.36 507.26 344.48 538.44 361.37 517.86 396.65 487.77 377.93";
@@ -62,6 +66,29 @@ export function WireMark({ className }: { className?: string }) {
     }
     const scene = new THREE.Scene();
     scene.add(group);
+    // Every edge gets its own direction to fly off in; the exit scatters the vertices along them.
+    const parts = group.children.map((m) => {
+      const pos = (m as THREE.LineSegments).geometry.attributes.position as THREE.BufferAttribute;
+      const base = Float32Array.from(pos.array as Float32Array);
+      const n = pos.count / 2, dirs = new Float32Array(n * 3);
+      for (let i = 0; i < n; i++) {
+        const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1), r = 3 + Math.random() * 7;
+        dirs[i * 3] = Math.sin(ph) * Math.cos(th) * r; dirs[i * 3 + 1] = Math.sin(ph) * Math.sin(th) * r; dirs[i * 3 + 2] = Math.cos(ph) * r;
+      }
+      return { pos, base, dirs, n };
+    });
+    let exitU = 0, appliedU = -1;
+    const applyExit = () => {
+      if (exitU === appliedU) return;
+      appliedU = exitU;
+      const k = exitU * exitU;
+      for (const { pos, base, dirs, n } of parts) {
+        const a = pos.array as Float32Array;
+        for (let i = 0; i < n; i++) for (let v = 0; v < 2; v++) { const o = (i * 2 + v) * 3; a[o] = base[o] + dirs[i * 3] * k; a[o + 1] = base[o + 1] + dirs[i * 3 + 1] * k; a[o + 2] = base[o + 2] + dirs[i * 3 + 2] * k; }
+        pos.needsUpdate = true;
+      }
+      material.opacity = 0.9 * (1 - exitU);
+    };
     const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 100);
     camera.position.set(0, 0, CAMERA_Z);
 
@@ -87,12 +114,15 @@ export function WireMark({ className }: { className?: string }) {
       if (!visible || hidden || covered) return;
       tickCursor(now);
       const t = (now - t0) / 1000;
-      group.rotation.y = (reduced ? -0.4 : t * 0.22) + cursor.x * 0.22; // one turn every ~29 s, plus a lean toward the pointer
+      group.rotation.y = (reduced ? -0.4 : t * 0.22) + cursor.x * 0.22 + exitU * 2.4; // one turn every ~29 s, plus a lean toward the pointer; spins loose on exit
       group.rotation.x = (reduced ? 0.1 : 0.1 + Math.sin(t * 0.35) * 0.08) + cursor.y * 0.14;
+      group.rotation.z = exitU * 0.5;
+      applyExit();
       group.position.x = cursor.x * 0.18;
       group.position.y = baseY - cursor.y * 0.12;
       renderer.render(scene, camera);
-      if (!reduced) raf = requestAnimationFrame(frame);
+      // Fully disintegrated, there is nothing to animate until the visitor scrolls back up.
+      if (!reduced && exitU < 1) raf = requestAnimationFrame(frame);
     };
     const loop = () => {
       if (!raf) raf = requestAnimationFrame(frame);
@@ -116,6 +146,10 @@ export function WireMark({ className }: { className?: string }) {
       covered = c;
       if (!c) loop();
     });
+    const unsubscribe = subscribeStory((p) => {
+      const u = rng(p, PHASE.markExit[0], PHASE.markExit[1]);
+      if (u !== exitU) { exitU = u; loop(); }
+    });
     loop();
 
     return () => {
@@ -123,6 +157,7 @@ export function WireMark({ className }: { className?: string }) {
       io.disconnect();
       ro.disconnect();
       unwatch();
+      unsubscribe();
       document.removeEventListener("visibilitychange", onVisibility);
       geometries.forEach((g) => g.dispose());
       material.dispose();

@@ -1,34 +1,217 @@
-import { Container, Section, SectionIntro } from "@/components/site/primitives";
-import { Reveal, RevealGroup, RevealItem } from "@/components/site/Reveal";
-import { HOW_IT_WORKS } from "@/lib/site-copy";
+"use client";
 
-/** The real path, in the order it happens. Replaces the old agency "process". */
+import { useEffect, useRef, useState } from "react";
+import { Orb, type AgentState } from "@/components/ui/orb";
+import { clamp, ease, PHASE, rng, subscribeStory, Typer } from "@/components/site/story/progress";
+import { HOW_IT_WORKS, HOW_IT_WORKS_HEAD } from "@/lib/site-copy";
+
+/**
+ * "How it works": the second act on the story's stage. Once the hero has
+ * untyped, the eyebrow, title and lead type themselves in place, then a
+ * horizontal timeline ravels in: one line, five stations, each with a
+ * small line-drawn scene that plays as the visitor scrolls the track
+ * along. The fifth grows into the centre while the others step back.
+ * Below `md` nothing pins: the stations stack under the header and each
+ * scene plays as it scrolls into view.
+ *
+ * The scenes are static SVG markup driven imperatively (stroke-dashoffset
+ * and transforms) from one subscriber; React only mounts them.
+ */
+const WIN = (ox: number, oy: number, cls = "w", bright = false) => `<g transform="translate(${ox} ${oy})">
+  <rect class="hiw-tile ${cls}" pathLength="1" x="0" y="0" width="300" height="150" rx="8"/><line class="hiw-tile ${cls}" pathLength="1" x1="0" y1="22" x2="300" y2="22"/>
+  <g><line class="hiw-tile ${cls}" pathLength="1" x1="18" y1="40" x2="80" y2="40"/><rect class="hiw-tile ${cls}" pathLength="1" x="18" y="58" width="110" height="9" rx="2"/><rect class="hiw-tile ${cls}" pathLength="1" x="18" y="73" width="80" height="9" rx="2"/><rect class="hiw-tile ${cls}" pathLength="1" x="160" y="40" width="122" height="66" rx="4"/><rect class="hiw-tile ${cls}" pathLength="1" x="18" y="112" width="80" height="26" rx="4"/><rect class="hiw-tile ${cls}" pathLength="1" x="110" y="112" width="80" height="26" rx="4"/><rect class="hiw-tile ${cls}" pathLength="1" x="202" y="112" width="80" height="26" rx="4"/></g>
+  <g class="wf" opacity="0"><rect x="18" y="58" width="110" height="9" rx="2" fill="rgba(245,245,243,${bright ? 0.5 : 0.18})"/><rect x="18" y="73" width="80" height="9" rx="2" fill="rgba(245,245,243,${bright ? 0.35 : 0.12})"/><rect x="160" y="40" width="122" height="66" rx="4" fill="rgba(16,212,90,${bright ? 0.34 : 0.14})"/><rect x="18" y="112" width="80" height="26" rx="4" fill="rgba(245,245,243,${bright ? 0.22 : 0.08})"/><rect x="110" y="112" width="80" height="26" rx="4" fill="rgba(245,245,243,${bright ? 0.22 : 0.08})"/><rect x="202" y="112" width="80" height="26" rx="4" fill="rgba(245,245,243,${bright ? 0.22 : 0.08})"/>${bright ? '<rect x="18" y="112" width="80" height="26" rx="4" fill="none" stroke="rgba(16,212,90,.6)"/>' : ""}</g></g>`;
+const CURSOR = '<svg viewBox="0 0 14 18"><path d="M1 1 L1 14 L4.4 10.8 L6.8 16.6 L9.2 15.6 L6.8 9.9 L11.6 9.9 Z" fill="#10d45a" stroke="#0a0a0a" stroke-width=".8"/></svg><span class="cr"></span>';
+
+/** The five scenes, in the order of the steps. Step 2's orb is a React child, not markup. */
+const SCENES: string[] = [
+  `<svg viewBox="0 0 400 210"><g>
+    <text x="14" y="20">Website</text>
+    <rect class="hiw-tile pk" pathLength="1" x="14" y="30" width="108" height="76" rx="8"/><text x="28" y="52">Express</text><text class="big" x="28" y="72">Launch in days</text><text class="sm" x="28" y="92">Industry template</text>
+    <rect class="hiw-tile pk" pathLength="1" x="146" y="30" width="108" height="76" rx="8"/><text x="160" y="52">Professional</text><text class="big" x="160" y="72">Launch in weeks</text><text class="sm" x="160" y="92">Up to 8 pages</text>
+    <rect class="hiw-tile pk" pathLength="1" x="278" y="30" width="108" height="76" rx="8"/><text x="292" y="52">Growth</text><text class="big" x="292" y="72">Scoped</text><text class="sm" x="292" y="92">Apps and portals</text>
+    <text x="14" y="128">+ Plan</text>
+    <rect class="hiw-tile pl" pathLength="1" x="14" y="136" width="88" height="60" rx="8"/><text x="26" y="158">Basic</text><text class="sm" x="26" y="176">Keep me online</text>
+    <rect class="hiw-tile pl" pathLength="1" x="110" y="136" width="88" height="60" rx="8"/><text x="122" y="158">Care</text><text class="sm" x="122" y="176">Changes handled</text>
+    <rect class="hiw-tile pl" pathLength="1" x="206" y="136" width="88" height="60" rx="8"/><text x="218" y="158">Growth</text><text class="sm" x="218" y="176">Virtue inside</text>
+    <rect class="hiw-tile pl" pathLength="1" x="302" y="136" width="88" height="60" rx="8"/><text x="314" y="158">Priority</text><text class="sm" x="314" y="176">Most capable</text>
+    <circle class="clickring" cx="68" cy="68" r="6" fill="none" stroke="#10d45a" opacity="0"/><circle class="cur" cx="392" cy="204" r="5"/></g></svg>
+    <span class="hiw-pill p1" style="left:2%;top:6%">Selected</span><span class="hiw-pill p2" style="left:26%;top:58%">Selected</span>`,
+  `<svg viewBox="0 0 400 210"><g>
+    <rect class="hiw-tile" pathLength="1" x="14" y="26" width="176" height="160" rx="8"/><text x="30" y="50">Kickoff call</text>
+    <rect class="hiw-tile" pathLength="1" x="66" y="82" width="72" height="58" rx="4"/><line class="hiw-tile" pathLength="1" x1="66" y1="98" x2="138" y2="98"/><line class="hiw-tile" pathLength="1" x1="82" y1="74" x2="82" y2="88"/><line class="hiw-tile" pathLength="1" x1="122" y1="74" x2="122" y2="88"/><circle cx="102" cy="120" r="5" fill="rgba(245,245,243,.32)"/>
+    <text x="30" y="172">15 min · a person</text>
+    <rect class="hiw-tile sel2" pathLength="1" x="210" y="26" width="176" height="160" rx="8"/><text x="226" y="50">Guided brief</text><text x="226" y="172">Virtue · saves as you go</text></g></svg>
+    <div class="hiw-bubble" style="left:53%;top:-8%"><span class="who">Virtue</span><span class="t"></span></div>`,
+  `<svg viewBox="0 0 400 210">${WIN(50, 30)}</svg>`,
+  `<svg viewBox="0 0 400 210"><g>
+    <rect class="hiw-tile d" pathLength="1" x="20" y="14" width="360" height="182" rx="8"/><line class="hiw-tile d" pathLength="1" x1="110" y1="14" x2="110" y2="196"/>
+    <text x="34" y="36" class="big" style="font-size:9px">Vigil</text>
+    <line class="hiw-tile d" pathLength="1" x1="34" y1="56" x2="84" y2="56"/><line class="hiw-tile d" pathLength="1" x1="34" y1="74" x2="76" y2="74"/><line class="hiw-tile d sel" pathLength="1" x1="34" y1="92" x2="92" y2="92"/><line class="hiw-tile d" pathLength="1" x1="34" y1="110" x2="70" y2="110"/><line class="hiw-tile d" pathLength="1" x1="34" y1="128" x2="80" y2="128"/>
+    <text x="126" y="40">Requests</text>
+    <rect class="hiw-tile d" pathLength="1" x="124" y="52" width="76" height="130" rx="4"/><rect class="hiw-tile d" pathLength="1" x="206" y="52" width="76" height="130" rx="4"/><rect class="hiw-tile d" pathLength="1" x="288" y="52" width="76" height="130" rx="4"/>
+    <text class="sm" x="130" y="66">Requested</text><text class="sm" x="212" y="66">In progress</text><text class="sm" x="294" y="66">Done</text></g></svg>
+    <span class="hiw-chip bad sm req" style="left:40.5%;top:46%"><i></i><b>Make the hours bigger</b></span>`,
+  `<div class="hiw-glow"></div><svg viewBox="0 0 400 210">${WIN(50, 30, "lv bright", true)}
+    <g class="up" opacity="0"><rect x="64" y="124" width="118" height="42" rx="6" fill="rgba(10,10,10,.9)" stroke="rgba(16,212,90,.55)"/><text class="sm" x="72" y="138">Uptime · 99.98%</text><path class="hiw-tile spark" pathLength="1" d="M72 158 L86 156 100 158 114 155 128 158 142 157 156 158 170 156 176 158" style="stroke:#10d45a;stroke-width:1.5"/></g>
+    <g class="lock" opacity="0"><rect x="333" y="37" width="9" height="8" rx="2" fill="none" stroke="#10d45a" stroke-width="1.2"/><path d="M335 37 v-3 a2.5 2.5 0 0 1 5 0 v3" fill="none" stroke="#10d45a" stroke-width="1.2"/></g></svg>
+    <span class="hiw-pill lp" style="left:30%;top:5%">Live</span>
+    <span class="hiw-cur2 c1">${CURSOR}</span><span class="hiw-cur2 c2">${CURSOR}</span><span class="hiw-cur2 c3">${CURSOR}</span>
+    <span class="hiw-chip sm n" style="left:8%;top:14%"><i></i>New lead · Priya S.</span>
+    <span class="hiw-chip sm n" style="left:94%;top:30%"><i></i>Booked · Tue 10:00</span>
+    <span class="hiw-chip sm n" style="left:12%;top:92%"><i></i>5★ review · Daniel K.</span>
+    <span class="hiw-chip sm n" style="left:92%;top:78%"><i></i>Visits +38% this week</span>
+    <span class="hiw-chip sm n" style="left:52%;top:-8%"><i></i>Ranking for “salon near me”</span>
+    <span class="hiw-chip sm n" style="left:86%;top:104%"><i></i>Order · $180</span>`,
+];
+const VB = "I'll take it from here.";
+const draw = (el: Element, q: number) => ((el as SVGElement).style.strokeDashoffset = String(1 - q));
+const pop = (el: HTMLElement, u: number) => (el.style.transform = `translate(-50%,-50%) scale(${Math.max(0, u)})`);
+const moveCursor = (el: Element, a: number[], b: number[], u: number) => { el.setAttribute("cx", String(a[0] + (b[0] - a[0]) * u)); el.setAttribute("cy", String(a[1] + (b[1] - a[1]) * u)); };
+const ringAt = (r: Element, cx: number, cy: number, u: number) => { r.setAttribute("cx", String(cx)); r.setAttribute("cy", String(cy)); r.setAttribute("r", String(6 + 20 * u)); r.setAttribute("opacity", String(u > 0 && u < 1 ? 1 - u : 0)); };
+
 export function HowItWorksSection() {
-  const last = HOW_IT_WORKS.length - 1;
+  const root = useRef<HTMLDivElement>(null);
+  const [orbState, setOrbState] = useState<AgentState>(null);
+
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const head = el.querySelector<HTMLElement>(".hiw-head")!, trackwrap = el.querySelector<HTMLElement>(".hiw-trackwrap")!, track = el.querySelector<HTMLElement>(".hiw-track")!;
+    const lineDraw = el.querySelector<SVGPathElement>(".hiw-line .draw")!, lineSvg = lineDraw.parentElement as unknown as SVGElement;
+    const stations = [...el.querySelectorAll<HTMLElement>(".hiw-station")];
+    const eyebrow = new Typer(head.querySelector(".hiw-eyebrow")!), h2 = new Typer(head.querySelector("h2")!), lead = new Typer(head.querySelector(".hiw-lead")!);
+    const desktop = () => window.matchMedia("(min-width: 768px)").matches;
+    let orb: AgentState = null;
+    const orbTo = (s: AgentState) => { if (s !== orb) { orb = s; setOrbState(s); } };
+
+    const renderStation = (i: number, q: number, st: HTMLElement, z: number) => {
+      const ill = st.querySelector<HTMLElement>(".hiw-ill")!;
+      st.classList.toggle("on", q > 0.12);
+      const pulse = st.querySelector<HTMLElement>(".hiw-pulse")!, pu = rng(q, 0.1, 0.45);
+      pulse.style.opacity = String(pu > 0 && pu < 1 ? 1 - pu : 0); pulse.style.transform = `scale(${1 + 3.2 * pu})`;
+      if (i === 0) {
+        const pk = ill.querySelectorAll("rect.pk"), pl = ill.querySelectorAll("rect.pl");
+        pk.forEach((t, k) => draw(t, ease.out(rng(q, k * 0.05, 0.22 + k * 0.05))));
+        pl.forEach((t, k) => draw(t, ease.out(rng(q, 0.16 + k * 0.04, 0.36 + k * 0.04))));
+        const cur = ill.querySelector(".cur")!, ring = ill.querySelector(".clickring")!;
+        const m1 = ease.io(rng(q, 0.36, 0.52)), m2 = ease.io(rng(q, 0.6, 0.74));
+        if (q < 0.6) moveCursor(cur, [392, 204], [68, 68], m1); else moveCursor(cur, [68, 68], [154, 166], m2);
+        if (q < 0.7) ringAt(ring, 68, 68, rng(q, 0.52, 0.62)); else ringAt(ring, 154, 166, rng(q, 0.74, 0.84));
+        pk[0].classList.toggle("sel", q > 0.53); pl[1].classList.toggle("sel", q > 0.75);
+        ill.querySelector<HTMLElement>(".p1")!.style.transform = `scale(${Math.max(0, ease.back(rng(q, 0.54, 0.64)))})`;
+        ill.querySelector<HTMLElement>(".p2")!.style.transform = `scale(${Math.max(0, ease.back(rng(q, 0.76, 0.86)))})`;
+      } else if (i === 1) {
+        ill.querySelectorAll(".hiw-tile").forEach((t, k) => draw(t, ease.out(rng(q, k * 0.04, 0.3 + k * 0.04))));
+        ill.querySelector(".sel2")!.classList.toggle("sel", q > 0.5);
+        const b = ill.querySelector<HTMLElement>(".hiw-bubble")!;
+        b.style.opacity = q > 0.52 ? "1" : "0"; b.style.transform = `translateY(${6 * (1 - rng(q, 0.52, 0.6))}px)`;
+        b.querySelector(".t")!.textContent = VB.slice(0, Math.round(VB.length * rng(q, 0.55, 0.85)));
+        orbTo(q > 0.5 && q < 0.9 ? "talking" : q > 0.2 ? "thinking" : null);
+        ill.querySelector<HTMLElement>(".hiw-orb")!.style.opacity = String(rng(q, 0.2, 0.4));
+      } else if (i === 2) {
+        ill.querySelectorAll(".hiw-tile.w").forEach((t, k) => draw(t, ease.out(rng(q, 0.05 + k * 0.05, 0.4 + k * 0.05))));
+        ill.querySelector(".wf")!.setAttribute("opacity", String(rng(q, 0.7, 0.95)));
+      } else if (i === 3) {
+        ill.querySelectorAll(".hiw-tile.d").forEach((t, k) => draw(t, ease.out(rng(q, k * 0.03, 0.28 + k * 0.03))));
+        const req = ill.querySelector<HTMLElement>(".req")!;
+        const a = ease.back(rng(q, 0.4, 0.5)), m1 = ease.io(rng(q, 0.56, 0.66)), m2 = ease.io(rng(q, 0.72, 0.82));
+        // column centres: 40.5 %, 61 %, 81.5 % of the box
+        req.style.left = `${40.5 + 20.5 * m1 + 20.5 * m2}%`; pop(req, a);
+        const done = q > 0.8; req.classList.toggle("bad", !done);
+        req.querySelector("b")!.textContent = done ? "Done · 2 hours later" : "Make the hours bigger";
+      } else {
+        ill.querySelectorAll(".hiw-tile.lv").forEach((t, k) => draw(t, ease.out(rng(q, k * 0.05, 0.3 + k * 0.05))));
+        ill.querySelector(".wf")!.setAttribute("opacity", String(ease.out(rng(q, 0.45, 0.7))));
+        ill.querySelector<HTMLElement>(".hiw-glow")!.style.opacity = String(rng(q, 0.55, 0.8));
+        ill.querySelector<HTMLElement>(".lp")!.style.transform = `scale(${Math.max(0, ease.back(rng(q, 0.6, 0.72)))})`;
+        ill.querySelector(".lock")!.setAttribute("opacity", String(rng(q, 0.66, 0.74)));
+        ill.querySelector(".up")!.setAttribute("opacity", String(rng(q, 0.74, 0.82))); draw(ill.querySelector(".spark")!, rng(q, 0.8, 0.96));
+        // the crowd arrives with the zoom: cursors click, and the good news pops around the site
+        const targets = [[[104, 112], [40, 40]], [[-4, 34], [58, 62]], [[104, 2], [76, 24]]];
+        ill.querySelectorAll<HTMLElement>(".hiw-cur2").forEach((c, k) => {
+          const s = 0.04 + k * 0.14, u = ease.io(rng(z, s, s + 0.14)), [from, to] = targets[k];
+          c.style.opacity = String(rng(z, s, s + 0.03)); c.style.left = `${from[0] + (to[0] - from[0]) * u}%`; c.style.top = `${from[1] + (to[1] - from[1]) * u}%`;
+          const r = rng(z, s + 0.14, s + 0.24), cr = c.querySelector<HTMLElement>(".cr")!;
+          cr.style.opacity = String(r > 0 && r < 1 ? 1 - r : 0); cr.style.transform = `scale(${1 + 2.5 * r})`;
+        });
+        ill.querySelectorAll<HTMLElement>(".hiw-chip.n").forEach((c, k) => pop(c, ease.back(rng(z, 0.1 + k * 0.12, 0.22 + k * 0.12))));
+      }
+    };
+
+    const renderDesktop = (p: number) => {
+      // the header types itself once the hero is clear
+      const t = rng(p, PHASE.head[0], PHASE.head[1]);
+      el.style.opacity = p > PHASE.head[0] - 0.02 ? "1" : "0"; el.style.pointerEvents = p > PHASE.head[0] ? "auto" : "none";
+      const a = rng(t, 0, 0.14), b = rng(t, 0.12, 0.72), c = rng(t, 0.7, 1);
+      eyebrow.set(eyebrow.full.length * a, a > 0 && a < 1); h2.set(h2.full.length * b, b > 0 && b < 1); lead.set(lead.full.length * c, c > 0 && c < 1);
+      // then the timeline ravels in and the visitor scrolls it along
+      const ravel = rng(p, PHASE.ravel[0], PHASE.ravel[1]), pf = rng(p, PHASE.film[0], PHASE.film[1]);
+      trackwrap.style.opacity = String(ravel);
+      track.style.transform = `translateX(${window.innerWidth / 2 - 260 - (2080 * Math.min(pf, 0.9)) / 0.9}px)`;
+      lineDraw.style.strokeDashoffset = String(1 - clamp(ravel * 0.16 + (pf / 0.9) * 0.92, 0, 1));
+      const z = ease.io(rng(pf, 0.84, 1));
+      stations.forEach((st, i) => renderStation(i, clamp((pf - i * 0.175) / 0.2, 0, 1), st, z));
+      stations.forEach((st, i) => { const last = i === 4; st.style.transform = `scale(${last ? 1 + 0.38 * z : 1 - 0.22 * z})`; st.style.opacity = String(last ? 1 : 1 - 0.7 * z); });
+      lineSvg.style.opacity = String(1 - 0.6 * z);
+      head.style.opacity = String(1 - 0.85 * z); head.style.transform = `translateY(${-24 * z}px)`;
+    };
+    const renderPhone = () => {
+      el.style.opacity = "1"; el.style.pointerEvents = "auto"; trackwrap.style.opacity = "1";
+      const r = el.getBoundingClientRect(), t = clamp((window.innerHeight * 0.9 - r.top) / (window.innerHeight * 0.5), 0, 1);
+      eyebrow.set(eyebrow.full.length * rng(t, 0, 0.2), false); h2.set(h2.full.length * rng(t, 0.15, 0.7), t > 0.15 && t < 0.7); lead.set(lead.full.length * rng(t, 0.65, 1), t > 0.65 && t < 1);
+      stations.forEach((st, i) => { const b = st.getBoundingClientRect(); renderStation(i, clamp((window.innerHeight * 0.88 - b.top) / (b.height * 0.9), 0, 1), st, 0); });
+    };
+
+    let raf = 0, last = 0;
+    const paint = () => { raf = 0; if (desktop()) renderDesktop(last); else renderPhone(); };
+    const unsubscribe = subscribeStory((p) => { last = p; if (!raf) raf = requestAnimationFrame(paint); });
+    const main = document.getElementById("site-root");
+    const onScroll = () => { if (!desktop() && !raf) raf = requestAnimationFrame(paint); };
+    (main ?? window).addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    paint();
+    return () => { cancelAnimationFrame(raf); unsubscribe(); (main ?? window).removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
+  }, []);
+
   return (
-    <Section id="how-it-works" alt fill>
-      <Container>
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-16">
-          <Reveal>
-            <SectionIntro eyebrow="How it works" tone="teal" title="From the website you choose to a site that is looked after." lead="Five steps. Two of them are yours, and Virtue is with you for both." />
-          </Reveal>
-          <RevealGroup as="ol">
+    <div ref={root} id="how-it-works" className="hiw relative z-[1] text-[#f5f5f3] md:absolute md:inset-0 md:opacity-0">
+      <div className="hiw-head">
+        <p className="hiw-eyebrow story-typing-pending" data-text={HOW_IT_WORKS_HEAD.eyebrow}>{HOW_IT_WORKS_HEAD.eyebrow}</p>
+        <h2 className="story-typing-pending" data-text={HOW_IT_WORKS_HEAD.title}>{HOW_IT_WORKS_HEAD.title}</h2>
+        <p className="hiw-lead story-typing-pending" data-text={HOW_IT_WORKS_HEAD.lead}>{HOW_IT_WORKS_HEAD.lead}</p>
+      </div>
+      <div className="hiw-trackwrap">
+        <div className="hiw-track">
+          <svg className="hiw-line" viewBox="0 0 2600 520" preserveAspectRatio="none" aria-hidden>
+            <path className="base" d="M0 278 Q130 264 260 278 T780 278 T1300 278 T1820 278 T2340 278 T2600 278" />
+            <path className="draw" pathLength="1" d="M0 278 Q130 264 260 278 T780 278 T1300 278 T1820 278 T2340 278 T2600 278" />
+          </svg>
+          <ol className="contents">
             {HOW_IT_WORKS.map((step, i) => (
-              <RevealItem as="li" key={step.n} className="flex gap-5">
-                {/* Number column: the connector sits under the number, centred, and stops at the last step. */}
-                <div className="flex shrink-0 flex-col items-center">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[color:var(--accent-4)] bg-[color:var(--bg-primary)] text-[11px] font-semibold text-[color:var(--accent-4)]">{step.n}</span>
-                  {i < last ? <span className="mt-2 w-px flex-1" style={{ background: "color-mix(in srgb, var(--accent-4) 35%, transparent)" }} aria-hidden /> : null}
+              <li key={step.n} className="hiw-station" style={{ left: `${260 + i * 520}px` }}>
+                <div className="hiw-ill" aria-hidden>
+                  <div className="contents" dangerouslySetInnerHTML={{ __html: SCENES[i] }} />
+                  {i === 1 ? (
+                    <div className="hiw-orb" style={{ left: "62.5%", top: "27%", width: "24%", opacity: 0 }}>
+                      <Orb agentState={orbState} seed={7} className="absolute inset-0" />
+                    </div>
+                  ) : null}
                 </div>
-                <div className={i < last ? "pb-7" : undefined}>
-                  <h3 className="text-lg font-semibold tracking-tight">{step.title}</h3>
-                  <p className="mt-1.5 max-w-xl text-[14px] leading-6 text-[color:var(--text-secondary)]">{step.body}</p>
+                <span className="hiw-node" aria-hidden />
+                <span className="hiw-pulse" aria-hidden />
+                <div className="hiw-card">
+                  <div className="k">
+                    Step 0{step.n} · <b>{step.who}</b>
+                  </div>
+                  <h3>{step.title}</h3>
+                  <p>{step.body}</p>
                 </div>
-              </RevealItem>
+              </li>
             ))}
-          </RevealGroup>
+          </ol>
         </div>
-      </Container>
-    </Section>
+      </div>
+    </div>
   );
 }

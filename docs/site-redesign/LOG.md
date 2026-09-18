@@ -228,3 +228,33 @@ keeps its server id (`_R_…`) on / and /terms, no #418. The vigil app pages
 (`app/(vigil)`: login, error, checkout, welcome) still print the address
 in plain text and will keep hitting the same rewrite until they use the
 component or the Cloudflare setting is turned off.
+
+## 2026-09-18 — The story stage: hero + "How it works" on one screen (approved, live)
+
+Previewed at https://claude.ai/artifact/TSSQ8KNtmBtZGzVqsQxj9L (v3), approved,
+built and shipped with the Cloudflare email fix.
+
+- **StoryStage** (`components/site/story/StoryStage.tsx`): one 820vh
+  section with a sticky 100svh stage; its scroll is the story's clock
+  (`components/site/story/progress.ts`: a tiny store, PHASE windows, eases
+  and the `Typer`). Below `md` nothing pins.
+- **Hero** (`sections/HeroSection.tsx`, first act): title and line type in
+  on load (`HeroWords`); scrolling untypes them, fades buttons, notes and
+  the scroll hint (`HeroScrollHint`), and the wireframe mark unravels and
+  disintegrates (`WireMark`: edge segments scatter along random vectors,
+  the group spins loose, the lines fade; it stops rendering once gone).
+- **How it works** (`sections/HowItWorksSection.tsx`, second act): the
+  eyebrow, title and lead type themselves in place, then a horizontal
+  timeline ravels in — five line-drawn scenes driven by stroke-dashoffset
+  and transforms (website + plan tiles with a cursor choosing Express and
+  Care; kickoff call or Virtue's guided brief with the real Orb shader;
+  the site assembling; the dashboard's request moving Requested → Done;
+  a bright live site with cursors and good-news chips) and a zoom finale.
+  Copy in `HOW_IT_WORKS` / `HOW_IT_WORKS_HEAD`. Styles are the `.hiw-*`
+  block in globals.css. Phones stack the stations and scrub each by its
+  own position.
+- **Scroll snap**: `snap-paused` on `#site-root` while the story is in
+  progress (p < 1, desktop); a 1 px marker at the section's bottom is the
+  snap position the page lands on when it resumes; an upward wheel/touch
+  at the story's end pauses snapping before the scroll so it never bounces.
+- Removed `PillarsSection` ("What you get"): redundant with the story.

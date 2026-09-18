@@ -469,3 +469,431 @@ main#site-root {
     animation: none;
   }
 }
+
+/*
+ * The story stage (home page): the hero and "How it works" on one pinned
+ * screen. Scroll snap is paused while the visitor is inside it.
+ */
+main#site-root.snap-sections.snap-paused {
+  scroll-snap-type: none;
+}
+@media (min-width: 768px) {
+  .story {
+    height: 820vh;
+  }
+}
+.story-typing-pending {
+  color: transparent;
+}
+.story-caret {
+  display: inline-block;
+  width: 0.06em;
+  height: 0.95em;
+  margin-left: 0.08em;
+  vertical-align: -0.12em;
+  background: var(--accent);
+  animation: story-blink 1s steps(2, start) infinite;
+}
+.story-caret-off {
+  display: none;
+}
+@keyframes story-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ----- How it works: the header, the track, the stations ----- */
+.hiw {
+  will-change: opacity;
+}
+.hiw-head {
+  position: relative;
+  z-index: 2;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 118px 24px 0;
+  will-change: opacity, transform;
+}
+.hiw-eyebrow {
+  margin: 0 0 14px;
+  min-height: 1.2em;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.hiw-head h2 {
+  margin: 0;
+  min-height: 1.06em;
+  font-family: var(--font-space-grotesk);
+  font-weight: 500;
+  font-size: clamp(26px, 2.9vw, 42px);
+  letter-spacing: -0.02em;
+  line-height: 1.06;
+  text-wrap: balance;
+}
+.hiw-lead {
+  margin: 16px 0 0;
+  max-width: 52ch;
+  min-height: 1.6em;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(245, 245, 243, 0.62);
+}
+.hiw-trackwrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 520px;
+  transform: translateY(-20%);
+  opacity: 0;
+}
+.hiw-track {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2600px;
+  height: 520px;
+  will-change: transform;
+}
+.hiw-line {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2600px;
+  height: 520px;
+  overflow: visible;
+}
+.hiw-line path {
+  fill: none;
+  stroke: rgba(245, 245, 243, 0.22);
+  stroke-width: 1;
+}
+.hiw-line path.draw {
+  stroke: #f5f5f3;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.hiw-station {
+  position: absolute;
+  top: 0;
+  width: 440px;
+  height: 520px;
+  margin-left: -220px;
+  list-style: none;
+  transform-origin: 50% 278px;
+  will-change: transform, opacity;
+}
+.hiw-ill {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 34px;
+  height: 214px;
+}
+.hiw-ill > .contents > svg,
+.hiw-ill svg:first-of-type {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.hiw-ill text {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  fill: rgba(245, 245, 243, 0.62);
+  text-transform: uppercase;
+}
+.hiw-ill text.big {
+  font-family: var(--font-inter);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  fill: #f5f5f3;
+}
+.hiw-ill text.sm {
+  font-size: 7.5px;
+  letter-spacing: 0.08em;
+}
+.hiw-tile {
+  fill: none;
+  stroke: rgba(245, 245, 243, 0.5);
+  stroke-width: 1.2;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  vector-effect: non-scaling-stroke;
+}
+.hiw-tile.sel {
+  stroke: var(--accent);
+}
+.hiw-tile.bright {
+  stroke: rgba(245, 245, 243, 0.85);
+}
+.hiw-ill .cur {
+  fill: var(--accent);
+  filter: drop-shadow(0 0 6px rgba(16, 212, 90, 0.8));
+}
+.hiw-node {
+  position: absolute;
+  left: 50%;
+  top: 278px;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  border: 1px solid #f5f5f3;
+  background: #0a0a0a;
+  transition: background 300ms ease, border-color 300ms ease;
+}
+.hiw-station.on .hiw-node {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 14px var(--accent);
+}
+.hiw-pulse {
+  position: absolute;
+  left: 50%;
+  top: 278px;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  opacity: 0;
+  transform-origin: center;
+}
+.hiw-card {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 318px;
+  opacity: 0.35;
+  transition: opacity 400ms ease;
+}
+.hiw-station.on .hiw-card {
+  opacity: 1;
+}
+.hiw-card .k {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245, 245, 243, 0.5);
+}
+.hiw-card .k b {
+  color: var(--accent);
+  font-weight: 500;
+}
+.hiw-card h3 {
+  margin: 8px 0 0;
+  font-family: var(--font-space-grotesk);
+  font-weight: 500;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+.hiw-card p {
+  margin: 8px 0 0;
+  max-width: 44ch;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: rgba(245, 245, 243, 0.6);
+}
+.hiw-pill {
+  position: absolute;
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: var(--accent);
+  color: #062b13;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transform: scale(0);
+}
+.hiw-chip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(16, 212, 90, 0.45);
+  background: rgba(18, 20, 19, 0.94);
+  color: #e6ebe8;
+  font-size: 11.5px;
+  white-space: nowrap;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  transform: translate(-50%, -50%) scale(0);
+  transform-origin: center;
+  will-change: transform;
+}
+.hiw-chip b {
+  font-weight: 500;
+}
+.hiw-chip i {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(16, 212, 90, 0.7);
+}
+.hiw-chip.bad {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+.hiw-chip.bad i {
+  background: #ff6b5c;
+  box-shadow: 0 0 8px rgba(255, 107, 92, 0.6);
+}
+.hiw-chip.sm {
+  font-size: 10.5px;
+  padding: 5px 8px;
+}
+.hiw-bubble {
+  position: absolute;
+  z-index: 2;
+  max-width: 230px;
+  padding: 9px 11px;
+  border-radius: 12px;
+  border-bottom-left-radius: 3px;
+  background: rgba(16, 212, 90, 0.14);
+  border: 1px solid rgba(16, 212, 90, 0.35);
+  color: #f5f5f3;
+  font-size: 12px;
+  line-height: 1.4;
+  opacity: 0;
+  transform: translateY(6px);
+  backdrop-filter: blur(6px);
+}
+.hiw-bubble .who {
+  display: block;
+  margin-bottom: 3px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(245, 245, 243, 0.55);
+}
+.hiw-orb {
+  position: absolute;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  pointer-events: none;
+}
+.hiw-glow {
+  position: absolute;
+  left: 10%;
+  top: 4%;
+  width: 80%;
+  height: 86%;
+  border-radius: 14px;
+  box-shadow: 0 0 70px rgba(16, 212, 90, 0.28), 0 0 140px rgba(245, 245, 243, 0.1);
+  opacity: 0;
+  pointer-events: none;
+}
+.hiw-cur2 {
+  position: absolute;
+  z-index: 3;
+  width: 14px;
+  height: 18px;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.hiw-cur2 svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 5px rgba(16, 212, 90, 0.8));
+}
+.hiw-cur2 .cr {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  opacity: 0;
+}
+@media (max-width: 767px) {
+  .hiw {
+    background: var(--bg-primary);
+    overflow-x: hidden; /* scene chips may poke past a phone's edge; the page must not scroll sideways */
+  }
+  .hiw-head {
+    padding: 72px 20px 0;
+  }
+  .hiw-trackwrap {
+    position: relative;
+    top: auto;
+    height: auto;
+    margin-top: 36px;
+    padding: 0 20px 40px;
+    transform: none;
+    opacity: 1;
+  }
+  .hiw-track {
+    position: relative;
+    width: auto;
+    height: auto;
+    transform: none !important;
+  }
+  .hiw-line {
+    display: none;
+  }
+  .hiw-station {
+    position: relative;
+    left: auto !important; /* the desktop track positions each station inline */
+    width: auto;
+    height: auto;
+    margin: 0 0 36px;
+    padding-left: 34px;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  .hiw-station::before {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 20px;
+    bottom: -36px;
+    width: 1px;
+    background: rgba(245, 245, 243, 0.16);
+  }
+  .hiw-station:last-child::before {
+    display: none;
+  }
+  .hiw-ill {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    height: 180px;
+  }
+  .hiw-node {
+    left: 0;
+    top: 6px;
+    margin: 0;
+  }
+  .hiw-pulse {
+    display: none;
+  }
+  .hiw-card {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    margin-top: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .story-caret {
+    animation: none;
+  }
+}
