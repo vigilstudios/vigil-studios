@@ -7,7 +7,7 @@ import { assertProductionDeployAllowed } from "@/lib/vigil/project-reviews";
 import { findExternalId, findProviderLink, providerEnum, upsertProviderLink } from "./provider-links";
 import { activateDomainVerification, beginDomainVerification } from "./domain";
 import { advanceWebsiteProjectStatus } from "./project-status";
-import { publishExpressPreview } from "@/lib/vigil/express-preview-review";
+import { publishPreviewToReview } from "@/lib/vigil/express-preview-review";
 import { assertWebsiteRepositoryReady } from "./repository";
 
 /**
@@ -136,7 +136,7 @@ export async function deployWebsite(
   let customerReady = false;
   if (snapshot.status === "ready" && environment === "preview" && snapshot.url) {
     await admin.from("websites").update({ preview_url: snapshot.url, status_reason: null }).eq("id", websiteId);
-    await publishExpressPreview(admin, websiteId, snapshot.url, options.triggeredBy);
+    await publishPreviewToReview(admin, websiteId, snapshot.url, options.triggeredBy);
     await advanceWebsiteProjectStatus(admin, websiteId, "review", snapshot.readyAt ?? new Date().toISOString());
     await prepareWebsiteDomains(admin, websiteId, provider);
     customerReady = true;
@@ -187,7 +187,7 @@ export async function syncDeployment(
   let customerReady = false;
   if (snapshot.status === "ready" && deployment.environment === "preview" && snapshot.url) {
     await admin.from("websites").update({ preview_url: snapshot.url, status_reason: null }).eq("id", deployment.website_id);
-    await publishExpressPreview(admin, deployment.website_id, snapshot.url, deployment.triggered_by);
+    await publishPreviewToReview(admin, deployment.website_id, snapshot.url, deployment.triggered_by);
     await advanceWebsiteProjectStatus(admin, deployment.website_id, "review", snapshot.readyAt ?? new Date().toISOString());
     await prepareWebsiteDomains(admin, deployment.website_id, provider);
     customerReady = true;

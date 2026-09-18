@@ -13,6 +13,7 @@ import { FloatingAttentionCenter, type AttentionItem } from "@/components/vigil/
 import { getCustomerExpressPreviewReview } from "@/lib/vigil/queries/dashboard";
 import { getUnreadNotifications } from "@/lib/vigil/queries/dashboard";
 import { customerDomainNeedsAttention } from "@/lib/vigil/attention";
+import { reviewRoundDefinition } from "@/lib/vigil/project-reviews";
 
 /**
  * Client dashboard chrome. Requires a signed-in user; pages decide whether
@@ -50,21 +51,26 @@ export default async function DashboardLayout({ children }: { children: React.Re
     const onboardingNeedsAttention = needsOnboarding(onboarding?.project);
     const expressReviewNeedsAttention = expressReview?.status === "awaiting_feedback";
     const websiteNeedsAttention = websites.some((site) => ["error", "suspended"].includes(site.status)) || expressReviewNeedsAttention;
-    const reviewNeedsAttention = Boolean(projectReviews?.rounds.some((round) => round.status === "awaiting_feedback"));
+    const awaitingRound = projectReviews?.rounds.find((round) => round.status === "awaiting_feedback") ?? null;
+    const reviewNeedsAttention = Boolean(awaitingRound);
+    const awaitingLabel = awaitingRound ? reviewRoundDefinition(awaitingRound.number)?.label ?? "Design review" : null;
     const domainNeedsAttention = customerDomainNeedsAttention(domains, websites);
     const subscriptionNeedsAttention = Boolean(subscription && ["past_due", "unpaid", "incomplete"].includes(subscription.status));
     const anythingNeedsAttention = onboardingNeedsAttention || websiteNeedsAttention || reviewNeedsAttention || domainNeedsAttention || subscriptionNeedsAttention;
     const derived: AttentionItem[] = [
       ...(onboardingNeedsAttention ? [{ key: "onboarding", title: "Finish setting up", body: "Complete and send your project details so the team can begin.", href: "/dashboard/onboarding" }] : []),
       ...(expressReviewNeedsAttention ? [{ key: "express-review", title: "Your website preview is ready", body: "Approve the preview or send your included request for changes.", href: "/dashboard/website" }] : []),
-      ...(reviewNeedsAttention ? [{ key: "professional-review", title: "A design review is waiting", body: "Review the current version and send one clear decision.", href: "/dashboard/review" }] : []),
+      ...(reviewNeedsAttention && professionalProject ? [{ key: "professional-review", title: `${awaitingLabel} is ready for review`, body: "Open the preview, then approve it or send one consolidated round of changes.", href: `/dashboard/review?project=${professionalProject.id}` }] : []),
       ...(domainNeedsAttention ? [{ key: "domain", title: "Your domain needs attention", body: "Check the DNS instructions and current connection status.", href: "/dashboard/domain" }] : []),
       ...(subscriptionNeedsAttention ? [{ key: "billing", title: "Your subscription needs attention", body: "Open billing to review the current payment status.", href: "/dashboard/billing" }] : []),
     ];
+    // A notification and a derived reminder for the same page are one item
+    // (the review notification carries ?project=, the reminder does not).
+    const pathOf = (href: string) => href.split(/[?#]/)[0];
     floatingItems = [
       ...derived,
       ...notifications
-        .filter((notification) => !derived.some((item) => item.href === (notification.href || "/dashboard")))
+        .filter((notification) => !derived.some((item) => pathOf(item.href) === pathOf(notification.href || "/dashboard")))
         .map((notification) => ({ key: `notification:${notification.id}`, notificationId: notification.id, title: notification.title, body: notification.body || "Open this update for details.", href: notification.href || "/dashboard" })),
     ];
     groups = [

@@ -48,3 +48,29 @@ describe("deployment customer notifications", () => {
     expect((fake.rows("deployments")[0].metadata as { customer_notification: { event: string } }).customer_notification.event).toBe("site_live");
   });
 });
+
+describe("Professional review notifications", () => {
+  it("tells the customer which review is ready and sends them to the Design review page", async () => {
+    const fake = seed("preview");
+    fake.rows("websites")[0].project_id = "proj_1";
+    fake.rows("projects").push({ id: "proj_1", organization_id: "org_1", kind: "professional", status: "review" });
+    fake.rows("project_review_rounds").push(
+      { id: "r1", project_id: "proj_1", organization_id: "org_1", round_number: 1, status: "approved", current_submission_id: "s1" },
+      { id: "r2", project_id: "proj_1", organization_id: "org_1", round_number: 2, status: "awaiting_feedback", current_submission_id: "s2" },
+    );
+    fake.rows("project_review_submissions").push(
+      { id: "s1", round_id: "r1", project_id: "proj_1", version: 1, preview_url: "https://one.test" },
+      { id: "s2", round_id: "r2", project_id: "proj_1", version: 1, preview_url: "https://preview.test" },
+    );
+
+    await notifyCustomerDeployment(fake.asClient(), "dep_1", "https://www.vigilstudios.co");
+
+    expect(sent.mock.calls[0][0].subject).toBe("Example Co: Full-site review is ready for review");
+    expect(sent.mock.calls[0][0].text).toContain("https://www.vigilstudios.co/dashboard/review?project=proj_1");
+    expect(fake.rows("notifications")[0]).toMatchObject({
+      kind: "project_review.submission",
+      title: "Full-site review is ready for review",
+      href: "/dashboard/review?project=proj_1",
+    });
+  });
+});

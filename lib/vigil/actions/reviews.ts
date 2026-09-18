@@ -185,6 +185,13 @@ async function recordCustomerDecision(projectId: string, roundNumber: number, de
       p_href: `/admin/reviews/${encodeURIComponent(projectId)}`,
     });
     if (notificationError) console.error("review staff notification failed:", notificationError.message);
+    await supabase
+      .from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .eq("user_id", ctx.user.id)
+      .eq("organization_id", ctx.organization.id)
+      .eq("kind", "project_review.submission")
+      .is("read_at", null);
     revalidatePath("/dashboard");
     revalidatePath("/admin");
     return { ok: true, data: response };
