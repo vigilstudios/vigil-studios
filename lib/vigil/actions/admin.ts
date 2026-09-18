@@ -101,7 +101,38 @@ export async function createOrganization(_prev: CreateOrgState, formData: FormDa
     revalidatePath("/admin/organizations");
     return { ok: true, data: { id: data.id } };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
+  }
+}
+
+const staffNoteSchema = z.object({ body: z.string().trim().min(1, "Write the note first.").max(4000) });
+
+/** Internal notes about a customer or order. Staff-only table; customers never see these. */
+export async function addStaffNote(entityType: "organization" | "order", entityId: string, formData: FormData): Promise<ActionResult> {
+  try {
+    const staff = await requireStaffOrThrow();
+    const parsed = staffNoteSchema.safeParse(Object.fromEntries(formData));
+    if (!parsed.success) throw new ValidationError("Check the highlighted fields.", issuesOf(parsed.error));
+    const supabase = await createClient();
+    const { error } = await supabase.from("staff_notes").insert({ entity_type: entityType, entity_id: entityId, body: parsed.data.body, created_by: staff.user.id });
+    if (error) throw error;
+    revalidatePath("/admin", "layout");
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return toActionError(error, "staff");
+  }
+}
+
+export async function deleteStaffNote(noteId: string): Promise<ActionResult> {
+  try {
+    await requireStaffOrThrow();
+    const supabase = await createClient();
+    const { error } = await supabase.from("staff_notes").delete().eq("id", noteId);
+    if (error) throw error;
+    revalidatePath("/admin", "layout");
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return toActionError(error, "staff");
   }
 }
 
@@ -115,7 +146,7 @@ export async function setOrganizationStatus(orgId: string, status: string): Prom
     revalidatePath(`/admin/organizations/${orgId}`);
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -127,7 +158,7 @@ export async function archiveOrganization(orgId: string): Promise<ActionResult> 
     revalidatePath(`/admin/organizations/${orgId}`);
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -139,7 +170,7 @@ export async function restoreOrganization(orgId: string): Promise<ActionResult> 
     revalidatePath(`/admin/organizations/${orgId}`);
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -150,7 +181,7 @@ export async function deleteOrganizationPermanently(orgId: string): Promise<Acti
     revalidatePath("/admin/organizations");
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -175,7 +206,7 @@ export async function inviteToOrganization(orgId: string, formData: FormData): P
     revalidatePath(`/admin/organizations/${orgId}`);
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -225,7 +256,7 @@ export async function createProject(orgId: string, formData: FormData): Promise<
     revalidatePath(`/admin/organizations/${orgId}`);
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -245,7 +276,7 @@ export async function setProjectStatus(projectId: string, next: string): Promise
     revalidatePath(`/admin/organizations/${project.organization_id}`);
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -266,7 +297,7 @@ export async function setWebsiteStatus(websiteId: string, next: string, reason?:
     revalidatePath(`/admin/organizations/${site.organization_id}`);
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -304,7 +335,7 @@ export async function updateWebsiteFields(websiteId: string, formData: FormData)
     revalidatePath(`/admin/websites/${websiteId}`);
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -343,7 +374,7 @@ export async function enqueueWebsiteJob(
     revalidatePath("/admin/jobs");
     return { ok: true, data: { jobId: job.id } };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -365,7 +396,7 @@ export async function addDomainForOrganization(orgId: string, formData: FormData
       .select("id")
       .single();
     if (error) {
-      if (error.code === "23505") throw new ValidationError("That hostname already exists.", { hostname: ["Already in use"] });
+      if (error.code === "23505") throw new ValidationError("This customer already has that hostname.", { hostname: ["Already added"] });
       throw error;
     }
     await logAuditEvent(supabase, { action: "domain.added", entityType: "domain", entityId: data.id, organizationId: orgId, after: { hostname, source } });
@@ -373,7 +404,7 @@ export async function addDomainForOrganization(orgId: string, formData: FormData
     revalidatePath("/admin/domains");
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -402,7 +433,7 @@ export async function attachDomainToWebsite(domainId: string, websiteId: string)
     revalidatePath("/admin/domains");
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -423,7 +454,7 @@ export async function setDomainStatus(domainId: string, next: string, reason?: s
     revalidatePath(`/admin/organizations/${domain.organization_id}`);
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -446,7 +477,7 @@ export async function enqueueDomainJob(domainId: string, kind: "domain.connect" 
     revalidatePath("/admin/jobs");
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -474,7 +505,7 @@ export async function createSubscription(orgId: string, formData: FormData): Pro
     revalidatePath("/admin/subscriptions");
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -494,7 +525,7 @@ export async function setSubscriptionStatus(subscriptionId: string, next: string
     revalidatePath(`/admin/organizations/${sub.organization_id}`);
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -520,7 +551,7 @@ export async function setEntitlementOverride(orgId: string, formData: FormData):
     revalidatePath(`/admin/organizations/${orgId}`);
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -534,7 +565,7 @@ export async function removeEntitlementOverride(orgId: string, featureCode: stri
     revalidatePath(`/admin/organizations/${orgId}`);
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -558,7 +589,7 @@ export async function setChangeRequestStatus(requestId: string, next: string): P
     revalidatePath("/admin/requests");
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -578,7 +609,7 @@ export async function retryJob(jobId: string): Promise<ActionResult> {
     revalidatePath("/admin/jobs");
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -595,7 +626,7 @@ export async function cancelJob(jobId: string): Promise<ActionResult> {
     revalidatePath("/admin/jobs");
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -608,7 +639,7 @@ export async function runJobsNow(): Promise<ActionResult<{ ran: number; failed: 
     revalidatePath("/admin/jobs");
     return { ok: true, data: { ran: outcomes.length, failed: outcomes.filter((o) => o.status === "failed").length } };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -655,7 +686,7 @@ export async function updatePlan(planId: string, formData: FormData): Promise<Ac
     revalidatePath("/admin/plans");
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -683,7 +714,7 @@ export async function setPlanFeature(planId: string, featureCode: string, raw: s
     revalidatePath("/admin/plans");
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -705,7 +736,7 @@ export async function grantStaff(formData: FormData): Promise<ActionResult> {
     revalidatePath("/admin/plans");
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -720,6 +751,6 @@ export async function revokeStaff(userId: string): Promise<ActionResult> {
     revalidatePath("/admin/plans");
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }

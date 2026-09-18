@@ -5,10 +5,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { logAuditEvent } from "@/lib/vigil/audit";
-import { ForbiddenError, ValidationError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
+import { ForbiddenError, NotFoundError, ValidationError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
 import { normalizeEmail } from "@/lib/vigil/auth/redirects";
 import { ACTIVE_ORG_COOKIE, assertOrgRole, requireOrgContextOrThrow, requireViewerOrThrow } from "@/lib/vigil/auth/session";
 import { sendOrganizationInvitation } from "@/lib/vigil/services/invitations";
+import { enforceRateLimit, RATE_LIMITS } from "@/lib/vigil/rate-limit";
 
 /** Choose which business the dashboard shows. Validated against membership. */
 export async function switchOrganization(organizationId: string): Promise<ActionResult> {
@@ -24,6 +25,45 @@ export async function switchOrganization(organizationId: string): Promise<Action
       path: "/",
       maxAge: 60 * 60 * 24 * 365,
     });
+    revalidatePath("/dashboard", "layout");
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
+/**
+ * Invitations sent by another customer wait for the invitee (staff-sent and
+ * purchase-created ones join on sign-in). The RPC checks the invitation is
+ * addressed to the signed-in email and still open.
+ */
+export async function acceptInvitation(inviteId: string): Promise<ActionResult<{ organizationId: string }>> {
+  try {
+    await requireViewerOrThrow();
+    const supabase = await createClient();
+    const { data: organizationId, error } = await supabase.rpc("accept_invitation", { p_invite: inviteId });
+    if (error || !organizationId) throw new NotFoundError("That invitation is no longer open.");
+    const cookieStore = await cookies();
+    cookieStore.set(ACTIVE_ORG_COOKIE, organizationId, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+    });
+    revalidatePath("/dashboard", "layout");
+    return { ok: true, data: { organizationId } };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
+export async function declineInvitation(inviteId: string): Promise<ActionResult> {
+  try {
+    await requireViewerOrThrow();
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("decline_invitation", { p_invite: inviteId });
+    if (error) throw new NotFoundError("That invitation is no longer open.");
     revalidatePath("/dashboard", "layout");
     return { ok: true, data: undefined };
   } catch (error) {
@@ -117,6 +157,7 @@ export async function inviteMember(_prev: InviteState, formData: FormData): Prom
     }
 
     const email = normalizeEmail(parsed.data.email);
+    await enforceRateLimit(`invite:org:${ctx.organization.id}`, RATE_LIMITS.inviteOrg);
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("organization_invites")
@@ -137,8 +178,12 @@ export async function inviteMember(_prev: InviteState, formData: FormData): Prom
       email,
       organizationName: ctx.organization.name,
       role: parsed.data.role,
+      requiresAcceptance: true,
     });
-    if (!delivery.sent) throw new ValidationError(`The invitation was saved, but the email could not be sent${delivery.error ? `: ${delivery.error}` : "."}`);
+    if (!delivery.sent) {
+      console.error("member invitation email failed:", delivery.error);
+      throw new ValidationError("The invitation was saved, but the email could not be sent. Try again in a few minutes.");
+    }
 
     revalidatePath("/dashboard/settings");
     return { ok: true, data: undefined };

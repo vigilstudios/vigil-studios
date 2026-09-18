@@ -387,6 +387,7 @@ export type Database = {
           status_reason: string | null
           updated_at: string
           verification: Json
+          verification_token: string
           verified_at: string | null
           website_id: string | null
         }
@@ -410,6 +411,7 @@ export type Database = {
           status_reason?: string | null
           updated_at?: string
           verification?: Json
+          verification_token?: string
           verified_at?: string | null
           website_id?: string | null
         }
@@ -433,6 +435,7 @@ export type Database = {
           status_reason?: string | null
           updated_at?: string
           verification?: Json
+          verification_token?: string
           verified_at?: string | null
           website_id?: string | null
         }
@@ -888,7 +891,6 @@ export type Database = {
           expires_at: string | null
           id: string
           metadata: Json
-          notes: string | null
           organization_id: string | null
           paid_at: string | null
           plan_amount_cents: number | null
@@ -916,7 +918,6 @@ export type Database = {
           expires_at?: string | null
           id?: string
           metadata?: Json
-          notes?: string | null
           organization_id?: string | null
           paid_at?: string | null
           plan_amount_cents?: number | null
@@ -944,7 +945,6 @@ export type Database = {
           expires_at?: string | null
           id?: string
           metadata?: Json
-          notes?: string | null
           organization_id?: string | null
           paid_at?: string | null
           plan_amount_cents?: number | null
@@ -1015,11 +1015,13 @@ export type Database = {
           accepted_at: string | null
           accepted_by: string | null
           created_at: string
+          declined_at: string | null
           email: string
           expires_at: string
           id: string
           invited_by: string | null
           organization_id: string
+          requires_acceptance: boolean
           revoked_at: string | null
           role: Database["public"]["Enums"]["org_role"]
         }
@@ -1027,11 +1029,13 @@ export type Database = {
           accepted_at?: string | null
           accepted_by?: string | null
           created_at?: string
+          declined_at?: string | null
           email: string
           expires_at?: string
           id?: string
           invited_by?: string | null
           organization_id: string
+          requires_acceptance?: boolean
           revoked_at?: string | null
           role?: Database["public"]["Enums"]["org_role"]
         }
@@ -1039,11 +1043,13 @@ export type Database = {
           accepted_at?: string | null
           accepted_by?: string | null
           created_at?: string
+          declined_at?: string | null
           email?: string
           expires_at?: string
           id?: string
           invited_by?: string | null
           organization_id?: string
+          requires_acceptance?: boolean
           revoked_at?: string | null
           role?: Database["public"]["Enums"]["org_role"]
         }
@@ -1134,7 +1140,6 @@ export type Database = {
           id: string
           legal_name: string | null
           name: string
-          notes: string | null
           phone: string | null
           slug: string
           status: Database["public"]["Enums"]["organization_status"]
@@ -1152,7 +1157,6 @@ export type Database = {
           id?: string
           legal_name?: string | null
           name: string
-          notes?: string | null
           phone?: string | null
           slug: string
           status?: Database["public"]["Enums"]["organization_status"]
@@ -1170,7 +1174,6 @@ export type Database = {
           id?: string
           legal_name?: string | null
           name?: string
-          notes?: string | null
           phone?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["organization_status"]
@@ -1912,6 +1915,44 @@ export type Database = {
           },
         ]
       }
+      staff_notes: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean
@@ -2223,6 +2264,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invitation: { Args: { p_invite: string }; Returns: string }
       accept_pending_invites: { Args: never; Returns: number }
       archive_customer: {
         Args: { p_actor_id: string; p_organization_id: string }
@@ -2259,9 +2301,23 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      decline_invitation: { Args: { p_invite: string }; Returns: undefined }
+      list_my_invitations: {
+        Args: never
+        Returns: {
+          created_at: string
+          expires_at: string
+          id: string
+          invited_by_name: string
+          organization_id: string
+          organization_name: string
+          role: Database["public"]["Enums"]["org_role"]
+        }[]
+      }
       log_audit_event: {
         Args: {
           p_action: string
+          p_actor_user_id?: string
           p_after?: Json
           p_before?: Json
           p_entity_id?: string
@@ -2288,6 +2344,10 @@ export type Database = {
           p_snapshot: Json
         }
         Returns: undefined
+      }
+      rate_limit: {
+        Args: { p_key: string; p_limit: number; p_window_seconds: number }
+        Returns: boolean
       }
       resolve_entitlements: {
         Args: { p_org: string }
@@ -2395,12 +2455,30 @@ export type Database = {
   }
   vigil: {
     Tables: {
-      [_ in never]: never
+      rate_limits: {
+        Row: {
+          hits: number
+          key: string
+          window_start: string
+        }
+        Insert: {
+          hits: number
+          key: string
+          window_start: string
+        }
+        Update: {
+          hits?: number
+          key?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      accept_invitation: { Args: { p_invite: string }; Returns: string }
       accept_invites_for_current_user: { Args: never; Returns: number }
       archive_organization: {
         Args: { p_actor_id: string; p_organization_id: string }
@@ -2416,6 +2494,8 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      current_email: { Args: never; Returns: string }
+      decline_invitation: { Args: { p_invite: string }; Returns: undefined }
       has_org_role: {
         Args: {
           p_org: string
@@ -2426,10 +2506,23 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
       is_org_member: { Args: { p_org: string }; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
+      list_my_invitations: {
+        Args: never
+        Returns: {
+          created_at: string
+          expires_at: string
+          id: string
+          invited_by_name: string
+          organization_id: string
+          organization_name: string
+          role: Database["public"]["Enums"]["org_role"]
+        }[]
+      }
       log_audit_event: {
         Args: {
           p_action: string
           p_actor_kind?: Database["public"]["Enums"]["actor_kind"]
+          p_actor_user_id?: string
           p_after?: Json
           p_before?: Json
           p_entity_id: string
@@ -2461,6 +2554,10 @@ export type Database = {
           p_snapshot: Json
         }
         Returns: undefined
+      }
+      rate_limit: {
+        Args: { p_key: string; p_limit: number; p_window_seconds: number }
+        Returns: boolean
       }
       resolve_entitlements: {
         Args: { p_org: string }

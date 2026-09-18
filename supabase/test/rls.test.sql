@@ -207,12 +207,21 @@ begin
   perform test.fails(
     'insert into public.audit_events (actor_kind, action, entity_type) values (''user'', ''x.y'', ''z'')',
     'alice: cannot insert audit rows directly');
-  perform vigil.log_audit_event('domain.connect_started', 'domain', v_id, '10000000-0000-0000-0000-00000000000a');
-  perform test.ok(test.count('select 1 from public.audit_events where action = ''domain.connect_started''') = 1,
-    'alice: can log an audit event for her org and read it back');
+  perform test.fails(
+    'select vigil.log_audit_event(''domain.connect_started'', ''domain'', ''' || v_id || ''', ''10000000-0000-0000-0000-00000000000a'')',
+    'alice: cannot write audit rows directly, even for her own org (the server does)');
   perform test.fails(
     'select vigil.log_audit_event(''x.y'', ''z'', null, ''' || v_org_b || ''')',
     'alice: cannot log audit events against org B');
+  perform test.logout();
+  perform test.login_service();
+  perform vigil.log_audit_event('domain.connect_started', 'domain', v_id, '10000000-0000-0000-0000-00000000000a', null, null, '{}'::jsonb, null, '00000000-0000-0000-0000-00000000000a');
+  perform test.ok((select actor_kind::text || ':' || actor_user_id::text from public.audit_events where action = 'domain.connect_started') = 'user:00000000-0000-0000-0000-00000000000a',
+    'service: audit row names the customer it acted for');
+  perform test.logout();
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  perform test.ok(test.count('select 1 from public.audit_events where action = ''domain.connect_started''') = 1,
+    'alice: reads the audit row the server wrote for her org');
 
   -- entitlements
   perform test.ok(
@@ -453,17 +462,55 @@ do $$
 declare n integer;
 begin
   perform test.login('00000000-0000-0000-0000-00000000000a');
-  insert into public.organization_invites (organization_id, email, role)
-    values ('10000000-0000-0000-0000-00000000000a', 'bob@example.com', 'manager');
+  insert into public.organization_invites (organization_id, email, role, invited_by)
+    values ('10000000-0000-0000-0000-00000000000a', 'bob@example.com', 'manager', '00000000-0000-0000-0000-00000000000a');
   perform test.logout();
 
   perform test.login('00000000-0000-0000-0000-00000000000b');
   select vigil.accept_invites_for_current_user() into n;
-  perform test.ok(n = 1, 'bob: accepted one invite');
+  perform test.ok(n = 0, 'bob: a customer-sent invite is not accepted on sign-in');
+  perform test.ok(test.count('select 1 from public.organizations') = 1, 'bob: still sees only his own organization');
+  perform test.ok(test.count('select 1 from vigil.list_my_invitations() where organization_id = ''10000000-0000-0000-0000-00000000000a'' and role = ''manager'' and invited_by_name = ''Alice Owner''') = 1,
+    'bob: sees the pending invitation with who sent it');
+  perform vigil.accept_invitation((select id from vigil.list_my_invitations() limit 1));
   perform test.ok(test.count('select 1 from public.organizations') = 2, 'bob: now sees both organizations');
   perform test.ok(vigil.org_role('10000000-0000-0000-0000-00000000000a') = 'manager', 'bob: joined A as manager');
+  perform test.ok(test.count('select 1 from vigil.list_my_invitations()') = 0, 'bob: accepted invitation leaves the list');
+  perform test.ok(test.count('select 1 from public.audit_events where action = ''member.invite_accepted'' and actor_user_id = ''00000000-0000-0000-0000-00000000000b''') = 1,
+    'bob: acceptance is audited');
+  perform test.logout();
+
+  -- Eve is invited by Alice too, but declines; and cannot accept an invite meant for someone else.
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  insert into public.organization_invites (organization_id, email, role)
+    values ('10000000-0000-0000-0000-00000000000a', 'eve@example.com', 'member');
+  perform test.logout();
+  perform test.login('00000000-0000-0000-0000-00000000000b');
+  perform test.fails(
+    'select vigil.accept_invitation((select id from public.organization_invites where email = ''eve@example.com''))',
+    'bob: cannot accept an invitation addressed to eve');
+  perform test.logout();
+  perform test.login('00000000-0000-0000-0000-00000000000e');
+  perform vigil.decline_invitation((select id from vigil.list_my_invitations() limit 1));
+  perform test.ok(test.count('select 1 from vigil.list_my_invitations()') = 0, 'eve: declined invitation leaves the list');
+  perform test.fails(
+    'select vigil.accept_invitation((select id from public.organization_invites where email = ''eve@example.com''))',
+    'eve: a declined invitation cannot be accepted later');
+  perform test.ok(not vigil.is_org_member('10000000-0000-0000-0000-00000000000a'), 'eve: declining never joins');
+  perform test.logout();
+
+  -- Staff-sent invites still accept on sign-in (the account the customer bought).
+  perform test.login('00000000-0000-0000-0000-00000000000c');
+  insert into public.organization_invites (organization_id, email, role)
+    values ('10000000-0000-0000-0000-00000000000b', 'alice@example.com', 'member');
+  perform test.logout();
+  perform test.ok((select requires_acceptance from public.organization_invites where email = 'alice@example.com') = false,
+    'staff-sent invites are trusted');
+  perform test.login('00000000-0000-0000-0000-00000000000a');
   select vigil.accept_invites_for_current_user() into n;
-  perform test.ok(n = 0, 'bob: acceptance is idempotent');
+  perform test.ok(n = 1, 'alice: staff invitation accepted on sign-in');
+  perform test.ok(vigil.is_org_member('10000000-0000-0000-0000-00000000000b'), 'alice: joined B');
+  delete from public.organization_members where organization_id = '10000000-0000-0000-0000-00000000000b' and user_id = '00000000-0000-0000-0000-00000000000a';
   perform test.logout();
 
   perform test.login('00000000-0000-0000-0000-00000000000a');
@@ -737,6 +784,167 @@ begin
     'automatic lifecycle: final approval approves the project');
 
   delete from public.organizations where id = v_org;
+  perform test.logout();
+end $$;
+
+-- --------------------------------------------------------------------------
+-- 0022 security hardening: owner minting, staff notifications, audit rows,
+-- pristine customer domains
+-- --------------------------------------------------------------------------
+do $$
+declare
+  v_org uuid;
+  v_project uuid;
+  v_website uuid;
+  v_round uuid;
+  v_submission uuid;
+  v_manager uuid := '00000000-0000-0000-0000-0000000000f1';
+  v_owner uuid := '00000000-0000-0000-0000-0000000000f2';
+  v_href text;
+begin
+  insert into auth.users (id, email) values (v_manager, 'manager@example.com'), (v_owner, 'owner2@example.com');
+  perform test.login_service();
+  insert into public.organizations (slug, name) values ('hardening-test', 'Hardening Test') returning id into v_org;
+  insert into public.organization_members (organization_id, user_id, role) values (v_org, v_owner, 'owner'), (v_org, v_manager, 'manager');
+  insert into public.projects (organization_id, name, kind, status) values (v_org, 'Hardening Express', 'express', 'in_progress') returning id into v_project;
+  insert into public.websites (organization_id, project_id, name) values (v_org, v_project, 'Hardening Express') returning id into v_website;
+  select id into v_round from public.project_review_rounds where project_id = v_project and round_number = 1;
+  insert into public.project_review_submissions (organization_id, project_id, round_id, version, preview_url)
+    values (v_org, v_project, v_round, 1, 'https://preview.example.com') returning id into v_submission;
+  perform test.logout();
+
+  -- 1. Managers cannot mint owners; owners still can.
+  perform test.login(v_manager);
+  perform test.fails(
+    'insert into public.organization_invites (organization_id, email, role) values (''' || v_org || ''', ''x@example.com'', ''owner'')',
+    'hardening: manager cannot invite an owner');
+  perform test.fails(
+    'insert into public.organization_members (organization_id, user_id, role) values (''' || v_org || ''', ''00000000-0000-0000-0000-00000000000e'', ''owner'')',
+    'hardening: manager cannot add an owner directly');
+  perform test.fails(
+    'insert into public.organization_invites (organization_id, email, role, invited_by) values (''' || v_org || ''', ''y@example.com'', ''member'', ''' || v_owner || ''')',
+    'hardening: manager cannot forge invited_by');
+  insert into public.organization_invites (organization_id, email, role, invited_by) values (v_org, 'z@example.com', 'manager', v_manager);
+  perform test.fails(
+    'update public.organization_invites set role = ''owner'' where organization_id = ''' || v_org || ''' and email = ''z@example.com''',
+    'hardening: manager cannot upgrade an invite to owner');
+  perform test.ok(test.count('select 1 from public.organization_invites where organization_id = ''' || v_org || ''' and email = ''z@example.com''') = 1,
+    'hardening: manager can still invite a manager');
+  perform test.logout();
+  perform test.login(v_owner);
+  insert into public.organization_invites (organization_id, email, role, invited_by) values (v_org, 'w@example.com', 'owner', v_owner);
+  perform test.ok(test.count('select 1 from public.organization_invites where organization_id = ''' || v_org || ''' and role = ''owner''') = 1,
+    'hardening: owner can invite an owner');
+  perform test.logout();
+
+  -- 2. Customer notifications to staff carry a derived link, never customer input.
+  perform test.login(v_manager);
+  perform test.fails(
+    'select public.notify_review_staff(''' || v_round || ''', ''Card declined'', ''Fix billing'', ''https://evil.example/'')',
+    'hardening: no review response, no staff notification');
+  insert into public.project_review_responses (organization_id, project_id, round_id, submission_id, kind, feedback)
+    values (v_org, v_project, v_round, v_submission, 'changes_requested', 'Please change the hero.');
+  perform public.notify_review_staff(v_round, 'Card declined', 'Fix billing', 'https://evil.example/');
+  perform public.notify_review_staff(v_round, 'Card declined', 'Fix billing', 'https://evil.example/');
+  perform test.logout();
+  select href into v_href from public.notifications where organization_id = v_org and kind = 'project_review.response' limit 1;
+  perform test.ok(v_href = '/admin/websites/' || v_website::text, 'hardening: staff notification link is derived from the round');
+  perform test.ok(test.count('select 1 from public.notifications where organization_id = ''' || v_org || ''' and title = ''Card declined''') = 0,
+    'hardening: staff notification title is derived, not customer text');
+  perform test.ok(test.count('select 1 from public.notifications where organization_id = ''' || v_org || ''' and kind = ''project_review.response''')
+    = test.count('select 1 from public.staff_members'),
+    'hardening: repeated customer notifications collapse into one per staff member');
+
+  -- 3. Customers never write audit rows themselves; triggers on their allowed actions still do.
+  perform test.login(v_manager);
+  perform test.fails(
+    'select public.log_audit_event(''subscription.status_changed'', ''subscription'', null, null, null, ''{"status":"canceled"}''::jsonb)',
+    'hardening: customer cannot write an organization-less audit row');
+  perform test.fails(
+    'select public.log_audit_event(''project.onboarding_step_completed'', ''project'', ''' || v_project || ''', ''' || v_org || ''', null, ''{"step":"basics"}''::jsonb)',
+    'hardening: customer cannot write audit rows for their own organization either');
+  perform test.ok(test.count('select 1 from public.audit_events where organization_id = ''' || v_org || ''' and action = ''review_response.submitted'' and actor_kind = ''user'' and actor_user_id = ''' || v_manager || '''') = 1,
+    'hardening: the review-response trigger still audits the customer action');
+
+  -- 4. Customer-created domains start pristine.
+  perform test.fails(
+    'insert into public.domains (organization_id, hostname, source, status, dns_ok, verification) values (''' || v_org || ''', ''pre-verified.example'', ''customer_owned'', ''pending'', true, ''{"launch_ready":true}''::jsonb)',
+    'hardening: customer cannot pre-set dns_ok / launch_ready on a new domain');
+  insert into public.domains (organization_id, website_id, hostname, source, status, kind) values (v_org, v_website, 'pristine.example', 'customer_owned', 'pending', 'apex');
+  perform test.ok(test.count('select 1 from public.domains where hostname = ''pristine.example''') = 1, 'hardening: customer can still record a plain owned domain');
+  perform test.logout();
+
+  perform test.login_service();
+  delete from public.organizations where id = v_org;
+  perform test.logout();
+  delete from auth.users where id in (v_manager, v_owner);
+end $$;
+
+-- --------------------------------------------------------------------------
+-- 0023: staff notes, domain ownership claims, rate limits
+-- --------------------------------------------------------------------------
+do $$
+declare
+  v_org_a uuid := '10000000-0000-0000-0000-00000000000a';
+  v_org_b uuid := '10000000-0000-0000-0000-00000000000b';
+  v_token_a text;
+  v_token_b text;
+  v_dom_a uuid;
+  v_dom_b uuid;
+begin
+  -- Staff notes: staff only, in both directions.
+  perform test.login('00000000-0000-0000-0000-00000000000c');
+  insert into public.staff_notes (entity_type, entity_id, body) values ('organization', v_org_a, 'Comped until December.');
+  perform test.ok(test.count('select 1 from public.staff_notes') >= 1, 'staff: can write and read notes');
+  perform test.logout();
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  perform test.ok(test.count('select 1 from public.staff_notes') = 0, 'alice: cannot read staff notes about her organization');
+  perform test.fails(
+    'insert into public.staff_notes (entity_type, entity_id, body) values (''organization'', ''' || v_org_a || ''', ''x'')',
+    'alice: cannot write staff notes');
+  perform test.ok(not exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'organizations' and column_name = 'notes'),
+    'organizations.notes is gone');
+  perform test.ok(not exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'orders' and column_name = 'notes'),
+    'orders.notes is gone');
+  perform test.logout();
+
+  -- Domain ownership: two organizations may record the same hostname, only a verified one holds it.
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  insert into public.domains (organization_id, hostname, source, status, verification_token)
+    values (v_org_a, 'contested.example', 'customer_owned', 'pending', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') returning id, verification_token into v_dom_a, v_token_a;
+  perform test.ok(v_token_a <> 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' and v_token_a ~ '^[0-9a-f]{32}$', 'alice: cannot choose the verification token');
+  perform test.fails(
+    'insert into public.domains (organization_id, hostname, source, status) values (''' || v_org_a || ''', ''contested.example'', ''customer_owned'', ''pending'')',
+    'alice: one row per hostname per organization');
+  perform test.logout();
+  perform test.login('00000000-0000-0000-0000-00000000000e');
+  insert into public.domains (organization_id, hostname, source, status)
+    values (v_org_b, 'contested.example', 'customer_owned', 'pending') returning id, verification_token into v_dom_b, v_token_b;
+  perform test.ok(v_dom_b is not null and v_token_b <> v_token_a, 'eve: may record the same hostname with her own token; nothing is reserved');
+  perform test.logout();
+  perform test.login_service();
+  update public.domains set dns_ok = true, status = 'verifying' where id = v_dom_a;
+  perform test.fails(
+    'update public.domains set dns_ok = true where id = ''' || v_dom_b || '''',
+    'service: a hostname verified by one organization cannot verify for another');
+  update public.domains set status = 'released' where id = v_dom_a;
+  update public.domains set dns_ok = true where id = v_dom_b;
+  perform test.ok((select dns_ok from public.domains where id = v_dom_b), 'service: a released claim frees the hostname');
+  delete from public.domains where id in (v_dom_a, v_dom_b);
+  perform test.logout();
+
+  -- Rate limits: service role only, fixed window.
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  perform test.fails('select public.rate_limit(''x'', 1, 60)', 'alice: cannot touch the rate limiter');
+  perform test.logout();
+  perform test.login_service();
+  perform test.ok(vigil.rate_limit('t:login', 2, 60), 'service: first hit allowed');
+  perform test.ok(vigil.rate_limit('t:login', 2, 60), 'service: second hit allowed');
+  perform test.ok(not vigil.rate_limit('t:login', 2, 60), 'service: third hit refused inside the window');
+  perform test.logout();
+  update vigil.rate_limits set window_start = now() - interval '2 minutes' where key = 't:login';
+  perform test.login_service();
+  perform test.ok(vigil.rate_limit('t:login', 2, 60), 'service: a new window starts clean');
   perform test.logout();
 end $$;
 

@@ -121,6 +121,7 @@ export const getOrgInvites = cache(async (organizationId: string) => {
     .eq("organization_id", organizationId)
     .is("accepted_at", null)
     .is("revoked_at", null)
+    .is("declined_at", null)
     .gt("expires_at", new Date().toISOString())
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -137,6 +138,21 @@ export const getOrgChangeRequests = cache(async (organizationId: string) => {
     .limit(50);
   if (error) throw error;
   return data;
+});
+
+export type PendingInvitation = { id: string; organization_id: string; organization_name: string; role: string; invited_by_name: string | null; expires_at: string };
+
+/** Invitations addressed to the signed-in email that wait for an answer. */
+export const listMyInvitations = cache(async (): Promise<PendingInvitation[]> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("list_my_invitations");
+  if (error) {
+    // The banner is an extra on every dashboard page; a database that has
+    // not received migration 0023 yet must not take the dashboard down.
+    console.error("list_my_invitations failed:", error.message);
+    return [];
+  }
+  return (data ?? []).map((row) => ({ id: row.id, organization_id: row.organization_id, organization_name: row.organization_name, role: row.role, invited_by_name: row.invited_by_name ?? null, expires_at: row.expires_at }));
 });
 
 export type SignedAttachment = { id: string; file_name: string; content_type: string; size_bytes: number; url: string | null };

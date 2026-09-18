@@ -112,7 +112,7 @@ export async function publishReviewSubmission(projectId: string, roundNumber: nu
     revalidatePath("/admin");
     return { ok: true, data: submission };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -136,7 +136,7 @@ export async function markReviewRevisionInProgress(projectId: string, roundNumbe
     revalidatePath("/admin");
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 

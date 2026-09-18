@@ -8,6 +8,7 @@ import { ForbiddenError, ValidationError, toActionError, type ActionResult } fro
 import { requireOrgContextOrThrow } from "@/lib/vigil/auth/session";
 import { FEATURES, resolveEntitlements } from "@/lib/vigil/entitlements";
 import { ATTACHMENTS_BUCKET, validateAttachments } from "@/lib/vigil/attachments";
+import { enforceRateLimit, RATE_LIMITS } from "@/lib/vigil/rate-limit";
 
 export type RequestState = ActionResult<{ id: string }> | null;
 
@@ -36,6 +37,7 @@ export async function createChangeRequest(_prev: RequestState, formData: FormDat
       throw new ValidationError("Check the highlighted fields.", issues);
     }
     const v = parsed.data;
+    await enforceRateLimit(`request:org:${ctx.organization.id}`, RATE_LIMITS.requestOrg);
 
     const supabase = await createClient();
     const { data, error } = await supabase

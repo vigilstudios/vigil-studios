@@ -18,3 +18,23 @@ export function requestOrigin(request: NextRequest): string {
   const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? request.nextUrl.host;
   return `${proto}://${host}`;
 }
+
+/**
+ * True when a state-changing request came from this site. The Origin header
+ * is compared with the Host the request arrived on (x-forwarded-host behind
+ * Vercel); `nextUrl.origin` is not used because in development it reports
+ * the server's configured hostname even when the page was served on
+ * 127.0.0.1. Older browsers omit Origin on same-origin form posts, and a
+ * cross-site fetch always carries sec-fetch-site.
+ */
+export function isSameOriginRequest(request: NextRequest): boolean {
+  if (request.headers.get("sec-fetch-site") === "cross-site") return false;
+  const origin = request.headers.get("origin");
+  if (!origin) return true;
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+}

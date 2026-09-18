@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { checkDnsRecords, checkHttpsReachable, detectRegistrar, platformDnsRecords, requiredRecords } from "../services/dns";
+import { checkDnsRecords, checkHttpsReachable, detectRegistrar, ownershipRecord, platformDnsRecords, requiredRecords, withOwnershipRecord } from "../services/dns";
 import { managedDomainConfigs } from "../services/domain";
 
 const env = { ...process.env };
@@ -104,5 +104,49 @@ describe("managedDomainConfigs", () => {
     expect(managedDomainConfigs("shop.example.com", "subdomain")).toEqual([
       { hostname: "shop.example.com", canonicalHostname: "shop.example.com" },
     ]);
+  });
+});
+
+describe("ownership record", () => {
+  it("lives at _vigil under the hostname and carries the row's token", () => {
+    expect(ownershipRecord("example.com", "abc")).toEqual({ type: "TXT", name: "_vigil", value: "vigil-verify=abc" });
+    expect(ownershipRecord("shop.example.com", "abc")).toEqual({ type: "TXT", name: "_vigil.shop", value: "vigil-verify=abc" });
+    expect(ownershipRecord("example.co.uk", "abc").name).toBe("_vigil");
+  });
+
+  it("is added to the platform and stored records, replacing a stale token", () => {
+    process.env.VIGIL_DNS_APEX_A = "76.76.21.21";
+    delete process.env.VIGIL_DNS_CNAME_TARGET;
+    expect(platformDnsRecords("example.com", "t1")).toEqual([
+      { type: "A", name: "@", value: "76.76.21.21" },
+      { type: "TXT", name: "_vigil", value: "vigil-verify=t1" },
+    ]);
+    const stored = [{ type: "A", name: "@", value: "9.9.9.9" }, { type: "TXT", name: "_vigil", value: "vigil-verify=old" }];
+    expect(requiredRecords("example.com", { required_records: stored }, "t2")).toEqual([
+      { type: "A", name: "@", value: "9.9.9.9" },
+      { type: "TXT", name: "_vigil", value: "vigil-verify=t2" },
+    ]);
+    expect(withOwnershipRecord(stored, "example.com", null)).toEqual(stored);
+  });
+
+  it("is not offered before the platform targets exist, so nothing verifies on the token alone", () => {
+    delete process.env.VIGIL_DNS_APEX_A;
+    delete process.env.VIGIL_DNS_CNAME_TARGET;
+    expect(platformDnsRecords("example.com", "t1")).toEqual([]);
+  });
+
+  it("only passes for the row whose token is published", async () => {
+    process.env.VIGIL_DNS_APEX_A = "76.76.21.21";
+    delete process.env.VIGIL_DNS_CNAME_TARGET;
+    const resolver = {
+      resolve4: async () => ["76.76.21.21"],
+      resolve6: async () => [],
+      resolveCname: async () => [],
+      resolveTxt: async (h: string) => (h === "_vigil.example.com" ? [["vigil-verify=owner-token"]] : []),
+    };
+    const owner = await checkDnsRecords("example.com", platformDnsRecords("example.com", "owner-token"), resolver);
+    const squatter = await checkDnsRecords("example.com", platformDnsRecords("example.com", "squatter-token"), resolver);
+    expect(owner.every((c) => c.ok)).toBe(true);
+    expect(squatter.map((c) => c.ok)).toEqual([true, false]);
   });
 });

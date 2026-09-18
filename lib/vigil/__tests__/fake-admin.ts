@@ -35,7 +35,7 @@ export class FakeAdmin {
       provisioning_jobs: [["idempotency_key"]],
       provider_links: [["provider", "resource_kind", "external_id"]],
       webhook_events: [["provider", "event_id"]],
-      domains: [["hostname"]],
+      domains: [["organization_id", "hostname"]],
       organizations: [["slug"]],
     };
     // Column defaults the real schema applies on insert.

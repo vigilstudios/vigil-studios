@@ -30,7 +30,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
         hostname: domainRow.hostname,
         status: domainRow.status,
         registrar: brief.domain?.registrar ?? ("other" as const),
-        records: requiredRecords(domainRow.hostname, domainRow.verification),
+        records: requiredRecords(domainRow.hostname, domainRow.verification, domainRow.verification_token),
         dnsOk: domainRow.dns_ok,
         sslOk: domainRow.ssl_ok,
         reachable: (domainRow.verification as { connection_reachable?: boolean } | null)?.connection_reachable ?? null,

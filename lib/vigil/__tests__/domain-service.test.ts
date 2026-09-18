@@ -135,3 +135,33 @@ describe("customer domain service", () => {
     expect(fake.rows("websites")[0]).toMatchObject({ live_url: "https://preview.vercel.app", primary_domain_id: null });
   });
 });
+
+describe("domain ownership", () => {
+  it("verifies only the organization whose token is in the zone", async () => {
+    process.env.VIGIL_DNS_APEX_A = "76.76.21.21";
+    const fake = new FakeAdmin({
+      domains: [
+        { id: "dom_owner", organization_id: "org_owner", hostname: "example.com", kind: "apex", website_id: null, status: "pending", verification: {}, verification_token: "owner-token" },
+        { id: "dom_squat", organization_id: "org_squat", hostname: "example.com", kind: "apex", website_id: null, status: "pending", verification: {}, verification_token: "squat-token" },
+      ],
+    });
+    // The public zone: A points at the platform, TXT carries the owner's token.
+    const zone = {
+      checkDns: vi.fn(async (_hostname: string, records: DnsRecord[]) =>
+        records.map((record) => {
+          const ok = record.type === "A" || record.value === "vigil-verify=owner-token";
+          return { record, found: ok ? [record.value] : [], ok };
+        })),
+      checkHttps: vi.fn(async () => true),
+    };
+    const deployment = provider((hostname) => snapshot(hostname, true));
+
+    await beginDomainVerification(fake.asClient(), "dom_owner", deployment, zone);
+    await beginDomainVerification(fake.asClient(), "dom_squat", deployment, zone);
+    const rows = fake.rows("domains");
+    expect(rows.find((r) => r.id === "dom_owner")?.dns_ok).toBe(true);
+    expect(rows.find((r) => r.id === "dom_squat")?.dns_ok).toBe(false);
+    const squatRecords = (rows.find((r) => r.id === "dom_squat")?.verification as { required_records: DnsRecord[] }).required_records;
+    expect(squatRecords).toContainEqual({ type: "TXT", name: "_vigil", value: "vigil-verify=squat-token" });
+  });
+});

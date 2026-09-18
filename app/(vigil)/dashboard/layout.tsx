@@ -6,7 +6,8 @@ import type { NavGroup } from "@/components/vigil/nav";
 import { getOrgContext, requireViewer } from "@/lib/vigil/auth/session";
 import { FEATURES, resolveEntitlements } from "@/lib/vigil/entitlements";
 import { getOnboardingProject, needsOnboarding } from "@/lib/vigil/queries/onboarding";
-import { getOrgDomains, getOrgProjects, getOrgSubscription, getOrgWebsites } from "@/lib/vigil/queries/dashboard";
+import { getOrgDomains, getOrgProjects, getOrgSubscription, getOrgWebsites, listMyInvitations } from "@/lib/vigil/queries/dashboard";
+import { PendingInvitations } from "@/components/vigil/PendingInvitations";
 import { getCustomerProjectReviews } from "@/lib/vigil/queries/reviews";
 import { FloatingAttentionCenter, type AttentionItem } from "@/components/vigil/FloatingAttentionCenter";
 import { getCustomerExpressPreviewReview } from "@/lib/vigil/queries/dashboard";
@@ -19,7 +20,7 @@ import { customerDomainNeedsAttention } from "@/lib/vigil/attention";
  */
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const viewer = await requireViewer("/dashboard");
-  const ctx = await getOrgContext();
+  const [ctx, invitations] = await Promise.all([getOrgContext(), listMyInvitations()]);
 
   let groups: NavGroup[] = [];
   let floatingItems: AttentionItem[] = [];
@@ -109,6 +110,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       }
     >
       <LiveDashboardSync scope={ctx ? { kind: "organization", organizationId: ctx.organization.id, userId: viewer.user.id } : { kind: "viewer", userId: viewer.user.id }} />
+      <PendingInvitations invitations={invitations} />
       {children}
       {ctx ? <FloatingAttentionCenter portal="customer" items={floatingItems} /> : null}
     </AppShell>

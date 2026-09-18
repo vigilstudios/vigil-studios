@@ -78,13 +78,17 @@ export async function createCheckoutLink(_prev: CreateOrderState, formData: Form
         plan_id: plan.id,
         build_price_id: build?.id ?? null,
         build_amount_cents: buildAmount ?? build?.amount_cents ?? null,
-        notes: v.notes || null,
         created_by: staff.user.id,
         expires_at: new Date(Date.now() + 30 * 86_400_000).toISOString(),
       })
       .select("id, checkout_token")
       .single();
     if (error) throw error;
+    if (v.notes) {
+      // Staff-only context for the order; the customer's own order row never carries it.
+      const { error: noteError } = await supabase.from("staff_notes").insert({ entity_type: "order", entity_id: order.id, body: v.notes, created_by: staff.user.id });
+      if (noteError) throw noteError;
+    }
 
     const url = `${await appUrl()}/checkout/${order.checkout_token}`;
     await logAuditEvent(supabase, { action: "order.link_created", entityType: "order", entityId: order.id, after: { business_name: v.business_name, email, plan: plan.name, project_kind: v.project_kind } });
@@ -106,7 +110,7 @@ export async function createCheckoutLink(_prev: CreateOrderState, formData: Form
     revalidatePath("/admin/orders");
     return { ok: true, data: { id: order.id, url, emailed } };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -131,7 +135,7 @@ export async function markOrderPaidAndProvision(orderId: string): Promise<Action
     revalidatePath("/admin/organizations");
     return { ok: true, data: { organizationId: after?.organization_id ?? "" } };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -144,7 +148,7 @@ export async function cancelOrder(orderId: string): Promise<ActionResult> {
     revalidatePath("/admin/orders");
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -158,7 +162,7 @@ export async function syncPrices(): Promise<ActionResult<SyncReport>> {
     revalidatePath("/admin/plans");
     return { ok: true, data: report };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }
 
@@ -175,6 +179,6 @@ export async function updateBuildPrice(buildPriceId: string, formData: FormData)
     revalidatePath("/admin/plans");
     return { ok: true, data: undefined };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, "staff");
   }
 }

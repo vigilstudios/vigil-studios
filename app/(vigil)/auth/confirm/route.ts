@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { clearNextCookie, resolveNext } from "@/lib/vigil/auth/next-cookie";
-import { requestOrigin } from "@/lib/vigil/auth/origin";
+import { isSameOriginRequest, requestOrigin } from "@/lib/vigil/auth/origin";
 import { safeNextPath } from "@/lib/vigil/auth/redirects";
 
 const allowedTypes: EmailOtpType[] = ["magiclink", "email", "signup", "invite", "recovery", "email_change"];
@@ -63,6 +63,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const origin = requestOrigin(request);
+  // The token is one-time, but a cross-site form could still post someone
+  // else's token into this browser and sign the visitor into a stranger's
+  // account (login CSRF). Only the page above may submit it.
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.redirect(`${origin}/login?error=link_invalid`, { status: 303 });
+  }
   const form = await request.formData();
   const tokenHash = String(form.get("token_hash") ?? "");
   const type = String(form.get("type") ?? "") as EmailOtpType;

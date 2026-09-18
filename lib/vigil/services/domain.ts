@@ -3,7 +3,7 @@ import { assertTransition, domainTransitions } from "@/lib/vigil/lifecycle";
 import { getDeploymentProvider } from "@/lib/vigil/providers/registry";
 import type { DeploymentProvider } from "@/lib/vigil/providers/types";
 import { NotFoundError } from "@/lib/vigil/auth/errors";
-import { checkDnsRecords, checkHttpsReachable, platformDnsRecords, type DnsCheck, type DnsRecord } from "./dns";
+import { checkDnsRecords, checkHttpsReachable, platformDnsRecords, withOwnershipRecord, type DnsCheck, type DnsRecord } from "./dns";
 import { findExternalId, providerEnum } from "./provider-links";
 
 export type ManagedDomainConfig = {
@@ -115,7 +115,7 @@ export async function beginDomainVerification(
   if (domain.status === "released") return;
   // A later preview deployment must never detach an already-live hostname.
   if (domain.status === "connected") return;
-  const records = platformDnsRecords(domain.hostname);
+  const records = platformDnsRecords(domain.hostname, domain.verification_token);
   const checkDns = connectionChecks.checkDns ?? checkDnsRecords;
   const publicChecks = records.length > 0 ? await checkDns(domain.hostname, records) : [];
   const dnsOk = publicChecks.length > 0 && publicChecks.every((check) => check.ok);
@@ -184,7 +184,7 @@ export async function activateDomainVerification(
   if (!siteExternalId) throw new NotFoundError("The provider website is not ready for domain activation.");
 
   const { plan, configs } = await addManagedDomains(provider, siteExternalId, domain.hostname, domain.kind);
-  const records = uniqueRecords(configs);
+  const records = withOwnershipRecord(uniqueRecords(configs), domain.hostname, domain.verification_token);
   const checkDns = connectionChecks.checkDns ?? checkDnsRecords;
   const checkHttps = connectionChecks.checkHttps ?? checkHttpsReachable;
   const publicChecks = records.length > 0 ? await checkDns(domain.hostname, records) : [];
@@ -234,8 +234,12 @@ export async function verifyDomain(
 
   const currentVerification = (domain.verification as Record<string, unknown> | null) ?? {};
   if (currentVerification.source !== "provider") {
-    const records = (currentVerification.required_records as DnsRecord[] | undefined) ?? platformDnsRecords(domain.hostname);
-    if (records.length === 0) return { connected: false, reason: "no_site" };
+    const stored = currentVerification.required_records as DnsRecord[] | undefined;
+    const base = stored && stored.length > 0 ? stored : platformDnsRecords(domain.hostname);
+    if (base.length === 0) return { connected: false, reason: "no_site" };
+    // Rows recorded before the ownership token existed carry stored records
+    // without it; the check always includes it.
+    const records = withOwnershipRecord(base, domain.hostname, domain.verification_token);
     const checks = await checkDns(domain.hostname, records);
     const dnsOk = checks.length > 0 && checks.every((check) => check.ok);
     let nextStatus = domain.status;
@@ -274,8 +278,9 @@ export async function verifyDomain(
   if (!siteExternalId) {
     // Nothing to attach to yet: still check public DNS so the customer sees
     // real progress ("your records are right; the site is next").
-    const records = (domain.verification as { required_records?: DnsRecord[] } | null)?.required_records ?? [];
-    if (records.length === 0) return { connected: false, reason: "no_site" };
+    const stored = (domain.verification as { required_records?: DnsRecord[] } | null)?.required_records ?? [];
+    if (stored.length === 0) return { connected: false, reason: "no_site" };
+    const records = withOwnershipRecord(stored, domain.hostname, domain.verification_token);
     const checks = await checkDns(domain.hostname, records);
     const dnsOk = checks.every((c) => c.ok);
     await admin
@@ -293,7 +298,7 @@ export async function verifyDomain(
 
   const plan = managedDomainConfigs(domain.hostname, domain.kind);
   const configs = await Promise.all(plan.map((item) => provider.getDomainConfig(siteExternalId, item.hostname)));
-  const records = uniqueRecords(configs);
+  const records = withOwnershipRecord(uniqueRecords(configs), domain.hostname, domain.verification_token);
   const publicChecks = records.length > 0 ? await checkDns(domain.hostname, records) : [];
   const dnsOk = publicChecks.length > 0 && publicChecks.every((check) => check.ok);
   const sslOk = dnsOk && configs.every((config) => config.sslReady && !config.misconfigured);

@@ -15,7 +15,7 @@ export type DnsRecord = { type: string; name: string; value: string };
  * (VIGIL_DNS_APEX_A, VIGIL_DNS_CNAME_TARGET, VIGIL_DNS_TXT_PREFIX): the
  * deployment provider overrides them with exact values once a site exists.
  */
-export function platformDnsRecords(hostname: string): DnsRecord[] {
+export function platformDnsRecords(hostname: string, ownershipToken?: string | null): DnsRecord[] {
   const apexA = process.env.VIGIL_DNS_APEX_A?.trim();
   const cname = process.env.VIGIL_DNS_CNAME_TARGET?.trim();
   if (!apexA && !cname) return [];
@@ -29,17 +29,41 @@ export function platformDnsRecords(hostname: string): DnsRecord[] {
   } else if (apexA) {
     records.push({ type: "A", name: relativeDnsName(hostname), value: apexA });
   }
-  return records;
+  return withOwnershipRecord(records, hostname, ownershipToken);
+}
+
+/**
+ * Proof of control. Every domain row carries its own token; the customer
+ * publishes it as TXT at _vigil.<hostname> and only the row holding that
+ * token can verify. Pointing the zone at the platform's shared targets is
+ * something any tenant could ask for; this record is what ties the
+ * hostname to one organization.
+ */
+export const OWNERSHIP_LABEL = "_vigil";
+export const OWNERSHIP_PREFIX = "vigil-verify=";
+
+export function ownershipRecord(hostname: string, token: string): DnsRecord {
+  const relative = relativeDnsName(hostname);
+  return { type: "TXT", name: relative === "@" ? OWNERSHIP_LABEL : `${OWNERSHIP_LABEL}.${relative}`, value: `${OWNERSHIP_PREFIX}${token}` };
+}
+
+/** The given records plus this row's ownership record (replacing any stale one). */
+export function withOwnershipRecord(records: DnsRecord[], hostname: string, token: string | null | undefined): DnsRecord[] {
+  if (!token) return records;
+  const own = ownershipRecord(hostname, token);
+  const rest = records.filter((r) => !(r.type.toUpperCase() === "TXT" && r.name === own.name && r.value.startsWith(OWNERSHIP_PREFIX)));
+  return [...rest, own];
 }
 
 /**
  * The records a customer must add: what the provider (or connect job) stored
- * on the row, else the platform's standard targets. Never empty while the
- * platform targets are configured, so the guide can always be completed.
+ * on the row, else the platform's standard targets, always including this
+ * row's ownership record. Never empty while the platform targets are
+ * configured, so the guide can always be completed.
  */
-export function requiredRecords(hostname: string, verification: unknown): DnsRecord[] {
+export function requiredRecords(hostname: string, verification: unknown, ownershipToken?: string | null): DnsRecord[] {
   const stored = ((verification as { required_records?: DnsRecord[] } | null)?.required_records ?? []).filter((r) => r && r.type && r.value);
-  return stored.length > 0 ? stored : platformDnsRecords(hostname);
+  return stored.length > 0 ? withOwnershipRecord(stored, hostname, ownershipToken) : platformDnsRecords(hostname, ownershipToken);
 }
 
 function fqdn(hostname: string, name: string): string {

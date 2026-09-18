@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/vigil/audit";
@@ -16,6 +17,7 @@ import { PROJECT_ASSETS_BUCKET, validateAssets, type AssetKind } from "@/lib/vig
 import { detectRegistrar, requiredRecords, type DnsRecord } from "@/lib/vigil/services/dns";
 import { beginDomainVerification, normalizeHostname, verifyDomain } from "@/lib/vigil/services/domain";
 import type { Json } from "@/types/database.types";
+import { enforceRateLimit, RATE_LIMITS } from "@/lib/vigil/rate-limit";
 
 /**
  * The guided onboarding writes to exactly two things the customer owns:
@@ -71,6 +73,7 @@ async function notifyStaffOfCompletedStep(ctx: OrgContext, project: { id: string
 export async function saveBriefSection(projectId: string, section: SectionKey, data: unknown, completed = false): Promise<ActionResult<{ brief: Brief }>> {
   try {
     const ctx = await requireOrgContextOrThrow();
+    await enforceRateLimit(`autosave:user:${ctx.user.id}`, RATE_LIMITS.autosaveUser);
     const { supabase, project, brief } = await loadProject(ctx, projectId);
     if (project.intake_completed_at) throw new ForbiddenError("This brief has already been sent to Vigil. Use Requests to change something.");
     const schema = SECTION_SCHEMAS[section];
@@ -79,6 +82,17 @@ export async function saveBriefSection(projectId: string, section: SectionKey, d
       const issues: Record<string, string[]> = {};
       for (const i of parsed.error.issues) (issues[i.path.join(".") || "_"] ??= []).push(i.message);
       throw new ValidationError("Check the highlighted fields.", issues);
+    }
+    // The domain step's `domainId` names a `domains` row that only the server
+    // creates (startOnboardingDomain). The client echoes it back on autosave,
+    // so it must be the row already on the brief or one this organization
+    // can read; anything else is dropped rather than carried into submitIntake.
+    if (section === "domain") {
+      const domainData = parsed.data as z.infer<typeof domainSchema>;
+      if (domainData.domainId && domainData.domainId !== brief.domain?.domainId) {
+        const { data: owned } = await supabase.from("domains").select("id").eq("id", domainData.domainId).eq("organization_id", ctx.organization.id).maybeSingle();
+        if (!owned) domainData.domainId = null;
+      }
     }
     const newlyCompleted = completed && !brief.progress.completed.includes(section);
     const next = withProgress({ ...brief, [section]: parsed.data }, section, completed);
@@ -195,9 +209,10 @@ export async function removeProjectAsset(assetId: string): Promise<ActionResult<
 /** Public-DNS guess of where the domain is managed, so the guide opens on the right registrar. */
 export async function guessRegistrar(hostnameInput: string): Promise<ActionResult<{ registrar: RegistrarKey | null; nameservers: string[] }>> {
   try {
-    await requireOrgContextOrThrow();
+    const ctx = await requireOrgContextOrThrow();
     const hostname = normalizeHostname(hostnameInput);
     if (!hostname) throw new ValidationError("Enter a domain like yourbusiness.com.", { hostname: ["Invalid domain"] });
+    await enforceRateLimit(`dns:user:${ctx.user.id}`, RATE_LIMITS.dnsLookupUser);
     const result = await detectRegistrar(hostname);
     return { ok: true, data: result };
   } catch (error) {
@@ -232,6 +247,7 @@ export async function startOnboardingDomain(projectId: string, input: { hostname
     const { supabase, brief } = await loadProject(ctx, projectId);
     const hostname = normalizeHostname(input.hostname);
     if (!hostname) throw new ValidationError("Enter a domain like yourbusiness.com.", { hostname: ["Invalid domain"] });
+    await enforceRateLimit(`domain:org:${ctx.organization.id}`, RATE_LIMITS.domainStartOrg);
     let registrar: RegistrarKey | null = input.registrar;
     if (!registrar) registrar = (await detectRegistrar(hostname)).registrar;
     registrar ??= "other";
@@ -256,7 +272,7 @@ export async function startOnboardingDomain(projectId: string, input: { hostname
         .select("id")
         .single();
       if (error) {
-        if (error.code === "23505") throw new ValidationError("That domain is already registered with Vigil under another account. Write to hello@vigilstudios.co and we will sort it out.", { hostname: ["Already in use"] });
+        if (error.code === "23505") throw new ValidationError("You have already added that domain.", { hostname: ["Already added"] });
         throw error;
       }
       domainId = data.id;
@@ -288,9 +304,9 @@ export async function startOnboardingDomain(projectId: string, input: { hostname
 }
 
 async function domainSetup(supabase: Awaited<ReturnType<typeof createClient>>, domainId: string, registrar: RegistrarKey): Promise<DomainSetup> {
-  const { data: domain, error } = await supabase.from("domains").select("id, hostname, status, verification, dns_ok, ssl_ok, status_reason").eq("id", domainId).single();
+  const { data: domain, error } = await supabase.from("domains").select("id, hostname, status, verification, verification_token, dns_ok, ssl_ok, status_reason").eq("id", domainId).single();
   if (error) throw error;
-  const records = requiredRecords(domain.hostname, domain.verification);
+  const records = requiredRecords(domain.hostname, domain.verification, domain.verification_token);
   const source = (domain.verification as { source?: string } | null)?.source;
   const reachable = (domain.verification as { connection_reachable?: boolean } | null)?.connection_reachable ?? null;
   const launchReady = (domain.verification as { launch_ready?: boolean } | null)?.launch_ready === true;
@@ -359,7 +375,10 @@ export async function submitIntake(projectId: string): Promise<ActionResult<{ co
 
     if (hasAdminClient() && brief.domain?.answer === "own" && brief.domain.domainId) {
       const admin = createAdminClient();
-      const { data: domain } = await admin.from("domains").select("metadata, status_reason").eq("id", brief.domain.domainId).maybeSingle();
+      // The brief is customer-writable (RLS lets members update projects.brief
+      // directly), so the domain it names is re-checked against this
+      // organization before anything is written with the service role.
+      const { data: domain } = await admin.from("domains").select("metadata, status_reason").eq("id", brief.domain.domainId).eq("organization_id", ctx.organization.id).maybeSingle();
       if (domain) {
         const metadata = domain.metadata && typeof domain.metadata === "object" && !Array.isArray(domain.metadata)
           ? domain.metadata as Record<string, Json | undefined>

@@ -5,12 +5,14 @@ import { ActionButton, ActionForm, SelectApply, TransitionSelect } from "@/compo
 import { Card, DefinitionList, PageHeader, StatusPill, Table, inputClass, tdClass, thClass } from "@/components/vigil/ui";
 import {
   addDomainForOrganization,
+  addStaffNote,
   archiveOrganization,
   attachDomainToWebsite,
   createProject,
   createSubscription,
   deleteOrganizationPermanently,
   inviteToOrganization,
+  deleteStaffNote,
   removeEntitlementOverride,
   restoreOrganization,
   setDomainStatus,
@@ -39,13 +41,13 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
   const { orgId } = await params;
   const [detail, catalog] = await Promise.all([getOrganizationDetail(orgId), getCatalog()]);
   if (!detail) notFound();
-  const { organization: org, members, invites, websites, domains, subscriptions, projects, overrides, audit, jobs, orders } = detail;
+  const { organization: org, members, invites, websites, domains, subscriptions, projects, overrides, audit, jobs, orders, notes } = detail;
   const isAdmin = staff.staffRole === "admin";
   const briefProject = projects.find((p) => !["closed", "cancelled"].includes(p.status)) ?? projects[0] ?? null;
   const brief = briefProject ? parseBrief(briefProject.brief) : null;
   const briefAssets = briefProject ? await getProjectAssets(briefProject.id) : [];
   const briefDomain = brief?.domain?.domainId ? domains.find((d) => d.id === brief.domain?.domainId) ?? null : null;
-  const openInvites = invites.filter((i) => !i.accepted_at && !i.revoked_at);
+  const openInvites = invites.filter((i) => !i.accepted_at && !i.revoked_at && !i.declined_at);
 
   return (
     <div>
@@ -104,7 +106,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
           </ul>
           {openInvites.length > 0 ? (
             <p className="mt-2 text-xs text-[color:var(--text-secondary)]">
-              Pending: {openInvites.map((i) => `${i.email} (${i.role})`).join(", ")}
+              Pending: {openInvites.map((i) => `${i.email} (${i.role}${i.requires_acceptance ? ", awaiting their acceptance" : ""})`).join(", ")}
             </p>
           ) : null}
           <ActionForm action={inviteToOrganization.bind(null, org.id)} submitLabel="Invite" className="mt-3 grid gap-2 sm:grid-cols-[1fr_8rem]">
@@ -427,12 +429,27 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
         </Card>
       </div>
 
-      {org.notes ? (
-        <Card className="mt-4">
-          <h2 className="text-base font-semibold">Internal notes</h2>
-          <p className="mt-2 whitespace-pre-wrap text-sm">{org.notes}</p>
-        </Card>
-      ) : null}
+      <Card className="mt-4">
+        <h2 className="text-base font-semibold">Internal notes</h2>
+        <p className="mt-1 text-xs text-[color:var(--text-secondary)]">Staff only. Nothing here is ever shown to the customer.</p>
+        <ul className="mt-3 divide-y divide-[color:var(--border)] text-sm">
+          {notes.map((n) => (
+            <li key={n.id} className="flex items-start justify-between gap-3 py-2">
+              <div className="min-w-0">
+                <p className="whitespace-pre-wrap">{n.body}</p>
+                <p className="mt-1 text-xs text-[color:var(--text-secondary)]">
+                  {n.entity_type === "order" ? "On an order · " : ""}{n.author?.full_name || n.author?.email || "Staff"} · {formatDateTime(n.created_at)}
+                </p>
+              </div>
+              <ActionButton variant="link" action={deleteStaffNote.bind(null, n.id)} confirmText="Delete this note?">Delete</ActionButton>
+            </li>
+          ))}
+          {notes.length === 0 ? <li className="py-2 text-[color:var(--text-secondary)]">None yet.</li> : null}
+        </ul>
+        <ActionForm action={addStaffNote.bind(null, "organization", org.id)} submitLabel="Add note" className="mt-3">
+          <textarea name="body" rows={3} className={inputClass} placeholder="Context for the team: pricing agreed, preferences, anything the next person should know." maxLength={4000} />
+        </ActionForm>
+      </Card>
 
       {isAdmin ? (
         <Card className="mt-4 border-[#ef4444]/40">

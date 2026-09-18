@@ -53,7 +53,7 @@ export const getOrganizationDetail = cache(async (orgId: string) => {
       .from("organization_members")
       .select("user_id, role, status, created_at, profile:profiles!organization_members_user_id_fkey(full_name, email)")
       .eq("organization_id", orgId),
-    supabase.from("organization_invites").select("id, email, role, expires_at, accepted_at, revoked_at").eq("organization_id", orgId).order("created_at", { ascending: false }),
+    supabase.from("organization_invites").select("id, email, role, expires_at, accepted_at, revoked_at, declined_at, requires_acceptance").eq("organization_id", orgId).order("created_at", { ascending: false }),
     supabase.from("websites").select("*").eq("organization_id", orgId).order("created_at"),
     supabase.from("domains").select("*").eq("organization_id", orgId).order("created_at"),
     supabase.from("subscriptions").select("*, plan:plans(code, name), price:plan_prices(amount_cents, currency, interval, interval_count)").eq("organization_id", orgId).order("created_at", { ascending: false }),
@@ -65,7 +65,18 @@ export const getOrganizationDetail = cache(async (orgId: string) => {
   ]);
   for (const r of [org, members, invites, websites, domains, subscriptions, projects, overrides, audit, jobs, orders]) if (r.error) throw r.error;
   if (!org.data) return null;
+  // Staff notes live in their own staff-only table (never on a row the
+  // customer can read); the customer page shows the organization's notes and
+  // any left on its orders.
+  const noteIds = [orgId, ...(orders.data ?? []).map((o) => o.id)];
+  const notes = await supabase
+    .from("staff_notes")
+    .select("id, entity_type, entity_id, body, created_at, author:profiles!staff_notes_created_by_fkey(full_name, email)")
+    .in("entity_id", noteIds)
+    .order("created_at", { ascending: false });
+  if (notes.error) throw notes.error;
   return {
+    notes: notes.data ?? [],
     organization: org.data,
     members: members.data ?? [],
     invites: invites.data ?? [],

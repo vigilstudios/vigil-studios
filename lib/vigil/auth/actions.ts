@@ -7,6 +7,8 @@ import type { ActionResult } from "./errors";
 import { NEXT_COOKIE, nextCookieOptions } from "./next-cookie";
 import { MIN_PASSWORD_LENGTH } from "./password";
 import { isPlausibleEmail, normalizeEmail, safeNextPath } from "./redirects";
+import { RateLimitedError } from "./errors";
+import { clientIp, enforceRateLimit, limitKey, RATE_LIMITS } from "@/lib/vigil/rate-limit";
 import { ONBOARDING_WELCOME_HREF } from "@/lib/vigil/onboarding/constants";
 
 async function siteOrigin(): Promise<string> {
@@ -34,6 +36,13 @@ export async function signInWithEmail(_prev: SignInState, formData: FormData): P
 
   if (!isPlausibleEmail(email)) {
     return { ok: false, error: "Enter the email address you use with Vigil Studios.", code: "validation" };
+  }
+  try {
+    await enforceRateLimit(limitKey("login:email", email), RATE_LIMITS.signInEmail);
+    await enforceRateLimit(limitKey("login:ip", await clientIp()), RATE_LIMITS.signInIp);
+  } catch (error) {
+    if (error instanceof RateLimitedError) return { ok: false, error: "Too many sign-in emails requested. Check your inbox for one that already arrived, or try again in a few minutes.", code: "rate_limited" };
+    throw error;
   }
 
   const supabase = await createClient();
@@ -80,6 +89,13 @@ export async function signInWithPassword(_prev: PasswordSignInState, formData: F
   const next = safeNextPath(String(formData.get("next") ?? ""));
   if (!isPlausibleEmail(email)) return { ok: false, error: "Enter the email address you use with Vigil Studios.", code: "validation" };
   if (!password) return { ok: false, error: "Enter your password, or email yourself a sign-in link.", code: "validation" };
+  try {
+    await enforceRateLimit(limitKey("password:email", email), RATE_LIMITS.passwordEmail);
+    await enforceRateLimit(limitKey("password:ip", await clientIp()), RATE_LIMITS.passwordIp);
+  } catch (error) {
+    if (error instanceof RateLimitedError) return { ok: false, error: "Too many attempts. Wait a few minutes, or email yourself a sign-in link instead.", code: "rate_limited" };
+    throw error;
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });

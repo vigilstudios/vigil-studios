@@ -9,6 +9,7 @@ import { assertOrgRole, requireOrgContextOrThrow } from "@/lib/vigil/auth/sessio
 import { enqueueJob, JOB_KINDS } from "@/lib/vigil/jobs";
 import { domainKind } from "@/lib/vigil/domains";
 import { beginDomainVerification, normalizeHostname } from "@/lib/vigil/services/domain";
+import { enforceRateLimit, RATE_LIMITS } from "@/lib/vigil/rate-limit";
 
 export type DomainState = ActionResult<{ domainId: string }> | null;
 
@@ -24,6 +25,7 @@ export async function startDomainConnection(_prev: DomainState, formData: FormDa
 
     const hostname = normalizeHostname(String(formData.get("hostname") ?? ""));
     if (!hostname) throw new ValidationError("Enter a domain like yourbusiness.com.", { hostname: ["Invalid domain"] });
+    await enforceRateLimit(`domain:org:${ctx.organization.id}`, RATE_LIMITS.domainStartOrg);
     const websiteId = String(formData.get("website_id") ?? "") || null;
 
     const supabase = await createClient();
@@ -40,7 +42,7 @@ export async function startDomainConnection(_prev: DomainState, formData: FormDa
       .select("id")
       .single();
     if (error) {
-      if (error.code === "23505") throw new ValidationError("That domain is already registered with Vigil.", { hostname: ["Already in use"] });
+      if (error.code === "23505") throw new ValidationError("You have already added that domain.", { hostname: ["Already added"] });
       throw error;
     }
 

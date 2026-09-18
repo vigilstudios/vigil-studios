@@ -33,7 +33,7 @@ export default async function DomainPage() {
             const reachable = (domain.verification as { connection_reachable?: boolean } | null)?.connection_reachable ?? null;
             const launchReady = (domain.verification as { launch_ready?: boolean } | null)?.launch_ready === true;
             const status = describeDomainStatus(domain.status, { dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable, launchReady });
-            const records = requiredRecords(domain.hostname, domain.verification);
+            const records = requiredRecords(domain.hostname, domain.verification, domain.verification_token);
             const linkedWebsite = websites.find((website) => website.id === domain.website_id);
             // Older previews were deployed before preview completion attached
             // the domain to the provider. Do not keep those customers locked

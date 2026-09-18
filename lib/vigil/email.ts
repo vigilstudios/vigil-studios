@@ -16,7 +16,12 @@ export type EmailMessage = { to: string; subject: string; html: string; text: st
 export async function sendEmail(message: EmailMessage): Promise<{ sent: boolean; id?: string; error?: string }> {
   const key = process.env.RESEND_API_KEY;
   if (!key) {
-    console.info(`[email:dry-run] to=${message.to} subject=${JSON.stringify(message.subject)}\n${message.text}`);
+    // Welcome and invitation emails carry a one-click sign-in link. Printing
+    // the body is the local workflow (click the link in the terminal), but on
+    // a deployment it puts a credential into the platform logs, so only the
+    // envelope is logged there.
+    const body = process.env.NODE_ENV === "development" ? `\n${message.text}` : "";
+    console.info(`[email:dry-run] to=${message.to} subject=${JSON.stringify(message.subject)}${body}`);
     return { sent: false };
   }
   try {

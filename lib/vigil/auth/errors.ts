@@ -53,6 +53,13 @@ export class ProviderNotConfiguredError extends VigilError {
   }
 }
 
+export class RateLimitedError extends VigilError {
+  constructor(message = "Too many attempts. Please wait a few minutes and try again.") {
+    super("rate_limited", message, 429);
+    this.name = "RateLimitedError";
+  }
+}
+
 export class ProviderError extends VigilError {
   readonly provider: string;
   readonly retryable: boolean;
@@ -74,11 +81,28 @@ export type ActionResult<T = undefined> =
   | { ok: true; data: T }
   | { ok: false; error: string; code?: string; issues?: Record<string, string[]> };
 
-export function toActionError(error: unknown): ActionResult<never> {
+/**
+ * Who reads the message. Customers get a plain sentence and never the text
+ * of a provider (Stripe, Resend, GitHub, Vercel) or a configuration error;
+ * the detail goes to the server log. Staff actions opt in to the detail.
+ */
+export type ErrorAudience = "customer" | "staff";
+
+const CUSTOMER_MESSAGES: Record<string, string> = {
+  provider_error: "We could not reach one of the services we depend on. Please try again in a moment.",
+  provider_not_configured: "That is not available yet. Please try again later or write to hello@vigilstudios.co.",
+};
+
+export function toActionError(error: unknown, audience: ErrorAudience = "customer"): ActionResult<never> {
   if (error instanceof ValidationError) {
     return { ok: false, error: error.message, code: error.code, issues: error.issues };
   }
   if (isVigilError(error)) {
+    const generic = audience === "customer" ? CUSTOMER_MESSAGES[error.code] : undefined;
+    if (generic) {
+      console.error(`[action] ${error.code}:`, error.message);
+      return { ok: false, error: generic, code: error.code };
+    }
     return { ok: false, error: error.message, code: error.code };
   }
   console.error("Unhandled action error:", error);

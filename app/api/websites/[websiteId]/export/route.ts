@@ -53,6 +53,10 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: "export_unavailable", message: err.message }, { status: 409 });
     }
     if (isVigilError(err)) {
+      if (err.code === "provider_error" || err.code === "provider_not_configured") {
+        console.error("site export provider failure:", err.message);
+        return NextResponse.json({ error: err.code, message: "The export is not available right now. Please try again later." }, { status: err.status });
+      }
       return NextResponse.json({ error: err.code, message: err.message }, { status: err.status });
     }
     console.error("site export failed:", err);
