@@ -96,7 +96,7 @@ export type ReviewUploadedFile = {
  * as props so a backend implementation can be added without changing the
  * review interaction or importing server-only code into a client component.
  */
-export type ReviewActionResult = { ok: true; data?: { id?: string; attached?: number; failed?: string[] } } | { ok: false; error: string };
+export type ReviewActionResult = { ok: true; data?: { id?: string; attached?: number; failed?: string[] } } | { ok: false; error: string; code?: string };
 
 export type ReviewActions = {
   submitDecision?: (input: ReviewDecisionInput) => Promise<ReviewActionResult>;

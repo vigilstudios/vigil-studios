@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { logAuditEvent } from "@/lib/vigil/audit";
-import { ForbiddenError, NotFoundError, ValidationError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
+import { ForbiddenError, NotFoundError, ValidationError, VigilError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
 import { requireOrgContextOrThrow, requireStaffOrThrow } from "@/lib/vigil/auth/session";
 import { reviewRoundDefinition, REVIEW_ATTACHMENTS_BUCKET, validateReviewAttachments, type ReviewRoundNumber } from "@/lib/vigil/project-reviews";
 
@@ -155,7 +155,9 @@ async function recordCustomerDecision(projectId: string, roundNumber: number, de
     if (roundError) throw roundError;
     if (!reviewRound) throw new NotFoundError("Review round not found.");
     if (!reviewRound.current_submission_id || reviewRound.status !== "awaiting_feedback") {
-      throw new ValidationError("This review version is no longer awaiting a response.");
+      // The customer already answered this version (or it moved on); the
+      // page shows the sent state rather than an error.
+      throw new VigilError("review_answered", "This version already has your answer. The team is working on it.", 409);
     }
     const normalizedFeedback = feedback?.trim() || null;
     if (decision === "request_revisions") {

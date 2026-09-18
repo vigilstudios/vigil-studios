@@ -149,6 +149,17 @@ export function ReviewDashboard({ review, organizationId, actions }: ReviewDashb
         feedback: feedback.trim() || undefined,
       });
       if (!result.ok) {
+        if (result.code === "review_answered") {
+          // Already recorded (a second click, or the page was stale): show
+          // the sent state instead of an error and pull the fresh round.
+          setDecision(null);
+          setFeedback("");
+          setFiles([]);
+          formRef.current?.reset();
+          setSuccess("Your answer for this version is already with the team.");
+          router.refresh();
+          return;
+        }
         setError(result.error);
         return;
       }
@@ -426,6 +437,9 @@ function DecisionPanel({ formRef, review, currentRound, decision, feedback, file
   onRemoveFile: (index: number) => void;
 }) {
   const canDecide = Boolean(review && (currentRound?.status === "awaiting_customer" || currentRound?.status === "awaiting_feedback"));
+  // Once a decision is recorded the round moves on; the form locks and says
+  // so in place of the submit button, so nothing here looks actionable.
+  const sent = sentState(currentRound?.status);
   return (
     <Panel title="Your decision">
       <form ref={formRef} onSubmit={onSubmit} className="space-y-4" noValidate>
@@ -462,13 +476,36 @@ function DecisionPanel({ formRef, review, currentRound, decision, feedback, file
           </div>
         ) : null}
         {decision === "request_revisions" ? <ReviewAttachments files={files} problems={attachmentProblems} busy={busy} onFiles={onFiles} onRemove={onRemoveFile} /> : null}
-        {!canDecide && !success ? <p className="rounded-lg bg-[color:var(--bg-surface-soft)] px-3 py-2.5 text-xs text-[color:var(--text-secondary)]">The decision buttons will become available when this round is ready for your review.</p> : null}
-        <FormError message={error} />
-        <FormSuccess message={success} />
-        {decision ? <button type="submit" disabled={!canDecide || busy || attachmentProblems.length > 0} className="btn-primary w-full text-sm">{progress.total > 0 ? `Uploading ${progress.done + 1} of ${progress.total}…` : decision === "approve" ? "Approve this round" : "Send revision list"}</button> : null}
+        {!canDecide && !sent && !success ? <p className="rounded-lg bg-[color:var(--bg-surface-soft)] px-3 py-2.5 text-xs text-[color:var(--text-secondary)]">The decision buttons will become available when this round is ready for your review.</p> : null}
+        <FormError message={canDecide ? error : null} />
+        <FormSuccess message={sent ? null : success} />
+        {sent ? (
+          <div>
+            <button type="button" disabled aria-disabled="true" className="btn-secondary w-full cursor-not-allowed text-sm opacity-60">{sent.button}</button>
+            <p className="mt-2 text-center text-[11px] leading-4 text-[color:var(--text-secondary)]">{sent.detail}</p>
+          </div>
+        ) : decision && canDecide ? (
+          <button type="submit" disabled={busy || attachmentProblems.length > 0} className="btn-primary w-full text-sm">{progress.total > 0 ? `Uploading ${progress.done + 1} of ${progress.total}…` : decision === "approve" ? "Approve this round" : "Send revision list"}</button>
+        ) : null}
       </form>
     </Panel>
   );
+}
+
+/** What the locked submit control says once this round has the customer's answer. */
+function sentState(status: ReviewStatus | undefined): { button: string; detail: string } | null {
+  switch (status) {
+    case "changes_requested":
+      return { button: "Revision list sent", detail: "Your notes are with the Vigil team. We will post the revised version here and let you know when it is ready." };
+    case "revision_in_progress":
+    case "in_progress":
+      return { button: "Revisions in progress", detail: "The Vigil team is making your changes. The next version will appear here for your review." };
+    case "approved":
+    case "complete":
+      return { button: "Round approved", detail: "You approved this round; the team is moving your project forward." };
+    default:
+      return null;
+  }
 }
 
 function ReviewAttachments({ files, problems, busy, onFiles, onRemove }: { files: File[]; problems: { name: string; reason: string }[]; busy: boolean; onFiles: (files: File[]) => void; onRemove: (index: number) => void }) {
