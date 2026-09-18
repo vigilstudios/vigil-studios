@@ -274,3 +274,14 @@ built and shipped with the Cloudflare email fix.
   black heading, no lead, dark cards, no marquee). The pointer is the Vigil
   star on fine-pointer devices (`components/site/StarCursor.tsx`): green,
   white over links and buttons, black over green surfaces, native in text fields.
+- "Ready when you are" (`sections/GetStartedSection.tsx`) is the hero's
+  stage again: the star grid, the turning wireframe mark (`WireMark` now
+  takes `size`, `lift` and `story` props) and good news popping up around
+  the viewport (`HeroNotes` in `good` mode with `items`, an `avoid` box and
+  `count`; the messages are `GET_STARTED.notes`). The section is sticky at
+  the end of the page so the footer scrolls over it; `watchCovered` now
+  judges any section by its own rect. Velaris and the orb are gone from it
+  (Velaris remains on /products/virtue). New line under the title:
+  "No builders to learn · no settings to babysit · someone always watching".
+  The `alt` sections lost their top/bottom hairlines (the line between
+  "Why not a builder" and the FAQ).

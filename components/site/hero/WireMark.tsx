@@ -27,7 +27,12 @@ const STAR: [number, number][] = (() => {
 const V_PATH = "M292.1,130.44L339.48.04l132.2-.04-175.39,420.45h-121.71S.46,1.1.46,1.1L0,.22C-.06.08.56.01.99.01l131.87.02,47.56,132.07,55.75,142.59,55.93-144.26Z";
 const CX = 538.44 / 2, CY = 420.45 / 2, UNIT = 1 / 100, WIDTH = 5.38, DEPTH = 0.95, CAMERA_Z = 16, FOV = 30;
 
-export function WireMark({ className }: { className?: string }) {
+/**
+ * `size` is the mark's share of the container's width, `lift` how far above
+ * centre it sits (world units; the visible height is ~8.6), and `story`
+ * whether it takes part in the home page story (unravelling on scroll).
+ */
+export function WireMark({ className, size = { desktop: 0.34, phone: 0.7 }, lift = { desktop: 0.9, phone: 0.7 }, story = true }: { className?: string; size?: { desktop: number; phone: number }; lift?: { desktop: number; phone: number }; story?: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const fallbackRef = useRef<SVGSVGElement>(null);
 
@@ -98,11 +103,11 @@ export function WireMark({ className }: { className?: string }) {
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      // ~34 % of the hero's width on desktop, ~70 % on a phone, sitting a little above centre so the words fit under it
+      // a share of the container's width, sitting above centre so the words fit under it
       const phone = w < 760;
       const visibleWidth = 2 * CAMERA_Z * Math.tan(THREE.MathUtils.degToRad(FOV / 2)) * camera.aspect;
-      group.scale.setScalar((visibleWidth * (phone ? 0.7 : 0.34)) / WIDTH);
-      baseY = phone ? 0.7 : 0.9;
+      group.scale.setScalar((visibleWidth * (phone ? size.phone : size.desktop)) / WIDTH);
+      baseY = phone ? lift.phone : lift.desktop;
       group.position.y = baseY;
     };
     fit();
@@ -146,10 +151,12 @@ export function WireMark({ className }: { className?: string }) {
       covered = c;
       if (!c) loop();
     });
-    const unsubscribe = subscribeStory((p) => {
-      const u = rng(p, PHASE.markExit[0], PHASE.markExit[1]);
-      if (u !== exitU) { exitU = u; loop(); }
-    });
+    const unsubscribe = story
+      ? subscribeStory((p) => {
+          const u = rng(p, PHASE.markExit[0], PHASE.markExit[1]);
+          if (u !== exitU) { exitU = u; loop(); }
+        })
+      : () => {};
     loop();
 
     return () => {
@@ -163,7 +170,7 @@ export function WireMark({ className }: { className?: string }) {
       material.dispose();
       renderer.dispose();
     };
-  }, []);
+  }, [size.desktop, size.phone, lift.desktop, lift.phone, story]);
 
   return (
     <>

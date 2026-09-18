@@ -116,14 +116,31 @@ export const START = {
   note: "Not sure? Start with Express. Moving up later is a conversation, not a migration.",
 };
 
+/** The close: one line, three ways in, and the good news that pops up around the viewport while the reader decides. */
 export const GET_STARTED = {
   title: "Ready when you are.",
-  lead: "Whether you need your first website, a bigger one, or something built to a scope, the next step is the same size: pick a starting point, or talk to a person first.",
+  line: "No builders to learn · no settings to babysit · someone always watching",
   primary: { label: "Find your starting point", href: "#start" },
   call: "Book a call",
   email: "hello@vigilstudios.co",
   emailLabel: "Email us",
   note: "Fifteen minutes with a person, no pitch. Email gets a reply within one business day.",
+  notes: [
+    "99.98% uptime, checked every minute",
+    "Express sites live in two business days",
+    "Your domain stays in your name",
+    "Cancel any time and keep your site",
+    "A person replies within one business day",
+    "SSL, backups and updates on every plan",
+    "Virtue sets up every customer",
+    "Websites from $599, once",
+    "No builders, no plugins, nothing to learn",
+    "Export your site whenever you like",
+    "One team, one dashboard, one receipt",
+    "Requests answered in plain words",
+    "Built by people, in New York",
+    "Missed calls texted back on Growth",
+  ],
 };
 
 /** /products/websites: what each build is for. Names and prices stay in build_prices; this page points at /pricing for numbers. */

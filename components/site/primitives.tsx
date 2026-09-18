@@ -40,7 +40,7 @@ export function SectionIntro({ eyebrow, tone, title, lead, align = "left", class
  */
 export function Section({ children, className, id, alt, accent, fill }: { children: ReactNode; className?: string; id?: string; alt?: boolean; accent?: boolean; fill?: boolean }) {
   return (
-    <section id={id} className={clsx("relative z-[1]", fill ? "flex flex-col justify-center py-20 md:min-h-[100svh] md:py-24" : "py-16 sm:py-24", accent ? "section-accent" : alt ? "border-y border-[color:var(--border)] bg-[color:var(--bg-section-alt)]" : "bg-[color:var(--bg-primary)]", className)}>
+    <section id={id} className={clsx("relative z-[1]", fill ? "flex flex-col justify-center py-20 md:min-h-[100svh] md:py-24" : "py-16 sm:py-24", accent ? "section-accent" : alt ? "bg-[color:var(--bg-section-alt)]" : "bg-[color:var(--bg-primary)]", className)}>
       {children}
     </section>
   );

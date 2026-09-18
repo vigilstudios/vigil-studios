@@ -55,24 +55,41 @@ const rnd = (a: number, b: number) => a + Math.random() * (b - a);
 const back = (t: number) => 1 + 2.6 * Math.pow(t - 1, 3) + 1.6 * Math.pow(t - 1, 2);
 const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
 
-export function HeroNotes() {
+/**
+ * `good` with `items` shows only good news (no problem phase, a longer
+ * hold), for the closing section. `avoid` is a box (in % of the host) the
+ * notes stay out of, where the words are; the default is the hero's.
+ */
+export function HeroNotes({ good = false, items, avoid, count }: { good?: boolean; items?: string[]; avoid?: { x: [number, number]; y: [number, number] }; count?: { desktop: number; phone: number } } = {}) {
   const ref = useRef<HTMLDivElement>(null);
+  const itemsRef = useRef(items), avoidRef = useRef(avoid), countRef = useRef(count);
 
   useEffect(() => {
     const host = ref.current;
     if (!host) return;
+    const goodItems = itemsRef.current, avoidBox = avoidRef.current, counts = countRef.current;
     startCursor();
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const phone = () => host.clientWidth < 760;
     const slots: Slot[] = [];
     let deck: number[] = [];
+    const pool: [string, string][] = goodItems ? goodItems.map((t) => [t, t]) : PAIRS;
     const next = () => {
-      if (!deck.length) deck = PAIRS.map((_, i) => i).sort(() => Math.random() - 0.5);
-      return PAIRS[deck.pop()!];
+      if (!deck.length) deck = pool.map((_, i) => i).sort(() => Math.random() - 0.5);
+      return pool[deck.pop()!];
     };
-    // an ellipse around the mark (which sits at 50 % / 45 %), never over the words below it, never off the edge
+    // an ellipse around the mark (which sits at 50 % / 45 %), never over the words below it, never off the edge;
+    // with an avoid box, anywhere in the viewport except that box
     const place = () => {
       const w = host.clientWidth, h = host.clientHeight;
+      if (avoidBox) {
+        for (let i = 0; i < 12; i++) {
+          const x = rnd(w * 0.06, w * 0.94), y = rnd(h * 0.12, h * 0.94);
+          const inside = x > w * avoidBox.x[0] / 100 && x < w * avoidBox.x[1] / 100 && y > h * avoidBox.y[0] / 100 && y < h * avoidBox.y[1] / 100;
+          if (!inside) return { x, y };
+        }
+        return { x: w * 0.1, y: h * 0.2 };
+      }
       const th = rnd(0, Math.PI * 2);
       const rx = w * (phone() ? rnd(0.28, 0.36) : rnd(0.3, 0.42)), ry = h * (phone() ? rnd(0.22, 0.3) : rnd(0.2, 0.32));
       let x = w / 2 + Math.cos(th) * rx, y = h * 0.45 + Math.sin(th) * ry;
@@ -92,7 +109,7 @@ export function HeroNotes() {
         if (d > 220) break;
       }
       const el = document.createElement("div");
-      el.className = "hero-note";
+      el.className = good ? "hero-note good" : "hero-note";
       el.innerHTML = `<i></i><b></b>`;
       el.querySelector("b")!.textContent = bad;
       host.appendChild(el);
@@ -103,7 +120,7 @@ export function HeroNotes() {
       el.style.transform = `translate(${p.x}px,${p.y}px) translate(-50%,-50%) scale(.6)`;
     };
     const ensure = (t: number) => {
-      const n = phone() ? 3 : 5;
+      const n = phone() ? (counts?.phone ?? 3) : (counts?.desktop ?? 5);
       while (slots.length < n) slots.push({ el: null, t0: t + slots.length * (TOTAL / n) * 0.9 + rnd(0, 0.4), bad: "", good: "", x: 0, y: 0, dx: 0, dy: 0, ph: 0, par: 0, hw: 0, flipped: false, struck: false });
       while (slots.length > n) slots.pop()!.el?.remove();
     };
@@ -123,16 +140,13 @@ export function HeroNotes() {
         }
         const a = t - s.t0, el = s.el;
         // State changes are keyed on elapsed time, not on which frame happens to run, so a throttled tab never skips one.
-        if (a >= T.pop + T.bad && !s.flipped) { s.flipped = true; el.classList.add("good"); el.querySelector("b")!.textContent = s.good; }
-        if (a >= T.pop + T.bad + T.flip + T.good && !s.struck) { s.struck = true; el.classList.add("strike"); }
+        if (!good && a >= T.pop + T.bad && !s.flipped) { s.flipped = true; el.classList.add("good"); el.querySelector("b")!.textContent = s.good; }
+        if (!good && a >= T.pop + T.bad + T.flip + T.good && !s.struck) { s.struck = true; el.classList.add("strike"); }
         let scale = 1, opacity = 1, k = 0;
+        const holdEnd = good ? T.pop + 3.4 : T.pop + T.bad + T.flip + T.good + T.strike + T.hold;
         if (a < T.pop) { k = a / T.pop; scale = 0.6 + 0.4 * back(k); opacity = Math.min(1, k * 2); }
-        else if (a < (k = T.pop + T.bad)) { /* the problem, showing */ }
-        else if (a < (k += T.flip)) { scale = 1 + 0.06 * Math.sin(((a - (T.pop + T.bad)) / T.flip) * Math.PI); }
-        else if (a < (k += T.good)) { /* handled, showing */ }
-        else if (a < (k += T.strike)) { /* the line draws (CSS transition) */ }
-        else if (a < (k += T.hold)) { /* crossed out, one beat */ }
-        else if (a < (k += T.out)) { const f = ease((a - (k - T.out)) / T.out); scale = 1 - 0.15 * f; opacity = 1 - f; s.y += 0.6; }
+        else if (a < holdEnd) { if (!good && a >= T.pop + T.bad && a < T.pop + T.bad + T.flip) scale = 1 + 0.06 * Math.sin(((a - (T.pop + T.bad)) / T.flip) * Math.PI); }
+        else if (a < holdEnd + T.out) { const f = ease((a - holdEnd) / T.out); scale = 1 - 0.15 * f; opacity = 1 - f; s.y += 0.6; }
         else { el.remove(); s.el = null; s.t0 = t + rnd(0.4, 1.6); continue; }
         const bob = reduced ? 0 : Math.sin(t * 1.3 + s.ph) * 4;
         if (!reduced) { s.x = Math.min(Math.max(s.x + s.dx / 60, s.hw), host.clientWidth - s.hw); s.y += s.dy / 60; }
@@ -158,8 +172,8 @@ export function HeroNotes() {
       covered = c;
       if (!c) loop();
     });
-    // They fade with the hero's words as the story begins.
-    const unsubscribe = subscribeStory((p) => {
+    // The hero's notes fade with its words as the story begins.
+    const unsubscribe = good ? () => {} : subscribeStory((p) => {
       host.style.opacity = String(1 - rng(rng(p, PHASE.untype[0], PHASE.untype[1]), 0, 0.35));
     });
     loop();
@@ -172,7 +186,7 @@ export function HeroNotes() {
       document.removeEventListener("visibilitychange", onVisibility);
       host.replaceChildren();
     };
-  }, []);
+  }, [good]);
 
   return <div ref={ref} className="pointer-events-none absolute inset-0 z-[3]" aria-hidden />;
 }

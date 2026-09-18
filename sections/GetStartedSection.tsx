@@ -1,38 +1,39 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { VelarisBackground } from "@/components/site/VelarisBackground";
-import { Reveal } from "@/components/site/Reveal";
-import { VirtueOrb } from "@/components/vigil/VirtueOrb";
 import { CalendlyPopup } from "@/components/CalendlyModal";
-import { GET_STARTED } from "@/lib/site-copy";
 import { EmailLink } from "@/components/site/Email";
+import { HeroNotes } from "@/components/site/hero/HeroNotes";
+import { WireMark } from "@/components/site/hero/WireMark";
+import { GET_STARTED } from "@/lib/site-copy";
 
 /**
- * The close, and the contact section: the same field as the hero, Virtue,
- * and three ways in. Whoever the reader is (a template, a Professional
- * site, something custom), each button is a real next step.
+ * The close, and the contact section: the hero's stage again. The star
+ * grid, the turning wireframe mark, and good news popping up around the
+ * viewport (uptime, ownership, response times) while three real next steps
+ * wait in the middle. The section sticks to the viewport at the end of the
+ * page, so the footer scrolls over it the way the page scrolled over the hero.
  */
 export function GetStartedSection() {
   return (
-    <section id="get-started" className="relative isolate z-[1] flex flex-col justify-center overflow-hidden bg-[color:var(--bg-primary)] py-20 md:min-h-[100svh] md:py-24">
-      <VelarisBackground className="absolute inset-0 -z-10 h-full w-full" grain={0.04} />
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-32 bg-[linear-gradient(to_bottom,var(--bg-section-alt),transparent)]" aria-hidden />
-      <div className="mx-auto flex w-full max-w-3xl flex-col items-center px-4 text-center sm:px-6">
-        <Reveal className="flex flex-col items-center">
-          <VirtueOrb size="lg" />
-          <h2 className="mt-8 text-3xl font-semibold tracking-tight sm:text-5xl">{GET_STARTED.title}</h2>
-          <p className="mt-4 max-w-xl text-base leading-7 text-[color:var(--text-primary)] opacity-80 sm:text-lg">{GET_STARTED.lead}</p>
-        </Reveal>
-        <Reveal delay={0.15} className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Link href={GET_STARTED.primary.href} className="btn-primary min-h-12 !px-6 text-sm font-semibold">
-            {GET_STARTED.primary.label} <ArrowRight className="ml-2 h-4 w-4" />
+    <section id="get-started" className="sticky top-0 z-0 isolate flex h-[100svh] flex-col overflow-hidden bg-[#0a0a0a] text-[#f5f5f3]">
+      <div className="hero-grid absolute inset-0" aria-hidden />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_55%_at_50%_40%,rgba(10,10,10,0)_0%,rgba(10,10,10,0.55)_100%)]" aria-hidden />
+      <WireMark className="absolute inset-0 block h-full w-full" story={false} size={{ desktop: 0.24, phone: 0.56 }} lift={{ desktop: 1.6, phone: 1.7 }} />
+      <HeroNotes good items={GET_STARTED.notes} avoid={{ x: [18, 82], y: [50, 92] }} count={{ desktop: 5, phone: 3 }} />
+
+      <div className="absolute inset-x-0 top-[57%] z-[5] px-6 text-center">
+        <h2 className="mx-auto max-w-3xl font-[family-name:var(--font-space-grotesk)] text-[clamp(28px,3.4vw,48px)] font-medium leading-[1.06] tracking-[-0.02em] text-balance">{GET_STARTED.title}</h2>
+        <p className="mt-4 font-mono text-[10.5px] uppercase tracking-[0.16em] text-[rgba(245,245,243,0.55)]">{GET_STARTED.line}</p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
+          <Link href={GET_STARTED.primary.href} className="btn-primary h-10 !px-4 text-[13px] font-semibold sm:!px-[18px]">
+            {GET_STARTED.primary.label} <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
           </Link>
-          <CalendlyPopup className="btn-secondary min-h-12 !px-6 text-sm font-medium">{GET_STARTED.call}</CalendlyPopup>
-          <EmailLink className="btn-secondary min-h-12 !px-6 text-sm font-medium" icon="mr-2 h-4 w-4" label={GET_STARTED.emailLabel} />
-        </Reveal>
-        <Reveal delay={0.25}>
-          <p className="mt-8 text-xs text-[color:var(--text-primary)] opacity-60">{GET_STARTED.note}</p>
-        </Reveal>
+          <CalendlyPopup className="inline-flex h-10 items-center justify-center rounded-lg border border-[color:var(--accent)] px-4 text-[13px] font-semibold text-[color:var(--accent)] transition-colors hover:bg-[rgba(16,212,90,0.1)] sm:px-[18px]">
+            {GET_STARTED.call}
+          </CalendlyPopup>
+          <EmailLink className="inline-flex h-10 items-center justify-center rounded-lg border border-[rgba(245,245,243,0.25)] px-4 text-[13px] font-semibold text-[#f5f5f3] transition-colors hover:bg-[rgba(255,255,255,0.08)] sm:px-[18px]" icon="mr-1.5 h-3.5 w-3.5" label={GET_STARTED.emailLabel} />
+        </div>
+        <p className="mt-6 text-xs text-[rgba(245,245,243,0.55)]">{GET_STARTED.note}</p>
       </div>
     </section>
   );

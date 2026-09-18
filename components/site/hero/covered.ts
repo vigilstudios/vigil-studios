@@ -1,17 +1,17 @@
 /**
- * The hero is sticky: the rest of the page scrolls over it. Once the
- * visitor has scrolled a full hero height it is completely covered, so its
- * canvas and notifications can stop. Reports every change of that state.
+ * Reports whether the section an element lives in is entirely off screen
+ * (scrolled past above, or not yet reached below) so its canvas and
+ * notifications can stop. A sticky section that is only partly covered by
+ * what scrolls over it still counts as visible.
  */
 export function watchCovered(el: HTMLElement, onChange: (covered: boolean) => void) {
   const root = el.closest("#site-root") as HTMLElement | null;
-  const hero = el.closest("section") as HTMLElement | null;
+  const section = el.closest("section") as HTMLElement | null;
   const target: HTMLElement | Window = root ?? window;
   let last: boolean | null = null;
   const check = () => {
-    const top = root ? root.scrollTop : window.scrollY;
-    const height = hero ? hero.clientHeight : window.innerHeight;
-    const covered = top >= height - 1;
+    const r = (section ?? el).getBoundingClientRect();
+    const covered = r.bottom <= 1 || r.top >= window.innerHeight - 1;
     if (covered !== last) {
       last = covered;
       onChange(covered);
