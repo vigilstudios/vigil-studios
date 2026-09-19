@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Film, Trash2, UploadCloud } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
@@ -10,6 +10,7 @@ import { formatBytes } from "@/lib/vigil/attachments";
 import { FILE_ACCEPT, filePath, formatMb, isVideo, validateFileBatch, type FileLimits, type FileUsage } from "@/lib/vigil/files";
 import { PROJECT_ASSETS_BUCKET } from "@/lib/vigil/onboarding/assets";
 import type { SignedAsset } from "@/lib/vigil/queries/onboarding";
+import { FileUploadButton } from "@/components/vigil/FileUploadButton";
 import { Panel } from "@/components/vigil/widgets";
 
 type Progress = { done: number; total: number; current: string; fraction: number };
@@ -30,7 +31,6 @@ export function FilesLibrary({ projectId, projectName, organizationId, initialAs
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
-  const input = useRef<HTMLInputElement | null>(null);
 
   const upload = async (picked: File[]) => {
     setError(null);
@@ -112,10 +112,9 @@ export function FilesLibrary({ projectId, projectName, organizationId, initialAs
             {limits.maxFileBytes !== null ? ` Up to ${formatMb(limits.maxFileBytes)} each.` : ""}
             {roomLeft !== null ? ` Room for ${roomLeft} more.` : ""}
           </p>
-          <input ref={input} type="file" multiple accept={FILE_ACCEPT} className="hidden" onChange={(e) => { void upload(Array.from(e.target.files ?? [])); e.target.value = ""; }} disabled={busy} />
-          <button type="button" onClick={() => input.current?.click()} disabled={busy || roomLeft === 0} className="btn-primary mt-4 min-h-10 !px-4 text-sm">
+          <FileUploadButton ariaLabel="Choose files to add" accept={FILE_ACCEPT} multiple disabled={busy || roomLeft === 0} onFiles={(files) => void upload(files)} className="btn-primary mt-4 min-h-10 items-center justify-center !px-4 text-sm">
             {busy ? "Uploading…" : "Choose files"}
-          </button>
+          </FileUploadButton>
         </div>
         {progress ? (
           <div className="mt-3">
