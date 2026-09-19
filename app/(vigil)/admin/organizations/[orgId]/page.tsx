@@ -345,20 +345,13 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
               {briefProject.intake_completed_at ? `Sent ${formatDateTime(briefProject.intake_completed_at)}` : `In progress · last step ${brief.progress.lastStep}`}
             </StatusPill>
           </div>
-          <p className="mt-1 text-xs text-[color:var(--text-secondary)]">
-            {briefProject.name}. {briefAssets.length} file{briefAssets.length === 1 ? "" : "s"} uploaded{briefAssets.length ? " (links valid 30 minutes)" : ""}.
-          </p>
-          {briefAssets.length > 0 ? (
-            <ul className="mt-2 flex flex-wrap gap-2">
-              {briefAssets.map((a) => (
-                <li key={a.id}>
-                  <a href={a.url ?? "#"} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-md border border-[color:var(--border)] px-2 py-1 text-xs hover:border-[color:var(--accent)]">
-                    <span className="uppercase text-[10px] text-[color:var(--text-secondary)]">{a.kind}</span> {a.file_name}{a.caption ? `: ${a.caption}` : ""}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : null}
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-[color:var(--text-secondary)]">
+              {briefProject.name}. {briefAssets.length} file{briefAssets.length === 1 ? "" : "s"} uploaded
+              {briefAssets.length ? ` (${briefAssets.filter((a) => a.kind === "photo").length} photos, ${briefAssets.filter((a) => a.kind === "video").length} videos, ${briefAssets.filter((a) => a.kind === "logo").length} logos, ${briefAssets.filter((a) => a.kind === "document").length} documents)` : ""}.
+            </p>
+            <Link href={`/admin/organizations/${org.id}/files`} className="btn-secondary text-xs">Open files</Link>
+          </div>
           <div className="mt-3">
             <BriefSummary brief={brief} projectKind={briefProject.kind} assets={briefAssets} domain={briefDomain ? { hostname: briefDomain.hostname, status: briefDomain.status } : null} />
           </div>
