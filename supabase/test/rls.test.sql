@@ -948,4 +948,53 @@ begin
   perform test.logout();
 end $$;
 
+-- --------------------------------------------------------------------------
+-- 0024: project file quotas are entitlements, enforced on the row
+-- --------------------------------------------------------------------------
+do $$
+declare
+  v_org uuid := '10000000-0000-0000-0000-00000000000a';
+  v_project uuid;
+  v_path text;
+begin
+  perform test.login_service();
+  insert into public.projects (organization_id, name, kind, status) values (v_org, 'Quota Test', 'express', 'in_progress') returning id into v_project;
+  perform test.logout();
+
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  perform test.ok((select value from vigil.resolve_entitlements(v_org) where feature_code = 'files.max_count') = '60'::jsonb, 'files: default library limit is 60');
+  v_path := v_org || '/' || v_project || '/big.mp4';
+  perform test.fails(
+    'insert into public.project_assets (organization_id, project_id, kind, object_path, file_name, content_type, size_bytes) values (''' || v_org || ''', ''' || v_project || ''', ''video'', ''' || v_path || ''', ''big.mp4'', ''video/mp4'', 600 * 1048576)',
+    'files: a file above the per-file ceiling is refused');
+  insert into public.project_assets (organization_id, project_id, kind, object_path, file_name, content_type, size_bytes)
+    values (v_org, v_project, 'video', v_org || '/' || v_project || '/clip.mp4', 'clip.mp4', 'video/mp4', 120 * 1048576);
+  perform test.ok(test.count('select 1 from public.project_assets where project_id = ''' || v_project || '''') = 1, 'files: a video within the limits is accepted');
+  perform test.logout();
+
+  -- Tighten the organization's limit with an override and hit it.
+  perform test.login('00000000-0000-0000-0000-00000000000d');
+  insert into public.entitlement_overrides (organization_id, feature_code, value, reason) values (v_org, 'files.max_count', '1'::jsonb, 'test');
+  insert into public.entitlement_overrides (organization_id, feature_code, value, reason) values (v_org, 'files.video_enabled', 'false'::jsonb, 'test');
+  perform test.logout();
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  perform test.fails(
+    'insert into public.project_assets (organization_id, project_id, kind, object_path, file_name, content_type, size_bytes) values (''' || v_org || ''', ''' || v_project || ''', ''photo'', ''' || v_org || '/' || v_project || '/two.png'', ''two.png'', ''image/png'', 10)',
+    'files: the per-organization count override holds');
+  perform test.logout();
+  perform test.login('00000000-0000-0000-0000-00000000000d');
+  delete from public.entitlement_overrides where organization_id = v_org and feature_code = 'files.max_count';
+  perform test.logout();
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  perform test.fails(
+    'insert into public.project_assets (organization_id, project_id, kind, object_path, file_name, content_type, size_bytes) values (''' || v_org || ''', ''' || v_project || ''', ''video'', ''' || v_org || '/' || v_project || '/two.mp4'', ''two.mp4'', ''video/mp4'', 10)',
+    'files: video can be switched off per organization');
+  perform test.logout();
+
+  perform test.login_service();
+  delete from public.entitlement_overrides where organization_id = v_org and feature_code like 'files.%';
+  delete from public.projects where id = v_project;
+  perform test.logout();
+end $$;
+
 drop schema test cascade;

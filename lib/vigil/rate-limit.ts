@@ -40,6 +40,8 @@ export const RATE_LIMITS = {
   autosaveUser: { limit: 300, windowSeconds: 10 * MINUTE },
   /** Change requests per organization. */
   requestOrg: { limit: 30, windowSeconds: HOUR },
+  /** Upload batches recorded per organization (each one emails staff). */
+  filesOrg: { limit: 40, windowSeconds: HOUR },
 } as const satisfies Record<string, RateLimitRule>;
 
 /** The caller's network address as the platform reports it. */

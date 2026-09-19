@@ -73,7 +73,7 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
         failed.push(...uploaded.map((u) => u.name));
       }
     }
-    if (failed.length > 0) setUploadError(`These did not upload: ${failed.join(", ")}. Try again, or send them later from Requests.`);
+    if (failed.length > 0) setUploadError(`These did not upload: ${failed.join(", ")}. Try again, or add them later from Files in your dashboard.`);
     setUploading(null);
   };
 
@@ -140,7 +140,7 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
       {/* Photos */}
       <section>
         <p className="mb-1 text-xs font-medium text-[color:var(--text-secondary)]">Photos <span className="font-normal opacity-70">(optional · up to {MAX_PHOTOS})</span></p>
-        <p className="mb-2 text-[11px] text-[color:var(--text-secondary)]">The place, the people, the work. Phone photos are fine. Add a caption if it helps.</p>
+        <p className="mb-2 text-[11px] text-[color:var(--text-secondary)]">The place, the people, the work. Phone photos are fine. Add a caption if it helps. Videos and more photos can go in Files in your dashboard, any time.</p>
         {photos.length > 0 ? (
           <ul className="mb-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
             {photos.map((a) => (

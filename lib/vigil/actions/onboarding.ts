@@ -14,6 +14,8 @@ import { REGISTRAR_GUIDES } from "@/lib/vigil/domain-guides";
 import { domainKind } from "@/lib/vigil/domains";
 import { domainSchema, parseBrief, SECTION_SCHEMAS, STEP_KEYS, type Brief, type RegistrarKey, type SectionKey, type StepKey } from "@/lib/vigil/onboarding/brief";
 import { PROJECT_ASSETS_BUCKET, validateAssets, type AssetKind } from "@/lib/vigil/onboarding/assets";
+import { resolveEntitlements } from "@/lib/vigil/entitlements";
+import { fileLimitsFor, recordUploadedFiles } from "@/lib/vigil/services/project-files";
 import { detectRegistrar, requiredRecords, type DnsRecord } from "@/lib/vigil/services/dns";
 import { beginDomainVerification, normalizeHostname, verifyDomain } from "@/lib/vigil/services/domain";
 import type { Json } from "@/types/database.types";
@@ -132,46 +134,23 @@ export async function markStep(projectId: string, step: StepKey, completed = fal
 
 export type UploadedAsset = { path: string; name: string; type: string; size: number; caption?: string | null };
 
-/** Record files the browser uploaded straight to the project-assets bucket. */
+/**
+ * Record files the browser uploaded straight to the project-assets bucket
+ * from the wizard. Same path as the Files page: the organization's limits
+ * apply and staff hear about the batch.
+ */
 export async function recordProjectAssets(projectId: string, kind: AssetKind, uploaded: UploadedAsset[]): Promise<ActionResult<{ recorded: { id: string; path: string }[]; failed: string[] }>> {
   try {
     const ctx = await requireOrgContextOrThrow();
-    const { supabase } = await loadProject(ctx, projectId);
+    const { supabase, project } = await loadProject(ctx, projectId);
     const problems = validateAssets(uploaded, kind);
     const bad = new Set(problems.map((p) => p.name));
-    const prefix = `${ctx.organization.id}/${projectId}/`;
-    const recorded: { id: string; path: string }[] = [];
-    const failed: string[] = [];
-    for (const file of uploaded) {
-      if (bad.has(file.name) || bad.has("*") || !file.path.startsWith(prefix)) {
-        failed.push(file.name);
-        continue;
-      }
-      const { data, error } = await supabase
-        .from("project_assets")
-        .insert({
-          organization_id: ctx.organization.id,
-          project_id: projectId,
-          kind,
-          bucket_id: PROJECT_ASSETS_BUCKET,
-          object_path: file.path,
-          file_name: file.name,
-          content_type: file.type,
-          size_bytes: file.size,
-          caption: file.caption ?? null,
-          uploaded_by: ctx.user.id,
-        })
-        .select("id")
-        .single();
-      if (error) {
-        failed.push(file.name);
-        await supabase.storage.from(PROJECT_ASSETS_BUCKET).remove([file.path]).catch(() => undefined);
-      } else {
-        recorded.push({ id: data.id, path: file.path });
-      }
-    }
+    const accepted = uploaded.filter((f) => !bad.has(f.name) && !bad.has("*"));
+    const rejected = uploaded.filter((f) => bad.has(f.name) || bad.has("*")).map((f) => f.name);
+    const limits = fileLimitsFor(await resolveEntitlements(ctx.organization.id));
+    const result = await recordUploadedFiles(supabase, ctx, project, accepted, limits, kind);
     revalidatePath("/dashboard/onboarding");
-    return { ok: true, data: { recorded, failed } };
+    return { ok: true, data: { recorded: result.recorded, failed: [...rejected, ...result.failed] } };
   } catch (error) {
     return toActionError(error);
   }

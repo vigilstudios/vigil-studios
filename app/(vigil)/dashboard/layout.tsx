@@ -80,6 +80,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           { href: "/dashboard", label: "Overview", icon: "overview", exact: true, attention: anythingNeedsAttention },
           { href: "/dashboard/website", label: "Website", icon: "website", attention: websiteNeedsAttention },
           ...(reviewRelevant ? [{ href: "/dashboard/review", label: "Design review", icon: "review" as const, attention: reviewNeedsAttention }] : []),
+          { href: "/dashboard/files", label: "Files", icon: "files" },
           { href: "/dashboard/domain", label: "Domain", icon: "domain", attention: domainNeedsAttention },
           { href: "/dashboard/billing", label: "Subscription", icon: "billing", attention: subscriptionNeedsAttention },
           { href: "/dashboard/requests", label: "Requests", icon: "requests", locked: !ent.enabled(FEATURES.requests) },

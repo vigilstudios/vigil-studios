@@ -11,13 +11,19 @@ export const ALLOWED_ASSET_TYPES: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/webp": "webp",
   "image/gif": "gif",
+  "image/heic": "heic",
+  "image/heif": "heif",
   "image/svg+xml": "svg",
   "application/pdf": "pdf",
+  "video/mp4": "mp4",
+  "video/quicktime": "mov",
+  "video/webm": "webm",
+  "video/x-m4v": "m4v",
 };
 export const IMAGE_ACCEPT = "image/png,image/jpeg,image/webp,image/gif";
 export const LOGO_ACCEPT = "image/png,image/jpeg,image/webp,image/svg+xml,application/pdf";
 
-export type AssetKind = "logo" | "photo" | "document" | "other";
+export type AssetKind = "logo" | "photo" | "document" | "other" | "video";
 export type AssetProblem = { name: string; reason: string };
 
 export function validateAssets(files: { name: string; type: string; size: number }[], kind: AssetKind, existingCount = 0): AssetProblem[] {
@@ -26,7 +32,7 @@ export function validateAssets(files: { name: string; type: string; size: number
     problems.push({ name: "*", reason: `Up to ${MAX_PHOTOS} photos for now; you can send more later.` });
   }
   for (const f of files) {
-    if (!ALLOWED_ASSET_TYPES[f.type]) problems.push({ name: f.name, reason: "Images (PNG, JPEG, WebP, GIF, SVG) or PDF only." });
+    if (!ALLOWED_ASSET_TYPES[f.type] || f.type.startsWith("video/")) problems.push({ name: f.name, reason: "Images (PNG, JPEG, WebP, GIF, SVG) or PDF here; videos go in Files once your dashboard is set up." });
     else if (kind === "photo" && !f.type.startsWith("image/")) problems.push({ name: f.name, reason: "Photos must be images." });
     else if (f.size > MAX_ASSET_BYTES) problems.push({ name: f.name, reason: "Larger than 20 MB." });
     else if (f.size === 0) problems.push({ name: f.name, reason: "Empty file." });

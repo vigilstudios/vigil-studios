@@ -2401,7 +2401,7 @@ export type Database = {
         | "expired"
       org_role: "owner" | "manager" | "member"
       organization_status: "active" | "suspended" | "offboarding" | "closed"
-      project_asset_kind: "logo" | "photo" | "document" | "other"
+      project_asset_kind: "logo" | "photo" | "document" | "other" | "video"
       project_kind: "express" | "professional" | "custom"
       project_phase:
         | "onboarding"
@@ -2743,7 +2743,7 @@ export const Constants = {
       ],
       org_role: ["owner", "manager", "member"],
       organization_status: ["active", "suspended", "offboarding", "closed"],
-      project_asset_kind: ["logo", "photo", "document", "other"],
+      project_asset_kind: ["logo", "photo", "document", "other", "video"],
       project_kind: ["express", "professional", "custom"],
       project_phase: [
         "onboarding",
