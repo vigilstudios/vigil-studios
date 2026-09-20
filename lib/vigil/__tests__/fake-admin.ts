@@ -37,6 +37,7 @@ export class FakeAdmin {
       webhook_events: [["provider", "event_id"]],
       domains: [["organization_id", "hostname"]],
       organizations: [["slug"]],
+      creative_workspaces: [["website_id"]],
     };
     // Column defaults the real schema applies on insert.
     const defaults: Record<string, () => Row> = {
@@ -47,6 +48,7 @@ export class FakeAdmin {
       websites: () => ({ status: "provisioning" }),
       domains: () => ({ status: "pending" }),
       subscriptions: () => ({ status: "incomplete" }),
+      creative_workspaces: () => ({ status: "not_started", generated_files: {}, warnings: [], asset_counts: {}, workflow_version: 1 }),
     };
     const conflictsWith = (payload: Row, ignore?: Row) =>
       (uniqueKeys[table] ?? []).some((cols) => cols.every((c) => payload[c] !== undefined) && rows.some((r) => r !== ignore && cols.every((c) => r[c] === payload[c])));

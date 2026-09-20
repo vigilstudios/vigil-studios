@@ -44,15 +44,18 @@ export function FilesLibrary({ projectId, projectName, organizationId, initialAs
     }
     const supabase = createClient();
     const { uploadToBucket } = await import("@/lib/vigil/storage-upload");
-    const uploaded: { path: string; name: string; type: string; size: number }[] = [];
+    const { sha256Blob } = await import("@/lib/vigil/checksum");
+    const uploaded: { path: string; name: string; type: string; size: number; checksum: string | null }[] = [];
     const failed: string[] = [];
     setProgress({ done: 0, total: files.length, current: files[0].name, fraction: 0 });
     for (const file of files) {
       const path = filePath(organizationId, projectId, file.type, crypto.randomUUID());
       setProgress((p) => (p ? { ...p, current: file.name, fraction: 0 } : p));
       try {
+        // Fingerprint first, streamed, so a large video never sits in memory.
+        const checksum = await sha256Blob(file).catch(() => null);
         await uploadToBucket(supabase, PROJECT_ASSETS_BUCKET, path, file, (fraction) => setProgress((p) => (p ? { ...p, fraction } : p)));
-        uploaded.push({ path, name: file.name, type: file.type, size: file.size });
+        uploaded.push({ path, name: file.name, type: file.type, size: file.size, checksum });
       } catch (err) {
         console.error("upload failed:", err);
         failed.push(file.name);

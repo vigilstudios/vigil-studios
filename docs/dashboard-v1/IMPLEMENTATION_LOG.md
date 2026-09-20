@@ -879,3 +879,41 @@ fail silently.
 - Project progress now follows authoritative delivery events: admin-created work begins at intake, completed onboarding starts the build, a ready preview starts review, Professional revision work returns to build, final approval marks the project approved, and a live website marks it launched with a launch timestamp.
 - Database triggers make the synchronization apply to every code path, deployment services advance through valid intermediate states, and the customer dashboard derives a truthful minimum stage from completed milestones as a final safeguard.
 - Migration `0019` backfills existing rows, including websites that were already live while their linked project remained in draft or intake. Manual admin transitions remain available for exceptional workflows.
+
+## 2026-09-20 — Automated Creative Workspace after Create Repo
+
+- **Create repository** keeps its behaviour and, once the repository exists,
+  queues a separate durable job `website.creative_workspace` for Professional
+  and Custom projects (policy `CREATIVE_WORKSPACE_PROJECT_KINDS`). A model or
+  storage failure there can never roll back or corrupt the repository.
+- The job writes `.vigil/creative/` into the customer repository in one
+  commit: immutable `source/` snapshots of the onboarding brief (internal and
+  private fields redacted, listed in `workspace.json`), Terra's validated
+  intelligence under `intelligence/`, `client-assets/` with an
+  `assets-manifest.json` (small files copied, videos and files over the
+  configurable limit left in storage as manifest entries plus
+  `.reference.json`), empty `outputs/phase-1` and `phase-2`, a versioned
+  `README.md` and `ASTRA_INSTRUCTIONS.md` (source precedence, tool awareness,
+  Phase 1 → human gate → Phase 2, Vigil's creative standard).
+- Terra is `gpt-5.6-terra` via the OpenAI Responses API with strict
+  structured output, the first and only OpenAI integration in the repo
+  (`lib/vigil/creative/terra.ts`). Output is validated against a zod schema
+  before use and stored on the row, so a retry after a Git failure reuses it.
+- Migration `0025` adds staff-only `creative_workspaces` (status, versions,
+  checksums, cached intelligence, generated-file shas, warnings, error,
+  commit). Admin website page gains a Creative workspace card with
+  Generate/Regenerate. Regeneration commits only what changed, never touches
+  `outputs/`, and keeps hand-edited generated files beside a `.v2` copy.
+- `GitHubRepositoryProvider` gains `getBranchHead`, `listTree` and
+  `commitFiles` (Git Data API, non-forced ref update). Deploy preview / live
+  and the deployment service are unchanged; a test asserts the separation.
+- Checks: 265 unit tests (40 new), typecheck, lint, database/RLS validation
+  (new assertions for 0025) and production build pass. Operator notes in
+  `CREATIVE_WORKSPACE.md`. Needs `OPENAI_API_KEY` on Vercel and `db push`.
+- Follow-ups the same day: uploads now stream a SHA-256 in the browser
+  (`lib/vigil/checksum.ts`, migration `0026` adds `project_assets.checksum`)
+  so every manifest entry carries a hash and committed files are verified
+  against it; PDF text layers are read with `pdf-parse` for Terra and saved
+  under `source/documents/`; `next.config.ts` keeps pdf-parse external.
+  First live run against OpenAI reached the API and stopped on "no credits
+  remaining" — the failure shows on the card and the job retries by itself.

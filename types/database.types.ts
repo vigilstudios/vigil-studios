@@ -293,6 +293,113 @@ export type Database = {
         }
         Relationships: []
       }
+      creative_workspaces: {
+        Row: {
+          asset_counts: Json
+          commit_sha: string | null
+          created_at: string
+          error: Json | null
+          finished_at: string | null
+          generated_at: string | null
+          generated_files: Json
+          id: string
+          idempotency_key: string | null
+          intelligence: Json | null
+          intelligence_at: string | null
+          intelligence_usage: Json | null
+          model_id: string | null
+          organization_id: string
+          project_id: string | null
+          prompt_version: number | null
+          schema_version: number | null
+          source_checksum: string | null
+          started_at: string | null
+          status: string
+          template_version: number | null
+          updated_at: string
+          warnings: Json
+          website_id: string
+          workflow_version: number
+        }
+        Insert: {
+          asset_counts?: Json
+          commit_sha?: string | null
+          created_at?: string
+          error?: Json | null
+          finished_at?: string | null
+          generated_at?: string | null
+          generated_files?: Json
+          id?: string
+          idempotency_key?: string | null
+          intelligence?: Json | null
+          intelligence_at?: string | null
+          intelligence_usage?: Json | null
+          model_id?: string | null
+          organization_id: string
+          project_id?: string | null
+          prompt_version?: number | null
+          schema_version?: number | null
+          source_checksum?: string | null
+          started_at?: string | null
+          status?: string
+          template_version?: number | null
+          updated_at?: string
+          warnings?: Json
+          website_id: string
+          workflow_version?: number
+        }
+        Update: {
+          asset_counts?: Json
+          commit_sha?: string | null
+          created_at?: string
+          error?: Json | null
+          finished_at?: string | null
+          generated_at?: string | null
+          generated_files?: Json
+          id?: string
+          idempotency_key?: string | null
+          intelligence?: Json | null
+          intelligence_at?: string | null
+          intelligence_usage?: Json | null
+          model_id?: string | null
+          organization_id?: string
+          project_id?: string | null
+          prompt_version?: number | null
+          schema_version?: number | null
+          source_checksum?: string | null
+          started_at?: string | null
+          status?: string
+          template_version?: number | null
+          updated_at?: string
+          warnings?: Json
+          website_id?: string
+          workflow_version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creative_workspaces_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creative_workspaces_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creative_workspaces_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: true
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+
       deployments: {
         Row: {
           commit_ref: string | null
@@ -1341,6 +1448,7 @@ export type Database = {
         Row: {
           bucket_id: string
           caption: string | null
+          checksum: string | null
           content_type: string
           created_at: string
           file_name: string
@@ -1355,6 +1463,7 @@ export type Database = {
         Insert: {
           bucket_id?: string
           caption?: string | null
+          checksum?: string | null
           content_type: string
           created_at?: string
           file_name: string
@@ -1369,6 +1478,7 @@ export type Database = {
         Update: {
           bucket_id?: string
           caption?: string | null
+          checksum?: string | null
           content_type?: string
           created_at?: string
           file_name?: string

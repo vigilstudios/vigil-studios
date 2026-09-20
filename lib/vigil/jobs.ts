@@ -7,6 +7,8 @@ import { notifyCustomerDeployment } from "./services/deployment-notifications";
 import { beginDomainVerification, verifyDomain } from "./services/domain";
 import { provisionOrder } from "./services/orders";
 import { provisionWebsiteRepository } from "./services/repository";
+import { CREATIVE_WORKSPACE_JOB_KIND, creativeWorkspaceJobKey, shouldAutoGenerate } from "./creative/enqueue";
+import { generateCreativeWorkspace, markCreativeWorkspaceQueued } from "./creative/service";
 
 /**
  * Durable, idempotent background work (master architecture §9).
@@ -20,6 +22,7 @@ export const JOB_KINDS = {
   websiteProvision: "website.provision",
   websiteDeploy: "website.deploy",
   websiteRepository: "website.repository",
+  websiteCreativeWorkspace: CREATIVE_WORKSPACE_JOB_KIND,
   deploymentSync: "website.deployment.sync",
   deploymentNotify: "website.deployment.notify",
   domainConnect: "domain.connect",
@@ -88,7 +91,27 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
   [JOB_KINDS.websiteRepository]: async ({ admin, job }) => {
     if (!job.website_id) throw new Error("website.repository requires website_id");
     const result = await provisionWebsiteRepository(admin, job.website_id);
-    return { repository_id: result.repositoryId, repository: result.fullName, created: result.created };
+    // The creative hand-off is its own durable job: a model or storage
+    // failure there never touches the repository this job just made.
+    const creative = await shouldAutoGenerate(admin, job.website_id);
+    if (creative.generate) {
+      await markCreativeWorkspaceQueued(admin, { websiteId: job.website_id, organizationId: creative.organizationId, projectId: creative.projectId });
+      await enqueueJob(admin, {
+        kind: JOB_KINDS.websiteCreativeWorkspace,
+        idempotencyKey: creativeWorkspaceJobKey(job.website_id),
+        organizationId: job.organization_id,
+        websiteId: job.website_id,
+        maxAttempts: 6,
+        createdBy: job.created_by,
+        requeueFailed: true,
+      });
+    }
+    return { repository_id: result.repositoryId, repository: result.fullName, created: result.created, creative_workspace_queued: creative.generate };
+  },
+  [JOB_KINDS.websiteCreativeWorkspace]: async ({ admin, job }) => {
+    if (!job.website_id) throw new Error("website.creative_workspace requires website_id");
+    const result = await generateCreativeWorkspace(admin, job.website_id);
+    return { status: result.status, commit_sha: result.commitSha, written: result.written, preserved: result.preserved, intelligence: result.intelligence, warnings: result.warnings.length };
   },
   [JOB_KINDS.deploymentSync]: async ({ admin, job }) => {
     const deploymentId = (job.payload as { deployment_id?: string } | null)?.deployment_id;

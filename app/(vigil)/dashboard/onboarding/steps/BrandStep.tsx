@@ -49,13 +49,15 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
     }
     setUploading({ kind, done: 0, total: files.length });
     const supabase = createClient();
-    const uploaded: { path: string; name: string; type: string; size: number }[] = [];
+    const { sha256Blob } = await import("@/lib/vigil/checksum");
+    const uploaded: { path: string; name: string; type: string; size: number; checksum: string | null }[] = [];
     const failed: string[] = [];
     for (const file of files) {
       const path = assetPath(organizationId, projectId, file.type, crypto.randomUUID());
+      const checksum = await sha256Blob(file).catch(() => null);
       const { error } = await supabase.storage.from(PROJECT_ASSETS_BUCKET).upload(path, file, { contentType: file.type, upsert: false });
       if (error) failed.push(file.name);
-      else uploaded.push({ path, name: file.name, type: file.type, size: file.size });
+      else uploaded.push({ path, name: file.name, type: file.type, size: file.size, checksum });
       setUploading((u) => (u ? { ...u, done: u.done + 1 } : u));
     }
     if (uploaded.length > 0) {

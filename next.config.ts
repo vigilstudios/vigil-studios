@@ -76,6 +76,9 @@ const nextConfig: NextConfig = {
   // 127.0.0.1 counts as a different origin from localhost. Without this,
   // pages opened at http://127.0.0.1:3000 render but never hydrate.
   allowedDevOrigins: ["127.0.0.1"],
+  // pdf-parse (creative workspace document text) ships pdfjs and an optional
+  // native canvas; both must stay unbundled and load from node_modules.
+  serverExternalPackages: ["pdf-parse", "pdfjs-dist", "@napi-rs/canvas"],
 };
 
 export default nextConfig;

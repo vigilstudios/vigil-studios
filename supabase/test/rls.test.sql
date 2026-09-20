@@ -997,4 +997,41 @@ begin
   perform test.logout();
 end $$;
 
+-- --------------------------------------------------------------------------
+-- 0025 Creative workspaces: staff only, one per website, same organization
+-- --------------------------------------------------------------------------
+do $$
+declare
+  v_org_a uuid := '10000000-0000-0000-0000-00000000000a';
+  v_org_b uuid := '10000000-0000-0000-0000-00000000000b';
+  v_site_a uuid := '20000000-0000-0000-0000-00000000000a';
+begin
+  perform test.login('00000000-0000-0000-0000-00000000000c');
+  insert into public.creative_workspaces (organization_id, website_id, status) values (v_org_a, v_site_a, 'queued');
+  perform test.ok(test.count('select 1 from public.creative_workspaces') = 1, 'creative: staff can record a workspace');
+  perform test.fails(
+    'insert into public.creative_workspaces (organization_id, website_id) values (''' || v_org_a || ''', ''' || v_site_a || ''')',
+    'creative: one record per website');
+  perform test.fails(
+    'insert into public.creative_workspaces (organization_id, website_id) values (''' || v_org_b || ''', ''' || v_site_a || ''')',
+    'creative: the website must belong to the organization');
+  perform test.fails(
+    'update public.creative_workspaces set status = ''done'' where website_id = ''' || v_site_a || '''',
+    'creative: status is limited to the known set');
+  perform test.logout();
+
+  perform test.login('00000000-0000-0000-0000-00000000000a');
+  perform test.ok(test.count('select 1 from public.creative_workspaces') = 0, 'alice: generation state is hidden from customers');
+  perform test.fails(
+    'insert into public.creative_workspaces (organization_id, website_id) values (''' || v_org_a || ''', ''' || v_site_a || ''')',
+    'alice: cannot record a workspace');
+  perform test.logout();
+
+  perform test.login_service();
+  update public.creative_workspaces set status = 'ready', commit_sha = 'abc' where website_id = v_site_a;
+  perform test.ok((select status from public.creative_workspaces where website_id = v_site_a) = 'ready', 'service: the job runner updates status');
+  delete from public.creative_workspaces where website_id = v_site_a;
+  perform test.logout();
+end $$;
+
 drop schema test cascade;

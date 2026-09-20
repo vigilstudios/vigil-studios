@@ -118,6 +118,26 @@ export const getWebsiteDetail = cache(async (websiteId: string) => {
   return { website: site.data, deployments: deployments.data ?? [], domains: domains.data ?? [], links: links.data ?? [], jobs: jobs.data ?? [] };
 });
 
+/** Creative Workspace generation state for a website; null until Create Repo has queued one. */
+export const getCreativeWorkspace = cache(async (websiteId: string) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("creative_workspaces")
+    .select("id, status, warnings, error, model_id, workflow_version, prompt_version, schema_version, template_version, source_checksum, asset_counts, commit_sha, generated_at, intelligence_at, started_at, finished_at, updated_at")
+    .eq("website_id", websiteId)
+    .maybeSingle();
+  if (error) {
+    // Migration 0025 not applied yet: the website page (and its deploy
+    // buttons) must keep working; the card shows "Not started" meanwhile.
+    if (error.code === "42P01" || error.code === "PGRST205") {
+      console.error("creative_workspaces is missing: apply migration 0025 (npx supabase db push).");
+      return null;
+    }
+    throw error;
+  }
+  return data;
+});
+
 export const listDomains = cache(async () => {
   const supabase = await createClient();
   const { data, error } = await supabase

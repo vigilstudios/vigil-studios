@@ -30,6 +30,8 @@ import { Constants } from "@/types/database.types";
 import { isAvailableExpressTemplateSlug } from "@/lib/constants";
 import { assertProductionDeployAllowed } from "@/lib/vigil/project-reviews";
 import { assertWebsiteRepositoryReady } from "@/lib/vigil/services/repository";
+import { creativeWorkspaceJobKey } from "@/lib/vigil/creative/enqueue";
+import { markCreativeWorkspaceQueued } from "@/lib/vigil/creative/service";
 
 /**
  * Staff operations. Every action re-verifies staff (or admin) membership,
@@ -341,26 +343,33 @@ export async function updateWebsiteFields(websiteId: string, formData: FormData)
 
 export async function enqueueWebsiteJob(
   websiteId: string,
-  kind: "website.repository" | "website.provision" | "website.deploy",
+  kind: "website.repository" | "website.provision" | "website.deploy" | "website.creative_workspace",
   environment: "production" | "preview" = "production"
 ): Promise<ActionResult<{ jobId: string }>> {
   try {
     const staff = await requireStaffOrThrow();
     const supabase = await createClient();
-    const { data: site, error } = await supabase.from("websites").select("id, organization_id").eq("id", websiteId).maybeSingle();
+    const { data: site, error } = await supabase.from("websites").select("id, organization_id, project_id").eq("id", websiteId).maybeSingle();
     if (error) throw error;
     if (!site) throw new NotFoundError();
     if (kind === JOB_KINDS.websiteDeploy) {
       await assertWebsiteRepositoryReady(supabase, websiteId);
       if (environment === "production") await assertProductionDeployAllowed(supabase, websiteId);
     }
-    // Provisioning is once per site; a deploy can be re-queued, but a double
-    // click inside the same minute collapses into one job.
+    if (kind === JOB_KINDS.websiteCreativeWorkspace) {
+      await assertWebsiteRepositoryReady(supabase, websiteId);
+      await markCreativeWorkspaceQueued(supabase, { websiteId, organizationId: site.organization_id, projectId: site.project_id });
+    }
+    // Provisioning is once per site; a deploy or a creative regeneration can
+    // be re-queued, but a double click inside the same minute collapses into
+    // one job.
     const key = kind === JOB_KINDS.websiteRepository
       ? `website.repository:${websiteId}`
       : kind === JOB_KINDS.websiteProvision
         ? `website.provision:${websiteId}`
-        : `website.deploy:${websiteId}:${environment}:${minuteBucket()}`;
+        : kind === JOB_KINDS.websiteCreativeWorkspace
+          ? creativeWorkspaceJobKey(websiteId, minuteBucket())
+          : `website.deploy:${websiteId}:${environment}:${minuteBucket()}`;
     const job = await enqueueJob(supabase, {
       kind,
       idempotencyKey: key,

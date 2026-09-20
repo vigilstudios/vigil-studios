@@ -132,7 +132,7 @@ export async function markStep(projectId: string, step: StepKey, completed = fal
   }
 }
 
-export type UploadedAsset = { path: string; name: string; type: string; size: number; caption?: string | null };
+export type UploadedAsset = { path: string; name: string; type: string; size: number; caption?: string | null; checksum?: string | null };
 
 /**
  * Record files the browser uploaded straight to the project-assets bucket

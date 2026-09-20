@@ -9,8 +9,10 @@ import type { Entitlements } from "@/lib/vigil/entitlements";
 import { FILE_FEATURES, MB, isVideo, kindForType, validateFileBatch, type FileLimits, type FileUsage } from "@/lib/vigil/files";
 import { logAuditEvent } from "@/lib/vigil/audit";
 import { PROJECT_ASSETS_BUCKET, type AssetKind } from "@/lib/vigil/onboarding/assets";
+import { isSha256Hex } from "@/lib/vigil/checksum";
 
-export type UploadedFile = { path: string; name: string; type: string; size: number; caption?: string | null };
+/** `checksum` is the browser's streamed SHA-256 of the file; absent for uploads that could not hash. */
+export type UploadedFile = { path: string; name: string; type: string; size: number; caption?: string | null; checksum?: string | null };
 export type RecordedFile = { id: string; path: string; kind: AssetKind };
 
 export function fileLimitsFor(ent: Entitlements): FileLimits {
@@ -79,6 +81,7 @@ export async function recordUploadedFiles(
         content_type: file.type,
         size_bytes: file.size,
         caption: file.caption ?? null,
+        checksum: isSha256Hex(file.checksum) ? file.checksum : null,
         uploaded_by: ctx.user.id,
       })
       .select("id")

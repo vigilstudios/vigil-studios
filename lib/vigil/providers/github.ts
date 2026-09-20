@@ -9,6 +9,22 @@ export type GitHubRepository = {
   defaultBranch: string;
 };
 
+export type GitHubBranchHead = { branch: string; commitSha: string; treeSha: string };
+
+/** The branch moved between reading its head and updating it; read again and decide again. */
+export class GitHubRefMovedError extends ProviderError {
+  constructor(branch: string) {
+    super("github", `The ${branch} branch changed while the commit was being prepared.`, { retryable: true, status: 422 });
+    this.name = "GitHubRefMovedError";
+  }
+}
+
+/** Repository-relative, forward-slash, no traversal, no absolute or hidden-escape segments. */
+export function assertRepositoryPath(filePath: string): void {
+  const ok = filePath.length > 0 && filePath.length <= 400 && !filePath.startsWith("/") && !filePath.includes("\\") && !filePath.includes("\0") && filePath.split("/").every((segment) => segment.length > 0 && segment !== "." && segment !== "..");
+  if (!ok) throw new ProviderError("github", `Refusing to write an unsafe repository path: ${JSON.stringify(filePath.slice(0, 80))}`);
+}
+
 type GitHubRepoResponse = {
   id: number;
   full_name: string;
@@ -62,6 +78,59 @@ export class GitHubRepositoryProvider {
       if (blob.encoding !== "base64" || !blob.content) throw new ProviderError("github", `GitHub could not return ${entry.path}.`);
       return { path: /^readme\.md$/i.test(entry.path) ? "PROJECT-README.md" : entry.path, content: Buffer.from(blob.content.replace(/\n/g, ""), "base64") };
     }));
+  }
+
+  /** The branch tip and its tree, read together so a commit can be built on exactly what was seen. */
+  async getBranchHead(fullName: string, branch: string): Promise<GitHubBranchHead> {
+    const repoPath = this.repoPath(fullName);
+    const response = await this.api(`/repos/${repoPath}/branches/${encodeURIComponent(branch)}`) as { name?: string; commit?: { sha?: string; commit?: { tree?: { sha?: string } } } };
+    if (!response.commit?.sha || !response.commit.commit?.tree?.sha) throw new ProviderError("github", `GitHub returned an incomplete branch for ${branch}.`);
+    return { branch, commitSha: response.commit.sha, treeSha: response.commit.commit.tree.sha };
+  }
+
+  /** Blob paths and shas under a prefix. Refuses a truncated listing rather than guessing what is there. */
+  async listTree(fullName: string, treeSha: string, prefix: string): Promise<Map<string, string>> {
+    const repoPath = this.repoPath(fullName);
+    const tree = await this.api(`/repos/${repoPath}/git/trees/${encodeURIComponent(treeSha)}?recursive=1`) as { truncated?: boolean; tree?: { path: string; type: string; sha: string }[] };
+    if (tree.truncated) throw new ProviderError("github", "The repository tree is too large to read safely.");
+    const entries = new Map<string, string>();
+    for (const entry of tree.tree ?? []) if (entry.type === "blob" && entry.path.startsWith(prefix)) entries.set(entry.path, entry.sha);
+    return entries;
+  }
+
+  /**
+   * One commit that adds or replaces the given files on top of `parent`,
+   * touching nothing else. The ref update is not forced: if the branch moved
+   * since `parent` was read, GitHub refuses and the caller re-reads and
+   * decides again, so two workers cannot silently stack commits.
+   */
+  async commitFiles(fullName: string, input: { branch: string; parentSha: string; baseTreeSha: string; message: string; files: { path: string; content: Buffer | string }[] }): Promise<{ commitSha: string; treeSha: string }> {
+    if (!this.token) throw new ProviderNotConfiguredError("GitHub repository access");
+    const repoPath = this.repoPath(fullName);
+    const tree: { path: string; mode: "100644"; type: "blob"; sha: string }[] = [];
+    for (const file of input.files) {
+      assertRepositoryPath(file.path);
+      const blob = await this.api(`/repos/${repoPath}/git/blobs`, { method: "POST", body: { content: Buffer.from(file.content).toString("base64"), encoding: "base64" } }) as { sha?: string };
+      if (!blob.sha) throw new ProviderError("github", `GitHub did not return a blob for ${file.path}.`, { retryable: true });
+      tree.push({ path: file.path, mode: "100644", type: "blob", sha: blob.sha });
+    }
+    const created = await this.api(`/repos/${repoPath}/git/trees`, { method: "POST", body: { base_tree: input.baseTreeSha, tree } }) as { sha?: string };
+    if (!created.sha) throw new ProviderError("github", "GitHub did not return a tree.", { retryable: true });
+    const commit = await this.api(`/repos/${repoPath}/git/commits`, { method: "POST", body: { message: input.message, tree: created.sha, parents: [input.parentSha] } }) as { sha?: string };
+    if (!commit.sha) throw new ProviderError("github", "GitHub did not return a commit.", { retryable: true });
+    try {
+      await this.api(`/repos/${repoPath}/git/refs/heads/${encodeURIComponent(input.branch)}`, { method: "PATCH", body: { sha: commit.sha, force: false } });
+    } catch (error) {
+      if (error instanceof ProviderError && error.status === 422) throw new GitHubRefMovedError(input.branch);
+      throw error;
+    }
+    return { commitSha: commit.sha, treeSha: created.sha };
+  }
+
+  private repoPath(fullName: string): string {
+    if (!this.token) throw new ProviderNotConfiguredError("GitHub repository access");
+    if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(fullName)) throw new ProviderError("github", "The repository reference is invalid.");
+    return fullName.split("/").map(encodeURIComponent).join("/");
   }
 
   async deleteRepository(fullName: string): Promise<void> {

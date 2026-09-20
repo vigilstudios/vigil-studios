@@ -7,7 +7,8 @@ import { enqueueDomainJob, enqueueWebsiteJob, setWebsiteStatus, updateWebsiteFie
 import { requireStaff } from "@/lib/vigil/auth/session";
 import { formatDateTime, titleCase } from "@/lib/vigil/format";
 import { websiteTransitions } from "@/lib/vigil/lifecycle";
-import { getWebsiteDetail } from "@/lib/vigil/queries/admin";
+import { getCreativeWorkspace, getWebsiteDetail } from "@/lib/vigil/queries/admin";
+import { CreativeWorkspaceCard } from "@/components/vigil/CreativeWorkspaceCard";
 import { AVAILABLE_EXPRESS_TEMPLATES } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import { getExpressPreviewReview } from "@/lib/vigil/express-preview-review";
@@ -24,9 +25,10 @@ export default async function WebsiteDetailPage({ params }: { params: Promise<{ 
   const repository = links.find((link) => link.resource_kind === "repository");
   const repositoryUrl = (repository?.metadata as { html_url?: string } | undefined)?.html_url;
   const supabase = await createClient();
-  const [launchReadiness, expressReview] = await Promise.all([
+  const [launchReadiness, expressReview, creativeWorkspace] = await Promise.all([
     getReviewDeployReadiness(supabase, w.id),
     w.project?.kind === "express" ? getExpressPreviewReview(supabase, w.id) : Promise.resolve(null),
+    getCreativeWorkspace(w.id),
   ]);
   const previewDisabledReason = repositoryUrl ? undefined : "Create the repository first.";
   const liveDisabledReason = !repositoryUrl ? "Create the repository first." : !launchReadiness.allowed ? launchReadiness.reason ?? "Customer approval is required." : undefined;
@@ -128,6 +130,8 @@ export default async function WebsiteDetailPage({ params }: { params: Promise<{ 
           </ActionForm>
         </Card>
       </div>
+
+      <CreativeWorkspaceCard websiteId={w.id} workspace={creativeWorkspace} repositoryUrl={repositoryUrl} projectKind={w.project?.kind} />
 
       <Card className="mt-4">
         <h2 className="text-base font-semibold">Domains</h2>
