@@ -75,10 +75,19 @@ export default async function CustomerFilesPage({ params }: { params: Promise<{ 
         description={
           <>
             {files.length} file{files.length === 1 ? "" : "s"} · {formatBytes(totalBytes)}
-            {projects.length > 1 ? ` · ${projects.length} projects` : ""}. Links stay valid for an hour; Download keeps the original file name.
+            {projects.length > 1 ? ` · ${projects.length} projects` : ""}. Links stay valid for an hour; Download keeps the original file name, and Download all packs every file into one zip.
           </>
         }
-        actions={<Link href={`/admin/organizations/${org.id}`} className="btn-secondary text-sm">Back to customer</Link>}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Link href={`/admin/organizations/${org.id}`} className="btn-secondary text-sm">Back to customer</Link>
+            {files.length > 0 ? (
+              <a href={`/api/admin/organizations/${org.id}/files.zip`} download className="btn-primary inline-flex items-center gap-1.5 text-sm">
+                <Download className="h-4 w-4" aria-hidden /> Download all (.zip)
+              </a>
+            ) : null}
+          </div>
+        }
       />
 
       <nav className="mb-4 flex flex-wrap gap-2 text-xs">
