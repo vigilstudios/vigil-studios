@@ -79,6 +79,12 @@ const nextConfig: NextConfig = {
   // pdf-parse (creative workspace document text) ships pdfjs and an optional
   // native canvas; both must stay unbundled and load from node_modules.
   serverExternalPackages: ["pdf-parse", "pdfjs-dist", "@napi-rs/canvas"],
+  // pdfjs loads its worker module by dynamic import at runtime, which file
+  // tracing cannot see. Jobs run from the cron route, admin actions and the
+  // checkout success page, so every server function ships the build (~3 MB).
+  outputFileTracingIncludes: {
+    "/**": ["./node_modules/pdfjs-dist/legacy/build/**", "./node_modules/pdf-parse/dist/**"],
+  },
 };
 
 export default nextConfig;
