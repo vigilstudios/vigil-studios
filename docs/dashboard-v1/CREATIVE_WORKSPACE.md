@@ -98,9 +98,13 @@ storage), `verified` (the stored bytes were downloaded and matched the upload
 hash), `download` (computed now; the row predates 0026 or the upload could not
 hash). A mismatch between stored bytes and the upload hash is a warning and is
 recorded on the entry. Files at or under
-`CREATIVE_ASSET_INLINE_MAX_BYTES` (default 5 MB) whose type is not in
+`CREATIVE_ASSET_INLINE_MAX_BYTES` (default 25 MB) whose type is not in
 `CREATIVE_ASSET_EXTERNAL_TYPES` (default `video/`) are copied into
-`client-assets/<category>/`. Everything else stays in storage and is
+`client-assets/<category>/`, in upload order, until the workspace's total
+inline budget `CREATIVE_ASSET_INLINE_TOTAL_MAX_BYTES` (default 600 MB) is
+spent — the job holds every copied file in memory before its single commit,
+so the budget is what keeps a large library from exhausting the function.
+Everything else stays in storage and is
 represented by the manifest entry plus a small `<name>.reference.json`.
 Filenames are sanitised to `[A-Za-z0-9._-]`, the extension comes from the MIME
 type, and collisions get `-2`, `-3` … in upload order. A file storage cannot
@@ -118,7 +122,8 @@ return is marked `failed` and warned about; the run continues.
 | `CREATIVE_MAX_OUTPUT_TOKENS` | `16000` | |
 | `CREATIVE_MAX_INPUT_CHARS` | `60000` | Brief text sent to the model; longer briefs are truncated with a marker |
 | `CREATIVE_REQUEST_TIMEOUT_MS` | `180000` | |
-| `CREATIVE_ASSET_INLINE_MAX_BYTES` | `5242880` | Git inclusion limit |
+| `CREATIVE_ASSET_INLINE_MAX_BYTES` | `26214400` | Git inclusion limit per file (25 MB) |
+| `CREATIVE_ASSET_INLINE_TOTAL_MAX_BYTES` | `629145600` | Total copied into one workspace (600 MB) |
 | `CREATIVE_ASSET_EXTERNAL_TYPES` | `video/` | MIME prefixes never committed |
 | `CREATIVE_DOCUMENT_TEXT` | `true` | Read PDF text layers for Terra |
 | `CREATIVE_DOCUMENT_TEXT_MAX_BYTES` | `15728640` | PDFs above this are not read |

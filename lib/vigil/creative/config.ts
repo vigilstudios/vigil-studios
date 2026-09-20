@@ -29,6 +29,8 @@ export type CreativeConfig = {
   requestTimeoutMs: number;
   /** Git inclusion policy: files at or under this size are copied into the repository. */
   inlineAssetMaxBytes: number;
+  /** Ceiling on the bytes copied into one workspace; later files stay in storage once it is reached. */
+  inlineAssetTotalMaxBytes: number;
   /** MIME prefixes that stay in object storage whatever their size. */
   externalOnlyTypes: string[];
   /** Read the text layer of customer PDFs for Terra and Astra. */
@@ -62,7 +64,8 @@ export function readCreativeConfig(env: Record<string, string | undefined> = pro
     maxOutputTokens: int(env.CREATIVE_MAX_OUTPUT_TOKENS, 16_000),
     maxInputChars: int(env.CREATIVE_MAX_INPUT_CHARS, 60_000),
     requestTimeoutMs: int(env.CREATIVE_REQUEST_TIMEOUT_MS, 180_000),
-    inlineAssetMaxBytes: int(env.CREATIVE_ASSET_INLINE_MAX_BYTES, 5 * 1024 * 1024),
+    inlineAssetMaxBytes: int(env.CREATIVE_ASSET_INLINE_MAX_BYTES, 25 * 1024 * 1024),
+    inlineAssetTotalMaxBytes: int(env.CREATIVE_ASSET_INLINE_TOTAL_MAX_BYTES, 600 * 1024 * 1024),
     externalOnlyTypes: (env.CREATIVE_ASSET_EXTERNAL_TYPES ?? "video/").split(",").map((s) => s.trim()).filter(Boolean),
     documentText: (env.CREATIVE_DOCUMENT_TEXT ?? "true").toLowerCase() !== "false",
     documentTextMaxBytes: int(env.CREATIVE_DOCUMENT_TEXT_MAX_BYTES, 15 * 1024 * 1024),

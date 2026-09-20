@@ -54,14 +54,17 @@ export type ManifestEntry = {
 export type AssetPlan = { entry: ManifestEntry; inline: boolean };
 
 /** Decide, deterministically, where each asset goes. Order is by upload time then id so names never shuffle between runs. */
-export function planAssets(rows: AssetRow[], config: Pick<CreativeConfig, "inlineAssetMaxBytes" | "externalOnlyTypes">): AssetPlan[] {
+export function planAssets(rows: AssetRow[], config: Pick<CreativeConfig, "inlineAssetMaxBytes" | "inlineAssetTotalMaxBytes" | "externalOnlyTypes">): AssetPlan[] {
   const sorted = [...rows].sort((a, b) => a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id));
   const taken = new Set<string>();
+  let budget = config.inlineAssetTotalMaxBytes;
   return sorted.map((row) => {
     const category = CATEGORY_FOR_KIND[row.kind] ?? "references";
     const filename = uniqueName(safeFilename(row.file_name, row.content_type), category, taken);
-    const externalReason = externalOnlyReason(row, config);
+    let externalReason = externalOnlyReason(row, config);
+    if (externalReason === null && row.size_bytes > budget) externalReason = `The ${Math.round(config.inlineAssetTotalMaxBytes / (1024 * 1024))} MB Git inclusion budget for this workspace was reached.`;
     const inline = externalReason === null;
+    if (inline) budget -= row.size_bytes;
     const dir = `${CREATIVE_WORKSPACE_ROOT}/client-assets/${category}`;
     return {
       inline,

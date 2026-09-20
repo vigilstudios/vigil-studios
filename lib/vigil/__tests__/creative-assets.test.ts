@@ -77,4 +77,15 @@ describe("asset manifest and Git inclusion policy", () => {
     expect(build.assetCounts).toMatchObject({ total: 2, committed: 1, external: 1, failed: 0, logos: 1, videos: 1 });
     expect(build.warnings.some((w) => w.includes("stayed in storage"))).toBe(true);
   });
+
+  it("stops copying once the per-workspace budget is spent, in upload order", () => {
+    const tight = readCreativeConfig({ CREATIVE_ASSET_INLINE_MAX_BYTES: String(10 * 1024 * 1024), CREATIVE_ASSET_INLINE_TOTAL_MAX_BYTES: String(12 * 1024 * 1024) });
+    const plans = planAssets(
+      [row({ id: "p1", file_name: "a.jpg", size_bytes: 8 * 1024 * 1024 }), row({ id: "p2", file_name: "b.jpg", size_bytes: 8 * 1024 * 1024, created_at: "2026-09-02T00:00:00Z" }), row({ id: "p3", file_name: "c.jpg", size_bytes: 3 * 1024 * 1024, created_at: "2026-09-03T00:00:00Z" })],
+      tight
+    );
+    expect(plans.map((p) => [p.entry.id, p.inline])).toEqual([["p1", true], ["p2", false], ["p3", true]]);
+    expect(plans[1].entry.reason).toMatch(/12 MB Git inclusion budget/);
+    expect(readCreativeConfig({}).inlineAssetMaxBytes).toBe(25 * 1024 * 1024);
+  });
 });
