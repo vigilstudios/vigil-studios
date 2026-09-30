@@ -145,6 +145,111 @@ export function DistributionBar({ segments, total }: { segments: { label: string
   );
 }
 
+export type ChartSegment = {
+  label: string;
+  value: number;
+  color: string;
+  tone?: Tone;
+};
+
+/** Donut chart: a compact current-state breakdown with a complete text legend. */
+export function DonutChart({
+  title,
+  segments,
+  centerValue,
+  centerLabel,
+}: {
+  title: string;
+  segments: ChartSegment[];
+  centerValue: ReactNode;
+  centerLabel: string;
+}) {
+  const total = segments.reduce((sum, segment) => sum + Math.max(segment.value, 0), 0);
+  let offset = 0;
+  const summary = segments.map((segment) => `${segment.label}: ${segment.value}`).join(", ");
+
+  return (
+    <div className="rounded-lg bg-[color:var(--bg-surface-soft)] p-3">
+      <h3 className="text-xs font-semibold">{title}</h3>
+      <div className="mt-3 flex items-center gap-4">
+        <div className="relative h-24 w-24 shrink-0">
+          <svg viewBox="0 0 42 42" className="h-full w-full" role="img" aria-label={`${title}. ${summary}`}>
+            <circle cx="21" cy="21" r="15.9155" fill="none" stroke="var(--track)" strokeWidth="5.5" />
+            {total > 0
+              ? segments.map((segment) => {
+                  const portion = (Math.max(segment.value, 0) / total) * 100;
+                  const dashOffset = -offset;
+                  offset += portion;
+                  if (portion === 0) return null;
+                  return (
+                    <circle
+                      key={segment.label}
+                      cx="21"
+                      cy="21"
+                      r="15.9155"
+                      fill="none"
+                      stroke={segment.color}
+                      strokeWidth="5.5"
+                      strokeDasharray={`${portion} ${100 - portion}`}
+                      strokeDashoffset={dashOffset}
+                      transform="rotate(-90 21 21)"
+                    />
+                  );
+                })
+              : null}
+          </svg>
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+            <span className="text-xl font-semibold leading-none tabular-nums">{centerValue}</span>
+            <span className="mt-1 text-[9px] font-medium uppercase tracking-[0.12em] text-[color:var(--text-secondary)]">{centerLabel}</span>
+          </div>
+        </div>
+        <ul className="min-w-0 flex-1 space-y-2 text-[11px]">
+          {segments.map((segment) => (
+            <li key={segment.label} className="flex min-w-0 items-center gap-2">
+              {segment.tone ? (
+                <ToneIcon tone={segment.tone} className="h-3 w-3" />
+              ) : (
+                <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: segment.color }} aria-hidden />
+              )}
+              <span className="min-w-0 flex-1 truncate text-[color:var(--text-secondary)]">{segment.label}</span>
+              <span className="font-semibold tabular-nums text-[color:var(--text-primary)]">{segment.value}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+/** Horizontal bar chart: compares current counts without implying a time trend. */
+export function HorizontalBarChart({ title, items }: { title: string; items: { label: string; value: number; tone: Tone }[] }) {
+  const max = Math.max(...items.map((item) => item.value), 1);
+  return (
+    <div>
+      <h3 className="text-xs font-semibold">{title}</h3>
+      <ul className="mt-3 grid gap-x-5 gap-y-3 sm:grid-cols-2">
+        {items.map((item) => (
+          <li key={item.label}>
+            <div className="mb-1.5 flex items-center justify-between gap-3 text-[11px]">
+              <span className="flex min-w-0 items-center gap-1.5 text-[color:var(--text-secondary)]">
+                <ToneIcon tone={item.tone} className="h-3 w-3" />
+                <span className="truncate">{item.label}</span>
+              </span>
+              <span className="font-semibold tabular-nums">{item.value}</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-[color:var(--track)]">
+              <div
+                className="h-full min-w-0 rounded-full"
+                style={{ width: `${item.value > 0 ? Math.max((item.value / max) * 100, 4) : 0}%`, background: toneVar[item.tone] }}
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 /** Stepper: a lifecycle track. `current` is the index of the active step; -1 means nothing started. */
 export function Stepper({
   steps,

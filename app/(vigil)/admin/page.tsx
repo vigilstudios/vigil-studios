@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { hasAdminClient } from "@/lib/supabase/admin";
 import { ButtonLink } from "@/components/vigil/ui";
-import { DistributionBar, KpiTile, Meter, Panel, StatusLine, Timeline } from "@/components/vigil/widgets";
+import { DistributionBar, DonutChart, HorizontalBarChart, KpiTile, Meter, Panel, StatusLine, Timeline, toneVar } from "@/components/vigil/widgets";
 import { requireStaff } from "@/lib/vigil/auth/session";
 import { formatRelative, humanizeAction, titleCase } from "@/lib/vigil/format";
 import { auditTone } from "@/lib/vigil/presenters";
@@ -22,6 +22,7 @@ export default async function AdminOverviewPage() {
 
   const attentionCount =
     attention.jobs.length + attention.domains.length + attention.websites.length + attention.subscriptions.length + attention.requests.length + attention.projects.length;
+  const websitesNotLive = Math.max(counts.websites - counts.live, 0);
 
   return (
     <div className="space-y-4">
@@ -50,31 +51,42 @@ export default async function AdminOverviewPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-12">
-        <Panel className="lg:col-span-7" title={`Needs attention${attentionCount ? ` · ${attentionCount}` : ""}`}>
-          {attentionCount === 0 ? (
-            <StatusLine tone="good" label="Nothing waiting on a human" hint="Failed jobs, broken domains, suspended sites, unpaid subscriptions and new requests land here." />
-          ) : (
-            <ul className="divide-y divide-[color:var(--border)]">
-              {attention.projects.map((project) => (
-                <AttentionRow key={`p${project.id}`} tone="info" href={`/admin/organizations/${project.organization?.id}`} title={`Onboarding ready · ${project.name}`} meta={`${project.organization?.name ?? "Unknown customer"} · ${titleCase(project.kind)} site`} when={project.updated_at} />
-              ))}
-              {attention.jobs.map((j) => (
-                <AttentionRow key={`j${j.id}`} tone="bad" href="/admin/jobs?status=failed" title={`Job failed · ${j.kind}`} meta={`${j.organization?.name ?? "Unknown customer"} · ${(j.error as { message?: string } | null)?.message ?? "no message"}`} when={j.updated_at} />
-              ))}
-              {attention.websites.map((w) => (
-                <AttentionRow key={`w${w.id}`} tone="bad" href={`/admin/websites/${w.id}`} title={`Website ${titleCase(w.status)} · ${w.name}`} meta={`${w.organization?.name ?? "Unknown customer"}${w.status_reason ? ` · ${w.status_reason}` : ""}`} when={w.updated_at} />
-              ))}
-              {attention.domains.map((d) => (
-                <AttentionRow key={`d${d.id}`} tone="warn" href="/admin/domains" title={`Domain ${titleCase(d.status)} · ${d.hostname}`} meta={`${d.organization?.name ?? "Unknown customer"}${d.status_reason ? ` · ${d.status_reason}` : ""}`} when={d.updated_at} />
-              ))}
-              {attention.subscriptions.map((s) => (
-                <AttentionRow key={`s${s.id}`} tone="warn" href="/admin/subscriptions" title={`Subscription ${titleCase(s.status)} · ${s.plan?.name ?? ""}`} meta={s.organization?.name ?? "Unknown customer"} when={s.updated_at} />
-              ))}
-              {attention.requests.map((r) => (
-                <AttentionRow key={`r${r.id}`} tone="info" href="/admin/requests" title={`New request · ${r.title}`} meta={r.organization?.name ?? "Unknown customer"} when={r.submitted_at} />
-              ))}
-            </ul>
-          )}
+        <Panel className="lg:col-span-7" title="Operations snapshot" action={<span className="text-[11px] text-[color:var(--text-secondary)]">Current state</span>}>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <DonutChart
+              title="Website status"
+              centerValue={counts.websites ? `${Math.round((counts.live / counts.websites) * 100)}%` : "—"}
+              centerLabel="live"
+              segments={[
+                { label: "Live", value: counts.live, tone: "good", color: toneVar.good },
+                { label: "Not live", value: websitesNotLive, tone: "neutral", color: toneVar.neutral },
+              ]}
+            />
+            <DonutChart
+              title="Attention mix"
+              centerValue={attentionCount}
+              centerLabel={attentionCount === 1 ? "item" : "items"}
+              segments={[
+                { label: "Onboarding", value: attention.projects.length, color: "var(--accent-2)" },
+                { label: "Failed jobs", value: attention.jobs.length, color: toneVar.bad },
+                { label: "Websites", value: attention.websites.length, color: "var(--accent-3)" },
+                { label: "Domains", value: attention.domains.length, color: toneVar.warn },
+                { label: "Billing", value: attention.subscriptions.length, color: "var(--accent-4)" },
+                { label: "Requests", value: attention.requests.length, color: toneVar.info },
+              ]}
+            />
+          </div>
+          <div className="mt-4 border-t border-[color:var(--border)] pt-4">
+            <HorizontalBarChart
+              title="Operational queue"
+              items={[
+                { label: "Domains to check", value: counts.domainsPending, tone: counts.domainsPending > 0 ? "warn" : "good" },
+                { label: "Open requests", value: counts.requestsOpen, tone: "info" },
+                { label: "Queued jobs", value: counts.jobsQueued, tone: "info" },
+                { label: "Failed jobs", value: counts.jobsFailed, tone: counts.jobsFailed > 0 ? "bad" : "good" },
+              ]}
+            />
+          </div>
         </Panel>
 
         <div className="flex flex-col gap-4 lg:col-span-5">
@@ -109,7 +121,34 @@ export default async function AdminOverviewPage() {
           </Panel>
         </div>
 
-        <Panel className="lg:col-span-12" title="Latest activity" action={<ButtonLink href="/admin/audit" variant="secondary" className="!px-2.5 !py-1 text-xs">Audit log</ButtonLink>}>
+        <Panel className="lg:col-span-7" title={`Needs attention${attentionCount ? ` · ${attentionCount}` : ""}`}>
+          {attentionCount === 0 ? (
+            <StatusLine tone="good" label="Nothing waiting on a human" hint="Failed jobs, broken domains, suspended sites, unpaid subscriptions and new requests land here." />
+          ) : (
+            <ul className="divide-y divide-[color:var(--border)]">
+              {attention.projects.map((project) => (
+                <AttentionRow key={`p${project.id}`} tone="info" href={`/admin/organizations/${project.organization?.id}`} title={`Onboarding ready · ${project.name}`} meta={`${project.organization?.name ?? "Unknown customer"} · ${titleCase(project.kind)} site`} when={project.updated_at} />
+              ))}
+              {attention.jobs.map((j) => (
+                <AttentionRow key={`j${j.id}`} tone="bad" href="/admin/jobs?status=failed" title={`Job failed · ${j.kind}`} meta={`${j.organization?.name ?? "Unknown customer"} · ${(j.error as { message?: string } | null)?.message ?? "no message"}`} when={j.updated_at} />
+              ))}
+              {attention.websites.map((w) => (
+                <AttentionRow key={`w${w.id}`} tone="bad" href={`/admin/websites/${w.id}`} title={`Website ${titleCase(w.status)} · ${w.name}`} meta={`${w.organization?.name ?? "Unknown customer"}${w.status_reason ? ` · ${w.status_reason}` : ""}`} when={w.updated_at} />
+              ))}
+              {attention.domains.map((d) => (
+                <AttentionRow key={`d${d.id}`} tone="warn" href="/admin/domains" title={`Domain ${titleCase(d.status)} · ${d.hostname}`} meta={`${d.organization?.name ?? "Unknown customer"}${d.status_reason ? ` · ${d.status_reason}` : ""}`} when={d.updated_at} />
+              ))}
+              {attention.subscriptions.map((s) => (
+                <AttentionRow key={`s${s.id}`} tone="warn" href="/admin/subscriptions" title={`Subscription ${titleCase(s.status)} · ${s.plan?.name ?? ""}`} meta={s.organization?.name ?? "Unknown customer"} when={s.updated_at} />
+              ))}
+              {attention.requests.map((r) => (
+                <AttentionRow key={`r${r.id}`} tone="info" href="/admin/requests" title={`New request · ${r.title}`} meta={r.organization?.name ?? "Unknown customer"} when={r.submitted_at} />
+              ))}
+            </ul>
+          )}
+        </Panel>
+
+        <Panel className="lg:col-span-5" title="Latest activity" action={<ButtonLink href="/admin/audit" variant="secondary" className="!px-2.5 !py-1 text-xs">Audit log</ButtonLink>}>
           <Timeline
             empty="No events yet."
             items={audit.slice(0, 8).map((e) => ({
