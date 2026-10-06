@@ -39,7 +39,7 @@ export default async function TokenCheckoutPage({ params, searchParams }: { para
   return (
     <CheckoutShell
       title={`Let's build ${order.business_name}`}
-      subtitle="Vigil Studios prepared this order for you. Check the plan, confirm your details, and pay securely. Your dashboard is ready the moment it goes through."
+      subtitle="Review your prepared order and confirm your details."
     >
       {canceled ? (
         <p className="mb-4 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface)] px-3 py-2 text-xs text-[color:var(--text-secondary)]">Payment was cancelled. Nothing was charged; you can try again below.</p>

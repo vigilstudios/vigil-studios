@@ -36,7 +36,7 @@ export const CREATOR_CAMPAIGN = creatorCampaignSchema.parse({
     code: "INFLUENCE",
     eyebrow: "The creator promotion",
     title: "Your creator offer.",
-    description: "Start with Express or create a tailored multi-page Professional site. Enter the creator promo code at checkout to apply your offer.",
+    description: "Start with Express or create a tailored multi-page Professional site. Your creator promo code is applied automatically when you start here.",
     terms: "Applies to new self-service Express and Professional one-time builds. Ongoing Vigil plans, custom/staff quotes and existing orders are excluded. Cannot be combined with other promotions.",
   },
   actions: {
@@ -63,7 +63,18 @@ export function matchesCreatorPromoCode(code: string | null | undefined, promoti
   return promotion.enabled && typeof code === "string" && code.trim().toUpperCase() === promotion.code;
 }
 
-/** Purchase preview and server pricing require deliberate code redemption, never campaign attribution. */
+/** Purchase preview and server pricing require a valid code, never campaign attribution. */
 export function creatorCodeOffer(kind: string, amountCents: number | null, code?: string | null): CreatorBuildOffer {
   return creatorBuildOffer(kind, amountCents, { ...CREATOR_CAMPAIGN.promotion, enabled: matchesCreatorPromoCode(code) });
+}
+
+/** Carry the published code through the promotion's purchase flow, independently of analytics/session attribution. */
+export function creatorPromoHref(href: string, search = "", campaign?: string): string {
+  if (!href.startsWith("/") || href.startsWith("//")) return href;
+  const url = new URL(href, "https://www.vigilstudios.co");
+  if (!["/express", "/professional", "/checkout"].includes(url.pathname)) return href;
+  const code = new URLSearchParams(search).get("promo");
+  if (!CREATOR_CAMPAIGN.promotion.enabled || (campaign !== CREATOR_CAMPAIGN.id && !matchesCreatorPromoCode(code))) return href;
+  if (!url.searchParams.has("promo")) url.searchParams.set("promo", CREATOR_CAMPAIGN.promotion.code);
+  return `${url.pathname}${url.search}${url.hash}`;
 }

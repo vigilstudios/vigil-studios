@@ -72,7 +72,7 @@ Virtue's guided onboarding is available for every customer. Ongoing Virtue autom
 
 Request allowances, support levels, Insights depth and Virtue levels have no approved values in the inspected catalog. Do not claim a larger change allowance, higher messaging allowance, custom workflows, priority support or a more capable Virtue solely from the plan name. Existing file-count limits are not website page limits. Ask the team to confirm unspecified allowances before purchase.
 
-Prices remain editable rows. The audit confirmed Express $599 and Professional $1,499 base builds; Custom quoted. The 15% creator promotion requires code INFLUENCE at checkout and discounts eligible new self-service Express/Professional builds only. Regular site pages show catalog prices; conditional offer prices appear on the creator page and after explicit checkout redemption. Recurring monthly/annual/three-year prices match migration `20260914000010_billing_periods.sql`. No price, promotion, subscription, provider link or entitlement was changed.
+Prices remain editable rows. The audit confirmed Express $599 and Professional $1,499 base builds; Custom quoted. The 15% creator promotion requires code INFLUENCE at checkout and discounts eligible new self-service Express/Professional builds only. Regular site pages show catalog prices; conditional offer prices appear on the creator page and after valid checkout redemption (automatically prefilled from promotion purchase links or manually entered). Recurring monthly/annual/three-year prices match migration `20260914000010_billing_periods.sql`. No price, promotion, subscription, provider link or entitlement was changed.
 
 ## Writing rules
 

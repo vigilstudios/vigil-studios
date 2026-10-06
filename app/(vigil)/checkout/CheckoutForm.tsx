@@ -10,7 +10,6 @@ import { FormError, inputClass, labelClass } from "@/components/vigil/ui";
 import type { CheckoutPlan } from "@/lib/vigil/queries/checkout";
 import { BILLING_PERIODS, billingPeriodByKey, savingsPercent, type BillingPeriodKey } from "@/lib/vigil/billing-periods";
 import { WEBSITE_TIERS } from "@/lib/vigil/site-tiers";
-import { RECURRING_SERVICE_NOTE } from "@/lib/site-copy";
 import { formatMoney } from "@/lib/vigil/format";
 import { CREATOR_CAMPAIGN, creatorCodeOffer, matchesCreatorPromoCode } from "@/lib/creator-campaign";
 
@@ -20,7 +19,7 @@ export type CheckoutFormProps = {
   projectKind: "express" | "professional" | "custom";
   templateSlug: string | null;
   templateName: string | null;
-  initial: { email?: string; businessName?: string; contactName?: string; planCode?: string; billingPeriod?: string };
+  initial: { email?: string; businessName?: string; contactName?: string; planCode?: string; billingPeriod?: string; promotionCode?: string };
   locked: { orderId: string; checkoutToken: string } | null;
   termsUrl: string | null;
   refundNote: string | null;
@@ -34,10 +33,11 @@ export function CheckoutForm(p: CheckoutFormProps) {
   const [planCode, setPlanCode] = useState<string>(defaultPlan?.code ?? "");
   // Controlled so a server-side error does not wipe what the buyer typed.
   const [fields, setFields] = useState({ businessName: p.initial.businessName ?? "", contactName: p.initial.contactName ?? "", email: p.initial.email ?? "", agree: false });
-  const [promoDraft, setPromoDraft] = useState("");
-  const [appliedCode, setAppliedCode] = useState("");
-  const [promoError, setPromoError] = useState<string | null>(null);
   const canRedeem = !p.locked && CREATOR_CAMPAIGN.promotion.enabled && p.projectKind !== "custom" && (p.build?.amountCents ?? 0) > 0;
+  const initialCode = canRedeem && matchesCreatorPromoCode(p.initial.promotionCode) ? CREATOR_CAMPAIGN.promotion.code : "";
+  const [promoDraft, setPromoDraft] = useState(initialCode);
+  const [appliedCode, setAppliedCode] = useState(initialCode);
+  const [promoError, setPromoError] = useState<string | null>(null);
   const offer = creatorCodeOffer(p.projectKind, p.build?.amountCents ?? null, canRedeem ? appliedCode : null);
   function applyPromo() {
     if (!canRedeem || !matchesCreatorPromoCode(promoDraft)) {
@@ -63,16 +63,17 @@ export function CheckoutForm(p: CheckoutFormProps) {
 
   const tier = WEBSITE_TIERS[p.projectKind];
   const scope = (
-    <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-4 text-sm leading-6">
-      <p className="font-semibold">Your website scope</p>
-      <p className="mt-1 text-[color:var(--text-secondary)]">{tier.description}</p>
-      <p className="mt-2 text-xs text-[color:var(--text-secondary)]">
-        {p.projectKind === "custom"
-          ? "Your agreed written scope controls pages, bespoke work, revisions and timeline."
-          : `${tier.primaryPages === 1 ? "One page" : "Up to eight primary pages"} · ${tier.revisions} revision ${tier.revisions === 1 ? "round" : "rounds"}. ${p.projectKind === "professional" ? "New bespoke components and advanced development need separate scope." : "Layout changes and embeds stay within the chosen design."}`}
-      </p>
-      <p className="mt-2 text-xs text-[color:var(--text-secondary)]">{RECURRING_SERVICE_NOTE}</p>
-    </div>
+    <details className="text-xs text-[color:var(--text-secondary)]">
+      <summary className="cursor-pointer py-2 font-medium text-[color:var(--text-primary)]">Website details</summary>
+      <p className="mt-1 leading-5">{tier.summary}</p>
+      <p className="mt-2 leading-5">{p.projectKind === "custom"
+        ? "Your agreed written scope controls pages, bespoke work, revisions and timeline."
+        : `${tier.primaryPages === 1 ? "One page" : "Up to 8 primary pages"} · ${tier.revisions} revision ${tier.revisions === 1 ? "round" : "rounds"}.`}</p>
+      <ul className="mt-2 space-y-1.5 leading-5">
+        {tier.included.map((item) => <li key={item}>{item}</li>)}
+      </ul>
+      {tier.excluded.length > 0 ? <p className="mt-3 leading-5"><span className="font-medium">Outside this build:</span> {tier.excluded.join("; ")}.</p> : null}
+    </details>
   );
 
   if (purchasable.length === 0) {
@@ -93,10 +94,9 @@ export function CheckoutForm(p: CheckoutFormProps) {
       if (attribution) {
         try { track("creator_checkout_submitted", { ...attribution, package: p.projectKind, plan: planCode, period: periodKey }); } catch { /* Payment must not depend on analytics. */ }
       }
-    }} className="grid gap-6 lg:grid-cols-[1fr_360px]" noValidate>
+    }} className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]" noValidate>
       <input type="hidden" name="project_kind" value={p.projectKind} />
       <input type="hidden" name="promotion_code" value={canRedeem ? appliedCode : ""} />
-      <div className="lg:col-span-2">{scope}</div>
       <input type="hidden" name="template_slug" value={p.templateSlug ?? ""} />
       {p.locked ? (
         <>
@@ -106,9 +106,9 @@ export function CheckoutForm(p: CheckoutFormProps) {
       ) : null}
 
       <div className="space-y-6">
-        <section>
-          <h2 className="text-sm font-semibold">1. Choose your Vigil plan</h2>
-          <p className="mt-1 text-xs text-[color:var(--text-secondary)]">An active recurring plan is required for Vigil hosting. Website updates and additional tools depend on the plan; allowances follow its configuration.</p>
+        <section className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-5">
+          <h2 className="text-base font-semibold">Hosting plan</h2>
+          <p className="mt-1 text-xs text-[color:var(--text-secondary)]">Required for hosting. Choose how often you pay.</p>
           {periods.length > 1 ? (
             <div className="mt-3 inline-flex max-w-full rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-0.5" role="radiogroup" aria-label="Billing period">
               {periods.map((per) => {
@@ -134,57 +134,93 @@ export function CheckoutForm(p: CheckoutFormProps) {
                 <label
                   key={x.id}
                   className={clsx(
-                    "relative flex cursor-pointer flex-col rounded-xl border p-4 transition-colors",
+                    "relative flex cursor-pointer flex-col rounded-lg border p-3 transition-colors focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[color:var(--accent)]",
                     selected ? "border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent)_8%,transparent)]" : "border-[color:var(--border)] bg-[color:var(--bg-surface)] hover:border-[color:var(--text-secondary)]",
                     !canBuy && "opacity-60"
                   )}
                 >
                   <input type="radio" name="plan_code" value={x.code} checked={selected} disabled={!canBuy || pending} onChange={() => setPlanCode(x.code)} className="sr-only" />
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
                       <p className="text-sm font-semibold">{x.name}</p>
-                      {x.tagline ? <p className="text-xs text-[color:var(--text-secondary)]">{x.tagline}</p> : null}
                     </div>
                     <div className="shrink-0 text-right">
                       <p className="text-sm font-semibold">{xp ? formatMoney(xp.amountCents, x.currency) : "Unavailable"}<span className="text-xs font-normal text-[color:var(--text-secondary)]">{xp ? (period.key === "month" ? "/mo" : ` ${period.every}`) : ""}</span></p>
                       {xp && period.months > 1 ? <p className="text-[11px] text-[color:var(--text-secondary)]">{formatMoney(Math.round(xp.amountCents / period.months), x.currency)}/mo{xSave ? ` · save ${xSave}%` : ""}</p> : null}
                     </div>
                   </div>
-                  <ul className="mt-3 space-y-1 text-xs text-[color:var(--text-secondary)]">
-                    {x.includes.map((i) => (
-                      <li key={i} className="flex items-start gap-1.5">
-                        <Check className="mt-0.5 h-3 w-3 shrink-0 text-[color:var(--accent)]" /> {i}
-                      </li>
-                    ))}
-                  </ul>
                   {!canBuy ? <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">Not available online for this period yet</p> : null}
                 </label>
               );
             })}
           </div>
+          {plan ? <details className="mt-3 text-xs text-[color:var(--text-secondary)]">
+            <summary className="cursor-pointer py-2 font-medium text-[color:var(--text-primary)]">What’s included in {plan.name}</summary>
+            {plan.tagline ? <p className="mt-1 leading-5">{plan.tagline}</p> : null}
+            <ul className="mt-2 space-y-2">
+              {plan.includes.map((item) => <li key={item} className="flex items-start gap-2"><Check className="mt-0.5 h-3 w-3 shrink-0 text-[color:var(--accent)]" />{item}</li>)}
+            </ul>
+            <p className="mt-3 leading-5">Updates and tools follow this plan’s configured allowances. Features marked “in development” are not yet available.</p>
+          </details> : null}
           {issues.plan_code ? <p className="mt-1 text-xs text-[#ef4444]">{issues.plan_code[0]}</p> : null}
         </section>
 
-        <section>
-          <h2 className="text-sm font-semibold">2. About your business</h2>
+        <section className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-5">
+          <h2 className="text-base font-semibold">Your details</h2>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label htmlFor="business_name" className={labelClass}>Business name</label>
-              <input id="business_name" name="business_name" value={fields.businessName} onChange={(e) => setField("businessName", e.target.value)} className={inputClass} placeholder="Marlow & Fen" required disabled={pending} />
+              <input id="business_name" name="business_name" value={fields.businessName} onChange={(e) => setField("businessName", e.target.value)} className={inputClass} autoComplete="organization" placeholder="Business name" required disabled={pending} />
               {issues.business_name ? <p className="mt-1 text-xs text-[#ef4444]">{issues.business_name[0]}</p> : null}
             </div>
             <div>
               <label htmlFor="contact_name" className={labelClass}>Your name</label>
-              <input id="contact_name" name="contact_name" value={fields.contactName} onChange={(e) => setField("contactName", e.target.value)} className={inputClass} placeholder="Alex Rivera" disabled={pending} />
+              <input id="contact_name" name="contact_name" value={fields.contactName} onChange={(e) => setField("contactName", e.target.value)} className={inputClass} autoComplete="name" placeholder="Full name" disabled={pending} />
             </div>
             <div>
-              <label htmlFor="email" className={labelClass}>Email (this becomes your sign-in)</label>
-              <input id="email" name="email" type="email" value={fields.email} onChange={(e) => setField("email", e.target.value)} className={inputClass} placeholder="you@yourbusiness.com" required disabled={pending} />
+              <label htmlFor="email" className={labelClass}>Email</label>
+              <input id="email" name="email" type="email" value={fields.email} onChange={(e) => setField("email", e.target.value)} className={inputClass} autoComplete="email" placeholder="you@yourbusiness.com" required disabled={pending} />
+              <p className="mt-1 text-[11px] text-[color:var(--text-secondary)]">Used to sign in to your dashboard.</p>
               {issues.email ? <p className="mt-1 text-xs text-[#ef4444]">{issues.email[0]}</p> : null}
             </div>
           </div>
         </section>
 
+      </div>
+
+      <aside className="h-fit rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-5 lg:sticky lg:top-6">
+        <h2 className="text-base font-semibold">Order summary</h2>
+        <dl className="mt-3 space-y-2 text-sm">
+          {p.build ? (
+            <div className="flex justify-between gap-3">
+              <dt className="text-[color:var(--text-secondary)]">{p.build.name}<span className="mt-0.5 block text-[11px]">One-time build{p.templateName ? ` · ${p.templateName}` : ""}</span></dt>
+              <dd className="shrink-0 text-right font-medium">{offer.percentOff && offer.originalAmountCents != null ? <del className="block text-xs text-[color:var(--text-secondary)]">{formatMoney(offer.originalAmountCents, p.build.currency)}</del> : null}{offer.amountCents !== null ? formatMoney(offer.amountCents, p.build.currency) : "Quoted"}</dd>
+            </div>
+          ) : null}
+          <div className="flex justify-between gap-3">
+            <dt className="text-[color:var(--text-secondary)]">{plan ? `${plan.name} · ${period.label.toLowerCase()}` : "Vigil plan"}</dt>
+            <dd className="font-medium">{price && plan ? formatMoney(price.amountCents, plan.currency) : "Unavailable"}</dd>
+          </div>
+          <div className="flex justify-between gap-3 border-t border-[color:var(--border)] pt-3 text-lg">
+            <dt className="font-semibold">Due today</dt>
+            <dd className="font-semibold">{formatMoney(dueToday, plan?.currency ?? "usd")}</dd>
+          </div>
+        </dl>
+        <div className="mt-3 border-t border-[color:var(--border)] pt-1">{scope}</div>
+        {canRedeem ? <div className="mt-4 border-t border-[color:var(--border)] pt-4">
+          <label htmlFor="promotion_code" className={labelClass}>Promo code</label>
+          <div className="mt-1 flex gap-2">
+            <input id="promotion_code" value={promoDraft} maxLength={32} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="Enter your code" disabled={pending} aria-describedby="promotion_code_status" aria-invalid={Boolean(promoError || issues.promotion_code)} className={clsx(inputClass, "min-w-0 flex-1")} onChange={(e) => { setPromoDraft(e.target.value); setAppliedCode(""); setPromoError(null); }} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyPromo(); } }} />
+            <button type="button" disabled={pending} onClick={applyPromo} className="btn-secondary shrink-0 !px-3 !py-2 text-xs">Apply</button>
+          </div>
+          <p id="promotion_code_status" role="status" className={clsx("mt-2 text-xs", promoError || issues.promotion_code ? "text-[#ef4444]" : "text-[color:var(--text-secondary)]")}>
+            {promoError ?? issues.promotion_code?.[0] ?? (offer.percentOff ? `${appliedCode} applied · ${offer.percentOff}% off the build` : "Discounts apply to the one-time build only.")}
+          </p>
+        </div> : null}
+        <p className="mt-4 leading-5 text-[11px] text-[color:var(--text-secondary)]">
+          {price && plan ? `Then ${formatMoney(price.amountCents, plan.currency)} ${period.every}${perMonth && period.months > 1 ? ` (${formatMoney(perMonth, plan.currency)}/mo)` : ""}, cancel any time.` : "Your plan renews automatically; cancel any time."} Sales tax is added at payment where it applies.
+        </p>
+        <div className="mt-4 border-t border-[color:var(--border)] pt-4">
         <section>
           <label className="flex items-start gap-2 text-xs text-[color:var(--text-secondary)]">
             <input type="checkbox" name="agree" checked={fields.agree} onChange={(e) => setField("agree", e.target.checked)} className="mt-0.5" disabled={pending} />
@@ -197,44 +233,12 @@ export function CheckoutForm(p: CheckoutFormProps) {
         </section>
 
         <FormError message={state && !state.ok ? state.error : null} />
-      </div>
-
-      <aside className="h-fit rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-5 lg:sticky lg:top-6">
-        <h2 className="text-sm font-semibold">Your order</h2>
-        <dl className="mt-3 space-y-2 text-sm">
-          {p.build ? (
-            <div className="flex justify-between gap-3">
-              <dt className="text-[color:var(--text-secondary)]">{p.build.name}{p.templateName ? ` · ${p.templateName}` : ""}</dt>
-              <dd className="text-right font-medium">{offer.percentOff && offer.originalAmountCents != null ? <del className="mr-2 text-xs text-[color:var(--text-secondary)]">{formatMoney(offer.originalAmountCents, p.build.currency)}</del> : null}{offer.amountCents !== null ? formatMoney(offer.amountCents, p.build.currency) : "Quoted"}</dd>
-            </div>
-          ) : null}
-          <div className="flex justify-between gap-3">
-            <dt className="text-[color:var(--text-secondary)]">{plan ? `${plan.name} · ${period.label.toLowerCase()}` : "Vigil plan"}</dt>
-            <dd className="font-medium">{price && plan ? formatMoney(price.amountCents, plan.currency) : "Unavailable"}</dd>
-          </div>
-          <div className="flex justify-between gap-3 border-t border-[color:var(--border)] pt-2 text-base">
-            <dt className="font-semibold">Due today</dt>
-            <dd className="font-semibold">{formatMoney(dueToday, plan?.currency ?? "usd")}</dd>
-          </div>
-        </dl>
-        {canRedeem ? <div className="mt-4 border-t border-[color:var(--border)] pt-4">
-          <label htmlFor="promotion_code" className={labelClass}>Promo code</label>
-          <div className="mt-1 flex gap-2">
-            <input id="promotion_code" value={promoDraft} maxLength={32} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="Enter your code" disabled={pending} aria-describedby="promotion_code_status" aria-invalid={Boolean(promoError || issues.promotion_code)} className={clsx(inputClass, "min-w-0 flex-1")} onChange={(e) => { setPromoDraft(e.target.value); setAppliedCode(""); setPromoError(null); }} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyPromo(); } }} />
-            <button type="button" disabled={pending} onClick={applyPromo} className="btn-secondary shrink-0 !px-3 !py-2 text-xs">Apply</button>
-          </div>
-          <p id="promotion_code_status" role="status" className={clsx("mt-2 text-xs", promoError || issues.promotion_code ? "text-[#ef4444]" : "text-[color:var(--text-secondary)]")}>
-            {promoError ?? issues.promotion_code?.[0] ?? (offer.percentOff ? `${appliedCode} applied: ${offer.percentOff}% off your one-time build. Your ongoing plan is unchanged.` : "Have a promo code? Apply it before continuing to payment.")}
-          </p>
-        </div> : null}
-        <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">
-          {price && plan ? `Then ${formatMoney(price.amountCents, plan.currency)} ${period.every}${perMonth && period.months > 1 ? ` (${formatMoney(perMonth, plan.currency)}/mo)` : ""}, cancel any time.` : "Your plan renews automatically; cancel any time."} Sales tax is added at payment where it applies.
-        </p>
+        </div>
         <button type="submit" className="btn-primary mt-4 w-full text-sm" disabled={pending || !price?.purchasable}>
           <Lock className="mr-1.5 h-3.5 w-3.5" />
-          {pending ? "Opening secure payment…" : "Continue to secure payment"}
+          {pending ? "Opening payment…" : "Continue to payment"}
         </button>
-        <p className="mt-2 text-center text-[11px] text-[color:var(--text-secondary)]">Payment is handled by Stripe. We never see your card.</p>
+        <p className="mt-2 text-center text-[11px] text-[color:var(--text-secondary)]">Secure payment with Stripe</p>
       </aside>
     </form>
   );

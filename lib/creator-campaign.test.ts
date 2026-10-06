@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { campaignAttribution, campaignHref } from "./campaign-attribution";
-import { CREATOR_CAMPAIGN, creatorBuildOffer, creatorCodeOffer, creatorCampaignSchema } from "./creator-campaign";
+import { CREATOR_CAMPAIGN, creatorBuildOffer, creatorCodeOffer, creatorCampaignSchema, creatorPromoHref } from "./creator-campaign";
 
 describe("creator campaign routing and attribution", () => {
   const attribution = campaignAttribution("?utm_source=creator&utm_campaign=launch&ref=muse&email=private@example.com&gclid=private", "creators");
@@ -28,6 +28,21 @@ describe("creator campaign routing and attribution", () => {
     expect(CREATOR_CAMPAIGN.actions.professional.href).toBe("/professional");
     expect(CREATOR_CAMPAIGN.promotion).toMatchObject({ enabled: true, percentOff: 15, code: "INFLUENCE" });
     expect(CREATOR_CAMPAIGN.showcase).toBeNull();
+  });
+  it("carries the published code from promotion CTAs through both package flows", () => {
+    expect(creatorPromoHref("/express", "", "creators")).toBe("/express?promo=INFLUENCE");
+    expect(creatorPromoHref("/professional", "", "creators")).toBe("/professional?promo=INFLUENCE");
+    expect(creatorPromoHref("/checkout?template=restaurant#details", "?promo=INFLUENCE")).toBe("/checkout?template=restaurant&promo=INFLUENCE#details");
+    expect(creatorPromoHref("/checkout?build=professional", "?promo=influence&plan=basic")).toBe("/checkout?build=professional&promo=INFLUENCE");
+  });
+  it("does not turn attribution, unrelated links or staff orders into promo entry points", () => {
+    for (const search of ["", "?vigil_campaign=creators", "?utm_campaign=creators", "?promo=WRONG"]) {
+      expect(creatorPromoHref("/checkout?build=professional", search)).toBe("/checkout?build=professional");
+    }
+    for (const href of ["/checkout/trusted-token", "/pricing", "/creators#choose-your-site", "https://other.example/checkout", "//other.example/checkout"]) {
+      expect(creatorPromoHref(href, "?promo=INFLUENCE", "creators")).toBe(href);
+    }
+    expect(creatorPromoHref("/checkout?build=professional&promo=OTHER", "?promo=INFLUENCE")).toBe("/checkout?build=professional&promo=OTHER");
   });
   it("rejects unsafe/dead configured CTA destinations and invalid showcase links", () => {
     for (const href of ["#", "", "javascript:alert(1)", "//evil.example", "http://insecure.example"]) {

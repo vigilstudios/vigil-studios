@@ -1,0 +1,195 @@
+{
+  "fixture": true,
+  "source": "Exact release CheckoutForm with read-only public catalog snapshot; no checkout submitted",
+  "checks": [
+    {
+      "label": "Professional promo prefilled and applied",
+      "pass": true,
+      "dom": {
+        "details": [
+          {
+            "label": "What’s included in Vigil Basic",
+            "open": false
+          },
+          {
+            "label": "Website details",
+            "open": false
+          }
+        ],
+        "overflow": false,
+        "promo": "INFLUENCE",
+        "text": "Your Professional website\n\nChoose your hosting plan and confirm your details.\n\nHosting plan\n\nRequired for hosting. Choose how often you pay.\n\nMonthly\nAnnual\nsave 17%\n3 years\nsave 25%\n\nVigil Priority\n\n$399.00/mo\n\nVigil Basic\n\n$29.00/mo\n\nVigil Growth\n\n$199.00/mo\n\nVigil Care\n\n$99.00/mo\n\nWhat’s included in Vigil Basic\nYour details\nBusiness name\nYour name\nEmail\n\nUsed to sign in to your dashboard.\n\nOrder summary\nProfessional Site\nOne-time build · Up to 8 tailored primary pages\n$1,499.00\n$1,274.15\nVigil Basic · monthly\n$29.00\nDue today\n$1,303.15\nWebsite details\nPromo code\nApply\n\nINFLUENCE applied · 15% off the build\n\nThen $29.00 a month, cancel any time. Sales tax is added at payment where it applies.\n\nI agree to the Vigil Studios service agreement.\nContinue to payment\n\nSecure payment with Stripe"
+      }
+    },
+    {
+      "label": "Annual recurring charge remains full price",
+      "pass": true,
+      "dom": {
+        "details": [
+          {
+            "label": "What’s included in Vigil Basic",
+            "open": false
+          },
+          {
+            "label": "Website details",
+            "open": false
+          }
+        ],
+        "overflow": false,
+        "promo": "INFLUENCE",
+        "text": "Your Professional website\n\nChoose your hosting plan and confirm your details.\n\nHosting plan\n\nRequired for hosting. Choose how often you pay.\n\nMonthly\nAnnual\nsave 17%\n3 years\nsave 25%\n\nVigil Priority\n\n$3,990.00 a year\n\n$332.50/mo · save 17%\n\nVigil Basic\n\n$290.00 a year\n\n$24.17/mo · save 17%\n\nVigil Growth\n\n$1,990.00 a year\n\n$165.83/mo · save 17%\n\nVigil Care\n\n$990.00 a year\n\n$82.50/mo · save 17%\n\nWhat’s included in Vigil Basic\nYour details\nBusiness name\nYour name\nEmail\n\nUsed to sign in to your dashboard.\n\nOrder summary\nProfessional Site\nOne-time build · Up to 8 tailored primary pages\n$1,499.00\n$1,274.15\nVigil Basic · annual\n$290.00\nDue today\n$1,564.15\nWebsite details\nPromo code\nApply\n\nINFLUENCE applied · 15% off the build\n\nThen $290.00 a year ($24.17/mo), cancel any time. Sales tax is added at payment where it applies.\n\nI agree to the Vigil Studios service agreement.\nContinue to payment\n\nSecure payment with Stripe"
+      }
+    },
+    {
+      "label": "Build boundaries remain available",
+      "pass": true,
+      "dom": {
+        "details": [
+          {
+            "label": "What’s included in Vigil Basic",
+            "open": false
+          },
+          {
+            "label": "Website details",
+            "open": true
+          }
+        ],
+        "overflow": false,
+        "promo": "INFLUENCE",
+        "text": "Your Professional website\n\nChoose your hosting plan and confirm your details.\n\nHosting plan\n\nRequired for hosting. Choose how often you pay.\n\nMonthly\nAnnual\nsave 17%\n3 years\nsave 25%\n\nVigil Priority\n\n$3,990.00 a year\n\n$332.50/mo · save 17%\n\nVigil Basic\n\n$290.00 a year\n\n$24.17/mo · save 17%\n\nVigil Growth\n\n$1,990.00 a year\n\n$165.83/mo · save 17%\n\nVigil Care\n\n$990.00 a year\n\n$82.50/mo · save 17%\n\nWhat’s included in Vigil Basic\nYour details\nBusiness name\nYour name\nEmail\n\nUsed to sign in to your dashboard.\n\nOrder summary\nProfessional Site\nOne-time build · Up to 8 tailored primary pages\n$1,499.00\n$1,274.15\nVigil Basic · annual\n$290.00\nDue today\n$1,564.15\nWebsite details\n\nA premium multi-page website, composed and art-directed for your brand.\n\nUp to 8 primary pages · 2 revision rounds.\n\nUp to 8 tailored primary pages\nBrand-led composition from premium design systems\nAdvanced forms and standard booking integrations\nStandard payments, maps, reviews, social and marketing integrations\nCMS for blogs, portfolios, services or similar content where appropriate\nAnalytics, conversion tracking and SEO foundations\nPerformance optimization and two revision rounds\n\nOutside this build: Custom web applications, dashboards or customer portals; Complex authentication or membership platforms; Native booking infrastructure; Large or operationally complex ecommerce; Custom APIs, multi-system synchronization or complex automation; New bespoke components, design systems or experimental interactions.\n\nPromo code\nApply\n\nINFLUENCE applied · 15% off the build\n\nThen $290.00 a year ($24.17/mo), cancel any time. Sales tax is added at payment where it applies.\n\nI agree to the Vigil Studios service agreement.\nContinue to payment\n\nSecure payment with Stripe"
+      }
+    },
+    {
+      "label": "Invalid code restores full build price",
+      "pass": true,
+      "dom": {
+        "details": [
+          {
+            "label": "What’s included in Vigil Basic",
+            "open": true
+          },
+          {
+            "label": "Website details",
+            "open": true
+          }
+        ],
+        "overflow": false,
+        "promo": "WRONG",
+        "text": "Your Professional website\n\nChoose your hosting plan and confirm your details.\n\nHosting plan\n\nRequired for hosting. Choose how often you pay.\n\nMonthly\nAnnual\nsave 17%\n3 years\nsave 25%\n\nVigil Priority\n\n$3,990.00 a year\n\n$332.50/mo · save 17%\n\nVigil Basic\n\n$290.00 a year\n\n$24.17/mo · save 17%\n\nVigil Growth\n\n$1,990.00 a year\n\n$165.83/mo · save 17%\n\nVigil Care\n\n$990.00 a year\n\n$82.50/mo · save 17%\n\nWhat’s included in Vigil Basic\n\nKeep me online\n\nManaged hosting, SSL and security\nDomain status and management\n\nUpdates and tools follow this plan’s configured allowances. Features marked “in development” are not yet available.\n\nYour details\nBusiness name\nYour name\nEmail\n\nUsed to sign in to your dashboard.\n\nOrder summary\nProfessional Site\nOne-time build · Up to 8 tailored primary pages\n$1,499.00\nVigil Basic · annual\n$290.00\nDue today\n$1,789.00\nWebsite details\n\nA premium multi-page website, composed and art-directed for your brand.\n\nUp to 8 primary pages · 2 revision rounds.\n\nUp to 8 tailored primary pages\nBrand-led composition from premium design systems\nAdvanced forms and standard booking integrations\nStandard payments, maps, reviews, social and marketing integrations\nCMS for blogs, portfolios, services or similar content where appropriate\nAnalytics, conversion tracking and SEO foundations\nPerformance optimization and two revision rounds\n\nOutside this build: Custom web applications, dashboards or customer portals; Complex authentication or membership platforms; Native booking infrastructure; Large or operationally complex ecommerce; Custom APIs, multi-system synchronization or complex automation; New bespoke components, design systems or experimental interactions.\n\nPromo code\nApply\n\nThis promo code is not available. Check your code and try again.\n\nThen $290.00 a year ($24.17/mo), cancel any time. Sales tax is added at payment where it applies.\n\nI agree to the Vigil Studios service agreement.\nContinue to payment\n\nSecure payment with Stripe"
+      }
+    },
+    {
+      "label": "Manual correction applies code without submitting",
+      "pass": true,
+      "dom": {
+        "details": [
+          {
+            "label": "What’s included in Vigil Basic",
+            "open": true
+          },
+          {
+            "label": "Website details",
+            "open": true
+          }
+        ],
+        "overflow": false,
+        "promo": "INFLUENCE",
+        "text": "Your Professional website\n\nChoose your hosting plan and confirm your details.\n\nHosting plan\n\nRequired for hosting. Choose how often you pay.\n\nMonthly\nAnnual\nsave 17%\n3 years\nsave 25%\n\nVigil Priority\n\n$3,990.00 a year\n\n$332.50/mo · save 17%\n\nVigil Basic\n\n$290.00 a year\n\n$24.17/mo · save 17%\n\nVigil Growth\n\n$1,990.00 a year\n\n$165.83/mo · save 17%\n\nVigil Care\n\n$990.00 a year\n\n$82.50/mo · save 17%\n\nWhat’s included in Vigil Basic\n\nKeep me online\n\nManaged hosting, SSL and security\nDomain status and management\n\nUpdates and tools follow this plan’s configured allowances. Features marked “in development” are not yet available.\n\nYour details\nBusiness name\nYour name\nEmail\n\nUsed to sign in to your dashboard.\n\nOrder summary\nProfessional Site\nOne-time build · Up to 8 tailored primary pages\n$1,499.00\n$1,274.15\nVigil Basic · annual\n$290.00\nDue today\n$1,564.15\nWebsite details\n\nA premium multi-page website, composed and art-directed for your brand.\n\nUp to 8 primary pages · 2 revision rounds.\n\nUp to 8 tailored primary pages\nBrand-led composition from premium design systems\nAdvanced forms and standard booking integrations\nStandard payments, maps, reviews, social and marketing integrations\nCMS for blogs, portfolios, services or similar content where appropriate\nAnalytics, conversion tracking and SEO foundations\nPerformance optimization and two revision rounds\n\nOutside this build: Custom web applications, dashboards or customer portals; Complex authentication or membership platforms; Native booking infrastructure; Large or operationally complex ecommerce; Custom APIs, multi-system synchronization or complex automation; New bespoke components, design systems or experimental interactions.\n\nPromo code\nApply\n\nINFLUENCE applied · 15% off the build\n\nThen $290.00 a year ($24.17/mo), cancel any time. Sales tax is added at payment where it applies.\n\nI agree to the Vigil Studios service agreement.\nContinue to payment\n\nSecure payment with Stripe"
+      }
+    },
+    {
+      "label": "Express promo automatically applied",
+      "pass": true,
+      "dom": {
+        "details": [
+          {
+            "label": "What’s included in Vigil Basic",
+            "open": false
+          },
+          {
+            "label": "Website details",
+            "open": false
+          }
+        ],
+        "overflow": false,
+        "promo": "INFLUENCE",
+        "text": "Your Express website\n\nChoose your hosting plan and confirm your details.\n\nHosting plan\n\nRequired for hosting. Choose how often you pay.\n\nMonthly\nAnnual\nsave 17%\n3 years\nsave 25%\n\nVigil Priority\n\n$399.00/mo\n\nVigil Basic\n\n$29.00/mo\n\nVigil Growth\n\n$199.00/mo\n\nVigil Care\n\n$99.00/mo\n\nWhat’s included in Vigil Basic\nYour details\nBusiness name\nYour name\nEmail\n\nUsed to sign in to your dashboard.\n\nOrder summary\nVigil Express\nOne-time build · Restaurant\n$599.00\n$509.15\nVigil Basic · monthly\n$29.00\nDue today\n$538.15\nWebsite details\nPromo code\nApply\n\nINFLUENCE applied · 15% off the build\n\nThen $29.00 a month, cancel any time. Sales tax is added at payment where it applies.\n\nI agree to the Vigil Studios service agreement.\nContinue to payment\n\nSecure payment with Stripe"
+      }
+    },
+    {
+      "label": "Ordinary checkout remains full price",
+      "pass": true,
+      "dom": {
+        "details": [
+          {
+            "label": "What’s included in Vigil Basic",
+            "open": false
+          },
+          {
+            "label": "Website details",
+            "open": false
+          }
+        ],
+        "overflow": false,
+        "promo": "",
+        "text": "Your Express website\n\nChoose your hosting plan and confirm your details.\n\nHosting plan\n\nRequired for hosting. Choose how often you pay.\n\nMonthly\nAnnual\nsave 17%\n3 years\nsave 25%\n\nVigil Priority\n\n$399.00/mo\n\nVigil Basic\n\n$29.00/mo\n\nVigil Growth\n\n$199.00/mo\n\nVigil Care\n\n$99.00/mo\n\nWhat’s included in Vigil Basic\nYour details\nBusiness name\nYour name\nEmail\n\nUsed to sign in to your dashboard.\n\nOrder summary\nVigil Express\nOne-time build · Restaurant\n$599.00\nVigil Basic · monthly\n$29.00\nDue today\n$628.00\nWebsite details\nPromo code\nApply\n\nDiscounts apply to the one-time build only.\n\nThen $29.00 a month, cancel any time. Sales tax is added at payment where it applies.\n\nI agree to the Vigil Studios service agreement.\nContinue to payment\n\nSecure payment with Stripe"
+      }
+    },
+    {
+      "label": "Locked quote excludes automatic promotion",
+      "pass": true,
+      "dom": {
+        "details": [
+          {
+            "label": "What’s included in Vigil Basic",
+            "open": false
+          },
+          {
+            "label": "Website details",
+            "open": false
+          }
+        ],
+        "overflow": false,
+        "text": "Your Professional website\n\nChoose your hosting plan and confirm your details.\n\nHosting plan\n\nRequired for hosting. Choose how often you pay.\n\nMonthly\nAnnual\nsave 17%\n3 years\nsave 25%\n\nVigil Priority\n\n$399.00/mo\n\nVigil Basic\n\n$29.00/mo\n\nVigil Growth\n\n$199.00/mo\n\nVigil Care\n\n$99.00/mo\n\nWhat’s included in Vigil Basic\nYour details\nBusiness name\nYour name\nEmail\n\nUsed to sign in to your dashboard.\n\nOrder summary\nProfessional Site\nOne-time build · Up to 8 tailored primary pages\n$420.00\nVigil Basic · monthly\n$29.00\nDue today\n$449.00\nWebsite details\n\nThen $29.00 a month, cancel any time. Sales tax is added at payment where it applies.\n\nI agree to the Vigil Studios service agreement.\nContinue to payment\n\nSecure payment with Stripe"
+      }
+    },
+    {
+      "label": "320px layout fits without horizontal scrolling",
+      "pass": true,
+      "dom": {
+        "details": [
+          {
+            "label": "What’s included in Vigil Basic",
+            "open": false
+          },
+          {
+            "label": "Website details",
+            "open": false
+          }
+        ],
+        "overflow": false,
+        "promo": "INFLUENCE",
+        "text": "Your Professional website\n\nChoose your hosting plan and confirm your details.\n\nHosting plan\n\nRequired for hosting. Choose how often you pay.\n\nMonthly\nAnnual\nsave 17%\n3 years\nsave 25%\n\nVigil Priority\n\n$399.00/mo\n\nVigil Basic\n\n$29.00/mo\n\nVigil Growth\n\n$199.00/mo\n\nVigil Care\n\n$99.00/mo\n\nWhat’s included in Vigil Basic\nYour details\nBusiness name\nYour name\nEmail\n\nUsed to sign in to your dashboard.\n\nOrder summary\nProfessional Site\nOne-time build · Up to 8 tailored primary pages\n$1,499.00\n$1,274.15\nVigil Basic · monthly\n$29.00\nDue today\n$1,303.15\nWebsite details\nPromo code\nApply\n\nINFLUENCE applied · 15% off the build\n\nThen $29.00 a month, cancel any time. Sales tax is added at payment where it applies.\n\nI agree to the Vigil Studios service agreement.\nContinue to payment\n\nSecure payment with Stripe"
+      }
+    },
+    {
+      "label": "390px layout fits without horizontal scrolling",
+      "pass": true,
+      "dom": {
+        "details": [
+          {
+            "label": "What’s included in Vigil Basic",
+            "open": false
+          },
+          {
+            "label": "Website details",
+            "open": false
+          }
+        ],
+        "overflow": false,
+        "promo": "INFLUENCE",
+        "text": "Your Professional website\n\nChoose your hosting plan and confirm your details.\n\nHosting plan\n\nRequired for hosting. Choose how often you pay.\n\nMonthly\nAnnual\nsave 17%\n3 years\nsave 25%\n\nVigil Priority\n\n$399.00/mo\n\nVigil Basic\n\n$29.00/mo\n\nVigil Growth\n\n$199.00/mo\n\nVigil Care\n\n$99.00/mo\n\nWhat’s included in Vigil Basic\nYour details\nBusiness name\nYour name\nEmail\n\nUsed to sign in to your dashboard.\n\nOrder summary\nProfessional Site\nOne-time build · Up to 8 tailored primary pages\n$1,499.00\n$1,274.15\nVigil Basic · monthly\n$29.00\nDue today\n$1,303.15\nWebsite details\nPromo code\nApply\n\nINFLUENCE applied · 15% off the build\n\nThen $29.00 a month, cancel any time. Sales tax is added at payment where it applies.\n\nI agree to the Vigil Studios service agreement.\nContinue to payment\n\nSecure payment with Stripe"
+      }
+    }
+  ]
+}

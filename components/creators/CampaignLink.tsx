@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useHydrated } from "@/components/ui/useSiteTheme";
 import { track } from "@vercel/analytics";
 import { campaignHref, captureCampaignAttribution, readCampaignAttribution, campaignAttribution } from "@/lib/campaign-attribution";
+import { creatorPromoHref } from "@/lib/creator-campaign";
 
 /** Uses the public site's button classes; callers own label, destination and placement. */
 export function CampaignLink({ href, children, className, event, placement, variant, campaign, activateCampaignOnClick }: {
@@ -16,7 +17,8 @@ export function CampaignLink({ href, children, className, event, placement, vari
   const attribution = hydrated && id ? { ...(prior?.campaign === id ? prior : {}), ...campaignAttribution(window.location.search, id) } : null;
   useEffect(() => { captureCampaignAttribution(campaign); }, [campaign]);
   const external = /^https:\/\//.test(href);
-  return <Link href={campaignHref(href, attribution)} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer" : undefined}
+  const destination = creatorPromoHref(href, hydrated ? window.location.search : "", campaign);
+  return <Link href={campaignHref(destination, attribution)} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer" : undefined}
     className={`${variant ? `btn-${variant} min-h-12 text-sm font-semibold` : ""} focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[color:var(--accent)] ${className ?? ""}`}
     onClick={() => {
       const current = captureCampaignAttribution(campaign ?? activateCampaignOnClick) ?? readCampaignAttribution();

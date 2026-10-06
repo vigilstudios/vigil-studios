@@ -45,7 +45,7 @@ export default async function CreatorsPage() {
 
     <Section id="choose-your-site" className={`${styles.anchor} !py-12 sm:!py-16`} alt><Container>
       <CreatorMotion><SectionIntro eyebrow={campaign.promotion.enabled ? `${campaign.promotion.percentOff}% off your build` : "Two ways to start"} title="Pick your starting point." align="center" /></CreatorMotion>
-      {campaign.promotion.enabled ? <p className="mt-5 text-center text-sm leading-7">Use code <code className="mx-1 select-all rounded border border-[color:var(--accent)]/40 bg-[color:var(--accent)]/10 px-3 py-1 font-semibold tracking-wider text-[color:var(--accent)]">{campaign.promotion.code}</code> at checkout for {campaign.promotion.percentOff}% off your one-time build.</p> : null}
+      {campaign.promotion.enabled ? <p className="mt-5 text-center text-sm leading-7">Code <code className="mx-1 select-all rounded border border-[color:var(--accent)]/40 bg-[color:var(--accent)]/10 px-3 py-1 font-semibold tracking-wider text-[color:var(--accent)]">{campaign.promotion.code}</code> is applied automatically at checkout for {campaign.promotion.percentOff}% off your one-time build.</p> : null}
       <div className="mt-7 grid gap-5 md:grid-cols-2">{(["express", "professional"] as const).map((kind) => {
         const tier = WEBSITE_TIERS[kind];
         const build = builds.find((item) => item.kind === kind);
