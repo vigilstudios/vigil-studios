@@ -1,0 +1,226 @@
+
+> vigil-studios@0.1.0 db:validate
+> scripts/db-validate.sh
+
+▸ auth shim
+▸ 20260913000000_retire_legacy_portal.sql
+▸ 20260913000001_foundation.sql
+▸ 20260913000002_identity.sql
+▸ 20260913000003_catalog_entitlements.sql
+▸ 20260913000004_websites_domains.sql
+▸ 20260913000005_operations.sql
+▸ 20260913000006_future_products.sql
+▸ 20260914000007_request_attachments.sql
+▸ 20260914000008_commerce.sql
+▸ 20260914000009_project_assets_update.sql
+▸ 20260914000010_billing_periods.sql
+▸ 20260915000011_vigil_express_name.sql
+▸ 20260915000012_delete_organization.sql
+▸ 20260916000013_professional_scope.sql
+▸ 20260916000014_project_reviews.sql
+▸ 20260916000015_customer_retirement.sql
+▸ 20260916000016_customer_retirement_hardening.sql
+▸ 20260916000017_customer_retirement_rpc.sql
+▸ 20260916000018_dashboard_realtime.sql
+▸ 20260917000019_automatic_project_status.sql
+▸ 20260917000020_express_preview_approval.sql
+▸ 20260917000021_grandfather_live_express_reviews.sql
+▸ 20260918000022_security_hardening.sql
+▸ 20260918000023_staff_notes_invites_domains_ratelimits.sql
+▸ 20260918000024_project_files.sql
+▸ 20260920000025_creative_workspaces.sql
+▸ 20260920000026_project_asset_checksums.sql
+▸ 20261006000027_package_positioning.sql
+▸ rls assertions
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:114: NOTICE:  ok - legacy: projects renamed to legacy_projects
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:114: NOTICE:  ok - legacy: prototype profiles preserved as legacy_profiles
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:114: NOTICE:  ok - legacy: demo client row kept
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:114: NOTICE:  ok - legacy: prototype sign-up trigger function removed
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:114: NOTICE:  ok - legacy: anon can no longer read the old tables
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:125: NOTICE:  ok - profile per auth user
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:125: NOTICE:  ok - profile picks up full_name from metadata
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:137: NOTICE:  ok - anon: no organizations
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:137: NOTICE:  ok - anon: no subscriptions
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:137: NOTICE:  ok - anon: no profiles
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: sees exactly one organization
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot see org B
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: sees only her website
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: provider links hidden
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: jobs hidden
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: webhook inbox hidden
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: staff table hidden
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: catalog is readable
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: sees only herself (no co-members yet)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot create websites (refused: new row violates row-level security policy for table "websites")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot create organizations (refused: new row violates row-level security policy for table "organizations")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot make herself staff (refused: new row violates row-level security policy for table "staff_members")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot change org status (refused: column "status" on organizations is managed by Vigil)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot change org slug (refused: column "slug" on organizations is managed by Vigil)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: can rename her organization
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: update on org B did not apply
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: can start connecting her own domain
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot add a domain to org B (refused: new row violates row-level security policy for table "domains")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot claim a purchased domain (refused: new row violates row-level security policy for table "domains")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot attach her domain to org B's website (refused: website 20000000-0000-0000-0000-00000000000b does not belong to organization 10000000-0000-0000-0000-00000000000a)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot file a request against org B's website (refused: website 20000000-0000-0000-0000-00000000000b does not belong to organization 10000000-0000-0000-0000-00000000000a)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot mark a domain connected (update filtered by RLS)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot insert audit rows directly (refused: new row violates row-level security policy for table "audit_events")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot write audit rows directly, even for her own org (the server does) (refused: audit events are recorded by the server)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot log audit events against org B (refused: audit events are recorded by the server)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - service: audit row names the customer it acted for
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: reads the audit row the server wrote for her org
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: growth plan grants virtue
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: resolved plan is growth
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot resolve entitlements for org B
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: insert does not stamp submitted_at (only the transition does)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot mark her request delivered (refused: customers cannot set request status to delivered)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot assign her request (refused: column "assigned_to" on change_requests is managed by Vigil)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: can close her own request
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:294: NOTICE:  ok - alice: can upload into her organization folder
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:294: NOTICE:  ok - alice: cannot upload into org B's folder (refused: new row violates row-level security policy for table "objects")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:294: NOTICE:  ok - alice: cannot upload outside an organization folder (refused: new row violates row-level security policy for table "objects")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:294: NOTICE:  ok - alice: attachment row recorded
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:294: NOTICE:  ok - alice: attachment path must encode her own organization (refused: new row for relation "change_request_attachments" violates check constraint "change_request_attachments_path_org")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:294: NOTICE:  ok - alice: attachment over 10 MB refused (refused: new row for relation "change_request_attachments" violates check constraint "change_request_attachments_size")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:294: NOTICE:  ok - bob: cannot see org A's objects
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:294: NOTICE:  ok - bob: cannot see org A's attachment rows
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:294: NOTICE:  ok - carol: staff sees the object
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:351: NOTICE:  ok - anon: can read the plan catalog for checkout
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:351: NOTICE:  ok - anon: can read build prices
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:351: NOTICE:  ok - anon: cannot read orders
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:351: NOTICE:  ok - order: checkout token generated
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:351: NOTICE:  ok - alice: cannot see unprovisioned orders
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:351: NOTICE:  ok - carol: staff sees orders
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:351: NOTICE:  ok - alice: can fill in her project brief
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:351: NOTICE:  ok - alice: cannot change project status (refused: column "status" on projects is managed by Vigil)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:351: NOTICE:  ok - alice: can record a project asset
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:351: NOTICE:  ok - alice: can caption her upload
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:351: NOTICE:  ok - alice: cannot move an uploaded object (refused: column "object_path" on project_assets is managed by Vigil)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:351: NOTICE:  ok - bob: cannot see org A's assets
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:351: NOTICE:  ok - service: deleting an organization removes its last owner too
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:376: NOTICE:  ok - bob: sees org B
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:376: NOTICE:  ok - bob: sees himself and his co-member
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:376: NOTICE:  ok - bob: member cannot rename the organization
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:376: NOTICE:  ok - bob: member cannot invite (refused: new row violates row-level security policy for table "organization_invites")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:376: NOTICE:  ok - bob: member cannot start a domain connection (refused: new row violates row-level security policy for table "domains")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:376: NOTICE:  ok - bob: no subscription means no virtue
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: staff sees every organization
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: staff sees provider links
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: staff sees every profile
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: status change wrote an audit row
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: audit row attributes the change to staff
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: staff can change org status
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: even staff cannot queue a job that crosses organizations (refused: website 20000000-0000-0000-0000-00000000000a does not belong to organization 10000000-0000-0000-0000-00000000000b)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: duplicate idempotency key refused (refused: duplicate key value violates unique constraint "provisioning_jobs_idempotency_key_key")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: staff cannot edit the catalog (update filtered by RLS)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: staff cannot grant overrides (refused: new row violates row-level security policy for table "entitlement_overrides")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:437: NOTICE:  ok - dave: admin can set a price
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:437: NOTICE:  ok - dave: override wins over plan default
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:437: NOTICE:  ok - bob: sees the override applied to his org
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:456: NOTICE:  ok - alice: cannot claim jobs (refused: staff or service role only)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:456: NOTICE:  ok - service: claims the one queued job
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:456: NOTICE:  ok - service: a running job is not reclaimed inside its lease
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:456: NOTICE:  ok - service: attempts incremented
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:524: NOTICE:  ok - bob: a customer-sent invite is not accepted on sign-in
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:524: NOTICE:  ok - bob: still sees only his own organization
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:524: NOTICE:  ok - bob: sees the pending invitation with who sent it
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:524: NOTICE:  ok - bob: now sees both organizations
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:524: NOTICE:  ok - bob: joined A as manager
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:524: NOTICE:  ok - bob: accepted invitation leaves the list
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:524: NOTICE:  ok - bob: acceptance is audited
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:524: NOTICE:  ok - bob: cannot accept an invitation addressed to eve (refused: that invitation is no longer open)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:524: NOTICE:  ok - eve: declined invitation leaves the list
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:524: NOTICE:  ok - eve: a declined invitation cannot be accepted later (refused: that invitation is no longer open)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:524: NOTICE:  ok - eve: declining never joins
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:524: NOTICE:  ok - staff-sent invites are trusted
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:524: NOTICE:  ok - alice: staff invitation accepted on sign-in
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:524: NOTICE:  ok - alice: joined B
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:524: NOTICE:  ok - alice: the last owner cannot leave (refused: an organization must keep at least one active owner)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:524: NOTICE:  ok - alice: the last owner cannot be demoted (refused: an organization must keep at least one active owner)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:542: NOTICE:  ok - alice: can edit her own name
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:542: NOTICE:  ok - alice: cannot change her email through the API (refused: column "email" on profiles is managed by Vigil)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:542: NOTICE:  ok - alice: cannot edit another profile
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:606: NOTICE:  ok - professional: exactly two included review rounds are seeded
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:606: NOTICE:  ok - alice: reads her Professional review rounds
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:606: NOTICE:  ok - alice: cannot publish a review submission (refused: only staff can publish review submissions)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:606: NOTICE:  ok - alice: cannot answer a non-current submission (refused: response does not match its submission and review round)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:606: NOTICE:  ok - staff: round two cannot be published before round one approval (refused: full-site review cannot start until design direction is approved)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:606: NOTICE:  ok - staff: publishing makes round one await customer feedback
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:606: NOTICE:  ok - alice: a consolidated response updates the round state
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:606: NOTICE:  ok - alice: cannot add a second response to the same version (refused: only the current review submission can receive a customer response)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:606: NOTICE:  ok - alice: can record an attachment on her consolidated changes
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:606: NOTICE:  ok - eve: cannot see another organization review workflow
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:606: NOTICE:  ok - eve: cannot see another organization review attachments
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:646: NOTICE:  ok - express: exactly one Full-site review round is seeded
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:646: NOTICE:  ok - express: a second request for changes is refused (refused: Express projects include one request for changes)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:646: NOTICE:  ok - express: the revised preview can be approved
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:660: NOTICE:  ok - deployment organization is taken from the website, not the caller
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:737: NOTICE:  ok - member: cannot archive a customer (refused: Admin access required)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:737: NOTICE:  ok - service: an active customer cannot be permanently purged (refused: Archive the customer before permanent deletion)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:737: NOTICE:  ok - archive: organization is closed and timestamped
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:737: NOTICE:  ok - archive: subscription row is canceled
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:737: NOTICE:  ok - archive: project and website are retired
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:737: NOTICE:  ok - archive: paid but unprovisioned orders cannot run later
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:737: NOTICE:  ok - restore: organization status is restored
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:737: NOTICE:  ok - restore: live website restores the project at launched
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:737: NOTICE:  ok - restore: billing remains canceled and requires an explicit new subscription
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:737: NOTICE:  ok - purge: customer, projects, websites, subscriptions and orders are removed
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:737: NOTICE:  ok - purge: provider links are removed
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:737: NOTICE:  ok - purge: one minimal deletion ledger remains
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:788: NOTICE:  ok - automatic lifecycle: completed intake starts the build
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:788: NOTICE:  ok - automatic lifecycle: ready preview starts review
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:788: NOTICE:  ok - automatic lifecycle: live website launches the project
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:788: NOTICE:  ok - automatic lifecycle: published review starts customer review
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:788: NOTICE:  ok - automatic lifecycle: first approval returns to the full build
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:788: NOTICE:  ok - automatic lifecycle: final approval approves the project
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: manager cannot invite an owner (refused: new row violates row-level security policy for table "organization_invites")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: manager cannot add an owner directly (refused: new row violates row-level security policy for table "organization_members")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: manager cannot forge invited_by (refused: new row violates row-level security policy for table "organization_invites")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: manager cannot upgrade an invite to owner (refused: new row violates row-level security policy for table "organization_invites")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: manager can still invite a manager
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: owner can invite an owner
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: no review response, no staff notification (refused: no review response to notify about)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: staff notification link is derived from the round
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: staff notification title is derived, not customer text
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: repeated customer notifications collapse into one per staff member
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: customer cannot write an organization-less audit row (refused: audit events are recorded by the server)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: customer cannot write audit rows for their own organization either (refused: audit events are recorded by the server)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: the review-response trigger still audits the customer action
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: customer cannot pre-set dns_ok / launch_ready on a new domain (refused: new row violates row-level security policy for table "domains")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: customer can still record a plain owned domain
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:949: NOTICE:  ok - staff: can write and read notes
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:949: NOTICE:  ok - alice: cannot read staff notes about her organization
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:949: NOTICE:  ok - alice: cannot write staff notes (refused: new row violates row-level security policy for table "staff_notes")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:949: NOTICE:  ok - organizations.notes is gone
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:949: NOTICE:  ok - orders.notes is gone
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:949: NOTICE:  ok - alice: cannot choose the verification token
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:949: NOTICE:  ok - alice: one row per hostname per organization (refused: duplicate key value violates unique constraint "domains_org_hostname_key")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:949: NOTICE:  ok - eve: may record the same hostname with her own token; nothing is reserved
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:949: NOTICE:  ok - service: a hostname verified by one organization cannot verify for another (refused: duplicate key value violates unique constraint "domains_hostname_claimed_idx")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:949: NOTICE:  ok - service: a released claim frees the hostname
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:949: NOTICE:  ok - alice: cannot touch the rate limiter (refused: permission denied for function rate_limit)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:949: NOTICE:  ok - service: first hit allowed
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:949: NOTICE:  ok - service: second hit allowed
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:949: NOTICE:  ok - service: third hit refused inside the window
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:949: NOTICE:  ok - service: a new window starts clean
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:998: NOTICE:  ok - files: default library limit is 60
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:998: NOTICE:  ok - files: a file above the per-file ceiling is refused (refused: That file is larger than 500 MB.)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:998: NOTICE:  ok - files: a video within the limits is accepted
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:998: NOTICE:  ok - files: the per-organization count override holds (refused: Your project library is full (1 files). Remove something or ask Vigil for more room.)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:998: NOTICE:  ok - files: video can be switched off per organization (refused: Video uploads are not enabled for this account.)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:1035: NOTICE:  ok - creative: staff can record a workspace
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:1035: NOTICE:  ok - creative: one record per website (refused: duplicate key value violates unique constraint "creative_workspaces_website_id_key")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:1035: NOTICE:  ok - creative: the website must belong to the organization (refused: website 20000000-0000-0000-0000-00000000000a does not belong to organization 10000000-0000-0000-0000-00000000000b)
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:1035: NOTICE:  ok - creative: status is limited to the known set (refused: new row for relation "creative_workspaces" violates check constraint "creative_workspaces_status")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:1035: NOTICE:  ok - alice: generation state is hidden from customers
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:1035: NOTICE:  ok - alice: cannot record a workspace (refused: new row violates row-level security policy for table "creative_workspaces")
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:1035: NOTICE:  ok - service: the job runner updates status
+psql:/private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/supabase/test/rls.test.sql:1037: NOTICE:  drop cascades to 7 other objects
+DETAIL:  drop cascades to function test.login(uuid,text)
+drop cascades to function test.login_service()
+drop cascades to function test.login_anon()
+drop cascades to function test.logout()
+drop cascades to function test.count(text)
+drop cascades to function test.ok(boolean,text)
+drop cascades to function test.fails(text,text)
+✓ migrations and RLS assertions passed

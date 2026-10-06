@@ -4,7 +4,7 @@ import { ExpressCatalogue } from "@/components/express/ExpressCatalogue";
 
 const title = "Vigil Express | Vigil Studios";
 const description =
-  "Fixed-price single-page websites built from a template made for your industry. See the full example before you buy, and go live in one to two business days.";
+  "Polished single-page websites from curated industry designs, customized around your brand. Preview the design before purchase; first look within two business days of onboarding.";
 
 export const metadata: Metadata = {
   title,

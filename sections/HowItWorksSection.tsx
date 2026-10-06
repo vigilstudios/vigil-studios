@@ -29,14 +29,14 @@ const CURSOR = '<svg viewBox="0 0 14 18"><path d="M1 1 L1 14 L4.4 10.8 L6.8 16.6
 const SCENES: string[] = [
   `<svg viewBox="0 0 400 210"><g>
     <text x="14" y="20">Website</text>
-    <rect class="hiw-tile pk" pathLength="1" x="14" y="30" width="108" height="76" rx="8"/><text x="28" y="52">Express</text><text class="big" x="28" y="72">Launch in days</text><text class="sm" x="28" y="92">Industry template</text>
-    <rect class="hiw-tile pk" pathLength="1" x="146" y="30" width="108" height="76" rx="8"/><text x="160" y="52">Professional</text><text class="big" x="160" y="72">Launch in weeks</text><text class="sm" x="160" y="92">Up to 8 pages</text>
-    <rect class="hiw-tile pk" pathLength="1" x="278" y="30" width="108" height="76" rx="8"/><text x="292" y="52">Growth</text><text class="big" x="292" y="72">Scoped</text><text class="sm" x="292" y="92">Apps and portals</text>
+    <rect class="hiw-tile pk" pathLength="1" x="14" y="30" width="108" height="76" rx="8"/><text x="28" y="52">Express</text><text class="big" x="28" y="72">Fast first look</text><text class="sm" x="28" y="92">Curated design</text>
+    <rect class="hiw-tile pk" pathLength="1" x="146" y="30" width="108" height="76" rx="8"/><text x="160" y="52">Professional</text><text class="big" x="160" y="72">Tailored design</text><text class="sm" x="160" y="92">Up to 8 pages</text>
+    <rect class="hiw-tile pk" pathLength="1" x="278" y="30" width="108" height="76" rx="8"/><text x="292" y="52">Custom</text><text class="big" x="292" y="72">Scoped</text><text class="sm" x="292" y="92">Bespoke build</text>
     <text x="14" y="128">+ Plan</text>
     <rect class="hiw-tile pl" pathLength="1" x="14" y="136" width="88" height="60" rx="8"/><text x="26" y="158">Basic</text><text class="sm" x="26" y="176">Keep me online</text>
     <rect class="hiw-tile pl" pathLength="1" x="110" y="136" width="88" height="60" rx="8"/><text x="122" y="158">Care</text><text class="sm" x="122" y="176">Changes handled</text>
-    <rect class="hiw-tile pl" pathLength="1" x="206" y="136" width="88" height="60" rx="8"/><text x="218" y="158">Growth</text><text class="sm" x="218" y="176">Virtue inside</text>
-    <rect class="hiw-tile pl" pathLength="1" x="302" y="136" width="88" height="60" rx="8"/><text x="314" y="158">Priority</text><text class="sm" x="314" y="176">Most capable</text>
+    <rect class="hiw-tile pl" pathLength="1" x="206" y="136" width="88" height="60" rx="8"/><text x="218" y="158">Growth</text><text class="sm" x="218" y="176">Tools coming</text>
+    <rect class="hiw-tile pl" pathLength="1" x="302" y="136" width="88" height="60" rx="8"/><text x="314" y="158">Priority</text><text class="sm" x="314" y="176">Tools coming</text>
     <circle class="clickring" cx="68" cy="68" r="6" fill="none" stroke="#10d45a" opacity="0"/><circle class="cur" cx="392" cy="204" r="5"/></g></svg>
     <span class="hiw-pill p1" style="left:2%;top:6%">Selected</span><span class="hiw-pill p2" style="left:26%;top:58%">Selected</span>`,
   `<svg viewBox="0 0 400 210"><g>
@@ -55,16 +55,16 @@ const SCENES: string[] = [
     <text class="sm" x="130" y="66">Requested</text><text class="sm" x="212" y="66">In progress</text><text class="sm" x="294" y="66">Done</text></g></svg>
     <span class="hiw-chip bad sm req" style="left:40.5%;top:46%"><i></i><b>Make the hours bigger</b></span>`,
   `<div class="hiw-glow"></div><svg viewBox="0 0 400 210">${WIN(50, 30, "lv bright", true)}
-    <g class="up" opacity="0"><rect x="64" y="124" width="118" height="42" rx="6" fill="rgba(10,10,10,.9)" stroke="rgba(16,212,90,.55)"/><text class="sm" x="72" y="138">Uptime · 99.98%</text><path class="hiw-tile spark" pathLength="1" d="M72 158 L86 156 100 158 114 155 128 158 142 157 156 158 170 156 176 158" style="stroke:#10d45a;stroke-width:1.5"/></g>
+    <g class="up" opacity="0"><rect x="64" y="124" width="118" height="42" rx="6" fill="rgba(10,10,10,.9)" stroke="rgba(16,212,90,.55)"/><text class="sm" x="72" y="138">Hosting · managed</text><path class="hiw-tile spark" pathLength="1" d="M72 158 L86 156 100 158 114 155 128 158 142 157 156 158 170 156 176 158" style="stroke:#10d45a;stroke-width:1.5"/></g>
     <g class="lock" opacity="0"><rect x="333" y="37" width="9" height="8" rx="2" fill="none" stroke="#10d45a" stroke-width="1.2"/><path d="M335 37 v-3 a2.5 2.5 0 0 1 5 0 v3" fill="none" stroke="#10d45a" stroke-width="1.2"/></g></svg>
     <span class="hiw-pill lp">Live</span>
     <span class="hiw-cur2 c1">${CURSOR}</span><span class="hiw-cur2 c2">${CURSOR}</span><span class="hiw-cur2 c3">${CURSOR}</span>
-    <span class="hiw-chip sm n" style="left:8%;top:14%"><i></i>New lead · Priya S.</span>
-    <span class="hiw-chip sm n" style="left:94%;top:30%"><i></i>Booked · Tue 10:00</span>
-    <span class="hiw-chip sm n" style="left:12%;top:92%"><i></i>5★ review · Daniel K.</span>
-    <span class="hiw-chip sm n" style="left:92%;top:78%"><i></i>Visits +38% this week</span>
-    <span class="hiw-chip sm n" style="left:52%;top:-8%"><i></i>Ranking for “salon near me”</span>
-    <span class="hiw-chip sm n" style="left:86%;top:104%"><i></i>Order · $180</span>`,
+    <span class="hiw-chip sm n" style="left:8%;top:14%"><i></i>Website · Live</span>
+    <span class="hiw-chip sm n" style="left:94%;top:30%"><i></i>Domain connected</span>
+    <span class="hiw-chip sm n" style="left:12%;top:92%"><i></i>Review approved</span>
+    <span class="hiw-chip sm n" style="left:92%;top:78%"><i></i>Mobile ready</span>
+    <span class="hiw-chip sm n" style="left:52%;top:-8%"><i></i>Security · SSL</span>
+    <span class="hiw-chip sm n" style="left:86%;top:104%"><i></i>Your code · yours</span>`,
 ];
 const VB = "I'll take it from here.";
 const draw = (el: Element, q: number) => ((el as SVGElement).style.strokeDashoffset = String(1 - q));
@@ -72,7 +72,7 @@ const pop = (el: HTMLElement, u: number) => (el.style.transform = `translate(-50
 const moveCursor = (el: Element, a: number[], b: number[], u: number) => { el.setAttribute("cx", String(a[0] + (b[0] - a[0]) * u)); el.setAttribute("cy", String(a[1] + (b[1] - a[1]) * u)); };
 const ringAt = (r: Element, cx: number, cy: number, u: number) => { r.setAttribute("cx", String(cx)); r.setAttribute("cy", String(cy)); r.setAttribute("r", String(6 + 20 * u)); r.setAttribute("opacity", String(u > 0 && u < 1 ? 1 - u : 0)); };
 
-const GOOD_NEWS = ["New lead · Priya S.", "Booked · Tue 10:00", "5★ review · Daniel K.", "Visits +38% this week", "Ranking for \u201csalon near me\u201d", "Order · $180", "New lead · Marcus T.", "Booked · Thu 2:30", "5★ review · Ana P.", "Quote request · answered", "Missed call · texted back", "Newsletter · 312 opens", "Instagram DM · answered", "Repeat customer · Leo M."];
+const GOOD_NEWS = ["Website · Live", "Domain connected", "Review approved", "Mobile ready", "Security · SSL", "Your code · yours", "Brand assets saved", "Brief sent to the team", "Pages ready for review", "Managed deployment", "Virtue guides setup", "Care · updates on request"];
 const rnd = (a: number, b: number) => a + Math.random() * (b - a);
 /** A spot on the ring just outside the site (in % of the scene box), so a chip never sits on the page itself. */
 const ringSpot = () => {

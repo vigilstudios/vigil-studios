@@ -9,6 +9,8 @@ import { beginCheckout, type CheckoutState } from "@/lib/vigil/actions/checkout"
 import { FormError, inputClass, labelClass } from "@/components/vigil/ui";
 import type { CheckoutPlan } from "@/lib/vigil/queries/checkout";
 import { BILLING_PERIODS, billingPeriodByKey, savingsPercent, type BillingPeriodKey } from "@/lib/vigil/billing-periods";
+import { WEBSITE_TIERS } from "@/lib/vigil/site-tiers";
+import { RECURRING_SERVICE_NOTE } from "@/lib/site-copy";
 import { formatMoney } from "@/lib/vigil/format";
 
 export type CheckoutFormProps = {
@@ -43,11 +45,28 @@ export function CheckoutForm(p: CheckoutFormProps) {
   const dueToday = buildCents + (price?.amountCents ?? 0);
   const perMonth = price ? Math.round(price.amountCents / period.months) : null;
 
+  const tier = WEBSITE_TIERS[p.projectKind];
+  const scope = (
+    <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-4 text-sm leading-6">
+      <p className="font-semibold">Your website scope</p>
+      <p className="mt-1 text-[color:var(--text-secondary)]">{tier.description}</p>
+      <p className="mt-2 text-xs text-[color:var(--text-secondary)]">
+        {p.projectKind === "custom"
+          ? "Your agreed written scope controls pages, bespoke work, revisions and timeline."
+          : `${tier.primaryPages === 1 ? "One page" : "Up to eight primary pages"} · ${tier.revisions} revision ${tier.revisions === 1 ? "round" : "rounds"}. ${p.projectKind === "professional" ? "New bespoke components and advanced development need separate scope." : "Layout changes and embeds stay within the chosen design."}`}
+      </p>
+      <p className="mt-2 text-xs text-[color:var(--text-secondary)]">{RECURRING_SERVICE_NOTE}</p>
+    </div>
+  );
+
   if (purchasable.length === 0) {
     return (
-      <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-5 text-sm">
-        <p className="font-semibold">Online checkout is not switched on yet.</p>
-        <p className="mt-2 text-[color:var(--text-secondary)]">Email <a className="underline" href="mailto:hello@vigilstudios.co">hello@vigilstudios.co</a> and we will set you up by hand.</p>
+      <div className="space-y-4">
+        {scope}
+        <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-5 text-sm">
+          <p className="font-semibold">Online checkout is not switched on yet.</p>
+          <p className="mt-2 text-[color:var(--text-secondary)]">Email <a className="underline" href="mailto:hello@vigilstudios.co">hello@vigilstudios.co</a> and we will set you up by hand.</p>
+        </div>
       </div>
     );
   }
@@ -60,6 +79,7 @@ export function CheckoutForm(p: CheckoutFormProps) {
       }
     }} className="grid gap-6 lg:grid-cols-[1fr_360px]" noValidate>
       <input type="hidden" name="project_kind" value={p.projectKind} />
+      <div className="lg:col-span-2">{scope}</div>
       <input type="hidden" name="template_slug" value={p.templateSlug ?? ""} />
       {p.locked ? (
         <>
@@ -71,16 +91,16 @@ export function CheckoutForm(p: CheckoutFormProps) {
       <div className="space-y-6">
         <section>
           <h2 className="text-sm font-semibold">1. Choose your Vigil plan</h2>
-          <p className="mt-1 text-xs text-[color:var(--text-secondary)]">Every Vigil-hosted website includes the Vigil platform. Pick how much you want us to take off your plate; you can change it later.</p>
+          <p className="mt-1 text-xs text-[color:var(--text-secondary)]">An active recurring plan is required for Vigil hosting. Website updates and additional tools depend on the plan; allowances follow its configuration.</p>
           {periods.length > 1 ? (
-            <div className="mt-3 inline-flex rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-0.5" role="radiogroup" aria-label="Billing period">
+            <div className="mt-3 inline-flex max-w-full rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-0.5" role="radiogroup" aria-label="Billing period">
               {periods.map((per) => {
                 const active = per.key === periodKey;
                 const save = Math.max(0, ...purchasable.map((x) => savingsPercent(x.prices.find((pr) => pr.period === per.key)?.amountCents ?? 0, per.months, x.monthlyCents) ?? 0));
                 return (
-                  <button key={per.key} type="button" role="radio" aria-checked={active} onClick={() => setPeriodKey(per.key)} disabled={pending} className={clsx("min-h-10 rounded-md px-3 text-xs font-medium transition-colors", active ? "bg-[color:var(--accent)] text-[color:var(--bg-primary)]" : "text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]")}>
-                    {per.label}
-                    {save > 0 ? <span className={clsx("ml-1.5 rounded-full px-1.5 py-0.5 text-[10px]", active ? "bg-black/15" : "bg-[color-mix(in_srgb,var(--accent)_16%,transparent)] text-[color:var(--accent)]")}>save {save}%</span> : null}
+                  <button key={per.key} type="button" role="radio" aria-checked={active} onClick={() => setPeriodKey(per.key)} disabled={pending} className={clsx("min-h-11 rounded-md px-2 py-1 text-xs sm:px-3 font-medium transition-colors", active ? "bg-[color:var(--accent)] text-[color:var(--bg-primary)]" : "text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]")}>
+                    <span className="flex flex-col items-center gap-1 sm:flex-row">{per.label}
+                    {save > 0 ? <span className={clsx("sm:ml-1.5 rounded-full px-1.5 py-0.5 text-[10px]", active ? "bg-black/15" : "bg-[color-mix(in_srgb,var(--accent)_16%,transparent)] text-[color:var(--accent)]")}>save {save}%</span> : null}</span>
                   </button>
                 );
               })}

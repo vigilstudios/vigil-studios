@@ -52,7 +52,7 @@ export function NewOrderForm({ plans, templates }: { plans: { code: string; name
           </>
         ) : (
           <div className="rounded-lg border border-[color:var(--border)] px-3 py-2 text-xs text-[color:var(--text-secondary)]">
-            {kind === "professional" ? "Up to 8 custom primary pages with standard booking and integrations. The build foundation is chosen after onboarding and scope review." : "The build foundation follows the agreed custom scope."}
+            {kind === "professional" ? "Up to 8 tailored primary pages with standard booking and integrations. Sections, art direction and page composition are selected from our premium design systems after scope review." : "The build foundation follows the agreed custom scope."}
           </div>
         )}
       </div>

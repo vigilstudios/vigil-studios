@@ -1,3 +1,5 @@
+> Historical reference. Current package scope and positioning are defined in [../business/PACKAGES.md](../business/PACKAGES.md); older custom-design and pricing statements below are not current sales promises.
+
 # vigilstudios.co redesign — brief for Astra (Codex)
 
 **Owner:** Vigil Studios. **Written:** 15 Sep 2026.

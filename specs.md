@@ -1,3 +1,5 @@
+> Historical reference. Current package scope and positioning are defined in [docs/business/PACKAGES.md](docs/business/PACKAGES.md); older custom-design and pricing statements below are not current sales promises.
+
 # Vigil Studios Website Specification
 
 ## Project Overview

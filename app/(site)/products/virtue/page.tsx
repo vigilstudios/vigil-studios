@@ -52,7 +52,7 @@ export default function VirtuePage() {
       <Section id="coming" alt>
         <Container>
           <div className="flex flex-wrap items-start justify-between gap-4">
-            <SectionIntro eyebrow="Coming" tone="violet" title="What she will do on Growth and Priority." lead="These are being built now. They arrive as configured workflows, not tools you have to set up, and you approve anything she says on your behalf." />
+            <SectionIntro eyebrow="Coming" tone="violet" title="What’s in development for Growth and Priority plans." lead="These are being built now. They arrive as configured workflows, not tools you have to set up, and you approve anything she says on your behalf." />
             <Chip tone="violet"><Clock className="h-3 w-3" /> In development</Chip>
           </div>
           <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -65,7 +65,7 @@ export default function VirtuePage() {
             ))}
           </ul>
           <p className="mt-8 max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)]">
-            Virtue is not a separate subscription. She is included with Growth and Priority, with usage allowances that match the plan. <Link href="/pricing" className="font-medium text-[color:var(--accent)]">See the plans <ArrowRight className="inline h-3.5 w-3.5" /></Link>
+            Virtue is not a separate subscription. She is included with Growth and Priority, as those features become available. Usage allowances are confirmed in your plan. <Link href="/pricing" className="font-medium text-[color:var(--accent)]">See the plans <ArrowRight className="inline h-3.5 w-3.5" /></Link>
           </p>
         </Container>
       </Section>

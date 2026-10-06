@@ -1,0 +1,51 @@
+{
+  "checks": [
+    {
+      "check": "Annual catalog amounts",
+      "values": [
+        "$290",
+        "$990",
+        "$1,990",
+        "$3,990"
+      ]
+    },
+    {
+      "check": "Three-year catalog amounts",
+      "values": [
+        "$779",
+        "$2,670",
+        "$5,370",
+        "$10,770"
+      ]
+    },
+    {
+      "check": "FAQ expands",
+      "expanded": "true"
+    },
+    {
+      "check": "Bespoke qualifier routes to scope call",
+      "pass": true
+    },
+    {
+      "check": "Standard Professional scope retains self-service/assisted result",
+      "pass": true
+    },
+    {
+      "check": "Mobile comparison exposes bespoke column by horizontal scrolling",
+      "pass": true
+    },
+    {
+      "check": "Authenticated website page on mobile",
+      "pass": true
+    },
+    {
+      "check": "Authenticated billing uses rollout-aware feature labels",
+      "pass": true
+    }
+  ],
+  "consoleErrors": [],
+  "notes": [
+    "Existing THREE.Clock deprecation warnings were observed; no runtime or hydration errors.",
+    "Local preview has no synced online payment configuration; purchase fallback verified, no payment submitted."
+  ]
+}

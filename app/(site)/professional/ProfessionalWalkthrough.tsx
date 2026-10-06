@@ -41,12 +41,12 @@ export function ProfessionalWalkthrough({ amountCents, currency, checkoutAvailab
 
         <section className="min-w-0 rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-5 sm:p-8">
           {step === 0 ? (
-            <WalkthroughStep title="A fully custom website, not a larger template." body="Professional is designed around your business, brand and customers from the ground up.">
-              <FeatureList items={[`Up to ${tier.primaryPages} custom primary pages`, "Custom navigation, layouts and content hierarchy", "Responsive desktop, tablet and mobile design", "Conversion-focused design and two revision rounds"]} />
+            <WalkthroughStep title="Premium design, composed around your brand." body="We combine premium design systems into a tailored multi-page experience, with creative direction shaped by your business and customers.">
+              <FeatureList items={[`Up to ${tier.primaryPages} tailored primary pages`, "Selected sections, typography, art direction and client media", "Responsive desktop, tablet and mobile design", "Nested pages, contextual CTAs and compatible motion"]} />
               <p className="mt-5 rounded-xl bg-[color:var(--bg-surface-soft)] p-4 text-sm leading-6 text-[color:var(--text-secondary)]">Privacy, terms, cookie and accessibility pages do not count toward the eight-page limit. Additional primary pages can be quoted separately.</p>
             </WalkthroughStep>
           ) : step === 1 ? (
-            <WalkthroughStep title="Modern website functionality is included." body="Professional is the highest tier that is still fundamentally a website. We do not strip out useful integrations to make higher plans look better.">
+            <WalkthroughStep title="Modern website functionality is included." body="Your site supports standard forms, booking and payments within the agreed page scope. New bespoke components, unique interaction systems and advanced development need a separate Custom scope.">
               <FeatureList items={["Contact, quote and multi-step lead forms", "Calendly, Acuity, Square, Vagaro, Fresha, Mindbody and similar booking embeds", "Simple Stripe, PayPal or Square payments and deposits", "Maps, reviews, email marketing, CRM forms, chat and social integrations", "Analytics, conversion tracking, SEO foundations and CMS where appropriate"]} />
             </WalkthroughStep>
           ) : step === 2 ? (
@@ -66,13 +66,13 @@ export function ProfessionalWalkthrough({ amountCents, currency, checkoutAvailab
           ) : (
             <WalkthroughStep
               title={route === "checkout" ? "Professional fits what you described." : "A short scope call is the right next step."}
-              body={route === "checkout" ? "You can purchase now. After payment, choose a kickoff call with our team or continue through my flexible guided brief." : "Part of what you selected needs an add-on or custom scope. Our team will confirm the right approach and price before you pay."}
+              body={route === "checkout" ? "You can purchase now. After payment, choose a kickoff call with our team or continue through my flexible guided brief." : "Part of what you selected needs an add-on or bespoke scope. Our team will confirm the right approach and price before you pay."}
             >
               {route === "checkout" ? (
                 <div className="rounded-xl border border-[color:var(--accent)]/40 bg-[color-mix(in_srgb,var(--accent)_6%,transparent)] p-5">
                   <p className="text-sm text-[color:var(--text-secondary)]">Professional website build</p>
                   <p className="mt-1 text-3xl font-semibold">{amountCents === null ? "Price shown at checkout" : formatMoney(amountCents, currency).replace(/\.00$/, "")} <span className="text-sm font-normal text-[color:var(--text-secondary)]">once, plus a Vigil plan</span></p>
-                  <p className="mt-3 text-xs leading-5 text-[color:var(--text-secondary)]">At checkout you choose the plan that hosts and operates the site. Virtue guides setup for every customer; the ongoing Virtue AI employee is included only with eligible Growth and Priority plans.</p>
+                  <p className="mt-3 text-xs leading-5 text-[color:var(--text-secondary)]">At checkout you choose the plan that hosts and operates the site. Virtue guides setup for every customer; the ongoing Virtue automation is in development for eligible Growth and Priority subscriptions.</p>
                   {checkoutAvailable ? (
                     <CampaignLink href="/checkout?build=professional" placement="professional_fit" event="creator_checkout_cta_click" className="btn-primary mt-5 min-h-12 w-full !px-5 !py-2.5 text-sm font-semibold">Continue to checkout <ArrowRight className="ml-1.5 h-4 w-4" /></CampaignLink>
                   ) : (

@@ -14,6 +14,7 @@ describe("website tier capabilities", () => {
   it("sends standard website needs to checkout and complex scope to consultation", () => {
     expect(professionalPurchaseRoute(["business_site", "booking_embed", "standard_integrations"])).toBe("checkout");
     expect(professionalPurchaseRoute(["business_site", "extra_pages"])).toBe("consult");
+    expect(professionalPurchaseRoute(["bespoke_design"])).toBe("consult");
     expect(professionalPurchaseRoute(["portal"])).toBe("consult");
     expect(professionalPurchaseRoute(["native_booking", "custom_systems"])).toBe("consult");
     expect(new Set(PROFESSIONAL_QUALIFIERS.map((item) => item.id)).size).toBe(PROFESSIONAL_QUALIFIERS.length);

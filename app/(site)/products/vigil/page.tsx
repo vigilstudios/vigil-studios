@@ -6,6 +6,7 @@ import { Card, CardRow } from "@/components/site/Cards";
 import { DashboardMock } from "@/components/site/DashboardMock";
 import { Chip, Container, Eyebrow, Section, SectionIntro } from "@/components/site/primitives";
 import { Reveal } from "@/components/site/Reveal";
+import { planBullets, planHasVirtue } from "@/lib/vigil/plan-presentation";
 import { VirtueOrb } from "@/components/vigil/VirtueOrb";
 import { GetStartedSection } from "@/sections/GetStartedSection";
 import { PLAN_COPY, VIGIL_PAGE } from "@/lib/site-copy";
@@ -92,7 +93,7 @@ export default async function VigilPage() {
       <Section alt id="plans">
         <Container>
           <Reveal>
-            <SectionIntro eyebrow="Four service levels" tone="teal" title="Pick how much we take off your plate." lead="Every Vigil website runs on a plan. Basic keeps it online; Care means you never touch it; Growth and Priority add Virtue. Change plans any time." />
+            <SectionIntro eyebrow="Four service levels" tone="teal" title="Pick how much we take off your plate." lead="Every Vigil-hosted website needs a separate plan. Basic manages hosting; Care adds website change requests. Growth and Priority include eligibility for additional tools in development. Features and allowances follow your plan." />
           </Reveal>
           <CardRow className="mt-10 md:grid-cols-2 xl:grid-cols-4">
             {plans.map((p) => {
@@ -101,11 +102,12 @@ export default async function VigilPage() {
                 <Card key={p.code}>
                   <div className="flex h-full flex-col rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-5">
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-base font-semibold">{p.name.replace(/^Vigil /, "")}</h3>
-                      {copy?.virtue ? <VirtueOrb size="sm" label="Includes Virtue" /> : null}
+                      <h3 className="text-base font-semibold">{p.name}</h3>
+                      {planHasVirtue(p.includes) ? <VirtueOrb size="sm" label="Virtue automation in development" /> : null}
                     </div>
                     <p className="text-sm text-[color:var(--text-secondary)]">{p.tagline}</p>
                     <p className="mt-3 text-sm">{copy?.headline}</p>
+                    <ul className="mt-3 space-y-1 text-xs leading-5 text-[color:var(--text-secondary)]">{planBullets(p.includes).map((label) => <li key={label}>{label}</li>)}</ul>
                     <p className="mt-auto pt-4 text-sm font-medium">{p.prices.month != null ? `From ${formatMoney(p.prices.month, p.currency).replace(/\.00$/, "")} / month` : ""}</p>
                   </div>
                 </Card>
@@ -129,7 +131,7 @@ export default async function VigilPage() {
                   <Chip tone="violet">Growth · Priority</Chip>
                 </div>
                 <h2 className="text-2xl font-semibold tracking-tight">The employee who lives in this dashboard.</h2>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)]">She set you up on day one. On Growth and Priority she keeps working after launch: leads, missed calls, reviews.</p>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)]">She guides setup on every plan. Ongoing lead follow-up, missed-call text-back and reviews are in development for eligible Growth and Priority subscriptions.</p>
               </div>
               <Link href="/products/virtue" className="btn-primary min-h-11 shrink-0 !px-5 !py-2 text-sm font-semibold">Meet Virtue <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
             </div>

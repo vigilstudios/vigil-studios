@@ -1,0 +1,589 @@
+path	matching_lines	classification
+AGENTS.md	2	engineering/reference
+CHANGELOG.md	8	engineering/reference
+CLAUDE.md	7	engineering/reference
+CreativePackageAutomationPlan.md	20	engineering/reference
+EXPRESS-STOREFRONT.md	36	engineering/reference
+README.md	2	engineering/reference
+Template-Catalogue.md	38	engineering/reference
+Vigil Professional Design Engine Implementation Plan.md	35	engineering/reference
+app/(site)/creators/creators.module.css	13	public marketing/demo
+app/(site)/creators/page.tsx	22	public marketing/demo
+app/(site)/express/page.tsx	10	public marketing/demo
+app/(site)/layout.tsx	3	public marketing/demo
+app/(site)/pricing/page.tsx	13	public marketing/demo
+app/(site)/process/page.tsx	1	public marketing/demo
+app/(site)/products/page.tsx	29	public marketing/demo
+app/(site)/products/vigil/page.tsx	29	public marketing/demo
+app/(site)/products/virtue/VirtueHero.tsx	9	public marketing/demo
+app/(site)/products/virtue/page.tsx	11	public marketing/demo
+app/(site)/products/websites/page.tsx	19	public marketing/demo
+app/(site)/professional/ProfessionalWalkthrough.tsx	23	public marketing/demo
+app/(site)/professional/page.tsx	7	public marketing/demo
+app/(site)/terms/page.tsx	21	public marketing/demo
+app/(vigil)/admin/audit/page.tsx	3	product/admin/backend
+app/(vigil)/admin/composition-lab/page.tsx	1	product/admin/backend
+app/(vigil)/admin/design-lab/page.tsx	1	product/admin/backend
+app/(vigil)/admin/domains/page.tsx	3	product/admin/backend
+app/(vigil)/admin/jobs/page.tsx	3	product/admin/backend
+app/(vigil)/admin/lab/page.tsx	3	product/admin/backend
+app/(vigil)/admin/layout.tsx	8	product/admin/backend
+app/(vigil)/admin/orders/NewOrderForm.tsx	15	product/admin/backend
+app/(vigil)/admin/orders/page.tsx	12	product/admin/backend
+app/(vigil)/admin/organizations/[orgId]/files/page.tsx	4	product/admin/backend
+app/(vigil)/admin/organizations/[orgId]/page.tsx	36	product/admin/backend
+app/(vigil)/admin/organizations/page.tsx	6	product/admin/backend
+app/(vigil)/admin/page.tsx	8	product/admin/backend
+app/(vigil)/admin/plans/PlanFeatureCell.tsx	4	product/admin/backend
+app/(vigil)/admin/plans/page.tsx	33	product/admin/backend
+app/(vigil)/admin/requests/page.tsx	5	product/admin/backend
+app/(vigil)/admin/reviews/[projectId]/page.tsx	7	product/admin/backend
+app/(vigil)/admin/reviews/page.tsx	5	product/admin/backend
+app/(vigil)/admin/subscriptions/page.tsx	13	product/admin/backend
+app/(vigil)/admin/websites/[websiteId]/page.tsx	21	product/admin/backend
+app/(vigil)/admin/websites/page.tsx	4	product/admin/backend
+app/(vigil)/auth/callback/route.ts	1	product/admin/backend
+app/(vigil)/auth/confirm/route.ts	3	product/admin/backend
+app/(vigil)/checkout/CheckoutForm.tsx	28	product/admin/backend
+app/(vigil)/checkout/CheckoutShell.tsx	2	product/admin/backend
+app/(vigil)/checkout/[token]/page.tsx	9	product/admin/backend
+app/(vigil)/checkout/page.tsx	15	product/admin/backend
+app/(vigil)/checkout/success/SuccessPanel.tsx	12	product/admin/backend
+app/(vigil)/checkout/success/page.tsx	3	product/admin/backend
+app/(vigil)/dashboard/billing/page.tsx	23	product/admin/backend
+app/(vigil)/dashboard/domain/page.tsx	3	product/admin/backend
+app/(vigil)/dashboard/files/FilesLibrary.tsx	1	product/admin/backend
+app/(vigil)/dashboard/files/page.tsx	1	product/admin/backend
+app/(vigil)/dashboard/insights/page.tsx	2	product/admin/backend
+app/(vigil)/dashboard/layout.tsx	23	product/admin/backend
+app/(vigil)/dashboard/leads/page.tsx	3	product/admin/backend
+app/(vigil)/dashboard/onboarding/OnboardingWizard.tsx	12	product/admin/backend
+app/(vigil)/dashboard/onboarding/later/route.ts	1	product/admin/backend
+app/(vigil)/dashboard/onboarding/page.tsx	2	product/admin/backend
+app/(vigil)/dashboard/onboarding/steps/AboutStep.tsx	1	product/admin/backend
+app/(vigil)/dashboard/onboarding/steps/BrandStep.tsx	8	product/admin/backend
+app/(vigil)/dashboard/onboarding/steps/DomainStep.tsx	9	product/admin/backend
+app/(vigil)/dashboard/onboarding/steps/KickoffStep.tsx	3	product/admin/backend
+app/(vigil)/dashboard/onboarding/steps/ReviewStep.tsx	3	product/admin/backend
+app/(vigil)/dashboard/onboarding/steps/StrategyStep.tsx	14	product/admin/backend
+app/(vigil)/dashboard/onboarding/welcome/route.ts	1	product/admin/backend
+app/(vigil)/dashboard/onboarding/wizard-ui.tsx	11	product/admin/backend
+app/(vigil)/dashboard/page.tsx	40	product/admin/backend
+app/(vigil)/dashboard/requests/NewRequestForm.tsx	3	product/admin/backend
+app/(vigil)/dashboard/requests/page.tsx	5	product/admin/backend
+app/(vigil)/dashboard/review/page.tsx	10	product/admin/backend
+app/(vigil)/dashboard/settings/page.tsx	3	product/admin/backend
+app/(vigil)/dashboard/virtue/page.tsx	7	product/admin/backend
+app/(vigil)/dashboard/website/page.tsx	17	product/admin/backend
+app/(vigil)/dashboard/welcome/page.tsx	1	product/admin/backend
+app/(vigil)/error.tsx	1	product/admin/backend
+app/(vigil)/layout.tsx	2	product/admin/backend
+app/(vigil)/login/LoginForm.tsx	1	product/admin/backend
+app/(vigil)/login/page.tsx	1	product/admin/backend
+app/(vigil)/not-found.tsx	1	product/admin/backend
+app/api/csp-report/route.ts	1	engineering/reference
+app/globals.css	13	engineering/reference
+app/manifest.ts	1	public marketing/demo
+app/sitemap.ts	10	engineering/reference
+components/CalendlyModal.tsx	1	engineering/reference
+components/creators/CampaignTracking.tsx	1	public marketing/demo
+components/creators/PromoBanner.tsx	3	public marketing/demo
+components/express/ExpressCatalogue.module.css	26	public marketing/demo
+components/express/ExpressCatalogue.tsx	32	public marketing/demo
+components/layout/Footer.tsx	3	public marketing/demo
+components/layout/Navigation.tsx	8	public marketing/demo
+components/portal/ClientOnboardingFlow.tsx	7	public marketing/demo
+components/portal/ClientPortalDashboard.tsx	2	public marketing/demo
+components/portal/ContentGuide.tsx	3	public marketing/demo
+components/portal/DomainHosting.tsx	5	public marketing/demo
+components/portal/PortalHero.tsx	6	public marketing/demo
+components/portal/portalData.ts	8	public marketing/demo
+components/process/ProcessRoadmap.tsx	13	public marketing/demo
+components/site/BuildCards.tsx	10	public marketing/demo
+components/site/DashboardMock.tsx	10	public marketing/demo
+components/site/Email.tsx	3	public marketing/demo
+components/site/FlipNumber.tsx	1	public marketing/demo
+components/site/PricingTable.tsx	14	public marketing/demo
+components/site/PricingTabs.tsx	8	public marketing/demo
+components/site/SegmentedControl.tsx	1	public marketing/demo
+components/site/SnapSections.tsx	3	public marketing/demo
+components/site/StarCursor.tsx	1	public marketing/demo
+components/site/StartMarquee.tsx	1	public marketing/demo
+components/site/StartMarqueeBackdrop.tsx	1	public marketing/demo
+components/site/hero/HeroNotes.tsx	6	public marketing/demo
+components/site/hero/WireMark.tsx	2	public marketing/demo
+components/site/primitives.tsx	4	public marketing/demo
+components/site/story/StoryStage.tsx	7	public marketing/demo
+components/ui/3d-marquee.tsx	7	engineering/reference
+components/ui/modern-hero-section.tsx	1	engineering/reference
+components/ui/orb.tsx	8	engineering/reference
+components/ui/velaris.tsx	1	engineering/reference
+components/vigil/AdminReviewPublishForm.tsx	1	product/admin/backend
+components/vigil/AppFrame.tsx	12	product/admin/backend
+components/vigil/AttributeWidget.tsx	1	product/admin/backend
+components/vigil/BriefSummary.tsx	12	product/admin/backend
+components/vigil/CreativeWorkspaceCard.tsx	2	product/admin/backend
+components/vigil/DomainGuide.tsx	5	product/admin/backend
+components/vigil/DownloadSiteButton.tsx	1	product/admin/backend
+components/vigil/ExpressPreviewDecision.tsx	12	product/admin/backend
+components/vigil/FileUploadButton.tsx	1	product/admin/backend
+components/vigil/FloatingAttentionCenter.tsx	10	product/admin/backend
+components/vigil/GatedFeature.tsx	6	product/admin/backend
+components/vigil/LiveDashboardSync.tsx	1	product/admin/backend
+components/vigil/Logo.tsx	2	product/admin/backend
+components/vigil/OnboardingCard.tsx	8	product/admin/backend
+components/vigil/PasswordForm.tsx	1	product/admin/backend
+components/vigil/ReviewDashboard.tsx	21	product/admin/backend
+components/vigil/SiteFrame.tsx	4	product/admin/backend
+components/vigil/VirtueOrb.tsx	8	product/admin/backend
+components/vigil/VirtueSpeech.tsx	3	product/admin/backend
+components/vigil/VirtueWelcome.tsx	9	product/admin/backend
+components/vigil/nav.ts	4	product/admin/backend
+components/vigil/review-contract.ts	4	product/admin/backend
+components/vigil/ui.tsx	1	product/admin/backend
+design-engine/actions/capabilities.ts	8	engineering/reference
+design-engine/commerce/types.ts	4	engineering/reference
+design-engine/composition/catalog.ts	2	engineering/reference
+design-engine/composition/collection-contracts.ts	20	engineering/reference
+design-engine/composition/collection-schemas.ts	1	engineering/reference
+design-engine/composition/commerce-contracts.ts	22	engineering/reference
+design-engine/composition/contract-validation.ts	2	engineering/reference
+design-engine/composition/contracts.ts	1	engineering/reference
+design-engine/composition/controls.ts	6	engineering/reference
+design-engine/composition/evidence-contracts.ts	1	engineering/reference
+design-engine/composition/evidence-descriptors.ts	17	engineering/reference
+design-engine/composition/evidence-schemas.ts	2	engineering/reference
+design-engine/composition/import-contracts.ts	2	engineering/reference
+design-engine/composition/render.tsx	4	engineering/reference
+design-engine/composition/schemas.ts	3	engineering/reference
+design-engine/composition/service-contracts.ts	15	engineering/reference
+design-engine/composition/styles.css	32	engineering/reference
+design-engine/composition/validation.ts	14	engineering/reference
+design-engine/foundations/art-direction.ts	3	engineering/reference
+design-engine/foundations/themes.ts	1	engineering/reference
+design-engine/foundations/typography/profiles.ts	2	engineering/reference
+design-engine/media/TreatedImage.tsx	4	engineering/reference
+design-engine/motion/MeasuredLoop.tsx	6	engineering/reference
+design-engine/motion/MotionPolicy.tsx	1	engineering/reference
+design-engine/motion/visibility.ts	1	engineering/reference
+design-engine/navigation/architectures.ts	13	engineering/reference
+design-engine/navigation/capabilities.ts	1	engineering/reference
+design-engine/navigation/types.ts	2	engineering/reference
+design-engine/preview/DesignLab.tsx	2	engineering/reference
+design-engine/preview/action-fixtures.ts	10	engineering/reference
+design-engine/preview/calibration/BatchStudy.tsx	1	engineering/reference
+design-engine/preview/calibration/CalibrationLab.tsx	1	engineering/reference
+design-engine/preview/calibration/batch.ts	5	engineering/reference
+design-engine/preview/calibration/calibration.css	35	engineering/reference
+design-engine/preview/client-adaptations.ts	3	engineering/reference
+design-engine/preview/client-navigation-contexts.ts	1	engineering/reference
+design-engine/preview/collection-003b/CollectionGallery.tsx	4	engineering/reference
+design-engine/preview/collection-003b/Study.tsx	3	engineering/reference
+design-engine/preview/collection-003b/collection.css	18	engineering/reference
+design-engine/preview/collection-003b/contracts.ts	4	engineering/reference
+design-engine/preview/collection-003b/fixtures.ts	4	engineering/reference
+design-engine/preview/collection-003b/studies.ts	10	engineering/reference
+design-engine/preview/collection-004/CollectionGallery.tsx	1	engineering/reference
+design-engine/preview/collection-004/collection.css	23	engineering/reference
+design-engine/preview/collection-004/fixtures.ts	7	engineering/reference
+design-engine/preview/collection-005/CollectionGallery.tsx	2	engineering/reference
+design-engine/preview/collection-005/collection.css	28	engineering/reference
+design-engine/preview/collection-005/studies.ts	7	engineering/reference
+design-engine/preview/collection-006/CollectionGallery.tsx	2	engineering/reference
+design-engine/preview/collection-006/Study.tsx	2	engineering/reference
+design-engine/preview/collection-006/collection.css	12	engineering/reference
+design-engine/preview/collection-006/fixtures.ts	8	engineering/reference
+design-engine/preview/collection-006/studies.ts	10	engineering/reference
+design-engine/preview/collection-007/CollectionGallery.tsx	6	engineering/reference
+design-engine/preview/collection-007/Study.tsx	2	engineering/reference
+design-engine/preview/collection-007/collection.css	47	engineering/reference
+design-engine/preview/collection-007/contracts.ts	4	engineering/reference
+design-engine/preview/collection-007/fixtures.ts	4	engineering/reference
+design-engine/preview/collection-007/studies.ts	25	engineering/reference
+design-engine/preview/collection-008/CollectionGallery.tsx	3	engineering/reference
+design-engine/preview/collection-008/Composition.tsx	15	engineering/reference
+design-engine/preview/collection-008/Study.tsx	9	engineering/reference
+design-engine/preview/collection-008/collection.css	40	engineering/reference
+design-engine/preview/collection-008/contracts.ts	1	engineering/reference
+design-engine/preview/collection-008/fixtures.ts	10	engineering/reference
+design-engine/preview/collection-008/studies.ts	23	engineering/reference
+design-engine/preview/composition/ActionEditor.tsx	8	engineering/reference
+design-engine/preview/composition/AddSectionCard.tsx	3	engineering/reference
+design-engine/preview/composition/CompositionLab.tsx	47	engineering/reference
+design-engine/preview/composition/ContextualActionsEditor.tsx	7	engineering/reference
+design-engine/preview/composition/NavigationLinksEditor.tsx	21	engineering/reference
+design-engine/preview/composition/SiteTree.tsx	32	engineering/reference
+design-engine/preview/composition/addition.ts	9	engineering/reference
+design-engine/preview/composition/fixtures.ts	16	engineering/reference
+design-engine/preview/composition/lab.css	9	engineering/reference
+design-engine/preview/composition/navigation-editing.ts	1	engineering/reference
+design-engine/preview/composition/options.ts	26	engineering/reference
+design-engine/preview/composition/site-fixture.ts	13	engineering/reference
+design-engine/preview/editor/ProfessionalLab.tsx	3	engineering/reference
+design-engine/preview/editor/editor.css	5	engineering/reference
+design-engine/preview/fonts/manifest.json	10	engineering/reference
+design-engine/preview/hero-expansion/FullViewportHero.tsx	1	engineering/reference
+design-engine/preview/hero-expansion/Gallery.tsx	2	engineering/reference
+design-engine/preview/hero-expansion/styles.css	2	engineering/reference
+design-engine/preview/hero-followup-fixtures.ts	1	engineering/reference
+design-engine/preview/import-fixtures.ts	1	engineering/reference
+design-engine/preview/production-fixtures.ts	1	engineering/reference
+design-engine/preview/render.tsx	1	engineering/reference
+design-engine/preview/service-fixtures.ts	1	engineering/reference
+design-engine/primitives/DesignPrimitives.tsx	1	engineering/reference
+design-engine/registry/capabilities.ts	2	engineering/reference
+design-engine/registry/collection-sections.ts	1	engineering/reference
+design-engine/registry/commerce-sections.ts	1	engineering/reference
+design-engine/registry/components.ts	10	engineering/reference
+design-engine/registry/creative-review.ts	8	engineering/reference
+design-engine/registry/evidence-sections.ts	1	engineering/reference
+design-engine/registry/foundations.ts	5	engineering/reference
+design-engine/registry/hero-followup.ts	3	engineering/reference
+design-engine/registry/import-sections.ts	1	engineering/reference
+design-engine/registry/navigation-hero-expansion.ts	3	engineering/reference
+design-engine/registry/production-sections.ts	2	engineering/reference
+design-engine/registry/service-sections.ts	3	engineering/reference
+design-engine/registry/story-sections.ts	1	engineering/reference
+design-engine/registry/types.ts	3	engineering/reference
+design-engine/registry/validation.ts	3	engineering/reference
+design-engine/sections/commerce/ProductPicture.tsx	1	engineering/reference
+design-engine/sections/commerce/styles.css	47	engineering/reference
+design-engine/sections/heroes/AssemblyHero.tsx	1	engineering/reference
+design-engine/sections/heroes/BetweenActsHero.tsx	1	engineering/reference
+design-engine/sections/heroes/ComparisonHero.tsx	2	engineering/reference
+design-engine/sections/heroes/FrontPageHero.tsx	8	engineering/reference
+design-engine/sections/heroes/ObjectStudyHero.tsx	1	engineering/reference
+design-engine/sections/heroes/VerticalRecordHero.tsx	1	engineering/reference
+design-engine/sections/heroes/expansion.css	2	engineering/reference
+design-engine/sections/heroes/followup.css	6	engineering/reference
+design-engine/sections/heroes/scene-shared.tsx	1	engineering/reference
+design-engine/sections/imports/ImageSphere.tsx	3	engineering/reference
+design-engine/sections/imports/styles.css	9	engineering/reference
+design-engine/sections/navigation/DispatchNavigation.tsx	1	engineering/reference
+design-engine/sections/navigation/MeridianNavigation.tsx	1	engineering/reference
+design-engine/sections/navigation/PocketDockNavigation.tsx	2	engineering/reference
+design-engine/sections/navigation/expansion.css	20	engineering/reference
+design-engine/sections/proof/EvidenceReveal.tsx	1	engineering/reference
+design-engine/sections/proof/OutcomeEquation.tsx	1	engineering/reference
+design-engine/sections/proof/StorySwitchboard.tsx	3	engineering/reference
+design-engine/sections/proof/styles.css	47	engineering/reference
+design-engine/sections/services/EvidenceInPractice.tsx	1	engineering/reference
+design-engine/sections/services/styles.css	39	engineering/reference
+design-engine/sections/storytelling/ManifestoFold.tsx	1	engineering/reference
+design-engine/sections/storytelling/styles.css	21	engineering/reference
+design-engine/sections/work/styles.css	27	engineering/reference
+design-engine/site/ActionBoundary.tsx	2	engineering/reference
+design-engine/site/action-schema.ts	3	engineering/reference
+design-engine/site/actions.ts	12	engineering/reference
+design-engine/site/index.ts	4	engineering/reference
+design-engine/site/model.ts	20	engineering/reference
+design-engine/site/navigation.ts	16	engineering/reference
+design-engine/site/operations.ts	53	engineering/reference
+design-engine/site/persistence.ts	7	engineering/reference
+design-engine/site/render.tsx	3	engineering/reference
+design-engine/site/routes.ts	24	engineering/reference
+design-engine/styles.css	6	engineering/reference
+docs/business/PACKAGES.md	39	internal current/historical documentation
+docs/campaigns/ASSET-GENERATION.md	1	internal current/historical documentation
+docs/campaigns/CREATORS.md	31	internal current/historical documentation
+docs/campaigns/GENERATED-CREATOR-PHOTOS.md	2	internal current/historical documentation
+docs/dashboard-v1/ARCHITECTURE.md	36	internal current/historical documentation
+docs/dashboard-v1/CODEX_PROMPT_customer-site-pipeline.md	25	internal current/historical documentation
+docs/dashboard-v1/CREATIVE_WORKSPACE.md	13	internal current/historical documentation
+docs/dashboard-v1/HANDOFF-CONTEXT.md	66	internal current/historical documentation
+docs/dashboard-v1/IMPLEMENTATION_LOG.md	172	internal current/historical documentation
+docs/design-engine/ACTIONS.md	11	internal current/historical documentation
+docs/design-engine/ARCHITECTURE.md	22	internal current/historical documentation
+docs/design-engine/ASTRA_CREATIVE_CONTEXT.md	10	internal current/historical documentation
+docs/design-engine/COMPONENT_CONTRIBUTION.md	19	internal current/historical documentation
+docs/design-engine/COMPOSITION_ARCHITECTURE.md	17	internal current/historical documentation
+docs/design-engine/CREATIVE_DIRECTION.md	6	internal current/historical documentation
+docs/design-engine/CREATIVE_TOOLING.md	15	internal current/historical documentation
+docs/design-engine/MILESTONE_4A_VERIFICATION.md	6	internal current/historical documentation
+docs/design-engine/PAGE_ARCHITECTURE.md	38	internal current/historical documentation
+docs/design-engine/TYPOGRAPHY_AND_ART_DIRECTION.md	5	internal current/historical documentation
+docs/design-engine/action-integration/AUDIT.md	3	internal current/historical documentation
+docs/design-engine/action-integration/VERIFICATION.md	9	internal current/historical documentation
+docs/design-engine/creative-calibration-002/CREATIVE_PROFILE.md	6	internal current/historical documentation
+docs/design-engine/creative-calibration-002/HERO_DIRECTIONS.md	12	internal current/historical documentation
+docs/design-engine/creative-calibration-003/BATCH_003.md	11	internal current/historical documentation
+docs/design-engine/creative-calibration-003/FEEDBACK_AND_AUDIT.md	4	internal current/historical documentation
+docs/design-engine/creative-calibration-003/VERIFICATION.md	3	internal current/historical documentation
+docs/design-engine/creative-collection-001/ASSET_NOTES.md	2	internal current/historical documentation
+docs/design-engine/creative-collection-001/CREATIVE_COLLECTION_001.md	12	internal current/historical documentation
+docs/design-engine/creative-collection-003b/ANTI_CONVERGENCE.md	5	internal current/historical documentation
+docs/design-engine/creative-collection-003b/APPROVAL_FOLLOWUP.md	4	internal current/historical documentation
+docs/design-engine/creative-collection-003b/README.md	16	internal current/historical documentation
+docs/design-engine/creative-collection-003b/VERIFICATION.md	3	internal current/historical documentation
+docs/design-engine/creative-collection-003b/approval-followup/floating.json	1	internal current/historical documentation
+docs/design-engine/creative-collection-003b/approval-followup/matrix.json	36	internal current/historical documentation
+docs/design-engine/creative-collection-004/CANDIDATES.md	3	internal current/historical documentation
+docs/design-engine/creative-collection-004/CAPABILITY_AUDIT.md	8	internal current/historical documentation
+docs/design-engine/creative-collection-004/HUMAN_REVIEW.md	2	internal current/historical documentation
+docs/design-engine/creative-collection-004/README.md	9	internal current/historical documentation
+docs/design-engine/creative-collection-004/VERIFICATION.md	6	internal current/historical documentation
+docs/design-engine/creative-collection-005/ASSET_NOTES.md	5	internal current/historical documentation
+docs/design-engine/creative-collection-005/DIVERSITY_REVIEW.md	18	internal current/historical documentation
+docs/design-engine/creative-collection-005/HUMAN_REVIEW.md	2	internal current/historical documentation
+docs/design-engine/creative-collection-005/README.md	15	internal current/historical documentation
+docs/design-engine/creative-collection-005/URBAN_REVIEW.md	2	internal current/historical documentation
+docs/design-engine/creative-collection-005/VERIFICATION.md	2	internal current/historical documentation
+docs/design-engine/creative-collection-005/assets-manifest.json	8	internal current/historical documentation
+docs/design-engine/creative-collection-006/ANTI_CONVERGENCE.md	11	internal current/historical documentation
+docs/design-engine/creative-collection-006/README.md	33	internal current/historical documentation
+docs/design-engine/creative-collection-006/VERIFICATION.md	3	internal current/historical documentation
+docs/design-engine/creative-collection-007/ANTI_CONVERGENCE.md	4	internal current/historical documentation
+docs/design-engine/creative-collection-007/ASSET_NOTES.md	1	internal current/historical documentation
+docs/design-engine/creative-collection-007/README.md	31	internal current/historical documentation
+docs/design-engine/creative-collection-007/VERIFICATION.md	5	internal current/historical documentation
+docs/design-engine/creative-collection-008/ANTI_CONVERGENCE.md	12	internal current/historical documentation
+docs/design-engine/creative-collection-008/CANDIDATES.md	6	internal current/historical documentation
+docs/design-engine/creative-collection-008/README.md	28	internal current/historical documentation
+docs/design-engine/creative-collection-008/VERIFICATION.md	1	internal current/historical documentation
+docs/design-engine/external-imports/REPORT.md	20	internal current/historical documentation
+docs/design-engine/external-imports/VERIFICATION.md	4	internal current/historical documentation
+docs/design-engine/hero-expansion-2026-10-02/README.md	3	internal current/historical documentation
+docs/design-engine/hero-productionization-h09-h16/VERIFICATION.md	5	internal current/historical documentation
+docs/design-engine/lab-edit-preview/VERIFICATION.md	2	internal current/historical documentation
+docs/design-engine/lab-global-preview/VERIFICATION.md	8	internal current/historical documentation
+docs/design-engine/lab-workflow/VERIFICATION.md	4	internal current/historical documentation
+docs/design-engine/page-architecture/VERIFICATION.md	11	internal current/historical documentation
+docs/design-engine/productionization-004-005/M13_PRODUCTION.md	6	internal current/historical documentation
+docs/design-engine/productionization-004-005/VERIFICATION.md	12	internal current/historical documentation
+docs/design-engine/productionization-006/VERIFICATION.md	17	internal current/historical documentation
+docs/design-engine/productionization-007/COMMERCE_CONTRACT.md	5	internal current/historical documentation
+docs/design-engine/productionization-007/VERIFICATION.md	11	internal current/historical documentation
+docs/design-engine/productionization-008/EVIDENCE_CONTRACT.md	3	internal current/historical documentation
+docs/design-engine/productionization-008/MOTION_COMMIT_FOLLOWUP.md	2	internal current/historical documentation
+docs/design-engine/productionization-008/VERIFICATION.md	20	internal current/historical documentation
+docs/design-engine/productionization-navigation-hero/AUDIT.md	4	internal current/historical documentation
+docs/design-engine/productionization-navigation-hero/CAPABILITIES.md	14	internal current/historical documentation
+docs/design-engine/productionization-navigation-hero/CLIENT_PREVIEW_FOLLOWUP.md	1	internal current/historical documentation
+docs/design-engine/productionization-navigation-hero/NAVIGATION_PALETTE_FOLLOWUP.md	1	internal current/historical documentation
+docs/design-engine/productionization-navigation-hero/SCROLL_FOLLOWUP.md	4	internal current/historical documentation
+docs/design-engine/productionization-navigation-hero/VERIFICATION.md	7	internal current/historical documentation
+docs/design-engine/productionization-navigation-hero/registry.json	31	internal current/historical documentation
+docs/site-redesign/BRIEF.md	77	internal current/historical documentation
+docs/site-redesign/CODEX-HANDOFF-PROMPT.md	16	internal current/historical documentation
+docs/site-redesign/LOG.md	76	internal current/historical documentation
+lib/constants.ts	18	engineering/reference
+lib/creator-campaign.test.ts	16	verification/tooling
+lib/creator-campaign.ts	7	public marketing/demo
+lib/design-engine-actions.test.ts	32	verification/tooling
+lib/design-engine-capabilities.test.ts	25	verification/tooling
+lib/design-engine-commerce-production.test.ts	9	verification/tooling
+lib/design-engine-commerce.test.ts	1	verification/tooling
+lib/design-engine-composition.test.ts	34	verification/tooling
+lib/design-engine-evidence-production.test.ts	4	verification/tooling
+lib/design-engine-external-imports.test.ts	8	verification/tooling
+lib/design-engine-hero-followup.test.ts	11	verification/tooling
+lib/design-engine-media.test.ts	1	verification/tooling
+lib/design-engine-navigation-editing.test.ts	34	verification/tooling
+lib/design-engine-navigation-hero-production.test.ts	8	verification/tooling
+lib/design-engine-production.test.ts	16	verification/tooling
+lib/design-engine-proof.test.ts	3	verification/tooling
+lib/design-engine-section-addition.test.ts	30	verification/tooling
+lib/design-engine-services-production.test.ts	13	verification/tooling
+lib/design-engine-services.test.ts	2	verification/tooling
+lib/design-engine-site.test.ts	92	verification/tooling
+lib/design-engine-story.test.ts	7	verification/tooling
+lib/design-engine.test.ts	1	verification/tooling
+lib/express-section-shots.json	38	engineering/reference
+lib/site-copy.ts	87	public marketing/demo
+lib/site.ts	1	public marketing/demo
+lib/supabase/admin.ts	1	engineering/reference
+lib/vigil/__tests__/admin-template-fields.test.ts	8	verification/tooling
+lib/vigil/__tests__/attention.test.ts	1	verification/tooling
+lib/vigil/__tests__/billing-periods.test.ts	4	verification/tooling
+lib/vigil/__tests__/billing.test.ts	20	verification/tooling
+lib/vigil/__tests__/catalog.test.ts	10	verification/tooling
+lib/vigil/__tests__/checkout-schema.test.ts	5	verification/tooling
+lib/vigil/__tests__/creative-assets.test.ts	23	verification/tooling
+lib/vigil/__tests__/creative-documents.test.ts	9	verification/tooling
+lib/vigil/__tests__/creative-fixtures.ts	7	verification/tooling
+lib/vigil/__tests__/creative-jobs.test.ts	7	verification/tooling
+lib/vigil/__tests__/creative-schema.test.ts	1	verification/tooling
+lib/vigil/__tests__/creative-service.test.ts	5	verification/tooling
+lib/vigil/__tests__/creative-source.test.ts	4	verification/tooling
+lib/vigil/__tests__/customer-retirement.test.ts	25	verification/tooling
+lib/vigil/__tests__/deployment-notifications.test.ts	3	verification/tooling
+lib/vigil/__tests__/deployment-review-gate.test.ts	3	verification/tooling
+lib/vigil/__tests__/entitlements.test.ts	12	verification/tooling
+lib/vigil/__tests__/export.test.ts	9	verification/tooling
+lib/vigil/__tests__/fake-admin.ts	1	verification/tooling
+lib/vigil/__tests__/files.test.ts	4	verification/tooling
+lib/vigil/__tests__/lifecycle.test.ts	6	verification/tooling
+lib/vigil/__tests__/onboarding.test.ts	18	verification/tooling
+lib/vigil/__tests__/orders.test.ts	54	verification/tooling
+lib/vigil/__tests__/plan-presentation.test.ts	9	verification/tooling
+lib/vigil/__tests__/presenters.test.ts	7	verification/tooling
+lib/vigil/__tests__/preview-review.test.ts	19	verification/tooling
+lib/vigil/__tests__/project-reviews-gate.test.ts	6	verification/tooling
+lib/vigil/__tests__/project-reviews.test.ts	3	verification/tooling
+lib/vigil/__tests__/providers.test.ts	4	verification/tooling
+lib/vigil/__tests__/reconcile.test.ts	12	verification/tooling
+lib/vigil/__tests__/review-contract.test.ts	1	verification/tooling
+lib/vigil/__tests__/server-only-stub.ts	1	verification/tooling
+lib/vigil/__tests__/settle.test.ts	8	verification/tooling
+lib/vigil/__tests__/site-tiers.test.ts	14	verification/tooling
+lib/vigil/__tests__/stripe.test.ts	28	verification/tooling
+lib/vigil/__tests__/vercel.test.ts	2	verification/tooling
+lib/vigil/__tests__/webhook.test.ts	27	verification/tooling
+lib/vigil/actions/admin-orders.ts	15	product/admin/backend
+lib/vigil/actions/admin.ts	44	product/admin/backend
+lib/vigil/actions/billing.ts	1	product/admin/backend
+lib/vigil/actions/checkout.ts	13	product/admin/backend
+lib/vigil/actions/domain.ts	1	product/admin/backend
+lib/vigil/actions/express-preview.ts	8	product/admin/backend
+lib/vigil/actions/onboarding.ts	5	product/admin/backend
+lib/vigil/actions/requests.ts	4	product/admin/backend
+lib/vigil/actions/reviews.ts	12	product/admin/backend
+lib/vigil/attention.ts	1	product/admin/backend
+lib/vigil/auth/actions.ts	2	product/admin/backend
+lib/vigil/auth/origin.ts	1	product/admin/backend
+lib/vigil/auth/session.ts	1	product/admin/backend
+lib/vigil/billing-periods.ts	4	product/admin/backend
+lib/vigil/checkout-schema.ts	3	product/admin/backend
+lib/vigil/creative/assets.ts	3	product/admin/backend
+lib/vigil/creative/config.ts	3	product/admin/backend
+lib/vigil/creative/documents.ts	9	product/admin/backend
+lib/vigil/creative/enqueue.ts	2	product/admin/backend
+lib/vigil/creative/publish.ts	6	product/admin/backend
+lib/vigil/creative/schema.ts	6	product/admin/backend
+lib/vigil/creative/service.ts	23	product/admin/backend
+lib/vigil/creative/source.ts	7	product/admin/backend
+lib/vigil/creative/status.ts	1	product/admin/backend
+lib/vigil/creative/templates.ts	16	product/admin/backend
+lib/vigil/creative/terra.ts	3	product/admin/backend
+lib/vigil/creative/workspace.ts	7	product/admin/backend
+lib/vigil/domain-guides.ts	2	product/admin/backend
+lib/vigil/entitlements.ts	11	product/admin/backend
+lib/vigil/express-preview-review.ts	16	product/admin/backend
+lib/vigil/files.ts	1	product/admin/backend
+lib/vigil/jobs.ts	4	product/admin/backend
+lib/vigil/lifecycle.ts	6	product/admin/backend
+lib/vigil/onboarding/brief.ts	10	product/admin/backend
+lib/vigil/onboarding/virtue-copy.ts	13	product/admin/backend
+lib/vigil/plan-presentation.ts	6	product/admin/backend
+lib/vigil/presenters.ts	13	product/admin/backend
+lib/vigil/project-reviews.ts	14	product/admin/backend
+lib/vigil/providers/null.ts	11	product/admin/backend
+lib/vigil/providers/stripe.ts	25	product/admin/backend
+lib/vigil/providers/stubs.ts	2	product/admin/backend
+lib/vigil/providers/types.ts	18	product/admin/backend
+lib/vigil/queries/admin.ts	32	product/admin/backend
+lib/vigil/queries/checkout.ts	21	product/admin/backend
+lib/vigil/queries/dashboard.ts	8	product/admin/backend
+lib/vigil/queries/public-pricing.ts	18	product/admin/backend
+lib/vigil/queries/reviews.ts	5	product/admin/backend
+lib/vigil/rate-limit.ts	1	product/admin/backend
+lib/vigil/services/billing.ts	22	product/admin/backend
+lib/vigil/services/catalog.ts	18	product/admin/backend
+lib/vigil/services/customer-retirement.ts	20	product/admin/backend
+lib/vigil/services/deployment-notifications.ts	4	product/admin/backend
+lib/vigil/services/deployment.ts	4	product/admin/backend
+lib/vigil/services/domain.ts	10	product/admin/backend
+lib/vigil/services/export.ts	14	product/admin/backend
+lib/vigil/services/orders.ts	50	product/admin/backend
+lib/vigil/services/provider-links.ts	2	product/admin/backend
+lib/vigil/services/reconcile.ts	1	product/admin/backend
+lib/vigil/services/repository.ts	12	product/admin/backend
+lib/vigil/services/settle.ts	1	product/admin/backend
+lib/vigil/services/webhook.ts	12	product/admin/backend
+lib/vigil/site-tiers.ts	50	product/admin/backend
+lib/vigil/types.ts	5	product/admin/backend
+next.config.ts	10	engineering/reference
+proxy.ts	2	engineering/reference
+public/express-templates/auto-services.html	34	Express customer-site example
+public/express-templates/home-services.html	16	Express customer-site example
+public/express-templates/medical.html	13	Express customer-site example
+public/express-templates/restaurant.html	23	Express customer-site example
+public/express-templates/retail.html	5	Express customer-site example
+public/express-templates/salon-spa.html	23	Express customer-site example
+scripts/capture-express-sections.mjs	22	verification/tooling
+scripts/creators-browser.mjs	173	verification/tooling
+scripts/db-gen-types.mjs	2	verification/tooling
+scripts/design-engine-actions-browser.mjs	30	verification/tooling
+scripts/design-engine-actions-lab.mjs	41	verification/tooling
+scripts/design-engine-actions-media.mjs	9	verification/tooling
+scripts/design-engine-actions-qa.tsx	7	verification/tooling
+scripts/design-engine-actions-surfaces.mjs	7	verification/tooling
+scripts/design-engine-client-hover-browser.mjs	23	verification/tooling
+scripts/design-engine-client-preview-browser.mjs	22	verification/tooling
+scripts/design-engine-commerce-interactions.mjs	69	verification/tooling
+scripts/design-engine-commerce-matrix.mjs	15	verification/tooling
+scripts/design-engine-hero-expansion-qa.mjs	2	verification/tooling
+scripts/design-engine-hero-followup-qa.mjs	37	verification/tooling
+scripts/design-engine-imports-browser.mjs	16	verification/tooling
+scripts/design-engine-imports-final-browser.mjs	11	verification/tooling
+scripts/design-engine-imports-lab.mjs	21	verification/tooling
+scripts/design-engine-imports-qa.tsx	2	verification/tooling
+scripts/design-engine-lab-edit-preview.mjs	40	verification/tooling
+scripts/design-engine-lab-global-preview.mjs	76	verification/tooling
+scripts/design-engine-lab-workflow.mjs	60	verification/tooling
+scripts/design-engine-navigation-followup.mjs	4	verification/tooling
+scripts/design-engine-navigation-hero-browser.mjs	3	verification/tooling
+scripts/design-engine-navigation-hero-edges.mjs	48	verification/tooling
+scripts/design-engine-navigation-hero-lab.mjs	5	verification/tooling
+scripts/design-engine-navigation-hero-qa.tsx	11	verification/tooling
+scripts/design-engine-navigation-interactions.mjs	3	verification/tooling
+scripts/design-engine-navigation-matrix.mjs	20	verification/tooling
+scripts/design-engine-navigation-scroll-browser.mjs	15	verification/tooling
+scripts/design-engine-navigation-scroll-frames.mjs	6	verification/tooling
+scripts/design-engine-navigation-scroll.mjs	1	verification/tooling
+scripts/design-engine-pass006-bounds.mjs	2	verification/tooling
+scripts/design-engine-pass006-interactions.mjs	4	verification/tooling
+scripts/design-engine-pass006-matrix.mjs	27	verification/tooling
+scripts/design-engine-pass007-interactions.mjs	53	verification/tooling
+scripts/design-engine-pass007-lab.mjs	33	verification/tooling
+scripts/design-engine-pass007-matrix.mjs	18	verification/tooling
+scripts/design-engine-pass008-browser.mjs	16	verification/tooling
+scripts/design-engine-pass008-interactions.mjs	34	verification/tooling
+scripts/design-engine-pass008-lab.mjs	46	verification/tooling
+scripts/design-engine-pass008-motion-commit.mjs	19	verification/tooling
+scripts/design-engine-pass008-qa.tsx	5	verification/tooling
+scripts/design-engine-pass008-refinements.mjs	6	verification/tooling
+scripts/design-engine-pass008-visual.mjs	9	verification/tooling
+scripts/design-engine-proof-axis-check.mjs	1	verification/tooling
+scripts/design-engine-proof-browser.mjs	41	verification/tooling
+scripts/design-engine-proof-lab.mjs	2	verification/tooling
+scripts/design-engine-proof-motion.mjs	10	verification/tooling
+scripts/design-engine-proof-qa.tsx	2	verification/tooling
+scripts/design-engine-proof-report.mjs	3	verification/tooling
+scripts/design-engine-qa.mjs	1	verification/tooling
+scripts/design-engine-qa.tsx	11	verification/tooling
+scripts/design-engine-site-accessibility.mjs	44	verification/tooling
+scripts/design-engine-site-browser.mjs	75	verification/tooling
+scripts/design-engine-site-qa.tsx	6	verification/tooling
+sections/FAQSection.tsx	1	public marketing/demo
+sections/GetStartedSection.tsx	1	public marketing/demo
+sections/HowItWorksSection.tsx	12	public marketing/demo
+sections/StartSection.tsx	7	public marketing/demo
+specs.md	29	engineering/reference
+supabase/config.toml	4	schema/catalog/history
+supabase/migrations/20260913000001_foundation.sql	4	schema/catalog/history
+supabase/migrations/20260913000003_catalog_entitlements.sql	90	schema/catalog/history
+supabase/migrations/20260913000004_websites_domains.sql	11	schema/catalog/history
+supabase/migrations/20260913000005_operations.sql	2	schema/catalog/history
+supabase/migrations/20260913000006_future_products.sql	10	schema/catalog/history
+supabase/migrations/20260914000008_commerce.sql	14	schema/catalog/history
+supabase/migrations/20260914000010_billing_periods.sql	12	schema/catalog/history
+supabase/migrations/20260915000011_vigil_express_name.sql	2	schema/catalog/history
+supabase/migrations/20260916000013_professional_scope.sql	3	schema/catalog/history
+supabase/migrations/20260916000014_project_reviews.sql	16	schema/catalog/history
+supabase/migrations/20260916000015_customer_retirement.sql	1	schema/catalog/history
+supabase/migrations/20260916000016_customer_retirement_hardening.sql	1	schema/catalog/history
+supabase/migrations/20260916000018_dashboard_realtime.sql	1	schema/catalog/history
+supabase/migrations/20260917000019_automatic_project_status.sql	2	schema/catalog/history
+supabase/migrations/20260917000020_express_preview_approval.sql	22	schema/catalog/history
+supabase/migrations/20260917000021_grandfather_live_express_reviews.sql	4	schema/catalog/history
+supabase/migrations/20260918000022_security_hardening.sql	2	schema/catalog/history
+supabase/migrations/20260918000023_staff_notes_invites_domains_ratelimits.sql	1	schema/catalog/history
+supabase/migrations/20260918000024_project_files.sql	1	schema/catalog/history
+supabase/migrations/20260920000025_creative_workspaces.sql	1	schema/catalog/history
+supabase/migrations/20261006000027_package_positioning.sql	8	schema/catalog/history
+supabase/test/auth-shim.sql	1	schema/catalog/history
+supabase/test/rls.test.sql	56	schema/catalog/history
+types/database.types.ts	93	engineering/reference
+types/index.ts	1	engineering/reference
+types/portal.ts	3	engineering/reference

@@ -1,3 +1,4 @@
+import { PLAN_FEATURE_LABELS } from "@/lib/vigil/plan-presentation";
 import type { Metadata } from "next";
 import { Card, DefinitionList, EmptyState, PageHeader, StatusPill } from "@/components/vigil/ui";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
@@ -88,7 +89,7 @@ export default async function BillingPage() {
             if (f.value_kind === "boolean") value = e?.value === true ? "Included" : "Not included";
             else if (f.value_kind === "limit") value = typeof e?.value === "number" ? String(e.value) : "To be confirmed";
             else value = typeof e?.value === "string" ? titleCase(e.value) : "To be confirmed";
-            return { label: f.name, value };
+            return { label: PLAN_FEATURE_LABELS.find(([code]) => code === f.code)?.[1] ?? f.name, value };
           })}
         />
       </Card>

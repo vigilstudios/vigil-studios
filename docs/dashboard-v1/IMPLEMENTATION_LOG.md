@@ -946,3 +946,13 @@ Validation: full lint, standalone typecheck, optimized production build and 209 
 ### 2026-10-06 — Creator campaign production release preflight
 
 User authorized the campaign production commit and deployment. Staged only campaign source, pricing/checkout integration, assets, documentation and creator log entries; excluded unrelated admin/Design Engine work. Exported the exact index into a clean temporary directory without local provider environment files. Full lint, standalone typecheck, all 290 tests / 48 files and optimized production build pass. Existing `main` → Vercel Git integration handles the production release.
+
+### 2026-10-06 — Repository-wide package positioning refresh
+
+Canonical scope and marketing now distinguish curated single-page Express, premium multi-page Professional composition and bespoke Custom (Growth-level) work. Updated pricing/cards/comparison/FAQs, Professional fit routing, creator/Scar context, pre-payment scope, onboarding/portal labels, terms, metadata and animated homepage copy. Recurring labels follow enabled database features and distinguish unfinished Virtue/Lead Hub/Insights from live guided onboarding; unset allowances are not promised. Preserved catalog names/prices/entitlements and the existing creator promotion. Added a guarded description-only catalog migration, validated locally without hosted push. Existing unrelated admin/engine work and Scar source remain untouched.
+
+Verification: 1,286 tests / 72 files, full lint, typecheck, production build and migration/RLS validation pass. Four-size browser matrix: 56 route/viewports plus billing, FAQ, fit-routing, comparison and authenticated dashboard checks; no runtime/hydration errors. Fixed 320px savings-toggle overflow without reducing typography. Current naming conflict, Stripe/local checkout limits, sources and release notes: `docs/business/PACKAGES.md` and `PACKAGE_REFRESH.md`; evidence beside them. No deployment, payment, provider sync, commit, push or next Design Engine milestone.
+
+### 2026-10-06 — Package refresh production release preflight
+
+User authorized production release. The exact release tree excludes unrelated admin/Design Engine work and passes full lint, standalone typecheck, 292 tests / 49 files, optimized build and migration/RLS validation without local provider environment files. Existing main → Vercel Git integration deploys the website. Hosted description-only migration is pending Supabase Keychain approval; canonical application descriptions are already independent of old catalog text. No live payment or Stripe provider sync was performed.

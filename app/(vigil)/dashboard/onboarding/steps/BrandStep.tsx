@@ -173,7 +173,7 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
       {projectKind !== "express" ? (
         <section>
           <p className="mb-1 text-xs font-medium text-[color:var(--text-secondary)]">Layouts, sketches and visual inspiration <span className="font-normal opacity-70">(optional)</span></p>
-          <p className="mb-2 text-[11px] text-[color:var(--text-secondary)]">Upload screenshots, mood boards, rough wireframes, PDFs or anything that helps explain the style and layout you have in mind. Add captions to tell us what matters.</p>
+          <p className="mb-2 text-[11px] text-[color:var(--text-secondary)]">Upload screenshots, mood boards, rough wireframes or PDFs to explain what matters. Professional uses these to guide section selection, typography and composition from our premium design systems; bespoke component invention requires separate scope.</p>
           {inspiration.length > 0 ? (
             <ul className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
               {inspiration.map((asset) => <AssetTile key={asset.id} asset={asset} onRemove={() => remove(asset)} captionable />)}

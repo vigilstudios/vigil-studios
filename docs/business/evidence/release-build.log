@@ -1,0 +1,88 @@
+
+> vigil-studios@0.1.0 build
+> next build
+
+▲ Next.js 16.3.5 (Turbopack)
+✓ Running next.config.ts took 1194ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 7.2s
+  Running TypeScript ...
+  Finished TypeScript in 7.2s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/53) ...
+  Generating static pages using 7 workers (13/53)
+  Generating static pages using 7 workers (26/53)
+  Generating static pages using 7 workers (39/53)
+✓ Generating static pages using 7 workers (53/53) in 1125ms
+  Finalizing page optimization ...
+
+Route (app)                                     Revalidate  Expire
+┌ ○ /                                                   5m      1y
+├ ○ /_not-found
+├ ƒ /admin
+├ ƒ /admin/audit
+├ ƒ /admin/domains
+├ ƒ /admin/jobs
+├ ƒ /admin/orders
+├ ƒ /admin/organizations
+├ ƒ /admin/organizations/[orgId]
+├ ƒ /admin/organizations/[orgId]/files
+├ ƒ /admin/plans
+├ ƒ /admin/requests
+├ ƒ /admin/reviews
+├ ƒ /admin/reviews/[projectId]
+├ ƒ /admin/subscriptions
+├ ƒ /admin/websites
+├ ƒ /admin/websites/[websiteId]
+├ ƒ /api/admin/organizations/[orgId]/files.zip
+├ ƒ /api/csp-report
+├ ƒ /api/health
+├ ƒ /api/jobs/run
+├ ƒ /api/webhooks/stripe
+├ ƒ /api/websites/[websiteId]/export
+├ ○ /apple-icon.png
+├ ƒ /auth/callback
+├ ƒ /auth/confirm
+├ ƒ /auth/signout
+├ ƒ /checkout
+├ ƒ /checkout/[token]
+├ ƒ /checkout/success
+├ ○ /creators                                           5m      1y
+├ ○ /creators/opengraph-image-6942ng
+├ ○ /creators/twitter-image-6942ng
+├ ƒ /dashboard
+├ ƒ /dashboard/billing
+├ ƒ /dashboard/domain
+├ ƒ /dashboard/files
+├ ƒ /dashboard/insights
+├ ƒ /dashboard/leads
+├ ƒ /dashboard/onboarding
+├ ƒ /dashboard/onboarding/later
+├ ƒ /dashboard/onboarding/welcome
+├ ƒ /dashboard/requests
+├ ƒ /dashboard/review
+├ ƒ /dashboard/settings
+├ ƒ /dashboard/virtue
+├ ƒ /dashboard/website
+├ ƒ /dashboard/welcome
+├ ○ /express                                            5m      1y
+├ ○ /icon.svg
+├ ƒ /login
+├ ○ /manifest.webmanifest
+├ ƒ /pricing
+├ ○ /process
+├ ○ /products                                           5m      1y
+├ ○ /products/vigil                                     5m      1y
+├ ○ /products/virtue
+├ ○ /products/websites                                  5m      1y
+├ ƒ /professional
+├ ○ /robots.txt
+├ ○ /sitemap.xml
+└ ○ /terms
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

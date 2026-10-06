@@ -58,9 +58,9 @@ These capabilities may be available to you. The list is context, not permission 
 
 ## 3. Vigil's creative standard
 
-Professional and Growth sites are specific, memorable, polished, responsive, commercially effective and clearly authored for this client. The test for every decision is: would this only make sense for this business?
+Professional and Custom (Growth-level bespoke) sites are specific, memorable, polished, responsive, commercially effective and clearly authored for this client. Professional is composed and art-directed from Vigil’s approved premium design systems, with configured typography, sections, layouts, media, nested pages, contextual actions and compatible motion. New components, design systems and experimental interactions require a separately agreed Custom scope. Read docs/business/PACKAGES.md in the Vigil Studios repository for current package language. The test for every decision is: would this only make sense for this business?
 
-Deliberately consider, when they reinforce the client's brand and goals: unconventional composition, editorial layouts, kinetic typography, scroll storytelling, masking and reveals, SVG choreography, video-integrated interfaces, procedural graphics, shaders and WebGL, interactive 3D, spatial depth, stateful Rive-style graphics, experimental navigation, and custom microinteractions.
+For agreed bespoke Custom scope, consider when they reinforce the client's brand and goals: unconventional composition, editorial layouts, kinetic typography, scroll storytelling, masking and reveals, SVG choreography, video-integrated interfaces, procedural graphics, shaders and WebGL, interactive 3D, spatial depth, stateful Rive-style graphics, experimental navigation, and custom microinteractions.
 
 These are possibilities, not quotas. Novelty must have a reason. Usability, accessibility (WCAG 2.2 AA as the floor), performance budgets, conversion and mobile quality are always required; reduced-motion behaviour is designed, not bolted on.
 

@@ -24,14 +24,14 @@ export function VirtueHero() {
             className="[&>p]:text-[color:var(--text-primary)] [&>p:not(:first-child)]:opacity-85 [&>p:not(:first-child)]:sm:text-lg [&>p:not(:first-child)]:sm:leading-8"
             lines={[
               { text: "Hello. I'm Virtue.", emphasis: true },
-              { text: "I work inside Vigil. Today I set up every customer, from sign-in to domain, and hand it all to the team. Soon, on Growth and Priority, I keep going after launch: following up leads, texting back missed calls, asking happy customers for reviews." },
+              { text: "I work inside Vigil. Today I set up every customer, from sign-in to domain, and hand it all to the team. Soon, on eligible Growth and Priority subscriptions, I keep going after launch: following up leads, texting back missed calls, asking happy customers for reviews." },
             ]}
             onStart={speech.onStart}
             onDone={() => { speech.onDone(); setSpoken(true); }}
           />
         </div>
         <div className={clsx("mt-6 flex flex-col gap-3 transition-opacity duration-700 sm:flex-row", spoken ? "opacity-100" : "opacity-0")}>
-          <Link href="/express" className="btn-primary min-h-12 !px-6 text-sm font-semibold">Start with a template <ArrowRight className="ml-2 h-4 w-4" /></Link>
+          <Link href="/express" className="btn-primary min-h-12 !px-6 text-sm font-semibold">Explore Express designs <ArrowRight className="ml-2 h-4 w-4" /></Link>
           <a href="#today" className="btn-secondary min-h-12 !px-6 text-sm">What she does today</a>
         </div>
       </div>

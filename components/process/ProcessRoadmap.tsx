@@ -70,7 +70,7 @@ const roadmapSteps = [
     icon: Code2,
     timeline: "Week 1-3",
     description:
-      "Your website is custom-coded for speed, mobile responsiveness, SEO structure, animations, and a polished user experience.",
+      "Your website is built within your package scope: a curated Express design, tailored Professional composition or bespoke Custom experience, with responsive design and SEO foundations.",
     deliverables: ["Responsive website", "SEO foundation", "Contact forms"],
   },
   {

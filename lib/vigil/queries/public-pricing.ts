@@ -1,11 +1,12 @@
 import "server-only";
+import { WEBSITE_TIERS } from "@/lib/vigil/site-tiers";
 import { CREATOR_CAMPAIGN, creatorBuildOffer, type CreatorBuildOffer } from "@/lib/creator-campaign";
 
 import { unstable_cache } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
 import { getPublicSupabaseEnv } from "@/lib/supabase/env";
 import { BILLING_PERIODS, type BillingPeriodKey } from "@/lib/vigil/billing-periods";
-import { FEATURES } from "@/lib/vigil/entitlements";
+import { PLAN_FEATURE_LABELS } from "@/lib/vigil/plan-presentation";
 import type { Database } from "@/types/database.types";
 
 /**
@@ -25,14 +26,7 @@ export type PublicPlan = {
 
 export type PublicBuild = CreatorBuildOffer & { kind: "express" | "professional" | "custom"; name: string; description: string | null; amountCents: number | null; currency: string };
 
-const includeLabels: [string, string][] = [
-  [FEATURES.hostingManaged, "Managed hosting, SSL and security"],
-  [FEATURES.domainManaged, "Domain status and management"],
-  [FEATURES.requests, "Website updates and content changes"],
-  [FEATURES.leads, "Lead Hub"],
-  [FEATURES.insights, "Vigil Insights"],
-  [FEATURES.virtue, "Virtue, your AI employee"],
-];
+const includeLabels = PLAN_FEATURE_LABELS;
 
 async function load(): Promise<{ plans: PublicPlan[]; builds: PublicBuild[] }> {
   const env = getPublicSupabaseEnv();
@@ -64,7 +58,7 @@ async function load(): Promise<{ plans: PublicPlan[]; builds: PublicBuild[] }> {
   });
   const order: PublicBuild["kind"][] = ["express", "professional", "custom"];
   const buildList: PublicBuild[] = (builds.data ?? [])
-    .map((b) => ({ kind: b.kind as PublicBuild["kind"], name: b.name, description: b.description, ...creatorBuildOffer(b.kind, b.amount_cents), currency: b.currency }))
+    .map((b) => ({ kind: b.kind as PublicBuild["kind"], name: b.name, description: WEBSITE_TIERS[b.kind as keyof typeof WEBSITE_TIERS]?.summary ?? b.description, ...creatorBuildOffer(b.kind, b.amount_cents), currency: b.currency }))
     .sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
   return { plans: out, builds: buildList };
 }

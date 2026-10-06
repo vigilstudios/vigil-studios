@@ -10,7 +10,7 @@ import { Chip } from "./primitives";
 import { Card, CardRow } from "./Cards";
 
 const tone = { express: "accent", professional: "teal", custom: "violet" } as const;
-const label = { express: "Fastest", professional: "Multi-page", custom: "Scoped" } as const;
+const label = { express: "Fastest", professional: "Multi-page", custom: "Bespoke" } as const;
 
 /** The three builds, paid once: rows in build_prices, copy from BUILD_COPY. */
 export function BuildCards({ builds, bullets = 4 }: { builds: PublicBuild[]; bullets?: number }) {
@@ -26,7 +26,7 @@ export function BuildCards({ builds, bullets = 4 }: { builds: PublicBuild[]; bul
               <h3 className="text-lg font-semibold tracking-tight">{b.name}</h3>
               <Chip tone={tone[b.kind]}>{label[b.kind]}</Chip>
             </div>
-            <p className="mt-1 text-sm text-[color:var(--text-secondary)]">{copy?.tagline ?? b.description}</p>
+            <p className="mt-1 text-sm text-[color:var(--text-secondary)] md:min-h-15">{copy?.tagline ?? b.description}</p>
             <p className="mt-5 text-3xl font-semibold tracking-tight">
               {b.amountCents != null ? formatMoney(b.amountCents, b.currency).replace(/\.00$/, "") : "Quoted"}
               <span className="text-sm font-normal text-[color:var(--text-secondary)]"> {b.amountCents != null ? "once" : "after a short call"}</span>
@@ -40,7 +40,7 @@ export function BuildCards({ builds, bullets = 4 }: { builds: PublicBuild[]; bul
             </ul>
             <div className="mt-auto pt-6">
               {express ? (
-                <Link href="/express" className="btn-primary inline-flex min-h-11 w-full !px-4 !py-2 text-sm font-semibold">Choose a template <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+                <Link href="/express" className="btn-primary inline-flex min-h-11 w-full !px-4 !py-2 text-sm font-semibold">Explore the designs <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
               ) : professional ? (
                 <Link href="/professional" className="btn-primary inline-flex min-h-11 w-full !px-4 !py-2 text-sm font-semibold">Start Professional <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
               ) : (

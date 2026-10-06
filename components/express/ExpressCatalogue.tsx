@@ -208,6 +208,8 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd" }: { amo
           </div>
         </header>
 
+        <p className="mb-4 max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)]">A polished single page from a curated industry design, customized with your brand, content and imagery. One design direction and one revision round; a separate recurring Vigil plan is required. First look within two business days of completed onboarding.</p>
+
         <div
           ref={industryTabsRef}
           className={styles.industryTabs}
@@ -341,8 +343,8 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd" }: { amo
                         </span>
                         <h3>{active.industry} is being built.</h3>
                         <p>
-                          This template is not ready to preview or buy yet. Check
-                          back soon, or ask us about a custom build for your
+                          This design is not ready to preview or buy yet. Check
+                          back soon, or ask us about a tailored Professional site for your
                           business today.
                         </p>
                       </div>

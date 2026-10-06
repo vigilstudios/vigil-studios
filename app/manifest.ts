@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Vigil Studios | Web Development Agency",
     short_name: "Vigil Studios",
     description:
-      "Custom-coded websites built for speed, search visibility, and measurable growth. No templates. No compromises.",
+      "Polished Express websites, tailored multi-page Professional experiences and bespoke Custom builds. Designed for your business and managed by Vigil.",
     start_url: "/",
     display: "standalone",
     background_color: "#0a0a0a",

@@ -30,16 +30,16 @@ const SECTIONS: { title: string; body: ReactNode[] }[] = [
   {
     title: "2. What you are buying",
     body: [
-      "There are two parts. The build is a one-time payment for the website itself: a Vigil Express site made from an industry template, a Professional site designed for you, or a Custom build with a written scope. The plan is an ongoing subscription (monthly, annual or three-year) that hosts the website, keeps the domain connected and the security certificate current, applies updates, and provides the service level of the plan you chose.",
-      "Every website hosted by Vigil needs an active plan; Basic is the minimum. Prices are the ones shown at checkout or on your checkout link at the time you pay. Each plan's inclusions and allowances (for example the number of change requests, or Virtue usage) are shown on the pricing page and in your dashboard.",
+      "There are two parts. The build is a one-time payment for the website itself: a Vigil Express single page from a curated industry design, a Professional multi-page composition tailored from our premium design systems, or a bespoke Custom build with a written scope. The plan is an ongoing subscription (monthly, annual or three-year) that hosts the website, keeps the domain connected and the security certificate current, applies updates, and provides the service level of the plan you chose.",
+      "Every website hosted by Vigil needs an active plan; Basic is the minimum. Prices are the ones shown at checkout or on your checkout link at the time you pay. Each plan's inclusions and allowances (for example the number of change requests, or Virtue usage) follow the active plan configuration; confirm any unspecified allowance with the team before purchase.",
     ],
   },
   {
     title: "3. How the build works",
     body: [
       "After payment, Virtue collects the details we need. Professional customers may instead book a kickoff call with our team, or complete the guided brief and upload layouts, inspiration and requirements. We start an Express build once its brief is sent; Professional and Custom follow the timeline confirmed after intake.",
-      "Scope and revisions: Express is one template-based page with one revision round. Professional includes up to eight primary pages with fully custom responsive design and two revision rounds. Simple utility or legal pages do not count toward the eight-page limit. Additional primary pages are quoted separately. Custom builds follow their written scope. A round means one consolidated list of changes.",
-      "Professional includes standard modern website functionality such as advanced forms, third-party booking links or embeds, simple payments, maps, reviews, analytics, conversion tracking, SEO foundations, social and marketing integrations, and CMS-driven content where appropriate. It does not include custom applications or portals, native booking infrastructure, advanced ecommerce, custom APIs, complex automation or proprietary Growth and Priority systems unless separately scoped.",
+      "Scope and revisions: Express is one page with a curated design direction, brand and content customization, and one revision round. Professional includes up to eight primary pages composed from Vigil’s premium design systems, tailored responsive design and two revision rounds. Simple utility or legal pages do not count toward the eight-page limit. Nested pages fall within the same primary-page allowance. Additional primary pages are quoted separately. Bespoke Custom builds follow their written scope. A round means one consolidated list of changes.",
+      "Professional includes standard modern website functionality such as advanced forms, third-party booking links or embeds, simple payments, maps, reviews, analytics, conversion tracking, SEO foundations, social and marketing integrations, and CMS-driven content where appropriate. New bespoke components, design systems and experimental interactions require separate scope. It does not include custom applications or portals, native booking infrastructure, advanced ecommerce, custom APIs, complex automation or proprietary Growth and Priority systems unless separately scoped.",
       "The site goes live on your domain once you approve it. From then on it runs under your plan.",
     ],
   },
@@ -61,7 +61,7 @@ const SECTIONS: { title: string; body: ReactNode[] }[] = [
     title: "6. What you own, and what stays ours",
     body: [
       "You own the site-specific source code, content and assets produced for your paid project: your pages, your words, your photos, your brand files. You own your domain from day one, in your own name, whether you brought it or we registered it for you.",
-      "Vigil keeps ownership of the Vigil platform, the dashboard, Virtue, the shared templates as a reusable system, and the shared libraries, automation and infrastructure your site runs on. You get a licence to use them while you are subscribed. You may not copy, resell or reuse the template system itself.",
+      "Vigil keeps ownership of the Vigil platform, the dashboard, Virtue, the shared design systems as reusable foundations, and the shared libraries, automation and infrastructure your site runs on. You get a licence to use them while you are subscribed. You may not copy, resell or reuse the design systems themselves.",
       "You are responsible for having the rights to what you give us (text, images, logos, customer data) and for what your website says about your business.",
     ],
   },
@@ -81,7 +81,7 @@ const SECTIONS: { title: string; body: ReactNode[] }[] = [
   {
     title: "9. Virtue",
     body: [
-      "Virtue is an AI employee inside Vigil. Today she runs onboarding for every customer. Additional Virtue features are included with the plans that list them, within that plan's usage allowances. Anything Virtue sends on your behalf uses the information and approvals you give; you are responsible for reviewing what goes out under your business's name. Virtue can make mistakes, and we do not guarantee any particular business result from her work.",
+      "Virtue is an AI employee inside Vigil. Today she runs onboarding for every customer. Ongoing automation, Lead Hub and Insights are in development for eligible Growth and Priority plans; eligibility does not mean those workflows are live today. Available features follow the active plan configuration and confirmed usage allowances. Anything Virtue sends on your behalf uses the information and approvals you give; you are responsible for reviewing what goes out under your business's name. Virtue can make mistakes, and we do not guarantee any particular business result from her work.",
     ],
   },
   {

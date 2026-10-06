@@ -108,4 +108,4 @@ export function afterSendLine(kind: ProjectKind, kickoffMode?: "guided" | "call"
 }
 
 /** Virtue helps everyone get set up; the AI employee is a Growth/Priority inclusion. */
-export const VIRTUE_NOTE = "Virtue helps every Vigil customer get set up. On Growth and Priority it keeps working for you after launch.";
+export const VIRTUE_NOTE = "Virtue helps every Vigil customer get set up. Ongoing Virtue automation is in development for eligible Growth and Priority subscriptions.";

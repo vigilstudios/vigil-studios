@@ -12,7 +12,7 @@ export const CREATIVE_PROMPT_VERSION = 1;
 /** Bump when the structured-output schema changes. */
 export const CREATIVE_SCHEMA_VERSION = 1;
 /** Bump when ASTRA_INSTRUCTIONS.md or README.md templates change. */
-export const CREATIVE_TEMPLATE_VERSION = 1;
+export const CREATIVE_TEMPLATE_VERSION = 2;
 
 export const CREATIVE_WORKSPACE_ROOT = ".vigil/creative";
 

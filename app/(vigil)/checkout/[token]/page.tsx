@@ -49,7 +49,7 @@ export default async function TokenCheckoutPage({ params, searchParams }: { para
         build={buildRow ? { name: buildRow.name, amountCents: buildAmount, currency: order.currency } : null}
         projectKind={order.project_kind}
         templateSlug={order.template_slug}
-        templateName={template?.industry ?? (order.project_kind === "professional" ? "Up to 8 custom pages" : order.project_kind === "custom" ? "Custom design" : null)}
+        templateName={template?.industry ?? (order.project_kind === "professional" ? "Up to 8 tailored primary pages" : order.project_kind === "custom" ? "Custom design" : null)}
         initial={{ email: order.email, businessName: order.business_name, contactName: order.contact_name ?? undefined, planCode: order.plan?.code }}
         locked={{ orderId: order.id, checkoutToken: token }}
         termsUrl={process.env.NEXT_PUBLIC_TERMS_URL ?? null}

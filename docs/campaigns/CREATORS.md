@@ -58,7 +58,7 @@ Its continuous loop reads “For creators & influencers” alongside the actual 
 | Checkout form submission | Existing validated server action → Stripe | `creator_checkout_submitted` |
 | Confirmed provisioned success | Existing dashboard/welcome-email onboarding | `creator_purchase_confirmed` |
 
-Express suits a one-page template-based start. Professional supports up to eight custom primary pages and more room to grow. The existing Professional qualifier routes larger scope to its Calendly consultation. No qualifier is bypassed. Express requires an available template: the dedicated `creator`/Muse template remains `coming`, explicitly disclosed on this page. Complete/publish it through the existing production engine before offering it for self-service purchase. Other available templates retain their existing checkout paths.
+Express suits a curated single-page start. Professional supports up to eight tailored primary pages composed from premium design systems. Bespoke components and original interactions belong to Custom (Growth-level scope), including Scar’s standalone project. See `../business/PACKAGES.md` for current language. The existing Professional qualifier routes larger scope to its Calendly consultation. No qualifier is bypassed. Express requires an available template: the dedicated `creator`/Muse template remains `coming`, explicitly disclosed on this page. Complete/publish it through the existing production engine before offering it for self-service purchase. Other available templates retain their existing checkout paths.
 
 Online-unavailable states retain the existing Express assisted email and Professional real Calendly widget. No dead links, `#` placeholders or fabricated checkout destinations.
 

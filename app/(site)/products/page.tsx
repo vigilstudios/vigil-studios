@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Check, CreditCard, Globe, Lock, MonitorSmartphone, RefreshCw, Shield } from "lucide-react";
 import { Footer } from "@/components/layout/Footer";
 import { Chip, Container, Eyebrow, Section, SectionIntro } from "@/components/site/primitives";
+import { planBullets, planHasVirtue } from "@/lib/vigil/plan-presentation";
 import { VirtueOrb } from "@/components/vigil/VirtueOrb";
 import { GetStartedSection } from "@/sections/GetStartedSection";
 import { EXPRESS_TEMPLATES } from "@/lib/constants";
@@ -42,7 +43,7 @@ export default async function ProductsPage() {
 
       <Section id="websites" alt>
         <Container>
-          <SectionIntro eyebrow="Websites" title="Built for you, by a person." lead="Start with a Vigil Express template for your industry, or go Professional or Custom. Whichever you choose, someone at Vigil builds it from what you tell Virtue." />
+          <SectionIntro eyebrow="Websites" title="Built for you, by a person." lead="Express brings a curated single page. Professional brings a tailored multi-page composition. Custom brings bespoke design and advanced functionality. We build around your brand and goals." />
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {builds.map((b) => {
               const copy = BUILD_COPY[b.kind];
@@ -61,7 +62,7 @@ export default async function ProductsPage() {
             })}
           </div>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link href="/express" className="btn-primary min-h-11 !px-5 !py-2 text-sm font-semibold">See the templates <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+            <Link href="/express" className="btn-primary min-h-11 !px-5 !py-2 text-sm font-semibold">Explore the designs <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
             <Link href="/professional" className="btn-secondary min-h-11 !px-5 !py-2 text-sm font-semibold">Start Professional <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
             <p className="text-sm text-[color:var(--text-secondary)]">
               {EXPRESS_TEMPLATES.filter((t) => t.status === "available").length} industries ready today · {EXPRESS_TEMPLATES.filter((t) => t.status === "coming").length} under construction
@@ -91,11 +92,12 @@ export default async function ProductsPage() {
                 return (
                   <div key={p.code} className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-5">
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-base font-semibold">{p.name.replace(/^Vigil /, "")}</h3>
-                      {copy?.virtue ? <VirtueOrb size="sm" label="Includes Virtue" /> : null}
+                      <h3 className="text-base font-semibold">{p.name}</h3>
+                      {planHasVirtue(p.includes) ? <VirtueOrb size="sm" label="Virtue automation in development" /> : null}
                     </div>
                     <p className="text-sm text-[color:var(--text-secondary)]">{p.tagline}</p>
                     <p className="mt-3 text-sm">{copy?.headline}</p>
+                    <ul className="mt-3 space-y-1 text-xs leading-5 text-[color:var(--text-secondary)]">{planBullets(p.includes).map((label) => <li key={label}>{label}</li>)}</ul>
                     <p className="mt-3 text-sm font-medium">{p.prices.month != null ? `${formatMoney(p.prices.month, p.currency).replace(/\.00$/, "")} / month` : ""}</p>
                   </div>
                 );
@@ -116,7 +118,7 @@ export default async function ProductsPage() {
                 <Chip tone="violet">Growth · Priority</Chip>
               </div>
               <h2 className="text-2xl font-semibold tracking-tight">The employee who lives in your dashboard.</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)]">Today Virtue sets up every customer. On Growth and Priority she keeps working after launch: leads, missed calls, reviews. See what she does now and what is coming.</p>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)]">Virtue guides setup for every customer. Ongoing lead follow-up, missed-call text-back and reviews are in development for eligible Growth and Priority subscriptions.</p>
             </div>
             <Link href="/products/virtue" className="btn-primary min-h-11 shrink-0 !px-5 !py-2 text-sm font-semibold">Meet Virtue <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
           </div>

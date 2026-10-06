@@ -45,7 +45,7 @@ export default async function WebsitePage() {
                 <Stepper steps={projectSteps} current={step.current} done={step.done} />
               </div>
             </Panel>
-            {preview.kind !== "none" ? <PreviewWidget src={preview.src} address={preview.address} title={`${project.name} preview`} note="The template your site is built from; your content replaces this as the build progresses." /> : null}
+            {preview.kind !== "none" ? <PreviewWidget src={preview.src} address={preview.address} title={`${project.name} preview`} note="Your chosen Express design; your brand and content replace this example as the build progresses." /> : null}
           </>
         ) : (
           <EmptyState title="No website yet" description="When Vigil Studios starts building your site, its status will show here." />
@@ -100,7 +100,7 @@ export default async function WebsitePage() {
                     </div>
                     <p className="mt-2 text-center text-[11px] text-[color:var(--text-secondary)]">
                       {preview.kind === "template"
-                        ? "The template your site is built from; your content replaces this as the build progresses."
+                        ? "Your chosen Express design; your brand and content replace this example as the build progresses."
                         : site.live_url
                           ? "Live view of your published site."
                           : "Preview of your current build. This is not the public live address yet."}

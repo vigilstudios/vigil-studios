@@ -1,3 +1,5 @@
+> Historical reference. Current package scope and positioning are defined in [docs/business/PACKAGES.md](docs/business/PACKAGES.md); older custom-design and pricing statements below are not current sales promises.
+
 # Express Sites — the storefront on this site
 
 **Written 27 Aug 2026.** The selling side of the Express tier. The templates

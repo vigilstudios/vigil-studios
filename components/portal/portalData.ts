@@ -57,7 +57,7 @@ export const timelineSteps = [
   },
   {
     title: "Website Build",
-    description: "Your custom website is designed, developed, and optimized.",
+    description: "Your multi-page website is composed and art-directed around your brand, then optimized for launch.",
     icon: Code2,
     status: "upcoming",
   },

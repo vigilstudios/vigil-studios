@@ -1,0 +1,127 @@
+
+> vigil-studios@0.1.0 test
+> vitest run
+
+
+ RUN  v3.2.7 /Users/belierjavier/Desktop/Vigil Studios/Websites/vigil-studios
+
+ ✓ lib/vigil/__tests__/export.test.ts (4 tests) 1163ms
+   ✓ buildSiteExport > packages the published build with a manifest and README  477ms
+   ✓ buildSiteExport > falls back to the template when the folder is missing, and never leaves the root  648ms
+ ✓ lib/vigil/__tests__/creative-service.test.ts (10 tests) 864ms
+   ✓ generateCreativeWorkspace > writes the whole workspace in one commit and records a ready row  758ms
+ ✓ lib/design-engine-commerce-production.test.ts (49 tests) 989ms
+ ✓ lib/design-engine-site.test.ts (53 tests) 1509ms
+   ✓ Page & Site Architecture Foundation > round-trips the portable complex document, with no transient editor state  440ms
+ ✓ lib/design-engine.test.ts (13 tests) 1202ms
+   ✓ Professional Design Engine component factory > renders every registered preview variant under multiple scoped themes  1116ms
+ ✓ lib/design-engine-client-preview.test.ts (212 tests) 932ms
+ ✓ lib/design-engine-navigation-hero-production.test.ts (29 tests) 781ms
+   ✓ Approved Navigation and Hero production contracts > supports every production Hero without pairwise rules and reports classified ink conflicts  654ms
+ ✓ lib/design-engine-services-production.test.ts (9 tests) 828ms
+   ✓ Productionization Pass 006 > renders independent structures across unrelated content, longer copy and every declared type/art  596ms
+ ✓ lib/design-engine-evidence-production.test.ts (20 tests) 592ms
+ ✓ lib/vigil/__tests__/files-zip.test.ts (5 tests) 473ms
+   ✓ zipStream > streams a zip that opens with the files intact  467ms
+ ✓ lib/design-engine-actions.test.ts (111 tests) 3868ms
+ ✓ lib/design-engine-commerce.test.ts (46 tests) 487ms
+ ✓ lib/vigil/__tests__/creative-documents.test.ts (6 tests) 291ms
+ ✓ lib/design-engine-production.test.ts (9 tests) 505ms
+ ✓ lib/design-engine-proof.test.ts (136 tests) 389ms
+ ✓ lib/vigil/__tests__/checksum.test.ts (3 tests) 184ms
+ ✓ lib/design-engine-composition.test.ts (93 tests) 4820ms
+   ✓ Composition Engine contracts and rendering > renders every sample composition and supported typography/art combination  1840ms
+ ✓ lib/design-engine-navigation-editing.test.ts (15 tests) 278ms
+ ✓ lib/design-engine-hero-followup.test.ts (5 tests) 276ms
+ ✓ lib/design-engine-media.test.ts (4 tests) 127ms
+ ✓ lib/design-engine-external-imports.test.ts (10 tests) 192ms
+ ✓ lib/vigil/__tests__/upload-controls.test.ts (2 tests) 26ms
+stdout | lib/vigil/__tests__/creative-schema.test.ts > Terra request > sends strict structured output and validates what comes back
+[creative] terra ok model=gpt-5.6-terra in=5 out=7 1ms
+
+ ✓ lib/vigil/__tests__/creative-schema.test.ts (10 tests) 32ms
+ ✓ lib/design-engine-calibration.test.ts (5 tests) 42ms
+ ✓ lib/vigil/__tests__/github.test.ts (7 tests) 30ms
+ ✓ lib/vigil/__tests__/vercel.test.ts (6 tests) 17ms
+ ✓ lib/design-engine-services.test.ts (5 tests) 250ms
+ ✓ lib/vigil/__tests__/format.test.ts (5 tests) 14ms
+ ✓ lib/vigil/__tests__/domain-service.test.ts (7 tests) 19ms
+ ✓ lib/vigil/__tests__/billing-periods.test.ts (4 tests) 16ms
+ ✓ lib/vigil/__tests__/customer-retirement.test.ts (7 tests) 6ms
+ ✓ lib/vigil/__tests__/creative-assets.test.ts (6 tests) 20ms
+ ✓ lib/design-engine-story.test.ts (5 tests) 228ms
+ ✓ lib/vigil/__tests__/creative-source.test.ts (9 tests) 23ms
+ ✓ lib/vigil/__tests__/stripe.test.ts (5 tests) 8ms
+ ✓ lib/vigil/__tests__/lifecycle.test.ts (12 tests) 11ms
+ ✓ lib/vigil/__tests__/project-status.test.ts (4 tests) 3ms
+ ✓ lib/vigil/__tests__/settle.test.ts (5 tests) 9ms
+ ✓ lib/vigil/__tests__/jobs.test.ts (16 tests) 7ms
+ ✓ lib/vigil/__tests__/orders.test.ts (13 tests) 11ms
+ ✓ lib/design-engine-navigation-expansion.test.ts (16 tests) 36ms
+ ✓ lib/vigil/__tests__/reconcile.test.ts (7 tests) 17ms
+ ✓ lib/design-engine-capabilities.test.ts (6 tests) 32ms
+ ✓ lib/vigil/__tests__/auth-confirm.test.ts (5 tests) 19ms
+stderr | lib/vigil/__tests__/redirects.test.ts > toActionError audiences > hides provider and configuration detail from customers
+[action] provider_error: No such price: 'price_123'
+[action] provider_not_configured: Billing is not configured for this environment.
+Unhandled action error: Error: pg: relation missing
+    at /Users/belierjavier/Desktop/Vigil Studios/Websites/vigil-studios/lib/vigil/__tests__/redirects.test.ts:47:34
+    at file:///Users/belierjavier/Desktop/Vigil%20Studios/Websites/vigil-studios/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11
+    at file:///Users/belierjavier/Desktop/Vigil%20Studios/Websites/vigil-studios/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26
+    at file:///Users/belierjavier/Desktop/Vigil%20Studios/Websites/vigil-studios/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///Users/belierjavier/Desktop/Vigil%20Studios/Websites/vigil-studios/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)
+    at runTest (file:///Users/belierjavier/Desktop/Vigil%20Studios/Websites/vigil-studios/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at runSuite (file:///Users/belierjavier/Desktop/Vigil%20Studios/Websites/vigil-studios/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)
+    at runSuite (file:///Users/belierjavier/Desktop/Vigil%20Studios/Websites/vigil-studios/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)
+
+ ✓ lib/vigil/__tests__/redirects.test.ts (8 tests) 10ms
+ ✓ lib/vigil/__tests__/creative-jobs.test.ts (5 tests) 18ms
+ ✓ lib/vigil/__tests__/onboarding.test.ts (12 tests) 17ms
+ ✓ lib/vigil/__tests__/providers.test.ts (8 tests) 6ms
+ ✓ lib/vigil/__tests__/deployment-review-gate.test.ts (4 tests) 16ms
+ ✓ lib/vigil/__tests__/webhook.test.ts (8 tests) 28ms
+ ✓ lib/vigil/__tests__/presenters.test.ts (7 tests) 5ms
+ ✓ lib/vigil/__tests__/deployment-notifications.test.ts (3 tests) 8ms
+ ✓ lib/vigil/__tests__/attachments.test.ts (3 tests) 9ms
+ ✓ lib/vigil/__tests__/billing.test.ts (3 tests) 7ms
+ ✓ lib/vigil/__tests__/dns.test.ts (13 tests) 5ms
+ ✓ lib/creator-campaign.test.ts (9 tests) 8ms
+ ✓ lib/vigil/__tests__/admin-template-fields.test.ts (2 tests) 4ms
+ ✓ lib/vigil/__tests__/checkout-schema.test.ts (4 tests) 18ms
+ ✓ lib/vigil/__tests__/attention.test.ts (9 tests) 2ms
+ ✓ lib/vigil/__tests__/preview-review.test.ts (8 tests) 5ms
+ ✓ lib/vigil/__tests__/generated-link.test.ts (3 tests) 2ms
+ ✓ lib/vigil/__tests__/project-reviews-gate.test.ts (3 tests) 5ms
+ ✓ lib/vigil/__tests__/site-tiers.test.ts (2 tests) 3ms
+ ✓ lib/vigil/__tests__/catalog.test.ts (1 test) 6ms
+ ✓ lib/vigil/__tests__/project-reviews.test.ts (3 tests) 2ms
+ ✓ lib/vigil/__tests__/plan-presentation.test.ts (2 tests) 4ms
+ ✓ lib/design-engine-hero-expansion.test.ts (2 tests) 3ms
+ ✓ lib/vigil/__tests__/files.test.ts (6 tests) 4ms
+ ✓ lib/vigil/__tests__/review-contract.test.ts (2 tests) 4ms
+ ✓ lib/vigil/__tests__/domains.test.ts (2 tests) 3ms
+ ✓ lib/vigil/__tests__/entitlements.test.ts (4 tests) 2ms
+ ✓ lib/design-engine-section-addition.test.ts (141 tests) 29075ms
+   ✓ compatible section additions > audits every registered section against composition-a  785ms
+   ✓ compatible section additions > audits every registered section against composition-b  384ms
+   ✓ compatible section additions > audits every registered section against composition-c  538ms
+   ✓ compatible section additions > audits every registered section against composition-e  513ms
+   ✓ compatible section additions > audits every registered section against story-b  311ms
+   ✓ compatible section additions > audits every registered section against story-c  578ms
+   ✓ compatible section additions > audits every registered section against story-f  497ms
+   ✓ compatible section additions > audits every registered section against production-0-0  370ms
+   ✓ compatible section additions > audits every registered section against production-0-1  590ms
+   ✓ compatible section additions > audits every registered section against production-1-0  466ms
+   ✓ compatible section additions > audits every registered section against production-1-1  899ms
+   ✓ compatible section additions > audits every registered section against production-2-0  963ms
+   ✓ compatible section additions > audits every registered section against production-2-1  612ms
+   ✓ compatible section additions > audits every registered section against services-4-0  305ms
+   ✓ compatible section additions > audits every registered section against services-6-1  323ms
+   ✓ compatible section additions > audits every registered section against commerce-0-0  319ms
+
+ Test Files  72 passed (72)
+      Tests  1286 passed (1286)
+   Start at  13:44:13
+   Duration  31.40s (transform 3.51s, setup 0ms, collect 31.76s, tests 50.90s, environment 8ms, prepare 4.82s)

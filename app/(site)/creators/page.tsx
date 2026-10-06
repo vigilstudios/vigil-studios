@@ -53,14 +53,14 @@ export default async function CreatorsPage() {
         return <CreatorMotion key={kind} className={styles.cardMotion} delay={professional ? .1 : 0}><Panel accent={professional ? "var(--accent)" : undefined} className={`${styles.priceCard} flex h-full flex-col`}>
           <p className={styles.kicker + " text-[color:var(--accent)]"}>{professional ? "Make it your own" : "A simple, faster start"}</p>
           <h3 className="mt-2 text-2xl font-semibold">{professional ? "Vigil Professional" : tier.name}</h3>
-          <p className="mt-2 text-sm text-[color:var(--text-secondary)]">{professional ? "A custom website with room for every side of your brand." : "A polished one-page site from an available template."}</p>
+          <p className="mt-2 text-sm text-[color:var(--text-secondary)]">{professional ? "A tailored multi-page composition with room for every side of your brand." : "A polished single page from a curated industry design."}</p>
           <div className="mt-5 flex items-baseline gap-3">
             <p className={`${styles.priceAmount} text-4xl font-semibold tracking-tight`}>{build?.amountCents != null ? formatMoney(build.amountCents, build.currency).replace(/\.00$/, "") : "Price at next step"}</p>
             {build?.percentOff && build.originalAmountCents != null ? <del className="text-sm text-[color:var(--text-secondary)]">{formatMoney(build.originalAmountCents, build.currency).replace(/\.00$/, "")}</del> : null}
           </div>
           <p className="mt-1 text-xs text-[color:var(--text-secondary)]">One-time build + an ongoing Vigil plan</p>
           <ul className="my-5 space-y-2 text-sm text-[color:var(--text-secondary)]">{tier.included.slice(0, 2).map(feature => <li key={feature} className="flex gap-2"><Check size={15} className="mt-0.5 shrink-0 text-[color:var(--accent)]" aria-hidden="true" />{feature}</li>)}<li className="flex gap-2"><Check size={15} className="shrink-0 text-[color:var(--accent)]" aria-hidden="true" />{tier.revisions} revision {tier.revisions === 1 ? "round" : "rounds"}</li></ul>
-          {!professional && creatorTemplate?.status !== "available" ? <p className="mb-4 text-xs text-[color:var(--text-secondary)]">A dedicated creator template is coming soon.</p> : null}
+          {!professional && creatorTemplate?.status !== "available" ? <p className="mb-4 text-xs text-[color:var(--text-secondary)]">A dedicated creator design is coming soon.</p> : null}
           <CampaignLink campaign={campaign.id} {...action} placement="package" event={`creator_${kind}_cta_click`} className="mt-auto w-full">{action.label}<ArrowRight className="ml-2 h-4 w-4" /></CampaignLink>
         </Panel></CreatorMotion>;
       })}</div>
@@ -68,20 +68,21 @@ export default async function CreatorsPage() {
         <p>{basic?.prices.month != null ? `Vigil plans from ${formatMoney(basic.prices.month, basic.currency)}/month.` : "Choose your ongoing plan at checkout."}{campaign.promotion.enabled ? " Promotion applies to the build fee only." : ""}</p>
         {campaign.promotion.enabled ? <details><summary>Offer details</summary><p>{campaign.promotion.terms}</p></details> : null}
       </div>
+      <p className="mt-4 text-center text-sm leading-6 text-[color:var(--text-secondary)]">Need original components or a unique creative experience? <a href="/products/websites#custom" className="underline underline-offset-4">Explore bespoke Custom builds</a>; those projects are quoted separately and excluded from the creator offer.</p>
       <p className={styles.processLine}>Choose your site <span>→</span> Share your brand <span>→</span> Review <span>→</span> Launch</p>
     </Container></Section>
 
     <Section className={styles.spotlight} id="creator-spotlight"><Container>
       <CreatorMotion className={styles.spotlightHeading}>
           <Eyebrow>Creator spotlight</Eyebrow><h2 className="text-4xl sm:text-5xl">{campaign.showcase?.name ?? "Made for Scar."}</h2>
-          <p className="mt-3 text-sm text-[color:var(--text-secondary)]">{campaign.showcase?.description ?? "Her content. Her city. Her own corner of the internet."}</p>
+          <p className="mt-3 text-sm text-[color:var(--text-secondary)]">{campaign.showcase?.description ?? "A standalone bespoke project: original creative direction and interactions designed for Scar."}</p>
           {campaign.showcase?.siteUrl ? <CampaignLink campaign={campaign.id} href={campaign.showcase.siteUrl} variant="secondary" event="creator_showcase_click" placement="showcase" className="mt-5">Explore her site<ArrowUpRight className="ml-2 h-4 w-4" /></CampaignLink> : null}
       </CreatorMotion>
       <CreatorMotion delay={.08} className="mt-7">
         <CreatorSpotlightPreview image={campaign.showcase?.image ?? "/creators/scarlen-portfolio.webp"} imageAlt={campaign.showcase?.imageAlt ?? "Scarlen López’s pink New York creator portfolio"} video={campaign.showcase ? campaign.showcase.video : "/creators/scarlen-startup.mp4"} />
       </CreatorMotion>
       <CreatorMotion className={styles.spotlightActions} delay={.14}>
-          <p className="mt-6 text-lg font-medium">Ready for yours?</p>
+          <p className="mt-6 text-lg font-medium">Find the right fit for your brand.</p>
           <div className="mt-3 flex flex-col justify-center gap-3 sm:flex-row">{(["express", "professional"] as const).map(kind => <CampaignLink campaign={campaign.id} key={kind} {...campaign.actions[kind]} placement="final" event={`creator_${kind}_cta_click`}>{campaign.actions[kind].label}<ArrowRight className="ml-2 h-4 w-4" /></CampaignLink>)}</div>
       </CreatorMotion>
     </Container></Section>

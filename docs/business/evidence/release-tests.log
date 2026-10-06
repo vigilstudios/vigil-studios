@@ -1,0 +1,84 @@
+
+> vigil-studios@0.1.0 test
+> vitest run
+
+
+ RUN  v3.2.7 /private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91
+
+ ✓ lib/vigil/__tests__/github.test.ts (7 tests) 23ms
+stdout | lib/vigil/__tests__/creative-schema.test.ts > Terra request > sends strict structured output and validates what comes back
+[creative] terra ok model=gpt-5.6-terra in=5 out=7 1ms
+
+ ✓ lib/vigil/__tests__/creative-schema.test.ts (10 tests) 22ms
+ ✓ lib/vigil/__tests__/checksum.test.ts (3 tests) 144ms
+ ✓ lib/vigil/__tests__/upload-controls.test.ts (2 tests) 34ms
+ ✓ lib/vigil/__tests__/creative-source.test.ts (9 tests) 22ms
+ ✓ lib/vigil/__tests__/files-zip.test.ts (5 tests) 353ms
+   ✓ zipStream > streams a zip that opens with the files intact  349ms
+ ✓ lib/vigil/__tests__/creative-assets.test.ts (6 tests) 25ms
+ ✓ lib/vigil/__tests__/creative-documents.test.ts (6 tests) 627ms
+   ✓ document text extraction > reads the text layer of a real PDF with pdf-parse  601ms
+ ✓ lib/vigil/__tests__/webhook.test.ts (8 tests) 13ms
+ ✓ lib/vigil/__tests__/checkout-schema.test.ts (4 tests) 4ms
+ ✓ lib/vigil/__tests__/auth-confirm.test.ts (5 tests) 13ms
+ ✓ lib/vigil/__tests__/creative-service.test.ts (10 tests) 647ms
+   ✓ generateCreativeWorkspace > writes the whole workspace in one commit and records a ready row  567ms
+ ✓ lib/vigil/__tests__/domain-service.test.ts (7 tests) 31ms
+ ✓ lib/vigil/__tests__/vercel.test.ts (6 tests) 42ms
+ ✓ lib/vigil/__tests__/billing-periods.test.ts (4 tests) 26ms
+ ✓ lib/vigil/__tests__/onboarding.test.ts (12 tests) 7ms
+ ✓ lib/vigil/__tests__/deployment-review-gate.test.ts (4 tests) 7ms
+ ✓ lib/vigil/__tests__/format.test.ts (5 tests) 12ms
+ ✓ lib/vigil/__tests__/creative-jobs.test.ts (5 tests) 6ms
+ ✓ lib/vigil/__tests__/reconcile.test.ts (7 tests) 8ms
+ ✓ lib/vigil/__tests__/lifecycle.test.ts (12 tests) 8ms
+stderr | lib/vigil/__tests__/redirects.test.ts > toActionError audiences > hides provider and configuration detail from customers
+[action] provider_error: No such price: 'price_123'
+[action] provider_not_configured: Billing is not configured for this environment.
+Unhandled action error: Error: pg: relation missing
+    at /private/var/folders/35/l41t0tcn2c9dcvb_kffydl440000gn/T/vigil-package-release-soazmb91/lib/vigil/__tests__/redirects.test.ts:47:34
+    at file:///Users/belierjavier/Desktop/Vigil%20Studios/Websites/vigil-studios/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11
+    at file:///Users/belierjavier/Desktop/Vigil%20Studios/Websites/vigil-studios/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26
+    at file:///Users/belierjavier/Desktop/Vigil%20Studios/Websites/vigil-studios/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///Users/belierjavier/Desktop/Vigil%20Studios/Websites/vigil-studios/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)
+    at runTest (file:///Users/belierjavier/Desktop/Vigil%20Studios/Websites/vigil-studios/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at runSuite (file:///Users/belierjavier/Desktop/Vigil%20Studios/Websites/vigil-studios/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)
+    at runSuite (file:///Users/belierjavier/Desktop/Vigil%20Studios/Websites/vigil-studios/node_modules/@vitest/runner/dist/chunk-hooks.js:1729:8)
+
+ ✓ lib/vigil/__tests__/redirects.test.ts (8 tests) 5ms
+ ✓ lib/vigil/__tests__/attachments.test.ts (3 tests) 2ms
+ ✓ lib/vigil/__tests__/orders.test.ts (13 tests) 16ms
+ ✓ lib/creator-campaign.test.ts (9 tests) 7ms
+ ✓ lib/vigil/__tests__/stripe.test.ts (5 tests) 6ms
+ ✓ lib/vigil/__tests__/deployment-notifications.test.ts (3 tests) 5ms
+ ✓ lib/vigil/__tests__/export.test.ts (4 tests) 1453ms
+   ✓ buildSiteExport > packages the published build with a manifest and README  455ms
+   ✓ buildSiteExport > falls back to the template when the folder is missing, and never leaves the root  973ms
+ ✓ lib/vigil/__tests__/settle.test.ts (5 tests) 8ms
+ ✓ lib/vigil/__tests__/billing.test.ts (3 tests) 4ms
+ ✓ lib/vigil/__tests__/providers.test.ts (8 tests) 5ms
+ ✓ lib/vigil/__tests__/customer-retirement.test.ts (7 tests) 6ms
+ ✓ lib/vigil/__tests__/preview-review.test.ts (8 tests) 5ms
+ ✓ lib/vigil/__tests__/catalog.test.ts (1 test) 5ms
+ ✓ lib/vigil/__tests__/project-reviews-gate.test.ts (3 tests) 5ms
+ ✓ lib/vigil/__tests__/presenters.test.ts (7 tests) 3ms
+ ✓ lib/vigil/__tests__/jobs.test.ts (16 tests) 6ms
+ ✓ lib/vigil/__tests__/admin-template-fields.test.ts (2 tests) 3ms
+ ✓ lib/vigil/__tests__/review-contract.test.ts (2 tests) 3ms
+ ✓ lib/vigil/__tests__/plan-presentation.test.ts (2 tests) 5ms
+ ✓ lib/vigil/__tests__/project-status.test.ts (4 tests) 3ms
+ ✓ lib/vigil/__tests__/dns.test.ts (13 tests) 6ms
+ ✓ lib/vigil/__tests__/site-tiers.test.ts (2 tests) 2ms
+ ✓ lib/vigil/__tests__/generated-link.test.ts (3 tests) 3ms
+ ✓ lib/vigil/__tests__/attention.test.ts (9 tests) 2ms
+ ✓ lib/vigil/__tests__/domains.test.ts (2 tests) 4ms
+ ✓ lib/vigil/__tests__/project-reviews.test.ts (3 tests) 2ms
+ ✓ lib/vigil/__tests__/files.test.ts (6 tests) 6ms
+ ✓ lib/vigil/__tests__/entitlements.test.ts (4 tests) 1ms
+
+ Test Files  49 passed (49)
+      Tests  292 passed (292)
+   Start at  14:21:28
+   Duration  2.42s (transform 829ms, setup 0ms, collect 4.46s, tests 3.65s, environment 5ms, prepare 2.86s)

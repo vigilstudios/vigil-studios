@@ -34,7 +34,7 @@ export const CREATOR_CAMPAIGN = creatorCampaignSchema.parse({
     percentOff: 15,
     eyebrow: "The creator promotion",
     title: "Your creator offer.",
-    description: "Start with Express or build a custom Professional site. Your creator offer is applied automatically.",
+    description: "Start with Express or create a tailored multi-page Professional site. Your creator offer is applied automatically.",
     terms: "Applies to new self-service Express and Professional one-time builds. Ongoing Vigil plans, custom/staff quotes and existing orders are excluded. Cannot be combined with other promotions.",
   },
   actions: {

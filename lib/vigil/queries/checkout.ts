@@ -1,10 +1,11 @@
 import "server-only";
+import { WEBSITE_TIERS } from "@/lib/vigil/site-tiers";
 
 import { cache } from "react";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { BILLING_PERIODS, type BillingPeriodKey } from "@/lib/vigil/billing-periods";
-import { FEATURES } from "@/lib/vigil/entitlements";
+import { PLAN_FEATURE_LABELS } from "@/lib/vigil/plan-presentation";
 import { getBillingProvider } from "@/lib/vigil/providers/registry";
 import { buildPriceExternalId, planPriceExternalId } from "@/lib/vigil/services/catalog";
 
@@ -31,14 +32,7 @@ export type CheckoutPlan = {
 
 export type CheckoutPrice = { id: string; period: BillingPeriodKey; amountCents: number; purchasable: boolean };
 
-const includeLabels: [string, string][] = [
-  [FEATURES.hostingManaged, "Managed hosting, SSL and security"],
-  [FEATURES.domainManaged, "Domain status and management"],
-  [FEATURES.requests, "Website updates and content changes"],
-  [FEATURES.leads, "Lead Hub"],
-  [FEATURES.insights, "Vigil Insights"],
-  [FEATURES.virtue, "Virtue, your AI employee"],
-];
+const includeLabels = PLAN_FEATURE_LABELS;
 
 export const getCheckoutCatalog = cache(async () => {
   const supabase = await createClient();
@@ -84,6 +78,7 @@ export const getCheckoutCatalog = cache(async () => {
   const buildList = await Promise.all(
     (builds.data ?? []).map(async (b) => ({
       ...b,
+      description: WEBSITE_TIERS[b.kind].summary,
       synced: b.amount_cents !== null && hasAdminClient() ? Boolean(await buildPriceExternalId(createAdminClient(), b.id, provider).catch(() => null)) : false,
     }))
   );

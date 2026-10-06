@@ -2,7 +2,6 @@
 // single page, responsive, basic SEO, one revision — but produced from a
 // per-industry template rather than a bespoke build, which is what makes the
 // lower price and the 1-2 day turnaround possible.
-export const EXPRESS_PRICE = "599";
 
 // The old Stripe payment link is retired: the catalogue's Buy button opens
 // /checkout (Stripe Checkout Sessions, provisioning and Virtue onboarding

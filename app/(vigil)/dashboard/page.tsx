@@ -1,3 +1,5 @@
+import { PLAN_FEATURE_LABELS } from "@/lib/vigil/plan-presentation";
+import { WEBSITE_TIERS } from "@/lib/vigil/site-tiers";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
@@ -131,7 +133,7 @@ export default async function OverviewPage() {
             <SiteFrame src={preview.src} address={preview.address} title={`${website?.name ?? project?.name ?? "Website"} preview`} />
           )}
           {preview.kind === "template" ? (
-            <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">Showing the template your site is built from; your content replaces this as the build progresses.</p>
+            <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">Showing your chosen Express design; your brand and content replace this example as the build progresses.</p>
           ) : null}
           <div className="mt-3 flex items-start justify-between gap-3">
             {displayedWebsiteStatus ? (
@@ -268,8 +270,8 @@ export default async function OverviewPage() {
                 <dd className="font-medium">{titleCase(project.kind)} site</dd>
               </div>
               <div>
-                <dt className="text-[color:var(--text-secondary)]">Template</dt>
-                <dd className="font-medium">{templateName(project.template_slug ?? website?.template_slug ?? null)}</dd>
+                <dt className="text-[color:var(--text-secondary)]">{project.kind === "express" ? "Industry design" : "Design approach"}</dt>
+                <dd className="font-medium">{project.kind === "express" ? templateName(project.template_slug ?? website?.template_slug ?? null) : WEBSITE_TIERS[project.kind].design}</dd>
               </div>
               <div>
                 <dt className="text-[color:var(--text-secondary)]">Started</dt>
@@ -297,16 +299,9 @@ export default async function OverviewPage() {
         </Panel>
 
         {/* Plan inclusions */}
-        <Panel className="lg:col-span-4" title="Your plan includes">
+        <Panel className="lg:col-span-4" title="Plan features">
           <Checklist
-            items={[
-              { label: "Managed hosting and deployment", tone: ent.enabled(FEATURES.hostingManaged) ? "good" : "neutral" },
-              { label: "Domain status and management", tone: ent.enabled(FEATURES.domainManaged) ? "good" : "neutral" },
-              { label: "Website updates and changes", tone: ent.enabled(FEATURES.requests) ? "good" : "neutral" },
-              { label: "Lead Hub", tone: ent.enabled(FEATURES.leads) ? "good" : "neutral" },
-              { label: "Vigil Insights", tone: ent.enabled(FEATURES.insights) ? "good" : "neutral" },
-              { label: "Virtue, your AI employee", tone: ent.enabled(FEATURES.virtue) ? "good" : "neutral" },
-            ]}
+            items={PLAN_FEATURE_LABELS.map(([code, label]) => ({ label, tone: ent.enabled(code) ? "good" as const : "neutral" as const }))}
           />
           {!ent.planCode ? <p className="mt-3 text-xs text-[color:var(--text-secondary)]">No active subscription yet.</p> : null}
         </Panel>
