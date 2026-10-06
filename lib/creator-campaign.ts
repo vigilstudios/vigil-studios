@@ -10,6 +10,7 @@ export const creatorCampaignSchema = z.object({
   promotion: z.object({
     enabled: z.boolean(),
     percentOff: z.number().int().min(1).max(50),
+    code: z.string().trim().toUpperCase().regex(/^[A-Z0-9-]{3,32}$/),
     eyebrow: z.string(),
     title: z.string(),
     description: z.string(),
@@ -26,15 +27,16 @@ export const creatorCampaignSchema = z.object({
   }).nullable(),
 });
 
-/** Shared campaign configuration. Base prices stay in the catalogue; the server applies the build offer below. */
+/** Shared campaign configuration. Base prices stay in the catalogue; checkout requires the published code. */
 export const CREATOR_CAMPAIGN = creatorCampaignSchema.parse({
   id: "creators",
   promotion: {
     enabled: true,
     percentOff: 15,
+    code: "INFLUENCE",
     eyebrow: "The creator promotion",
     title: "Your creator offer.",
-    description: "Start with Express or create a tailored multi-page Professional site. Your creator offer is applied automatically.",
+    description: "Start with Express or create a tailored multi-page Professional site. Enter the creator promo code at checkout to apply your offer.",
     terms: "Applies to new self-service Express and Professional one-time builds. Ongoing Vigil plans, custom/staff quotes and existing orders are excluded. Cannot be combined with other promotions.",
   },
   actions: {
@@ -55,4 +57,13 @@ export function creatorBuildOffer(kind: string, amountCents: number | null, prom
   if (!promotion.enabled || amountCents === null || amountCents === 0 || !["express", "professional"].includes(kind)) return { amountCents, originalAmountCents: amountCents, discountCents: 0, percentOff: null };
   const discounted = Math.round(amountCents * (100 - promotion.percentOff) / 100);
   return { amountCents: discounted, originalAmountCents: amountCents, discountCents: amountCents - discounted, percentOff: promotion.percentOff };
+}
+
+export function matchesCreatorPromoCode(code: string | null | undefined, promotion = CREATOR_CAMPAIGN.promotion): boolean {
+  return promotion.enabled && typeof code === "string" && code.trim().toUpperCase() === promotion.code;
+}
+
+/** Purchase preview and server pricing require deliberate code redemption, never campaign attribution. */
+export function creatorCodeOffer(kind: string, amountCents: number | null, code?: string | null): CreatorBuildOffer {
+  return creatorBuildOffer(kind, amountCents, { ...CREATOR_CAMPAIGN.promotion, enabled: matchesCreatorPromoCode(code) });
 }

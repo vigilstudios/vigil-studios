@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { campaignAttribution, campaignHref } from "./campaign-attribution";
-import { CREATOR_CAMPAIGN, creatorBuildOffer, creatorCampaignSchema } from "./creator-campaign";
+import { CREATOR_CAMPAIGN, creatorBuildOffer, creatorCodeOffer, creatorCampaignSchema } from "./creator-campaign";
 
 describe("creator campaign routing and attribution", () => {
   const attribution = campaignAttribution("?utm_source=creator&utm_campaign=launch&ref=muse&email=private@example.com&gclid=private", "creators");
@@ -26,7 +26,7 @@ describe("creator campaign routing and attribution", () => {
   it("routes only to existing package entry points with the authorized creator promotion", () => {
     expect(CREATOR_CAMPAIGN.actions.express.href).toBe("/express");
     expect(CREATOR_CAMPAIGN.actions.professional.href).toBe("/professional");
-    expect(CREATOR_CAMPAIGN.promotion).toMatchObject({ enabled: true, percentOff: 15 });
+    expect(CREATOR_CAMPAIGN.promotion).toMatchObject({ enabled: true, percentOff: 15, code: "INFLUENCE" });
     expect(CREATOR_CAMPAIGN.showcase).toBeNull();
   });
   it("rejects unsafe/dead configured CTA destinations and invalid showcase links", () => {
@@ -38,6 +38,16 @@ describe("creator campaign routing and attribution", () => {
 });
 
 describe("creator build promotion", () => {
+  it("requires explicit valid redemption instead of automatically discounting a purchase", () => {
+    for (const code of [undefined, null, "", "creators", "WRONG"]) {
+      expect(creatorCodeOffer("express", 59900, code)).toMatchObject({ amountCents: 59900, discountCents: 0, percentOff: null });
+    }
+    expect(creatorCodeOffer("express", 59900, " influence ").amountCents).toBe(50915);
+    expect(creatorCodeOffer("professional", 149900, "INFLUENCE").amountCents).toBe(127415);
+    expect(creatorCodeOffer("custom", 350000, "INFLUENCE").amountCents).toBe(350000);
+    expect(creatorCodeOffer("basic", 2900, "INFLUENCE").amountCents).toBe(2900);
+  });
+
   it("discounts only Express and Professional in integer cents", () => {
     expect(creatorBuildOffer("express", 59900)).toMatchObject({ amountCents: 50915, originalAmountCents: 59900, discountCents: 8985, percentOff: 15 });
     expect(creatorBuildOffer("professional", 149900).amountCents).toBe(127415);

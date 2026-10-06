@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { creatorBuildOffer } from "@/lib/creator-campaign";
 import { Footer } from "@/components/layout/Footer";
 import { Container, Section } from "@/components/site/primitives";
 import { getCheckoutCatalog } from "@/lib/vigil/queries/checkout";
@@ -19,7 +18,7 @@ export default async function ProfessionalPage() {
     <>
       <Section className="pt-28 sm:pt-36">
         <Container>
-          <ProfessionalWalkthrough amountCents={creatorBuildOffer("professional", build?.amount_cents ?? null).amountCents} currency={build?.currency ?? "usd"} checkoutAvailable={Boolean(build?.synced)} />
+          <ProfessionalWalkthrough amountCents={build?.amount_cents ?? null} currency={build?.currency ?? "usd"} checkoutAvailable={Boolean(build?.synced)} />
         </Container>
       </Section>
       <Footer />

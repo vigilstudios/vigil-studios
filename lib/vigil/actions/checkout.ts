@@ -73,6 +73,7 @@ export async function beginCheckout(_prev: CheckoutState, formData: FormData): P
       templateSlug,
       planCode: v.plan_code,
       billingPeriod: v.billing_period,
+      promotionCode: v.promotion_code,
       existingOrderId,
       buildAmountOverrideCents: buildOverride,
       appUrl: await appUrl(),

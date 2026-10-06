@@ -8,7 +8,7 @@ import { CreatorHeroScene } from "@/components/creators/CreatorHeroScene";
 import { CreatorMotion } from "@/components/creators/CreatorMotion";
 import { CreatorSpotlightPreview } from "@/components/creators/CreatorSpotlightPreview";
 import { HeroCollage } from "@/components/ui/modern-hero-section";
-import { CREATOR_CAMPAIGN as campaign } from "@/lib/creator-campaign";
+import { CREATOR_CAMPAIGN as campaign, creatorBuildOffer } from "@/lib/creator-campaign";
 import { WEBSITE_TIERS } from "@/lib/vigil/site-tiers";
 import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
 import { formatMoney } from "@/lib/vigil/format";
@@ -45,9 +45,11 @@ export default async function CreatorsPage() {
 
     <Section id="choose-your-site" className={`${styles.anchor} !py-12 sm:!py-16`} alt><Container>
       <CreatorMotion><SectionIntro eyebrow={campaign.promotion.enabled ? `${campaign.promotion.percentOff}% off your build` : "Two ways to start"} title="Pick your starting point." align="center" /></CreatorMotion>
+      {campaign.promotion.enabled ? <p className="mt-5 text-center text-sm leading-7">Use code <code className="mx-1 select-all rounded border border-[color:var(--accent)]/40 bg-[color:var(--accent)]/10 px-3 py-1 font-semibold tracking-wider text-[color:var(--accent)]">{campaign.promotion.code}</code> at checkout for {campaign.promotion.percentOff}% off your one-time build.</p> : null}
       <div className="mt-7 grid gap-5 md:grid-cols-2">{(["express", "professional"] as const).map((kind) => {
         const tier = WEBSITE_TIERS[kind];
         const build = builds.find((item) => item.kind === kind);
+        const offer = creatorBuildOffer(kind, build?.amountCents ?? null);
         const professional = kind === "professional";
         const action = campaign.actions[kind];
         return <CreatorMotion key={kind} className={styles.cardMotion} delay={professional ? .1 : 0}><Panel accent={professional ? "var(--accent)" : undefined} className={`${styles.priceCard} flex h-full flex-col`}>
@@ -55,10 +57,10 @@ export default async function CreatorsPage() {
           <h3 className="mt-2 text-2xl font-semibold">{professional ? "Vigil Professional" : tier.name}</h3>
           <p className="mt-2 text-sm text-[color:var(--text-secondary)]">{professional ? "A tailored multi-page composition with room for every side of your brand." : "A polished single page from a curated industry design."}</p>
           <div className="mt-5 flex items-baseline gap-3">
-            <p className={`${styles.priceAmount} text-4xl font-semibold tracking-tight`}>{build?.amountCents != null ? formatMoney(build.amountCents, build.currency).replace(/\.00$/, "") : "Price at next step"}</p>
-            {build?.percentOff && build.originalAmountCents != null ? <del className="text-sm text-[color:var(--text-secondary)]">{formatMoney(build.originalAmountCents, build.currency).replace(/\.00$/, "")}</del> : null}
+            <p className={`${styles.priceAmount} text-4xl font-semibold tracking-tight`}>{offer.amountCents != null && build ? formatMoney(offer.amountCents, build.currency).replace(/\.00$/, "") : "Price at next step"}</p>
+            {offer.percentOff && offer.originalAmountCents != null && build ? <del className="text-sm text-[color:var(--text-secondary)]">{formatMoney(offer.originalAmountCents, build.currency).replace(/\.00$/, "")}</del> : null}
           </div>
-          <p className="mt-1 text-xs text-[color:var(--text-secondary)]">One-time build + an ongoing Vigil plan</p>
+          <p className="mt-1 text-xs text-[color:var(--text-secondary)]">One-time build{offer.percentOff ? ` with code ${campaign.promotion.code}` : ""} + an ongoing Vigil plan</p>
           <ul className="my-5 space-y-2 text-sm text-[color:var(--text-secondary)]">{tier.included.slice(0, 2).map(feature => <li key={feature} className="flex gap-2"><Check size={15} className="mt-0.5 shrink-0 text-[color:var(--accent)]" aria-hidden="true" />{feature}</li>)}<li className="flex gap-2"><Check size={15} className="shrink-0 text-[color:var(--accent)]" aria-hidden="true" />{tier.revisions} revision {tier.revisions === 1 ? "round" : "rounds"}</li></ul>
           {!professional && creatorTemplate?.status !== "available" ? <p className="mb-4 text-xs text-[color:var(--text-secondary)]">A dedicated creator design is coming soon.</p> : null}
           <CampaignLink campaign={campaign.id} {...action} placement="package" event={`creator_${kind}_cta_click`} className="mt-auto w-full">{action.label}<ArrowRight className="ml-2 h-4 w-4" /></CampaignLink>

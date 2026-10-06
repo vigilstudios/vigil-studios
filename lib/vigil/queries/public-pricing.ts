@@ -1,6 +1,5 @@
 import "server-only";
 import { WEBSITE_TIERS } from "@/lib/vigil/site-tiers";
-import { CREATOR_CAMPAIGN, creatorBuildOffer, type CreatorBuildOffer } from "@/lib/creator-campaign";
 
 import { unstable_cache } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
@@ -11,7 +10,7 @@ import type { Database } from "@/types/database.types";
 
 /**
  * Prices for the marketing site, read from the same rows the checkout uses
- * so the two can never disagree. Anonymous client (the catalogue tables
+ * with code discounts applied separately at checkout. Anonymous client (the catalogue tables
  * allow anon reads), cached for five minutes, no cookies — so the marketing
  * pages stay static-ish.
  */
@@ -24,7 +23,7 @@ export type PublicPlan = {
   includes: { code: string; label: string; on: boolean }[];
 };
 
-export type PublicBuild = CreatorBuildOffer & { kind: "express" | "professional" | "custom"; name: string; description: string | null; amountCents: number | null; currency: string };
+export type PublicBuild = { kind: "express" | "professional" | "custom"; name: string; description: string | null; amountCents: number | null; currency: string };
 
 const includeLabels = PLAN_FEATURE_LABELS;
 
@@ -58,9 +57,9 @@ async function load(): Promise<{ plans: PublicPlan[]; builds: PublicBuild[] }> {
   });
   const order: PublicBuild["kind"][] = ["express", "professional", "custom"];
   const buildList: PublicBuild[] = (builds.data ?? [])
-    .map((b) => ({ kind: b.kind as PublicBuild["kind"], name: b.name, description: WEBSITE_TIERS[b.kind as keyof typeof WEBSITE_TIERS]?.summary ?? b.description, ...creatorBuildOffer(b.kind, b.amount_cents), currency: b.currency }))
+    .map((b) => ({ kind: b.kind as PublicBuild["kind"], name: b.name, description: WEBSITE_TIERS[b.kind as keyof typeof WEBSITE_TIERS]?.summary ?? b.description, amountCents: b.amount_cents, currency: b.currency }))
     .sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
   return { plans: out, builds: buildList };
 }
 
-export const getPublicPricing = unstable_cache(load, ["public-pricing-v3-creator-offer", String(CREATOR_CAMPAIGN.promotion.enabled), String(CREATOR_CAMPAIGN.promotion.percentOff)], { revalidate: 300, tags: ["pricing"] });
+export const getPublicPricing = unstable_cache(load, ["public-pricing-v4-catalog-prices"], { revalidate: 300, tags: ["pricing"] });

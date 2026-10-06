@@ -1,0 +1,139 @@
+{
+  "checks": [
+    {
+      "check": "Professional regular checkout",
+      "passed": true
+    },
+    {
+      "check": "Invalid code has feedback and keeps regular total",
+      "passed": true
+    },
+    {
+      "check": "Professional code redemption",
+      "passed": true
+    },
+    {
+      "check": "Code leaves annual recurring price unchanged",
+      "passed": true
+    },
+    {
+      "check": "Clearing the code restores regular build",
+      "passed": true
+    },
+    {
+      "check": "Express regular checkout",
+      "passed": true
+    },
+    {
+      "check": "Express code applies using Enter",
+      "passed": true
+    },
+    {
+      "check": "Mobile promo controls fit",
+      "passed": true
+    },
+    {
+      "check": "Saved staff quote is unchanged and cannot redeem another code",
+      "passed": true
+    },
+    {
+      "check": "320px /: pricing and promo visibility",
+      "passed": true,
+      "result": {
+        "code": false,
+        "discountExpress": false,
+        "discountProfessional": false,
+        "express": true,
+        "overflow": false,
+        "professional": true,
+        "route": "/",
+        "width": 320
+      }
+    },
+    {
+      "check": "320px /pricing: pricing and promo visibility",
+      "passed": true,
+      "result": {
+        "code": false,
+        "discountExpress": false,
+        "discountProfessional": false,
+        "express": true,
+        "overflow": false,
+        "professional": true,
+        "route": "/pricing",
+        "width": 320
+      }
+    },
+    {
+      "check": "320px /express: pricing and promo visibility",
+      "passed": true,
+      "result": {
+        "code": false,
+        "discountExpress": false,
+        "discountProfessional": false,
+        "express": true,
+        "overflow": false,
+        "professional": false,
+        "route": "/express",
+        "width": 320
+      }
+    },
+    {
+      "check": "320px /creators: pricing and promo visibility",
+      "passed": true,
+      "result": {
+        "code": true,
+        "discountExpress": true,
+        "discountProfessional": true,
+        "express": true,
+        "overflow": false,
+        "professional": true,
+        "route": "/creators",
+        "width": 320
+      }
+    },
+    {
+      "check": "1705px /pricing: pricing and promo visibility",
+      "passed": true,
+      "result": {
+        "code": false,
+        "discountExpress": false,
+        "discountProfessional": false,
+        "express": true,
+        "overflow": false,
+        "professional": true,
+        "route": "/pricing",
+        "width": 1705
+      }
+    },
+    {
+      "check": "1705px /: pricing and promo visibility",
+      "passed": true,
+      "result": {
+        "code": false,
+        "discountExpress": false,
+        "discountProfessional": false,
+        "express": true,
+        "overflow": false,
+        "professional": true,
+        "route": "/",
+        "width": 1705
+      }
+    },
+    {
+      "check": "1705px /creators: pricing and promo visibility",
+      "passed": true,
+      "result": {
+        "code": true,
+        "discountExpress": true,
+        "discountProfessional": true,
+        "express": true,
+        "overflow": false,
+        "professional": true,
+        "route": "/creators",
+        "width": 1705
+      }
+    }
+  ],
+  "checkoutFixture": "Temporary local-only route renders actual CheckoutForm using read-only catalog snapshot; no payment submitted."
+}

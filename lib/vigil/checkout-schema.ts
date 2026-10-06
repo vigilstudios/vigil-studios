@@ -12,6 +12,7 @@ export const checkoutSchema = z.object({
   billing_period: z.enum(["month", "year", "year3"]).default("month"),
   project_kind: z.enum(["express", "professional", "custom"]).default("express"),
   template_slug: z.string().trim().max(80).optional().or(z.literal("")),
+  promotion_code: z.string().trim().max(32, "Promo codes must be 32 characters or fewer.").optional(),
   order_id: z.string().uuid().optional().or(z.literal("")),
   checkout_token: z.string().trim().optional().or(z.literal("")),
   agree: z.string().optional(),

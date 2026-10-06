@@ -9,6 +9,12 @@ describe("checkoutSchema", () => {
     expect(parsed).toMatchObject({ email: "Owner@Example.com", business_name: "Marlow & Fen", plan_code: "care", billing_period: "month", project_kind: "express" });
   });
 
+  it("accepts an optional bounded promo code without trusting a submitted discount", () => {
+    expect(checkoutSchema.parse({ ...good, promotion_code: " INFLUENCE ", discount_amount_cents: 100000 })).toMatchObject({ promotion_code: "INFLUENCE" });
+    expect(checkoutSchema.parse({ ...good, promotion_code: "INFLUENCE", discount_amount_cents: 100000 })).not.toHaveProperty("discount_amount_cents");
+    expect(checkoutSchema.safeParse({ ...good, promotion_code: "x".repeat(33) }).success).toBe(false);
+  });
+
   it("names every bad field the way the form shows it", () => {
     const res = checkoutSchema.safeParse({ email: "not-an-email", business_name: "M", plan_code: "", billing_period: "weekly", order_id: "nope" });
     expect(res.success).toBe(false);

@@ -1,5 +1,5 @@
 import "server-only";
-import { CREATOR_CAMPAIGN, creatorBuildOffer } from "@/lib/creator-campaign";
+import { CREATOR_CAMPAIGN, creatorCodeOffer, matchesCreatorPromoCode } from "@/lib/creator-campaign";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { generatedConfirmationUrl } from "@/lib/vigil/auth/generated-link";
@@ -39,6 +39,8 @@ export type CheckoutRequest = {
   planCode: string;
   /** How the plan is paid for; defaults to monthly. */
   billingPeriod?: BillingPeriodKey;
+  /** Explicit customer redemption; campaign/UTM attribution never grants a discount. */
+  promotionCode?: string | null;
   /** Staff-created links carry an existing order; self-serve creates one. */
   existingOrderId?: string | null;
   /** Staff-quoted build amount (custom builds); overrides the catalog amount. */
@@ -69,9 +71,13 @@ export async function startCheckout(admin: DbClient, req: CheckoutRequest, provi
   if (buildError) throw buildError;
   if (!build) throw new ValidationError("That kind of build is not available for online checkout.");
 
-  // Only new self-service builds get the offer. Token retries and staff quotes keep their trusted amount.
-  const offer = !req.existingOrderId && req.buildAmountOverrideCents == null ? creatorBuildOffer(req.projectKind, build.amount_cents) : null;
-  const promotion = offer?.percentOff ? { campaign: CREATOR_CAMPAIGN.id, percent_off: offer.percentOff, original_build_amount_cents: offer.originalAmountCents, discount_amount_cents: offer.discountCents } : null;
+  // Only an explicitly redeemed code on a new self-service build grants the offer.
+  // Token retries and staff quotes keep their trusted amount and existing metadata.
+  const code = req.promotionCode?.trim() ?? "";
+  const eligible = !req.existingOrderId && req.buildAmountOverrideCents == null && ["express", "professional"].includes(req.projectKind) && build.amount_cents !== null && build.amount_cents > 0;
+  if (code && (!eligible || !matchesCreatorPromoCode(code))) throw new ValidationError("This promo code is not available for this order.", { promotion_code: ["Check your code. It applies to new Express and Professional builds only."] });
+  const offer = eligible ? creatorCodeOffer(req.projectKind, build.amount_cents, code) : null;
+  const promotion = offer?.percentOff ? { campaign: CREATOR_CAMPAIGN.id, code: CREATOR_CAMPAIGN.promotion.code, percent_off: offer.percentOff, original_build_amount_cents: offer.originalAmountCents, discount_amount_cents: offer.discountCents } : null;
   const buildAmount = offer?.amountCents ?? req.buildAmountOverrideCents ?? build.amount_cents;
   if (promotion && build.currency !== planPrice.currency) throw new ValidationError("The build and plan currencies must match.");
   let orderMetadata: Record<string, unknown> = {};

@@ -12,10 +12,11 @@ import { BILLING_PERIODS, billingPeriodByKey, savingsPercent, type BillingPeriod
 import { WEBSITE_TIERS } from "@/lib/vigil/site-tiers";
 import { RECURRING_SERVICE_NOTE } from "@/lib/site-copy";
 import { formatMoney } from "@/lib/vigil/format";
+import { CREATOR_CAMPAIGN, creatorCodeOffer, matchesCreatorPromoCode } from "@/lib/creator-campaign";
 
 export type CheckoutFormProps = {
   plans: CheckoutPlan[];
-  build: { name: string; amountCents: number | null; currency: string; originalAmountCents?: number | null; percentOff?: number | null } | null;
+  build: { name: string; amountCents: number | null; currency: string } | null;
   projectKind: "express" | "professional" | "custom";
   templateSlug: string | null;
   templateName: string | null;
@@ -33,6 +34,21 @@ export function CheckoutForm(p: CheckoutFormProps) {
   const [planCode, setPlanCode] = useState<string>(defaultPlan?.code ?? "");
   // Controlled so a server-side error does not wipe what the buyer typed.
   const [fields, setFields] = useState({ businessName: p.initial.businessName ?? "", contactName: p.initial.contactName ?? "", email: p.initial.email ?? "", agree: false });
+  const [promoDraft, setPromoDraft] = useState("");
+  const [appliedCode, setAppliedCode] = useState("");
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const canRedeem = !p.locked && CREATOR_CAMPAIGN.promotion.enabled && p.projectKind !== "custom" && (p.build?.amountCents ?? 0) > 0;
+  const offer = creatorCodeOffer(p.projectKind, p.build?.amountCents ?? null, canRedeem ? appliedCode : null);
+  function applyPromo() {
+    if (!canRedeem || !matchesCreatorPromoCode(promoDraft)) {
+      setAppliedCode("");
+      setPromoError("This promo code is not available. Check your code and try again.");
+      return;
+    }
+    setAppliedCode(promoDraft.trim().toUpperCase());
+    setPromoDraft(promoDraft.trim().toUpperCase());
+    setPromoError(null);
+  }
   const setField = (k: keyof typeof fields, v: string | boolean) => setFields((f) => ({ ...f, [k]: v }));
   // Periods offered = those at least one plan can be bought for.
   const periods = BILLING_PERIODS.filter((per) => purchasable.some((x) => x.prices.some((pr) => pr.period === per.key && pr.purchasable)));
@@ -41,7 +57,7 @@ export function CheckoutForm(p: CheckoutFormProps) {
   const plan = p.plans.find((x) => x.code === planCode) ?? null;
   const priceOf = (x: CheckoutPlan) => x.prices.find((pr) => pr.period === periodKey) ?? null;
   const price = plan ? priceOf(plan) : null;
-  const buildCents = p.build?.amountCents ?? 0;
+  const buildCents = offer.amountCents ?? 0;
   const dueToday = buildCents + (price?.amountCents ?? 0);
   const perMonth = price ? Math.round(price.amountCents / period.months) : null;
 
@@ -79,6 +95,7 @@ export function CheckoutForm(p: CheckoutFormProps) {
       }
     }} className="grid gap-6 lg:grid-cols-[1fr_360px]" noValidate>
       <input type="hidden" name="project_kind" value={p.projectKind} />
+      <input type="hidden" name="promotion_code" value={canRedeem ? appliedCode : ""} />
       <div className="lg:col-span-2">{scope}</div>
       <input type="hidden" name="template_slug" value={p.templateSlug ?? ""} />
       {p.locked ? (
@@ -188,7 +205,7 @@ export function CheckoutForm(p: CheckoutFormProps) {
           {p.build ? (
             <div className="flex justify-between gap-3">
               <dt className="text-[color:var(--text-secondary)]">{p.build.name}{p.templateName ? ` · ${p.templateName}` : ""}</dt>
-              <dd className="text-right font-medium">{p.build.percentOff && p.build.originalAmountCents != null ? <del className="mr-2 text-xs text-[color:var(--text-secondary)]">{formatMoney(p.build.originalAmountCents, p.build.currency)}</del> : null}{p.build.amountCents !== null ? formatMoney(p.build.amountCents, p.build.currency) : "Quoted"}</dd>
+              <dd className="text-right font-medium">{offer.percentOff && offer.originalAmountCents != null ? <del className="mr-2 text-xs text-[color:var(--text-secondary)]">{formatMoney(offer.originalAmountCents, p.build.currency)}</del> : null}{offer.amountCents !== null ? formatMoney(offer.amountCents, p.build.currency) : "Quoted"}</dd>
             </div>
           ) : null}
           <div className="flex justify-between gap-3">
@@ -200,7 +217,16 @@ export function CheckoutForm(p: CheckoutFormProps) {
             <dd className="font-semibold">{formatMoney(dueToday, plan?.currency ?? "usd")}</dd>
           </div>
         </dl>
-        {p.build?.percentOff ? <p className="mt-3 text-xs font-medium">{p.build.percentOff}% creator promotion applied to the one-time build. Your ongoing plan is unchanged.</p> : null}
+        {canRedeem ? <div className="mt-4 border-t border-[color:var(--border)] pt-4">
+          <label htmlFor="promotion_code" className={labelClass}>Promo code</label>
+          <div className="mt-1 flex gap-2">
+            <input id="promotion_code" value={promoDraft} maxLength={32} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="Enter your code" disabled={pending} aria-describedby="promotion_code_status" aria-invalid={Boolean(promoError || issues.promotion_code)} className={clsx(inputClass, "min-w-0 flex-1")} onChange={(e) => { setPromoDraft(e.target.value); setAppliedCode(""); setPromoError(null); }} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyPromo(); } }} />
+            <button type="button" disabled={pending} onClick={applyPromo} className="btn-secondary shrink-0 !px-3 !py-2 text-xs">Apply</button>
+          </div>
+          <p id="promotion_code_status" role="status" className={clsx("mt-2 text-xs", promoError || issues.promotion_code ? "text-[#ef4444]" : "text-[color:var(--text-secondary)]")}>
+            {promoError ?? issues.promotion_code?.[0] ?? (offer.percentOff ? `${appliedCode} applied: ${offer.percentOff}% off your one-time build. Your ongoing plan is unchanged.` : "Have a promo code? Apply it before continuing to payment.")}
+          </p>
+        </div> : null}
         <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">
           {price && plan ? `Then ${formatMoney(price.amountCents, plan.currency)} ${period.every}${perMonth && period.months > 1 ? ` (${formatMoney(perMonth, plan.currency)}/mo)` : ""}, cancel any time.` : "Your plan renews automatically; cancel any time."} Sales tax is added at payment where it applies.
         </p>
