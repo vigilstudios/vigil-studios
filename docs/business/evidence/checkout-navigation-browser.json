@@ -1,0 +1,16 @@
+{
+  "checks": [
+    {
+      "label": "Creator → Express client navigation retains promo without refresh",
+      "pass": true,
+      "href": "/checkout?template=restaurant&promo=INFLUENCE&vigil_campaign=creators"
+    },
+    {
+      "label": "Ordinary Express navigation does not inherit promo from analytics",
+      "pass": true,
+      "href": "/checkout?template=restaurant&vigil_campaign=creators"
+    }
+  ],
+  "errors": [],
+  "source": "Optimized production build, actual public pages and client navigation, no refresh or submission"
+}
