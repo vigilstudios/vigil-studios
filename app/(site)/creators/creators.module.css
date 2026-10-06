@@ -11,7 +11,7 @@
 :global(body):has(.page) :global(nav) :global(.font-mono) { font-family: var(--font-inter), sans-serif; font-size: 11px; letter-spacing: .12em; }
 .page h1, .page h2 { font-family: var(--font-creator-editorial), "Bodoni 72", Didot, serif; font-weight: 400; letter-spacing: -.035em; }
 .page h3 { font-family: var(--font-inter), sans-serif; letter-spacing: -.025em; }
-.hero { min-height: calc(100svh - var(--creator-promo-height, 0px)); padding: 90px 14px 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff; overflow: hidden; }
+.hero { scroll-margin-top: var(--creator-promo-height, 0px); min-height: calc(100svh - var(--creator-promo-height, 0px)); padding: 90px 14px 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff; overflow: hidden; }
 .scene { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
 .title { font-size: clamp(3rem, 5.8vw, 5.3rem); line-height: 1.03; text-wrap: balance; }
 .title em { color: #b16b87; font-weight: 400; }

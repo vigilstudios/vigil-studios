@@ -120,7 +120,7 @@ try {
   await page.getByRole('link', { name: 'Find your website', exact: true }).click();
   await page.locator('.creator-promo-link').click();
   await page.waitForURL(/#creator-hero$/);
-  record('same-page banner returns to hero', await page.locator('#site-root').evaluate(el => el.scrollTop <= 50));
+  record('same-page banner returns to hero', await page.locator('#site-root').evaluate(el => el.scrollTop <= 1));
   await page.locator('.creator-promo-link').focus();
   record('clicked/focused/hovered banner keeps moving', await page.locator('.creator-promo-track').evaluate(async el => { const animation = el.getAnimations()[0]; const before = animation.currentTime; await new Promise(resolve => setTimeout(resolve, 200)); return getComputedStyle(el).animationPlayState === 'running' && animation.currentTime > before; }));
   record("creator SEO title", (await page.title()).includes("Websites for Creators"));
@@ -250,7 +250,7 @@ try {
   await ordinary.goto(`${origin}/?utm_source=ordinary_banner&utm_medium=site&utm_campaign=launch`, { waitUntil: 'domcontentloaded' });
   await ordinary.locator('.creator-promo-link').click();
   await ordinary.waitForURL(/\/creators.*#creator-hero$/);
-  record('cross-page banner opens creator hero', await ordinary.locator('#site-root').evaluate(el => el.scrollTop <= 50));
+  record('cross-page banner opens creator hero', await ordinary.locator('#site-root').evaluate(el => el.scrollTop <= 1));
   record("banner activates campaign only on click and retains source", await ordinary.evaluate(() => window.__events.some(e => e.name === 'creator_promotion_banner_click' && e.data?.utm_source === 'ordinary_banner')));
   await ordinary.getByRole('link', { name: 'Start with Express', exact: true }).first().click();
   await ordinary.waitForURL(/\/express\?/);

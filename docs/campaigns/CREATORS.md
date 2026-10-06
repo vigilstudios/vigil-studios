@@ -37,7 +37,7 @@ The existing billing adapter sends the selected recurring plan price plus an ad-
 
 ## Site-wide banner
 
-A shared pink banner links to `/creators#creator-hero` across all public marketing pages, login and checkout/success routes. On marketing pages it is fixed above navigation, with explicit space reserved for both. Product checkout/login use a flow banner. Authenticated `/admin` and `/dashboard` workspaces retain their existing chrome.
+A shared pink banner links to `/creators#creator-hero` across all public marketing pages, login and checkout/success routes. The hero anchor reserves the banner offset so the introductory line remains below the fixed navigation after a click. On marketing pages it is fixed above navigation, with explicit space reserved for both. Product checkout/login use a flow banner. Authenticated `/admin` and `/dashboard` workspaces retain their existing chrome.
 
 The banner establishes campaign attribution only when clicked. Ordinary public visitors are not silently marked as creator traffic. The banner is driven by the same percentage/enable flag as server fulfillment.
 
@@ -99,7 +99,7 @@ Full lint, standalone typecheck, production build and 70 test files / 1,252 test
 
 Development validation did not submit a live payment or booking. Production deploys from `main` through the repository’s existing Vercel Git integration. Unrelated dirty admin/Design Engine work is excluded from the campaign release.
 
-Release preflight on October 6, 2026 exported the exact staged campaign tree into a clean temporary directory, without local provider environment files or uncommitted Design Engine work. That isolated release passed full lint, standalone typecheck, all 290 tests across 48 files and the optimized production build. The earlier 1,252-test result above includes local Design Engine work that is intentionally outside this release.
+Release preflight on October 6, 2026 exported the exact staged campaign tree into a clean temporary directory, without local provider environment files or uncommitted Design Engine work. That isolated release passed full lint, standalone typecheck, all 290 tests across 48 files and the optimized production build. The earlier 1,252-test result above includes local Design Engine work that is intentionally outside this release. The final banner-anchor offset also passed another isolated production build and 12 same-page/cross-page checks across six viewports, including a 1280×720 desktop: the root returns to scroll position zero, the introductory line stays below navigation and the banner continues moving.
 
 The local `.env.production.local` profile supplies no Stripe secret, so its existing not-configured provider leaves online checkout unavailable; working assisted fallbacks were tested. This does not establish hosted Vercel configuration. Before influencer traffic goes live, verify hosted live Stripe credentials/webhook and synced approved catalog prices, test the payment-to-onboarding path, confirm custom-event ingestion and provide the final Scar URL/assets. The page and offer need no new environment variable. Choose a promotion end date only if wanted; otherwise disable it deliberately through the shared flag when the campaign ends.
 
