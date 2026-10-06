@@ -1,0 +1,63 @@
+.hero { position: relative; width: 100%; overflow: hidden; }
+.copy { position: relative; z-index: 4; width: 100%; max-width: 980px; padding: 0 16px; margin: 0 auto; text-align: center; animation: copyArrive 1.6s cubic-bezier(.22,.61,.36,1) both; }
+:where(.heading) { font-size: clamp(3rem, 6vw, 5.3rem); line-height: 1.03; }
+:where(.subtitle) { max-width: 540px; margin: 18px auto 0; line-height: 1.7; color: var(--text-secondary); }
+.collage { position: relative; width: min(1000px, 100%); height: clamp(260px, 33svh, 360px); margin: 20px auto 0; isolation: isolate; }
+.tile { position: absolute; width: 17%; aspect-ratio: 3/4; }
+.tile img { display: block; width: 100%; height: auto; aspect-ratio: 3/4; object-fit: cover; border-radius: 12px; user-select: none; }
+.photo { border-radius: 12px; background: #f1e8e9; box-shadow: 0 14px 35px rgba(54,31,42,.12); animation: photoArrive 1.8s cubic-bezier(.22,.61,.36,1) both; }
+.float { animation: creatorFloat 7s ease-in-out infinite; }
+.tile:nth-child(1) { left: 50%; top: 50%; width: 23%; z-index: 3; transform: translate(-50%,-50%) rotate(-3deg); }
+.tile:nth-child(2) { left: 22%; top: 5%; transform: rotate(-7deg); z-index: 1; }
+.tile:nth-child(3) { right: 23%; top: 0; width: 16%; transform: rotate(7deg); z-index: 1; }
+.tile:nth-child(4) { right: 18%; bottom: 0; width: 19%; transform: rotate(-5deg); z-index: 4; }
+.tile:nth-child(5) { right: 3%; top: 21%; transform: rotate(8deg); z-index: 2; }
+.tile:nth-child(6) { left: 17%; bottom: -1%; width: 18%; transform: rotate(6deg); z-index: 4; }
+.tile:nth-child(7) { left: 3%; top: 23%; width: 16%; transform: rotate(-6deg); z-index: 2; }
+.tile:nth-child(2) .float { animation-delay: -1.2s; animation-duration: 7.5s; }
+.tile:nth-child(3) .float { animation-delay: -2.5s; }
+.tile:nth-child(4) .float { animation-delay: -3.5s; animation-duration: 8s; }
+.tile:nth-child(5) .float { animation-delay: -4.8s; }
+.tile:nth-child(6) .float { animation-delay: -5.2s; animation-duration: 8.5s; }
+.tile:nth-child(7) .float { animation-delay: -6s; }
+.tile:nth-child(2) .photo, .tile:nth-child(3) .photo { animation-delay: .15s; }
+.tile:nth-child(4) .photo, .tile:nth-child(5) .photo { animation-delay: .3s; }
+.tile:nth-child(6) .photo, .tile:nth-child(7) .photo { animation-delay: .45s; }
+.collage[data-active="false"] .float { animation-play-state: paused; }
+.stats { display: flex; justify-content: center; gap: 48px; margin-top: 30px; text-align: center; }
+.stats strong { color: var(--accent); font-size: 2rem; }
+@keyframes creatorFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@keyframes copyArrive { from { opacity: .2; transform: translateY(30px); } to { opacity: 1; transform: none; } }
+@keyframes photoArrive { from { opacity: .1; transform: translateY(40px) scale(.9); } to { opacity: 1; transform: none; } }
+@media(max-width: 1023px) {
+  .collage { width: min(860px, 100%); height: clamp(280px, 37svh, 380px); }
+  .tile:nth-child(1) { width: 25%; }
+}
+@media(min-width: 640px) and (max-height: 800px) {
+  .collage { width: min(900px, 100%); height: clamp(210px, 32svh, 256px); margin-top: 14px; }
+}
+@media(max-width: 639px) {
+  .copy { padding: 0 12px; }
+  .collage { height: clamp(225px, 32svh, 300px); margin-top: 22px; }
+  .tile img, .photo { border-radius: 7px; }
+  .tile:nth-child(1) { width: 35%; }
+  .tile:nth-child(2) { left: 13%; top: 1%; width: 27%; }
+  .tile:nth-child(3) { right: 14%; top: 0; width: 24%; }
+  .tile:nth-child(4) { right: 9%; bottom: 1%; width: 29%; }
+  .tile:nth-child(5) { right: -2%; top: 25%; width: 24%; }
+  .tile:nth-child(6) { left: 9%; bottom: 0; width: 28%; }
+  .tile:nth-child(7) { left: -2%; top: 25%; width: 24%; }
+  .float { animation-name: creatorFloatSmall; }
+  :where(.subtitle) { max-width: 330px; }
+}
+@media(max-width: 639px) and (max-height: 650px) {
+  .collage { height: 175px; margin-top: 14px; }
+  .tile:nth-child(1) { width: 31%; }
+  .tile:nth-child(2), .tile:nth-child(3) { width: 23%; }
+  .tile:nth-child(4), .tile:nth-child(6) { width: 24%; }
+  .tile:nth-child(5), .tile:nth-child(7) { width: 21%; }
+}
+@keyframes creatorFloatSmall { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@media(prefers-reduced-motion: reduce) {
+  .copy, .photo, .float { animation: none !important; }
+}

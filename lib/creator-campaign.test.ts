@@ -1,0 +1,56 @@
+import { describe, expect, it } from "vitest";
+import { campaignAttribution, campaignHref } from "./campaign-attribution";
+import { CREATOR_CAMPAIGN, creatorBuildOffer, creatorCampaignSchema } from "./creator-campaign";
+
+describe("creator campaign routing and attribution", () => {
+  const attribution = campaignAttribution("?utm_source=creator&utm_campaign=launch&ref=muse&email=private@example.com&gclid=private", "creators");
+  it("retains approved attribution keys and excludes unrelated/personal query parameters", () => {
+    expect(attribution).toEqual({ campaign: "creators", utm_source: "creator", utm_campaign: "launch", ref: "muse" });
+    expect(campaignAttribution(`?utm_term=${"x".repeat(150)}`, "creators").utm_term?.length).toBe(100);
+  });
+  it("keeps Express template and Professional build selectors through attribution", () => {
+    expect(campaignHref("/checkout?template=restaurant", attribution)).toContain("template=restaurant&vigil_campaign=creators");
+    expect(campaignHref("/checkout?build=professional", attribution)).toContain("build=professional&vigil_campaign=creators");
+  });
+  it("preserves offer anchors and explicit destination UTMs", () => {
+    const href = campaignHref("/creators?utm_source=explicit#choose-your-site", attribution);
+    expect(href).toContain("utm_source=explicit");
+    expect(href).toMatch(/#choose-your-site$/);
+    expect(campaignHref(href, attribution)).toBe(href);
+  });
+  it("does not attach our campaign data to external client sites or normal visits", () => {
+    expect(campaignHref("https://creator.example/work", attribution)).toBe("https://creator.example/work");
+    expect(campaignHref("//other.example", attribution)).toBe("//other.example");
+    expect(campaignHref("/checkout?build=professional", null)).toBe("/checkout?build=professional");
+  });
+  it("routes only to existing package entry points with the authorized creator promotion", () => {
+    expect(CREATOR_CAMPAIGN.actions.express.href).toBe("/express");
+    expect(CREATOR_CAMPAIGN.actions.professional.href).toBe("/professional");
+    expect(CREATOR_CAMPAIGN.promotion).toMatchObject({ enabled: true, percentOff: 15 });
+    expect(CREATOR_CAMPAIGN.showcase).toBeNull();
+  });
+  it("rejects unsafe/dead configured CTA destinations and invalid showcase links", () => {
+    for (const href of ["#", "", "javascript:alert(1)", "//evil.example", "http://insecure.example"]) {
+      expect(creatorCampaignSchema.safeParse({ ...CREATOR_CAMPAIGN, actions: { ...CREATOR_CAMPAIGN.actions, express: { ...CREATOR_CAMPAIGN.actions.express, href } } }).success).toBe(false);
+    }
+    expect(creatorCampaignSchema.safeParse({ ...CREATOR_CAMPAIGN, showcase: { name: "Creator", description: "The work", image: "/creators/project.webp", imageAlt: "Creator homepage", siteUrl: "https://creator.example" } }).success).toBe(true);
+  });
+});
+
+describe("creator build promotion", () => {
+  it("discounts only Express and Professional in integer cents", () => {
+    expect(creatorBuildOffer("express", 59900)).toMatchObject({ amountCents: 50915, originalAmountCents: 59900, discountCents: 8985, percentOff: 15 });
+    expect(creatorBuildOffer("professional", 149900).amountCents).toBe(127415);
+    expect(creatorBuildOffer("express", 143).amountCents).toBe(122);
+    expect(creatorBuildOffer("custom", 350000).amountCents).toBe(350000);
+    expect(creatorBuildOffer("basic", 2900).amountCents).toBe(2900);
+    expect(creatorBuildOffer("express", null).amountCents).toBeNull();
+  });
+  it("restores canonical prices when the promotion is disabled", () => {
+    expect(creatorBuildOffer("express", 59900, { ...CREATOR_CAMPAIGN.promotion, enabled: false })).toMatchObject({ amountCents: 59900, discountCents: 0, percentOff: null });
+  });
+  it("rejects invalid monetary input and invalid configured percentages", () => {
+    for (const amount of [-1, 1.5, NaN, Number.MAX_SAFE_INTEGER]) expect(() => creatorBuildOffer("express", amount)).toThrow(RangeError);
+    for (const percentOff of [0, -15, 101, 15.5]) expect(creatorCampaignSchema.safeParse({ ...CREATOR_CAMPAIGN, promotion: { ...CREATOR_CAMPAIGN.promotion, percentOff } }).success).toBe(false);
+  });
+});

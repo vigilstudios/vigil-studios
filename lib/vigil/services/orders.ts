@@ -1,4 +1,5 @@
 import "server-only";
+import { CREATOR_CAMPAIGN, creatorBuildOffer } from "@/lib/creator-campaign";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { generatedConfirmationUrl } from "@/lib/vigil/auth/generated-link";
@@ -68,7 +69,18 @@ export async function startCheckout(admin: DbClient, req: CheckoutRequest, provi
   if (buildError) throw buildError;
   if (!build) throw new ValidationError("That kind of build is not available for online checkout.");
 
-  const buildAmount = req.buildAmountOverrideCents ?? build.amount_cents;
+  // Only new self-service builds get the offer. Token retries and staff quotes keep their trusted amount.
+  const offer = !req.existingOrderId && req.buildAmountOverrideCents == null ? creatorBuildOffer(req.projectKind, build.amount_cents) : null;
+  const promotion = offer?.percentOff ? { campaign: CREATOR_CAMPAIGN.id, percent_off: offer.percentOff, original_build_amount_cents: offer.originalAmountCents, discount_amount_cents: offer.discountCents } : null;
+  const buildAmount = offer?.amountCents ?? req.buildAmountOverrideCents ?? build.amount_cents;
+  if (promotion && build.currency !== planPrice.currency) throw new ValidationError("The build and plan currencies must match.");
+  let orderMetadata: Record<string, unknown> = {};
+  if (req.existingOrderId) {
+    const { data: existing, error: metadataError } = await admin.from("orders").select("metadata").eq("id", req.existingOrderId).maybeSingle();
+    if (metadataError) throw metadataError;
+    orderMetadata = (existing?.metadata as Record<string, unknown> | null) ?? {};
+  }
+  if (promotion) orderMetadata.creator_promotion = promotion;
   const useCatalogBuild = req.buildAmountOverrideCents == null && build.amount_cents !== null;
   const planExternal = await planPriceExternalId(admin, planPrice.id, provider);
   const buildExternal = useCatalogBuild ? await buildPriceExternalId(admin, build.id, provider) : null;
@@ -95,14 +107,14 @@ export async function startCheckout(admin: DbClient, req: CheckoutRequest, provi
     const { error } = await admin.from("orders").update(snapshot).eq("id", orderId).eq("status", "pending");
     if (error) throw error;
   } else {
-    const { data, error } = await admin.from("orders").insert({ ...snapshot, created_by: req.createdBy ?? null }).select("id").single();
+    const { data, error } = await admin.from("orders").insert({ ...snapshot, metadata: orderMetadata as Json, created_by: req.createdBy ?? null }).select("id").single();
     if (error) throw error;
     orderId = data.id;
   }
 
   const lineItems: CheckoutLineItem[] = [{ priceExternalId: planExternal }];
-  if (buildExternal) lineItems.push({ priceExternalId: buildExternal });
-  else if (buildAmount !== null && buildAmount > 0) lineItems.push({ adHoc: { name: `${build.name}: ${req.businessName.trim()}`, description: "One-time website build", amountCents: buildAmount, currency: planPrice.currency } });
+  if (buildExternal && !promotion) lineItems.push({ priceExternalId: buildExternal });
+  else if (buildAmount !== null && buildAmount > 0) lineItems.push({ adHoc: { name: `${build.name}: ${req.businessName.trim()}`, description: promotion ? `${promotion.percent_off}% creator promotion applied — one-time website build` : "One-time website build", amountCents: buildAmount, currency: planPrice.currency } });
 
   let session: { url: string; externalId: string };
   try {
@@ -116,7 +128,7 @@ export async function startCheckout(admin: DbClient, req: CheckoutRequest, provi
     collectTax: process.env.STRIPE_TAX === "true",
     // Stripe's "Add promotion code" field. Codes only exist if staff create
     // them (friends and family, a live test); CHECKOUT_PROMOTION_CODES=false hides it.
-    allowPromotionCodes: process.env.CHECKOUT_PROMOTION_CODES !== "false",
+    allowPromotionCodes: !orderMetadata.creator_promotion && process.env.CHECKOUT_PROMOTION_CODES !== "false",
     });
   } catch (err) {
     // A self-serve order with no payment page is dead; staff links stay pending for a retry.
@@ -127,7 +139,7 @@ export async function startCheckout(admin: DbClient, req: CheckoutRequest, provi
   }
 
   await upsertProviderLink(admin, { provider: providerEnum(provider.name), resourceKind: "checkout_session", externalId: session.externalId, entityType: "order", entityId: orderId });
-  await admin.from("orders").update({ metadata: { checkout_session: session.externalId } as unknown as Json }).eq("id", orderId);
+  await admin.from("orders").update({ metadata: { ...orderMetadata, checkout_session: session.externalId } as unknown as Json }).eq("id", orderId);
 
   return { orderId, url: session.url };
 }

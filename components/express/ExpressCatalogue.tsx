@@ -2,7 +2,8 @@
 
 import type { CSSProperties } from "react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import Link from "next/link";
+import { CampaignLink } from "@/components/creators/CampaignLink";
+import { formatMoney } from "@/lib/vigil/format";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -13,7 +14,7 @@ import {
   Monitor,
   Smartphone,
 } from "lucide-react";
-import { EXPRESS_PRICE, EXPRESS_TEMPLATES } from "@/lib/constants";
+import { EXPRESS_TEMPLATES } from "@/lib/constants";
 import accentsBySlug from "@/lib/express-accents.json";
 import styles from "./ExpressCatalogue.module.css";
 
@@ -114,7 +115,7 @@ function PreviewPeek({
   );
 }
 
-export function ExpressCatalogue() {
+export function ExpressCatalogue({ amountCents = null, currency = "usd" }: { amountCents?: number | null; currency?: string } = {}) {
   const industries = INDUSTRIES;
   const [industryIndex, setIndustryIndex] = useState(0);
   const [variantIndex, setVariantIndex] = useState(0);
@@ -392,9 +393,9 @@ export function ExpressCatalogue() {
                         View
                         <ArrowUpRight size={17} />
                       </a>
-                      <Link href={`/checkout?template=${active.slug}`} className={styles.enquire}>
-                        Buy · ${EXPRESS_PRICE}
-                      </Link>
+                      <CampaignLink href={`/checkout?template=${active.slug}`} className={styles.enquire} placement="express_catalogue" event="creator_checkout_cta_click">
+                        Buy{amountCents !== null ? ` · ${formatMoney(amountCents, currency).replace(/\.00$/, "")}` : ""}
+                      </CampaignLink>
                     </>
                   )}
                 </div>

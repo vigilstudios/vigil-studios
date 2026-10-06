@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import { CampaignLink } from "@/components/creators/CampaignLink";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { clsx } from "clsx";
 import { CalendlyPopup } from "@/components/CalendlyModal";
@@ -74,7 +74,7 @@ export function ProfessionalWalkthrough({ amountCents, currency, checkoutAvailab
                   <p className="mt-1 text-3xl font-semibold">{amountCents === null ? "Price shown at checkout" : formatMoney(amountCents, currency).replace(/\.00$/, "")} <span className="text-sm font-normal text-[color:var(--text-secondary)]">once, plus a Vigil plan</span></p>
                   <p className="mt-3 text-xs leading-5 text-[color:var(--text-secondary)]">At checkout you choose the plan that hosts and operates the site. Virtue guides setup for every customer; the ongoing Virtue AI employee is included only with eligible Growth and Priority plans.</p>
                   {checkoutAvailable ? (
-                    <Link href="/checkout?build=professional" className="btn-primary mt-5 min-h-12 w-full !px-5 !py-2.5 text-sm font-semibold">Continue to checkout <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+                    <CampaignLink href="/checkout?build=professional" placement="professional_fit" event="creator_checkout_cta_click" className="btn-primary mt-5 min-h-12 w-full !px-5 !py-2.5 text-sm font-semibold">Continue to checkout <ArrowRight className="ml-1.5 h-4 w-4" /></CampaignLink>
                   ) : (
                     <p className="mt-5 rounded-lg border border-[color:var(--border)] p-3 text-sm">Online Professional checkout is temporarily unavailable. Book a call and we&apos;ll prepare the order for you.</p>
                   )}

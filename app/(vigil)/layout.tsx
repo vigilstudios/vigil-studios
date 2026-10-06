@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PromoBanner } from "@/components/creators/PromoBanner";
 import { Space_Grotesk, Inter } from "next/font/google";
 import "@/app/globals.css";
 import "@/components/vigil/vigil.css";
@@ -37,6 +38,7 @@ export default function VigilRootLayout({ children }: { children: React.ReactNod
       <body className="min-h-screen font-sans antialiased">
         {/* Applies the saved theme before first paint; the marketing toggle uses the same key. */}
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
+        <PromoBanner publicOnly />
         {children}
       </body>
     </html>

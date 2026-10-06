@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { creatorBuildOffer } from "@/lib/creator-campaign";
 import { EXPRESS_TEMPLATES } from "@/lib/constants";
 import { getCheckoutCatalog } from "@/lib/vigil/queries/checkout";
 import { CheckoutForm } from "./CheckoutForm";
@@ -20,6 +21,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
   const template = projectKind === "express" && slug ? EXPRESS_TEMPLATES.find((t) => t.slug === slug && t.status === "available") ?? null : null;
   const catalog = await getCheckoutCatalog();
   const build = catalog.builds.find((b) => b.kind === projectKind) ?? null;
+  const offer = creatorBuildOffer(projectKind, build?.amount_cents ?? null);
 
   return (
     <CheckoutShell
@@ -31,7 +33,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
       ) : null}
       <CheckoutForm
         plans={catalog.plans}
-        build={build?.synced ? { name: build.name, amountCents: build.amount_cents, currency: build.currency } : null}
+        build={build?.synced ? { name: build.name, ...offer, currency: build.currency } : null}
         projectKind={projectKind}
         templateSlug={template?.slug ?? null}
         templateName={projectKind === "professional" ? "Up to 8 custom pages" : template?.industry ?? null}

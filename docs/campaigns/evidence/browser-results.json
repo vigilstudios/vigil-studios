@@ -1,0 +1,852 @@
+{
+  "results": [
+    {
+      "name": "320: white hero with centered copy",
+      "pass": true
+    },
+    {
+      "name": "320: seven generated creator photos below centered copy",
+      "pass": true
+    },
+    {
+      "name": "320: collage assets load with responsive sources",
+      "pass": true
+    },
+    {
+      "name": "320: hero and photos use slower entrance motion",
+      "pass": true
+    },
+    {
+      "name": "320: hero fills viewport and scroll cue fits",
+      "pass": true
+    },
+    {
+      "name": "320: scroll cue visible above fold",
+      "pass": true
+    },
+    {
+      "name": "320: CTA follows shared site styling with campaign tokens",
+      "pass": true
+    },
+    {
+      "name": "320: light editorial palette",
+      "pass": true
+    },
+    {
+      "name": "320: creator editorial font loaded",
+      "pass": true
+    },
+    {
+      "name": "320: flat backgrounds without gradients",
+      "pass": true
+    },
+    {
+      "name": "320: HTTP 200",
+      "pass": true
+    },
+    {
+      "name": "320: no page or inner-scroller overflow",
+      "pass": true
+    },
+    {
+      "name": "320: three compact campaign sections",
+      "pass": true
+    },
+    {
+      "name": "320: all six campaign links meet 44px touch target",
+      "pass": true
+    },
+    {
+      "name": "320: banner and navigation do not overlap",
+      "pass": true
+    },
+    {
+      "name": "320: canonical prices have 15% discount",
+      "pass": true
+    },
+    {
+      "name": "320: prices have campaign color",
+      "pass": true
+    },
+    {
+      "name": "320: banner uses Vigil font and identifies creators/influencers",
+      "pass": true
+    },
+    {
+      "name": "320: startup video is deferred before spotlight",
+      "pass": true
+    },
+    {
+      "name": "320: hero CTA exposes both offers below navigation/banner",
+      "pass": true,
+      "detail": 110
+    },
+    {
+      "name": "320: actual Scar portfolio has a high-resolution poster",
+      "pass": true
+    },
+    {
+      "name": "320: Scar spotlight reserves a full viewport",
+      "pass": true
+    },
+    {
+      "name": "320: real project startup plays on entry",
+      "pass": true
+    },
+    {
+      "name": "320: project video has a crisp high-resolution source",
+      "pass": true
+    },
+    {
+      "name": "320: campaign/main click hooks",
+      "pass": true
+    },
+    {
+      "name": "375: white hero with centered copy",
+      "pass": true
+    },
+    {
+      "name": "375: seven generated creator photos below centered copy",
+      "pass": true
+    },
+    {
+      "name": "375: collage assets load with responsive sources",
+      "pass": true
+    },
+    {
+      "name": "375: hero and photos use slower entrance motion",
+      "pass": true
+    },
+    {
+      "name": "375: hero fills viewport and scroll cue fits",
+      "pass": true
+    },
+    {
+      "name": "375: scroll cue visible above fold",
+      "pass": true
+    },
+    {
+      "name": "375: CTA follows shared site styling with campaign tokens",
+      "pass": true
+    },
+    {
+      "name": "375: light editorial palette",
+      "pass": true
+    },
+    {
+      "name": "375: creator editorial font loaded",
+      "pass": true
+    },
+    {
+      "name": "375: flat backgrounds without gradients",
+      "pass": true
+    },
+    {
+      "name": "375: HTTP 200",
+      "pass": true
+    },
+    {
+      "name": "375: no page or inner-scroller overflow",
+      "pass": true
+    },
+    {
+      "name": "375: three compact campaign sections",
+      "pass": true
+    },
+    {
+      "name": "375: all six campaign links meet 44px touch target",
+      "pass": true
+    },
+    {
+      "name": "375: banner and navigation do not overlap",
+      "pass": true
+    },
+    {
+      "name": "375: canonical prices have 15% discount",
+      "pass": true
+    },
+    {
+      "name": "375: prices have campaign color",
+      "pass": true
+    },
+    {
+      "name": "375: banner uses Vigil font and identifies creators/influencers",
+      "pass": true
+    },
+    {
+      "name": "375: startup video is deferred before spotlight",
+      "pass": true
+    },
+    {
+      "name": "375: hero CTA exposes both offers below navigation/banner",
+      "pass": true,
+      "detail": 110
+    },
+    {
+      "name": "375: actual Scar portfolio has a high-resolution poster",
+      "pass": true
+    },
+    {
+      "name": "375: Scar spotlight reserves a full viewport",
+      "pass": true
+    },
+    {
+      "name": "375: real project startup plays on entry",
+      "pass": true
+    },
+    {
+      "name": "375: project video has a crisp high-resolution source",
+      "pass": true
+    },
+    {
+      "name": "375: campaign/main click hooks",
+      "pass": true
+    },
+    {
+      "name": "430: white hero with centered copy",
+      "pass": true
+    },
+    {
+      "name": "430: seven generated creator photos below centered copy",
+      "pass": true
+    },
+    {
+      "name": "430: collage assets load with responsive sources",
+      "pass": true
+    },
+    {
+      "name": "430: hero and photos use slower entrance motion",
+      "pass": true
+    },
+    {
+      "name": "430: hero fills viewport and scroll cue fits",
+      "pass": true
+    },
+    {
+      "name": "430: scroll cue visible above fold",
+      "pass": true
+    },
+    {
+      "name": "430: CTA follows shared site styling with campaign tokens",
+      "pass": true
+    },
+    {
+      "name": "430: light editorial palette",
+      "pass": true
+    },
+    {
+      "name": "430: creator editorial font loaded",
+      "pass": true
+    },
+    {
+      "name": "430: flat backgrounds without gradients",
+      "pass": true
+    },
+    {
+      "name": "430: HTTP 200",
+      "pass": true
+    },
+    {
+      "name": "430: no page or inner-scroller overflow",
+      "pass": true
+    },
+    {
+      "name": "430: three compact campaign sections",
+      "pass": true
+    },
+    {
+      "name": "430: all six campaign links meet 44px touch target",
+      "pass": true
+    },
+    {
+      "name": "430: banner and navigation do not overlap",
+      "pass": true
+    },
+    {
+      "name": "430: canonical prices have 15% discount",
+      "pass": true
+    },
+    {
+      "name": "430: prices have campaign color",
+      "pass": true
+    },
+    {
+      "name": "430: banner uses Vigil font and identifies creators/influencers",
+      "pass": true
+    },
+    {
+      "name": "430: startup video is deferred before spotlight",
+      "pass": true
+    },
+    {
+      "name": "430: hero CTA exposes both offers below navigation/banner",
+      "pass": true,
+      "detail": 110
+    },
+    {
+      "name": "430: actual Scar portfolio has a high-resolution poster",
+      "pass": true
+    },
+    {
+      "name": "430: Scar spotlight reserves a full viewport",
+      "pass": true
+    },
+    {
+      "name": "430: real project startup plays on entry",
+      "pass": true
+    },
+    {
+      "name": "430: project video has a crisp high-resolution source",
+      "pass": true
+    },
+    {
+      "name": "430: campaign/main click hooks",
+      "pass": true
+    },
+    {
+      "name": "768: white hero with centered copy",
+      "pass": true
+    },
+    {
+      "name": "768: seven generated creator photos below centered copy",
+      "pass": true
+    },
+    {
+      "name": "768: collage assets load with responsive sources",
+      "pass": true
+    },
+    {
+      "name": "768: hero and photos use slower entrance motion",
+      "pass": true
+    },
+    {
+      "name": "768: hero fills viewport and scroll cue fits",
+      "pass": true
+    },
+    {
+      "name": "768: scroll cue visible above fold",
+      "pass": true
+    },
+    {
+      "name": "768: CTA follows shared site styling with campaign tokens",
+      "pass": true
+    },
+    {
+      "name": "768: light editorial palette",
+      "pass": true
+    },
+    {
+      "name": "768: creator editorial font loaded",
+      "pass": true
+    },
+    {
+      "name": "768: flat backgrounds without gradients",
+      "pass": true
+    },
+    {
+      "name": "768: HTTP 200",
+      "pass": true
+    },
+    {
+      "name": "768: no page or inner-scroller overflow",
+      "pass": true
+    },
+    {
+      "name": "768: three compact campaign sections",
+      "pass": true
+    },
+    {
+      "name": "768: all six campaign links meet 44px touch target",
+      "pass": true
+    },
+    {
+      "name": "768: banner and navigation do not overlap",
+      "pass": true
+    },
+    {
+      "name": "768: canonical prices have 15% discount",
+      "pass": true
+    },
+    {
+      "name": "768: prices have campaign color",
+      "pass": true
+    },
+    {
+      "name": "768: banner uses Vigil font and identifies creators/influencers",
+      "pass": true
+    },
+    {
+      "name": "768: startup video is deferred before spotlight",
+      "pass": true
+    },
+    {
+      "name": "768: hero CTA exposes both offers below navigation/banner",
+      "pass": true,
+      "detail": 115
+    },
+    {
+      "name": "768: actual Scar portfolio has a high-resolution poster",
+      "pass": true
+    },
+    {
+      "name": "768: Scar spotlight reserves a full viewport",
+      "pass": true
+    },
+    {
+      "name": "768: real project startup plays on entry",
+      "pass": true
+    },
+    {
+      "name": "768: project video has a crisp high-resolution source",
+      "pass": true
+    },
+    {
+      "name": "768: campaign/main click hooks",
+      "pass": true
+    },
+    {
+      "name": "1366: white hero with centered copy",
+      "pass": true
+    },
+    {
+      "name": "1366: seven generated creator photos below centered copy",
+      "pass": true
+    },
+    {
+      "name": "1366: collage assets load with responsive sources",
+      "pass": true
+    },
+    {
+      "name": "1366: hero and photos use slower entrance motion",
+      "pass": true
+    },
+    {
+      "name": "1366: hero fills viewport and scroll cue fits",
+      "pass": true
+    },
+    {
+      "name": "1366: scroll cue visible above fold",
+      "pass": true
+    },
+    {
+      "name": "1366: CTA follows shared site styling with campaign tokens",
+      "pass": true
+    },
+    {
+      "name": "1366: light editorial palette",
+      "pass": true
+    },
+    {
+      "name": "1366: creator editorial font loaded",
+      "pass": true
+    },
+    {
+      "name": "1366: flat backgrounds without gradients",
+      "pass": true
+    },
+    {
+      "name": "1366: HTTP 200",
+      "pass": true
+    },
+    {
+      "name": "1366: no page or inner-scroller overflow",
+      "pass": true
+    },
+    {
+      "name": "1366: three compact campaign sections",
+      "pass": true
+    },
+    {
+      "name": "1366: all six campaign links meet 44px touch target",
+      "pass": true
+    },
+    {
+      "name": "1366: banner and navigation do not overlap",
+      "pass": true
+    },
+    {
+      "name": "1366: canonical prices have 15% discount",
+      "pass": true
+    },
+    {
+      "name": "1366: prices have campaign color",
+      "pass": true
+    },
+    {
+      "name": "1366: banner uses Vigil font and identifies creators/influencers",
+      "pass": true
+    },
+    {
+      "name": "1366: startup video is deferred before spotlight",
+      "pass": true
+    },
+    {
+      "name": "1366: hero CTA exposes both offers below navigation/banner",
+      "pass": true,
+      "detail": 115
+    },
+    {
+      "name": "1366: actual Scar portfolio has a high-resolution poster",
+      "pass": true
+    },
+    {
+      "name": "1366: Scar spotlight reserves a full viewport",
+      "pass": true
+    },
+    {
+      "name": "1366: real project startup plays on entry",
+      "pass": true
+    },
+    {
+      "name": "1366: project video has a crisp high-resolution source",
+      "pass": true
+    },
+    {
+      "name": "1366: campaign/main click hooks",
+      "pass": true
+    },
+    {
+      "name": "1440: white hero with centered copy",
+      "pass": true
+    },
+    {
+      "name": "1440: seven generated creator photos below centered copy",
+      "pass": true
+    },
+    {
+      "name": "1440: collage assets load with responsive sources",
+      "pass": true
+    },
+    {
+      "name": "1440: hero and photos use slower entrance motion",
+      "pass": true
+    },
+    {
+      "name": "1440: hero fills viewport and scroll cue fits",
+      "pass": true
+    },
+    {
+      "name": "1440: scroll cue visible above fold",
+      "pass": true
+    },
+    {
+      "name": "1440: CTA follows shared site styling with campaign tokens",
+      "pass": true
+    },
+    {
+      "name": "1440: light editorial palette",
+      "pass": true
+    },
+    {
+      "name": "1440: creator editorial font loaded",
+      "pass": true
+    },
+    {
+      "name": "1440: flat backgrounds without gradients",
+      "pass": true
+    },
+    {
+      "name": "1440: HTTP 200",
+      "pass": true
+    },
+    {
+      "name": "1440: no page or inner-scroller overflow",
+      "pass": true
+    },
+    {
+      "name": "1440: three compact campaign sections",
+      "pass": true
+    },
+    {
+      "name": "1440: all six campaign links meet 44px touch target",
+      "pass": true
+    },
+    {
+      "name": "1440: banner and navigation do not overlap",
+      "pass": true
+    },
+    {
+      "name": "1440: canonical prices have 15% discount",
+      "pass": true
+    },
+    {
+      "name": "1440: prices have campaign color",
+      "pass": true
+    },
+    {
+      "name": "1440: banner uses Vigil font and identifies creators/influencers",
+      "pass": true
+    },
+    {
+      "name": "1440: startup video is deferred before spotlight",
+      "pass": true
+    },
+    {
+      "name": "1440: hero CTA exposes both offers below navigation/banner",
+      "pass": true,
+      "detail": 115
+    },
+    {
+      "name": "1440: actual Scar portfolio has a high-resolution poster",
+      "pass": true
+    },
+    {
+      "name": "1440: Scar spotlight reserves a full viewport",
+      "pass": true
+    },
+    {
+      "name": "1440: real project startup plays on entry",
+      "pass": true
+    },
+    {
+      "name": "1440: project video has a crisp high-resolution source",
+      "pass": true
+    },
+    {
+      "name": "1440: campaign/main click hooks",
+      "pass": true
+    },
+    {
+      "name": "social reactions appear at varying random positions",
+      "pass": true
+    },
+    {
+      "name": "social reactions animate without invented counts",
+      "pass": true
+    },
+    {
+      "name": "hero pause/resume control is removed",
+      "pass": true
+    },
+    {
+      "name": "collage images float alongside reactions",
+      "pass": true
+    },
+    {
+      "name": "offscreen hero stops generating reactions",
+      "pass": true
+    },
+    {
+      "name": "offscreen collage suspends its floats automatically",
+      "pass": true
+    },
+    {
+      "name": "project playback pauses",
+      "pass": true
+    },
+    {
+      "name": "manual project pause survives visibility synchronization",
+      "pass": true
+    },
+    {
+      "name": "project playback resumes",
+      "pass": true
+    },
+    {
+      "name": "project intro can replay",
+      "pass": true
+    },
+    {
+      "name": "project playback stops offscreen",
+      "pass": true
+    },
+    {
+      "name": "promotion banner loops",
+      "pass": true
+    },
+    {
+      "name": "banner pause control",
+      "pass": true
+    },
+    {
+      "name": "banner resume control",
+      "pass": true
+    },
+    {
+      "name": "same-page banner returns to hero",
+      "pass": true
+    },
+    {
+      "name": "clicked/focused/hovered banner keeps moving",
+      "pass": true
+    },
+    {
+      "name": "creator SEO title",
+      "pass": true
+    },
+    {
+      "name": "canonical",
+      "pass": true
+    },
+    {
+      "name": "description/OG/Twitter",
+      "pass": true
+    },
+    {
+      "name": "Twitter image response",
+      "pass": true
+    },
+    {
+      "name": "share image response",
+      "pass": true
+    },
+    {
+      "name": "share image is 1200×630 PNG",
+      "pass": true
+    },
+    {
+      "name": "Express entry preserves UTMs/ref",
+      "pass": true
+    },
+    {
+      "name": "Express Buy preserves template and campaign",
+      "pass": true
+    },
+    {
+      "name": "Express online-unavailable state is explicit",
+      "pass": true
+    },
+    {
+      "name": "Express has working assisted-conversion email",
+      "pass": true
+    },
+    {
+      "name": "Professional online-unavailable state is explicit",
+      "pass": true
+    },
+    {
+      "name": "Professional provides its existing assisted booking route",
+      "pass": true
+    },
+    {
+      "name": "Professional assisted booking opens the real Calendly widget",
+      "pass": true
+    },
+    {
+      "name": "keyboard-visible focus",
+      "pass": true
+    },
+    {
+      "name": "reduced motion shows static reactions and hides animated cloud",
+      "pass": true
+    },
+    {
+      "name": "reduced motion retains the usable hero CTA",
+      "pass": true
+    },
+    {
+      "name": "reduced motion stops collage and banner loops",
+      "pass": true
+    },
+    {
+      "name": "reduced motion shows static project with no autoplay",
+      "pass": true
+    },
+    {
+      "name": "reduced motion removes CTA transitions",
+      "pass": true
+    },
+    {
+      "name": "keyboard campaign navigation",
+      "pass": true
+    },
+    {
+      "name": "server-rendered no-JS offers",
+      "pass": true
+    },
+    {
+      "name": "Retina spotlight video has enough native pixels for its rendered size",
+      "pass": true
+    },
+    {
+      "name": "Retina spotlight poster has enough native pixels for its rendered size",
+      "pass": true
+    },
+    {
+      "name": "storage blocked still routes with URL attribution",
+      "pass": true
+    },
+    {
+      "name": "creator_campaign_visit: event emitted",
+      "pass": true
+    },
+    {
+      "name": "creator_express_cta_click: event emitted",
+      "pass": true
+    },
+    {
+      "name": "creator_professional_cta_click: event emitted",
+      "pass": true
+    },
+    {
+      "name": "creator_checkout_cta_click: event emitted",
+      "pass": true
+    },
+    {
+      "name": "small iPhone touch: offer navigation",
+      "pass": true
+    },
+    {
+      "name": "small iPhone touch: no custom cursor",
+      "pass": true
+    },
+    {
+      "name": "ordinary Express visitor: original checkout selector",
+      "pass": true
+    },
+    {
+      "name": "ordinary visitor: no creator attribution/events",
+      "pass": true
+    },
+    {
+      "name": "/: public promotion banner present",
+      "pass": true
+    },
+    {
+      "name": "/pricing: public promotion banner present",
+      "pass": true
+    },
+    {
+      "name": "/express: public promotion banner present",
+      "pass": true
+    },
+    {
+      "name": "/professional: public promotion banner present",
+      "pass": true
+    },
+    {
+      "name": "/process: public promotion banner present",
+      "pass": true
+    },
+    {
+      "name": "/checkout?template=restaurant: public promotion banner present",
+      "pass": true
+    },
+    {
+      "name": "/login: public promotion banner present",
+      "pass": true
+    },
+    {
+      "name": "cross-page banner opens creator hero",
+      "pass": true
+    },
+    {
+      "name": "banner activates campaign only on click and retains source",
+      "pass": true
+    },
+    {
+      "name": "banner visitor attribution persists downstream",
+      "pass": true
+    },
+    {
+      "name": "no hydration/runtime errors",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "errors": [],
+  "availability": {
+    "express": false,
+    "professional": false
+  }
+}

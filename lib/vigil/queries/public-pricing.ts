@@ -1,4 +1,5 @@
 import "server-only";
+import { CREATOR_CAMPAIGN, creatorBuildOffer, type CreatorBuildOffer } from "@/lib/creator-campaign";
 
 import { unstable_cache } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
@@ -22,7 +23,7 @@ export type PublicPlan = {
   includes: { code: string; label: string; on: boolean }[];
 };
 
-export type PublicBuild = { kind: "express" | "professional" | "custom"; name: string; description: string | null; amountCents: number | null; currency: string };
+export type PublicBuild = CreatorBuildOffer & { kind: "express" | "professional" | "custom"; name: string; description: string | null; amountCents: number | null; currency: string };
 
 const includeLabels: [string, string][] = [
   [FEATURES.hostingManaged, "Managed hosting, SSL and security"],
@@ -63,9 +64,9 @@ async function load(): Promise<{ plans: PublicPlan[]; builds: PublicBuild[] }> {
   });
   const order: PublicBuild["kind"][] = ["express", "professional", "custom"];
   const buildList: PublicBuild[] = (builds.data ?? [])
-    .map((b) => ({ kind: b.kind as PublicBuild["kind"], name: b.name, description: b.description, amountCents: b.amount_cents, currency: b.currency }))
+    .map((b) => ({ kind: b.kind as PublicBuild["kind"], name: b.name, description: b.description, ...creatorBuildOffer(b.kind, b.amount_cents), currency: b.currency }))
     .sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
   return { plans: out, builds: buildList };
 }
 
-export const getPublicPricing = unstable_cache(load, ["public-pricing-v2"], { revalidate: 300, tags: ["pricing"] });
+export const getPublicPricing = unstable_cache(load, ["public-pricing-v3-creator-offer", String(CREATOR_CAMPAIGN.promotion.enabled), String(CREATOR_CAMPAIGN.promotion.percentOff)], { revalidate: 300, tags: ["pricing"] });

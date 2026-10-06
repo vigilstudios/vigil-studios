@@ -3,6 +3,8 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "@/app/globals.css";
+import { CREATOR_CAMPAIGN } from "@/lib/creator-campaign";
+import { PromoBanner } from "@/components/creators/PromoBanner";
 import { Navigation } from "@/components/layout/Navigation";
 import { StarCursor } from "@/components/site/StarCursor";
 import {
@@ -102,7 +104,8 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans">
+      <body className={`font-sans ${CREATOR_CAMPAIGN.promotion.enabled ? "creator-promo-active" : ""}`} >
+        <PromoBanner fixed />
         <Navigation />
         <main id="site-root" className="h-dvh overflow-y-auto">
           {children}

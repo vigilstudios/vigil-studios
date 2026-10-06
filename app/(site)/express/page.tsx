@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
 import { ExpressCatalogue } from "@/components/express/ExpressCatalogue";
 
 const title = "Vigil Express | Vigil Studios";
@@ -19,6 +20,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ExpressPage() {
-  return <ExpressCatalogue />;
+export default async function ExpressPage() {
+  const { builds } = await getPublicPricing();
+  const build = builds.find((item) => item.kind === "express");
+  return <ExpressCatalogue amountCents={build?.amountCents ?? null} currency={build?.currency ?? "usd"} />;
 }

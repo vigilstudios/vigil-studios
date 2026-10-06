@@ -974,3 +974,31 @@ html.star-cursor label {
 .star-cursor-el.is-down svg {
   transform: scale(0.8);
 }
+
+/* The creator promotion owns a small fixed rail above public navigation. */
+.creator-promo-active { --creator-promo-height: 36px; }
+.creator-promo-active #site-root { padding-top: var(--creator-promo-height); }
+.creator-promo-banner { height: 36px; display: grid; grid-template-columns: minmax(0,1fr) 36px; overflow: hidden; background: #f2c7d7; color: #422b36; font-family: var(--font-space-grotesk), sans-serif; }
+.creator-promo-fixed { position: fixed; z-index: 60; inset: 0 0 auto; }
+.creator-promo-link { display: flex; align-items: center; overflow: hidden; height: 100%; font-size: 11px; font-weight: 500; letter-spacing: .055em; text-transform: uppercase; }
+.creator-promo-track { display: flex; width: max-content; flex-shrink: 0; animation: creatorPromoLoop 70s linear infinite; }
+.creator-promo-group { display: flex; flex-shrink: 0; }
+.creator-promo-message { display: flex; align-items: center; gap: 12px; padding-right: 48px; white-space: nowrap; }
+.creator-promo-message strong { font-weight: 700; }
+.creator-promo-banner[data-paused="true"] .creator-promo-track { animation-play-state: paused; }
+.creator-promo-static { display: none; }
+.creator-promo-pause { display: grid; place-items: center; height: 100%; width: 100%; border-left: 1px solid #422b3624; cursor: pointer; }
+.creator-promo-pause:hover { background: #eab6c9; }
+.creator-promo-link:hover { background: #eab6c9; }
+.creator-promo-link:focus-visible, .creator-promo-pause:focus-visible { outline: 2px solid #80405b; outline-offset: -3px; }
+@keyframes creatorPromoLoop { to { transform: translateX(-50%); } }
+@media(max-width: 639px) {
+  .creator-promo-active { --creator-promo-height: 44px; }
+  .creator-promo-banner { height: 44px; grid-template-columns: minmax(0,1fr) 44px; }
+  .creator-promo-link { min-height: 44px; font-size: 10px; }
+}
+@media(prefers-reduced-motion: reduce) {
+  .creator-promo-banner { grid-template-columns: minmax(0,1fr); }
+  .creator-promo-track, .creator-promo-pause { display: none; }
+  .creator-promo-static { display: flex; align-items: center; justify-content: center; width: 100%; gap: 5px; padding: 0 12px; line-height: 1.4; text-align: center; }
+}

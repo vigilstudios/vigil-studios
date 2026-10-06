@@ -65,6 +65,7 @@ export function Navigation() {
   return (
     <nav
       ref={navRef}
+      style={{ top: "var(--creator-promo-height, 0px)" }}
       className={`fixed left-0 right-0 top-0 z-50 border-b transition-colors duration-300 ${
         isOpen
           ? "border-[color:var(--border)] bg-[color:var(--bg-secondary)]"

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Analytics } from "@vercel/analytics/next";
+import { CampaignTracking } from "@/components/creators/CampaignTracking";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/vigil/Logo";
 
@@ -7,6 +9,7 @@ export function CheckoutShell({ title, subtitle, children, centered }: { title?:
   if (centered) {
     return (
       <div className="vigil-frame flex min-h-screen flex-col bg-[color:var(--bg-primary)] text-[13px] text-[color:var(--text-primary)]">
+        <Analytics /><CampaignTracking />
         <header className="border-b border-[color:var(--border)]">
           <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
             <Link href="/" aria-label="Vigil home" className="flex items-center">
@@ -21,6 +24,7 @@ export function CheckoutShell({ title, subtitle, children, centered }: { title?:
   }
   return (
     <div className="vigil-frame min-h-screen bg-[color:var(--bg-primary)] text-[13px] text-[color:var(--text-primary)]">
+      <Analytics /><CampaignTracking />
       <header className="border-b border-[color:var(--border)]">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
           <Link href="/" aria-label="Vigil Studios home" className="flex items-center gap-2">

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import Stripe from "stripe";
 import { StripeBillingProvider } from "../providers/stripe";
 
@@ -26,6 +26,26 @@ const subscription = {
   metadata: { order_id: "ord_1" },
   items: { object: "list", data: [{ id: "si_1", object: "subscription_item", price: { id: "price_care", object: "price" }, current_period_start: 1_757_808_000, current_period_end: 1_760_400_000 }] },
 };
+
+describe("StripeBillingProvider.createCheckoutSession", () => {
+  it("sends a discounted one-time build alongside the unchanged recurring price, without another promo code", async () => {
+    const adapter = new StripeBillingProvider("sk_test_placeholder");
+    const client = (adapter as unknown as { stripe: Stripe }).stripe;
+    const create = vi.spyOn(client.checkout.sessions, "create").mockResolvedValue({ id: "cs_offer", url: "https://checkout.stripe.com/test" } as Stripe.Response<Stripe.Checkout.Session>);
+    await adapter.createCheckoutSession({
+      mode: "subscription",
+      lineItems: [{ priceExternalId: "price_care_month" }, { adHoc: { name: "Express build", amountCents: 50915, currency: "usd" } }],
+      customerEmail: "test@example.test", successUrl: "https://example.test/success", cancelUrl: "https://example.test/cancel",
+      reference: { order_id: "ord_offer" }, allowPromotionCodes: false,
+    });
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({
+      mode: "subscription", allow_promotion_codes: false,
+      line_items: [{ price: "price_care_month", quantity: 1 }, { quantity: 1, price_data: { currency: "usd", unit_amount: 50915, product_data: { name: "Express build" } } }],
+      subscription_data: { metadata: { order_id: "ord_offer" } },
+    }));
+    create.mockRestore();
+  });
+});
 
 describe("StripeBillingProvider.parseWebhook", () => {
   it("rejects a bad signature and a missing header", async () => {

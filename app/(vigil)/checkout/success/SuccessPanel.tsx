@@ -1,5 +1,6 @@
 "use client";
 
+import { CampaignTracking } from "@/components/creators/CampaignTracking";
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -46,6 +47,7 @@ export function SuccessPanel({ orderId, email, status, businessName, emailSent }
 
   return (
     <div className="flex w-full max-w-xl flex-col items-center">
+      <CampaignTracking event="creator_purchase_confirmed" confirmed={ready} dedupeKey={orderId} />
       <VirtueOrb size="xl" state={!ready ? "thinking" : speech.speaking ? "talking" : "idle"} />
       <div className="mt-8 min-h-[7rem] w-full">
         <VirtueSpeech key={`${status}-${String(emailSent)}`} lines={lines} onStart={speech.onStart} onDone={() => { speech.onDone(); setSpoken(true); }} />

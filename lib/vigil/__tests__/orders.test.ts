@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NullBillingProvider } from "../providers/null";
 import { completeCheckout, provisionOrder, startCheckout } from "../services/orders";
+import { CREATOR_CAMPAIGN } from "@/lib/creator-campaign";
 import { FakeAdmin } from "./fake-admin";
 
 // No Supabase secret in tests: the welcome email falls back to /login and
@@ -48,15 +49,16 @@ describe("startCheckout", () => {
     expect(order.business_name).toBe("Marlow & Fen");
     expect(order.plan_amount_cents).toBe(4900);
     expect(order.plan_price_id).toBe(PRICE);
-    expect(order.build_amount_cents).toBe(59900);
+    expect(order.build_amount_cents).toBe(50915);
     expect(res.orderId).toBe(order.id);
 
     const input = spy.mock.calls[0][0];
     expect(input.mode).toBe("subscription");
-    expect(input.lineItems).toEqual([{ priceExternalId: "price_ext_care" }, { priceExternalId: "price_ext_build" }]);
+    expect(input.lineItems).toMatchObject([{ priceExternalId: "price_ext_care" }, { adHoc: { amountCents: 50915, currency: "usd" } }]);
+    expect(order.metadata).toMatchObject({ creator_promotion: { percent_off: 15, original_build_amount_cents: 59900, discount_amount_cents: 8985 } });
     expect(input.successUrl).toBe(`https://app.test/checkout/success?order=${order.id}`);
     expect(input.reference).toMatchObject({ order_id: order.id, plan_code: "care", project_kind: "express", template_slug: "restaurant" });
-    expect(input.allowPromotionCodes).toBe(true);
+    expect(input.allowPromotionCodes).toBe(false);
 
     const link = fake.rows("provider_links").find((l) => l.resource_kind === "checkout_session");
     expect(link).toMatchObject({ entity_type: "order", entity_id: order.id });
@@ -79,8 +81,43 @@ describe("startCheckout", () => {
     const provider = new NullBillingProvider();
     const spy = vi.spyOn(provider, "createCheckoutSession");
     await startCheckout(fake.asClient(), { email: "owner@professional.test", businessName: "Professional Co", projectKind: "professional", planCode: "care", appUrl: "https://app.test" }, provider);
-    expect(fake.rows("orders")[0]).toMatchObject({ project_kind: "professional", build_amount_cents: 149900, template_slug: null });
-    expect(spy.mock.calls[0][0].lineItems).toEqual([{ priceExternalId: "price_ext_care" }, { priceExternalId: "price_ext_professional" }]);
+    expect(fake.rows("orders")[0]).toMatchObject({ project_kind: "professional", build_amount_cents: 127415, template_slug: null });
+    expect(spy.mock.calls[0][0].lineItems).toMatchObject([{ priceExternalId: "price_ext_care" }, { adHoc: { amountCents: 127415 } }]);
+  });
+
+  it("keeps regular catalogue charges and promotion-code behavior when the campaign is disabled", async () => {
+    const enabled = CREATOR_CAMPAIGN.promotion.enabled;
+    CREATOR_CAMPAIGN.promotion.enabled = false;
+    try {
+      const provider = new NullBillingProvider();
+      const spy = vi.spyOn(provider, "createCheckoutSession");
+      await startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, provider);
+      expect(fake.rows("orders")[0].build_amount_cents).toBe(59900);
+      expect(spy.mock.calls[0][0].lineItems).toEqual([{ priceExternalId: "price_ext_care" }, { priceExternalId: "price_ext_build" }]);
+      expect(spy.mock.calls[0][0].allowPromotionCodes).toBe(true);
+    } finally { CREATOR_CAMPAIGN.promotion.enabled = enabled; }
+  });
+
+  it("honors staff quotes and keeps a creator retry amount without discounting it twice", async () => {
+    const provider = new NullBillingProvider();
+    const spy = vi.spyOn(provider, "createCheckoutSession");
+    fake.rows("orders").push({ id: "quoted", status: "pending", checkout_token: "quoted_token", metadata: { staff_note: "Approved quote" } });
+    await startCheckout(fake.asClient(), { email: "a@b.c", businessName: "Quoted", projectKind: "express", planCode: "care", existingOrderId: "quoted", buildAmountOverrideCents: 42000, appUrl: "https://app.test" }, provider);
+    expect(fake.rows("orders")[0]).toMatchObject({ build_amount_cents: 42000, metadata: { staff_note: "Approved quote" } });
+    expect(spy.mock.calls[0][0].allowPromotionCodes).toBe(true);
+    const first = await startCheckout(fake.asClient(), { email: "a@b.c", businessName: "New", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, provider);
+    await startCheckout(fake.asClient(), { email: "a@b.c", businessName: "New", projectKind: "express", planCode: "care", existingOrderId: first.orderId, buildAmountOverrideCents: 50915, appUrl: "https://app.test" }, provider);
+    const retry = fake.rows("orders").find(order => order.id === first.orderId);
+    expect(retry).toMatchObject({ build_amount_cents: 50915, metadata: { creator_promotion: { original_build_amount_cents: 59900 } } });
+    expect(spy.mock.calls.at(-1)?.[0].allowPromotionCodes).toBe(false);
+  });
+
+  it("retains the synced build-price gate during the offer and rejects a currency mismatch", async () => {
+    fake.rows("provider_links").splice(1, 1);
+    await expect(startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, new NullBillingProvider())).rejects.toThrow(/not been synced/);
+    expect(fake.rows("orders")).toHaveLength(0);
+    fake.rows("build_prices")[0].currency = "eur";
+    await expect(startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, new NullBillingProvider())).rejects.toThrow(/currencies must match/);
   });
 
   it("marks a self-serve order failed when the provider refuses to open a payment page", async () => {

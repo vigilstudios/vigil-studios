@@ -1,5 +1,7 @@
 "use client";
 
+import { track } from "@vercel/analytics";
+import { captureCampaignAttribution } from "@/lib/campaign-attribution";
 import { useActionState, useState } from "react";
 import { Check, Lock } from "lucide-react";
 import { clsx } from "clsx";
@@ -11,7 +13,7 @@ import { formatMoney } from "@/lib/vigil/format";
 
 export type CheckoutFormProps = {
   plans: CheckoutPlan[];
-  build: { name: string; amountCents: number | null; currency: string } | null;
+  build: { name: string; amountCents: number | null; currency: string; originalAmountCents?: number | null; percentOff?: number | null } | null;
   projectKind: "express" | "professional" | "custom";
   templateSlug: string | null;
   templateName: string | null;
@@ -51,7 +53,12 @@ export function CheckoutForm(p: CheckoutFormProps) {
   }
 
   return (
-    <form action={action} className="grid gap-6 lg:grid-cols-[1fr_360px]" noValidate>
+    <form action={action} onSubmit={() => {
+      const attribution = captureCampaignAttribution();
+      if (attribution) {
+        try { track("creator_checkout_submitted", { ...attribution, package: p.projectKind, plan: planCode, period: periodKey }); } catch { /* Payment must not depend on analytics. */ }
+      }
+    }} className="grid gap-6 lg:grid-cols-[1fr_360px]" noValidate>
       <input type="hidden" name="project_kind" value={p.projectKind} />
       <input type="hidden" name="template_slug" value={p.templateSlug ?? ""} />
       {p.locked ? (
@@ -161,7 +168,7 @@ export function CheckoutForm(p: CheckoutFormProps) {
           {p.build ? (
             <div className="flex justify-between gap-3">
               <dt className="text-[color:var(--text-secondary)]">{p.build.name}{p.templateName ? ` · ${p.templateName}` : ""}</dt>
-              <dd className="font-medium">{p.build.amountCents !== null ? formatMoney(p.build.amountCents, p.build.currency) : "Quoted"}</dd>
+              <dd className="text-right font-medium">{p.build.percentOff && p.build.originalAmountCents != null ? <del className="mr-2 text-xs text-[color:var(--text-secondary)]">{formatMoney(p.build.originalAmountCents, p.build.currency)}</del> : null}{p.build.amountCents !== null ? formatMoney(p.build.amountCents, p.build.currency) : "Quoted"}</dd>
             </div>
           ) : null}
           <div className="flex justify-between gap-3">
@@ -173,6 +180,7 @@ export function CheckoutForm(p: CheckoutFormProps) {
             <dd className="font-semibold">{formatMoney(dueToday, plan?.currency ?? "usd")}</dd>
           </div>
         </dl>
+        {p.build?.percentOff ? <p className="mt-3 text-xs font-medium">{p.build.percentOff}% creator promotion applied to the one-time build. Your ongoing plan is unchanged.</p> : null}
         <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">
           {price && plan ? `Then ${formatMoney(price.amountCents, plan.currency)} ${period.every}${perMonth && period.months > 1 ? ` (${formatMoney(perMonth, plan.currency)}/mo)` : ""}, cancel any time.` : "Your plan renews automatically; cancel any time."} Sales tax is added at payment where it applies.
         </p>
