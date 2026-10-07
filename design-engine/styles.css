@@ -9,6 +9,8 @@
 @import "./sections/heroes/followup.css";
 @import "./sections/services/styles.css";
 @import "./sections/work/styles.css";
+@import "./media/styles.css";
+@import "./composition/width.css";
 /* Scoped client-site foundation. Never reference the marketing site's tokens here. */
 .de-root {
   container-type: inline-size;

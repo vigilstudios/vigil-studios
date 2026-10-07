@@ -13,7 +13,7 @@ export {
 } from "./capabilities";
 export type { ExpansionNavigationId } from "./capabilities";
 import { z } from "zod";
-import { mediaSourceSchema } from "../media/types";
+import { mediaSourceSchema, videoPlaybackSchema } from "../media/types";
 import { navigationArchitectures } from "./architectures";
 import type { NavigationArchitecture, NavigationConfig } from "./types";
 const text = z.string().trim().min(1);
@@ -31,12 +31,12 @@ export const destinationSchema = z
 export const logoSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("text") }).strict(),
   z.object({ kind: z.literal("wordmark") }).strict(),
-  z.object({ kind: z.literal("symbol"), src: mediaSourceSchema }).strict(),
-  z.object({ kind: z.literal("combined"), src: mediaSourceSchema }).strict(),
+  z.object({ kind: z.literal("symbol"), src: mediaSourceSchema, mediaType: z.enum(["image", "video"]).optional(), playback: videoPlaybackSchema.optional() }).strict(),
+  z.object({ kind: z.literal("combined"), src: mediaSourceSchema, mediaType: z.enum(["image", "video"]).optional(), playback: videoPlaybackSchema.optional() }).strict(),
   z
     .object({
       kind: z.literal("image"),
-      src: mediaSourceSchema,
+      src: mediaSourceSchema, mediaType: z.enum(["image", "video"]).optional(), playback: videoPlaybackSchema.optional(),
       width: z.number().positive(),
       height: z.number().positive(),
     })

@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { SectionInstance } from "@/design-engine/composition/schemas";
 import type { LiquidGlassCarouselHandle } from "./liquid-glass-carousel-engine";
+import { isVideoAsset } from "@/design-engine/media/source";
 import { useMotionPolicy } from "@/design-engine/motion/MotionPolicy";
 import { Plate } from "@/design-engine/sections/work/shared";
 import { ItemAction } from "@/design-engine/actions/SectionActions";
@@ -28,7 +29,8 @@ export function LiquidGlassCarousel(
     .map((work) => `${work.id}:${work.image.src}`)
     .join("|");
   const failed = failedSet === assetKey,
-    native = failed || policy.reduced || section.motion === "none";
+    mixedMedia = works.some(work => isVideoAsset(work.image)),
+    native = mixedMedia || failed || policy.reduced || section.motion === "none";
   const items = useMemo(
     () =>
       works.map((work) => ({
@@ -118,17 +120,11 @@ export function LiquidGlassCarousel(
   ]);
   function nativeImages() {
     return (
-      <div className="vm-liquid-native">
+      <div className="vm-liquid-native" data-mixed={mixedMedia || undefined}>
         {works.map((work) => (
           <article key={work.id}>
-            <button
-              type="button"
-              aria-label={`Inspect ${work.title}`}
-              onClick={(event) => inspect(work.id, event.currentTarget)}
-            >
-              <Plate image={work.image} />
-              <span>{work.title}</span>
-            </button>
+            <Plate image={work.image}/>
+            <button type="button" aria-label={`Inspect ${work.title}`} onClick={event => inspect(work.id, event.currentTarget)}>{work.title}</button>
             <ItemAction group="works" itemId={work.id} />
           </article>
         ))}

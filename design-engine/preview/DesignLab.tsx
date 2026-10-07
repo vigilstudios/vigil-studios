@@ -97,6 +97,8 @@ export function DesignLab({
   const [theme, setTheme] =
     useState<(typeof designThemes)[number]["id"]>("neutral");
   const [device, setDevice] = useState("desktop");
+  const [sectionWidth, setSectionWidth] = useState("default");
+  const [widthPreview, setWidthPreview] = useState<string | null>(null);
   const [tab, setTab] = useState("component");
   const [variantId, setVariantId] = useState("");
   const [editor, setEditor] = useState<{
@@ -396,6 +398,9 @@ export function DesignLab({
             </select>
           </label>
           {"composition" in selected && selected.status === "production" && <ActionPreviewControls key={selected.id} section={makeSection(selected.id as SectionId, "action-preview")} onChange={value => setActionPreview({ id: selected.id, value })}/>}
+          <CapabilityControl label="Section width" value={sectionWidth}
+            choices={[{value:"default",label:"Original / contained"},{value:"full",label:"Full width · keep gutters"},{value:"edge",label:"Edge to edge · no gutters"}]}
+            onPreview={setWidthPreview} onChange={value => {setWidthPreview(null);setSectionWidth(value);}} />
           <CapabilityControl key={`preset-${selected.id}`} label="Preset" value={variant.id}
             choices={selected.previewVariants.map(item => ({ value: item.id, label: item.label }))}
             onPreview={value => {
@@ -815,11 +820,11 @@ export function DesignLab({
               : "min-h-[28rem]"
           }
         >
-          {renderDesignPreview(selected.id, variant.id, overrides, {
+          <div className="de-section-layout" data-width={widthPreview ?? sectionWidth}>{renderDesignPreview(selected.id, variant.id, overrides, {
             adaptation: activeAdaptation,
             ...activeBrand,
             contextualActions: actionPreview.id === selected.id ? actionPreview.value : undefined,
-          })}
+          })}</div>
         </DesignThemeProvider>
         } audition={shown ? (
         <DesignThemeProvider
@@ -834,11 +839,11 @@ export function DesignLab({
               : "min-h-[28rem]"
           }
         >
-          {renderDesignPreview(selected.id, shownVariant!, shownOverrides, shown?.client ?? {
+          <div className="de-section-layout" data-width={widthPreview ?? sectionWidth}>{renderDesignPreview(selected.id, shownVariant!, shownOverrides, shown?.client ?? {
             adaptation: activeAdaptation,
             ...activeBrand,
             contextualActions: actionPreview.id === selected.id ? actionPreview.value : undefined,
-          })}
+          })}</div>
         </DesignThemeProvider>
         ) : undefined} />
       ) : (

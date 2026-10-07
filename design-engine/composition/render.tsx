@@ -105,7 +105,7 @@ import type { PageComposition, SectionInstance } from "./schemas";
 
 /** Exhaustive, typed implementation routing. It contains no calibration copy/media. */
 export function renderSection(section: SectionInstance): ReactNode {
-  return <SectionActionProvider section={section}>{renderSectionBody(section)}</SectionActionProvider>;
+  return <div className="de-section-layout" data-width={section.sectionWidth ?? "default"}><SectionActionProvider section={section}>{renderSectionBody(section)}</SectionActionProvider></div>;
 }
 function renderSectionBody(section: SectionInstance): ReactNode {
   switch (section.component) {

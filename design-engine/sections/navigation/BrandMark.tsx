@@ -1,5 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- Client-authored logo sources with text recovery. */
+import { MediaAsset } from "../../media/MediaAsset";
+import { isVideoAsset } from "../../media/source";
 import { useState } from "react";
 import type { z } from "zod";
 import type { logoSchema } from "../../navigation/schemas";
@@ -17,7 +19,7 @@ export function BrandMark({
   return (
     <>
       {hasSource && !broken && (
-        <img
+        isVideoAsset(logo) ? <MediaAsset asset={{ src:logo.src,alt:brand,width:logo.kind === "image" ? logo.width : 48,height:logo.kind === "image" ? logo.height : 48,mediaType:logo.mediaType,playback:logo.playback }} preview style={{width:logo.kind === "image" ? logo.width : 48,height:logo.kind === "image" ? logo.height : 48}}/> : <img
           src={logo.src}
           width={logo.kind === "image" ? logo.width : 48}
           height={logo.kind === "image" ? logo.height : 48}

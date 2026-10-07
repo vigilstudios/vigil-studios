@@ -1,3 +1,4 @@
+import { SectionVideoPlayer } from "../../media/VideoPlayer";
 
 import type { SectionPayload } from "../../composition/schemas";
 import { EvidenceShell, Attribution, EvidenceSource } from "./shared";
@@ -10,25 +11,8 @@ const c = content;
         <div className="de-proof-conversation">
           <div className="de-proof-interview-scene">
             {c.video ? (
-              <video
-                controls
-                preload="none"
-                playsInline
-                aria-label={c.video.label}
-                poster={c.video.poster.src}
-                width={c.video.width}
-                height={c.video.height}
-              >
-                <source src={c.video.src} />
-                {c.video.captions && (
-                  <track
-                    kind="captions"
-                    src={c.video.captions.src}
-                    srcLang={c.video.captions.language}
-                    label={c.video.captions.label}
-                  />
-                )}
-              </video>
+              <SectionVideoPlayer video={c.video}/>
+
             ) : (
               <EvidenceMediaReveal image={c.still} motion={motion} label="Interview setting" />
             )}

@@ -1,4 +1,5 @@
 "use client";
+import { SectionVideoPlayer } from "../../media/VideoPlayer";
 import { ItemAction } from "../../actions/SectionActions";
 import { useState } from "react";
 import type { SectionInstance } from "../../composition/schemas";
@@ -55,27 +56,8 @@ export function MediaCabinet({
             {record.kind === "image" ? (
               <Plate image={record.image} />
             ) : (
-              <video
-                key={record.video.src}
-                controls
-                playsInline
-                preload="none"
-                poster={record.video.poster.src}
-                width={record.video.width}
-                height={record.video.height}
-                aria-label={record.video.label}
-              >
-                <source src={record.video.src} />
-                {record.video.captions ? (
-                  <track
-                    kind="captions"
-                    src={record.video.captions.src}
-                    srcLang={record.video.captions.language}
-                    label={record.video.captions.label}
-                    default
-                  />
-                ) : null}
-              </video>
+              <SectionVideoPlayer key={record.video.src} video={record.video}/>
+
             )}
             <h3 className="de-heading">{record.title}</h3><ItemAction group="records" itemId={record.id}/>
             {record.note ? <p className="de-text">{record.note}</p> : null}

@@ -1,4 +1,5 @@
 "use client";
+import { isVideoAsset } from "@/design-engine/media/source";
 import { useRef, useState } from "react";
 import type { SectionInstance } from "@/design-engine/composition/schemas";
 import { useMotionPolicy } from "@/design-engine/motion/MotionPolicy";
@@ -76,7 +77,7 @@ export function ImageGallery(section: SectionInstance<"work.image-gallery">) {
                     aria-label={`Inspect ${work.title}`}
                     onClick={(event) => inspect(work.id, event.currentTarget)}
                   >
-                    View image
+                    {isVideoAsset(work.image) ? "View video" : "View image"}
                   </button>
                 )}
                 <ItemAction

@@ -1,4 +1,5 @@
 "use client";
+import { containsVideoAsset } from "../media/source";
 import type { ReactNode } from "react";
 import { DesignButton } from "../primitives/DesignButton";
 import { useActionResolution, useSectionActions } from "./ActionContext";
@@ -39,5 +40,8 @@ export function ActionMedia({ itemId, group, children }: { itemId: string; group
   const resolved = useActionResolution(configured?.slot);
   if (!resolved) return <>{children}</>;
   if (resolved.issue) return <div className="de-action-media" aria-disabled="true" title={resolved.issue}>{children}<span role="status">Destination unavailable</span></div>;
+  const records = section && (section.content as Record<string,unknown>)[group];
+  const record = Array.isArray(records) ? records.find(item => item.id === itemId) : undefined;
+  if (containsVideoAsset(record)) return <div className="de-action-media" data-video="true">{children}<a data-action-link="true" className="de-action-media-destination" href={resolved.href} download={"download" in resolved ? resolved.download : undefined}>{resolved.label}</a></div>;
   return <a data-action-link="true" className="de-action-media" href={resolved.href} download={"download" in resolved ? resolved.download : undefined} aria-label={resolved.label}>{children}</a>;
 }

@@ -68,10 +68,12 @@ export const sectionSchemas = {
   "story.working-conversation": z.object({ content: z.object({ title: text.max(180), introduction: text.max(600), attribution: text.max(300), exchanges: z.array(z.object({ question: text.max(180), speaker: text.max(80), role: text.max(100), answer: text.max(900), aside: text.max(300).optional() }).strict()).min(2).max(4) }).strict(), structure: z.enum(["transcript", "roundtable"]), motion: z.literal("none") }).strict(),
   "story.decision-ledger": z.object({ content: z.object({ title: text.max(180), introduction: text.max(600), columns: z.tuple([text.max(60), text.max(60), text.max(60)]), rationaleLabel: text.max(60), decisions: z.array(z.object({ belief: text.max(100), tension: text.max(120), practice: text.max(300), rationale: text.max(700) }).strict()).min(2).max(5) }).strict(), structure: z.enum(["open", "disclosure"]), motion: z.literal("none") }).strict(),
 } as const;
+export const sectionWidthSchema = z.enum(["default", "full", "edge"]);
+export type SectionWidth = z.infer<typeof sectionWidthSchema>;
 export type SectionId = keyof typeof sectionSchemas;
 export type SectionPayload<K extends SectionId> = z.infer<(typeof sectionSchemas)[K]>;
 export type SectionInstance<K extends SectionId = SectionId> = {
-  [Id in K]: SectionPayload<Id> & { id: string; component: Id; overrides?: CreativeOverrides; actions?: ActionBinding[]; contextualActions?: ContextualActions; navigationSource?: NavigationSource }
+  [Id in K]: SectionPayload<Id> & { id: string; component: Id; sectionWidth?: SectionWidth; overrides?: CreativeOverrides; actions?: ActionBinding[]; contextualActions?: ContextualActions; navigationSource?: NavigationSource }
 }[K];
 export type PageComposition = { id: string; label: string; site: SiteConfiguration; overrides?: CreativeOverrides; sections: SectionInstance[] };
 
@@ -84,13 +86,13 @@ export function parseSection(input: unknown): SectionInstance {
     void lens; void structure;
     input = {...retained,component:"work.liquid-glass",structure:"liquid-lens",skin:"site",alignment:"center",height:"section",entry:"none",gap:"tight"};
   }
-  const envelope = z.object({ id: text.regex(/^[a-z][a-z0-9-]*$/), component: z.enum(Object.keys(sectionSchemas) as [SectionId, ...SectionId[]]), overrides: creativeOverrideSchema.optional(), actions: z.array(actionBindingSchema).optional(), contextualActions: contextualActionsSchema.optional(), navigationSource: navigationSourceSchema.optional() }).passthrough().parse(input);
-  const { id, component, overrides, actions, contextualActions, navigationSource, ...payload } = envelope;
+  const envelope = z.object({ id: text.regex(/^[a-z][a-z0-9-]*$/), component: z.enum(Object.keys(sectionSchemas) as [SectionId, ...SectionId[]]), sectionWidth: sectionWidthSchema.optional(), overrides: creativeOverrideSchema.optional(), actions: z.array(actionBindingSchema).optional(), contextualActions: contextualActionsSchema.optional(), navigationSource: navigationSourceSchema.optional() }).passthrough().parse(input);
+  const { id, component, sectionWidth, overrides, actions, contextualActions, navigationSource, ...payload } = envelope;
   if (navigationSource && !component.startsWith("navigation.") && !component.startsWith("footer.")) throw new Error("Only Navigation and Footer consume site destinations.");
   if (!component.startsWith("navigation.") && actions?.some(binding => binding.path[1] === "home")) throw new Error("Only Navigation supports a home destination binding.");
   if (navigationSource && actions?.some(binding => binding.path[1] === "links")) throw new Error("Site-derived menu links are owned by the Site Tree. Remove legacy link bindings or use authored destinations.");
   if (actions && new Set(actions.map(binding => JSON.stringify(binding.path))).size !== actions.length) throw new Error("Action paths must be unique.");
-  const section = { id, component, overrides, ...(contextualActions ? { contextualActions } : {}), ...(actions ? { actions } : {}), ...(navigationSource ? { navigationSource } : {}), ...sectionSchemas[component].parse(payload) } as SectionInstance;
+  const section = { id, component, ...(sectionWidth ? { sectionWidth } : {}), overrides, ...(contextualActions ? { contextualActions } : {}), ...(actions ? { actions } : {}), ...(navigationSource ? { navigationSource } : {}), ...sectionSchemas[component].parse(payload) } as SectionInstance;
   validateContextualActions(section, contextualActions);
   return section;
 }

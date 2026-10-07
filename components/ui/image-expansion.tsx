@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
+import { isVideoAsset } from "@/design-engine/media/source";
 import { Sun, Moon } from "lucide-react";
 import type { SectionInstance } from "@/design-engine/composition/schemas";
 import { Plate } from "@/design-engine/sections/work/shared";
@@ -150,7 +151,7 @@ export function ImageExpansionSlider(
                       aria-label={`Inspect ${work.title}`}
                       onClick={(event) => inspect(work.id, event.currentTarget)}
                     >
-                      View image
+                      {isVideoAsset(work.image) ? "View video" : "View image"}
                     </button>
                   )}
                   <ItemAction

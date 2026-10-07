@@ -1,5 +1,7 @@
 "use client";
 // Portable media delivery stays at the host application boundary.
+import { MediaAsset } from "../../media/MediaAsset";
+import { SectionVideoPlayer } from "../../media/VideoPlayer";
 import { useState, type CSSProperties } from "react";
 import type { ProductMedia } from "../../commerce/types";
 import type { MediaTreatment } from "../../media/types";
@@ -33,32 +35,8 @@ export function Picture({
   if (media.kind === "video" && !compact)
     return (
       <div className="de-commerce-film">
-        <video
-          key={key}
-          controls
-          preload="none"
-          playsInline
-          aria-label={media.video.label}
-          poster={media.video.poster.src}
-          width={media.video.width}
-          height={media.video.height}
-          onError={() => setFailed(key)}
-        >
-          <source src={media.video.src} />
-          {media.video.captions && (
-            <track
-              default
-              kind="captions"
-              src={media.video.captions.src}
-              srcLang={media.video.captions.language}
-              label={media.video.captions.label}
-            />
-          )}
-        </video>
-        <details>
-          <summary>Transcript</summary>
-          <p>{media.video.transcript}</p>
-        </details>
+        <SectionVideoPlayer key={key} video={media.video}/>
+
       </div>
     );
   const position = (f: typeof source.focal) =>
@@ -76,26 +54,8 @@ export function Picture({
         } as CSSProperties
       }
     >
-      <picture>
-        {source.mobileSrc && !compact && (
-          <source media="(max-width:700px)" srcSet={source.mobileSrc} />
-        )}
-        <img
-          key={key}
-          src={source.src}
-          alt={compact ? "" : source.alt}
-          width={source.width}
-          height={source.height}
-          srcSet={source.srcSet}
-          sizes={
-            source.sizes ??
-            (compact ? "160px" : "(max-width: 700px) 90vw, 60vw")
-          }
-          loading="lazy"
-          decoding="async"
-          onError={() => setFailed(key)}
-        />
-      </picture>
+      <MediaAsset key={key} asset={source} preview={compact} sizes={compact ? "160px" : "(max-width: 700px) 90vw, 60vw"} onError={() => setFailed(key)}/>
+
       {media.kind === "interactive-placeholder" && !compact && (
         <p>
           <strong>360° · static view</strong>

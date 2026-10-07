@@ -1,3 +1,4 @@
+import { MediaAsset } from "../../media/MediaAsset";
 import { SectionActions, ItemAction } from "../../actions/SectionActions";
 import type { ReactNode } from "react";
 import type { SectionImage, MediaTreatment } from "../../media/types";
@@ -46,23 +47,8 @@ export function ServicePicture({
   motion: "none" | "media-reveal";
 }) {
   const plate = (
-    <picture
-      className={`de-service-picture de-service-picture--${treatment.tone}`}
-    >
-      {image.mobileSrc && (
-        <source media="(max-width:700px)" srcSet={image.mobileSrc} />
-      )}
-      <img
-        src={image.src}
-        alt={image.alt}
-        width={image.width}
-        height={image.height}
-        srcSet={image.srcSet}
-        sizes={image.sizes}
-        loading="lazy"
-        decoding="async"
-      />
-    </picture>
+    <MediaAsset asset={image} className={`de-service-picture de-service-picture--${treatment.tone}`}/>
+
   );
   return motion === "media-reveal" ? (
     <MediaReveal duration={0.6}>{plate}</MediaReveal>

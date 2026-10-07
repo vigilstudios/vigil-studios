@@ -1,0 +1,52 @@
+/* Saved section width uses its host artboard, so previews and exported sites agree without viewport overflow. */
+.de-section-layout {
+  min-width: 0;
+}
+.de-section-layout:is([data-width="full"], [data-width="edge"]) {
+  --de-container: 100%;
+}
+.de-root
+  .de-section-layout:is([data-width="full"], [data-width="edge"])
+  > :is(section, footer, header, nav),
+.de-root
+  .de-section-layout:is([data-width="full"], [data-width="edge"])
+  :is(
+    .de-ending-inner,
+    .vm-inner,
+    .de-container,
+    .de-service-disclosures,
+    .de-service-system,
+    .de-service-path,
+    .vm-strips,
+    .de-work,
+    .de-service,
+    .de-proof,
+    .de-import
+  ) {
+  max-width: none;
+  width: 100%;
+}
+.de-section-layout[data-width="edge"] {
+  --de-gutter: 0px;
+}
+.de-root .de-section-layout[data-width="edge"] > :is(section, footer, header, nav),
+.de-root
+  .de-section-layout[data-width="edge"]
+  :is(
+    .de-ending-inner,
+    .de-container,
+    .de-work,
+    .de-service,
+    .de-proof,
+    .de-import,
+    .vigil-media
+  ) {
+  padding-inline: 0 !important;
+  margin-inline: 0;
+}
+.de-root .de-section-layout[data-width="edge"] .vm-strips {
+  padding-inline: 0;
+}
+.de-root .de-section-layout[data-width="edge"] .vm-expansion-shell {
+  border-radius: 0;
+}

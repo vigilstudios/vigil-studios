@@ -1,0 +1,219 @@
+@import "./video-layouts.css";
+.de-video {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+}
+.de-video > video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.de-video[data-preview] {
+  pointer-events: none;
+}
+.de-video > .de-video-enlarge {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  z-index: 5;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #ffffff80;
+  border-radius: 50%;
+  background: #111c;
+  color: white;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font: 700 1.3rem/1 sans-serif;
+  padding: 0;
+}
+.de-video-transcript {
+  position: relative;
+  background: var(--de-background, white);
+  color: var(--de-foreground, #111);
+  padding: 0.5rem;
+  height: auto;
+}
+.de-video-unavailable {
+  display: grid;
+  place-items: center;
+  min-height: 10rem;
+  padding: 1rem;
+  background: var(--de-surface, #eee);
+}
+.de-root .de-video-dialog,
+.de-video-dialog {
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: clamp(1rem, 3vw, 3rem);
+  border: 0;
+  background: #08080a;
+  color: white;
+  overflow: auto;
+}
+.de-video-dialog::backdrop {
+  background: #000d;
+}
+.de-root .de-video-dialog h2 {
+  color: white;
+  font: 500 1.1rem/1.4 var(--de-font-body, sans-serif);
+  margin: 0 7rem 1rem 0;
+}
+.de-root .de-video-dialog > video,
+.de-video-dialog > video {
+  position: static;
+  width: 100%;
+  height: calc(100dvh - 9rem);
+  max-height: none;
+  object-fit: contain;
+  transform: none;
+  border: 0;
+  border-radius: 0;
+}
+.de-root .de-video-close,
+.de-video-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  min-height: 44px;
+  padding: 0.6rem 1rem;
+  border: 1px solid #777;
+  background: #222;
+  color: white;
+  cursor: pointer;
+}
+.de-root dialog .de-video-enlarge {
+  display: none;
+}
+/* Player chrome stays operable above a gallery's image-selection/copy overlay. */
+.vm-strip:has(.de-video) .vm-strip-trigger {
+  pointer-events: none;
+}
+.vm-strip:has(.de-video) .de-video {
+  z-index: 2;
+}
+.vm-expansion-card:has(.de-video) .vm-expansion-copy,
+.vm-apple-card:has(.de-video) .vm-apple-copy {
+  pointer-events: none;
+}
+.vm-expansion-card:has(.de-video) .vm-expansion-copy button,
+.vm-expansion-card:has(.de-video) .vm-expansion-copy a,
+.vm-apple-card:has(.de-video) .vm-apple-copy button,
+.vm-apple-card:has(.de-video) .vm-apple-copy a {
+  pointer-events: auto;
+}
+.vigil-media .vm-liquid-native[data-mixed] {
+  display: flex;
+  overflow-x: auto;
+  gap: var(--vm-gap);
+  scroll-snap-type: x mandatory;
+}
+.vigil-media .vm-liquid-native[data-mixed] > article {
+  flex: 0 0 min(78%, 34rem);
+  scroll-snap-align: center;
+}
+.vigil-media .vm-liquid-native[data-mixed] > article > :is(picture, .de-video) {
+  display: block;
+  height: clamp(18rem, 45cqw, 32rem);
+}
+.vigil-media .vm-liquid-native[data-mixed] > article > picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.composition-media-controls fieldset {
+  margin: 1rem 0;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  display: grid;
+  gap: 0.7rem;
+  min-width: 0;
+}
+.composition-media-controls label {
+  display: grid;
+  gap: 0.4rem;
+}
+.composition-media-controls input:not([type="checkbox"]),
+.composition-media-controls select,
+.composition-media-controls textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 0.5rem;
+}
+.composition-media-controls .composition-media-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.de-root .de-video-dialog > video {
+  height: calc(100dvh - 9rem) !important;
+  width: 100% !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  transform: none !important;
+}
+.de-root :is(article, figure, li):has(.de-video) .de-action-stretched::after {
+  display: none;
+}
+.de-root .de-action-media-destination {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  text-decoration: underline;
+}
+
+/* Gallery inspection hit areas cannot intercept playable media. */
+.vm-expansion-card:has(.de-video) .vm-card-hit {
+  display: none;
+}
+.vm-expansion-card:has(.de-video) .vm-vignette,
+.vm-apple-card:has(.de-video) .vm-apple-shade,
+.vm-strip:has(.de-video) .vm-strip-caption {
+  pointer-events: none;
+}
+.vm-strip:has(.de-video) .vm-strip-caption button,
+.vm-strip:has(.de-video) .vm-strip-caption a {
+  pointer-events: auto;
+}
+.vm-expansion-card:has(.de-video[data-controls="true"]) .vm-expansion-copy,
+.vm-strip:has(.de-video[data-controls="true"]) .vm-strip-caption {
+  bottom: 4rem;
+}
+.vm-apple-card:has(.de-video[data-controls="true"]) .vm-apple-actions {
+  margin-bottom: 3rem;
+}
+
+.de-root .de-video-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.de-root .de-video-dialog[open] > h2 {
+  font: 500 1.1rem/1.4 var(--de-font-body, sans-serif) !important;
+  margin: 0 8rem 0 0 !important;
+  max-width: none;
+  max-height: 6rem;
+  overflow: auto;
+  flex-shrink: 0;
+}
+.de-root .de-video-dialog[open] > video {
+  height: auto !important;
+  flex: 1 1 0;
+  min-height: 0;
+}
+.composition-media-controls .composition-media-toggle input[type="checkbox"] {
+  width: auto;
+  flex: 0 0 auto;
+  margin: 0;
+}

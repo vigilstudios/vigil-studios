@@ -156,7 +156,7 @@
 .de-composition-geometry .de-navigation-region[data-sticky=true]{position:sticky;top:0;height:0}
 .de-composition-geometry .de-navigation-region[data-sticky=true]:has(.de-navigation-system[data-position=flow]){height:var(--de-navigation-height)}
 .de-composition-geometry .de-navigation-root{overflow:visible;min-height:0}
-.de-composition-geometry [data-hero-section]>.de-root>section:not(.hx-hero):not(.de-comparison){padding-top:calc(var(--de-section-space,4rem) + var(--de-overlay-inset))}
+.de-composition-geometry [data-hero-section]>.de-root>.de-section-layout>section:not(.hx-hero):not(.de-comparison){padding-top:calc(var(--de-section-space,4rem) + var(--de-overlay-inset))}
 .de-composition-geometry .de-comparison{padding-top:calc(2rem + var(--de-overlay-inset));min-height:var(--de-scene-viewport,100svh)}
 .de-composition-geometry[data-navigation-position=edge]{display:grid;grid-template-columns:13rem minmax(0,1fr)}
 .de-composition-geometry[data-navigation-position=edge]>.de-navigation-region{grid-column:1;grid-row:1;align-self:start}
@@ -169,7 +169,7 @@
 
 .de-composition-geometry[data-navigation-position=overlay]>.de-navigation-region:has(.de-island-nav){position:absolute;inset:0 0 auto}
 .de-composition-geometry[data-navigation-position=overlay]>.de-navigation-region .de-navigation-root{background:transparent}
-.de-composition-geometry[data-navigation-position=flow] [data-hero-section]>.de-root>section:not(.hx-hero):not(.de-comparison){padding-top:var(--de-section-space)}
+.de-composition-geometry[data-navigation-position=flow] [data-hero-section]>.de-root>.de-section-layout>section:not(.hx-hero):not(.de-comparison){padding-top:var(--de-section-space)}
 /* Navigation queries use the whole page field, including the reserved Margin Rail column. */
 .de-composition,.de-composition-geometry{container-type:inline-size}
 .de-root.de-navigation-root,.de-navigation-system{container-type:normal}

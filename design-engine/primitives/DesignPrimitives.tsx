@@ -1,3 +1,6 @@
+import { VideoPlayer } from "../media/VideoPlayer";
+import { isVideoAsset } from "../media/source";
+import type { VideoPlayback } from "../media/types";
 import type { ReactNode } from "react";
 import { VigilIcon } from "../icons/VigilIcon";
 
@@ -92,6 +95,7 @@ export function DesignMediaFrame({ children, aspect = "wide", caption, className
 }
 
 type ImageMedia = {
+  playback?: VideoPlayback;
   kind: "image";
   src: string;
   alt: string;
@@ -101,6 +105,7 @@ type ImageMedia = {
   fit?: "cover" | "contain";
 };
 type VideoMedia = {
+  playback?: VideoPlayback;
   kind: "video";
   src: string;
   label: string;
@@ -110,8 +115,8 @@ type VideoMedia = {
 
 /** Portable media element: the containing frame reserves its aspect ratio. */
 export function DesignMedia(props: ImageMedia | VideoMedia) {
-  if (props.kind === "video") {
-    return <video className={`de-media de-media--${props.fit ?? "auto"}`} src={props.src} poster={props.poster} aria-label={props.label} controls playsInline preload="metadata" />;
+  if (props.kind === "video" || isVideoAsset({src:props.src})) {
+    return <VideoPlayer asset={{ src: props.src, alt: props.kind === "video" ? props.label : props.alt, width:1280,height:720,mediaType:"video",playback:{...props.playback,poster:props.kind === "video" ? props.poster : props.playback?.poster} }} imageClassName={`de-media de-media--${props.fit ?? "auto"}`}/>;
   }
   // A native image keeps this package portable across client projects with different image hosts.
   // eslint-disable-next-line @next/next/no-img-element

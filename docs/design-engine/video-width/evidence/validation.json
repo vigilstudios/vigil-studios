@@ -1,0 +1,30 @@
+{
+  "sectionCount": 98,
+  "tests": 1568,
+  "testFiles": 75,
+  "lint": "passed",
+  "typecheck": "passed",
+  "productionBuild": "passed",
+  "runtime": "v1-370dc5d628a328911563",
+  "runtimeVerifiedFiles": 27,
+  "browser": {
+    "desktop": [
+      1440,
+      1000
+    ],
+    "mobile": [
+      390,
+      844
+    ],
+    "hoverGalleryWidths": {
+      "default": 1024,
+      "full": 1324.8125,
+      "edge": 1440
+    },
+    "hiddenControlsKeyboardPlayback": "passed",
+    "enlargeEscapeFocusRestoration": "passed",
+    "loopAndOffscreenPauseResume": "passed",
+    "editorPersistence": "passed",
+    "desktopMobileOverflow": false
+  }
+}
