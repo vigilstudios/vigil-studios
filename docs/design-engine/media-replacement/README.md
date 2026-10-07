@@ -53,4 +53,8 @@ Evidence: [browser.json](evidence/browser.json), [lab.json](evidence/lab.json), 
 
 Implementation files are the four UI modules above, shared UI/CSS/engine modules, reusable primitives, `components.json`, `lib/utils.ts`, package manifests, the ending registry/schema/contracts/actions/render/preview files, removal of the old gallery implementation/styles, relevant inventory/persistence tests and readiness documentation/scripts. Hero, About, Socials, Services, CTA, Contact, Footer and Navigation implementations are unchanged.
 
+Fresh-checkout validation now generates Next.js framework/image/route declarations with `next typegen` before TypeScript, following the installed framework documentation. This one-command compatibility fix prevents CI from depending on an earlier build.
+
+The existing Supabase Preview integration reports a remote/local migration-history mismatch on both the prior editor commit and this release. It is outside Media replacement scope; no database schema was changed. Website production deployment completes independently.
+
 Production uses the established main → Vercel Git integration. Final commit/deployment status is recorded in `evidence/release.json` after live verification.
