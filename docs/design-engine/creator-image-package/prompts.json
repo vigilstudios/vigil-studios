@@ -1,0 +1,149 @@
+[
+  {
+    "id": "pink-light-hero",
+    "palette": "pink-light",
+    "role": "hero",
+    "prompt": "Use case: photorealistic-natural. Asset type: website wide hero photograph, landscape 3:2. Primary request: candid digital-camera photo of a sunlit lived-in creator studio, pale pink desk and curtains. A creator is photographed strictly from behind, torso and hands at a desk setting up a compact camera on a small tabletop tripod next to a closed notebook and coffee. Their head is turned away and cropped above the neck: absolutely no face, no facial features, no reflections of faces. Camera gear looks simple and plausible. Wide room view, useful breathing room, imperfect everyday styling, authentic unposed moment. Lighting/color: airy daylight, pale blush pink, warm cream and soft rose, bright exposure, real soft window shadows. Digital point-and-shoot aesthetic, mild sensor grain, real materials, believable natural detail and little imperfections, understated direct-flash feel. No logos, text, watermarks, collage, diptych or graphic overlay. One single photograph. Not glossy stock photography or a 3D render.",
+    "source": "docs/design-engine/creator-image-package/originals/pink-light-hero.png",
+    "generationMode": "built-in imagegen",
+    "visualReview": "No visible faces; varied skin tones, including Black creators."
+  },
+  {
+    "id": "pink-light-product",
+    "palette": "pink-light",
+    "role": "product",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator product collaboration photo, portrait 2:3. Primary request: candid close digital-camera photograph of an unbranded skincare bottle and balm pot on a slightly rumpled blush pink cotton cloth, with a human hand placing the bottle casually near a compact mirror turned downward. Tight product frame, tactile glass, fabric and skin, not a formal catalog setup. Lighting/color: airy daylight, pale blush pink, warm cream and soft rose, bright exposure, real soft window shadows. Lived-in a sunlit lived-in creator studio, pale pink desk and curtains. Point-and-shoot direct flash with gentle grain, realistic shadows and tiny imperfections. No head or face visible, no faces in any reflections. Blank packaging with no logos, labels, text, watermarks, collage or graphic overlay. One single photograph, not a render.",
+    "source": "docs/design-engine/creator-image-package/originals/pink-light-product.png",
+    "generationMode": "built-in imagegen",
+    "visualReview": "No visible faces; varied skin tones, including Black creators."
+  },
+  {
+    "id": "pink-light-pov",
+    "palette": "pink-light",
+    "role": "pov",
+    "prompt": "Use case: photorealistic-natural. Asset type: first-person creator lifestyle / behind-the-scenes photograph, landscape 3:2. Primary request: first-person looking down at a creator's hands reviewing photographs on the rear screen of a compact digital camera over their desk, an open blank notebook and coffee nearby, sleeves and lap at bottom edge. Camera display shows only an indistinct object still life, no people. Lighting/color: airy daylight, pale blush pink, warm cream and soft rose, bright exposure, real soft window shadows. Setting: a sunlit lived-in creator studio, pale pink desk and curtains. Candid digital snapshot, slightly off-center framing, mild grain, true photographic textures, spontaneous everyday moment. Plausible hands and camera geometry. Absolutely no face, head or facial reflections, no legible text, brands, watermarks, collage or graphic overlay. One single photograph, not glossy stock photography or a render.",
+    "source": "docs/design-engine/creator-image-package/originals/pink-light-pov.png",
+    "generationMode": "built-in imagegen",
+    "visualReview": "No visible faces; varied skin tones, including Black creators."
+  },
+  {
+    "id": "pink-light-objects",
+    "palette": "pink-light",
+    "role": "objects",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator everyday-objects still life, square photograph. Primary request: casually arranged compact digital camera, coiled wired earbuds, a blank folded notebook, ceramic coffee cup and a fabric tote partly visible on a dusty blush pink tabletop in a sunlit lived-in creator studio, pale pink desk and curtains. Overhead candid snapshot, asymmetric loosely lived-in placement, not a perfectly aligned flat lay. Lighting/color: airy daylight, pale blush pink, warm cream and soft rose, bright exposure, real soft window shadows. Authentic point-and-shoot photography, mild digital sensor grain, subtle direct flash, tactile objects, imperfections and plausible physical forms. No people, faces, reflections of people, logos, labels, readable text, watermarks, collage or graphic overlay. One single photograph, not a 3D render.",
+    "source": "docs/design-engine/creator-image-package/originals/pink-light-objects.png",
+    "generationMode": "built-in imagegen",
+    "visualReview": "No visible faces; varied skin tones, including Black creators."
+  },
+  {
+    "id": "pink-dark-hero",
+    "palette": "pink-dark",
+    "role": "hero",
+    "prompt": "Use case: photorealistic-natural. Asset type: website wide hero photograph, landscape 3:2. Primary request: candid digital-camera photo of a lived-in creator studio after dusk, pink lamp light and charcoal-pink desk. A creator is photographed strictly from behind, torso and hands at a desk setting up a compact camera on a small tabletop tripod next to a closed notebook and coffee. Their head is turned away and cropped above the neck: absolutely no face, no facial features, no reflections of faces. Camera gear looks simple and plausible. Wide room view, useful breathing room, imperfect everyday styling, authentic unposed moment. Lighting/color: dusky plum, dusty rose and pink practical lamp accents against deep wine shadows, dark but readable exposure. Digital point-and-shoot aesthetic, mild sensor grain, real materials, believable natural detail and little imperfections, understated direct-flash feel. No logos, text, watermarks, collage, diptych or graphic overlay. One single photograph. Not glossy stock photography or a 3D render.",
+    "source": "docs/design-engine/creator-image-package/originals/pink-dark-hero.png",
+    "generationMode": "built-in imagegen",
+    "visualReview": "No visible faces; varied skin tones, including Black creators."
+  },
+  {
+    "id": "pink-dark-product",
+    "palette": "pink-dark",
+    "role": "product",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator product collaboration photo, portrait 2:3. Primary request: candid close digital-camera photograph of an unbranded skincare bottle and balm pot on a slightly rumpled blush pink cotton cloth, with a human hand placing the bottle casually near a compact mirror turned downward. Tight product frame, tactile glass, fabric and skin, not a formal catalog setup. Lighting/color: dusky plum, dusty rose and pink practical lamp accents against deep wine shadows, dark but readable exposure. Lived-in a lived-in creator studio after dusk, pink lamp light and charcoal-pink desk. Point-and-shoot direct flash with gentle grain, realistic shadows and tiny imperfections. No head or face visible, no faces in any reflections. Blank packaging with no logos, labels, text, watermarks, collage or graphic overlay. One single photograph, not a render.",
+    "source": "docs/design-engine/creator-image-package/originals/pink-dark-product.png",
+    "generationMode": "built-in imagegen",
+    "visualReview": "No visible faces; varied skin tones, including Black creators."
+  },
+  {
+    "id": "pink-dark-pov",
+    "palette": "pink-dark",
+    "role": "pov",
+    "prompt": "Use case: photorealistic-natural. Asset type: first-person creator lifestyle / behind-the-scenes photograph, landscape 3:2. Primary request: first-person looking down at a creator's hands reviewing photographs on the rear screen of a compact digital camera over their desk, an open blank notebook and coffee nearby, sleeves and lap at bottom edge. Camera display shows only an indistinct object still life, no people. Lighting/color: dusky plum, dusty rose and pink practical lamp accents against deep wine shadows, dark but readable exposure. Setting: a lived-in creator studio after dusk, pink lamp light and charcoal-pink desk. Candid digital snapshot, slightly off-center framing, mild grain, true photographic textures, spontaneous everyday moment. Plausible hands and camera geometry. Absolutely no face, head or facial reflections, no legible text, brands, watermarks, collage or graphic overlay. One single photograph, not glossy stock photography or a render. The creator is a Black adult, with richly dark brown skin clearly visible on both hands and wrists. Preserve natural deep brown skin accurately under the pink ambient lighting.",
+    "source": "docs/design-engine/creator-image-package/originals/pink-dark-pov.png",
+    "generationMode": "built-in imagegen",
+    "visualReview": "No visible faces; varied skin tones, including Black creators."
+  },
+  {
+    "id": "pink-dark-objects",
+    "palette": "pink-dark",
+    "role": "objects",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator everyday-objects still life, square photograph. Primary request: casually arranged compact digital camera, coiled wired earbuds, a blank folded notebook, ceramic coffee cup and a fabric tote partly visible on a dusty blush pink tabletop in a lived-in creator studio after dusk, pink lamp light and charcoal-pink desk. Overhead candid snapshot, asymmetric loosely lived-in placement, not a perfectly aligned flat lay. Lighting/color: dusky plum, dusty rose and pink practical lamp accents against deep wine shadows, dark but readable exposure. Authentic point-and-shoot photography, mild digital sensor grain, subtle direct flash, tactile objects, imperfections and plausible physical forms. No people, faces, reflections of people, logos, labels, readable text, watermarks, collage or graphic overlay. One single photograph, not a 3D render.",
+    "source": "docs/design-engine/creator-image-package/originals/pink-dark-objects.png",
+    "generationMode": "built-in imagegen",
+    "visualReview": "No visible faces; varied skin tones, including Black creators."
+  },
+  {
+    "id": "neutral-light-hero",
+    "palette": "neutral-light",
+    "role": "hero",
+    "prompt": "Use case: photorealistic-natural. Asset type: website wide hero photograph, landscape 3:2. Primary request: candid digital-camera photo of a sunlit lived-in creator studio, warm oak desk and linen curtains. A creator is photographed strictly from behind, torso and hands at a desk setting up a compact camera on a small tabletop tripod next to a closed notebook and coffee. Their head is turned away and cropped above the neck: absolutely no face, no facial features, no reflections of faces. Camera gear looks simple and plausible. Wide room view, useful breathing room, imperfect everyday styling, authentic unposed moment. Lighting/color: warm ivory, oatmeal, soft stone and natural tan wood, bright exposure, natural sunlight. Digital point-and-shoot aesthetic, mild sensor grain, real materials, believable natural detail and little imperfections, understated direct-flash feel. No logos, text, watermarks, collage, diptych or graphic overlay. One single photograph. Not glossy stock photography or a 3D render.",
+    "source": "docs/design-engine/creator-image-package/originals/neutral-light-hero.png",
+    "generationMode": "built-in imagegen",
+    "visualReview": "No visible faces; varied skin tones, including Black creators."
+  },
+  {
+    "id": "neutral-light-product",
+    "palette": "neutral-light",
+    "role": "product",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator product collaboration photo, portrait 2:3. Primary request: candid close digital-camera photograph of an unbranded skincare bottle and balm pot on a slightly rumpled natural linen cloth, with a human hand placing the bottle casually near a compact mirror turned downward. Tight product frame, tactile glass, fabric and skin, not a formal catalog setup. Lighting/color: warm ivory, oatmeal, soft stone and natural tan wood, bright exposure, natural sunlight. Lived-in a sunlit lived-in creator studio, warm oak desk and linen curtains. Point-and-shoot direct flash with gentle grain, realistic shadows and tiny imperfections. No head or face visible, no faces in any reflections. Blank packaging with no logos, labels, text, watermarks, collage or graphic overlay. One single photograph, not a render.",
+    "source": "docs/design-engine/creator-image-package/originals/neutral-light-product.png",
+    "generationMode": "built-in imagegen",
+    "visualReview": "No visible faces; varied skin tones, including Black creators."
+  },
+  {
+    "id": "neutral-light-pov",
+    "palette": "neutral-light",
+    "role": "pov",
+    "prompt": "Use case: photorealistic-natural. Asset type: first-person creator lifestyle / behind-the-scenes photograph, landscape 3:2. Primary request: first-person looking down at a creator's hands reviewing photographs on the rear screen of a compact digital camera over their desk, an open blank notebook and coffee nearby, sleeves and lap at bottom edge. Camera display shows only an indistinct object still life, no people. Lighting/color: warm ivory, oatmeal, soft stone and natural tan wood, bright exposure, natural sunlight. Setting: a sunlit lived-in creator studio, warm oak desk and linen curtains. Candid digital snapshot, slightly off-center framing, mild grain, true photographic textures, spontaneous everyday moment. Plausible hands and camera geometry. Absolutely no face, head or facial reflections, no legible text, brands, watermarks, collage or graphic overlay. One single photograph, not glossy stock photography or a render.",
+    "source": "docs/design-engine/creator-image-package/originals/neutral-light-pov.png",
+    "generationMode": "built-in imagegen",
+    "visualReview": "No visible faces; varied skin tones, including Black creators."
+  },
+  {
+    "id": "neutral-light-objects",
+    "palette": "neutral-light",
+    "role": "objects",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator everyday-objects still life, square photograph. Primary request: casually arranged compact digital camera, coiled wired earbuds, a blank folded notebook, ceramic coffee cup and a fabric tote partly visible on a warm neutral stone tabletop in a sunlit lived-in creator studio, warm oak desk and linen curtains. Overhead candid snapshot, asymmetric loosely lived-in placement, not a perfectly aligned flat lay. Lighting/color: warm ivory, oatmeal, soft stone and natural tan wood, bright exposure, natural sunlight. Authentic point-and-shoot photography, mild digital sensor grain, subtle direct flash, tactile objects, imperfections and plausible physical forms. No people, faces, reflections of people, logos, labels, readable text, watermarks, collage or graphic overlay. One single photograph, not a 3D render.",
+    "source": "docs/design-engine/creator-image-package/originals/neutral-light-objects.png",
+    "generationMode": "built-in imagegen",
+    "visualReview": "No visible faces; varied skin tones, including Black creators."
+  },
+  {
+    "id": "neutral-dark-hero",
+    "palette": "neutral-dark",
+    "role": "hero",
+    "prompt": "Use case: photorealistic-natural. Asset type: website wide hero photograph, landscape 3:2. Primary request: candid digital-camera photo of a lived-in creator studio at night, dark wood desk and warm desk lamp. A creator is photographed strictly from behind, torso and hands at a desk setting up a compact camera on a small tabletop tripod next to a closed notebook and coffee. Their head is turned away and cropped above the neck: absolutely no face, no facial features, no reflections of faces. Camera gear looks simple and plausible. Wide room view, useful breathing room, imperfect everyday styling, authentic unposed moment. Lighting/color: charcoal, espresso, taupe, warm gray, amber lamp highlights, dark but readable exposure. Digital point-and-shoot aesthetic, mild sensor grain, real materials, believable natural detail and little imperfections, understated direct-flash feel. No logos, text, watermarks, collage, diptych or graphic overlay. One single photograph. Not glossy stock photography or a 3D render.",
+    "source": "docs/design-engine/creator-image-package/originals/neutral-dark-hero.png",
+    "generationMode": "built-in imagegen",
+    "editPrompt": "Use case: precise-object-edit. Edit the supplied generated demo photograph. Make the visible creator a Black adult with deep dark chocolate-brown skin: both hands and all visible wrists must be unmistakably rich dark brown, not pale or tan. Preserve accurate natural highlights on dark skin under the warm amber lamp. For the hero, retain the rear view and no visible head/face. Change only the visible skin tone; keep the exact composition, clothes, objects, lighting, dark neutral palette and candid digital-camera photographic style. Do not add faces or change anything else.",
+    "visualReview": "No visible faces; varied skin tones, including Black creators."
+  },
+  {
+    "id": "neutral-dark-product",
+    "palette": "neutral-dark",
+    "role": "product",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator product collaboration photo, portrait 2:3. Primary request: candid close digital-camera photograph of an unbranded skincare bottle and balm pot on a slightly rumpled natural linen cloth, with a human hand placing the bottle casually near a compact mirror turned downward. Tight product frame, tactile glass, fabric and skin, not a formal catalog setup. Lighting/color: charcoal, espresso, taupe, warm gray, amber lamp highlights, dark but readable exposure. Lived-in a lived-in creator studio at night, dark wood desk and warm desk lamp. Point-and-shoot direct flash with gentle grain, realistic shadows and tiny imperfections. No head or face visible, no faces in any reflections. Blank packaging with no logos, labels, text, watermarks, collage or graphic overlay. One single photograph, not a render.",
+    "source": "docs/design-engine/creator-image-package/originals/neutral-dark-product.png",
+    "generationMode": "built-in imagegen",
+    "editPrompt": "Use case: precise-object-edit. Edit the supplied generated demo photograph. Make the visible creator a Black adult with deep dark chocolate-brown skin: both hands and all visible wrists must be unmistakably rich dark brown, not pale or tan. Preserve accurate natural highlights on dark skin under the warm amber lamp. For the hero, retain the rear view and no visible head/face. Change only the visible skin tone; keep the exact composition, clothes, objects, lighting, dark neutral palette and candid digital-camera photographic style. Do not add faces or change anything else.",
+    "visualReview": "No visible faces; varied skin tones, including Black creators."
+  },
+  {
+    "id": "neutral-dark-pov",
+    "palette": "neutral-dark",
+    "role": "pov",
+    "prompt": "Use case: photorealistic-natural. Asset type: first-person creator lifestyle / behind-the-scenes photograph, landscape 3:2. Primary request: first-person looking down at a creator's hands reviewing photographs on the rear screen of a compact digital camera over their desk, an open blank notebook and coffee nearby, sleeves and lap at bottom edge. Camera display shows only an indistinct object still life, no people. Lighting/color: charcoal, espresso, taupe, warm gray, amber lamp highlights, dark but readable exposure. Setting: a lived-in creator studio at night, dark wood desk and warm desk lamp. Candid digital snapshot, slightly off-center framing, mild grain, true photographic textures, spontaneous everyday moment. Plausible hands and camera geometry. Absolutely no face, head or facial reflections, no legible text, brands, watermarks, collage or graphic overlay. One single photograph, not glossy stock photography or a render.",
+    "source": "docs/design-engine/creator-image-package/originals/neutral-dark-pov.png",
+    "generationMode": "built-in imagegen",
+    "editPrompt": "Use case: precise-object-edit. Edit the supplied generated demo photograph. Make the visible creator a Black adult with deep dark chocolate-brown skin: both hands and all visible wrists must be unmistakably rich dark brown, not pale or tan. Preserve accurate natural highlights on dark skin under the warm amber lamp. For the hero, retain the rear view and no visible head/face. Change only the visible skin tone; keep the exact composition, clothes, objects, lighting, dark neutral palette and candid digital-camera photographic style. Do not add faces or change anything else.",
+    "visualReview": "No visible faces; varied skin tones, including Black creators."
+  },
+  {
+    "id": "neutral-dark-objects",
+    "palette": "neutral-dark",
+    "role": "objects",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator everyday-objects still life, square photograph. Primary request: casually arranged compact digital camera, coiled wired earbuds, a blank folded notebook, ceramic coffee cup and a fabric tote partly visible on a warm neutral stone tabletop in a lived-in creator studio at night, dark wood desk and warm desk lamp. Overhead candid snapshot, asymmetric loosely lived-in placement, not a perfectly aligned flat lay. Lighting/color: charcoal, espresso, taupe, warm gray, amber lamp highlights, dark but readable exposure. Authentic point-and-shoot photography, mild digital sensor grain, subtle direct flash, tactile objects, imperfections and plausible physical forms. No people, faces, reflections of people, logos, labels, readable text, watermarks, collage or graphic overlay. One single photograph, not a 3D render.",
+    "source": "docs/design-engine/creator-image-package/originals/neutral-dark-objects.png",
+    "generationMode": "built-in imagegen",
+    "visualReview": "No visible faces; varied skin tones, including Black creators."
+  }
+]

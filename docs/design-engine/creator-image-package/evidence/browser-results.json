@@ -1,0 +1,207 @@
+{
+  "checks": [
+    {
+      "case": "design-apply",
+      "id": "hero.full-scene",
+      "pack": "creator-pink-light",
+      "images": 1
+    },
+    {
+      "case": "design-apply",
+      "id": "hero.full-scene",
+      "pack": "creator-pink-dark",
+      "images": 1
+    },
+    {
+      "case": "design-apply",
+      "id": "hero.full-scene",
+      "pack": "creator-neutral-light",
+      "images": 1
+    },
+    {
+      "case": "design-apply",
+      "id": "hero.full-scene",
+      "pack": "creator-neutral-dark",
+      "images": 1
+    },
+    {
+      "case": "design-apply",
+      "id": "hero.comparison",
+      "pack": "creator-pink-light",
+      "images": 2
+    },
+    {
+      "case": "design-apply",
+      "id": "hero.comparison",
+      "pack": "creator-pink-dark",
+      "images": 2
+    },
+    {
+      "case": "design-apply",
+      "id": "hero.comparison",
+      "pack": "creator-neutral-light",
+      "images": 2
+    },
+    {
+      "case": "design-apply",
+      "id": "hero.comparison",
+      "pack": "creator-neutral-dark",
+      "images": 2
+    },
+    {
+      "case": "design-apply",
+      "id": "hero.object-study",
+      "pack": "creator-pink-light",
+      "images": 1
+    },
+    {
+      "case": "design-apply",
+      "id": "hero.object-study",
+      "pack": "creator-pink-dark",
+      "images": 1
+    },
+    {
+      "case": "design-apply",
+      "id": "hero.object-study",
+      "pack": "creator-neutral-light",
+      "images": 1
+    },
+    {
+      "case": "design-apply",
+      "id": "hero.object-study",
+      "pack": "creator-neutral-dark",
+      "images": 1
+    },
+    {
+      "case": "design-apply",
+      "id": "work.viewport-gallery",
+      "pack": "creator-pink-light",
+      "images": 4
+    },
+    {
+      "case": "design-apply",
+      "id": "work.viewport-gallery",
+      "pack": "creator-pink-dark",
+      "images": 4
+    },
+    {
+      "case": "design-apply",
+      "id": "work.viewport-gallery",
+      "pack": "creator-neutral-light",
+      "images": 4
+    },
+    {
+      "case": "design-apply",
+      "id": "work.viewport-gallery",
+      "pack": "creator-neutral-dark",
+      "images": 4
+    },
+    {
+      "case": "design-apply",
+      "id": "work.media-cabinet",
+      "pack": "creator-pink-light",
+      "images": 5
+    },
+    {
+      "case": "design-apply",
+      "id": "work.media-cabinet",
+      "pack": "creator-pink-dark",
+      "images": 5
+    },
+    {
+      "case": "design-apply",
+      "id": "work.media-cabinet",
+      "pack": "creator-neutral-light",
+      "images": 5
+    },
+    {
+      "case": "design-apply",
+      "id": "work.media-cabinet",
+      "pack": "creator-neutral-dark",
+      "images": 5
+    },
+    {
+      "case": "design-apply",
+      "id": "commerce.inspection-desk",
+      "pack": "creator-pink-light",
+      "images": 4
+    },
+    {
+      "case": "design-apply",
+      "id": "commerce.inspection-desk",
+      "pack": "creator-pink-dark",
+      "images": 4
+    },
+    {
+      "case": "design-apply",
+      "id": "commerce.inspection-desk",
+      "pack": "creator-neutral-light",
+      "images": 4
+    },
+    {
+      "case": "design-apply",
+      "id": "commerce.inspection-desk",
+      "pack": "creator-neutral-dark",
+      "images": 4
+    },
+    {
+      "case": "design-apply",
+      "id": "primitive.media",
+      "pack": "creator-pink-light",
+      "images": 1
+    },
+    {
+      "case": "design-apply",
+      "id": "primitive.media",
+      "pack": "creator-pink-dark",
+      "images": 1
+    },
+    {
+      "case": "design-apply",
+      "id": "primitive.media",
+      "pack": "creator-neutral-light",
+      "images": 1
+    },
+    {
+      "case": "design-apply",
+      "id": "primitive.media",
+      "pack": "creator-neutral-dark",
+      "images": 1
+    },
+    {
+      "case": "hover-rollback"
+    },
+    {
+      "case": "keyboard-apply"
+    },
+    {
+      "case": "composition-apply",
+      "pack": "creator-pink-light",
+      "images": 1
+    },
+    {
+      "case": "composition-apply",
+      "pack": "creator-pink-dark",
+      "images": 1
+    },
+    {
+      "case": "composition-apply",
+      "pack": "creator-neutral-light",
+      "images": 1
+    },
+    {
+      "case": "composition-apply",
+      "pack": "creator-neutral-dark",
+      "images": 1
+    },
+    {
+      "case": "responsive-index",
+      "width": 768
+    },
+    {
+      "case": "responsive-index",
+      "width": 390
+    }
+  ],
+  "errors": []
+}

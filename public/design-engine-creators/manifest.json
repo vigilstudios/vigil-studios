@@ -1,0 +1,310 @@
+{
+  "id": "creators-v1",
+  "generatedOn": "2026-10-07",
+  "assets": [
+    {
+      "id": "pink-light-hero",
+      "set": "pink-light",
+      "role": "hero",
+      "src": "/design-engine-creators/pink-light-hero.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "A creator setting up a camera at a desk, viewed from behind with their face hidden. pink light; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/pink-light-hero-640.webp 640w, /design-engine-creators/pink-light-hero.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/pink-light-hero-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 204368,
+      "sha256": "c3ae9486b2aa46a4d99e2ac89a6085929ea7a39cdc042eee9a6e768d41f112c7",
+      "generator": "built-in imagegen",
+      "source": "originals/pink-light-hero.png"
+    },
+    {
+      "id": "pink-light-product",
+      "set": "pink-light",
+      "role": "product",
+      "src": "/design-engine-creators/pink-light-product.webp",
+      "width": 1024,
+      "height": 1536,
+      "alt": "A hand arranging an unbranded skincare bottle and balm on fabric. pink light; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/pink-light-product-640.webp 640w, /design-engine-creators/pink-light-product.webp 1024w",
+      "thumbnail": {
+        "src": "/design-engine-creators/pink-light-product-240.webp",
+        "width": 240,
+        "height": 360
+      },
+      "bytes": 169284,
+      "sha256": "ffc84cf7ddbe53367d533a8b0e0a9231b3b2031a4d651a3a1a1a74a05e93b2bf",
+      "generator": "built-in imagegen",
+      "source": "originals/pink-light-product.png"
+    },
+    {
+      "id": "pink-light-pov",
+      "set": "pink-light",
+      "role": "pov",
+      "src": "/design-engine-creators/pink-light-pov.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "A creator's hands reviewing a photograph on a digital camera at a desk. pink light; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/pink-light-pov-640.webp 640w, /design-engine-creators/pink-light-pov.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/pink-light-pov-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 189284,
+      "sha256": "5d9510b8d9a8bd791c6ce5a285eb3389d3c7d92b9c58292cc556a6265aa312a5",
+      "generator": "built-in imagegen",
+      "source": "originals/pink-light-pov.png"
+    },
+    {
+      "id": "pink-light-objects",
+      "set": "pink-light",
+      "role": "objects",
+      "src": "/design-engine-creators/pink-light-objects.webp",
+      "width": 1254,
+      "height": 1254,
+      "alt": "A compact camera, earbuds, notebook, coffee and tote on a tabletop. pink light; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/pink-light-objects-640.webp 640w, /design-engine-creators/pink-light-objects.webp 1254w",
+      "thumbnail": {
+        "src": "/design-engine-creators/pink-light-objects-240.webp",
+        "width": 240,
+        "height": 240
+      },
+      "bytes": 156728,
+      "sha256": "dbc64435f0163425f2074daa36f03f306287e83525c5e884c0f104beb316ce6e",
+      "generator": "built-in imagegen",
+      "source": "originals/pink-light-objects.png"
+    },
+    {
+      "id": "pink-dark-hero",
+      "set": "pink-dark",
+      "role": "hero",
+      "src": "/design-engine-creators/pink-dark-hero.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "A creator setting up a camera at a desk, viewed from behind with their face hidden. pink dark; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/pink-dark-hero-640.webp 640w, /design-engine-creators/pink-dark-hero.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/pink-dark-hero-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 146540,
+      "sha256": "924e286f104a20349e78ed63853ba1e111303feb693857c3997d5241f02f7816",
+      "generator": "built-in imagegen",
+      "source": "originals/pink-dark-hero.png"
+    },
+    {
+      "id": "pink-dark-product",
+      "set": "pink-dark",
+      "role": "product",
+      "src": "/design-engine-creators/pink-dark-product.webp",
+      "width": 1024,
+      "height": 1536,
+      "alt": "A hand arranging an unbranded skincare bottle and balm on fabric. pink dark; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/pink-dark-product-640.webp 640w, /design-engine-creators/pink-dark-product.webp 1024w",
+      "thumbnail": {
+        "src": "/design-engine-creators/pink-dark-product-240.webp",
+        "width": 240,
+        "height": 360
+      },
+      "bytes": 102466,
+      "sha256": "1cfdcdc0a09c39c8ffc3c50cdc47041842f35e395e5db65c085e52522dbb1992",
+      "generator": "built-in imagegen",
+      "source": "originals/pink-dark-product.png"
+    },
+    {
+      "id": "pink-dark-pov",
+      "set": "pink-dark",
+      "role": "pov",
+      "src": "/design-engine-creators/pink-dark-pov.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "A creator's hands reviewing a photograph on a digital camera at a desk. pink dark; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/pink-dark-pov-640.webp 640w, /design-engine-creators/pink-dark-pov.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/pink-dark-pov-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 118534,
+      "sha256": "b38be990bd6f978ca3c82044f83ed9c4b46bb4c1ac5179afdf18456b18fef9a1",
+      "generator": "built-in imagegen",
+      "source": "originals/pink-dark-pov.png"
+    },
+    {
+      "id": "pink-dark-objects",
+      "set": "pink-dark",
+      "role": "objects",
+      "src": "/design-engine-creators/pink-dark-objects.webp",
+      "width": 1254,
+      "height": 1254,
+      "alt": "A compact camera, earbuds, notebook, coffee and tote on a tabletop. pink dark; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/pink-dark-objects-640.webp 640w, /design-engine-creators/pink-dark-objects.webp 1254w",
+      "thumbnail": {
+        "src": "/design-engine-creators/pink-dark-objects-240.webp",
+        "width": 240,
+        "height": 240
+      },
+      "bytes": 138618,
+      "sha256": "1faae61c9cebc4511a791d828b483e015c9c8ecd68dd27a098a1905ccd6ecff9",
+      "generator": "built-in imagegen",
+      "source": "originals/pink-dark-objects.png"
+    },
+    {
+      "id": "neutral-light-hero",
+      "set": "neutral-light",
+      "role": "hero",
+      "src": "/design-engine-creators/neutral-light-hero.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "A creator setting up a camera at a desk, viewed from behind with their face hidden. neutral light; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/neutral-light-hero-640.webp 640w, /design-engine-creators/neutral-light-hero.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/neutral-light-hero-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 239368,
+      "sha256": "a2c864ce9c04c1692030d7bbf67e5709e3a8a8fb61ca9315c3216182d1820d44",
+      "generator": "built-in imagegen",
+      "source": "originals/neutral-light-hero.png"
+    },
+    {
+      "id": "neutral-light-product",
+      "set": "neutral-light",
+      "role": "product",
+      "src": "/design-engine-creators/neutral-light-product.webp",
+      "width": 1024,
+      "height": 1536,
+      "alt": "A hand arranging an unbranded skincare bottle and balm on fabric. neutral light; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/neutral-light-product-640.webp 640w, /design-engine-creators/neutral-light-product.webp 1024w",
+      "thumbnail": {
+        "src": "/design-engine-creators/neutral-light-product-240.webp",
+        "width": 240,
+        "height": 360
+      },
+      "bytes": 201588,
+      "sha256": "0fe6fc885ff3fc13664cde16292953ca250f0c2ebdc7b68fe7c2b18c31256965",
+      "generator": "built-in imagegen",
+      "source": "originals/neutral-light-product.png"
+    },
+    {
+      "id": "neutral-light-pov",
+      "set": "neutral-light",
+      "role": "pov",
+      "src": "/design-engine-creators/neutral-light-pov.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "A creator's hands reviewing a photograph on a digital camera at a desk. neutral light; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/neutral-light-pov-640.webp 640w, /design-engine-creators/neutral-light-pov.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/neutral-light-pov-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 164378,
+      "sha256": "e244bce778120bec6e0ac6d97bfb86123e75fba8f25d1c1023b07b73272e42b4",
+      "generator": "built-in imagegen",
+      "source": "originals/neutral-light-pov.png"
+    },
+    {
+      "id": "neutral-light-objects",
+      "set": "neutral-light",
+      "role": "objects",
+      "src": "/design-engine-creators/neutral-light-objects.webp",
+      "width": 1254,
+      "height": 1254,
+      "alt": "A compact camera, earbuds, notebook, coffee and tote on a tabletop. neutral light; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/neutral-light-objects-640.webp 640w, /design-engine-creators/neutral-light-objects.webp 1254w",
+      "thumbnail": {
+        "src": "/design-engine-creators/neutral-light-objects-240.webp",
+        "width": 240,
+        "height": 240
+      },
+      "bytes": 274174,
+      "sha256": "cf01e0f6822af0bab7ba35608f888c3e6d990411010d4535fe5d9ba33760c705",
+      "generator": "built-in imagegen",
+      "source": "originals/neutral-light-objects.png"
+    },
+    {
+      "id": "neutral-dark-hero",
+      "set": "neutral-dark",
+      "role": "hero",
+      "src": "/design-engine-creators/neutral-dark-hero.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "A creator setting up a camera at a desk, viewed from behind with their face hidden. neutral dark; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/neutral-dark-hero-640.webp 640w, /design-engine-creators/neutral-dark-hero.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/neutral-dark-hero-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 126412,
+      "sha256": "f83c884e1036d756a8d35adad9fc55899ea03958a8fc6b191c5f8817328f103a",
+      "generator": "built-in imagegen",
+      "source": "originals/neutral-dark-hero.png"
+    },
+    {
+      "id": "neutral-dark-product",
+      "set": "neutral-dark",
+      "role": "product",
+      "src": "/design-engine-creators/neutral-dark-product.webp",
+      "width": 1024,
+      "height": 1536,
+      "alt": "A hand arranging an unbranded skincare bottle and balm on fabric. neutral dark; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/neutral-dark-product-640.webp 640w, /design-engine-creators/neutral-dark-product.webp 1024w",
+      "thumbnail": {
+        "src": "/design-engine-creators/neutral-dark-product-240.webp",
+        "width": 240,
+        "height": 360
+      },
+      "bytes": 127928,
+      "sha256": "5f2989694d90beb1cdceb45c91a4fee7065b584b43e2642ababf57216db80e73",
+      "generator": "built-in imagegen",
+      "source": "originals/neutral-dark-product.png"
+    },
+    {
+      "id": "neutral-dark-pov",
+      "set": "neutral-dark",
+      "role": "pov",
+      "src": "/design-engine-creators/neutral-dark-pov.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "A creator's hands reviewing a photograph on a digital camera at a desk. neutral dark; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/neutral-dark-pov-640.webp 640w, /design-engine-creators/neutral-dark-pov.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/neutral-dark-pov-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 129030,
+      "sha256": "5ab3fa2884c27dcd3e637b9da567c83129d89d2cc2ab7df869327570747c85eb",
+      "generator": "built-in imagegen",
+      "source": "originals/neutral-dark-pov.png"
+    },
+    {
+      "id": "neutral-dark-objects",
+      "set": "neutral-dark",
+      "role": "objects",
+      "src": "/design-engine-creators/neutral-dark-objects.webp",
+      "width": 1254,
+      "height": 1254,
+      "alt": "A compact camera, earbuds, notebook, coffee and tote on a tabletop. neutral dark; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/neutral-dark-objects-640.webp 640w, /design-engine-creators/neutral-dark-objects.webp 1254w",
+      "thumbnail": {
+        "src": "/design-engine-creators/neutral-dark-objects-240.webp",
+        "width": 240,
+        "height": 240
+      },
+      "bytes": 200524,
+      "sha256": "834b2b9c4140a18d0a0bd563dd31117d8a7914934ca8842932b749975c7ea180",
+      "generator": "built-in imagegen",
+      "source": "originals/neutral-dark-objects.png"
+    }
+  ]
+}

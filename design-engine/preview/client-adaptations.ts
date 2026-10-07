@@ -39,6 +39,10 @@ import { storyAdaptations } from "./collection-004/fixtures";
 import { mediaBriefs } from "./collection-005/fixtures";
 import { serviceContexts } from "./collection-006/fixtures";
 import { commerceContexts } from "./collection-007/fixtures";
+import {
+  creatorImagePackages, creatorPackageFor, supportsCreatorPackage,
+  creatorContext, adaptCreatorSection, creatorLogo,
+} from "./creator-image-packages";
 
 const labels: Record<string, string> = {
   authored: "Original example",
@@ -72,7 +76,7 @@ export function clientAdaptationsFor(id: DesignComponentId) {
       : []),
     "security",
   ];
-  return values.map((value) => {
+  const choices = values.map((value) => {
     let label = labels[value] ?? value;
     if (declared) {
       if (id.startsWith("services.")) {
@@ -128,8 +132,13 @@ export function clientAdaptationsFor(id: DesignComponentId) {
     }
     return { value, label };
   });
+  return supportsCreatorPackage(id)
+    ? [...choices, ...creatorImagePackages.map(({ id: value, label }) => ({ value, label }))]
+    : choices;
 }
 export function clientExample(adaptation: string) {
+  const creator = creatorPackageFor(adaptation);
+  if (creator) return creatorContext(creator);
   return (
     navigationContexts.find((c) => c.id === adaptation) ?? navigationContexts[0]
   );
@@ -139,6 +148,13 @@ export function exampleLogo(
   kind: BrandTreatment,
 ): NavigationLogo {
   if (kind === "text" || kind === "wordmark") return { kind };
+  const creator = creatorImagePackages.find(pack => pack.brand === brand);
+  if (creator) {
+    if (kind === "image") return { kind, src: creatorLogo(brand, creator.foreground), width: 360, height: 68 };
+    return {
+      kind, src: "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect x="6" y="12" width="36" height="27" rx="5" fill="${creator.foreground}"/><circle cx="24" cy="25" r="8" fill="${creator.background}"/><path d="M15 12V8h18v4" fill="${creator.foreground}"/></svg>`),
+    };
+  }
   const c =
     navigationContexts.find((c) => c.brand === brand) ?? navigationContexts[0];
   if (kind === "image")
@@ -177,6 +193,15 @@ export function adaptSectionExample(
     )
   )
     throw Error(`Unsupported client adaptation: ${id}/${adaptation}`);
+  const creator = creatorPackageFor(adaptation);
+  if (creator) {
+    const choices = clientAdaptationsFor(id as DesignComponentId)
+      .filter(choice => choice.value !== "authored" && !creatorPackageFor(choice.value));
+    const baseline = choices.find(choice => choice.value === (
+      id.startsWith("commerce.") ? "beauty" : id.startsWith("work.") ? "urban" : "architecture"
+    )) ?? choices[0];
+    return adaptCreatorSection(adaptSectionExample(section, baseline.value, length), creator);
+  }
   let data: SectionInstance;
   if (endingSectionIds.includes(id as EndingSectionId))
     data = makeEndingSection(id as EndingSectionId,section.id,{adaptation,contentLength:length});
@@ -272,7 +297,7 @@ export function adaptSectionExample(
         .map((l) => ({
           label: l.label,
           href: "#approach",
-          ...(a?.nested && "children" in l
+          ...(a?.nested && "children" in l && l.children
             ? {
                 children: l.children.map((label) => ({
                   label,
@@ -291,7 +316,7 @@ export function adaptSectionExample(
   } else if (id.startsWith("hero.")) {
     data = heroFixture(
       id as Parameters<typeof heroFixture>[0],
-      clientExample(adaptation),
+      navigationContexts.find(c => c.id === adaptation) ?? navigationContexts[0],
       section.id,
     );
     // Pair registration stays valid when an apparel example uses a portrait second view.

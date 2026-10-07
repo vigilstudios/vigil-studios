@@ -1,4 +1,5 @@
 import { makeEndingSection } from "./ending-fixtures";
+import { creatorPackageFor, creatorImage } from "./creator-image-packages";
 import {
   adaptSectionExample,
   clientExample,
@@ -138,7 +139,8 @@ export function renderDesignPreview(
           body: "Create a clear path from a promising idea to a lasting result.",
         },
       ];
-  const previewImage = adapted
+  const creatorPack = creatorPackageFor(client.adaptation ?? "");
+  const previewImage = creatorPack ? creatorImage(creatorPack, "hero").src : adapted
     ? client.adaptation === "security"
       ? "/design-engine-study-003b/security-before.svg"
       : immersiveFixture(client.adaptation === "streetwear" ? 1 : 0).image.src
