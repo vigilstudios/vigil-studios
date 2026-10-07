@@ -174,7 +174,7 @@ export function renderDesignPreview(
   switch (id) {
     case "cta.editorial": case "cta.signal": case "contact.inquiry":
     case "footer.sitemap": case "footer.compact": case "footer.split": case "footer.banner":
-    case "work.expand-rail": case "work.card-rail": case "work.glass-lens": return renderPreviewSection(makeEndingSection(id,"individual-ending",config));
+    case "work.expand-rail": case "work.card-rail": case "work.image-expansion": case "work.image-gallery": case "work.apple-cards": case "work.liquid-glass": return renderPreviewSection(makeEndingSection(id,"individual-ending",config));
     case "hero.image-marquee":
     case "story.process-timeline":
     case "work.image-sphere": return renderPreviewSection(makeImportSection(id,"individual-import",config));

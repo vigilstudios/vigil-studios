@@ -15,7 +15,7 @@ import { DesignMedia } from "@/design-engine/primitives/DesignPrimitives";
 describe("Professional Design Engine component factory", () => {
   it("has unique, serializable definitions and discoverable categories", () => {
     expect(new Set(designComponents.map((item) => item.id)).size).toBe(designComponents.length);
-    expect(designComponents).toHaveLength(121);
+    expect(designComponents).toHaveLength(124);
     expect(findDesignComponents({ category: "primitive" })).toHaveLength(13);
     expect(findDesignComponents({ category: "motion" })).toHaveLength(12);
     expect(findDesignComponents({ category: "icon" })).toHaveLength(1);

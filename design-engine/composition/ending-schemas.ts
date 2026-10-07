@@ -33,6 +33,7 @@ const footerContent = {
 };
 const footerCommon = { ...common, navigationDepth: z.enum(["top-level", "two-level", "all"]) };
 const records = z.array(photoRecordSchema).min(2).max(16).refine(unique, "Record IDs must be unique.");
+const mediaStyle = { skin:z.enum(["reference","site"]), alignment:z.enum(["left","center","right"]) };
 const gallery = {content:z.object({...intro,works:records}).strict(),surface:common.surface,density:common.density};
 export const endingSectionSchemas = {
   "cta.editorial": z.object({...common,content:z.object(intro).strict(),structure:z.enum(["left","center","right"])}).strict(),
@@ -44,7 +45,10 @@ export const endingSectionSchemas = {
   "footer.banner": z.object({...footerCommon,content:z.object({...footerContent,title:text(180),newsletter:endingFormSchema.optional()}).strict(),structure:z.enum(["center","left"])}).strict(),
   "work.expand-rail": z.object({...gallery,structure:z.enum(["label-rails","image-strips"]),motion:z.enum(["none","depth-shift"]),height:z.enum(["portrait","landscape"]),railWidth:z.enum(["compact","comfortable"]),defaultId:identity.optional()}).strict(),
   "work.card-rail": z.object({...gallery,structure:z.enum(["cards","coverflow"]),motion:z.enum(["none","depth-shift"]),ratio:z.enum(["portrait","square","landscape"]),filter:z.enum(["none","category"]),inspection:z.enum(["none","dialog"])}).strict(),
-  "work.glass-lens": z.object({...gallery,structure:z.enum(["portrait","landscape"]),motion:z.enum(["none","depth-shift"]),lens:z.enum(["subtle","strong"])}).strict(),
+  "work.image-expansion": z.object({...gallery,...mediaStyle,structure:z.literal("tabbed-cards"),motion:z.enum(["none","depth-shift"]),colorMode:z.enum(["dark","light"]),filter:z.enum(["category","none"]),inspection:z.enum(["dialog","none"]),ratio:z.enum(["landscape","square"])}).strict(),
+  "work.image-gallery": z.object({...gallery,...mediaStyle,structure:z.literal("expanding-strips"),motion:z.enum(["none","depth-shift"]),height:z.enum(["standard","tall"]),inspection:z.enum(["dialog","none"])}).strict(),
+  "work.apple-cards": z.object({...gallery,...mediaStyle,structure:z.literal("portrait-cards"),motion:z.enum(["none","depth-shift"]),height:z.enum(["standard","tall"]),inspection:z.enum(["dialog","none"])}).strict(),
+  "work.liquid-glass": z.object({...gallery,...mediaStyle,structure:z.literal("liquid-lens"),motion:z.enum(["none","depth-shift"]),height:z.enum(["section","viewport"]),entry:z.enum(["rise-grow","none"]),gap:z.enum(["tight","open"])}).strict(),
 } as const;
 export const endingSectionIds = Object.keys(endingSectionSchemas) as (keyof typeof endingSectionSchemas)[];
 export type EndingSectionId = keyof typeof endingSectionSchemas;

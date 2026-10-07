@@ -10,7 +10,7 @@ const base="http://127.0.0.1:4397",cases=[
  ["contact","component=contact.inquiry&actions"],["sitemap","component=footer.sitemap&siteTree&actions"],
  ["compact","component=footer.compact&siteTree&actions"],["split","component=footer.split&siteTree&actions"],
  ["banner","component=footer.banner&siteTree&actions"],["expand","component=work.expand-rail"],
- ["cards","component=work.card-rail"],["glass","component=work.glass-lens"],
+ ["cards","component=work.card-rail"],["glass","component=work.liquid-glass"],
  ["reverse-cta","component=cta.signal&structure=reverse&actions&fullActions"],
  ["image-strips","component=work.expand-rail&structure=image-strips"],
  ["coverflow","component=work.card-rail&structure=coverflow"],
@@ -36,7 +36,7 @@ for(const[name,query]of cases.slice(0,10)){
  }
  await page.emulateMedia({reducedMotion:"reduce"});await page.goto(`${base}/?${query}`);await settle();results.push({name,reduced:true,...await measure()});await page.emulateMedia({reducedMotion:"no-preference"});
 }
-for(const component of ["work.expand-rail","work.card-rail","work.glass-lens"])for(const width of [1440,1024,320]){
+for(const component of ["work.expand-rail","work.card-rail","work.liquid-glass"])for(const width of [1440,1024,320]){
  await page.setViewportSize({width,height:1000});await page.goto(`${base}/?component=${component}&maximum`);await settle();results.push({name:component,maximum:true,...await measure()});
 }
 await page.setViewportSize({width:1440,height:1000});
@@ -45,7 +45,7 @@ await page.setViewportSize({width:320,height:900});await page.goto(`${base}/?com
 await page.setViewportSize({width:1440,height:1000});await page.goto(`${base}/?component=work.card-rail`);await settle();const inspect=page.getByRole("button",{name:/^Inspect /}).first();await inspect.click();interactions.push({check:"inspection dialog",pass:await page.locator("dialog").evaluate(e=>e.open)&&await page.locator("dialog button").evaluate(e=>e===document.activeElement)});await page.keyboard.press("Escape");interactions.push({check:"dialog focus restoration",pass:await inspect.evaluate(e=>e===document.activeElement)});await page.getByRole("button",{name:"Next image",exact:true}).click();await page.waitForTimeout(700);interactions.push({check:"card navigation",pass:(await page.locator('.de-gallery-controls [role="status"]').textContent()).startsWith("2")});
 const filter=page.locator('[aria-label="Gallery categories"] button').nth(1);await filter.click();interactions.push({check:"category filter",pass:await filter.getAttribute("aria-pressed")==="true"});
 await page.goto(`${base}/?component=work.card-rail&structure=coverflow`);await settle();await page.getByRole("button",{name:"Next image",exact:true}).click();await page.waitForTimeout(700);interactions.push({check:"coverflow centered navigation",pass:(await page.locator('.de-gallery-controls [role="status"]').textContent()).startsWith("2")&&await page.locator('.de-gallery-card[data-active="true"]').count()===1});
-await page.goto(`${base}/?component=work.glass-lens`);await settle();await page.getByRole("button",{name:"Next image",exact:true}).click();interactions.push({check:"lens selection",pass:(await page.locator('.de-gallery-controls [role="status"]').textContent()).startsWith("2")});
+
 for(const form of ["success","failure","missing"]){
  await page.goto(`${base}/?component=contact.inquiry&form=${form}`);await settle();
  const submit=page.locator('.de-ending-form button[type="submit"]');

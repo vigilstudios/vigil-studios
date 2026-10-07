@@ -35,7 +35,11 @@ export function makeEndingSection<K extends EndingSectionId>(component:K,id:stri
     :component.startsWith("footer.")?{...common,content:{...footerContent,...(["footer.split","footer.banner"].includes(component)?{title:content.title,newsletter:inquiryPreset("newsletter")}:{})},structure:component==="footer.compact"?"center":component==="footer.banner"?"center":"brand-left",navigationDepth:component==="footer.compact"?"top-level":"two-level"}
     :component==="work.expand-rail"?{id,component,content:{...content,title:"Selected work",works:gallery.content.works},surface:"transparent",density:"open",structure:"label-rails",motion:"depth-shift",height:"portrait",railWidth:"compact"}
     :component==="work.card-rail"?{id,component,content:{...content,title:"Explore the collection",works:gallery.content.works},surface:"transparent",density:"open",structure:"cards",motion:"depth-shift",ratio:"portrait",filter:"category",inspection:"dialog"}
-    :{id,component,content:{...content,title:"A closer look",works:gallery.content.works},surface:"transparent",density:"open",structure:"portrait",motion:"depth-shift",lens:"strong"};
+    :{id,component,content:{...content,title:context==="creator"?"Featured content":"Our latest creations",introduction:context==="creator"?"Campaigns, creator photography and stories from the latest collaborations.":"A visual collection of our most recent work, crafted with intention and style.",works:gallery.content.works},surface:"transparent",density:"open",skin:"reference",alignment:component==="work.apple-cards"?"left":"center",motion:"depth-shift",
+      ...(component==="work.image-expansion"?{structure:"tabbed-cards",colorMode:"dark",filter:"category",inspection:"dialog",ratio:"landscape"}
+        :component==="work.image-gallery"?{structure:"expanding-strips",height:"standard",inspection:"dialog"}
+        :component==="work.apple-cards"?{structure:"portrait-cards",height:"standard",inspection:"dialog"}
+        :{structure:"liquid-lens",height:"section",entry:"rise-grow",gap:"tight"})};
   const choices=Object.fromEntries(Object.entries(config).filter(([key])=>key in payload&&!["id","component","content"].includes(key)));
   return parseSection({...payload,...choices}) as unknown as SectionInstance<K>;
 }

@@ -1,7 +1,11 @@
 import { EditorialConversion, SignalConversion } from "../sections/endings/Conversion";
 import { InquiryContact } from "../sections/endings/InquiryContact";
 import { SitemapFooter, CompactFooter, SplitFooter, BannerFooter } from "../sections/endings/Footers";
-import { ExpandRailGallery, CardRailGallery, GlassLensGallery } from "../sections/endings/Galleries";
+import { ExpandRailGallery, CardRailGallery } from "../sections/endings/Galleries";
+import { ImageExpansionSlider } from "../../components/ui/image-expansion";
+import { ImageGallery } from "../../components/ui/image-gallery";
+import AppleCardCarousel from "../../components/ui/carousel-08";
+import { LiquidGlassCarousel } from "../../components/ui/liquid-glass-carousel";
 import { ImageMarqueeHero } from "../sections/imports/ImageMarqueeHero";
 import { ProcessTimeline } from "../sections/imports/ProcessTimeline";
 import { ImageSphere } from "../sections/imports/ImageSphere";
@@ -114,7 +118,10 @@ function renderSectionBody(section: SectionInstance): ReactNode {
     case "footer.banner": return <BannerFooter {...section}/>;
     case "work.expand-rail": return <ExpandRailGallery {...section}/>;
     case "work.card-rail": return <CardRailGallery {...section}/>;
-    case "work.glass-lens": return <GlassLensGallery {...section}/>;
+    case "work.image-expansion": return <ImageExpansionSlider {...section}/>;
+    case "work.image-gallery": return <ImageGallery {...section}/>;
+    case "work.apple-cards": return <AppleCardCarousel {...section}/>;
+    case "work.liquid-glass": return <LiquidGlassCarousel {...section}/>;
     case "hero.image-marquee": return <ImageMarqueeHero {...section}/>;
     case "story.process-timeline": return <ProcessTimeline {...section}/>;
     case "work.image-sphere": return <ImageSphere {...section}/>;

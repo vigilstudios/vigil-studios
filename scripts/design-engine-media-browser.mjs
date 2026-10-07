@@ -1,0 +1,34 @@
+import {createRequire} from 'node:module';
+import fs from 'node:fs';
+const require=createRequire(import.meta.url),{chromium}=require('/Users/belierjavier/.npm/_npx/e41f203b7505f1fb/node_modules/playwright');
+const browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true,args:['--enable-webgl','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const page=await browser.newPage(),errors=[],results=[],interactions=[],audits=[];
+page.on('pageerror',error=>errors.push(error.message));
+const out='docs/design-engine/media-replacement/evidence',base='http://127.0.0.1:4398',ids=['work.image-expansion','work.image-gallery','work.apple-cards','work.liquid-glass','work.expand-rail','work.card-rail'];
+async function load(id,query=''){await page.goto(`${base}/?component=${id}&adaptation=creator&${query}`);await page.evaluate(async()=>{await document.fonts.ready;await Promise.all([...document.images].map(i=>{i.loading='eager';return i.decode().catch(()=>{});}));});await page.waitForTimeout(id==='work.liquid-glass'?4200:150);}
+async function measure(){return page.evaluate(()=>({width:innerWidth,overflow:document.documentElement.scrollWidth>innerWidth+1,broken:[...document.images].filter(i=>i.getClientRects().length&&(!i.complete||!i.naturalWidth)).map(i=>i.src),duplicateIds:[...document.querySelectorAll('[id]')].map(e=>e.id).filter((id,i,all)=>all.indexOf(id)!==i),headingClipped:[...document.querySelectorAll('.vm-heading h2,.vm-apple-copy h3,.vm-expansion-copy h3')].filter(e=>e.scrollWidth>e.clientWidth+2).map(e=>e.textContent)}));}
+for(const id of ids){
+ for(const width of [1440,1024,768,390,320]){
+  await page.setViewportSize({width,height:1000});await load(id);results.push({id,mode:'reference',...await measure()});
+  if(ids.indexOf(id)<4&&(width===1440||width===390)){await page.locator('.vigil-media').screenshot({path:`${out}/${id.replace('work.','')}-${width}.png`});await page.addScriptTag({url:`${base}/axe.js`});audits.push({id,width,violations:await page.evaluate(async()=>{const r=await axe.run('.vigil-media',{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}});return r.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}));})});}
+ }
+ if(ids.indexOf(id)<4){
+  for(const width of [1440,320]){await page.setViewportSize({width,height:1000});await load(id,'skin=site&type=fashion&art=runway&contentLength=long&maximum');results.push({id,mode:'site-long-maximum',...await measure()});}
+  await page.emulateMedia({reducedMotion:'reduce'});await load(id);results.push({id,reduced:true,...await measure(),canvas:await page.locator('canvas').count()});await page.emulateMedia({reducedMotion:'no-preference'});
+ }
+ console.log(`Responsive ${id}`);
+}
+await page.setViewportSize({width:1440,height:1000});await load(ids[0]);
+let trigger=page.getByRole('button',{name:/^Inspect /}).first();await trigger.click();interactions.push({check:'slider dialog',pass:await page.locator('dialog').evaluate(e=>e.open)});await page.keyboard.press('ArrowRight');interactions.push({check:'dialog next',pass:(await page.locator('.vm-dialog [role=status]').textContent()).includes('2 of')});await page.keyboard.press('Escape');interactions.push({check:'dialog focus restored',pass:await trigger.evaluate(e=>e===document.activeElement)});
+await page.getByRole('button',{name:'Switch to light gallery'}).click();interactions.push({check:'theme toggle',pass:await page.locator('.vm-expansion-shell').getAttribute('data-tone')==='light'});
+const category=page.locator('.vm-tabs button').nth(1);await category.click();interactions.push({check:'category filter',pass:await category.getAttribute('aria-pressed')==='true'});
+await page.locator('.vm-tabs button').first().click();await page.getByRole('button',{name:'Go to image 3',exact:true}).click();await page.waitForTimeout(600);interactions.push({check:'slider dot scroll',pass:Number(await page.locator('.vm-expansion-track').evaluate(e=>e.scrollLeft))>0});
+await load(ids[1]);await page.locator('.vm-strip-trigger').nth(2).focus();interactions.push({check:'strip keyboard expansion',pass:await page.locator('.vm-strip').nth(2).getAttribute('data-active')==='true'});await page.setViewportSize({width:320,height:900});await page.locator('.vm-strip-trigger').nth(1).click();interactions.push({check:'strip mobile selection',pass:await page.locator('.vm-strip').nth(1).getAttribute('data-active')==='true'});
+await page.setViewportSize({width:1440,height:1000});await load(ids[2]);await page.getByRole('button',{name:'Next image',exact:true}).click();await page.waitForTimeout(1000);interactions.push({check:'apple carousel moves',pass:await page.locator('.vm-apple-track').evaluate(e=>getComputedStyle(e).transform!=='none'&&getComputedStyle(e).transform!=='matrix(1, 0, 0, 1, 0, 0)')});
+await load(ids[3],'entry=none');interactions.push({check:'liquid supplied WebGL',pass:await page.locator('canvas').count()===1});await page.getByRole('button',{name:'Next image',exact:true}).click();await page.waitForTimeout(1300);interactions.push({check:'liquid navigation',pass:(await page.locator('.vm-liquid-counter').textContent()).startsWith('02')});
+await page.locator('canvas').click({position:{x:650,y:330}});await page.waitForTimeout(1200);interactions.push({check:'liquid click focus',pass:await page.getByRole('button',{name:'Close focus',exact:true}).count()===1});await page.keyboard.press('Escape');
+await page.locator('canvas').evaluate(canvas=>canvas.dispatchEvent(new Event('webglcontextlost',{cancelable:true})));await page.waitForTimeout(250);interactions.push({check:'WebGL context-loss fallback',pass:await page.locator('canvas').count()===0&&await page.locator('.vm-liquid-native img').count()>0});
+await page.emulateMedia({reducedMotion:'reduce'});await load(ids[3]);interactions.push({check:'reduced-motion native gallery',pass:await page.locator('canvas').count()===0&&await page.locator('.vm-liquid-native img').count()>0});
+fs.writeFileSync(`${out}/browser.json`,JSON.stringify({results,interactions,audits,errors},null,2));
+console.log(JSON.stringify({layouts:results.length,interactions,audits:audits.filter(a=>a.violations.length),errors},null,2));await browser.close();
+if(errors.length||results.some(r=>r.overflow||r.broken.length||r.duplicateIds.length||r.headingClipped.length)||interactions.some(r=>!r.pass)||audits.some(a=>a.violations.length))process.exitCode=1;

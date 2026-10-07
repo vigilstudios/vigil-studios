@@ -1,0 +1,487 @@
+{
+  "results": [
+    {
+      "id": "work.image-expansion",
+      "mode": "reference",
+      "width": 1440,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.image-expansion",
+      "mode": "reference",
+      "width": 1024,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.image-expansion",
+      "mode": "reference",
+      "width": 768,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.image-expansion",
+      "mode": "reference",
+      "width": 390,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.image-expansion",
+      "mode": "reference",
+      "width": 320,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.image-expansion",
+      "mode": "site-long-maximum",
+      "width": 1440,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.image-expansion",
+      "mode": "site-long-maximum",
+      "width": 320,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.image-expansion",
+      "reduced": true,
+      "width": 320,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": [],
+      "canvas": 0
+    },
+    {
+      "id": "work.image-gallery",
+      "mode": "reference",
+      "width": 1440,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.image-gallery",
+      "mode": "reference",
+      "width": 1024,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.image-gallery",
+      "mode": "reference",
+      "width": 768,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.image-gallery",
+      "mode": "reference",
+      "width": 390,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.image-gallery",
+      "mode": "reference",
+      "width": 320,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.image-gallery",
+      "mode": "site-long-maximum",
+      "width": 1440,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.image-gallery",
+      "mode": "site-long-maximum",
+      "width": 320,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.image-gallery",
+      "reduced": true,
+      "width": 320,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": [],
+      "canvas": 0
+    },
+    {
+      "id": "work.apple-cards",
+      "mode": "reference",
+      "width": 1440,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.apple-cards",
+      "mode": "reference",
+      "width": 1024,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.apple-cards",
+      "mode": "reference",
+      "width": 768,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.apple-cards",
+      "mode": "reference",
+      "width": 390,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.apple-cards",
+      "mode": "reference",
+      "width": 320,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.apple-cards",
+      "mode": "site-long-maximum",
+      "width": 1440,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.apple-cards",
+      "mode": "site-long-maximum",
+      "width": 320,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.apple-cards",
+      "reduced": true,
+      "width": 320,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": [],
+      "canvas": 0
+    },
+    {
+      "id": "work.liquid-glass",
+      "mode": "reference",
+      "width": 1440,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.liquid-glass",
+      "mode": "reference",
+      "width": 1024,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.liquid-glass",
+      "mode": "reference",
+      "width": 768,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.liquid-glass",
+      "mode": "reference",
+      "width": 390,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.liquid-glass",
+      "mode": "reference",
+      "width": 320,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.liquid-glass",
+      "mode": "site-long-maximum",
+      "width": 1440,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.liquid-glass",
+      "mode": "site-long-maximum",
+      "width": 320,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.liquid-glass",
+      "reduced": true,
+      "width": 320,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": [],
+      "canvas": 0
+    },
+    {
+      "id": "work.expand-rail",
+      "mode": "reference",
+      "width": 1440,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.expand-rail",
+      "mode": "reference",
+      "width": 1024,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.expand-rail",
+      "mode": "reference",
+      "width": 768,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.expand-rail",
+      "mode": "reference",
+      "width": 390,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.expand-rail",
+      "mode": "reference",
+      "width": 320,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.card-rail",
+      "mode": "reference",
+      "width": 1440,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.card-rail",
+      "mode": "reference",
+      "width": 1024,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.card-rail",
+      "mode": "reference",
+      "width": 768,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.card-rail",
+      "mode": "reference",
+      "width": 390,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    },
+    {
+      "id": "work.card-rail",
+      "mode": "reference",
+      "width": 320,
+      "overflow": false,
+      "broken": [],
+      "duplicateIds": [],
+      "headingClipped": []
+    }
+  ],
+  "interactions": [
+    {
+      "check": "slider dialog",
+      "pass": true
+    },
+    {
+      "check": "dialog next",
+      "pass": true
+    },
+    {
+      "check": "dialog focus restored",
+      "pass": true
+    },
+    {
+      "check": "theme toggle",
+      "pass": true
+    },
+    {
+      "check": "category filter",
+      "pass": true
+    },
+    {
+      "check": "slider dot scroll",
+      "pass": true
+    },
+    {
+      "check": "strip keyboard expansion",
+      "pass": true
+    },
+    {
+      "check": "strip mobile selection",
+      "pass": true
+    },
+    {
+      "check": "apple carousel moves",
+      "pass": true
+    },
+    {
+      "check": "liquid supplied WebGL",
+      "pass": true
+    },
+    {
+      "check": "liquid navigation",
+      "pass": true
+    },
+    {
+      "check": "liquid click focus",
+      "pass": true
+    },
+    {
+      "check": "WebGL context-loss fallback",
+      "pass": true
+    },
+    {
+      "check": "reduced-motion native gallery",
+      "pass": true
+    }
+  ],
+  "audits": [
+    {
+      "id": "work.image-expansion",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "id": "work.image-expansion",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "id": "work.image-gallery",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "id": "work.image-gallery",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "id": "work.apple-cards",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "id": "work.apple-cards",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "id": "work.liquid-glass",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "id": "work.liquid-glass",
+      "width": 390,
+      "violations": []
+    }
+  ],
+  "errors": []
+}

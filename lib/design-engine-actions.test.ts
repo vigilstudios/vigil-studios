@@ -21,8 +21,8 @@ import { actionSchema } from "@/design-engine/site/action-schema";
 const production = designComponents.filter(entry => entry.status === "production");
 const markup = (section: ReturnType<typeof makeSection>, site = makeComplexSiteFixture()) => renderToStaticMarkup(createElement(ActionSiteProvider,{site},renderSection(section)));
 describe("Production Library Action & CTA Integration", () => {
-  it("audits all 86 Production components and every other runtime section with serializable registry capabilities", () => {
-    expect(production).toHaveLength(86);
+  it("audits all 89 Production components and every other runtime section with serializable registry capabilities", () => {
+    expect(production).toHaveLength(89);
     for (const entry of production) {
       const capability = getActionCapabilities(entry.id);
       expect("composition" in entry ? entry.composition?.actions : undefined).toEqual(capability);

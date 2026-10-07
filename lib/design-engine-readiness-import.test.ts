@@ -109,6 +109,6 @@ describe("Readiness import production contracts",()=>{
   it("rejects footer source on ordinary content and allows it only on navigation/footer",()=>{
     expect(()=>parseSection({...makeEndingSection("cta.editorial","conversion"),navigationSource:{mode:"site",depth:"all"}})).toThrow();
     expect(()=>parseSection({...makeEndingSection("footer.sitemap","footer"),navigationSource:{mode:"site",depth:"all"}})).not.toThrow();
-    expect(endingSectionIds).toHaveLength(10);
+    expect(endingSectionIds).toHaveLength(13);
   });
 });

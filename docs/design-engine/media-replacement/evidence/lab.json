@@ -1,0 +1,73 @@
+{
+  "results": [
+    {
+      "check": "retired option absent",
+      "pass": true
+    },
+    {
+      "check": "Design Lab Image Expansion Slider",
+      "pass": true
+    },
+    {
+      "check": "Design Lab Hover Expanding Image Gallery",
+      "pass": true
+    },
+    {
+      "check": "Design Lab Apple Card Carousel",
+      "pass": true
+    },
+    {
+      "check": "Design Lab Liquid Glass Carousel",
+      "pass": true
+    },
+    {
+      "check": "add and author work.image-expansion",
+      "pass": true
+    },
+    {
+      "check": "custom style work.image-expansion",
+      "pass": true
+    },
+    {
+      "check": "reload authored work.image-expansion",
+      "pass": true
+    },
+    {
+      "check": "add and author work.image-gallery",
+      "pass": true
+    },
+    {
+      "check": "custom style work.image-gallery",
+      "pass": true
+    },
+    {
+      "check": "reload authored work.image-gallery",
+      "pass": true
+    },
+    {
+      "check": "add and author work.apple-cards",
+      "pass": true
+    },
+    {
+      "check": "custom style work.apple-cards",
+      "pass": true
+    },
+    {
+      "check": "reload authored work.apple-cards",
+      "pass": true
+    },
+    {
+      "check": "add and author work.liquid-glass",
+      "pass": true
+    },
+    {
+      "check": "custom style work.liquid-glass",
+      "pass": true
+    },
+    {
+      "check": "reload authored work.liquid-glass",
+      "pass": true
+    }
+  ],
+  "errors": []
+}

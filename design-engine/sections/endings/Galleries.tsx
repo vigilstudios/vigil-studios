@@ -45,18 +45,3 @@ export function CardRailGallery(section:SectionInstance<"work.card-rail">) {
     {section.inspection==="dialog"&&<dialog className="de-gallery-dialog" ref={dialog} aria-labelledby={`${uid}-inspection`} onClose={()=>opener.current?.focus()}><button type="button" autoFocus onClick={()=>dialog.current?.close()}>Close inspection</button><h3 id={`${uid}-inspection`} className="de-heading">{inspection.title}</h3><Plate image={inspection.image}/>{inspection.note&&<p className="de-text">{inspection.note}</p>}<ItemAction group="works" itemId={inspection.id}/></dialog>}
   </div></section>;
 }
-
-/** A bounded native image ribbon and refracting inspection lens, without a perpetual WebGL/GSAP loop. */
-export function GlassLensGallery(section:SectionInstance<"work.glass-lens">) {
-  const c=section.content,uid=useId(),policy=useMotionPolicy();
-  const [selected,setSelected]=useState(c.works[0].id);
-  const index=Math.max(0,c.works.findIndex(work=>work.id===selected)),work=c.works[index];
-  const moving=section.motion!=="none"&&!policy.reduced;
-  const variables={"--de-ending-duration":`${.6*policy.duration}s`,"--de-lens-scale":section.lens==="strong"?"1.18":"1.07","--de-lens-filter":`url(#${uid}-lens)`} as CSSProperties;
-  return <section id={section.id} className="de-ending de-glass" data-layout={section.structure} data-motion={moving} data-surface={section.surface} data-density={section.density} aria-labelledby={`${section.id}-title`} style={variables}><div className="de-ending-inner"><EndingHeading id={section.id} content={c}/>
-    <svg className="de-visually-hidden" aria-hidden="true"><defs><filter id={`${uid}-lens`} x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale={section.lens==="strong"?28:10} xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg>
-    <div className="de-glass-stage" aria-hidden="true"><div className="de-glass-ribbon" style={{transform:`translateX(calc(50% - ${index} * var(--de-glass-panel) - var(--de-glass-panel) / 2))`}}>{c.works.map(record=><div key={record.id}><Plate image={record.image}/></div>)}</div><div className="de-glass-lens"><Plate image={work.image}/></div></div>
-    <div className="de-gallery-controls" role="group" aria-label="Select image"><button type="button" aria-label="Previous image" disabled={index===0} onClick={()=>setSelected(c.works[index-1].id)}>← Previous</button><p className="de-mono" role="status">{index+1} / {c.works.length}</p><button type="button" aria-label="Next image" disabled={index===c.works.length-1} onClick={()=>setSelected(c.works[index+1].id)}>Next →</button></div>
-    <div className="de-glass-reading"><Plate image={work.image}/><div><p className="de-accent">{work.category}</p><h3 className="de-heading">{work.title}</h3>{work.note&&<p className="de-text">{work.note}</p>}<ItemAction group="works" itemId={work.id}/><details><summary>All images</summary><ul>{c.works.map(record=><li key={record.id}><button type="button" aria-pressed={record.id===work.id} onClick={()=>setSelected(record.id)}>{record.title}</button></li>)}</ul></details></div></div>
-  </div></section>;
-}

@@ -1,3 +1,5 @@
+> October 7 update: the four supplied Media prompts now have independent implementations. See [Media replacement](../media-replacement/README.md) for current registry names, styling and release evidence. The October 6 validation figures below are historical.
+
 # CTA, contact, footer and gallery import pass
 
 Implemented in `vigil-studios`, the repository that owns the shared Professional Design Engine. The pasted Design Engine brief governs the adaptation: these are native, typed section systems using the existing renderer, creative layers, Page Foundation and Action system. Source brands, placeholder hrefs, global font overrides and third-party component architectures were replaced with client data and engine contracts.
@@ -24,9 +26,9 @@ There are **16 supplied component prompt bodies**: 13 inline bodies and three co
 | Prompt 14 · `hover-expand-gallery.tsx` | Gallery | `work.expand-rail` / Expanding Image Rail | New production system: vertical title rails, selected image, touch/keyboard selection, mobile accordion. |
 | `skiper49.tsx` · Skiper 49 / Carousel_003 | Gallery | `work.card-rail` / Editorial Card Rail | Consolidated with card carousel: centered perspective arrangement retained, with explicit step controls. No automatic looping or autoplay. Source credit: Skiper UI, Gurvinder Singh; source illustrative art credit: AarzooAly. Source illustrations are not shipped. |
 | Inline `carousel-08.tsx` | Gallery | `work.card-rail` / Editorial Card Rail | New production system: editorial image cards, separate item destinations and step controls. |
-| Attachment `carousel-08.tsx` | Gallery | `work.card-rail` / Editorial Card Rail | Exact duplicate avoided; same system as inline source. |
-| Attachment `image-expansion.tsx` | Gallery | `work.card-rail` / Editorial Card Rail | Consolidated: category filtering and full-image inspection dialog retained. |
-| Attachment `liquid-glass-carousel.tsx` | Gallery | `work.glass-lens` / Glass Lens Gallery | New production system: ribbon beneath a fixed refracting lens. Adapted to bounded native selection and SVG refraction; the source's continuous WebGL/GSAP renderer and infinite pointer scrolling are not replicated. |
+| Attachment `carousel-08.tsx` | Gallery | `work.apple-cards` / Apple Card Carousel | October 7: independent tall photographic cards and Embla drag-free rail. |
+| Attachment `image-expansion.tsx` | Gallery | `work.image-expansion` / Image Expansion Slider | October 7: independent tabbed overlay cards with full-screen inspection. |
+| Attachment `liquid-glass-carousel.tsx` | Gallery | `work.liquid-glass` / Liquid Glass Carousel | October 7 correction restores the supplied WebGL shader, infinite ribbon and GSAP choreography; see media-replacement. |
 
 Every source in a consolidated group receives the production capabilities detailed below. Existing production component designs extended: **0**. Shared Action, Site, rendering, contracts and editor infrastructure were extended. Thirteen thin compatibility exports retain the supplied filenames under `components/ui`; they accept native `SectionInstance` contracts rather than the source demo props.
 
@@ -104,11 +106,9 @@ All ten systems have strict serializable content/configuration schemas, declared
 
 **Structural idea:** editorial image card strip, optionally centered in perspective, with independent category filtering and inspection. **Customization:** common image records/copy, density/surface, portrait/square/landscape ratio, filter none/category, inspection none/dialog. **Layout options:** cards, coverflow. **Typography/art:** common profiles/directions. **CTA capability:** optional section primary and independent per-card link; inspection remains a named button. **Page/Action:** shared resolver; filters/selection preserve stable records. **Contact/form/footer:** none; portfolio-page capable. **Motion:** none/depth-shift; native scroll-snap and bounded perspective, no automatic loop. **Responsive:** horizontal native swipe on narrow screens with readable card width. **Accessibility:** named region and Previous/Next buttons, live count, pressed category controls; native dialog supports Escape, initial close focus and return focus to opener. The source's decorative arrow is an actual inspection control or actual typed destination, never a dead button.
 
-### Glass Lens Gallery — `work.glass-lens`
+### Liquid Glass Carousel — `work.liquid-glass`
 
-**External reference:** liquid-glass-carousel attachment. **Category:** Gallery/Portfolio. **Disposition:** new production component with an explicit renderer adaptation.
-
-**Structural idea:** bounded image ribbon under a fixed rounded refracting lens. **Customization:** common image records, heading/context, density/surface, lens subtle/strong. **Layout options:** portrait, landscape. **Typography/art:** common profiles/directions. **CTA capability:** optional section primary plus selected-record link. **Page/Action:** canonical record uses typed destination independently of selection. **Contact/form/footer:** none; portfolio-page capable. **Motion:** explicit selection transition, SVG displacement plus CSS scale; no perpetual RAF/WebGL/GSAP loop or shader equivalence claim. **Responsive:** lens stage scales; canonical image/context remains available below it. **Accessibility:** named Previous/Next, live count and All images selector; decorative ribbon/lens hidden from assistive technology, canonical image retains authored alt; reduced motion shows a complete static view.
+Replaced by the supplied shader/GSAP carousel in the October 7 Media correction. See [Media replacement](../media-replacement/README.md) for current components and validation. The earlier imitation is removed from active registries, rendering, styles, previews and exports; saved old sections migrate on import.
 
 ## Shared integration and verification
 

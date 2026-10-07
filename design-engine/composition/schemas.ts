@@ -77,6 +77,13 @@ export type PageComposition = { id: string; label: string; site: SiteConfigurati
 
 /** Metadata is kept separate from executable schemas; neither accepts undeclared fields. */
 export function parseSection(input: unknown): SectionInstance {
+  // Import-only compatibility: the retired option never enters the active registry.
+  if (input && typeof input === "object" && "component" in input && input.component === "work.glass-lens") {
+    const legacy = input as Record<string, unknown>;
+    const { lens, structure, ...retained } = legacy;
+    void lens; void structure;
+    input = {...retained,component:"work.liquid-glass",structure:"liquid-lens",skin:"site",alignment:"center",height:"section",entry:"none",gap:"tight"};
+  }
   const envelope = z.object({ id: text.regex(/^[a-z][a-z0-9-]*$/), component: z.enum(Object.keys(sectionSchemas) as [SectionId, ...SectionId[]]), overrides: creativeOverrideSchema.optional(), actions: z.array(actionBindingSchema).optional(), contextualActions: contextualActionsSchema.optional(), navigationSource: navigationSourceSchema.optional() }).passthrough().parse(input);
   const { id, component, overrides, actions, contextualActions, navigationSource, ...payload } = envelope;
   if (navigationSource && !component.startsWith("navigation.") && !component.startsWith("footer.")) throw new Error("Only Navigation and Footer consume site destinations.");

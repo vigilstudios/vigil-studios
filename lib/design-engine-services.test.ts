@@ -38,8 +38,8 @@ describe("Collection 006 services and capabilities review",()=>{
   expect(serviceStudySchemas.C12.safeParse(scope.content).success).toBe(false);
  });
  it("keeps studies separate from their production inventory and preserves earlier human decisions",()=>{
-  expect(designComponents).toHaveLength(121);
-  expect(designComponents.filter(c=>c.status==="production")).toHaveLength(86);
+  expect(designComponents).toHaveLength(124);
+  expect(designComponents.filter(c=>c.status==="production")).toHaveLength(89);
   expect(designComponents.filter(c=>"sourceConcept" in c && serviceStudies.some(s=>s.id===c.sourceConcept))).toHaveLength(12);
   expect(collection004Review.S05.status).toBe("Rejected");
   expect(collection004Review.S04.status).toBe("Promising / Revision Required");
@@ -49,8 +49,8 @@ describe("Collection 006 services and capabilities review",()=>{
   for(const s of serviceStudies){expect(serviceProposal(s).motion).toEqual(["none"]);expect(serviceProposal(s).usage).toBe(s.usage);}
  });
  it("keeps composition IDs stable while exposing distinct readable titles",()=>{
-  expect(compositionFixtures).toHaveLength(144);
-  expect(new Set(compositionFixtures.map(f=>f.label)).size).toBe(144);
+  expect(compositionFixtures).toHaveLength(147);
+  expect(new Set(compositionFixtures.map(f=>f.label)).size).toBe(147);
   expect(compositionFixtures[0].id).toBe("composition-a");
   expect(compositionFixtures.every(f=>!/^004|^[A-E] ·/.test(f.label))).toBe(true);
  });
