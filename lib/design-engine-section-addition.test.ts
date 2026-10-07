@@ -1,3 +1,4 @@
+import { setImmediate } from "node:timers/promises";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -15,7 +16,9 @@ const groups = sectionOptionGroups(designComponents);
 const ids = groups.flatMap(group => group.options.map(option => option.value));
 
 describe("compatible section additions", () => {
-  it.each(compositionFixtures.map(page => [page.id, page] as const))("audits every registered section against %s", (_id, page) => {
+  it.each(compositionFixtures.map(page => [page.id, page] as const))("audits every registered section against %s", async (_id, page) => {
+    // Let the worker flush progress between the CPU-heavy fixture audits.
+    await setImmediate();
     expect(inspectComposition(page).issues).toEqual([]);
     let allowed = 0, blocked = 0;
     for (const id of ids) {
