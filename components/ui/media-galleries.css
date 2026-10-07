@@ -693,7 +693,7 @@
     overscroll-behavior-x: contain;
   }
   .vm-strip {
-    flex: 0 0 18%;
+    flex: 1 0 18%;
     min-width: 44px;
     scroll-snap-align: center;
   }
