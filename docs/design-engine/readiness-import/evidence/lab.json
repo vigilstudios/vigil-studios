@@ -1,0 +1,117 @@
+{
+  "results": [
+    {
+      "check": "design discovery cta.editorial",
+      "pass": true
+    },
+    {
+      "check": "design discovery cta.signal",
+      "pass": true
+    },
+    {
+      "check": "design discovery contact.inquiry",
+      "pass": true
+    },
+    {
+      "check": "design discovery footer.sitemap",
+      "pass": true
+    },
+    {
+      "check": "design discovery footer.compact",
+      "pass": true
+    },
+    {
+      "check": "design discovery footer.split",
+      "pass": true
+    },
+    {
+      "check": "design discovery footer.banner",
+      "pass": true
+    },
+    {
+      "check": "design discovery work.expand-rail",
+      "pass": true
+    },
+    {
+      "check": "design discovery work.card-rail",
+      "pass": true
+    },
+    {
+      "check": "design discovery work.glass-lens",
+      "pass": true
+    },
+    {
+      "check": "design hover preview",
+      "pass": true
+    },
+    {
+      "check": "design rollback",
+      "pass": true
+    },
+    {
+      "check": "design keyboard preview",
+      "pass": true
+    },
+    {
+      "check": "design commit",
+      "pass": true
+    },
+    {
+      "check": "blank canvas CTA addition and editable content",
+      "pass": true
+    },
+    {
+      "check": "booking preset and honest email draft",
+      "pass": true
+    },
+    {
+      "check": "footer addition derives real Site Tree",
+      "pass": true
+    },
+    {
+      "check": "share global footer",
+      "pass": true
+    },
+    {
+      "check": "page footer override",
+      "pass": true
+    },
+    {
+      "check": "serialized draft reload content/form/global/override",
+      "pass": true
+    },
+    {
+      "check": "composition ending 0",
+      "pass": true
+    },
+    {
+      "check": "composition ending 1",
+      "pass": true
+    },
+    {
+      "check": "composition ending 2",
+      "pass": true
+    },
+    {
+      "check": "composition ending 3",
+      "pass": true
+    },
+    {
+      "check": "composition gallery work-expand-rail",
+      "pass": true
+    },
+    {
+      "check": "composition gallery work-card-rail",
+      "pass": true
+    },
+    {
+      "check": "composition gallery work-glass-lens",
+      "pass": true
+    },
+    {
+      "check": "gallery record editor and typed item actions",
+      "pass": true
+    }
+  ],
+  "errors": []
+}

@@ -29,6 +29,8 @@ export type NavItem = {
   label: string;
   icon: NavIcon;
   exact?: boolean;
+  /** Internal workspaces that require a desktop viewport. */
+  desktopOnly?: boolean;
   /** Rendered dimmed with a lock; the page explains why. */
   locked?: boolean;
   /** Small trailing tag such as "Soon". */

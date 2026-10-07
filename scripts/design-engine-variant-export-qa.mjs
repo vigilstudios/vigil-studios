@@ -1,0 +1,14 @@
+import {createRequire} from 'node:module';import fs from 'node:fs';
+const require=createRequire(import.meta.url),{chromium}=require('/Users/belierjavier/.npm/_npx/e41f203b7505f1fb/node_modules/playwright');
+const browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true}),page=await browser.newPage({viewport:{width:1920,height:1100}}),errors=[],results=[];
+page.on('pageerror',e=>errors.push(e.message));page.on('console',e=>{if(e.type()==='error')errors.push(e.text())});
+await page.goto('http://127.0.0.1:4397/?lab=composition');const c=page.getByRole('region',{name:'Composition Lab editor',exact:true});await c.getByLabel('Section type',{exact:true}).selectOption('cta');await c.getByRole('button',{name:'Editorial Conversion',exact:true}).click();
+fs.mkdirSync('/tmp/vigil-editor-export-qa',{recursive:true});const exports=[];
+for(let i=1;i<=3;i++){
+ await c.getByRole('tab',{name:'Section',exact:true}).click();await c.getByLabel('title',{exact:true}).fill(`Export roundtrip sample ${i}`);await c.getByLabel('title',{exact:true}).blur();
+ await c.getByRole('tab',{name:'Pages',exact:true}).click();if(!await c.getByLabel('Variant name',{exact:true}).isVisible())await c.getByText('Portable site document',{exact:true}).click();await c.getByLabel('Variant name',{exact:true}).fill(`Creator variant 0${i}`);
+ const downloading=page.waitForEvent('download');await c.getByRole('button',{name:'Export site JSON',exact:true}).click();const download=await downloading,path=`/tmp/vigil-editor-export-qa/${download.suggestedFilename()}`;await download.saveAs(path);const json=fs.readFileSync(path,'utf8'),site=JSON.parse(json);exports.push(json);
+ results.push({check:`named variant ${i}`,pass:download.suggestedFilename()===`creator-variant-0${i}.site.json`&&site.title===`Creator variant 0${i}`&&site.pages[0].sections[0].content.title===`Export roundtrip sample ${i}`});
+}
+await c.getByRole('button',{name:'Import / inspect JSON',exact:true}).click();await c.getByLabel('Site JSON',{exact:true}).fill(exports[0]);await c.getByRole('button',{name:'Confirm replace site',exact:true}).click();results.push({check:'import first variant preserves its own configuration',pass:(await c.locator('.de-ending-heading h2').textContent())==='Export roundtrip sample 1'});await page.waitForTimeout(350);await page.reload();await c.locator('.de-ending-heading h2').waitFor();results.push({check:'imported variant survives reload',pass:(await c.locator('.de-ending-heading h2').textContent())==='Export roundtrip sample 1'});
+const out='docs/design-engine/editor-release/evidence';fs.mkdirSync(out,{recursive:true});fs.writeFileSync(`${out}/variant-export.json`,JSON.stringify({results,errors},null,2));console.log(JSON.stringify({results,errors},null,2));await browser.close();if(errors.length||results.some(r=>!r.pass))process.exitCode=1;

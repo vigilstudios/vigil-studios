@@ -1,0 +1,41 @@
+{
+  "repository": "vigil-studios",
+  "date": "2026-10-06",
+  "commands": [
+    {
+      "command": "npm run test -- --maxWorkers=2",
+      "result": "pass",
+      "files": 75,
+      "tests": 1366
+    },
+    {
+      "command": "npm run typecheck",
+      "result": "pass"
+    },
+    {
+      "command": "npm run lint",
+      "result": "pass",
+      "warnings": 0
+    },
+    {
+      "command": "npm run build",
+      "result": "pass"
+    }
+  ],
+  "browser": {
+    "layoutChecks": 187,
+    "overflows": 0,
+    "clippedCopy": 0,
+    "duplicateIds": 0,
+    "brokenMedia": 0,
+    "accessibilityAudits": 26,
+    "violations": 0,
+    "interactions": 12,
+    "failedInteractions": 0,
+    "labChecks": 28,
+    "failedLabChecks": 0,
+    "browserErrors": []
+  },
+  "readiness": "PARTIAL",
+  "boundary": "Hosted inquiry, booking-request and newsletter delivery require a verified FormSubmissionProvider adapter."
+}

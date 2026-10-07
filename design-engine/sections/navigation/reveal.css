@@ -1,0 +1,56 @@
+/* Imported directly by NavigationShell so the app tracks reveal CSS as a module
+   dependency. Every painted surface moves with the header, never its flow reserve. */
+.de-root .de-navigation-system[data-scroll="reveal"],
+.de-root.de-navigation-root:has(.de-navigation-system[data-scroll="reveal"]) {
+  background: transparent;
+}
+
+/* Composition owns pinning. A second sticky slot can leave stationary chrome. */
+.de-root .de-navigation-system[data-scroll="reveal"] > .de-nx-nav-slot {
+  position: relative;
+  top: 0;
+}
+
+.de-root .de-navigation-system[data-scroll="reveal"] .de-nx-navigation {
+  transform: translate3d(0, 0, 0);
+}
+
+/* A chosen scroll interaction is independent of decorative entrance motion none. */
+.de-root .de-navigation-system[data-scroll="reveal"]:not([data-reduced="true"]) .de-nx-navigation {
+  transition: transform .38s cubic-bezier(.22, .61, .36, 1) !important;
+}
+
+.de-root .de-navigation-system[data-scroll="reveal"][data-hidden="true"] .de-nx-navigation {
+  transform: translate3d(0, calc(-100% - 48px), 0);
+  pointer-events: none;
+}
+
+.de-root .de-navigation-system[data-scroll="reveal"][data-position="edge"][data-hidden="true"] .de-nx-navigation {
+  transform: translate3d(-110%, 0, 0);
+}
+
+@container (max-width: 760px) {
+  .de-root .de-navigation-system[data-scroll="reveal"][data-position="edge"][data-hidden="true"] .de-nx-navigation {
+    transform: translate3d(0, -110%, 0);
+  }
+}
+
+/* Focus must immediately bring its target into view, including mid-transition. */
+.de-root .de-navigation-system[data-scroll="reveal"] .de-nx-navigation:focus-within {
+  transform: translate3d(0, 0, 0) !important;
+  transition: none !important;
+  pointer-events: auto !important;
+}
+
+.de-root .de-navigation-system[data-scroll="reveal"][data-reduced="true"] .de-nx-navigation {
+  transform: translate3d(0, 0, 0);
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .de-root .de-navigation-system[data-scroll="reveal"] .de-nx-navigation {
+    transform: translate3d(0, 0, 0) !important;
+    transition: none !important;
+    pointer-events: auto;
+  }
+}

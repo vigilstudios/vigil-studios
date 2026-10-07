@@ -1,0 +1,25 @@
+{
+  "results": [
+    {
+      "check": "named variant 1",
+      "pass": true
+    },
+    {
+      "check": "named variant 2",
+      "pass": true
+    },
+    {
+      "check": "named variant 3",
+      "pass": true
+    },
+    {
+      "check": "import first variant preserves its own configuration",
+      "pass": true
+    },
+    {
+      "check": "imported variant survives reload",
+      "pass": true
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,164 @@
+/* Authored H09/H16 geometry, independent of their preserved calibration studies. */
+.de-root .de-production-hero:is(.de-object-study, .de-vertical-record) {
+  display: grid;
+  gap: var(--de-grid-gap);
+}
+.de-root
+  :is(.de-object-study, .de-vertical-record)
+  :is(header, aside, li, span) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.de-root .de-production-hero:is(.de-object-study, .de-vertical-record) h1.de-display {
+  font-size: max(2rem, min(calc(var(--de-display-size) * 0.7), 5.5cqw));
+  max-width: 100%;
+}
+.de-root :is(.de-object-study__mast, .de-vertical-record__mast) {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: var(--de-stack);
+}
+.de-root .de-production-hero.de-object-study h1.de-display {
+  font-size: max(2rem, min(calc(var(--de-display-size) * 0.6), 4.5cqw));
+}
+.de-root :is(.de-object-study, .de-vertical-record) .de-button {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.de-root .de-object-study {
+  grid-template-columns: minmax(0, 27fr) minmax(0, 65fr) minmax(2rem, 8fr);
+  grid-template-rows: auto 1fr;
+}
+.de-root .de-object-study__mast {
+  grid-column: 1/-1;
+  padding-bottom: var(--de-stack);
+}
+.de-root .de-object-study__copy {
+  justify-content: space-between;
+  padding-block: 1rem;
+}
+.de-root .de-object-study__plate {
+  width: var(--de-media-width);
+  justify-self: center;
+}
+.de-root .de-object-study__plate .de-treated__frame {
+  aspect-ratio: auto;
+  height: clamp(28rem, 44cqw, 39rem);
+  border-radius: max(0.8rem, var(--de-radius));
+  padding: var(--de-media-frame);
+}
+.de-root .de-object-study__number {
+  font-size: clamp(1.5rem, 4cqw, 4rem);
+}
+.de-root .de-object-study__material {
+  color: var(--de-muted);
+}
+.de-root .de-production-hero.de-vertical-record {
+  grid-template-columns: minmax(0, 33fr) minmax(0, 38fr) minmax(0, 29fr);
+  grid-template-rows: auto 1fr;
+  padding-block: 0;
+}
+.de-root .de-vertical-record__mast {
+  grid-column: 1;
+  grid-row: 1;
+  padding-top: var(--de-section-space);
+}
+.de-root .de-vertical-record__copy {
+  grid-column: 1;
+  grid-row: 2;
+  justify-content: space-between;
+  padding-bottom: var(--de-section-space);
+}
+.de-root .de-vertical-record__spine {
+  grid-column: 2;
+  grid-row: 1/3;
+  min-height: 44rem;
+  min-width: 0;
+}
+.de-root .de-vertical-record__spine .de-treated {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.de-root .de-vertical-record__spine .de-treated__frame {
+  aspect-ratio: auto;
+  min-height: 0;
+  flex: 1;
+  border-radius: 0;
+}
+.de-root .de-vertical-record__record {
+  grid-column: 3;
+  grid-row: 2;
+  padding-block: var(--de-stack) var(--de-section-space);
+}
+.de-root .de-vertical-record__record h2 {
+  font-weight: var(--de-mono-weight);
+  padding-bottom: var(--de-stack);
+  border-bottom: var(--de-border-width) solid var(--de-border);
+}
+.de-root .de-vertical-record__record ol {
+  list-style: none;
+  padding: 0;
+  margin: var(--de-stack) 0 0;
+  display: grid;
+  gap: var(--de-stack);
+}
+.de-root .de-vertical-record__record li {
+  display: grid;
+  gap: 0.4rem;
+}
+@container (max-width:1000px) {
+  .de-root .de-vertical-record {
+    column-gap: min(var(--de-grid-gap), 1.5rem);
+  }
+}
+@container (max-width:700px) {
+  .de-root .de-object-study {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .de-root .de-object-study__copy {
+    grid-column: 1/-1;
+    gap: var(--de-stack);
+  }
+  .de-root .de-object-study__plate {
+    grid-column: 1;
+    width: 100%;
+  }
+  .de-root .de-object-study__plate .de-treated__frame {
+    height: clamp(21rem, 90cqw, 32rem);
+  }
+  .de-root .de-object-study__number {
+    font-size: 1.5rem;
+    max-width: 4ch;
+  }
+  .de-root .de-production-hero.de-vertical-record {
+    grid-template-columns: minmax(0, 65fr) minmax(0, 35fr);
+    padding-top: var(--de-section-space);
+  }
+  .de-root .de-vertical-record__mast {
+    grid-column: 1/-1;
+    grid-row: 1;
+    padding-top: 0;
+  }
+  .de-root .de-vertical-record__copy {
+    grid-column: 1/-1;
+    grid-row: 2;
+    gap: var(--de-stack);
+    padding-bottom: var(--de-stack);
+  }
+  .de-root .de-vertical-record__spine {
+    grid-column: 1;
+    grid-row: 3;
+    min-height: 30rem;
+  }
+  .de-root .de-vertical-record__record {
+    grid-column: 2;
+    grid-row: 3;
+    padding-top: var(--de-stack);
+  }
+  .de-root .de-production-hero:is(.de-object-study, .de-vertical-record) h1.de-display {
+    font-size: max(2rem, min(calc(var(--de-display-size) * 0.85), 12cqw));
+  }
+}

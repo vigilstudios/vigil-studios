@@ -1,0 +1,7 @@
+/* Recursive groups stay in document flow inside each authored panel. */
+.de-nx-panel .de-nx-submenu { position: static; min-width: 0; max-width: none; box-shadow: none; padding: .5rem; margin-block: .35rem; }
+.de-nx-panel .de-nx-submenu .de-nx-submenu { padding-inline: .25rem; }
+.de-nx-panel .de-nx-link-item { min-width: 0; }
+.de-nx-panel .de-nx-link-item summary { white-space: normal; overflow-wrap: anywhere; min-height: 44px; }
+.de-nx-panel .de-nx-submenu a { min-height: 44px; white-space: normal; overflow-wrap: anywhere; }
+.de-nx-panel .de-nx-link-item:last-child .de-nx-submenu { inset: auto; }

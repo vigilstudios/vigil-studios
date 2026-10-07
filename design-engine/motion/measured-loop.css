@@ -1,0 +1,13 @@
+/* Shared visual-only measured loop; its owner supplies canonical accessible content. */
+.de-root {
+.de-measured-loop{overflow:clip;contain:inline-size;max-width:100%;padding-block:2rem}
+.de-measured-loop[data-gap="compact"]{--de-loop-gap:calc(var(--de-grid-gap) * .7)}
+.de-measured-loop[data-gap="spacious"]{--de-loop-gap:calc(var(--de-grid-gap) * 1.7)}
+.de-measured-loop[data-fade="soft"]{mask-image:linear-gradient(to right,transparent,#000 5%,#000 95%,transparent)}
+.de-measured-loop-track{display:flex;width:max-content;animation:de-evidence-loop var(--de-loop-duration,120s) linear infinite;animation-play-state:paused}
+.de-measured-loop[data-ready="true"][data-running="true"] .de-measured-loop-track{animation-play-state:running;will-change:transform}
+.de-measured-loop[data-direction="right"] .de-measured-loop-track{animation-direction:reverse}
+.de-measured-loop[data-hover-pause="true"]:hover .de-measured-loop-track{animation-play-state:paused;will-change:auto}
+.de-measured-loop-group{display:flex;gap:var(--de-loop-gap);padding-right:var(--de-loop-gap);align-items:center;flex-shrink:0}
+.de-measured-loop-item{width:var(--de-chorus-width);flex-shrink:0}
+}

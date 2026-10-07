@@ -1,0 +1,1633 @@
+/* Collection 007 is a Lab-only vocabulary. No storefront or global selectors. */
+.de-root[data-typography] .c7-study {
+  --c7-rule: color-mix(in srgb, var(--de-foreground) 25%, transparent);
+  padding: var(--de-section-space) var(--de-gutter);
+  background: var(--de-background);
+  color: var(--de-foreground);
+  font: var(--de-body-weight) var(--de-body-size) / var(--de-body-leading)
+    var(--de-font-body);
+  overflow-wrap: anywhere;
+}
+.c7-study * {
+  box-sizing: border-box;
+  min-width: 0;
+}
+.de-root[data-typography] .c7-study :is(h2, h3, h4, p, figure, ol, ul, dl, dd) {
+  margin: 0;
+}
+.c7-study :is(ol, ul) {
+  padding: 0;
+  list-style: none;
+}
+.c7-study img,
+.c7-study video {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.c7-study :is(button, select, input, a, summary) {
+  color: inherit;
+  font: inherit;
+}
+.c7-study :is(button, summary, select, a) {
+  min-height: 44px;
+}
+.c7-study button,
+.c7-study summary {
+  cursor: pointer;
+}
+.c7-study button {
+  border: 1px solid var(--c7-rule);
+  background: transparent;
+  padding: 0.7rem 1rem;
+}
+.c7-study button[aria-pressed="true"] {
+  background: var(--de-foreground);
+  color: var(--de-background);
+}
+.c7-study :is(a, button, select, input, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--de-accent);
+  outline-offset: 4px;
+}
+.c7-study select {
+  background: var(--de-background);
+  border: 1px solid var(--de-foreground);
+  padding: 0.6rem;
+  max-width: 100%;
+  font-size: 1rem;
+}
+.c7-study small,
+.c7-number,
+.c7-kicker,
+.c7-study dt {
+  font-family: var(--de-font-mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  font-weight: 400;
+}
+.c7-study small {
+  display: block;
+}
+.c7-study a {
+  text-underline-offset: 0.25em;
+}
+.c7-sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.de-root[data-typography] .c7-study h2 {
+  font-family: var(--de-font-display);
+  font-size: var(--de-display-size);
+  font-weight: var(--de-display-weight);
+  font-style: var(--de-display-style);
+  font-variation-settings: var(--de-display-axes);
+  line-height: var(--de-display-leading);
+  letter-spacing: var(--de-display-tracking);
+  text-transform: var(--de-display-transform);
+  max-width: var(--de-display-measure);
+  margin: 1.8rem 0;
+}
+.de-root[data-typography] .c7-study h3 {
+  font-family: var(--de-font-heading);
+  font-weight: var(--de-heading-weight);
+  font-style: var(--de-heading-style);
+  font-size: clamp(1.4rem, 2.6cqw, 2.6rem);
+  line-height: 1.15;
+  letter-spacing: var(--de-heading-tracking);
+}
+.c7-heading {
+  margin-bottom: clamp(2rem, 4.5cqw, 5rem);
+}
+.c7-kicker {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  text-transform: var(--de-accent-transform);
+  letter-spacing: var(--de-accent-tracking);
+}
+.c7-introduction {
+  max-width: 48ch;
+  margin-left: auto !important;
+}
+.c7-picture {
+  background: color-mix(in srgb, var(--de-foreground) 5%, transparent);
+}
+.c7-picture img {
+  max-height: 680px;
+}
+.c7-missing {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  min-height: 220px;
+  background: color-mix(in srgb, var(--de-foreground) 6%, transparent);
+  border: 1px dashed var(--c7-rule);
+}
+.c7-missing > span {
+  font-size: 2rem;
+}
+.c7-missing p {
+  max-width: 32ch;
+}
+.c7-placeholder > p {
+  padding: 1rem;
+  font-size: 0.85rem;
+}
+.c7-film details {
+  padding: 1rem;
+  border-bottom: 1px solid var(--c7-rule);
+}
+.c7-film summary {
+  padding: 0.6rem 0;
+}
+.c7-study figcaption {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  padding: 0.9rem 0;
+  max-width: 70ch;
+}
+.c7-record {
+  padding: 1.1rem 0;
+}
+.c7-record h3 {
+  font-size: clamp(1.25rem, 1.8cqw, 1.8rem) !important;
+  margin: 0.55rem 0 !important;
+}
+.c7-record > p:not(.c7-price) {
+  font-size: 0.95rem;
+  max-width: 44ch;
+}
+.c7-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-family: var(--de-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.95rem;
+  margin: 0.65rem 0 !important;
+}
+.c7-price del {
+  opacity: 0.75;
+  font-size: 0.85em;
+}
+.c7-availability {
+  font-size: 0.75rem;
+  display: block;
+}
+.c7-product-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  font-size: 0.8rem !important;
+  text-decoration: underline;
+  max-width: 100%;
+}
+.c7-product-link svg {
+  flex-shrink: 0;
+}
+.c7-choice-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.c7-choice-line button {
+  font-family: var(--de-font-mono);
+  font-size: 0.8rem;
+}
+.c7-destination {
+  padding: 2rem;
+  margin-top: 2rem;
+  background: var(--de-foreground);
+  color: var(--de-background);
+}
+.c7-destination h3 {
+  margin: 1rem 0 !important;
+}
+.c7-destination button {
+  border-color: currentColor;
+  margin-top: 1rem;
+}
+.c7-destination :focus-visible {
+  outline-color: currentColor !important;
+}
+/* P01: Unequal editorial attention, separate lead and shelf. */
+.c7-edit {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 6%;
+}
+.c7-edit > .c7-editorial-item > .c7-picture {
+  min-height: 460px;
+  display: grid;
+  align-items: center;
+}
+.c7-edit > .c7-editorial-item img {
+  max-height: 620px;
+}
+.c7-editor-note {
+  font-family: var(--de-font-heading);
+  font-size: clamp(1.4rem, 2.6cqw, 2.5rem);
+  line-height: 1.25;
+  max-width: 28ch;
+  margin: 1.5rem 0 4rem !important;
+}
+.c7-edit-support {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.3rem;
+}
+.c7-edit-support .c7-picture {
+  height: 250px;
+  display: grid;
+  place-items: center;
+}
+.c7-edit-support img {
+  max-height: 250px;
+}
+.c7-item-note {
+  font-size: 0.8rem;
+  margin: 0.9rem 0 !important;
+  max-width: 35ch;
+}
+.c7-edit-support .c7-record {
+  border-top: 1px solid var(--c7-rule);
+}
+/* P02: Scan lines retain category/availability/price roles. */
+.c7-p02 .c7-heading {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.c7-p02 .c7-kicker {
+  grid-column: 1/-1;
+}
+.c7-p02 .c7-heading h2 {
+  font-size: clamp(2rem, 4cqw, 4rem) !important;
+}
+.c7-p02 .c7-introduction {
+  align-self: end;
+}
+.c7-filters {
+  border-top: 2px solid currentColor;
+  border-bottom: 1px solid var(--c7-rule);
+}
+.c7-filters summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 0;
+  list-style: none;
+}
+.c7-filters summary::-webkit-details-marker {
+  display: none;
+}
+.c7-filters > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 1rem 0 2rem;
+}
+.c7-filters label {
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+.c7-filters .c7-check {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+.c7-check input {
+  width: 24px;
+  height: 24px;
+  accent-color: var(--de-accent);
+}
+.c7-register-labels,
+.c7-ledger li {
+  display: grid;
+  grid-template-columns: 1fr 16% 24%;
+  gap: 2rem;
+  align-items: center;
+}
+.c7-register-labels {
+  font: 0.7rem var(--de-font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 1.2rem 0;
+}
+.c7-ledger li {
+  border-top: 1px solid var(--c7-rule);
+  padding: 1rem 0;
+}
+.c7-ledger-object {
+  display: grid;
+  grid-template-columns: 2rem 76px 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+.c7-ledger-object :is(.c7-picture, .c7-missing) {
+  height: 76px;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.c7-ledger-object .c7-missing {
+  border: 0;
+  align-items: center;
+}
+.c7-ledger-object .c7-missing :is(p, small) {
+  display: none;
+}
+.c7-ledger-object img {
+  height: 76px;
+}
+.c7-ledger-object .c7-product-link {
+  font-size: 1rem !important;
+}
+.c7-ledger footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 2px solid currentColor;
+  padding: 1.5rem 0;
+  font-size: 0.8rem;
+}
+.c7-empty {
+  padding: 2rem 0;
+}
+/* P03: Central object and peripheral record, not a split buy box. */
+.c7-p03 .c7-heading {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.c7-p03 .c7-heading :is(h2, .c7-introduction) {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.c7-p03 .c7-introduction {
+  max-width: 44ch;
+}
+.c7-pedestal {
+  display: grid;
+  grid-template-columns: 20% 1fr 23%;
+  gap: 3%;
+  align-items: center;
+}
+.c7-edition {
+  grid-column: 1/-1;
+  text-align: center;
+  font: 0.75rem var(--de-font-mono);
+  letter-spacing: 0.16em;
+  margin: 1rem 0 !important;
+}
+.c7-object {
+  grid-column: 2;
+  grid-row: 2 / 4;
+}
+.c7-object .c7-picture {
+  border-radius: 40% 40% 2px 2px;
+  overflow: hidden;
+}
+.c7-object img {
+  height: 560px;
+}
+.c7-pedestal dl {
+  grid-column: 1;
+  grid-row: 2;
+}
+.c7-pedestal dl > div {
+  border-top: 1px solid var(--c7-rule);
+  padding: 1.3rem 0;
+}
+.c7-pedestal dd {
+  font-size: 0.9rem;
+  margin: 0.4rem 0 !important;
+}
+.c7-pedestal > .c7-record {
+  grid-column: 3;
+  grid-row: 2;
+}
+.c7-p03 .c7-price {
+  font-size: 0.85rem;
+}
+/* P04: Poster statement, panoramic exposure and a release bar. */
+.c7-p04 .c7-introduction {
+  display: none;
+}
+.c7-p04 .c7-heading h2 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.c7-p04 .c7-heading {
+  margin-bottom: 2rem;
+}
+.c7-release > h3 {
+  font-family: var(--de-font-display) !important;
+  font-size: clamp(3rem, 12.5cqw, 12rem) !important;
+  line-height: 0.92 !important;
+  letter-spacing: -0.025em !important;
+  max-width: 14ch;
+  margin-bottom: 1.4rem !important;
+}
+.c7-release > .c7-picture {
+  height: clamp(250px, 42cqw, 580px);
+}
+.c7-release > .c7-picture img {
+  height: 100%;
+}
+.c7-release-strip {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr auto auto;
+  gap: 1.3rem;
+  align-items: center;
+  border-top: 4px solid currentColor;
+  border-bottom: 4px solid currentColor;
+  padding: 1.2rem 0;
+}
+.c7-release-strip > p:first-child {
+  font-size: 0.85rem;
+}
+.c7-release-strip h4 {
+  font: 1.2rem/1.2 var(--de-font-heading);
+}
+.c7-release-strip > a {
+  grid-column: 1/-1;
+  font-size: 1rem !important;
+  justify-content: flex-end;
+}
+/* P05: Category worlds, not SKU cards. */
+.c7-p05 .c7-heading h2 {
+  max-width: 14ch;
+}
+.c7-atlas article {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  align-items: center;
+  gap: 8%;
+  padding: 3.5rem 0;
+  border-top: 1px solid var(--c7-rule);
+}
+.c7-atlas article:nth-child(even) {
+  grid-template-columns: 1.2fr 0.8fr;
+}
+.c7-atlas article:nth-child(even) > .c7-picture {
+  order: -1;
+  width: 75%;
+}
+.c7-atlas .c7-picture img {
+  max-height: 430px;
+}
+.c7-atlas-title h3 {
+  font-size: clamp(2.4rem, 5.8cqw, 5.5rem) !important;
+  margin: 1.2rem 0 !important;
+}
+.c7-atlas-title a {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+}
+.c7-atlas-title a:hover {
+  text-decoration: underline;
+}
+.c7-atlas-title p {
+  max-width: 32ch;
+  font-size: 0.95rem;
+}
+/* P06: An authored look relationship with an accessible legend. */
+.c7-look {
+  display: grid;
+  grid-template-columns: 1.15fr 0.8fr;
+  gap: 2rem 6%;
+}
+.c7-look > .c7-choice-line {
+  grid-column: 1/-1;
+}
+.c7-look-scene .c7-picture img {
+  max-height: 720px;
+}
+.c7-look-legend {
+  padding: 1rem 0;
+}
+.c7-look-choices {
+  margin: 2rem 0;
+}
+.c7-look-choices button {
+  display: grid;
+  grid-template-columns: 2rem 1fr 1.5rem;
+  gap: 1rem;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-top: 1px solid var(--c7-rule);
+  padding: 1.2rem 0.8rem;
+}
+.c7-look-choices small {
+  margin-top: 0.4rem;
+}
+.c7-look-selected {
+  border-top: 3px solid currentColor;
+  padding-top: 1.5rem;
+}
+.c7-look-selected > .c7-kicker {
+  font-size: 0.65rem;
+}
+.c7-look-selected > p:nth-child(2) {
+  font-family: var(--de-font-heading);
+  font-size: 1.8rem;
+  margin: 0.7rem 0 !important;
+}
+/* P07 and P14 share only the native sequence mechanism, not item structures. */
+.c7-sequence-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--c7-rule);
+  font: 0.8rem var(--de-font-mono);
+}
+.c7-sequence-controls > div {
+  display: flex;
+  gap: 0.5rem;
+}
+.c7-sequence-controls button {
+  padding: 0.7rem;
+}
+.c7-sequence {
+  display: flex;
+  gap: 2rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  padding: 0 0.25rem 1.5rem;
+  overscroll-behavior-x: contain;
+}
+.c7-sequence > article {
+  flex: 0 0 85%;
+  scroll-snap-align: start;
+}
+.c7-spread {
+  display: grid;
+  grid-template-columns: 1fr 24%;
+  gap: 2rem;
+}
+.c7-spread-story h3 {
+  font-size: clamp(2rem, 5cqw, 5rem) !important;
+  margin: 1rem 0 !important;
+}
+.c7-spread-story > p {
+  max-width: 44ch;
+  margin: 1rem 0 2rem !important;
+}
+.c7-spread-story > .c7-picture {
+  height: 400px;
+}
+.c7-spread-story img {
+  height: 100%;
+}
+.c7-colophon {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border-left: 1px solid currentColor;
+  padding-left: 1.5rem;
+}
+.c7-colophon > .c7-number {
+  font-size: 5rem;
+  line-height: 1;
+  margin-bottom: auto;
+}
+.c7-colophon > small {
+  padding-top: 2rem;
+}
+.c7-colophon .c7-record {
+  border-top: 1px solid var(--c7-rule);
+  margin-top: 0.8rem;
+}
+/* P08: whole-to-detail inspection, named targets instead of hover magnification. */
+.c7-anatomy {
+  display: grid;
+  grid-template-columns: 28% 1fr;
+  gap: 6%;
+}
+.c7-anatomy > aside {
+  align-self: center;
+}
+.c7-anatomy > aside .c7-picture img {
+  max-height: 300px;
+}
+.c7-anatomy > aside small {
+  margin: 1rem 0;
+}
+.c7-inspection > .c7-choice-line {
+  margin-bottom: 1rem;
+}
+.c7-inspection > div > .c7-picture img {
+  height: 440px;
+}
+.c7-material-copy {
+  display: grid;
+  grid-template-columns: 0.7fr 1fr;
+  gap: 1rem 2rem;
+  padding: 1.8rem 0;
+  border-bottom: 1px solid var(--c7-rule);
+}
+.c7-material-copy > small {
+  grid-column: 1/-1;
+  max-width: 72ch;
+}
+/* P09: document provenance with an optional image margin. */
+.c7-origin {
+  display: grid;
+  grid-template-columns: 27% 1fr;
+  gap: 7%;
+}
+.c7-origin-object .c7-picture img {
+  max-height: 330px;
+}
+.c7-origin ol {
+  border-top: 2px solid currentColor;
+}
+.c7-origin li {
+  display: grid;
+  grid-template-columns: 24% 1fr;
+  gap: 2rem;
+  border-bottom: 1px solid var(--c7-rule);
+  padding: 2rem 0;
+}
+.c7-origin-marker > span {
+  font: 3.4rem/1.2 var(--de-font-display);
+}
+.c7-origin-marker small {
+  margin-top: 1rem;
+}
+.c7-origin li h3 {
+  font-size: 1.8rem !important;
+}
+.c7-origin li p {
+  margin: 1rem 0 !important;
+}
+.c7-evidence {
+  padding-left: 1rem;
+  border-left: 2px solid var(--de-accent);
+}
+.c7-origin li figure {
+  width: 55%;
+  margin-top: 1.5rem !important;
+}
+.c7-origin li figure img {
+  max-height: 230px;
+}
+.c7-origin footer {
+  grid-column: 1/-1;
+  border-top: 2px dashed currentColor;
+  padding: 1.4rem 0;
+  font: 0.75rem var(--de-font-mono);
+}
+/* P10: one active viewing well, native media lifecycle. */
+.c7-p10 .c7-heading h2 {
+  font-size: clamp(2rem, 4cqw, 4rem) !important;
+}
+.c7-desk {
+  display: grid;
+  grid-template-columns: 1fr 24%;
+  gap: 2rem;
+}
+.c7-primary-media {
+  grid-row: 1/3;
+}
+.c7-primary-media :is(.c7-picture img, video) {
+  height: 560px;
+}
+.c7-primary-media figcaption span {
+  display: block;
+  font-family: var(--de-font-mono);
+  margin-bottom: 0.5rem;
+}
+.c7-contact-sheet {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+  align-content: start;
+}
+.c7-contact-sheet button {
+  padding: 0.4rem;
+  text-align: left;
+}
+.c7-contact-sheet .c7-picture img {
+  height: 105px;
+}
+.c7-contact-sheet button > span {
+  display: block;
+  font: 0.7rem var(--de-font-mono);
+  margin: 0.6rem 0;
+}
+.c7-contact-sheet button > small {
+  font-size: 0.65rem;
+}
+.c7-contact-sheet .c7-missing {
+  min-height: 105px;
+  max-height: 105px;
+  overflow: hidden;
+  padding: 0.5rem;
+}
+.c7-contact-sheet .c7-missing small,
+.c7-contact-sheet .c7-missing > span {
+  display: none;
+}
+.c7-desk-record {
+  align-self: end;
+  border-top: 1px solid var(--c7-rule);
+  padding-top: 1.4rem;
+}
+.c7-desk-record h3 {
+  font-size: 1.5rem !important;
+}
+/* P11: all media exposed, parallel captions and intrinsic aspect ratios. */
+.c7-folio-record {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  padding: 1rem 0;
+  margin-bottom: 4rem;
+}
+.c7-folio-record h3 {
+  font-size: 1.2rem !important;
+}
+.c7-folio > figure {
+  display: grid;
+  grid-template-columns: 25% 1fr;
+  gap: 5%;
+  margin: 0 0 5rem !important;
+  align-items: center;
+}
+.c7-folio > figure:nth-child(odd) > .c7-picture {
+  width: 80%;
+  justify-self: end;
+}
+.c7-folio > figure:nth-child(3n) > .c7-picture {
+  width: 100%;
+  justify-self: start;
+}
+.c7-folio figcaption .c7-number {
+  display: block;
+  font-size: 3.5rem;
+  margin-bottom: 2rem;
+}
+.c7-folio figcaption h4 {
+  font: 1.4rem/1.2 var(--de-font-heading);
+  margin: 1rem 0 !important;
+}
+.c7-folio .c7-picture img {
+  max-height: 800px;
+}
+/* P12: visible native option groups and a truthful variant receipt. */
+.c7-atelier {
+  display: grid;
+  grid-template-columns: 0.9fr 1fr;
+  gap: 8%;
+}
+.c7-option-object .c7-picture {
+  border-radius: var(--de-radius);
+  overflow: hidden;
+}
+.c7-option-object img {
+  height: 360px;
+}
+.c7-option-object h3 {
+  margin: 1.6rem 0 1rem !important;
+}
+.c7-option-object > p {
+  max-width: 40ch;
+  font-size: 0.9rem;
+}
+.c7-option-workbook fieldset {
+  border: 0;
+  border-top: 1px solid var(--c7-rule);
+  padding: 1.5rem 0 2rem;
+  margin: 0;
+}
+.c7-option-workbook legend {
+  font: 1.15rem var(--de-font-heading);
+  padding-right: 1rem;
+}
+.c7-option-workbook fieldset > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.c7-option {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--c7-rule);
+}
+.c7-option:has(input:checked) {
+  background: var(--de-foreground);
+  color: var(--de-background);
+}
+.c7-option input {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--de-accent);
+}
+.c7-option:focus-within {
+  outline: 3px solid var(--de-accent);
+  outline-offset: 3px;
+}
+.c7-option > span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.c7-option i {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+.c7-variant-receipt {
+  padding: 1.7rem 0;
+  border-top: 3px solid currentColor;
+  border-bottom: 1px solid var(--c7-rule);
+  display: grid;
+  gap: 0.7rem;
+}
+.c7-variant-receipt strong {
+  font: 1.6rem var(--de-font-mono);
+}
+.c7-guidance {
+  font-size: 0.8rem;
+  max-width: 55ch;
+  margin: 1.5rem 0 !important;
+}
+/* P13: criterion-aligned baseline/candidate, never pricing-plan cards. */
+.c7-bench {
+  max-width: 1100px;
+  margin: auto;
+}
+.c7-candidate {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  font-size: 0.8rem;
+  margin-bottom: 2rem;
+}
+.c7-bench-objects {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-left: 23%;
+}
+.c7-bench-objects > .c7-record {
+  border: 0;
+}
+.c7-bench-objects article > .c7-picture {
+  margin-top: 0.8rem;
+}
+.c7-bench-objects img {
+  height: 200px;
+}
+.c7-bench table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.c7-bench caption {
+  text-align: left;
+  font: 0.75rem var(--de-font-mono);
+  padding: 1.5rem 0;
+}
+.c7-bench th,
+.c7-bench td {
+  text-align: left;
+  vertical-align: top;
+  padding: 1rem;
+  border-top: 1px solid var(--c7-rule);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+.c7-bench th:first-child {
+  width: 23%;
+  font-family: var(--de-font-mono);
+  font-size: 0.75rem;
+}
+.c7-bench thead {
+  border-top: 3px solid currentColor;
+}
+.c7-bench tbody tr:last-child {
+  border-bottom: 3px solid currentColor;
+}
+/* P14: relation-first companion sequence with its own anchored introduction. */
+.c7-companions {
+  display: grid;
+  grid-template-columns: 25% 1fr;
+  gap: 0 5%;
+}
+.c7-anchor {
+  grid-column: 1;
+  grid-row: 1/3;
+  padding-top: 1rem;
+}
+.c7-anchor h3 {
+  margin: 1rem 0 !important;
+}
+.c7-anchor > p {
+  font-size: 0.9rem;
+  max-width: 30ch;
+}
+.c7-companions > .c7-sequence,
+.c7-companions > .c7-sequence-controls {
+  grid-column: 2;
+}
+.c7-companions .c7-sequence > article {
+  flex-basis: 58%;
+}
+.c7-companion > small {
+  border-bottom: 1px solid var(--c7-rule);
+  padding: 1rem 0;
+}
+.c7-companion > p {
+  font-family: var(--de-font-heading);
+  font-size: 1.3rem;
+  line-height: 1.3;
+  margin: 1.3rem 0 !important;
+  min-height: 5rem;
+}
+.c7-companion > .c7-picture img {
+  height: 290px;
+}
+/* Authored tablet/mobile composition, driven by artboard container width. */
+@container (max-width:900px) {
+  .c7-edit {
+    gap: 4%;
+  }
+  .c7-edit-support {
+    grid-template-columns: 1fr;
+  }
+  .c7-edit-support .c7-editorial-item {
+    display: grid;
+    grid-template-columns: 42% 1fr;
+    gap: 1rem;
+  }
+  .c7-edit-support .c7-item-note {
+    display: none;
+  }
+  .c7-edit-support .c7-picture,
+  .c7-edit-support img {
+    max-height: 210px;
+  }
+  .c7-edit-support .c7-record {
+    border-top: 0;
+  }
+  .c7-editor-note {
+    margin-bottom: 2rem !important;
+  }
+  .c7-pedestal {
+    grid-template-columns: 20% 1fr 24%;
+    gap: 2%;
+  }
+  .c7-object img {
+    height: 400px;
+  }
+  .c7-release-strip {
+    grid-template-columns: 1fr 1fr;
+  }
+  .c7-desk {
+    grid-template-columns: 1fr;
+  }
+  .c7-primary-media {
+    grid-row: auto;
+  }
+  .c7-primary-media :is(.c7-picture img, video) {
+    height: 460px;
+  }
+  .c7-contact-sheet {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .c7-desk-record {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .c7-bench-objects {
+    margin-left: 20%;
+  }
+  .c7-companions {
+    grid-template-columns: 22% 1fr;
+  }
+  .c7-colophon {
+    padding-left: 1rem;
+  }
+  .c7-spread {
+    grid-template-columns: 1fr 30%;
+    gap: 1rem;
+  }
+  .c7-spread-story > .c7-picture {
+    height: 320px;
+  }
+}
+@container (max-width:600px) {
+  .de-root[data-typography] .c7-study {
+    padding: 2rem 1.15rem;
+    font-size: 1rem;
+  }
+  .c7-heading {
+    margin-bottom: 2rem;
+  }
+  .c7-kicker {
+    font-size: 0.65rem;
+    gap: 0.6rem;
+  }
+  .c7-heading h2 {
+    margin: 1.2rem 0 !important;
+  }
+  .c7-introduction {
+    font-size: 0.95rem;
+    margin-left: 0 !important;
+  }
+  .c7-record h3 {
+    font-size: 1.3rem !important;
+  }
+  .c7-record > small {
+    font-size: 0.65rem;
+  }
+  .c7-missing {
+    min-height: 190px;
+    padding: 1rem;
+  }
+  .c7-price {
+    font-size: 0.9rem;
+  }
+  .c7-product-link {
+    gap: 0.5rem;
+  }
+  .c7-study figcaption {
+    font-size: 0.75rem;
+  }
+  .c7-study button {
+    padding: 0.7rem;
+  }
+  .c7-edit {
+    display: block;
+  }
+  .c7-edit > .c7-editorial-item > .c7-picture {
+    min-height: 0;
+  }
+  .c7-edit > .c7-editorial-item img {
+    height: 350px;
+  }
+  .c7-edit > .c7-editorial-item .c7-record {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.3rem 1rem;
+  }
+  .c7-edit > .c7-editorial-item .c7-record h3 {
+    grid-column: 1/-1;
+  }
+  .c7-edit > .c7-editorial-item .c7-record > small {
+    grid-column: 1/-1;
+  }
+  .c7-edit > .c7-editorial-item .c7-record > a {
+    grid-column: 1/-1;
+  }
+  .c7-editor-note {
+    font-size: 1.5rem;
+    border-top: 1px solid var(--c7-rule);
+    padding-top: 1.5rem;
+    margin: 1.5rem 0 !important;
+  }
+  .c7-edit-support {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .c7-edit-support .c7-editorial-item {
+    display: block;
+  }
+  .c7-edit-support .c7-picture,
+  .c7-edit-support img {
+    height: 180px;
+  }
+  .c7-edit-support h3 {
+    font-size: 1.15rem !important;
+  }
+  .c7-edit-support .c7-item-note {
+    display: block;
+    font-size: 0.7rem;
+  }
+  .c7-edit-support .c7-record {
+    padding: 0.5rem 0;
+  }
+  .c7-p02 .c7-heading {
+    display: block;
+  }
+  .c7-register-labels {
+    display: none;
+  }
+  .c7-filters > div {
+    display: grid;
+    gap: 1rem;
+  }
+  .c7-ledger li {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .c7-ledger-object {
+    grid-column: 1/-1;
+    grid-template-columns: 1.5rem 52px 1fr;
+    gap: 0.6rem;
+  }
+  .c7-ledger-object :is(.c7-picture, .c7-missing),
+  .c7-ledger-object img {
+    height: 64px;
+  }
+  .c7-ledger li > .c7-price {
+    justify-self: end;
+    font-size: 0.8rem;
+  }
+  .c7-ledger li > .c7-availability {
+    padding-left: 2rem;
+  }
+  .c7-ledger footer {
+    display: block;
+    font-size: 0.75rem;
+  }
+  .c7-ledger footer small {
+    margin-top: 0.7rem;
+  }
+  .c7-pedestal {
+    grid-template-columns: 1fr;
+  }
+  .c7-edition {
+    grid-row: 1;
+    grid-column: 1 !important;
+    font-size: 0.65rem;
+  }
+  .c7-object {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .c7-object img {
+    height: 350px;
+  }
+  .c7-pedestal dl {
+    grid-column: 1;
+    grid-row: 3;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.7rem;
+  }
+  .c7-pedestal dt {
+    font-size: 0.65rem;
+  }
+  .c7-pedestal dd {
+    font-size: 0.75rem;
+  }
+  .c7-pedestal > .c7-record {
+    grid-column: 1;
+    grid-row: 4;
+    text-align: center;
+    max-width: 30ch;
+    margin: auto;
+  }
+  .c7-pedestal .c7-price {
+    justify-content: center;
+  }
+  .c7-release > h3 {
+    font-size: clamp(2.6rem, 14cqw, 5rem) !important;
+  }
+  .c7-release > .c7-picture {
+    height: 240px;
+  }
+  .c7-release-strip {
+    gap: 0.8rem;
+    padding: 1rem 0;
+  }
+  .c7-release-strip h4 {
+    font-size: 1.2rem;
+  }
+  .c7-release-strip > p:first-child {
+    font-size: 0.75rem;
+  }
+  .c7-atlas article,
+  .c7-atlas article:nth-child(even) {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 1.5rem;
+    padding: 2rem 0;
+  }
+  .c7-atlas article > .c7-picture {
+    width: 85%;
+    align-self: flex-end;
+  }
+  .c7-atlas article:nth-child(even) > .c7-picture {
+    order: 0;
+    width: 65%;
+    align-self: flex-start;
+  }
+  .c7-atlas-title h3 {
+    font-size: 2.6rem !important;
+  }
+  .c7-atlas-title p {
+    font-size: 0.85rem;
+  }
+  .c7-atlas .c7-picture img {
+    max-height: 300px;
+  }
+  .c7-look {
+    display: block;
+  }
+  .c7-look > .c7-choice-line {
+    margin-bottom: 1.4rem;
+  }
+  .c7-look-scene .c7-picture img {
+    height: 390px;
+  }
+  .c7-look-legend {
+    padding-top: 0.4rem;
+  }
+  .c7-look-choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+    margin: 1rem 0;
+  }
+  .c7-look-choices button {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    border: 1px solid var(--c7-rule);
+    text-align: left;
+  }
+  .c7-look-choices button > svg {
+    display: none;
+  }
+  .c7-look-choices button small {
+    font-size: 0.65rem;
+  }
+  .c7-look-selected {
+    padding-top: 1rem;
+  }
+  .c7-look-selected > .c7-record {
+    padding: 0.3rem 0;
+  }
+  .c7-sequence {
+    gap: 1rem;
+  }
+  .c7-sequence > article {
+    flex-basis: 89%;
+  }
+  .c7-sequence-controls {
+    font-size: 0.7rem;
+  }
+  .c7-sequence-controls > div {
+    flex-shrink: 0;
+  }
+  .c7-spread {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .c7-spread-story h3 {
+    font-size: 2.4rem !important;
+  }
+  .c7-spread-story > p {
+    font-size: 0.9rem;
+  }
+  .c7-spread-story > .c7-picture {
+    height: 290px;
+  }
+  .c7-colophon {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: 0.6rem;
+    border-left: 0;
+    border-top: 2px solid currentColor;
+    padding: 1rem 0;
+  }
+  .c7-colophon > .c7-number {
+    font-size: 2.3rem;
+    grid-row: 1/3;
+  }
+  .c7-colophon > small {
+    padding: 0;
+    font-size: 0.65rem;
+  }
+  .c7-colophon > .c7-record {
+    margin: 0;
+    padding: 0.4rem 0;
+  }
+  .c7-anatomy {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .c7-anatomy > aside {
+    display: grid;
+    grid-template-columns: 75px 1fr;
+    gap: 0.5rem 1rem;
+    align-items: center;
+    width: 100%;
+  }
+  .c7-anatomy > aside > .c7-picture {
+    grid-row: 1/3;
+  }
+  .c7-anatomy > aside img {
+    height: 95px;
+  }
+  .c7-anatomy > aside small {
+    margin: 0;
+    font-size: 0.65rem;
+  }
+  .c7-anatomy > aside a {
+    font-size: 0.7rem !important;
+  }
+  .c7-inspection > div > .c7-picture img {
+    height: 300px;
+  }
+  .c7-material-copy {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+    padding: 1.4rem 0;
+  }
+  .c7-material-copy > small {
+    font-size: 0.7rem;
+  }
+  .c7-origin {
+    display: block;
+  }
+  .c7-origin-object {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .c7-origin-object .c7-picture img {
+    height: 160px;
+  }
+  .c7-origin-object .c7-record {
+    padding: 0;
+  }
+  .c7-origin li {
+    grid-template-columns: 23% 1fr;
+    gap: 1rem;
+    padding: 1.5rem 0;
+  }
+  .c7-origin-marker > span {
+    font-size: 2.4rem;
+  }
+  .c7-origin-marker small {
+    font-size: 0.6rem;
+  }
+  .c7-origin li h3 {
+    font-size: 1.4rem !important;
+  }
+  .c7-origin li p {
+    font-size: 0.9rem;
+  }
+  .c7-origin li figure {
+    width: 100%;
+  }
+  .c7-origin footer {
+    font-size: 0.65rem;
+    margin-top: 2rem;
+  }
+  .c7-evidence {
+    font-size: 0.65rem;
+  }
+  .c7-primary-media :is(.c7-picture img, video) {
+    height: 320px;
+  }
+  .c7-contact-sheet {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .c7-contact-sheet .c7-picture img {
+    height: 90px;
+  }
+  .c7-contact-sheet button > small {
+    font-size: 0.6rem;
+  }
+  .c7-desk {
+    gap: 1rem;
+  }
+  .c7-desk-record {
+    display: block;
+  }
+  .c7-folio-record {
+    margin-bottom: 2rem;
+  }
+  .c7-folio > figure {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 0.8rem;
+    margin-bottom: 3rem !important;
+  }
+  .c7-folio figcaption {
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    gap: 0.6rem;
+    max-width: 100%;
+  }
+  .c7-folio figcaption .c7-number {
+    font-size: 1.4rem;
+    margin: 0;
+    grid-row: 1/3;
+  }
+  .c7-folio figcaption h4 {
+    font-size: 1.2rem;
+    margin: 0 !important;
+  }
+  .c7-folio figcaption p {
+    grid-column: 2;
+  }
+  .c7-folio > figure > .c7-picture {
+    width: 100%;
+    align-self: flex-start;
+  }
+  .c7-folio > figure:nth-child(odd) > .c7-picture {
+    width: 80%;
+    align-self: flex-end;
+  }
+  .c7-folio .c7-picture img {
+    max-height: 490px;
+  }
+  .c7-atelier {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .c7-option-object {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 0.8rem 1rem;
+  }
+  .c7-option-object > .c7-picture {
+    grid-row: 1/3;
+  }
+  .c7-option-object img {
+    height: 130px;
+  }
+  .c7-option-object h3 {
+    font-size: 1.4rem !important;
+    margin: 0 !important;
+  }
+  .c7-option-object p {
+    font-size: 0.8rem;
+  }
+  .c7-option-workbook fieldset {
+    padding-bottom: 1.4rem;
+  }
+  .c7-variant-receipt strong {
+    font-size: 1.35rem;
+  }
+  .c7-candidate {
+    display: grid;
+    gap: 0.6rem;
+  }
+  .c7-bench-objects {
+    margin-left: 0;
+    gap: 1rem;
+  }
+  .c7-bench-objects img {
+    height: 145px;
+  }
+  .c7-bench-objects h3 {
+    font-size: 1.15rem !important;
+  }
+  .c7-bench-objects .c7-price {
+    font-size: 0.8rem;
+  }
+  .c7-bench th,
+  .c7-bench td {
+    padding: 0.75rem 0.4rem;
+    font-size: 0.75rem;
+  }
+  .c7-bench th:first-child {
+    width: 24%;
+    font-size: 0.65rem;
+  }
+  .c7-bench thead th {
+    font-size: 0.65rem;
+  }
+  .c7-companions {
+    display: block;
+  }
+  .c7-anchor {
+    border-top: 2px solid currentColor;
+    margin-bottom: 1.5rem;
+  }
+  .c7-anchor h3 {
+    font-size: 1.5rem !important;
+  }
+  .c7-anchor > p {
+    max-width: 40ch;
+  }
+  .c7-companions .c7-sequence > article {
+    flex-basis: 86%;
+  }
+  .c7-companion > .c7-picture img {
+    height: 260px;
+  }
+  .c7-companion > p {
+    min-height: 0;
+    font-size: 1.25rem;
+  }
+  .c7-destination {
+    padding: 1.3rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .c7-study * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+.c7-notes dl > div {
+  border-top: 1px solid var(--border);
+  padding: 0.8rem 0;
+}
+.c7-notes dt {
+  font-weight: 600;
+}
+.c7-notes dd {
+  margin: 0.4rem 0;
+  line-height: 1.6;
+}
+.c7-notes p {
+  line-height: 1.6;
+}
+.c7-notes pre {
+  white-space: pre-wrap;
+  font-size: 0.7rem;
+}
+.c7-overview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  background: #e0e0dc;
+  padding: 24px;
+}
+.c7-overview > article {
+  background: #fff;
+  color: #222;
+  overflow: hidden;
+}
+.c7-overview > article > h3 {
+  padding: 16px;
+  font: 16px/1.3 sans-serif;
+}
+.c7-overview-stage {
+  width: 1440px;
+  height: 980px;
+  transform: scale(0.455);
+  transform-origin: top left;
+  margin-bottom: -534px;
+  overflow: hidden;
+}
+.c7-overview > article > button {
+  padding: 16px;
+  min-height: 44px;
+  border: 0;
+  border-top: 1px solid #aaa;
+  width: 100%;
+  text-align: left;
+  background: #fff;
+  color: #222;
+  cursor: pointer;
+}
+/* Contain absolutely positioned assistive text inside native horizontal regions. */
+.c7-study,
+.c7-sequence {
+  position: relative;
+}

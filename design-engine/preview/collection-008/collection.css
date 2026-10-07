@@ -1,0 +1,1453 @@
+.de-root[data-typography] {
+  /* Collection 008 is an isolated creative workspace, not a production skin. */
+  .c8-study {
+    container-type: inline-size;
+    padding: 2rem var(--de-gutter, 4%);
+    background: var(--de-background);
+    color: var(--de-foreground);
+    font-family: var(--de-font-body);
+    overflow-wrap: anywhere;
+  }
+  .c8-study * {
+    box-sizing: border-box;
+    min-width: 0;
+  }
+  .c8-study :is(p, h2, h3, figure, blockquote, dl, dd, ol) {
+    margin: 0;
+  }
+  .c8-study :is(p, dd) {
+    font: var(--de-body-weight, 400)
+      var(--de-body-size, 1rem)/var(--de-body-leading, 1.6) var(--de-font-body);
+    max-width: 65ch;
+  }
+  .c8-study p + p {
+    margin-top: 1rem;
+  }
+  .c8-study h2 {
+    font-family: var(--de-font-display);
+    font-weight: var(--de-display-weight);
+    font-style: var(--de-display-style);
+    font-size: clamp(2.3rem, 5.4cqw, 5.8rem);
+    line-height: 1.04;
+    letter-spacing: var(--de-display-tracking);
+    text-transform: var(--de-display-transform);
+    max-width: 21ch;
+  }
+  .c8-study h3 {
+    font: var(--de-heading-weight, 600) clamp(1.2rem, 2.3cqw, 2rem)/1.2
+      var(--de-font-heading);
+    letter-spacing: var(--de-heading-tracking);
+    margin-bottom: 0.8rem;
+  }
+  .c8-study a {
+    color: inherit;
+  }
+  .c8-study :is(button, summary) {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    min-height: 44px;
+  }
+  .c8-study button {
+    background: transparent;
+    border: 1px solid currentColor;
+    text-align: left;
+    padding: 0.7rem 1rem;
+  }
+  .c8-study :is(button, summary, a):focus-visible {
+    outline: 3px solid var(--de-accent);
+    outline-offset: 5px;
+  }
+  .c8-study button[aria-pressed="true"] {
+    color: var(--de-background);
+    background: var(--de-foreground);
+  }
+  .c8-study summary {
+    padding: 0.8rem 0;
+    line-height: 1.5;
+  }
+  .c8-study summary:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .c8-study small {
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+  .c8-eyebrow,
+  .c8-colophon,
+  .c8-footer,
+  .c8-study dt {
+    font: 500 0.72rem/1.5 var(--de-font-mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .c8-colophon,
+  .c8-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--de-border);
+    padding-top: 0.8rem;
+  }
+  .c8-colophon {
+    margin-bottom: 3.6rem;
+  }
+  .c8-footer {
+    margin-top: 4rem;
+    color: var(--de-muted);
+  }
+  .c8-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+    align-items: end;
+    gap: 4rem;
+    margin-bottom: 3.5rem;
+  }
+  .c8-intro > p {
+    max-width: 40ch;
+  }
+  .c8-picture {
+    position: relative;
+    width: 100%;
+  }
+  .c8-picture img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    min-height: 0;
+  }
+  .c8-picture img[src$=".svg"] {
+    object-fit: contain;
+    background: var(--de-background);
+  }
+  .c8-picture > figcaption {
+    font: 0.65rem/1.5 var(--de-font-mono);
+    padding: 0.5rem 0;
+    color: var(--de-muted);
+  }
+  .c8-image-unavailable {
+    min-height: 180px;
+    background: color-mix(
+      in srgb,
+      var(--de-foreground) 6%,
+      var(--de-background)
+    );
+    border: 1px dashed var(--de-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .c8-image-unavailable svg {
+    width: 32px;
+    height: 32px;
+  }
+  .c8-source {
+    margin-top: 0.8rem;
+    font-size: 0.8rem;
+  }
+  .c8-source > summary {
+    font: 0.7rem/1.5 var(--de-font-mono);
+    letter-spacing: 0.04em;
+  }
+  .c8-source dl {
+    padding: 1rem;
+    border-left: 2px solid var(--de-border);
+    display: grid;
+    gap: 0.8rem;
+  }
+  .c8-source dd {
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+  .c8-source dt {
+    font-size: 0.65rem;
+  }
+  .c8-voice blockquote p {
+    font: var(--de-heading-weight, 500) clamp(1.25rem, 2.2cqw, 2rem)/1.28
+      var(--de-font-heading);
+    letter-spacing: var(--de-heading-tracking);
+    max-width: 38ch;
+  }
+  .c8-voice blockquote p:before {
+    content: "“";
+  }
+  .c8-voice blockquote p:after {
+    content: "”";
+  }
+  .c8-attribution {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-top: 1.2rem;
+    font-size: 0.83rem;
+    line-height: 1.4;
+  }
+  .c8-attribution span {
+    color: var(--de-muted);
+  }
+  .c8-result > strong {
+    display: block;
+    font: var(--de-display-weight) clamp(3rem, 8cqw, 8rem)/1
+      var(--de-font-display);
+    letter-spacing: -0.04em;
+    margin: 0.8rem 0;
+  }
+  .c8-result > strong small {
+    display: block;
+    font: 400 0.85rem/1.5 var(--de-font-body);
+    letter-spacing: 0;
+    margin-top: 0.5rem;
+  }
+  .c8-result > p {
+    font-size: 0.85rem;
+  }
+  .c8-destination {
+    border-top: 1px solid var(--de-border);
+    margin-top: 1.8rem;
+  }
+  .c8-destination > summary {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+  }
+  .c8-destination > div {
+    padding: 1.5rem;
+    border-left: 2px solid currentColor;
+  }
+  .c8-destination h3 {
+    margin-top: 0.8rem;
+  }
+  .c8-all-records {
+    grid-column: 1/-1;
+    border-top: 1px solid var(--de-border);
+    margin-top: 2rem;
+  }
+  .c8-all-records article {
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--de-border);
+  }
+  /* E01: a portrait margin and a long, uninterrupted voice. */
+  .c8-e01 .c8-intro {
+    grid-template-columns: 1fr;
+  }
+  .c8-e01 .c8-intro > p {
+    display: none;
+  }
+  .c8-margin {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 9%;
+    padding-block: 1rem 3rem;
+  }
+  .c8-witness .c8-picture {
+    max-width: 330px;
+  }
+  .c8-witness .c8-picture img {
+    aspect-ratio: 3/4;
+    object-position: 50% 35%;
+    filter: grayscale(1);
+  }
+  .c8-margin-quote {
+    padding-top: 4rem;
+  }
+  .c8-margin-quote .c8-voice blockquote p {
+    font-family: var(--de-font-display);
+    font-weight: var(--de-display-weight);
+    font-style: var(--de-display-style);
+    font-size: clamp(2rem, 4.8cqw, 5rem);
+    line-height: 1.1;
+    max-width: 25ch;
+  }
+  .c8-margin-note {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 2rem !important;
+    padding-left: 18%;
+    font-size: 0.9rem !important;
+  }
+  .c8-margin-note > span {
+    font-size: 2rem;
+  }
+  /* E02: the arithmetic is the composition. */
+  .c8-e02 .c8-intro h2 {
+    font-size: clamp(2rem, 4cqw, 4rem);
+  }
+  .c8-equation {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 3rem;
+  }
+  .c8-equation-values {
+    display: grid;
+    grid-template-columns: 1fr 0.25fr 1fr;
+    gap: 1rem;
+    align-items: center;
+    grid-column: 1/-1;
+    border-block: 2px solid currentColor;
+    padding: 2rem 0;
+  }
+  .c8-equation-values > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .c8-equation-values strong {
+    font: var(--de-display-weight) clamp(4.5rem, 19cqw, 19rem)/0.95
+      var(--de-font-display);
+    letter-spacing: -0.07em;
+    font-variant-numeric: tabular-nums;
+  }
+  .c8-equation-values small {
+    font: 1rem/1.5 var(--de-font-body);
+  }
+  .c8-equation-values i {
+    height: 8px;
+    background: currentColor;
+    display: block;
+    min-width: 2px;
+  }
+  .c8-equation-values > div:first-child i {
+    background: var(--de-muted);
+  }
+  .c8-equals-arrow {
+    font-size: clamp(2rem, 5cqw, 5rem);
+    text-align: center;
+  }
+  .c8-equation-note {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 2rem;
+  }
+  .c8-equation-note h3,
+  .c8-equation-note > .c8-source {
+    grid-column: 1/-1;
+  }
+  .c8-equation-note > p {
+    margin: 0;
+  }
+  .c8-delta {
+    font: 600 1.5rem/1.25 var(--de-font-mono) !important;
+  }
+  .c8-delta small {
+    font: 0.8rem/1.5 var(--de-font-body);
+  }
+  .c8-equation > .c8-voice {
+    border-left: 1px solid currentColor;
+    padding-left: 2rem;
+  }
+  /* E03: three different chapter forms, with conditions exposed. */
+  .c8-dossier-subject {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 1rem 0;
+    border-block: 1px solid currentColor;
+  }
+  .c8-dossier-subject p {
+    font-size: 0.8rem;
+  }
+  .c8-chapters {
+    list-style: none;
+    padding: 2rem 0;
+    display: grid;
+    grid-template-columns: 1fr 0.85fr 1.4fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  .c8-chapter-number {
+    display: block;
+    font: 500 1rem var(--de-font-mono);
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .c8-chapters .c8-picture {
+    margin: 1.5rem 0;
+  }
+  .c8-chapters .c8-picture img {
+    aspect-ratio: 4/3;
+  }
+  .c8-chapters .c8-stage-value {
+    font: var(--de-display-weight) clamp(3.5rem, 8cqw, 8rem)/1
+      var(--de-font-display);
+    margin-top: 1.5rem;
+  }
+  .c8-stage-value small {
+    display: block;
+    font: 0.8rem/1.6 var(--de-font-body);
+    margin-top: 0.6rem;
+  }
+  .c8-intervention {
+    padding: 1.5rem;
+    background: var(--de-foreground);
+    color: var(--de-background);
+    margin-top: 5rem;
+  }
+  .c8-intervention > p {
+    font-size: 0.9rem;
+  }
+  .c8-process-arrow {
+    display: block;
+    font-size: 4rem;
+    text-align: right;
+    margin-top: 3rem;
+  }
+  .c8-outcome {
+    padding-left: 1.2rem;
+    border-left: 1px solid var(--de-border);
+  }
+  .c8-dossier-footer {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 5rem;
+    border-top: 1px solid currentColor;
+    padding-top: 2.5rem;
+  }
+  .c8-dossier-footer > div > p {
+    font-size: 0.85rem;
+  }
+  /* E04: image slice, opaque evidence caption, compact case footer. */
+  .c8-case-panorama {
+    position: relative;
+  }
+  .c8-case-panorama > .c8-picture img {
+    height: 500px;
+  }
+  .c8-case-panorama > .c8-picture > figcaption {
+    position: absolute;
+    top: 0.5rem;
+    left: 1rem;
+    background: var(--de-background);
+    color: var(--de-foreground);
+    padding: 0.4rem;
+  }
+  .c8-case-panorama > figcaption {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 34%;
+    padding: 2rem;
+    background: var(--de-foreground);
+    color: var(--de-background);
+  }
+  .c8-case-panorama .c8-result > strong {
+    font-size: clamp(3rem, 7cqw, 7rem);
+  }
+  .c8-case-footer {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 4rem;
+    padding-top: 2rem;
+  }
+  .c8-case-facts {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .c8-case-facts > div {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 1rem;
+  }
+  .c8-case-facts dd {
+    font-size: 0.92rem;
+  }
+  /* E05: catalog and generous accession plate. */
+  .c8-credentials {
+    display: grid;
+    grid-template-columns: 1fr 1.8fr;
+    gap: 3rem;
+  }
+  .c8-credential-index {
+    border-top: 1px solid currentColor;
+  }
+  .c8-credential-index button {
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid var(--de-border);
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    gap: 0.2rem 1rem;
+    padding: 1.2rem;
+  }
+  .c8-credential-index button small {
+    grid-column: 2;
+  }
+  .c8-accession {
+    border: 1px solid var(--de-border);
+    padding: 3rem 8%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 510px;
+  }
+  .c8-accession-year {
+    font: var(--de-display-weight) clamp(4rem, 9cqw, 9rem)/1.1
+      var(--de-font-display);
+    margin: 2rem 0;
+  }
+  .c8-accession h3 {
+    max-width: 20ch;
+    font-size: clamp(1.7rem, 3.5cqw, 3.5rem);
+  }
+  .c8-accession .c8-source {
+    text-align: left;
+    width: 100%;
+  }
+  /* E06: a chorus with deliberate asymmetry, no quote cards. */
+  .c8-e06 .c8-intro {
+    display: block;
+    text-align: center;
+  }
+  .c8-e06 .c8-intro h2 {
+    margin: 0 auto;
+    max-width: 18ch;
+  }
+  .c8-e06 .c8-intro > p {
+    margin: 1.5rem auto;
+  }
+  .c8-chorus {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr 1fr;
+    gap: 4rem 4%;
+  }
+  .c8-chorus-voice {
+    padding-top: 1rem;
+    border-top: 1px solid currentColor;
+  }
+  .c8-chorus-voice .c8-picture {
+    margin: 1rem 0;
+    max-width: 210px;
+  }
+  .c8-chorus-voice .c8-picture img {
+    aspect-ratio: 1;
+    object-position: 50% 25%;
+    border-radius: 50%;
+  }
+  .c8-chorus-voice-0 {
+    grid-column: span 2;
+  }
+  .c8-chorus-voice-0 .c8-picture {
+    float: left;
+    margin-right: 2rem;
+    width: 25%;
+  }
+  .c8-chorus-voice-0 .c8-voice blockquote p {
+    font: var(--de-display-weight) clamp(1.8rem, 3.7cqw, 3.8rem)/1.15
+      var(--de-font-display);
+  }
+  .c8-chorus-voice-1 {
+    padding-top: 5rem;
+    border-top: 0;
+  }
+  .c8-chorus-voice-2 .c8-voice blockquote p {
+    font-size: 1.35rem;
+  }
+  .c8-chorus-voice-3 {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    gap: 1rem;
+  }
+  .c8-chorus-voice-3 > .c8-eyebrow {
+    grid-column: 1/-1;
+  }
+  /* E07: sample distribution plus a spacious review journal. */
+  .c8-reviews {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 7%;
+  }
+  .c8-rating > strong {
+    font: var(--de-display-weight) clamp(4rem, 9cqw, 9rem)/1.1
+      var(--de-font-display);
+    display: block;
+    margin-top: 1rem;
+  }
+  .c8-rating > strong small {
+    font-size: 1.2rem;
+  }
+  .c8-rating > p {
+    font-size: 0.85rem;
+  }
+  .c8-distribution {
+    display: grid;
+    gap: 0.8rem;
+    margin: 2rem 0;
+  }
+  .c8-distribution > div {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr 1rem;
+    gap: 1rem;
+    align-items: center;
+    font: 0.8rem var(--de-font-mono);
+  }
+  .c8-distribution i {
+    height: 6px;
+    background: color-mix(in srgb, currentColor 15%, transparent);
+  }
+  .c8-distribution b {
+    display: block;
+    height: 100%;
+    background: currentColor;
+  }
+  .c8-filters {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.4rem;
+  }
+  .c8-filters button {
+    font-size: 0.8rem;
+  }
+  .c8-review-row {
+    border-top: 1px solid currentColor;
+    margin-top: 1.3rem;
+    padding: 1.3rem 0;
+  }
+  .c8-review-meta {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    align-items: center;
+    font: 0.7rem/1.5 var(--de-font-mono);
+    margin-bottom: 1rem;
+  }
+  .c8-review-meta strong {
+    font-size: 1rem;
+  }
+  .c8-review-row .c8-voice blockquote p {
+    font: 400 1.2rem/1.6 var(--de-font-body);
+    max-width: 55ch;
+  }
+  /* E08: cinema framing, then questions instead of a play-shaped promise. */
+  .c8-conversation {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 5%;
+  }
+  .c8-interview-scene .c8-picture img {
+    aspect-ratio: 4/5;
+    object-fit: cover;
+  }
+  .c8-interview-scene video {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+  .c8-interview-credit {
+    border-top: 1px solid currentColor;
+    padding-top: 0.8rem;
+    margin-top: 1rem;
+  }
+  .c8-interview-credit > .c8-attribution {
+    margin-top: 0;
+  }
+  .c8-interview-credit > span {
+    display: block;
+    font: 0.72rem/1.5 var(--de-font-mono);
+    margin-top: 1rem;
+  }
+  .c8-interview-transcript {
+    padding-top: 3rem;
+  }
+  .c8-interview-transcript > details {
+    border-bottom: 1px solid currentColor;
+  }
+  .c8-interview-transcript > details > summary {
+    font: 500 1.15rem/1.4 var(--de-font-heading);
+    padding: 1.5rem 0;
+  }
+  .c8-interview-transcript summary > span {
+    display: inline-block;
+    margin-right: 1.5rem;
+    font: 0.75rem var(--de-font-mono);
+  }
+  .c8-interview-transcript blockquote p {
+    font: var(--de-display-weight) clamp(1.5rem, 2.5cqw, 2.5rem)/1.25
+      var(--de-font-display);
+    padding-bottom: 2rem;
+  }
+  .c8-interview-transcript section {
+    padding-bottom: 1.5rem;
+  }
+  /* E09: tenure means a dated relationship, never a free-floating logo. */
+  .c8-relationship-axis {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    font: 0.75rem var(--de-font-mono);
+    padding: 1rem 0;
+  }
+  .c8-relationship-axis {
+    gap: 2rem;
+  }
+  .c8-relationship-axis > div {
+    display: flex;
+    justify-content: space-between;
+  }
+  .c8-relationships article {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2rem;
+    padding: 1.8rem 0;
+    border-top: 1px solid var(--de-border);
+  }
+  .c8-relationships article h3 {
+    font-size: clamp(1.5rem, 2.8cqw, 2.8rem);
+    font-weight: 400;
+  }
+  .c8-relationships article p {
+    font-size: 0.85rem;
+  }
+  .c8-tenure {
+    padding-top: 0.4rem;
+  }
+  .c8-tenure > span {
+    font: 0.8rem var(--de-font-mono);
+  }
+  .c8-tenure > i {
+    display: block;
+    min-height: 7px;
+    background: var(--de-foreground);
+    margin-top: 1.5rem;
+  }
+  /* E10: a ledger shaped by elapsed time. */
+  .c8-progress-method {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    border-top: 2px solid currentColor;
+    padding-top: 1.5rem;
+  }
+  .c8-progress-method p {
+    font-size: 0.9rem;
+  }
+  .c8-progress ol {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(var(--c8-point-count), minmax(0, 1fr));
+    gap: 1.4rem;
+    padding: 4rem 0 0;
+  }
+  .c8-progress li {
+    border-top: 2px solid currentColor;
+    padding-top: 1rem;
+    margin-top: calc(var(--c8-step) * 2.7rem);
+  }
+  .c8-progress time {
+    font: 0.8rem var(--de-font-mono);
+  }
+  .c8-progress li > strong {
+    font: var(--de-display-weight) clamp(3rem, 6.5cqw, 7rem)/1
+      var(--de-font-display);
+    display: block;
+    padding: 1.5rem 0;
+  }
+  .c8-progress li > strong small {
+    font: 0.75rem/1.5 var(--de-font-body);
+    display: block;
+    margin-top: 0.7rem;
+  }
+  .c8-progress li > p {
+    font-size: 0.9rem;
+  }
+  /* E11: a claim on the left and inspectable working on the right. */
+  .c8-evidence-desk {
+    display: grid;
+    grid-template-columns: 1fr 1.45fr;
+    gap: 8%;
+  }
+  .c8-evidence-desk > aside {
+    border-top: 4px solid currentColor;
+    padding-top: 1.5rem;
+  }
+  .c8-evidence-desk > aside h3 {
+    font-size: clamp(1.8rem, 3cqw, 3rem);
+    margin: 1.5rem 0;
+  }
+  .c8-evidence-desk > aside p {
+    font-size: 0.9rem;
+  }
+  .c8-exhibit-count {
+    display: block;
+    font: var(--de-display-weight) 7rem/1 var(--de-font-display);
+    margin-top: 3rem;
+  }
+  .c8-exhibit-count small {
+    display: block;
+    font: 0.8rem/1.5 var(--de-font-mono);
+    margin-top: 0.8rem;
+  }
+  .c8-evidence-desk ol {
+    list-style: none;
+    padding: 0;
+  }
+  .c8-evidence-desk li {
+    border-top: 1px solid currentColor;
+    padding: 1.5rem 0 2rem;
+  }
+  .c8-evidence-desk li h3 {
+    margin-top: 0.5rem;
+  }
+  .c8-evidence-desk li p {
+    font-size: 0.9rem;
+  }
+  .c8-evidence-desk .c8-picture img {
+    max-height: 380px;
+    object-fit: contain;
+    background: color-mix(in srgb, currentColor 5%, transparent);
+  }
+  /* E12: discovery across cases, without autoplay or a hidden result. */
+  .c8-switchboard {
+    display: grid;
+    grid-template-columns: 1fr 1.8fr;
+    gap: 4rem;
+  }
+  .c8-story-index button {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 2rem 1fr 1rem;
+    gap: 0.6rem;
+    padding: 1.5rem 1rem;
+    border: 0;
+    border-top: 1px solid currentColor;
+  }
+  .c8-story-index button strong {
+    font-size: 1.4rem;
+  }
+  .c8-story-index button small {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .c8-story-index button > span:last-child {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .c8-story-scene {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: center;
+    margin-top: 1.5rem;
+  }
+  .c8-story-scene .c8-picture img {
+    aspect-ratio: 1;
+  }
+  .c8-story-scene .c8-result > strong {
+    font-size: clamp(3rem, 5cqw, 5rem);
+  }
+  .c8-story-detail .c8-case-facts {
+    margin: 1.7rem 0;
+  }
+  .c8-story-detail > .c8-voice {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--de-border);
+  }
+  @container (max-width:850px) {
+    .c8-intro {
+      gap: 2rem;
+    }
+    .c8-equation {
+      grid-template-columns: 1fr;
+    }
+    .c8-equation > .c8-voice {
+      border-left: 0;
+      border-top: 1px solid currentColor;
+      padding: 1.5rem 0 0;
+    }
+    .c8-chapters {
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .c8-intervention {
+      margin-top: 0;
+    }
+    .c8-outcome {
+      grid-column: 1/-1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem 2rem;
+      border-left: 0;
+      padding: 0;
+      border-top: 1px solid currentColor;
+      padding-top: 1.5rem;
+    }
+    .c8-outcome > .c8-chapter-number {
+      grid-column: 1/-1;
+    }
+    .c8-outcome > .c8-picture {
+      grid-row: 2/5;
+      grid-column: 2;
+      margin: 0;
+    }
+    .c8-dossier-footer {
+      gap: 2rem;
+    }
+    .c8-credentials {
+      gap: 1.5rem;
+    }
+    .c8-accession {
+      padding: 2rem;
+      min-height: 400px;
+    }
+    .c8-case-panorama > figcaption {
+      width: 43%;
+    }
+    .c8-case-footer {
+      gap: 2rem;
+    }
+    .c8-chorus {
+      gap: 2rem;
+    }
+    .c8-reviews {
+      gap: 2rem;
+    }
+    .c8-conversation {
+      gap: 2rem;
+    }
+    .c8-switchboard {
+      gap: 2rem;
+    }
+    .c8-relationships article {
+      gap: 1rem;
+    }
+    .c8-progress ol {
+      gap: 0.8rem;
+    }
+  }
+  @container (max-width:560px) {
+    .c8-study .c8-intro {
+      display: block;
+      margin-bottom: 2rem;
+    }
+    .c8-intro > p {
+      margin-top: 1.2rem;
+      max-width: 100%;
+    }
+    .c8-colophon {
+      margin-bottom: 2.5rem;
+      gap: 0.5rem;
+      font-size: 0.62rem;
+    }
+    .c8-footer {
+      font-size: 0.65rem;
+      gap: 0.5rem;
+      margin-top: 2.5rem;
+    }
+    .c8-study h2 {
+      font-size: clamp(2rem, 9cqw, 3.1rem);
+      max-width: 100%;
+    }
+    .c8-study p {
+      font-size: 1rem;
+    }
+    .c8-study .c8-source :is(p, dd) {
+      font-size: 0.8rem;
+    }
+    .c8-margin {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      padding-bottom: 0;
+    }
+    .c8-witness {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 1rem;
+      align-items: center;
+    }
+    .c8-witness .c8-picture img {
+      aspect-ratio: 1;
+    }
+    .c8-witness .c8-picture figcaption {
+      font-size: 0.6rem;
+    }
+    .c8-witness .c8-image-unavailable {
+      min-height: 100px;
+      padding: 0.4rem;
+    }
+    .c8-witness .c8-image-unavailable small {
+      display: none;
+    }
+    .c8-witness > .c8-attribution {
+      margin: 0;
+    }
+    .c8-margin-quote {
+      padding-top: 0;
+    }
+    .c8-margin-quote .c8-voice blockquote p {
+      font-size: clamp(1.75rem, 8cqw, 2.6rem);
+    }
+    .c8-margin-note {
+      padding-left: 0;
+      gap: 1rem;
+    }
+    .c8-equation {
+      gap: 1.5rem;
+    }
+    .c8-equation-values {
+      gap: 0.5rem;
+      padding: 1.5rem 0;
+    }
+    .c8-equation-values strong {
+      font-size: clamp(3.5rem, 23cqw, 6rem);
+    }
+    .c8-equation-values small {
+      font-size: 0.8rem;
+    }
+    .c8-equation-note {
+      grid-template-columns: 1fr;
+    }
+    .c8-equation-note h3,
+    .c8-equation-note > .c8-source {
+      grid-column: auto;
+    }
+    .c8-chapters {
+      display: block;
+      padding: 1.5rem 0;
+    }
+    .c8-chapters > li {
+      padding-left: 2rem;
+      border-left: 1px solid currentColor;
+      position: relative;
+      margin: 0 0 1.5rem;
+    }
+    .c8-chapters .c8-chapter-number {
+      position: absolute;
+      left: -0.5rem;
+      top: 0;
+      background: var(--de-background);
+      color: var(--de-foreground);
+      padding: 0.2rem 0;
+      border: 0;
+      font-size: 0.75rem;
+    }
+    .c8-chapters .c8-baseline .c8-picture {
+      max-width: 70%;
+      margin: 0.8rem 0;
+    }
+    .c8-chapters .c8-stage-value {
+      font-size: 3.5rem;
+    }
+    .c8-chapters .c8-intervention {
+      margin-left: 2rem;
+      padding: 1.3rem;
+    }
+    .c8-intervention .c8-chapter-number {
+      position: static;
+      background: transparent;
+      color: inherit;
+      margin-bottom: 1rem;
+    }
+    .c8-process-arrow {
+      font-size: 2.5rem;
+      margin-top: 1rem;
+    }
+    .c8-chapters .c8-outcome {
+      display: block;
+      border-top: 0;
+      padding-top: 0;
+    }
+    .c8-outcome .c8-picture {
+      margin: 1rem 0;
+    }
+    .c8-dossier-subject {
+      display: block;
+    }
+    .c8-dossier-subject p {
+      margin-top: 0.5rem;
+    }
+    .c8-dossier-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .c8-case-panorama > .c8-picture img {
+      height: 240px;
+    }
+    .c8-case-panorama > figcaption {
+      position: static;
+      width: 100%;
+      padding: 1.5rem;
+    }
+    .c8-case-footer {
+      display: block;
+      padding-top: 1.5rem;
+    }
+    .c8-case-footer > .c8-voice {
+      margin-top: 2rem;
+    }
+    .c8-case-facts > div {
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
+    }
+    .c8-credentials {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .c8-credential-index {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-top: 0;
+      gap: 0.5rem;
+    }
+    .c8-credential-index button {
+      padding: 0.7rem;
+      border: 1px solid currentColor;
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      font-size: 0.85rem;
+    }
+    .c8-accession {
+      min-height: 330px;
+      padding: 2rem 1.2rem;
+    }
+    .c8-accession-year {
+      font-size: 5rem;
+      margin: 1rem 0;
+    }
+    .c8-chorus {
+      display: block;
+    }
+    .c8-chorus-voice {
+      margin-top: 2rem;
+    }
+    .c8-chorus-voice-1 {
+      padding: 1rem 0 0 15%;
+      border-top: 1px solid currentColor;
+    }
+    .c8-chorus-voice-0 .c8-voice blockquote p {
+      font-size: 1.8rem;
+    }
+    .c8-chorus-voice-0 .c8-picture {
+      float: none;
+      width: 90px;
+      margin: 0.8rem 0;
+    }
+    .c8-chorus-voice-3 {
+      display: block;
+      padding-right: 10%;
+    }
+    .c8-chorus-voice-3 > .c8-picture {
+      max-width: 100px;
+    }
+    .c8-reviews {
+      display: block;
+    }
+    .c8-rating {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 1rem;
+    }
+    .c8-rating > .c8-eyebrow,
+    .c8-rating > p:last-child {
+      grid-column: 1/-1;
+    }
+    .c8-rating > strong {
+      font-size: 4rem;
+    }
+    .c8-rating > .c8-distribution {
+      grid-column: 2;
+      grid-row: 2/4;
+      margin: 1rem 0;
+    }
+    .c8-rating > p {
+      font-size: 0.8rem;
+    }
+    .c8-distribution > div {
+      grid-template-columns: 2.5rem 1fr 1rem;
+      gap: 0.5rem;
+      font-size: 0.65rem;
+    }
+    .c8-review-journal {
+      margin-top: 2rem;
+    }
+    .c8-filters button {
+      padding: 0.6rem;
+      font-size: 0.75rem;
+    }
+    .c8-review-row .c8-voice blockquote p {
+      font-size: 1.1rem;
+    }
+    .c8-conversation {
+      display: block;
+    }
+    .c8-interview-scene .c8-picture img {
+      aspect-ratio: 16/10;
+    }
+    .c8-interview-credit {
+      display: flex;
+      gap: 1rem;
+      justify-content: space-between;
+    }
+    .c8-interview-credit > span {
+      max-width: 12ch;
+      margin: 0;
+    }
+    .c8-interview-transcript {
+      padding-top: 2rem;
+    }
+    .c8-interview-transcript blockquote p {
+      font-size: 1.7rem;
+    }
+    .c8-relationship-axis {
+      display: none;
+    }
+    .c8-relationships article {
+      grid-template-columns: 1fr auto;
+      gap: 0.5rem 1rem;
+    }
+    .c8-relationships article > div:last-child {
+      grid-column: 1/-1;
+    }
+    .c8-tenure > i {
+      display: none;
+    }
+    .c8-progress-method {
+      display: block;
+    }
+    .c8-progress ol {
+      display: block;
+      padding-top: 2rem;
+    }
+    .c8-progress li {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem 1rem;
+      margin: 0 0 1.5rem;
+      padding: 1rem 0;
+    }
+    .c8-progress li > strong {
+      grid-column: 2;
+      grid-row: 1/3;
+      padding: 0;
+      font-size: 4rem;
+    }
+    .c8-progress li > p {
+      grid-column: 1;
+    }
+    .c8-progress li > .c8-source {
+      grid-column: 1/-1;
+    }
+    .c8-evidence-desk {
+      display: block;
+    }
+    .c8-evidence-desk > aside {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      column-gap: 1rem;
+      padding-bottom: 2rem;
+    }
+    .c8-evidence-desk > aside > .c8-eyebrow,
+    .c8-evidence-desk > aside > h3 {
+      grid-column: 1/-1;
+    }
+    .c8-exhibit-count {
+      font-size: 3rem;
+      margin-top: 0;
+    }
+    .c8-exhibit-count small {
+      font-size: 0.65rem;
+      max-width: 9ch;
+    }
+    .c8-switchboard {
+      display: block;
+    }
+    .c8-story-index {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    .c8-story-index button {
+      display: flex;
+      flex-direction: column;
+      padding: 0.8rem;
+      border: 1px solid currentColor;
+    }
+    .c8-story-index button strong {
+      font-size: 1rem;
+    }
+    .c8-story-index button > span:last-child {
+      display: none;
+    }
+    .c8-story-scene {
+      gap: 1rem;
+    }
+    .c8-story-scene .c8-result > strong {
+      font-size: 3.5rem;
+    }
+    .c8-story-scene .c8-result > p {
+      font-size: 0.75rem;
+    }
+    .c8-study .c8-voice blockquote p {
+      overflow-wrap: anywhere;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .c8-study * {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+/* Collection controls, comparative artboards and audition retention. */
+.c8-notes {
+  font: 14px/1.6 var(--font-sans, Arial, sans-serif);
+  padding: 1rem 0;
+}
+.c8-notes h3 {
+  margin: 1.5rem 0 0.5rem;
+}
+.c8-notes dl > div {
+  margin-bottom: 1.2rem;
+}
+.c8-notes dt {
+  font-weight: 700;
+}
+.c8-notes dd {
+  margin: 0;
+}
+.c8-notes pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 11px;
+}
+.c8-controls {
+  display: grid;
+  gap: 1rem;
+}
+.c8-overview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 1rem;
+  background: #e4e7e3;
+}
+.c8-overview article > h3 {
+  font:
+    16px/1.4 Arial,
+    sans-serif;
+  color: #182820;
+  margin: 0 0 1rem;
+}
+.c8-overview-stage {
+  height: 480px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.c8-overview-stage > .de-root {
+  width: 1440px;
+  zoom: 0.46;
+}
+.c8-overview article > button {
+  min-height: 44px;
+  margin-top: 0.7rem;
+}
+.c8-retained[aria-hidden="true"] {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+.c8-audition {
+  pointer-events: none;
+}
+.c8-context-banner {
+  padding: 1rem 4%;
+  background: #182c27;
+  color: #fff;
+  font:
+    13px/1.6 Arial,
+    sans-serif;
+}
+.c8-composition {
+  --de-scene-viewport: 850px;
+  container-type: inline-size;
+}
+.c8-composition .de-composition {
+  container-type: inline-size;
+}
+
+/* Two study-local motion treatments reuse Marquee, FadeReveal and MotionPolicy. */
+.de-root[data-typography] .c8-study {
+  .c8-playback {
+    grid-column: 1/-1;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .c8-playback button {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+  }
+  .c8-playback p,
+  .c8-playback-note {
+    font: 0.8rem/1.5 var(--de-font-body);
+    max-width: 60ch;
+  }
+  .c8-loop-tape {
+    border-block: 1px solid var(--de-border);
+    padding: 2rem 0;
+    margin-block: 2rem;
+  }
+  .c8-loop .de-marquee__group {
+    gap: 3rem;
+    padding-right: 3rem;
+    align-items: flex-start;
+  }
+  .c8-loop .de-marquee__group > span {
+    flex: 0 0 clamp(18rem, 38cqw, 34rem);
+    width: clamp(18rem, 38cqw, 34rem);
+    white-space: normal;
+    font: var(--de-display-weight) clamp(1.5rem, 2.8cqw, 2.5rem)/1.25
+      var(--de-font-display);
+    border: 0;
+    border-radius: 0;
+    background: none;
+    padding: 1rem 0;
+  }
+  .c8-loop[data-paused="true"] .de-marquee__track {
+    animation-play-state: paused !important;
+  }
+  .c8-loop-reading {
+    margin-top: 1.5rem;
+  }
+  .c8-loop-reading > summary {
+    font-weight: 600;
+  }
+  .c8-story-fade > .c8-voice {
+    border-top: 1px solid var(--de-border);
+    padding-top: 1.5rem;
+  }
+  .c8-switchboard > .c8-playback {
+    margin-bottom: 0;
+  }
+  @container (max-width:560px) {
+    .c8-playback {
+      display: block;
+    }
+    .c8-playback p {
+      margin-top: 0.8rem;
+    }
+    .c8-switchboard > .c8-playback {
+      margin-bottom: 1.5rem;
+    }
+    .c8-loop-tape {
+      padding: 1rem 0;
+    }
+  }
+}

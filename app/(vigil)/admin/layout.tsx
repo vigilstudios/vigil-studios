@@ -32,6 +32,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       items: [
         { href: "/admin/jobs", label: "Jobs", icon: "jobs", attention: attention.jobs },
         { href: "/admin/audit", label: "Audit log", icon: "audit" },
+        { href: "/admin/lab", label: "Lab", icon: "websites", desktopOnly: true },
         { href: "/admin/plans", label: "Plans & staff", icon: "plans", locked: staff.staffRole !== "admin" },
       ],
     },

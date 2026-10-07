@@ -1,0 +1,24 @@
+/* Contrast chooses an orientation of the site palette, never a separate brand.
+   Direct import also keeps these rules tracked by the running app. */
+.de-root .de-navigation-system[data-contrast="brand"] {
+  --de-nx-bg: var(--de-background);
+  --de-nx-fg: var(--de-foreground);
+}
+
+.de-root .de-navigation-system[data-contrast="light-on-dark"] {
+  --de-nx-bg: var(--de-palette-dark);
+  --de-nx-fg: var(--de-palette-light);
+}
+
+.de-root .de-navigation-system[data-contrast="dark-on-light"] {
+  --de-nx-bg: var(--de-palette-light);
+  --de-nx-fg: var(--de-palette-dark);
+}
+
+.de-root .de-navigation-system[data-scroll="solidify"]:not([data-past-hero="true"])[data-hero-contrast="light-on-dark"] .de-nx-navigation {
+  color: var(--de-palette-light);
+}
+
+.de-root .de-navigation-system[data-scroll="solidify"]:not([data-past-hero="true"])[data-hero-contrast="dark-on-light"] .de-nx-navigation {
+  color: var(--de-palette-dark);
+}

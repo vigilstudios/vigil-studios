@@ -129,7 +129,7 @@ export function AppFrame({
             ) : null}
             <ul className="space-y-0.5">
               {group.items.map((item) => (
-                <li key={item.href}>
+                <li key={item.href} className={item.desktopOnly ? "hidden lg:block" : undefined}>
                   <NavLink item={item} active={isActive(item, pathname)} collapsed={rail} />
                 </li>
               ))}

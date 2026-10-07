@@ -1,0 +1,94 @@
+.composition-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.composition-control { display: grid; gap: .4em; min-width: 0; }
+.composition-control--wide { grid-column: 1 / -1; }
+.composition-panel > h2 { margin-bottom: 12px; }
+.composition-category-choices { display: grid; gap: 10px; }
+.lab-editor .composition-category-card { display: grid; gap: 7px; padding: 10px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 6px; white-space: normal; }
+.composition-category-card > span { display: flex; justify-content: space-between; gap: 10px; color: var(--text-primary); font-weight: 600; }
+.composition-category-card small { color: var(--text-secondary); font-weight: 400; }
+.lab-editor .composition-category-card select { width: 100%; max-width: none; }
+.composition-add-section { border: 1px solid var(--border); border-radius: 6px; padding: 12px; background: var(--bg-primary); }
+.composition-add-section > h3 { margin-top: 0; }
+.composition-add-section > .composition-control + .composition-control { margin-top: 12px; }
+.composition-add-section > p { margin-block: 12px 8px; }
+.composition-preset-picker > summary { display: flex; align-items: center; gap: 8px; min-height: 30px; cursor: pointer; font-size: 10px; color: var(--text-secondary); list-style: none; }
+.composition-preset-picker > summary::-webkit-details-marker { display: none; }
+.composition-preset-picker > summary > span { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 6px 8px; border: 1px solid var(--border); border-radius: 5px; color: var(--text-primary); background: var(--bg-primary); }
+.composition-preset-picker > summary::after { content: "▾"; }
+.composition-preset-picker[open] > summary::after { content: "▴"; }
+.composition-lab .lab-editor-toolbar:has(.composition-preset-picker[open]) { z-index: 5; }
+.composition-preset-bar { position: fixed; top: 62px; left: 24px; width: min(920px, calc(100vw - 48px)); max-height: calc(100vh - 86px); overflow: auto; padding: 14px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 9px; box-shadow: 0 12px 45px rgb(0 0 0 / .3); }
+.composition-preset-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
+.composition-preset-heading strong { font-size: 12px; }
+.composition-preset-heading button { width: 30px; }
+.composition-preset-bar .composition-category-choices { grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); }
+.composition-selection { display: grid; gap: 8px; padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px solid var(--border); }
+.composition-selection > button { justify-self: start; font-size: .85em !important; }
+.composition-panel .composition-dna { border: 0; margin: -4px 0 12px; }
+.composition-health button { color: var(--accent) !important; font-size: 10px !important; }
+.composition-health--error button { color: #ef9b85 !important; }
+.composition-sections { list-style: none; padding: 0; display: grid; gap: 8px; margin-bottom: 16px; }
+.composition-sections li { min-width: 0; }
+.composition-section-choice { width: 100%; text-align: left; }
+.composition-section-choice > span { display: block; margin-top: 3px; font-size: .8em; color: var(--text-secondary); }
+.composition-sections li > div { display: flex; gap: 4px; margin-top: 5px; }
+.composition-panel > .composition-control { margin-bottom: 8px; }
+.composition-colors { display: grid; gap: 8px; margin-block: 10px; }
+.composition-colors label { display: flex; justify-content: space-between; align-items: center; }
+.composition-colors input { width: 36px; height: 26px; }
+.composition-json-label { margin-block: 10px; }
+.composition-panel > details > button + button { margin-left: 5px; }
+.composition-panel [role="alert"] { overflow-wrap: anywhere; }
+.composition-footnote { margin-top: 16px; }
+.composition-issues { padding-left: 16px; display: grid; gap: 10px; font-size: .9em; }
+.composition-blocked { padding: 80px; min-height: 700px; }
+.composition-blocked h2 { font-size: 28px; margin-bottom: 24px; }
+.composition-blocked ul { margin-bottom: 24px; }
+.composition-selectable[data-inspect="true"] [data-section-id] { cursor: crosshair; }
+.composition-selectable .de-composition-content > [data-section-id] { position: relative; }
+.composition-selectable[data-inspect="true"] [data-section-id]:hover { outline: 2px dashed var(--accent); outline-offset: -2px; }
+.composition-selectable[data-inspect="true"] [data-lab-selected] { outline: 2px solid var(--accent); outline-offset: -2px; }
+.composition-selectable[data-inspect="true"] [data-lab-selected]::after { content: attr(data-section-id); position: absolute; top: 0; right: 0; z-index: 5; padding: 4px 8px; background: var(--accent); color: var(--bg-primary); font: 11px monospace; border-radius: 0 0 0 4px; pointer-events: none; }
+
+.composition-style-list { display: grid; gap: 6px; }
+.lab-editor .composition-style-list > button { min-height: 44px; text-align: left; padding: 10px; }
+.composition-style-list > button > span { display: block; }
+.composition-style-list > button > small { display: block; margin-top: 5px; color: var(--text-secondary); font-size: .8em; line-height: 1.4; }
+.composition-style-list > button[aria-disabled="true"] { opacity: .5; cursor: default; }
+.composition-style-list > button:not([aria-disabled="true"]):is(:hover, :focus-visible) { border-color: var(--accent); background: var(--bg-surface-soft); }
+.composition-empty-canvas { display: grid; align-content: center; justify-items: center; gap: 18px; min-height: var(--de-viewport-height, 900px); color: var(--text-secondary); font: 18px/1.5 sans-serif; }
+.composition-empty-canvas h2 { font-size: 32px; color: var(--text-primary); }
+.composition-empty-canvas button { font-size: 16px !important; }
+.composition-preview-notice { position: sticky; top: 0; z-index: 10; padding: 10px 16px; background: var(--accent); color: var(--bg-primary); font: 16px/1.4 sans-serif; }
+.composition-selectable [data-lab-preview] { outline: 3px dashed var(--accent); outline-offset: -3px; pointer-events: none; }
+.composition-clear-dialog { position: fixed; inset: 0; margin: auto; max-width: min(440px, calc(100vw - 40px)); padding: 24px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-secondary); color: var(--text-primary); box-shadow: 0 15px 80px rgb(0 0 0 / .4); }
+.composition-clear-dialog::backdrop { background: rgb(0 0 0 / .6); }
+.composition-clear-dialog h2 { font-size: 20px; margin-bottom: 12px; }
+.composition-clear-dialog p { font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
+.composition-clear-dialog > div { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+.composition-clear-dialog button { min-height: 40px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 5px; background: var(--bg-primary); color: var(--text-primary); cursor: pointer; }
+.composition-clear-dialog button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.composition-site-tree { list-style: none; margin: 8px 0; padding: 0; }
+.composition-site-tree .composition-site-tree { padding-left: 13px; margin-left: 5px; border-left: 1px solid var(--border); }
+.composition-site-tree li > div { display: flex; align-items: center; gap: 4px; margin-block: 4px; }
+.lab-editor .composition-page-choice { flex: 1; min-width: 0; text-align: left; white-space: normal; }
+.composition-page-choice[aria-current="page"] { border-color: var(--accent); background: var(--bg-tertiary); }
+.composition-page-choice span, .composition-page-choice small { display: block; font-size: .8em; color: var(--text-secondary); overflow-wrap: anywhere; }
+.composition-page-tools { display: flex; flex-wrap: wrap; gap: 6px; margin-block: 10px; }
+.composition-page-details, .composition-action-editor form { display: grid; gap: 10px; margin-block: 14px; }
+.composition-action-editor label { display: grid; gap: 5px; }
+.composition-site-import { width: min(800px, calc(100vw - 40px)); }
+.composition-site-import textarea { width: 100%; max-width: 100%; font: 12px monospace; }
+.composition-page-details p { overflow-wrap: anywhere; }
+
+.composition-navbar-editor form, .composition-navbar-editor label, .composition-navbar-destination { display: grid; gap: 7px; }
+.composition-navbar-editor form { margin-block: 12px; }
+.composition-navbar-editor input, .composition-navbar-editor select { width: 100%; min-width: 0; }
+.composition-navbar-items { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.composition-navbar-items .composition-navbar-items { padding-left: 10px; margin-top: 8px; border-left: 1px solid var(--border); }
+.composition-navbar-items fieldset { min-width: 0; margin: 0; padding: 10px; border: 1px solid var(--border); border-radius: 6px; display: grid; gap: 9px; }
+.composition-navbar-items legend { padding-inline: 4px; max-width: 100%; overflow-wrap: anywhere; }
+.composition-navbar-editor .composition-page-tools { margin-block: 0; }
+.composition-navbar-route { font-size: .85em; color: var(--text-secondary); overflow-wrap: anywhere; }
+.composition-navbar-button { border-top: 1px solid var(--border); padding-top: 12px; }

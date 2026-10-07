@@ -1,0 +1,37 @@
+/* Viewport and zoom remain a single, uncompressed group in both Lab workspaces. */
+.lab-editor-toolbar .lab-editor-view {
+  gap: 16px;
+}
+
+.lab-editor-toolbar .lab-editor-viewport {
+  flex: none;
+}
+
+.lab-editor-toolbar .lab-editor-viewport > .lab-preview-choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.lab-editor-toolbar .lab-editor-viewport .lab-choice-trigger {
+  width: 160px;
+  min-width: 160px;
+  min-height: 34px;
+  padding-inline: 12px;
+}
+
+.lab-editor-toolbar .lab-editor-viewport .lab-choice-options {
+  right: 0;
+  width: 240px;
+  min-width: 240px;
+  gap: 8px;
+  padding: 10px;
+  margin-top: 6px;
+  white-space: normal;
+}
+
+.lab-editor-toolbar .lab-editor-viewport .lab-choice-options > button {
+  min-height: 42px;
+  padding: 10px 12px;
+}

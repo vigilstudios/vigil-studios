@@ -1,0 +1,33 @@
+"use client";
+import {useState,type ReactNode} from "react";
+import {LabEditor} from "../editor/LabEditor";
+import {DesignThemeProvider} from "../../foundations/DesignThemeProvider";
+import {ComparisonHero} from "../../sections/heroes/ComparisonHero";
+import {makeSection} from "../composition/fixtures";
+import {FullViewportHero,type ImmersiveHeroId,type SceneAlignment,type ScenePosition,type SceneVoice} from "./FullViewportHero";
+import {immersiveContexts,immersiveFixture} from "./fixtures";
+
+export function HeroExpansionGallery({toolbar,workspaceSwitch}:{toolbar?:ReactNode;workspaceSwitch?:ReactNode}){
+ const [hero,setHero]=useState<ImmersiveHeroId|"hero.comparison">("hero.full-scene"),[adaptation,setAdaptation]=useState(0),[alignment,setAlignment]=useState<SceneAlignment>("left"),[position,setPosition]=useState<ScenePosition>("middle"),[voice,setVoice]=useState<SceneVoice>("subtle"),[ink,setInk]=useState<"light"|"dark">("light"),[width,setWidth]=useState(1440),[tab,setTab]=useState("study"),[long,setLong]=useState(false);
+ const context=immersiveContexts[adaptation],content=immersiveFixture(adaptation),comparison=makeSection("hero.comparison","hx-comparison");
+ if(long){content.title="A different way to see the world around us.";content.description="Every project begins with a closer look at the people, places and possibilities in front of us. Discover work shaped by careful observation and a willingness to imagine something different.";}
+ return <LabEditor title="Design Lab" toolbar={toolbar} workspaceSwitch={workspaceSwitch} canvasWidth={width} resetKey={`${hero}-${width}-${adaptation}`} activeTab={tab} onTabChange={setTab} tabs={[
+  {id:"study",label:"Study",content:<div className="hx-inspector"><h2>Hero Expansion</h2><p>Compact Comparison refinement + two full-viewport image proposals. Text sits over the image. Creative Study · approved references. H12, HX01 and HX02 Production Systems are available in the component catalog and Composition.</p>
+   <label>Hero study<select aria-label="Hero study" value={hero} onChange={e=>{const value=e.target.value as typeof hero;setHero(value);setVoice(value==="hero.scene-poster"?"loud":"subtle");}}><option value="hero.comparison">H12 · Compact Comparison</option><option value="hero.full-scene">HX01 · Full Scene</option><option value="hero.scene-poster">HX02 · Scene Poster</option></select></label>
+   <label>Artboard<select aria-label="Hero artboard" value={width} onChange={e=>setWidth(Number(e.target.value))}>{[1440,1024,768,390,320].map(w=><option key={w}>{w}</option>)}</select></label>
+   <label>{hero==="hero.comparison"?"Context panel placement":"Text alignment"}<select aria-label="Hero alignment" value={alignment} onChange={e=>setAlignment(e.target.value as SceneAlignment)}>{["left","center","right"].map(v=><option key={v}>{v}</option>)}</select></label>
+   {hero!=="hero.comparison"&&<>
+    <label>Client adaptation<select aria-label="Hero adaptation" value={adaptation} onChange={e=>setAdaptation(Number(e.target.value))}>{immersiveContexts.map((c,i)=><option key={c.name} value={i}>{c.brand} · {c.name}</option>)}</select></label>
+    <label>Vertical position<select aria-label="Hero position" value={position} onChange={e=>setPosition(e.target.value as ScenePosition)}>{["top","middle","bottom"].map(v=><option key={v}>{v}</option>)}</select></label>
+    <label>Type presence<select aria-label="Hero voice" value={voice} onChange={e=>setVoice(e.target.value as SceneVoice)}><option value="subtle">Subtle</option><option value="loud">Loud</option></select></label>
+    <label>Text contrast<select aria-label="Hero ink" value={ink} onChange={e=>setInk(e.target.value as "light"|"dark")}><option value="light">Light text / darkened image</option><option value="dark">Dark text / softened image</option></select></label>
+    <label>Copy length<select aria-label="Hero copy" value={long?"long":"standard"} onChange={e=>setLong(e.target.value==="long")}><option value="standard">Authored</option><option value="long">Long copy</option></select></label>
+   </>}
+   <p>{hero==="hero.comparison"?"A smaller context panel leaves more of both registered images visible. Placement is independent of slider value; native range and step/reset controls remain accessible.":hero==="hero.full-scene"?"HX01 keeps title, context and action together in one movable reading group. The image stays uninterrupted around it.":"HX02 separates the headline from a lower context band. A large field of image connects the proposition to its caption, explanation and next step."}</p>
+   <p>{hero==="hero.comparison"?"Alignment is also available in Component catalog and Composition controls.":"All nine placements and both type presences are available. Image crop follows the authored desktop/mobile focal point; long content can expand the scene without clipping."}</p></div>},
+  {id:"contract",label:"Contract",content:<div className="hx-inspector"><h2>Full image, authored text</h2><p>Both proposals fill at least one viewport. The Lab uses an 850px scene to match its scrollable artboard. Images cover the scene; title and context remain in the foreground, with no content bubble.</p><p>HX01 reads as one compact introduction. HX02 divides the title field from an anchored context register. Typography, crop and composition remain independently adjustable. This workspace preserves the approved creative references; production implementations have independent registry entries.</p><p>Native links, semantic h1, descriptive image text, focus outlines, stable static imagery and no automatic motion. Small screens preserve the headline before context and action. Future client imagery needs a contrast and focal-point review.</p><p>Three adaptations each: architecture, independent apparel, performance. Existing generated assets are illustrative; no client claims or commissions are implied.</p></div>},
+ ]}><DesignThemeProvider typography={hero==="hero.comparison"?"humanist":hero==="hero.scene-poster"?context.posterTypography:context.typography} artDirection={context.art} motion="none"><div className="hx-stage">
+  {hero==="hero.comparison"?<ComparisonHero {...comparison} contentAlignment={alignment} content={{...comparison.content,action:{...comparison.content.action,href:"#hx-next"}}}/>:<FullViewportHero kind={hero} content={content} {...{alignment,position,voice,ink}}/>}
+  <section className="hx-next" id="hx-next"><h2>The story continues.</h2><p>This is the next section of the page. The opening image fills the Hero, while its text stays selectable and its action remains a real link.</p></section>
+ </div></DesignThemeProvider></LabEditor>;
+}

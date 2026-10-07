@@ -1,0 +1,182 @@
+/* Portable composition and selected structures. No Lab chrome, palettes or artwork. */
+.de-composition { position: relative; isolation: isolate; }
+.de-composition-slot { min-width: 0; display: flow-root; }
+.de-composition-slot:has(.de-navigation-root) { position: relative; z-index: 3; }
+.de-root.de-navigation-root { overflow: visible; }
+.de-navigation-root .de-nav__brand { min-width: 0; max-width: calc(100% - 4.5rem); overflow-wrap: anywhere; }
+.de-navigation-root .de-nav__links { min-width: 0; }
+.de-navigation-root .de-nav__links > a { min-width: 0; overflow-wrap: anywhere; }
+.de-navigation-root .de-nav :is(a, button) { min-height: 44px; }
+.de-composition--overlay > .de-composition-slot:first-child { position: absolute; inset: 0 0 auto; }
+.de-composition--overlay > .de-composition-slot:first-child .de-root { background: transparent; }
+.de-root .de-production-hero { padding: var(--de-section-space) var(--de-gutter, 4%); min-width: 0; }
+.de-root .de-production-hero .de-display { font-family: var(--de-font-display); font-size: var(--de-display-size, clamp(2.6rem, 7cqw, 7rem)); font-weight: var(--de-display-weight, 500); line-height: var(--de-display-leading, 1.05); letter-spacing: var(--de-display-tracking, -.03em); white-space: pre-line; overflow-wrap: anywhere; }
+.de-root .de-production-copy { display: flex; flex-direction: column; align-items: start; gap: var(--de-stack); min-width: 0; }
+.de-root .de-production-copy .de-display { max-width: 100%; }
+.de-root .de-production-hero .de-text { white-space: pre-line; }
+
+/* Geometry reserves space; focal points belong to the source. Filters touch images only. */
+.de-root .de-treated { margin: 0; min-width: 0; }
+.de-root .de-treated__frame { overflow: hidden; aspect-ratio: 3 / 2; background: var(--de-surface-elevated); }
+.de-root .de-treated picture { display: block; width: 100%; height: 100%; }
+.de-root .de-treated img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--de-focal); }
+.de-root .de-treated--full-bleed .de-treated__frame { aspect-ratio: 16 / 9; }
+.de-root .de-treated--contained img { object-fit: contain; }
+.de-root .de-treated--framed .de-treated__frame { border: var(--de-border-width) solid var(--de-border); padding: max(.5rem, var(--de-media-frame, .5rem)); border-radius: var(--de-radius); }
+.de-root .de-treated--panorama .de-treated__frame { aspect-ratio: 3 / 1; }
+.de-root .de-treated--portrait-emphasis .de-treated__frame { aspect-ratio: 3 / 4; }
+.de-root .de-treated--editorial-crop .de-treated__frame { aspect-ratio: 4 / 5; }
+.de-root .de-treated__frame--monochrome img { filter: grayscale(1); }
+.de-root .de-treated__frame--high-contrast img { filter: contrast(1.25); }
+.de-root .de-treated figcaption { padding-block: .6rem; color: var(--de-muted); }
+
+/* H17: folio + masthead + unequal spread always survive. */
+.de-root .de-front-page__folio { display: flex; justify-content: space-between; gap: 1rem; border-block: var(--de-border-width) solid var(--de-border); padding-block: .7rem; }
+.de-root .de-front-page div.de-front-page__masthead { max-width: none; font-size: clamp(2.5rem, 9cqw, 9rem); padding-block: .15em; border-bottom: calc(var(--de-border-width) * 2) solid currentColor; }
+.de-root .de-front-page__spread { display: grid; grid-template-columns: 30% minmax(0, 1fr) 17%; gap: var(--de-grid-gap); padding-top: var(--de-stack); }
+.de-root .de-front-page h1.de-display { font-size: max(1.8rem, calc(var(--de-display-size, 4rem) * .58)); }
+.de-root .de-front-page--lead-story .de-front-page__spread { grid-template-columns: 36% minmax(0, 1fr) 17%; }
+.de-root .de-front-page__abstract { border-top: var(--de-border-width) solid var(--de-border); padding-top: 1rem; }
+.de-root .de-front-page__scene { min-width: 0; }
+
+/* H18: the data plot shares a baseline with proposition and readout. */
+.de-root .de-open-circuit__proposition { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); align-items: end; gap: var(--de-grid-gap); }
+.de-root .de-open-circuit__signal { margin: var(--de-stack) 0; }
+.de-root .de-open-circuit__signal svg { display: block; width: 100%; height: clamp(12rem, 24cqw, 19rem); }
+.de-root .de-open-circuit__baseline { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--de-grid-gap); border-top: var(--de-border-width) solid var(--de-border); padding-top: var(--de-stack); }
+.de-root .de-open-circuit__baseline strong.de-display { font-size: max(2rem, calc(var(--de-display-size, 4rem) * .7)); }
+.de-root .de-signal-values { margin-top: 1.5rem; }
+.de-root .de-signal-values summary { cursor: pointer; padding-block: .7rem; }
+.de-root .de-signal-values table { width: 100%; margin-top: 1rem; text-align: left; border-collapse: collapse; }
+.de-root .de-signal-values :is(th, td) { padding: .6rem; border-bottom: 1px solid var(--de-border); }
+.de-root .de-open-circuit--annotated .de-open-circuit__signal { padding: var(--de-stack); border-inline-start: var(--de-border-width) solid var(--de-accent); }
+
+/* H22: type bookends an interrupted ribbon, rather than becoming a split Hero. */
+.de-root .de-between-acts h1.de-display { max-width: 100%; margin-block: 1rem; }
+.de-root .de-between-acts__interval { display: grid; grid-template-columns: 16% minmax(0, 1fr); gap: var(--de-grid-gap); align-items: end; margin-inline-start: var(--de-art-offset, 8%); }
+.de-root .de-between-acts__closing { display: flex; flex-direction: column; align-items: end; gap: var(--de-stack); margin-block: var(--de-stack); }
+.de-root .de-between-acts__closing p.de-display { max-width: 100%; text-align: end; }
+.de-root .de-between-acts__closing .de-text { align-self: start; }
+.de-root .de-between-acts--extended-pause .de-between-acts__interval { margin-block: calc(var(--de-stack) * 2); }
+
+/* H24: each plane corresponds to a authored part and specification. */
+.de-root .de-assembly__main { display: grid; grid-template-columns: 53% minmax(0, 1fr); align-items: center; gap: var(--de-grid-gap); }
+.de-root .de-assembly__diagram { margin: 0; min-width: 0; }
+.de-root .de-assembly__planes { display: grid; gap: 3rem; padding: 3rem 1rem; }
+.de-root .de-assembly__planes > div { display: flex; align-items: center; justify-content: center; min-height: 5rem; transform: skewY(-12deg); border: calc(var(--de-border-width) * 2) solid var(--de-foreground); padding: .7rem; }
+.de-root .de-assembly__planes > div:first-child { background: var(--de-foreground); color: var(--de-background); }
+.de-root .de-assembly__planes > div:nth-child(2) { border-style: dashed; }
+.de-root .de-assembly__planes span { display: block; max-width: 100%; text-align: center; transform: skewY(12deg); }
+.de-root .de-assembly--compact .de-assembly__planes { gap: 1.5rem; }
+.de-root .de-assembly__joint { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; border-top: calc(var(--de-border-width) * 2) solid currentColor; margin-top: var(--de-stack); padding-top: var(--de-stack); }
+.de-root .de-assembly__specifications { display: flex; flex-wrap: wrap; gap: var(--de-grid-gap); margin-top: var(--de-stack); }
+.de-root .de-assembly__specifications > div { flex: 1 1 12rem; }
+.de-root .de-assembly__specifications dd { margin: .5rem 0 0; }
+
+/* H12 protects one shared crop, a safe navigation zone and opaque controls. */
+.de-root .de-comparison { position: relative; isolation: isolate; min-height: min(100svh, 56rem); display:flex; align-items:flex-end; padding-top: max(12rem, 25svh); padding-bottom:2rem; }
+.de-root .de-comparison__visual { position: absolute; inset: 0; z-index: -1; }
+.de-root .de-comparison__visual .de-treated, .de-root .de-comparison__visual .de-treated__frame { height: 100%; aspect-ratio: auto; }
+.de-root .de-comparison__visual figcaption { display: none; }
+.de-root .de-comparison__before { position: absolute; inset: 0; }
+.de-root .de-comparison__seam { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--de-background); }
+.de-root .de-comparison__content { width: min(100%, 22rem); flex-shrink:0; gap:.65rem; background: var(--de-background); padding: 1rem; border-radius: var(--de-radius); }
+.de-root .de-comparison__content h1.de-display { font-size: clamp(1.35rem, 2.1cqw, 1.8rem); line-height:1.1; }
+.de-root .de-comparison__content :is(input, label) { width: 100%; }
+.de-root .de-comparison__content input { accent-color: var(--de-accent); min-height: 44px; }
+.de-root .de-comparison__content output { float: right; }
+.de-root .de-comparison__controls { display: grid; grid-template-columns:44px 1fr 44px; gap:.5rem; width:100%; }
+.de-root .de-comparison__controls button { border: 1px solid var(--de-border); padding: .7rem; min-height: 44px; cursor: pointer; }
+
+/* N01: opaque control island, local panel and purposeful rounded containment. */
+.de-root .de-island-nav { position: relative; display: flex; align-items: center; gap: 1.5rem; width: fit-content; max-width: calc(100% - 2rem); margin: 1rem auto; padding: .6rem 1rem; border: var(--de-border-width) solid var(--de-border); border-radius: 999px; background: var(--de-surface); color: var(--de-foreground); }
+.de-root .de-island-nav--end { margin-inline-end: var(--de-gutter, 4%); }
+.de-root .de-island-nav__brand { max-width: 18ch; min-width: 0; overflow-wrap: anywhere; }
+.de-root .de-island-nav__immediate { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+.de-root .de-island-nav__immediate a { min-width: 0; overflow-wrap: anywhere; }
+.de-root .de-island-nav :is(a, button) { min-height: 44px; display: inline-flex; align-items: center; }
+.de-root .de-island-nav button { flex: none; width: 44px; justify-content: center; cursor: pointer; }
+.de-root .de-island-nav__panel { position: absolute; top: calc(100% + .5rem); inset-inline-end: 0; width: min(22rem, 100%); padding: 1rem; background: var(--de-surface); border: var(--de-border-width) solid var(--de-border); border-radius: min(var(--de-radius), 1rem); box-shadow: var(--de-shadow); z-index: 4; }
+.de-root .de-island-nav__panel[hidden] { display: none; }
+.de-root .de-island-nav__panel > a { display: flex; padding: .6rem; overflow-wrap: anywhere; }
+
+/* N02: native dialog handles inertness, containment and Escape. */
+.de-root .de-contents-nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem var(--de-gutter, 4%); border-bottom: var(--de-border-width) solid var(--de-border); min-height: var(--de-nav-height, 5rem); }
+.de-root .de-contents-nav > a { min-width: 0; overflow-wrap: anywhere; }
+.de-root .de-contents-nav button { display: inline-flex; flex: none; align-items: center; justify-content: center; gap: .7rem; min-width: 44px; min-height: 44px; cursor: pointer; }
+.de-root .de-contents-nav__sheet { position: fixed; inset: 1rem; width: min(100% - 2rem, var(--de-container)); max-height: calc(100dvh - 2rem); margin: auto; padding: clamp(1.25rem, 4vw, 4rem); background: var(--de-background); color: var(--de-foreground); border: var(--de-border-width) solid var(--de-border); overflow-y: auto; }
+.de-root .de-contents-nav__sheet::backdrop { background: rgb(0 0 0 / .6); }
+.de-root .de-contents-nav__sheet-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+.de-root .de-contents-nav__columns { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 3rem; }
+.de-root .de-contents-nav__destinations { list-style: none; padding: 0; margin: 0; }
+.de-root .de-contents-nav__destinations li { display: flex; align-items: baseline; gap: 1rem; padding-block: 1rem; border-top: var(--de-border-width) solid var(--de-border); }
+.de-root .de-contents-nav__destinations a { min-width: 0; overflow-wrap: anywhere; min-height: 44px; }
+.de-root .de-contents-nav__columns aside { display: grid; align-content: start; gap: 2rem; }
+.de-root summary:focus-visible { outline: 3px solid var(--de-accent); outline-offset: 4px; }
+
+@container (max-width: 700px) {
+  .de-root .de-production-hero { padding: 1.5rem; }
+  .de-root .de-treated img { object-position: var(--de-mobile-focal); }
+  .de-root .de-treated--panorama .de-treated__frame { aspect-ratio: 4 / 3; }
+  .de-root .de-front-page__folio { flex-wrap: wrap; }
+  .de-root .de-front-page div.de-front-page__masthead { font-size: clamp(2rem, 12cqw, 4rem); }
+  .de-root .de-front-page__spread, .de-root .de-front-page--lead-story .de-front-page__spread { grid-template-columns: 1fr; gap: 1.5rem; }
+  .de-root .de-front-page h1.de-display { font-size: max(2rem, calc(var(--de-display-size, 3rem) * .85)); }
+  .de-root .de-open-circuit__proposition { grid-template-columns: 1fr; gap: 1.5rem; }
+  .de-root .de-open-circuit__signal svg { height: 12rem; }
+  .de-root .de-between-acts__interval { grid-template-columns: 1fr; margin: 1rem 0; }
+  .de-root .de-between-acts__closing { align-items: start; }
+  .de-root .de-between-acts__closing p.de-display { text-align: start; }
+  .de-root .de-assembly__main { grid-template-columns: 1fr; }
+  .de-root .de-assembly__planes { padding-inline: 1rem; }
+  .de-root .de-assembly__specifications { flex-direction: column; }
+  .de-root .de-assembly__specifications > div { flex-basis: auto; }
+  .de-root .de-comparison { min-height:100svh; padding-top:16rem; }
+  .de-root .de-comparison__visual { bottom:0; height:auto; }
+  .de-root .de-comparison__content { width:min(100%,22rem); padding: .9rem; }
+  .de-root .de-island-nav__immediate { display: none; }
+  .de-root .de-island-nav { justify-content: space-between; width: calc(100% - 2rem); }
+  .de-root .de-contents-nav > .de-mono { display: none; }
+  .de-root .de-contents-nav__columns { grid-template-columns: 1fr; gap: 2rem; }
+}
+@media (max-width: 700px) { .de-root .de-contents-nav__columns { grid-template-columns: 1fr; } }
+
+/* Compact H12 context keeps the registered image pair visible. Placement is independent of seam state. */
+.de-root .de-comparison[data-content-alignment=center]{justify-content:center}
+.de-root .de-comparison[data-content-alignment=right]{justify-content:flex-end}
+.de-root .de-comparison__content .de-text{font-size:.875rem;line-height:1.45}
+.de-root .de-comparison__content .de-accent{font-size:.65rem}
+.de-root .de-comparison__content .de-button{min-height:44px;padding:.5rem .75rem;font-size:.8rem}
+.de-root .de-comparison__controls button{background:transparent;color:inherit;font:inherit;font-size:.8rem;padding:.4rem}
+.de-root .de-comparison__content :is(h1,p){margin:0}
+
+/* Measured Navigation/Hero geometry. Menus remain outside document layout. */
+.de-composition-geometry{position:relative;min-width:0;--de-navigation-height:0px;--de-overlay-inset:0px}
+.de-composition-geometry .de-navigation-region{position:relative;z-index:100}
+.de-composition-geometry .de-navigation-region[data-sticky=true]{position:sticky;top:0;height:0}
+.de-composition-geometry .de-navigation-region[data-sticky=true]:has(.de-navigation-system[data-position=flow]){height:var(--de-navigation-height)}
+.de-composition-geometry .de-navigation-root{overflow:visible;min-height:0}
+.de-composition-geometry [data-hero-section]>.de-root>section:not(.hx-hero):not(.de-comparison){padding-top:calc(var(--de-section-space,4rem) + var(--de-overlay-inset))}
+.de-composition-geometry .de-comparison{padding-top:calc(2rem + var(--de-overlay-inset));min-height:var(--de-scene-viewport,100svh)}
+.de-composition-geometry[data-navigation-position=edge]{display:grid;grid-template-columns:13rem minmax(0,1fr)}
+.de-composition-geometry[data-navigation-position=edge]>.de-navigation-region{grid-column:1;grid-row:1;align-self:start}
+.de-composition-geometry[data-navigation-position=edge]>:is(main,.de-composition-content){grid-column:2;grid-row:1;min-width:0}
+.de-composition-geometry .de-nx-threshold-shelf{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));background:var(--de-foreground);color:var(--de-background);padding:1rem 3%;gap:1rem}
+.de-composition-geometry .de-nx-threshold-shelf a{display:flex;flex-direction:column;justify-content:space-between;gap:1rem;font:clamp(1.1rem,2cqw,2rem)/1.2 var(--de-font-heading);padding:1rem;border-left:1px solid currentColor;color:inherit;overflow-wrap:anywhere;text-decoration:none;min-height:44px}
+.de-composition-geometry .de-nx-threshold-shelf a span{font:.7rem var(--de-font-mono)}
+.de-composition-geometry .de-nx-threshold-shelf a:focus-visible{outline:3px solid currentColor;outline-offset:3px}
+@container(max-width:760px){.de-composition-geometry[data-navigation-position=edge]{display:block}.de-composition-geometry .de-nx-threshold-shelf{display:block}.de-composition-geometry .de-nx-threshold-shelf a{flex-direction:row;border-left:0;border-bottom:1px solid currentColor}}
+
+.de-composition-geometry[data-navigation-position=overlay]>.de-navigation-region:has(.de-island-nav){position:absolute;inset:0 0 auto}
+.de-composition-geometry[data-navigation-position=overlay]>.de-navigation-region .de-navigation-root{background:transparent}
+.de-composition-geometry[data-navigation-position=flow] [data-hero-section]>.de-root>section:not(.hx-hero):not(.de-comparison){padding-top:var(--de-section-space)}
+/* Navigation queries use the whole page field, including the reserved Margin Rail column. */
+.de-composition,.de-composition-geometry{container-type:inline-size}
+.de-root.de-navigation-root,.de-navigation-system{container-type:normal}
+
+/* The Navigation owns the top identity line when it overlays a continuous scene. */
+.de-composition-geometry:is([data-navigation-position="overlay"],[data-navigation-position="floating"]) [data-hero-section] .hx-scene-meta{display:none}
+@container(max-width:760px){.de-composition-geometry[data-navigation-position="edge"] [data-hero-section] .hx-scene-meta{display:none}}
+
+/* The moving header owns every painted surface; flow reservation stays invisible. */
+.de-composition-geometry .de-navigation-root:has(.de-navigation-system){background:transparent}

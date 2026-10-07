@@ -1,0 +1,114 @@
+{
+  "version": "v1-c5d1eba91b880618d112",
+  "schemaVersion": 1,
+  "files": [
+    {
+      "path": "anton-latin-400-normal.woff2",
+      "sha256": "d0fa07ff63dd60cbc0e2f58e29c802dca2a5ae0276c999f59c6111ab7bbaec3b"
+    },
+    {
+      "path": "archivo-black-latin-400-normal.woff2",
+      "sha256": "25f33e61cf995abd6be62931cf03bf427286259177b43618cc410ee0157cfd30"
+    },
+    {
+      "path": "bodoni-moda-latin-standard-italic.woff2",
+      "sha256": "b737328c13b92784ee78d99e62e3bcc38eeef0f2dba41d107637b3acea46781f"
+    },
+    {
+      "path": "bodoni-moda-latin-standard-normal.woff2",
+      "sha256": "c032219ef636f7b4932f7d1dc91bdab602c970f090770b546bea4effaab3463c"
+    },
+    {
+      "path": "client.css",
+      "sha256": "8a0420d5439eb2de8553ff797f053b95cce2c20c1d30552dafa7b804c6c76eba"
+    },
+    {
+      "path": "client.js",
+      "sha256": "1f86699f4116f1f69ec30d0d8a7dae0b4abf30cdd0e1249a13be5d6f66542e83"
+    },
+    {
+      "path": "cormorant-garamond-latin-wght-italic.woff2",
+      "sha256": "6f2f5c3b1abc3d0bb035a927f66a90ca873f94fc31c4966c8d024142c2036e55"
+    },
+    {
+      "path": "cormorant-garamond-latin-wght-normal.woff2",
+      "sha256": "d80df8ff5aecd299a61549f9e29ab1ed0b9b05f4ea71d50fe978e07d5240b235"
+    },
+    {
+      "path": "fonts.css",
+      "sha256": "17c8dd38320a1f9d6338850f8aa18bf92bbdb04ff11a98522e9866821d235a5f"
+    },
+    {
+      "path": "fraunces-latin-full-italic.woff2",
+      "sha256": "04a14ea380db53a35a3ec651934b21061234685bb604d30aac82663b5d9e539b"
+    },
+    {
+      "path": "fraunces-latin-full-normal.woff2",
+      "sha256": "7e744849028e2219e2aa1bc467dc4032980dc4487c9c3da3010081cd72d3b103"
+    },
+    {
+      "path": "ibm-plex-mono-latin-400-normal.woff2",
+      "sha256": "08949f728dc52d528e69b1667d15c89a5686a4ee9a296ff90983985f99c380f7"
+    },
+    {
+      "path": "ibm-plex-mono-latin-500-normal.woff2",
+      "sha256": "01d285447409c8a588692162439a038b8cbd7871309ee20267b0d2d91c6e8e22"
+    },
+    {
+      "path": "jost-latin-wght-normal.woff2",
+      "sha256": "7726a5cd6f3c0e876c028ea2a643d45f7aad4b0f164b70966c669f4a4668f4b9"
+    },
+    {
+      "path": "LICENSE.font-anton.txt",
+      "sha256": "9267baca92b7a7ce9db6dd9e6cc32c9fe3ddf1ac96e421d5f87c5746b9089d6a"
+    },
+    {
+      "path": "LICENSE.font-archivo-black.txt",
+      "sha256": "4cafdbbd100af37a23805af09b7068e4daafb4516dc3d6d52436f4a9d7b4c0d3"
+    },
+    {
+      "path": "LICENSE.font-bodoni-moda.txt",
+      "sha256": "6c64f717433eadd29b058d6254fe25c1ee2d249ce3772f843bb21f73285779c2"
+    },
+    {
+      "path": "LICENSE.font-cormorant-garamond.txt",
+      "sha256": "732f37009943e7f4378cf37113c9bcc4716af002a8583511aa91ed5d37683e73"
+    },
+    {
+      "path": "LICENSE.font-fraunces.txt",
+      "sha256": "cd3384cafac6f2bddc3955273958a2e029f97027c8037ac539ef5744a77b579e"
+    },
+    {
+      "path": "LICENSE.font-ibm-plex-mono.txt",
+      "sha256": "23b0a9d0c6d3f140a0b77e483c5cfa6bba574325ef5cb189ed9f2fec4884533f"
+    },
+    {
+      "path": "LICENSE.font-jost.txt",
+      "sha256": "536533cad95838e13777663c4109b802aa662ef1ef285337f0c7f51d35682fdc"
+    },
+    {
+      "path": "LICENSE.font-public-sans.txt",
+      "sha256": "705a497c781f6463ff819abb513bb495f3fb05256f1d20321e3275813c0bafa5"
+    },
+    {
+      "path": "LICENSE.font-recursive.txt",
+      "sha256": "b4160a38a0fb152c167fada709bd6757a5785cfa4670c3106d386d5558626ce3"
+    },
+    {
+      "path": "LICENSE.font-source-sans-3.txt",
+      "sha256": "18aabf190848725e2576eefb5c29ba06aac1029d02132252a7f312eac2e50cf3"
+    },
+    {
+      "path": "public-sans-latin-wght-normal.woff2",
+      "sha256": "5ed4d31c988e73b258894244f209069ebe77dc7e564861954b21198b6de90d68"
+    },
+    {
+      "path": "recursive-latin-full-normal.woff2",
+      "sha256": "14ef41458aeba3d812284c4e32ee956910b88845062c61e91cc8578c2b78bccb"
+    },
+    {
+      "path": "source-sans-3-latin-wght-normal.woff2",
+      "sha256": "7a19a7027e125257d310c6dbd78ae3a30b5ea1e3794d60b12bb28227a003bfda"
+    }
+  ]
+}
