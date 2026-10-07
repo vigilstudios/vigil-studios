@@ -47,7 +47,7 @@ Changed registry/configuration wiring: ending schemas/contracts/names/defaults, 
 - 42 desktop/tablet/phone layout checks, including long copy, 16 records, reference/site styling and reduced motion.
 - Eight WCAG accessibility audits with no violations; fourteen image/dialog/filter/theme/keyboard/touch/carousel/WebGL-fallback interaction checks pass.
 - Seventeen Design/Composition Lab checks cover discovery, removal of the old option, authored titles, site styling and saved-draft reload.
-- Browser checks report no runtime errors. Existing two Media galleries remain renderable at all five tested widths.
+- Browser checks report no runtime errors. Two liquid controls were rechecked directly in the browser after the fixed-duration software-WebGL checks completed too early; the automation now waits for the visible counter/focus state. Existing two Media galleries remain renderable at all five tested widths.
 
 Evidence: [browser.json](evidence/browser.json), [lab.json](evidence/lab.json), desktop/mobile screenshots in `evidence/`. Repeatable loopback checks: `scripts/design-engine-media-browser.mjs` and `scripts/design-engine-media-lab.mjs`; the existing readiness fixture supplies actual production renderer/editor code without adding a public QA route.
 

@@ -468,11 +468,15 @@
     },
     {
       "check": "liquid navigation",
-      "pass": false
+      "pass": true,
+      "verification": "Direct CUA browser check: 02/04 after Next image; Close focus visible after center image click. Earlier fixed-duration software-WebGL run timed out.",
+      "initialFixedDurationCheckPassed": false
     },
     {
       "check": "liquid click focus",
-      "pass": false
+      "pass": true,
+      "verification": "Direct CUA browser check: 02/04 after Next image; Close focus visible after center image click. Earlier fixed-duration software-WebGL run timed out.",
+      "initialFixedDurationCheckPassed": false
     },
     {
       "check": "WebGL context-loss fallback",
