@@ -1004,3 +1004,25 @@ See `EGRESS-INCIDENT-2026-10-08.md` for evidence, limits and billing implication
 
 Isolated release validation also passed: 77 test files / 1,585 tests, type
 checking, changed-file lint and production build, without the unrelated work.
+
+
+## 2026-10-08 — Follow-up runtime reliability/cost audit
+
+Reviewed the published image-fix baseline for remaining media loops, cancellation,
+job leases/retries and billing delivery recovery. Reproduced and corrected three
+additional failure paths: ZIP cancellation did not abort Storage fetching; failed
+or abandoned billing events were acknowledged without recovery; serial job
+batches could expire waiting leases and ignore final-write errors/ownership.
+
+Archives now propagate cancellation and byte-based backpressure. Billing events
+claim failed/stale receipts atomically and guard completion against newer claims.
+Jobs claim one at a time with a start budget and guarded, checked result writes.
+Checkout executes at most one inline job, leaving child work to the runner.
+No schema migration, billing-setting change or asset deletion is included.
+
+Validation: 77 files / 1,594 tests; typecheck; full lint; production build; and
+committed migrations/RLS assertions in disposable local PostgreSQL all passed.
+Production-config build reads still report Supabase's egress restriction, so
+live authenticated service restoration is not claimed. Unpublished Professional
+changes remain excluded. Scope, evidence and remaining limits are documented in
+`RUNTIME-AUDIT-2026-10-08.md`.

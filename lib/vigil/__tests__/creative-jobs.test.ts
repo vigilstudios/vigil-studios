@@ -50,7 +50,7 @@ describe("Create Repo → creative workspace", () => {
   it("still creates the repository, then queues the workspace as its own job", async () => {
     const fake = seed("professional");
     await enqueueJob(fake.asClient(), { kind: JOB_KINDS.websiteRepository, idempotencyKey: "website.repository:site_1", organizationId: "org_1", websiteId: "site_1" });
-    const first = await runDueJobs(fake.asClient(), { worker: "t" });
+    const first = await runDueJobs(fake.asClient(), { worker: "t", limit: 1 });
     expect(first).toEqual([expect.objectContaining({ kind: "website.repository", status: "succeeded" })]);
     expect(repository).toHaveBeenCalledWith(expect.anything(), "site_1");
 
@@ -70,7 +70,7 @@ describe("Create Repo → creative workspace", () => {
     const fake = seed("professional");
     generate.mockRejectedValueOnce(new Error("socket hang up"));
     await enqueueJob(fake.asClient(), { kind: JOB_KINDS.websiteRepository, idempotencyKey: "website.repository:site_1", organizationId: "org_1", websiteId: "site_1" });
-    await runDueJobs(fake.asClient(), { worker: "t" });
+    await runDueJobs(fake.asClient(), { worker: "t", limit: 1 });
     const outcome = await runDueJobs(fake.asClient(), { worker: "t" });
     expect(outcome[0]).toMatchObject({ kind: "website.creative_workspace", status: "queued", error: "socket hang up" });
     expect(fake.rows("provisioning_jobs")[0].status).toBe("succeeded");

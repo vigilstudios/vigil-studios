@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import JSZip from "jszip";
 import { zipEntries, zipStream } from "../services/files-zip";
 
@@ -43,5 +43,40 @@ describe("zipStream", () => {
   it("fails the stream when storage refuses a file", async () => {
     const entries = [{ path: "Cust/Photos/missing.jpg", url: "https://f/missing.jpg", mtime: new Date() }];
     await expect(new Response(zipStream(entries, fetchFile)).arrayBuffer()).rejects.toThrow(/storage returned 404/);
+  });
+
+  it("aborts an in-flight storage request when the browser cancels the archive", async () => {
+    let resolve!: (response: Response) => void;
+    let signal: AbortSignal | null = null;
+    const upstreamCanceled = vi.fn();
+    const fetchFile = vi.fn((_url: string, init?: RequestInit) => {
+      signal = init?.signal ?? null;
+      return new Promise<Response>(r => { resolve = r; });
+    });
+    const entries = ["a", "b"].map(n => ({ path: `${n}.jpg`, url: `https://f/${n}`, mtime: new Date() }));
+    const reader = zipStream(entries, fetchFile).getReader();
+    const pending = reader.read();
+    await vi.waitFor(() => expect(fetchFile).toHaveBeenCalledTimes(1));
+    await reader.cancel();
+    expect((signal as AbortSignal | null)?.aborted).toBe(true);
+    // Even a fetch implementation that completes after cancellation must be closed.
+    resolve(new Response(new ReadableStream({ cancel: upstreamCanceled })));
+    await pending;
+    await vi.waitFor(() => expect(upstreamCanceled).toHaveBeenCalledTimes(1));
+    expect(fetchFile).toHaveBeenCalledTimes(1);
+  });
+
+  it("pauses storage after about 1 MB when the browser stops reading, and cancels the active body", async () => {
+    let reads = 0;
+    const upstreamCanceled = vi.fn();
+    const body = new ReadableStream<Uint8Array>({
+      pull(controller) { reads++; controller.enqueue(new Uint8Array(256 * 1024)); },
+      cancel: upstreamCanceled,
+    }, { highWaterMark: 0 });
+    const archive = zipStream([{ path: "large.mov", url: "https://f/large", mtime: new Date() }], async () => new Response(body));
+    await vi.waitFor(() => expect(reads).toBeGreaterThanOrEqual(4));
+    expect(reads).toBeLessThanOrEqual(5);
+    await archive.cancel();
+    expect(upstreamCanceled).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,6 +1,6 @@
 import { ProviderError, ProviderNotConfiguredError, isVigilError } from "@/lib/vigil/auth/errors";
 import { escapeHtml, layout, sendEmail, staffNotificationAddress } from "@/lib/vigil/email";
-import type { DbClient, ProvisioningJob } from "@/lib/vigil/types";
+import type { DbClient, ProvisioningJob, Updates } from "@/lib/vigil/types";
 import type { Json } from "@/types/database.types";
 import { deployWebsite, finalizeWebsiteLaunch, provisionWebsite, syncDeployment } from "./services/deployment";
 import { notifyCustomerDeployment } from "./services/deployment-notifications";
@@ -323,20 +323,36 @@ export function classifyFailure(error: unknown): { retryable: boolean; delaySeco
 
 export async function runDueJobs(
   admin: DbClient,
-  options: { worker: string; limit?: number; leaseSeconds?: number } 
+  options: { worker: string; limit?: number; leaseSeconds?: number; budgetMs?: number }
 ): Promise<JobOutcome[]> {
-  const { data: claimed, error } = await admin.rpc("claim_jobs", {
-    p_worker: options.worker,
-    p_limit: options.limit ?? 10,
-    p_lease_seconds: options.leaseSeconds ?? 300,
-  });
-  if (error) throw error;
-
+  const deadline = Date.now() + (options.budgetMs ?? 200_000);
   const outcomes: JobOutcome[] = [];
-  for (const job of claimed ?? []) {
+  // A lease starts when a job is claimed, not when its handler starts. Claiming
+  // a whole batch then running it sequentially lets untouched jobs expire.
+  while (outcomes.length < (options.limit ?? 10) && Date.now() < deadline) {
+    const { data: claimed, error } = await admin.rpc("claim_jobs", {
+      p_worker: options.worker,
+      p_limit: 1,
+      p_lease_seconds: options.leaseSeconds ?? 300,
+    });
+    if (error) throw error;
+    const job = claimed?.[0];
+    if (!job) break;
     outcomes.push(await runOne(admin, job));
   }
   return outcomes;
+}
+
+class JobLeaseLostError extends Error {}
+
+/** Never acknowledge a write error, or finish a job reclaimed by another worker. */
+async function persistJob(admin: DbClient, job: ProvisioningJob, update: Updates<"provisioning_jobs">): Promise<void> {
+  const { data, error } = await admin.from("provisioning_jobs").update(update)
+    .eq("id", job.id).eq("status", "running")
+    .eq("locked_by", job.locked_by!).eq("locked_at", job.locked_at!)
+    .select("id").maybeSingle();
+  if (error) throw error;
+  if (!data) throw new JobLeaseLostError(`Lease lost for job ${job.id}.`);
 }
 
 async function runOne(admin: DbClient, job: ProvisioningJob): Promise<JobOutcome> {
@@ -344,21 +360,16 @@ async function runOne(admin: DbClient, job: ProvisioningJob): Promise<JobOutcome
 
   const handler = handlers.get(job.kind);
   if (!handler) {
-    await admin
-      .from("provisioning_jobs")
-      .update({ status: "failed", error: { code: "unknown_kind", message: `No handler for ${job.kind}` }, finished_at: finishedAt, locked_by: null, locked_at: null })
-      .eq("id", job.id);
+    await persistJob(admin, job, { status: "failed", error: { code: "unknown_kind", message: `No handler for ${job.kind}` }, finished_at: finishedAt, locked_by: null, locked_at: null });
     return { id: job.id, kind: job.kind, status: "failed", error: `No handler for ${job.kind}` };
   }
 
   try {
     const result = await handler({ admin, job });
-    await admin
-      .from("provisioning_jobs")
-      .update({ status: "succeeded", result: result ?? null, error: null, finished_at: finishedAt, locked_by: null, locked_at: null })
-      .eq("id", job.id);
+    await persistJob(admin, job, { status: "succeeded", result: result ?? null, error: null, finished_at: new Date().toISOString(), locked_by: null, locked_at: null });
     return { id: job.id, kind: job.kind, status: "succeeded" };
   } catch (err) {
+    if (err instanceof JobLeaseLostError) throw err;
     const failure = classifyFailure(err);
     console.error(`[jobs] ${job.kind} ${job.id} attempt ${job.attempts} failed:`, err);
     const exhausted = job.attempts >= job.max_attempts;
@@ -367,17 +378,11 @@ async function runOne(admin: DbClient, job: ProvisioningJob): Promise<JobOutcome
     if (failure.retryable && !exhausted) {
       const delay = failure.delaySeconds ?? backoffSeconds(job.attempts);
       const scheduledFor = new Date(Date.now() + delay * 1000).toISOString();
-      await admin
-        .from("provisioning_jobs")
-        .update({ status: "queued", error: errorJson, scheduled_for: scheduledFor, locked_by: null, locked_at: null })
-        .eq("id", job.id);
+      await persistJob(admin, job, { status: "queued", error: errorJson, scheduled_for: scheduledFor, locked_by: null, locked_at: null });
       return { id: job.id, kind: job.kind, status: "queued", error: failure.message };
     }
 
-    await admin
-      .from("provisioning_jobs")
-      .update({ status: "failed", error: errorJson, finished_at: finishedAt, locked_by: null, locked_at: null })
-      .eq("id", job.id);
+    await persistJob(admin, job, { status: "failed", error: errorJson, finished_at: new Date().toISOString(), locked_by: null, locked_at: null });
     await notifyPermanentFailure(job, failure.message, exhausted).catch(() => undefined);
     return { id: job.id, kind: job.kind, status: "failed", error: failure.message };
   }

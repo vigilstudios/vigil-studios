@@ -6,6 +6,7 @@ import { receiveBillingEvent } from "@/lib/vigil/services/webhook";
 import type { BillingEvent } from "@/lib/vigil/providers/types";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
 /**
  * Billing webhook. The provider verifies the signature and normalizes the

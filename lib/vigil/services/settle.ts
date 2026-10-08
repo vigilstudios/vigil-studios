@@ -50,7 +50,8 @@ export async function settleOrder(admin: DbClient, orderId: string, options: { p
     await enqueueJob(admin, { kind: JOB_KINDS.orderProvision, idempotencyKey: `order.provision:${orderId}`, payload: { order_id: orderId }, maxAttempts: 8, requeueFailed: true });
     actions.push("queued");
     if (options.run !== false) {
-      await runDueJobs(admin, { worker: options.worker ?? "settle", limit: 3 }).catch(() => undefined);
+      // Keep downstream repository/model work off the checkout success page.
+      await runDueJobs(admin, { worker: options.worker ?? "settle", limit: 1 }).catch(() => undefined);
       const { data: again } = await admin.from("orders").select("status").eq("id", orderId).single();
       status = again?.status ?? status;
     }

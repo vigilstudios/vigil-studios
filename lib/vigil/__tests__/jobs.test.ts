@@ -95,6 +95,54 @@ describe("runDueJobs", () => {
     expect(row.locked_by).toBeNull();
   });
 
+  it("does not lease waiting jobs before the current handler finishes", async () => {
+    const fake = new FakeAdmin({ provisioning_jobs: [seedJob({}), seedJob({ id: "j2", idempotency_key: "j2" })] });
+    registerJobHandler("test.ok", async ({ job }) => {
+      if (job.id === "j1") expect(fake.rows("provisioning_jobs")[1]).toMatchObject({ status: "queued", attempts: 0 });
+      return { done: true };
+    });
+    const out = await runDueJobs(fake.asClient(), { worker: "t", limit: 2 });
+    expect(out).toHaveLength(2);
+    expect(out.map(o => o.status)).toEqual(["succeeded", "succeeded"]);
+  });
+
+  it("leaves remaining jobs unclaimed when the invocation budget is spent", async () => {
+    vi.useFakeTimers();
+    try {
+      const fake = new FakeAdmin({ provisioning_jobs: [seedJob({}), seedJob({ id: "j2", idempotency_key: "j2" })] });
+      registerJobHandler("test.ok", async () => {
+        vi.advanceTimersByTime(210_000);
+        return { done: true };
+      });
+      const out = await runDueJobs(fake.asClient(), { worker: "t", limit: 2 });
+      expect(out.map(o => o.id)).toEqual(["j1"]);
+      expect(fake.rows("provisioning_jobs")[1]).toMatchObject({ status: "queued", attempts: 0 });
+    } finally { vi.useRealTimers(); }
+  });
+
+  it("does not overwrite a job reclaimed by another worker", async () => {
+    const fake = new FakeAdmin({ provisioning_jobs: [seedJob({})] });
+    registerJobHandler("test.ok", async () => {
+      fake.rows("provisioning_jobs")[0].locked_by = "new-worker";
+      return { done: true };
+    });
+    await expect(runDueJobs(fake.asClient(), { worker: "old-worker" })).rejects.toThrow(/Lease lost/);
+    expect(fake.rows("provisioning_jobs")[0]).toMatchObject({ status: "running", locked_by: "new-worker" });
+  });
+
+  it("does not report success when the database refuses the final job update", async () => {
+    const fake = new FakeAdmin({ provisioning_jobs: [seedJob({})] });
+    const from = fake.from.bind(fake);
+    vi.spyOn(fake, "from").mockImplementation(table => {
+      const query = from(table);
+      if (table === "provisioning_jobs") query.maybeSingle = async () => ({ data: null, error: { message: "database unavailable" } });
+      return query;
+    });
+    registerJobHandler("test.ok", async () => ({ done: true }));
+    await expect(runDueJobs(fake.asClient(), { worker: "t" })).rejects.toMatchObject({ message: "database unavailable" });
+    expect(fake.rows("provisioning_jobs")[0].status).toBe("running");
+  });
+
   it("re-queues a retryable failure with backoff while attempts remain", async () => {
     registerJobHandler("test.flaky", async () => {
       throw new Error("timeout");

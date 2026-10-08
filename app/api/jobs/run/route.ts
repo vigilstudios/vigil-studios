@@ -5,6 +5,7 @@ import { runDueJobs } from "@/lib/vigil/jobs";
 import { reconcileOrders } from "@/lib/vigil/services/reconcile";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
 /**
  * Drain the provisioning queue, then reconcile orders (skip with

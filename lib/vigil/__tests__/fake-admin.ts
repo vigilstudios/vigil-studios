@@ -186,6 +186,7 @@ export class FakeAdmin {
       for (const j of due) {
         j.status = "running";
         j.locked_by = args.p_worker;
+        j.locked_at = new Date().toISOString();
         j.attempts = Number(j.attempts ?? 0) + 1;
       }
       return { data: due.map((j) => ({ ...j })), error: null };

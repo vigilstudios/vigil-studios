@@ -73,6 +73,45 @@ describe("receiveBillingEvent", () => {
     expect(fake.rows("provisioning_jobs").map((job) => job.kind)).toEqual(["order.provision", "website.repository"]);
   });
 
+  it("allows only one concurrent retry of a failed event", async () => {
+    const provider = getBillingProvider();
+    let finish!: (value: null) => void;
+    const subscription = vi.spyOn(provider, "getSubscription").mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+    const event: BillingEvent = { externalEventId: "evt_retry", type: "invoice.paid", rawType: "invoice.paid", subscriptionExternalId: "sub_retry", raw: {} };
+    fake.rows("webhook_events").push({ id: "inbox_retry", provider: "other", event_id: event.externalEventId, status: "failed" });
+    const first = receiveBillingEvent(fake.asClient(), event, provider);
+    await vi.waitFor(() => expect(subscription).toHaveBeenCalledTimes(1));
+    await expect(receiveBillingEvent(fake.asClient(), event, provider)).rejects.toThrow(/in progress/);
+    finish(null);
+    await expect(first).resolves.toEqual({ duplicate: false, outcome: "ignored" });
+    await expect(receiveBillingEvent(fake.asClient(), event, provider)).resolves.toEqual({ duplicate: true });
+    expect(subscription).toHaveBeenCalledTimes(1);
+    expect(fake.rows("webhook_events")).toHaveLength(1);
+    subscription.mockRestore();
+  });
+
+  it("reclaims a received event left behind by a timed-out handler", async () => {
+    const event: BillingEvent = { externalEventId: "evt_crashed", type: "ignored", rawType: "unknown", raw: {} };
+    fake.rows("webhook_events").push({ id: "crashed", provider: "other", event_id: event.externalEventId, status: "received", received_at: new Date(Date.now() - 11 * 60_000).toISOString() });
+    await expect(receiveBillingEvent(fake.asClient(), event)).resolves.toEqual({ duplicate: false, outcome: "ignored" });
+    expect(fake.rows("webhook_events")[0].status).toBe("ignored");
+    expect(fake.rows("webhook_events")).toHaveLength(1);
+  });
+
+  it("does not finish or fail an event claimed by a newer delivery", async () => {
+    const provider = getBillingProvider();
+    const subscription = vi.spyOn(provider, "getSubscription").mockImplementation(async () => {
+      fake.rows("webhook_events")[0].received_at = "2099-01-01T00:00:00.000Z";
+      return null;
+    });
+    try {
+      const event: BillingEvent = { externalEventId: "evt_reclaimed", type: "invoice.paid", rawType: "invoice.paid", subscriptionExternalId: "sub_reclaimed", raw: {} };
+      await expect(receiveBillingEvent(fake.asClient(), event, provider)).rejects.toThrow(/lease was reclaimed/);
+      expect(fake.rows("webhook_events")[0]).toMatchObject({ status: "received", received_at: "2099-01-01T00:00:00.000Z" });
+      expect(fake.rows("webhook_events")[0].processed_at).toBeUndefined();
+    } finally { subscription.mockRestore(); }
+  });
+
   it("finds the order through the session link when the reference is missing, and ignores unknown sessions", async () => {
     const snapshot = await getBillingProvider().getCheckoutSession(sessionId);
     const res = await receiveBillingEvent(fake.asClient(), checkoutCompleted(null, sessionId, snapshot));
@@ -131,9 +170,15 @@ describe("receiveBillingEvent", () => {
     const provider = getBillingProvider();
     const snapshot = await provider.getCheckoutSession(sessionId);
     // Make completing the checkout impossible: the order row vanishes between insert and handling.
+    const savedOrder = { ...fake.rows("orders")[0] };
     fake.rows("orders").length = 0;
     await expect(receiveBillingEvent(fake.asClient(), checkoutCompleted(orderId, sessionId, snapshot, "evt_boom"), provider)).rejects.toThrow(/not found/);
     expect(fake.rows("webhook_events")[0]).toMatchObject({ event_id: "evt_boom", status: "failed" });
     expect((fake.rows("webhook_events")[0].error as { message: string }).message).toMatch(/not found/);
+    fake.rows("orders").push(savedOrder);
+    await expect(receiveBillingEvent(fake.asClient(), checkoutCompleted(orderId, sessionId, snapshot, "evt_boom"), provider)).resolves.toEqual({ duplicate: false, outcome: "provisioning" });
+    expect(fake.rows("webhook_events")).toHaveLength(1);
+    expect(fake.rows("webhook_events")[0].status).toBe("processed");
+    expect(fake.rows("projects")).toHaveLength(1);
   });
 });
