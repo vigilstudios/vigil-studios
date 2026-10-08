@@ -980,3 +980,27 @@ Verification: exact staged source passes lint, typecheck, all 298 tests / 49 fil
 Owner authorized making the editor live. Isolated the standalone staff Design/Composition Lab release from unrelated customer-project, provider, checkout and schema edits. Included all renderer/preview dependencies and referenced review media, preserved staff authorization, added desktop Admin Lab navigation and named Site Definition exports. Pages → Portable site document now names a variant and downloads an independent `.site.json` with all pages/layers/actions/global slots. JSON import restores it; browser draft still holds only one working site. The repository handoff guide explains three designs and media/notes requirements.
 
 Isolated release verification passes: 1,350 tests / 73 files, typecheck, lint, optimized production build, 28 lab workflows and five independent named export/import checks. Deployment follows the established main → Vercel integration; exact commit/live checks are recorded in `docs/design-engine/editor-release/evidence/live.json`. Customer-project pipeline files and migrations remain excluded. No real inquiry/newsletter submission or Express variant generation is part of this release.
+
+
+## 2026-10-08 — Private image egress incident fix (local release candidate)
+
+Diagnosed minute-by-minute re-downloads of signed originals in Supabase gateway
+logs: 57 requests per hour for one photo, with fresh signed tokens. Storage was
+155.218 GB on October 4 versus 59.094 MB PostgREST. Whole-route background
+refresh and rotating preview URLs caused the loop.
+
+Stopped healthy-Realtime and hidden/offline refreshes; stabilized subscription
+dependencies; disabled automatic dashboard refresh in the Lab; retained valid
+private image preview URLs; removed video tile preloading; paused hidden-tab
+domain/deployment polls. Eight regressions and the full 1,601-test working
+checkout suite pass, along with type checking, changed-file lint and production
+build. A real Chrome fixture confirms 57 re-signs cause one image HTTP request,
+with renewal and replacement still working.
+
+Release candidate is isolated from unrelated uncommitted work on
+`codex/fix-storage-egress`. No production release or Supabase billing change is
+claimed. HTTP 402 restrictions still block live login until service restoration.
+See `EGRESS-INCIDENT-2026-10-08.md` for evidence, limits and billing implications.
+
+Isolated release validation also passed: 77 test files / 1,585 tests, type
+checking, changed-file lint and production build, without the unrelated work.

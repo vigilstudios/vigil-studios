@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { RefreshCw } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
 import { TopbarActions } from "./AppFrame";
+import { createDashboardRefreshController, dashboardAutoRefreshEnabled } from "@/lib/vigil/dashboard-refresh";
 
 type Scope =
   | { kind: "admin" }
@@ -38,67 +39,77 @@ const adminTables = [...organizationTables, "notifications", "provisioning_jobs"
  */
 export function LiveDashboardSync({ scope }: { scope: Scope }) {
   const router = useRouter();
+  const automatic = dashboardAutoRefreshEnabled(usePathname());
+  const kind = scope.kind;
+  const organizationId = scope.kind === "organization" ? scope.organizationId : null;
+  const userId = scope.kind === "admin" ? null : scope.userId;
   const [state, setState] = useState<ConnectionState>("connecting");
   const [refreshing, setRefreshing] = useState(false);
-  const refreshTimer = useRef<number | null>(null);
   const settleTimer = useRef<number | null>(null);
 
   const refresh = useCallback(() => {
-    if (refreshTimer.current) window.clearTimeout(refreshTimer.current);
-    refreshTimer.current = window.setTimeout(() => {
-      setRefreshing(true);
-      router.refresh();
-      if (settleTimer.current) window.clearTimeout(settleTimer.current);
-      settleTimer.current = window.setTimeout(() => setRefreshing(false), 800);
-    }, 250);
+    setRefreshing(true);
+    router.refresh();
+    if (settleTimer.current) window.clearTimeout(settleTimer.current);
+    settleTimer.current = window.setTimeout(() => setRefreshing(false), 800);
   }, [router]);
 
   useEffect(() => {
+    if (!automatic) return;
+    const controller = createDashboardRefreshController({
+      refresh,
+      isVisible: () => document.visibilityState === "visible",
+      isOnline: () => navigator.onLine,
+    });
     const supabase = createClient();
-    const channel = supabase.channel(`dashboard:${scope.kind}:${scope.kind === "organization" ? scope.organizationId : scope.kind === "viewer" ? scope.userId : "all"}`);
-    const tables = scope.kind === "admin" ? adminTables : scope.kind === "organization" ? organizationTables : [];
+    const channel = supabase.channel(`dashboard:${kind}:${organizationId ?? userId ?? "all"}`);
+    const tables = kind === "admin" ? adminTables : kind === "organization" ? organizationTables : [];
 
     for (const table of tables) {
-      const filter = scope.kind === "organization" ? `organization_id=eq.${scope.organizationId}` : undefined;
-      channel.on("postgres_changes", { event: "*", schema: "public", table, ...(filter ? { filter } : {}) }, refresh);
+      const filter = kind === "organization" ? `organization_id=eq.${organizationId}` : undefined;
+      channel.on("postgres_changes", { event: "*", schema: "public", table, ...(filter ? { filter } : {}) }, controller.changed);
     }
-    if (scope.kind === "organization") {
-      channel.on("postgres_changes", { event: "*", schema: "public", table: "organizations", filter: `id=eq.${scope.organizationId}` }, refresh);
-    } else if (scope.kind === "admin") {
-      channel.on("postgres_changes", { event: "*", schema: "public", table: "organizations" }, refresh);
+    if (kind === "organization") {
+      channel.on("postgres_changes", { event: "*", schema: "public", table: "organizations", filter: `id=eq.${organizationId}` }, controller.changed);
+    } else if (kind === "admin") {
+      channel.on("postgres_changes", { event: "*", schema: "public", table: "organizations" }, controller.changed);
     }
-    if (scope.kind !== "admin") channel.on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${scope.userId}` }, refresh);
+    if (kind !== "admin") channel.on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` }, controller.changed);
 
     channel.subscribe((status) => {
-      if (status === "SUBSCRIBED") setState("live");
-      else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") setState("offline");
+      const connected = status === "SUBSCRIBED";
+      controller.connection(connected);
+      setState(connected ? "live" : "offline");
     });
 
     const refreshWhenVisible = () => {
-      if (document.visibilityState === "visible") refresh();
+      if (document.visibilityState === "visible") controller.wake();
     };
-    window.addEventListener("focus", refresh);
-    window.addEventListener("online", refresh);
+    window.addEventListener("focus", controller.wake);
+    window.addEventListener("online", controller.wake);
     document.addEventListener("visibilitychange", refreshWhenVisible);
-    const fallback = window.setInterval(refresh, 60_000);
+    const fallback = window.setInterval(controller.poll, 60_000);
 
     return () => {
-      if (refreshTimer.current) window.clearTimeout(refreshTimer.current);
-      if (settleTimer.current) window.clearTimeout(settleTimer.current);
+      controller.dispose();
       window.clearInterval(fallback);
-      window.removeEventListener("focus", refresh);
-      window.removeEventListener("online", refresh);
+      window.removeEventListener("focus", controller.wake);
+      window.removeEventListener("online", controller.wake);
       document.removeEventListener("visibilitychange", refreshWhenVisible);
       void supabase.removeChannel(channel);
     };
-  }, [refresh, scope]);
+  }, [automatic, refresh, kind, organizationId, userId]);
 
-  const label = refreshing ? "Updating" : state === "live" ? "Live" : state === "offline" ? "Offline" : "Connecting";
+  useEffect(() => () => {
+    if (settleTimer.current) window.clearTimeout(settleTimer.current);
+  }, []);
+
+  const label = refreshing ? "Updating" : !automatic ? "Manual" : state === "live" ? "Live" : state === "offline" ? "Offline" : "Connecting";
   return (
     <TopbarActions>
       <div className="flex items-center gap-1.5" aria-live="polite">
         <span className="hidden items-center gap-1.5 text-[11px] text-[color:var(--text-secondary)] sm:inline-flex">
-          <span className={`h-1.5 w-1.5 rounded-full ${state === "live" ? "bg-[color:var(--accent)]" : state === "offline" ? "bg-[#ef4444]" : "bg-[#f59e0b]"}`} />
+          <span className={`h-1.5 w-1.5 rounded-full ${!automatic ? "bg-[color:var(--text-secondary)]" : state === "live" ? "bg-[color:var(--accent)]" : state === "offline" ? "bg-[#ef4444]" : "bg-[#f59e0b]"}`} />
           {label}
         </span>
         <button

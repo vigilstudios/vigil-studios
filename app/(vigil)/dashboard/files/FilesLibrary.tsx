@@ -12,6 +12,7 @@ import { PROJECT_ASSETS_BUCKET } from "@/lib/vigil/onboarding/assets";
 import type { SignedAsset } from "@/lib/vigil/queries/onboarding";
 import { FileUploadButton } from "@/components/vigil/FileUploadButton";
 import { Panel } from "@/components/vigil/widgets";
+import { AssetPreviewImage } from "@/components/vigil/AssetPreviewImage";
 
 type Progress = { done: number; total: number; current: string; fraction: number };
 
@@ -159,10 +160,7 @@ function FileTile({ asset, canManage, onRemove }: { asset: SignedAsset; canManag
     <li className="relative overflow-hidden rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)]">
       <a href={asset.url ?? "#"} target="_blank" rel="noreferrer" className="flex aspect-square items-center justify-center overflow-hidden">
         {image && asset.url ? (
-          // eslint-disable-next-line @next/next/no-img-element -- signed or local object URL
-          <img src={asset.url} alt={asset.caption ?? asset.file_name} className="h-full w-full object-cover" />
-        ) : video && asset.url ? (
-          <video src={asset.url} muted playsInline preload="metadata" className="h-full w-full object-cover" />
+          <AssetPreviewImage src={asset.url} alt={asset.caption ?? asset.file_name} className="h-full w-full object-cover" />
         ) : (
           <span className="flex flex-col items-center gap-1 px-2 text-center text-[10px] font-semibold uppercase text-[color:var(--text-secondary)]">
             {video ? <Film className="h-5 w-5" aria-hidden /> : <FileText className="h-5 w-5" aria-hidden />}

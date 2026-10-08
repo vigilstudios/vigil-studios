@@ -17,6 +17,7 @@ export function DomainGuidePanel({ domain, initialRegistrar, canManage }: { doma
   useEffect(() => {
     if (state.status !== "verifying" || state.launchReady) return;
     const id = window.setInterval(async () => {
+      if (document.visibilityState !== "visible" || !navigator.onLine) return;
       const res = await getDomainSetup(state.domainId, registrar);
       if (res.ok) {
         setState(res.data);

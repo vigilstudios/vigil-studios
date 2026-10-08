@@ -1,6 +1,7 @@
 import { FileText, Paperclip } from "lucide-react";
 import { formatBytes } from "@/lib/vigil/attachments";
 import type { SignedAttachment } from "@/lib/vigil/queries/dashboard";
+import { AssetPreviewImage } from "./AssetPreviewImage";
 
 /** Attachment chips with signed links; images get a thumbnail. */
 export function AttachmentList({ items, compact = false }: { items: SignedAttachment[]; compact?: boolean }) {
@@ -12,8 +13,7 @@ export function AttachmentList({ items, compact = false }: { items: SignedAttach
         const body = (
           <>
             {isImage && a.url ? (
-              // eslint-disable-next-line @next/next/no-img-element -- signed, expiring storage URL
-              <img src={a.url} alt="" className={compact ? "h-6 w-6 rounded object-cover" : "h-9 w-9 rounded object-cover"} />
+              <AssetPreviewImage src={a.url} alt="" className={compact ? "h-6 w-6 rounded object-cover" : "h-9 w-9 rounded object-cover"} />
             ) : (
               <span className={`flex items-center justify-center rounded bg-[color:var(--bg-surface-soft)] ${compact ? "h-6 w-6" : "h-9 w-9"}`}>
                 {isImage ? <Paperclip className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5" />}

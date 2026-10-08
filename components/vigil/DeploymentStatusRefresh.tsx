@@ -9,7 +9,9 @@ export function DeploymentStatusRefresh({ active }: { active: boolean }) {
 
   useEffect(() => {
     if (!active) return;
-    const timer = window.setInterval(() => router.refresh(), 15_000);
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible" && navigator.onLine) router.refresh();
+    }, 15_000);
     return () => window.clearInterval(timer);
   }, [active, router]);
 

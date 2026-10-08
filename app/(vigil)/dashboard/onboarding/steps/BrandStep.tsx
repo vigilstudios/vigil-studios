@@ -1,5 +1,7 @@
 "use client";
 
+import { AssetPreviewImage } from "@/components/vigil/AssetPreviewImage";
+
 import { useEffect, useState } from "react";
 import { ImagePlus, Trash2, Upload } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
@@ -234,8 +236,7 @@ function AssetTile({ asset, onRemove, captionable }: { asset: SignedAsset; onRem
     <li className="relative w-full overflow-hidden rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)]">
       <div className="flex aspect-square items-center justify-center overflow-hidden">
         {isImage && asset.url ? (
-          // eslint-disable-next-line @next/next/no-img-element -- signed or local object URL
-          <img src={asset.url} alt={asset.caption ?? asset.file_name} className="h-full w-full object-cover" />
+          <AssetPreviewImage src={asset.url} alt={asset.caption ?? asset.file_name} className="h-full w-full object-cover" />
         ) : (
           <span className="px-2 text-center text-[10px] font-semibold uppercase text-[color:var(--text-secondary)]">{asset.content_type === "application/pdf" ? "PDF" : asset.file_name.split(".").pop()}</span>
         )}

@@ -8,6 +8,7 @@ import { formatBytes } from "@/lib/vigil/attachments";
 import { formatDateTime } from "@/lib/vigil/format";
 import { isVideo } from "@/lib/vigil/files";
 import { Card, PageHeader, StatusPill } from "@/components/vigil/ui";
+import { AssetPreviewImage } from "@/components/vigil/AssetPreviewImage";
 
 export const metadata: Metadata = { title: "Customer files" };
 
@@ -124,10 +125,7 @@ export default async function CustomerFilesPage({ params }: { params: Promise<{ 
                   <li key={f.id} className="overflow-hidden rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)]">
                     <a href={url ?? "#"} target="_blank" rel="noreferrer" className="relative flex aspect-square items-center justify-center overflow-hidden bg-black/20">
                       {image && url ? (
-                        // eslint-disable-next-line @next/next/no-img-element -- signed URL
-                        <img src={url} alt={f.caption ?? f.file_name} className="h-full w-full object-cover" loading="lazy" />
-                      ) : video && url ? (
-                        <video src={url} muted playsInline preload="metadata" className="h-full w-full object-cover" />
+                        <AssetPreviewImage src={url} alt={f.caption ?? f.file_name} className="h-full w-full object-cover" />
                       ) : (
                         <span className="flex flex-col items-center gap-1 px-2 text-center text-[10px] font-semibold uppercase text-[color:var(--text-secondary)]">
                           {video ? <Film className="h-6 w-6" aria-hidden /> : <FileText className="h-6 w-6" aria-hidden />}

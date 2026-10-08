@@ -48,6 +48,7 @@ export function DomainStep({ initial, projectId, businessName, domain, onDomain,
   useEffect(() => {
     if (!domain || domain.status !== "verifying") return;
     pollRef.current = window.setInterval(async () => {
+      if (document.visibilityState !== "visible" || !navigator.onLine) return;
       const res = await getDomainSetup(domain.domainId, registrar ?? "other");
       if (res.ok) onDomain(res.data);
     }, 20_000);
