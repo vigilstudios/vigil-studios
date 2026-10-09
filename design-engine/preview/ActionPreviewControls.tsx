@@ -4,6 +4,7 @@ import { getActionCapabilities, actionItems } from "../actions/capabilities";
 import type { ContextualActions, ActionPresentation } from "../actions/schema";
 import type { SectionInstance } from "../composition/schemas";
 import { ActionPresentationControls } from "./composition/ContextualActionsEditor";
+import { sectionCTAAnimation } from "../presentation/schema";
 /** Design inspection uses a labelled external example; canonical destination editing belongs to Composition. */
 export function ActionPreviewControls({ section, onChange }: { section: SectionInstance; onChange: (value?: ContextualActions) => void }) {
   const capability = getActionCapabilities(section.component);
@@ -20,6 +21,6 @@ export function ActionPreviewControls({ section, onChange }: { section: SectionI
   return <details className="lab-control-wide"><summary>Preview contextual actions</summary><p>{capability.classification} · {capability.reason}</p>{presentation && <>
     <label><input type="checkbox" checked={enabled} onChange={event => { setEnabled(event.target.checked); update(event.target.checked, value, target); }}/>Preview example action</label>
     <label>Preview action slot<select value={target} onChange={event => { setTarget(event.target.value); setValue({}); update(enabled, {}, event.target.value); }}>{options.map(option => <option key={option}>{option}</option>)}</select></label>
-    {enabled && <ActionPresentationControls capability={presentation} value={value} onPreview={next => update(enabled, next ?? value, target)} onChange={next => { setValue(next); update(enabled, next, target); }}/>}</>}
+    {enabled && <ActionPresentationControls capability={presentation} value={value} ctaAnimation={sectionCTAAnimation(section.presentation)} onPreview={next => update(enabled, next ?? value, target)} onChange={next => { setValue(next); update(enabled, next, target); }}/>}</>}
   </details>;
 }

@@ -3,9 +3,9 @@ import { ContentTextField } from "./ContentFields";
 import { inquiryFormDefaults, inquiryFormPresets, type InquiryFormAppearance } from "../../forms/appearance";
 import type { ActionPresentation } from "../../actions/schema";
 import { coreIconNames } from "../../icons/names";
-import { buttonShapes, hoverEffects } from "../../presentation/schema";
+import { buttonShapes, hoverEffects, type CTAAnimation } from "../../presentation/schema";
 
-export function InquiryFormAppearanceControls({ value, onChange }: { value?: InquiryFormAppearance; onChange: (value?: InquiryFormAppearance) => void }) {
+export function InquiryFormAppearanceControls({ value, ctaAnimation, onChange }: { value?: InquiryFormAppearance; ctaAnimation?: CTAAnimation; onChange: (value?: InquiryFormAppearance) => void }) {
   const design = { ...inquiryFormDefaults, ...value };
   const patch = (key: keyof InquiryFormAppearance, next: unknown) => onChange({ ...value, [key]: next });
   const select = (label: string, current: string, options: readonly string[], change: (next: string) => void) => <label key={label}>{label}<select aria-label={label} value={current} onChange={event => change(event.target.value)}>{options.map(option => <option key={option} value={option}>{option.replace(/-/g," ")}</option>)}</select></label>;
@@ -36,7 +36,7 @@ export function InquiryFormAppearanceControls({ value, onChange }: { value?: Inq
     <details className="composition-content-group"><summary>Form submit button</summary>
       {select("Submit variant",value?.submit?.variant ?? "inherit",["inherit","primary","secondary","outline","ghost","text","underline","inverse"],next => button("variant",next))}
       {select("Submit shape",value?.submit?.shape ?? "inherit",["inherit",...buttonShapes],next => button("shape",next))}
-      {select("Submit hover",value?.submit?.hover ?? "inherit",["inherit",...hoverEffects],next => button("hover",next))}
+      {ctaAnimation !== undefined ? <p>CTA animation is {ctaAnimation.replace(/-/g," ")} for this section. Edit it in Motion, or choose Inherit there for a separate submit hover style.</p> : select("Submit hover",value?.submit?.hover ?? "inherit",["inherit",...hoverEffects],next => button("hover",next))}
       {select("Submit size",value?.submit?.size ?? "inherit",["inherit","small","medium","large","display"],next => button("size",next))}
       {select("Submit icon",value?.submit?.icon === null ? "none" : value?.submit?.icon ?? "inherit",["inherit","none",...coreIconNames],next => button("icon",next === "none" ? null : next))}
       {select("Submit icon position",value?.submit?.iconPosition ?? "inherit",["inherit","leading","trailing"],next => button("iconPosition",next))}

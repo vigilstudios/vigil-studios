@@ -2,9 +2,9 @@
 import { createContext, useContext, type ReactNode } from "react";
 import { VigilIcon } from "../icons/VigilIcon";
 import type { VigilIconName } from "../icons/names";
-import type { PresentationSettings } from "./schema";
-const PresentationContext = createContext<PresentationSettings>({});
-export function PresentationProvider({ value, children }: { value: PresentationSettings; children: ReactNode }) {
+import type { ResolvedPresentation } from "./schema";
+const PresentationContext = createContext<ResolvedPresentation>({});
+export function PresentationProvider({ value, children }: { value: ResolvedPresentation; children: ReactNode }) {
   return <PresentationContext.Provider value={value}>{children}</PresentationContext.Provider>;
 }
 export function usePresentation() { return useContext(PresentationContext); }

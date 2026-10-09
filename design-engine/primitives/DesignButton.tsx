@@ -3,6 +3,7 @@ import { usePresentation } from "../presentation/PresentationContext";
 import type { ReactNode } from "react";
 import type { ActionPresentation } from "../actions/schema";
 import { VigilIcon } from "../icons/VigilIcon";
+import { resolveActionPresentation } from "../actions/presentation";
 
 export type DesignButtonProps = {
   children: ReactNode;
@@ -14,13 +15,14 @@ export type DesignButtonProps = {
   onClick?: () => void;
   type?: "button" | "submit" | "reset";
   presentation?: ActionPresentation;
+  authoredPresentation?: ActionPresentation;
   download?: string | true;
   unavailable?: string;
 };
 
-export function DesignButton({ children, href, variant = "solid", size = "comfortable", className = "", disabled, onClick, type = "button", presentation, download, unavailable }: DesignButtonProps) {
+export function DesignButton({ children, href, variant = "solid", size = "comfortable", className = "", disabled, onClick, type = "button", presentation, authoredPresentation, download, unavailable }: DesignButtonProps) {
   const defaults = usePresentation();
-  if (presentation || Object.keys(defaults.buttons ?? {}).length || defaults.motion?.ctaHover) presentation = { ...defaults.buttons, ...presentation, hover: presentation?.hover ?? (defaults.motion?.ctaHover && defaults.motion.ctaHover !== "none" ? defaults.motion.ctaHover : undefined) ?? defaults.buttons?.hover ?? "none" };
+  if (presentation || authoredPresentation || Object.keys(defaults.buttons ?? {}).length || defaults.motion?.ctaHover || defaults.motionMode === "none") presentation = resolveActionPresentation(defaults, presentation, authoredPresentation);
   const classes = presentation ? `de-action de-action--${presentation.variant ?? "auto"} de-action--${presentation.size ?? "medium"} ${className}` : `de-button de-button--${variant} de-button--${size} ${className}`;
   const attributes = { "data-action-link": presentation ? "true" : undefined, className: classes, "data-action-width": presentation?.width, "data-action-surface": presentation?.surface, "data-action-align": presentation?.alignment, "data-action-shape": presentation?.shape, "data-action-hover": presentation?.hover };
   const icon = presentation?.icon ? <VigilIcon name={presentation.icon} decorative size={18}/> : null;

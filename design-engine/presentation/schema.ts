@@ -46,15 +46,23 @@ export const presentationSchema = z.object({
 export type HeadingSettings = z.infer<typeof headingSchema>;
 export type PresentationSettings = z.infer<typeof presentationSchema>;
 export type MotionSettings = z.infer<typeof motionSettingsSchema>;
-export function resolvePresentation(site?: PresentationSettings, page?: PresentationSettings, section?: PresentationSettings): PresentationSettings {
-  const merge = <K extends "heading" | "buttons" | "controls" | "motion" | "viewport">(key: K) => ({ ...site?.[key], ...page?.[key], ...section?.[key] });
-  const parentHeading = { ...site?.heading, ...page?.heading };
-  const parentMotion = { ...site?.motion, ...page?.motion };
+export type CTAAnimation = typeof hoverEffects[number];
+/** Runtime provenance; never part of serialized presentation settings. */
+export type ResolvedPresentation = PresentationSettings & { ctaAnimationOverride?: CTAAnimation };
+export function sectionCTAAnimation(value?: PresentationSettings): CTAAnimation | undefined {
+  return value?.motionMode === "none" ? "none" : value?.motionMode === "override" ? value.motion?.ctaHover : undefined;
+}
+export function resolvePresentation(site?: PresentationSettings, page?: PresentationSettings, section?: PresentationSettings): ResolvedPresentation {
+  const defined = <T extends object>(value?: T): Partial<T> => Object.fromEntries(Object.entries(value ?? {}).filter(([, item]) => item !== undefined)) as Partial<T>;
+  const merge = <K extends "heading" | "buttons" | "controls" | "motion" | "viewport">(key: K) => ({ ...defined(site?.[key]), ...defined(page?.[key]), ...defined(section?.[key]) });
+  const parentHeading = { ...defined(site?.heading), ...defined(page?.heading) };
+  const parentMotion = { ...defined(site?.motion), ...defined(page?.motion) };
   return {
     heading: section?.headingMode === "original" ? undefined : section?.headingMode === "override" ? merge("heading") : parentHeading,
     headingMode: section?.headingMode,
     buttons: merge("buttons"), controls: merge("controls"), viewport: merge("viewport"),
     motion: section?.motionMode === "none" ? { ...parentMotion, entrance: "none", exit: "none", mediaHover: "none", ctaHover: "none", stagger: 0 } : section?.motionMode === "override" ? merge("motion") : parentMotion,
     motionMode: section?.motionMode,
+    ctaAnimationOverride: sectionCTAAnimation(section),
   };
 }

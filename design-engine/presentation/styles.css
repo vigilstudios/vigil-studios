@@ -19,16 +19,18 @@
 .de-root .de-action[data-action-shape=soft] { border-radius: 6px !important; }
 .de-root .de-action[data-action-shape=rounded] { border-radius: 16px !important; }
 .de-root .de-action[data-action-shape=pill] { border-radius: 999px !important; }
-.de-root .de-action[data-action-hover] { transition: transform .25s ease,background-color .25s ease,color .25s ease,box-shadow .25s ease; }
+.de-root .de-action[data-action-hover] { transition: transform .25s ease,background-color .25s ease,color .25s ease,border-color .25s ease,box-shadow .25s ease; }
+.de-root .de-action[data-action-hover=none],.de-root .de-action[data-action-hover=none] svg { transition:none; }
+.de-root .de-action[data-action-hover=underline] { text-decoration:none; }
+.de-root .de-action[data-action-hover=underline] .de-action-label { background:linear-gradient(currentColor,currentColor) left bottom / 0% 1px no-repeat;transition:background-size .25s ease; }
 @media (hover:hover) {
-  .de-root .de-action[data-action-hover]:hover { text-decoration: none!important; }
-  .de-root .de-action[data-action-hover]:hover svg { transform:none!important; }
-  .de-root .de-action[data-action-hover=underline]:hover { text-decoration: underline!important; text-underline-offset: .4em; }
-  .de-root .de-action[data-action-hover=lift]:hover, .de-presentation[data-controls-hover=lift] button:not(:disabled):hover { transform:translateY(-3px); }
-  .de-root .de-action[data-action-hover=icon-slide]:hover svg { transform:translateX(4px)!important; }
-  .de-root .de-action[data-action-hover=color]:hover { background:var(--de-surface-elevated); color:var(--de-foreground); }
-  .de-root .de-action[data-action-hover=sweep]:hover { box-shadow:inset 0 -4em 0 var(--de-accent); color:var(--de-accent-foreground); }
-  .de-root .de-action[data-action-hover=glow]:hover { box-shadow:0 0 0 4px color-mix(in srgb,currentColor 12%,transparent),0 8px 24px color-mix(in srgb,currentColor 15%,transparent); }
+  .de-root .de-action[data-action-hover]:not(:disabled):not([aria-disabled=true]):hover svg { transform:none!important; }
+  .de-root .de-action[data-action-hover=underline]:not(:disabled):not([aria-disabled=true]):hover .de-action-label { background-size:100% 1px; }
+  .de-root .de-action[data-action-hover=lift]:not(:disabled):not([aria-disabled=true]):hover, .de-presentation[data-controls-hover=lift] button:not(.de-action):not(:disabled):hover { transform:translateY(-3px); }
+  .de-root .de-action[data-action-hover=icon-slide]:not(:disabled):not([aria-disabled=true]):hover svg { transform:translateX(4px)!important; }
+  .de-root .de-action[data-action-hover=color]:not(:disabled):not([aria-disabled=true]):hover { background:var(--de-action-hover-ground); color:var(--de-action-hover-ink);border-color:var(--de-action-hover-ground); }
+  .de-root .de-action[data-action-hover=sweep]:not(:disabled):not([aria-disabled=true]):hover { box-shadow:inset 0 -4em 0 var(--de-action-hover-ground); color:var(--de-action-hover-ink); }
+  .de-root .de-action[data-action-hover=glow]:not(:disabled):not([aria-disabled=true]):hover { box-shadow:0 0 0 4px color-mix(in srgb,currentColor 12%,transparent),0 8px 24px color-mix(in srgb,currentColor 15%,transparent); }
   .de-presentation[data-media-hover] picture { transition: transform .5s cubic-bezier(.2,.7,.2,1),filter .5s ease; }
   .de-presentation[data-media-hover=zoom] picture:not(:has(video)):hover { transform:scale(1.035); }
   .de-presentation[data-media-hover=pan] picture:not(:has(video)):hover { transform:translateY(-5px) scale(1.025); }
@@ -61,5 +63,5 @@
 .de-presentation[data-controls-icon=trailing] button:not(.de-action):not(:has(svg))::after {margin-right:0;margin-left:.5em;}
 
 @media (prefers-reduced-motion:reduce) {
- .de-root .de-presentation .de-action[data-action-hover]:hover,.de-root .de-presentation .de-action[data-action-hover]:hover svg,.de-presentation[data-controls-hover] button:hover {transform:none!important;transition:none!important;}
+ .de-root .de-presentation .de-action[data-action-hover]:not(:disabled):not([aria-disabled=true]):hover,.de-root .de-presentation .de-action[data-action-hover]:not(:disabled):not([aria-disabled=true]):hover svg,.de-presentation[data-controls-hover] button:hover {transform:none!important;transition:none!important;}
 }

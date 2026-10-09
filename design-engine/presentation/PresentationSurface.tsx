@@ -3,7 +3,7 @@ import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import { useMotionPolicy } from "../motion/MotionPolicy";
 import { controlIconMasks } from "./control-icon-masks";
 import { PresentationProvider } from "./PresentationContext";
-import type { MotionSettings, PresentationSettings } from "./schema";
+import type { MotionSettings, ResolvedPresentation } from "./schema";
 import "./styles.css";
 export function motionFrame(effect: string, settings: MotionSettings = {}): Keyframe {
   const distance = settings.distance ?? 32, blur = settings.blur ?? 10;
@@ -17,7 +17,7 @@ export function motionFrame(effect: string, settings: MotionSettings = {}): Keyf
   if (effect === "clip") frame.clipPath = "inset(0 0 100% 0)";
   return frame;
 }
-export function PresentationSurface({ value, navigation = false, children }: { value: PresentationSettings; navigation?: boolean; children: ReactNode }) {
+export function PresentationSurface({ value, navigation = false, children }: { value: ResolvedPresentation; navigation?: boolean; children: ReactNode }) {
   const root = useRef<HTMLDivElement>(null), policy = useMotionPolicy();
   const motion = JSON.stringify(value.motion ?? {});
   useEffect(() => {
