@@ -19,6 +19,10 @@ October 9, 2026. The user approved all five phases and explicitly authorized uni
 - Local QA uses `node scripts/design-engine-creator-editor-qa.mjs`, which builds the real editor and portable site renderer at `/tmp/vigil-creator-editor-qa`. The fixture is not imported into production code.
 - Initial isolated build used a dependency symlink rejected by Turbopack. The webpack build passed; dependencies were then copied locally to permit checking the normal production command as well.
 
-Final check results and deployment verification are appended during release.
+The completed checks and live verification are recorded below.
 
 Release checks: full suite **79 files / 1,728 tests passed**; full repository ESLint passed; `npm run typecheck` passed; normal Turbopack `npm run build` passed after replacing the local dependency symlink with a copy. Additional targeted checks cover the final shared control-icon additions. Portable runtime is regenerated and content-addressed for the release.
+
+Production verification: implementation commit `6aaf175` is deployed successfully by Vercel. The public runtime manifest serves `v1-6720d906595fafea75b8`. GitHub’s **Typecheck, lint, test, build** check passed. The separate Supabase Preview integration reports “Remote migration versions not found in local migrations directory”; this release contains no database migrations and the existing unreleased platform work was preserved.
+
+The revised Muse site was imported into the live Lab in Chrome, reports Local draft saved, and survives refresh. Live checks confirmed the 1710×985 full preview at scale 1, centered 64px Socials title, 420px testimonial cards, removed obsolete testimonial controls, optional Contact image and corrected navigation/footer destinations. Screenshots are in `evidence/live-*.jpg`. A fresh Lab tab was used after the original tab’s debugger connection stalled. Original draft recovery export: `/tmp/vigil-creator-editor-backup/muse-original.site.json`.
