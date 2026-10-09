@@ -5,7 +5,7 @@ import { mediaGeometries, mediaTones } from "../media/types";
 import { motionLanguages, artIds, typographyIds } from "./schemas";
 import { motionPresetNames } from "../registry/types";
 const strings = z.array(z.string().min(1)).min(1);
-const presentation = z.object({ variant: strings.optional(), size: strings.optional(), alignment: strings.optional(), width: strings.optional(), surface: strings.optional(), icon: strings.optional(), iconPosition: strings.optional() }).strict();
+const presentation = z.object({ shape: strings.optional(), hover: strings.optional(), variant: strings.optional(), size: strings.optional(), alignment: strings.optional(), width: strings.optional(), surface: strings.optional(), icon: strings.optional(), iconPosition: strings.optional() }).strict();
 const contractSchema = z.object({
  actions: z.object({classification:z.enum(["no-action","section-primary-action","section-primary-secondary-actions","per-item-action","mixed-action"]),reason:z.string().min(1),primary:presentation.optional(),secondary:presentation.optional(),items:z.array(z.object({group:z.string().min(1),label:z.string().min(1),path:strings,identity:z.enum(["id","productId"]),displays:z.array(z.enum(["link","media","whole-item"])).min(1),presentation}).strict())}).strict().optional(),
  configuration:z.array(z.object({name:z.string().min(1),options:strings}).strict()).optional(),

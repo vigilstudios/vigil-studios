@@ -1,4 +1,5 @@
 "use client";
+import { ControlIcon } from "@/design-engine/presentation/PresentationContext";
 import { useRef, useState } from "react";
 import { isVideoAsset } from "@/design-engine/media/source";
 import type { SectionInstance } from "@/design-engine/composition/schemas";
@@ -136,7 +137,7 @@ export function ImageExpansionSlider(
                       aria-label={`Inspect ${work.title}`}
                       onClick={(event) => inspect(work.id, event.currentTarget)}
                     >
-                      {isVideoAsset(work.image) ? "View video" : "View image"}
+                      <ControlIcon/> {isVideoAsset(work.image) ? "View video" : "View image"}
                     </button>
                   )}
                   <ItemAction

@@ -131,7 +131,15 @@ export const chorusOptions = {
 } as const;
 export const chorusDefaults = { layout:"ribbon", columns:"three", visualStyle:"typographic", alignment:"center", quoteScale:"standard", authorTreatment:"text-only", surface:"transparent", direction:"left", speed:"slow", intensity:"standard", pauseOnHover:"yes", pauseOnFocus:"yes", edgeFade:"soft", gap:"regular" } as const;
 export const chorusConfiguration = Object.entries(chorusOptions).map(([name,options])=>({name,options}));
+export const chorusCardSchema = z.object({
+ width:z.number().min(220).max(900).optional(), minHeight:z.number().min(0).max(800).optional(), padding:z.number().min(0).max(100).optional(), gap:z.number().min(0).max(100).optional(), quoteSize:z.number().min(14).max(64).optional(),
+ design:z.enum(["transparent","outline","solid","editorial"]).optional(), shape:z.enum(["square","soft","rounded"]).optional(), hover:z.enum(["none","lift","enlarge"]).optional(),
+ horizontal:z.enum(["left","center","right"]).optional(), vertical:z.enum(["start","center","end","spread"]).optional(),
+ portraitSize:z.number().min(32).max(240).optional(), portraitFrame:z.enum(["square","soft","circle","portrait"]).optional(), portraitAlignment:z.enum(["left","center","right"]).optional(),
+ order:z.array(z.enum(["portrait","quote","name","role","company"])).min(1).max(5).refine(items=>new Set(items).size===items.length && items.includes("quote"),"Unique card pieces including quote required").optional(),
+}).strict();
 export const chorusSettingsSchema = z.object({
+ cardSettings:chorusCardSchema.optional(),
  layout:z.enum(chorusOptions.layout).default("ribbon"), columns:z.enum(chorusOptions.columns).default("three"),
  visualStyle:z.enum(chorusOptions.visualStyle), alignment:z.enum(chorusOptions.alignment), quoteScale:z.enum(chorusOptions.quoteScale), authorTreatment:z.enum(chorusOptions.authorTreatment), surface:z.enum(chorusOptions.surface), direction:z.enum(chorusOptions.direction), speed:z.enum(chorusOptions.speed), intensity:z.enum(chorusOptions.intensity), pauseOnHover:z.enum(chorusOptions.pauseOnHover), pauseOnFocus:z.enum(chorusOptions.pauseOnFocus), edgeFade:z.enum(chorusOptions.edgeFade), gap:z.enum(chorusOptions.gap)
 }).strict();

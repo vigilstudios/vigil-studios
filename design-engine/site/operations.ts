@@ -89,7 +89,7 @@ export function deletePage(site: SiteDefinition, pageId: string, strategy: "subt
 export function applyPageComposition(site: SiteDefinition, pageId: string, composition: PageComposition): SiteDefinition {
   const next = structuredClone(site), page = next.pages.find(page => page.id === pageId);
   if (!page) throw new Error("Page does not exist.");
-  next.settings = structuredClone(composition.site); page.overrides = structuredClone(composition.overrides); page.title = composition.label;
+  next.settings = structuredClone(composition.site); page.overrides = structuredClone(composition.overrides); page.presentation = structuredClone(composition.presentation); page.title = composition.label;
   for (const name of ["navigation", "footer"] as const) {
     const instance = composition.sections.find(section => getSectionContract(section.component).category === name);
     if (!instance) { if (effectiveSections(site, site.pages.find(page => page.id === pageId)!).some(section => getSectionContract(section.component).category === name)) page.slots[name] = { mode: "omit" }; }

@@ -1,3 +1,4 @@
+import { buttonShapes, hoverEffects } from "../presentation/schema";
 import { coreIconNames } from "../icons/names";
 import type { SectionInstance } from "../composition/schemas";
 import type { ActionPresentation, ContextualActions } from "./schema";
@@ -113,7 +114,7 @@ const authoredActionCapabilities: Record<string, ActionCapabilities> = {
   "proof.story-switchboard": section("Customer-story links belong to each selected story and accessible reading summary.", [item("stories", "Customer story")]),
 };
 export const actionCapabilities = Object.fromEntries(Object.entries(authoredActionCapabilities).map(([id, value]) => {
-  const icons = (presentation: PresentationCapability) => ({ ...presentation, icon: coreIconNames, iconPosition: ["leading", "trailing"] });
+  const icons = (presentation: PresentationCapability) => ({ ...presentation, variant: ["primary", "secondary", "outline", "ghost", "text", "underline", "inverse"], size: ["small", "medium", "large", "display"], shape: buttonShapes, hover: hoverEffects, icon: coreIconNames, iconPosition: ["leading", "trailing"] });
   return [id, JSON.parse(JSON.stringify({ ...value, ...(value.primary ? { primary: icons(value.primary) } : {}), ...(value.secondary ? { secondary: icons(value.secondary) } : {}), items: value.items.map(item => ({ ...item, presentation: icons(item.presentation) })) }))];
 })) as Record<string, ActionCapabilities>;
 export function getActionCapabilities(id: string): ActionCapabilities {

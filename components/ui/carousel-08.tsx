@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { ControlIcon } from "@/design-engine/presentation/PresentationContext";
 import type { SectionInstance } from "@/design-engine/composition/schemas";
 import { Plate } from "@/design-engine/sections/work/shared";
 import { ItemAction } from "@/design-engine/actions/SectionActions";
@@ -72,7 +72,7 @@ export function AppleCardCarousel(
                       aria-label={`Inspect ${work.title}`}
                       onClick={(event) => inspect(work.id, event.currentTarget)}
                     >
-                      <ArrowUpRight size={18} />
+                      <ControlIcon size={18} />
                     </button>
                   )}
                 </div>

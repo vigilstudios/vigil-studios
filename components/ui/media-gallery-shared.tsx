@@ -6,7 +6,8 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import { ArrowLeft, ArrowRight, X } from "lucide-react";
+import { ControlIcon } from "@/design-engine/presentation/PresentationContext";
+import { X } from "lucide-react";
 import type { SectionInstance } from "@/design-engine/composition/schemas";
 import type { PhotoRecord } from "@/design-engine/composition/collection-schemas";
 import { Plate } from "@/design-engine/sections/work/shared";
@@ -86,9 +87,9 @@ export function StepButton({
       disabled={disabled}
     >
       {direction === "next" ? (
-        <ArrowRight size={16} />
+        <ControlIcon kind="next" fallback="arrow-right" size={16} />
       ) : (
-        <ArrowLeft size={16} />
+        <ControlIcon kind="previous" fallback="arrow-left" size={16} />
       )}
     </button>
   );

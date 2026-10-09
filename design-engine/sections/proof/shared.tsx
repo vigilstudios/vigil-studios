@@ -6,7 +6,7 @@ export const number = (value:number) => new Intl.NumberFormat("en-US",{maximumFr
 export function EvidenceShell({id,content,evidenceMode,concept,children}:{id:string;content:{title:string;introduction:string;eyebrow?:string};evidenceMode:"publication"|"illustrative";concept:string;children:ReactNode}) {
  if(evidenceMode === "publication" && evidencePublicationIssues(content).length) throw new Error("Illustrative evidence requires explicit Lab mode");
  return <section id={id} className={`de-proof de-proof-${concept.toLowerCase()}`} aria-labelledby={`${id}-heading`}>
- {evidenceMode === "illustrative" && <p className="de-proof-disclosure">Design Lab example · fictional evidence and illustrative media</p>}
+ {evidenceMode === "illustrative" && concept !== "E06" && <p className="de-proof-disclosure">Design Lab example · fictional evidence and illustrative media</p>}
  <header className="de-proof-intro">{content.eyebrow && <span className="de-proof-eyebrow">{content.eyebrow}</span>}<h2 id={`${id}-heading`}>{content.title}</h2><p>{content.introduction}</p></header>
  {children}<SectionActions/></section>;
 }

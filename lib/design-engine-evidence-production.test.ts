@@ -25,7 +25,7 @@ describe("Pass 008 production evidence",()=>{
  it.each(evidenceSectionIds)("%s has narrow schemas, three honest contexts and canonical readable evidence",component=>{
   for(const context of ["security","strength","furniture"]) {
    const s=makeEvidenceSection(component,"evidence",context,"long");expect(()=>parseSection(s)).not.toThrow();
-   const html=renderToStaticMarkup(renderSection(s));expect(html).toContain("fictional evidence");expect(html).toContain("Source");
+   const html=renderToStaticMarkup(renderSection(s));if(component!=="proof.moving-chorus")expect(html).toContain("fictional evidence");else expect(html).not.toContain("de-proof-disclosure");if(component!=="proof.moving-chorus")expect(html).toContain("Source");else if("voices" in s.content)expect(html).toContain(s.content.voices[0].quote);
    expect(()=>parseSection({...s,evidenceMode:"publication"})).toThrow(/illustrative/);
    expect(()=>parseSection({...s,unrelated:"fake-platform-total"})).toThrow();
   }

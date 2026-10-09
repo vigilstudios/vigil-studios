@@ -1,4 +1,5 @@
 "use client";
+import { usePresentation } from "../presentation/PresentationContext";
 import { containsVideoAsset } from "../media/source";
 import type { ReactNode } from "react";
 import { DesignButton } from "../primitives/DesignButton";
@@ -8,9 +9,10 @@ export type LegacyDestination = { label: string; href: string };
 
 function SlotLink({ slot, fallback, presentation, className = "", children, onClick }: { slot?: ActionSlot; fallback?: LegacyDestination; presentation?: ActionPresentation; className?: string; children?: ReactNode; onClick?: () => void }) {
   const resolved = useActionResolution(slot);
+  const defaults = usePresentation();
   if (slot && !slot.enabled || !slot && !fallback) return null;
   const label = resolved?.label ?? fallback?.label;
-  return <DesignButton href={resolved?.href ?? (slot ? undefined : fallback?.href)} disabled={!!resolved?.issue} unavailable={resolved?.issue} download={resolved && "download" in resolved ? resolved.download : undefined} presentation={{ ...presentation, ...resolved?.presentation }} className={className} onClick={onClick}>{children ?? label}</DesignButton>;
+  return <DesignButton href={resolved?.href ?? (slot ? undefined : fallback?.href)} disabled={!!resolved?.issue} unavailable={resolved?.issue} download={resolved && "download" in resolved ? resolved.download : undefined} presentation={{ ...presentation, ...defaults.buttons, ...resolved?.presentation, hover: resolved?.presentation?.hover ?? (defaults.motion?.ctaHover && defaults.motion.ctaHover !== "none" ? defaults.motion.ctaHover : defaults.buttons?.hover) ?? presentation?.hover }} className={className} onClick={onClick}>{children ?? label}</DesignButton>;
 }
 export function SectionActions({ primary, secondary, className = "" }: { primary?: LegacyDestination; secondary?: LegacyDestination; className?: string }) {
   const { section, capability } = useSectionActions();

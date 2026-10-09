@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { presentationSchema } from "../presentation/schema";
 import { getSectionContract } from "./catalog";
 import { creativeOverrideSchema, parseSection, siteSchema, type CreativeLayers, type CreativeOverrides, type PageComposition, type SectionInstance, type SiteConfiguration } from "./schemas";
 
@@ -8,7 +9,7 @@ export function resolveCreativeLayers(site: SiteConfiguration, page: CreativeOve
     artDirection: section.artDirection ?? page.artDirection ?? site.artDirection,
     motion: section.motion ?? page.motion ?? site.motion };
 }
-const envelopeSchema = z.object({ id: z.string().regex(/^[a-z][a-z0-9-]*$/), label: z.string().min(1), site: siteSchema, overrides: creativeOverrideSchema.optional(), sections: z.array(z.unknown()).max(20) }).strict();
+const envelopeSchema = z.object({ id: z.string().regex(/^[a-z][a-z0-9-]*$/), label: z.string().min(1), site: siteSchema, overrides: creativeOverrideSchema.optional(), presentation: presentationSchema.optional(), sections: z.array(z.unknown()).max(20) }).strict();
 
 /** JSON and code callers pass through the same strict boundary. No CSS/style escape hatch. */
 export function inspectComposition(input: unknown): { composition?: PageComposition; issues: CompositionIssue[] } {

@@ -1,4 +1,5 @@
 "use client";
+import { ControlIcon } from "@/design-engine/presentation/PresentationContext";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { SectionInstance } from "@/design-engine/composition/schemas";
 import type { LiquidGlassCarouselHandle } from "./liquid-glass-carousel-engine";
@@ -194,7 +195,7 @@ export function LiquidGlassCarousel(
               aria-label={`Inspect ${current.title}`}
               onClick={(event) => inspect(current.id, event.currentTarget)}
             >
-              View image
+              <ControlIcon/> View image
             </button>
             <ItemAction group="works" itemId={current.id} />
             <StepButton

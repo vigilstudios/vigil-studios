@@ -94,8 +94,8 @@ describe("Production Library Action & CTA Integration", () => {
   });
   it("rejects fake/destructive controls and keeps intentional no-action components actionless", () => {
     expect(()=>parseSection({...makeSection("proof.moving-chorus","test-subject"),contextualActions:{primary:{enabled:true,label:"Fake",action:{type:"page",pageId:"page-home"}}}})).toThrow("does not support");
-    expect(()=>makeActionSection("hero.comparison",{size:"display"})).toThrow("Unsupported action presentation");
-    expect(()=>parseSection({...makeSection("hero.comparison","test-subject"),contextualActions:{primary:{enabled:false,presentation:{size:"display"}}}})).toThrow("Unsupported action presentation");
+    expect(makeActionSection("hero.comparison",{size:"display",shape:"square",hover:"icon-slide"}).contextualActions?.primary?.presentation).toMatchObject({size:"display",shape:"square",hover:"icon-slide"});
+    expect(parseSection({...makeSection("hero.comparison","test-subject"),contextualActions:{primary:{enabled:false,presentation:{size:"display"}}}}).contextualActions?.primary?.presentation?.size).toBe("display");
     expect(()=>makeActionSection("hero.full-scene",{alignment:"right"})).toThrow("Unsupported action presentation");
     const html=renderToStaticMarkup(createElement(ContextualActionsEditor,{site:makeComplexSiteFixture(),section:makeSection("proof.moving-chorus","test-subject"),onChange:()=>{}}));
     expect(html).not.toContain("CTA enabled");

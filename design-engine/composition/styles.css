@@ -180,3 +180,6 @@
 
 /* The moving header owns every painted surface; flow reservation stays invisible. */
 .de-composition-geometry .de-navigation-root:has(.de-navigation-system){background:transparent}
+
+/* Keep section destinations readable underneath the measured sticky navigation. */
+.de-composition-geometry :is([data-section-id],section[id]) { scroll-margin-top:var(--de-navigation-height,8rem); }

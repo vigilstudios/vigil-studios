@@ -1,4 +1,10 @@
 "use client";
+import { ComponentPresentationControls, TestimonialPortraitControls } from "./ComponentPresentationControls";
+import { PresentationControls } from "./PresentationControls";
+import { resolvePresentation } from "../../presentation/schema";
+import { ClientDataEditor, type ClientDataDraft } from "./ClientDataEditor";
+import { ContentFields } from "./ContentFields";
+import { endingSectionIds, type EndingSectionId } from "../../composition/ending-schemas";
 import { CreatorContentEditor } from "./CreatorContentEditor";
 import { EndingContentEditor } from "./EndingContentEditor";
 import {getDesignComponent} from "../../registry/components";
@@ -70,7 +76,8 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
   const [site, setSite] = useState<SiteDefinition>(() => project?.site ?? siteFromComposition(makeBlankComposition()));
   const [pageId, setPageId] = useState(project?.site.navigation.homePageId ?? "page-home");
   const [saving, setSaving] = useState(false);
-  const [clientEditVersion, setClientEditVersion] = useState(0);
+  const [clientDrafts, setClientDrafts] = useState<Record<string, ClientDataDraft | undefined>>({});
+  const [inspectorTab, setInspectorTab] = useState("design");
   const [savedDocument, setSavedDocument] = useState(() => project ? serializeSite(project.site) : "");
   const dirty = Boolean(project && serializeSite(site) !== savedDocument);
   async function saveProject() {
@@ -91,7 +98,7 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
   const [storageNotice, setStorageNotice] = useState("");
   const [siteError, setSiteError] = useState("");
   function setComposition(value: SetStateAction<PageComposition>) {
-    try { const next = typeof value === "function" ? value(composition) : value; setSite(applyPageComposition(site, pageId, next)); setSiteError(""); }
+    try { const next = typeof value === "function" ? value(composition) : value; setSite(previous => applyPageComposition(previous, pageId, typeof value === "function" ? value(pageComposition(previous, pageId)) : next)); setSiteError(""); }
     catch (error) { setSiteError(error instanceof Error ? error.message : "Invalid site edit."); }
   }
   function commitSite(next: SiteDefinition) { try { setSite(parseSiteDefinition(next)); setSiteError(""); } catch (error) { setSiteError(error instanceof Error ? error.message : "Invalid site definition."); } }
@@ -125,7 +132,7 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
   const current = composition.sections.find(section => section.id === selected) ?? composition.sections[0];
   const addition = useMemo(() => previewStyle && tab === "sections" ? prepareSectionAddition(composition, previewStyle) : null, [previewStyle, tab, composition]);
   const pending = addition && !addition.reason ? addition : null;
-  const editing = tab === "section" && sectionPreview?.base === current ? sectionPreview : null;
+  const editing = sectionPreview?.base === current ? sectionPreview : null;
   const layerEditing = layerPreview?.scope === (tab === "pages" ? "page" : tab) && layerPreview.base === composition ? layerPreview : null;
   const shownComposition = useMemo(() => pending?.composition ?? layerEditing?.candidate ?? (editing ? { ...composition, sections: composition.sections.map(section => section.id === editing.candidate.id ? editing.candidate : section) } : composition), [pending, editing, layerEditing, composition]);
   const auditionId = pending?.section.id ?? editing?.candidate.id;
@@ -202,9 +209,9 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
       if (node.dataset.sectionId === id) node.scrollIntoView({ block: "start", inline: "nearest" });
     });
   }
-  function selectSection(id: string) { setSectionPreview(null); setLayerPreview(null); setSelected(id); setTab("section"); requestAnimationFrame(() => findSection(id)); }
+  function selectSection(id: string) { setSectionPreview(null); setLayerPreview(null); setSelected(id); setTab("sections"); requestAnimationFrame(() => findSection(id)); }
   const globalReason = (key: keyof CreativeOverrides, value: string, scope: "site" | "page") => layerIssues(globalLayer(key, value, scope), scope).map(issue => `${issue.section ?? "Page"}: ${issue.message}`).join(" ") || undefined;
-  const siteControls = <><SiteStructureControls site={site} pageId={pageId} onChange={commitSite}/><SiteActionControl site={site} onChange={commitSite}/><Panel title="Site layers"><p>Shared defaults for pages across the site. Page and section overrides take precedence.</p><div className="composition-controls">
+  const siteControls = <><Panel title="Site presentation"><PresentationControls scope="site" value={composition.site.presentation} onChange={presentation => setComposition(sitePatch({presentation}))}/><PresentationControls scope="site" motionOnly value={composition.site.presentation} onChange={presentation => setComposition(sitePatch({presentation}))}/></Panel><SiteStructureControls site={site} pageId={pageId} onChange={commitSite}/><SiteActionControl site={site} onChange={commitSite}/><Panel title="Site layers"><p>Shared defaults for pages across the site. Page and section overrides take precedence.</p><div className="composition-controls">
     <CapabilityControl label="Typography profile" value={composition.site.typography} choices={typographyProfiles.map(profile => ({ value: profile.id, reason: globalReason("typography", profile.id, "site") }))}
       onPreview={value => previewLayer(value === null ? null : globalLayer("typography", value, "site"), "site", "Typography profile")} onChange={value => commitLayers(globalLayer("typography", value, "site"))} />
     <CapabilityControl label="Art direction" value={composition.site.artDirection} choices={artDirections.map(art => ({ value: art.id, reason: globalReason("artDirection", art.id, "site") }))}
@@ -224,14 +231,14 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
     <button type="button" onPointerEnter={event => { if (event.pointerType !== "touch") previewLayer(clearedColors(), "site", "Clear color overrides"); }} onPointerLeave={() => previewLayer(null, "site", "Clear color overrides")}
       onFocus={() => previewLayer(clearedColors(), "site", "Clear color overrides")} onBlur={() => previewLayer(null, "site", "Clear color overrides")} onClick={() => commitLayers(clearedColors())}>Clear color overrides</button>
   </details></Panel><p role="status">{storageNotice}</p>{!project && <button type="button" onClick={() => { try { localStorage.setItem(siteDraftKey, serializeSite(site)); setStorageReady(true); setStorageNotice("Local draft saved."); } catch { setStorageNotice("Storage unavailable. Export site JSON."); } }}>Save local draft</button>}</>;
-  const pageControls = <Panel title="Page overrides"><p>Overrides for this page. Inherit uses the site defaults; section overrides take precedence.</p><div className="composition-controls">
+  const pageControls = <><Panel title="Page presentation"><PresentationControls scope="page" value={composition.presentation} inherited={composition.site.presentation} onChange={presentation => setComposition({...composition,presentation})}/><PresentationControls scope="page" motionOnly value={composition.presentation} inherited={composition.site.presentation} onChange={presentation => setComposition({...composition,presentation})}/></Panel><Panel title="Page overrides"><p>Overrides for this page. Inherit uses the site defaults; section overrides take precedence.</p><div className="composition-controls">
     <CapabilityControl label="Page typography" value={composition.overrides?.typography ?? "inherit"} choices={["inherit", ...typographyProfiles.map(profile => profile.id)].map(value => ({ value, reason: globalReason("typography", value, "page") }))}
       onPreview={value => previewLayer(value === null ? null : globalLayer("typography", value, "page"), "page", "Page typography")} onChange={value => commitLayers(globalLayer("typography", value, "page"))} />
     <CapabilityControl label="Page art direction" value={composition.overrides?.artDirection ?? "inherit"} choices={["inherit", ...artDirections.map(art => art.id)].map(value => ({ value, reason: globalReason("artDirection", value, "page") }))}
       onPreview={value => previewLayer(value === null ? null : globalLayer("artDirection", value, "page"), "page", "Page art direction")} onChange={value => commitLayers(globalLayer("artDirection", value, "page"))} />
     {systemMotion.reduced ? <p className="lab-layer-note">Effective motion: none under OS reduced motion. Authored page intensity {composition.overrides?.motion ?? "inherit"} is retained.</p> : <CapabilityControl label="Page motion" value={composition.overrides?.motion ?? "inherit"} choices={["inherit", ...motions].map(value => ({ value, reason: globalReason("motion", value, "page") }))}
       onPreview={value => previewLayer(value === null ? null : globalLayer("motion", value, "page"), "page", "Page motion")} onChange={value => commitLayers(globalLayer("motion", value, "page"))} />}
-  </div></Panel>;
+  </div></Panel></>;
   const sectionList = <Panel title="Layout"><ol className="composition-sections">{composition.sections.map((section, index) => <li key={section.id}>
           <button type="button" className="composition-section-choice" aria-pressed={selected === section.id} onClick={() => selectSection(section.id)}>{entryTitle(section.component)}<span>{section.id} · {sectionCategoryLabel(section.component)}</span></button>
           <div><button type="button" disabled={index === 0} aria-label={`Move ${section.id} up`} onClick={() => move(section.id, -1)}>↑</button><button type="button" disabled={index === composition.sections.length - 1} aria-label={`Move ${section.id} down`} onClick={() => move(section.id, 1)}>↓</button><button type="button" aria-label={`Remove ${section.id}`} onClick={() => setComposition(previous => ({ ...previous, sections: previous.sections.filter(item => item.id !== section.id) }))}>Remove</button></div>
@@ -241,18 +248,23 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
               const derived = parseSection({ ...section, navigationSource: { mode: "site", depth: "all" } });
               if (!navigationIssues(site, derived).length) { section = derived; next = { ...next, sections: next.sections.map(item => item.id === section.id ? section : item) }; }
             }
-            setPreviewStyle(null); setComposition(next); setSelected(section.id); setTab("section"); requestAnimationFrame(() => { findSection(section.id); preview.current?.closest(".lab-editor")?.querySelector<HTMLButtonElement>('.lab-panel-tabs [aria-selected="true"]')?.focus(); }); }} />
+            setPreviewStyle(null); setComposition(next); setSelected(section.id); setTab("sections"); requestAnimationFrame(() => { findSection(section.id); preview.current?.closest(".lab-editor")?.querySelector<HTMLButtonElement>('.lab-panel-tabs [aria-selected="true"]')?.focus(); }); }} />
         </Panel>;
-  const sectionControls = <>
-    <p className="lab-layer-note">Page: {site.pages.find(page => page.id === pageId)?.title}. Inherited Navigation edits update the shared global section; create a page override in Site for independent changes.</p><div className="composition-selection"><label className="composition-control">Selected section<select aria-label="Selected section" value={current?.id ?? ""} onChange={event => selectSection(event.target.value)}>{composition.sections.map(section => <option key={section.id} value={section.id}>{entryTitle(section.component)} · {section.id}</option>)}</select></label><button type="button" disabled={!current} onClick={() => current && findSection(current.id)}>Find in preview ↗</button></div>
-    {current && <ActionEditor key={`${pageId}-${current.id}-${current.component}`} site={site} section={current} onChange={updateSection} onPreview={candidate => setSectionPreview(candidate ? { base: current, candidate, label: "Contextual actions" } : null)} onSiteChange={commitSite} onOpenPages={() => setTab("pages")}/>}
-    {current && <CreatorContentEditor key={`${pageId}-${current.id}-${current.component}-${clientEditVersion}`} section={current} onChange={updateSection}/>}
-    {current && <EndingContentEditor key={`${pageId}-${current.id}-${current.component}-${clientEditVersion}`} site={site} section={current} onChange={updateSection}/>}
-    {project && current && <ProjectSectionControls key={`${pageId}-${current.id}`} section={current} assets={project.assets} sources={project.sources} onChange={section => { try { updateSection(transitionSection(current, { content: section.content, ...("media" in section ? { media: section.media } : {}) }).section); setClientEditVersion(value => value + 1); setSiteError(""); } catch (failure) { setSiteError(failure instanceof Error ? failure.message : "Invalid client data."); } }}/>}
-    {current ? <SectionInspector key={`${fixture}-${current.id}-${current.component}-${clientEditVersion}`} section={current} composition={composition} width={device === "mobile" ? 390 : device === "tablet" ? 768 : 1440} onChange={updateSection} onPreview={(candidate, label) => setSectionPreview(previous => candidate ? { base: current, candidate, label } : previous?.label === label ? null : previous)} /> : <p>Add a registered section to begin.</p>}
-  </>;
+  const selectionControls = <>    <p className="lab-layer-note">{site.pages.find(page => page.id === pageId)?.title} · {current ? entryTitle(current.component) : "Choose a section"}</p><div className="composition-selection"><label className="composition-control">Selected section<select aria-label="Selected section" value={current?.id ?? ""} onChange={event => selectSection(event.target.value)}>{composition.sections.map(section => <option key={section.id} value={section.id}>{entryTitle(section.component)} · {section.id}</option>)}</select></label><button type="button" disabled={!current} onClick={() => current && findSection(current.id)}>Find in preview ↗</button></div>
+</>;
+  const sectionControls = <>{selectionControls}{current && <ComponentPresentationControls key={`custom-${pageId}-${current.id}`} section={current} onChange={updateSection}/>}{current && <PresentationControls key={`presentation-${pageId}-${current.id}-${current.component}`} value={current.presentation} inherited={resolvePresentation(composition.site.presentation,composition.presentation)} navigation={current.component.startsWith("navigation.")} onChange={presentation => updateSection(transitionSection(current,{presentation}).section)}/>}{current ? <SectionInspector key={`design-${pageId}-${current.id}-${current.component}`} section={current} composition={composition} width={device === "mobile" ? 390 : device === "tablet" ? 768 : 1440} onChange={updateSection} onPreview={(candidate, label) => setSectionPreview(previous => candidate ? { base: current, candidate, label } : previous?.label === label ? null : previous)} /> : <p>Add a section to begin.</p>}</>;
+  const contentControls = <>{selectionControls}{current && <>
+    <ActionEditor key={`actions-${pageId}-${current.id}-${current.component}`} site={site} section={current} onChange={updateSection} onPreview={candidate => setSectionPreview(candidate ? { base: current, candidate, label: "Contextual actions" } : null)} onSiteChange={commitSite} onOpenPages={() => setTab("pages")}/>
+    <CreatorContentEditor key={`creator-${pageId}-${current.id}-${current.component}`} section={current} onChange={updateSection}/>
+    <EndingContentEditor key={`ending-${pageId}-${current.id}-${current.component}`} site={site} section={current} onChange={updateSection}/>
+    {!current.component.startsWith("navigation.") && !["about.creator-profile", "proof.social-reach"].includes(current.component) && !endingSectionIds.includes(current.component as EndingSectionId) && <ContentFields key={`copy-${pageId}-${current.id}-${current.component}`} section={current} onChange={updateSection}/>}
+    {project && <ProjectSectionControls key={`project-${pageId}-${current.id}`} section={current} assets={project.assets} sources={project.sources} onChange={section => { try { updateSection(transitionSection(current, { content: section.content, ...("media" in section ? { media: section.media } : {}) }).section); setSiteError(""); } catch (failure) { setSiteError(failure instanceof Error ? failure.message : "Invalid client data."); } }}/>}
+    <TestimonialPortraitControls section={current} onChange={updateSection}/>
+    <MediaControls key={`media-${pageId}-${current.id}`} section={current} onChange={patch => updateSection(transitionSection(current, patch).section)}/>
+    <ClientDataEditor key={`json-${pageId}-${current.id}-${current.component}`} section={current} draft={clientDrafts[`${pageId}-${current.id}-${current.component}`]} onChange={updateSection} onDraft={draft => setClientDrafts(previous => ({ ...previous, [`${pageId}-${current.id}-${current.component}`]: draft }))}/>
+  </>}</>;
   const qaControls = <><Panel title="Compatibility"><div aria-live="polite" role="status">{inspection.issues.length ? <ul className="composition-issues">{inspection.issues.map((issue, index) => <li key={index}><strong>{issue.section ?? "Page"}</strong>: {issue.message}</li>)}</ul> : <p>Declared capabilities are compatible. Review content, contrast and media at each width.</p>}</div>{transitions.length ? <ul className="composition-transitions">{transitions.map((notice,index)=><li key={index}><strong>{notice.section}</strong>: {notice.message}</li>)}</ul> : null}</Panel><Panel title="Site action diagnostics"><p role="alert">{siteError}</p>{actionWarnings.length ? <ul>{actionWarnings.map((issue, index) => <li key={index}>{issue.pageId ?? "Site"} / {issue.sectionId ?? "Navigation"}: {issue.message}</li>)}</ul> : <p>No broken typed actions.</p>}</Panel><details><summary>Site Definition / JSON</summary><pre>{JSON.stringify(site, null, 2)}</pre></details><p className="composition-footnote">Images are retained generated review studies. Client projects supply their own content, licensed media and font bindings. Footers can be shared globally or overridden per page.</p></>;
-  return <div className="composition-lab" onKeyDown={event => { if (event.key === "Escape") { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); } }}><LabEditor title="Composition Lab" workspaceSwitch={workspaceSwitch} resetKey={`${fixture}-${replay}`} canvasWidth={shownDevice === "mobile" ? 390 : shownDevice === "tablet" ? 768 : 1440} activeTab={tab} onTabChange={value => { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); setTab(value); }}
+  return <div className="composition-lab" onKeyDown={event => { if (event.key === "Escape") { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); } }}><LabEditor title="Composition Lab" workspaceSwitch={workspaceSwitch} resetKey={fixture} canvasWidth={shownDevice === "mobile" ? 390 : shownDevice === "tablet" ? 768 : 1440} activeTab={tab} onTabChange={value => { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); setTab(value); }}
     viewportControl={<Control label="Viewport" value={device} values={["desktop", "tablet", "mobile"]} onChange={setDevice} onPreview={setPreviewDevice} />}
     toolbar={<>
       {project && <><button type="button" disabled={saving} onClick={saveProject}>{saving ? "Saving…" : dirty ? "Save project · unsaved" : "Save project"}</button><button type="button" disabled={dirty || saving} title={dirty ? "Save the current edits before deployment" : "Export this saved project and deploy its preview"} onClick={async () => { try { await project.deploy(); setStorageNotice("Preview job queued. Open Project to follow deployment status."); } catch (failure) { setStorageNotice(failure instanceof Error ? failure.message : "Could not deploy preview."); } }}>Deploy preview</button><span role="status">{storageNotice}</span></>}
@@ -272,17 +284,18 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
       {siteError && <span role="alert">{siteError}</span>}
       <span className={`composition-health ${inspection.issues.length ? "composition-health--error" : ""}`}><button type="button" onClick={() => setTab("qa")}>{inspection.issues.length ? `${inspection.issues.length} issues` : "Compatible"}</button></span>
     </>}
+    inspectorTabs={[{ id: "design", label: "Design", content: sectionControls }, { id: "content", label: "Content", content: contentControls }, { id: "motion", label: "Motion", content: <>{selectionControls}{current && <PresentationControls key={`motion-${pageId}-${current.id}-${current.component}`} motionOnly value={current.presentation} inherited={resolvePresentation(composition.site.presentation,composition.presentation)} navigation={current.component.startsWith("navigation." )} onChange={presentation => updateSection(transitionSection(current,{presentation}).section)}/>}</> }]} inspectorTab={inspectorTab} onInspectorTabChange={setInspectorTab}
     tabs={[
       ...(project ? [{ id: "project", label: "Project", content: project.context }] : []),
-      { id: "section", label: "Section", content: sectionControls },
-      { id: "sections", label: "Layout", content: sectionList },
-      { id: "pages", label: "Pages", content: <><SiteTree site={site} pageId={pageId} onChange={commitSite} onSelect={selectPage}/>{pageControls}</> },
+      { id: "sections", label: "Sections", content: sectionList },
+      { id: "pages", label: "Pages", content: <><SiteTree site={site} pageId={pageId} onChange={commitSite} onImport={next => { setClientDrafts({}); commitSite(next); }} onSelect={selectPage}/>{pageControls}</> },
       { id: "site", label: "Site", content: siteControls },
       { id: "qa", label: "QA", content: qaControls },
     ]}>
       <div ref={preview} className="composition-selectable" data-inspect={inspect} onClickCapture={event => {
         if (!(event.target instanceof Element)) return;
-        if (!inspect) {
+        const fullPreview = event.currentTarget.closest(".lab-editor")?.getAttribute("data-full-preview") === "true";
+        if (!inspect || fullPreview) {
           const anchor = event.target.closest<HTMLAnchorElement>("a[href]");
           if (anchor && !anchor.hasAttribute("download")) {
             const href = anchor.getAttribute("href")!, [path, sectionId] = href.split("#");
@@ -293,7 +306,7 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
         }
         const slot = event.target.closest<HTMLElement>("[data-section-id]");
         if (!slot?.dataset.sectionId) return;
-        event.preventDefault(); event.stopPropagation(); setSelected(slot.dataset.sectionId); setTab("section");
+        event.preventDefault(); event.stopPropagation(); setSelected(slot.dataset.sectionId); setTab("sections");
       }}>
         {(pending || editing || layerEditing) && <p className="composition-preview-notice" role="status">{pending ? "Preview · click the style to add" : `Preview · ${layerEditing?.label ?? editing?.label} · click to apply`}</p>}
         {inspection.issues.length === 0 ? composition.sections.length === 0 && !pending ? <div className="composition-empty-canvas"><h2>Blank canvas</h2><p>Choose a style in Layout, or start from a demo composition.</p><button type="button" onClick={() => setTab("sections")}>Browse layouts</button></div> : <PreviewCanvas key={`${fixture}-${replay}`} authored={<ActionBoundary site={site} composition={renderedComposition}><CompositionPreview key={replay} composition={renderedComposition} /></ActionBoundary>} audition={pending || editing || layerEditing ? <ActionBoundary site={site} composition={renderedAudition}><CompositionPreview key={replay} composition={renderedAudition} /></ActionBoundary> : undefined} /> : <div className="composition-blocked"><h2>Resolve compatibility to preview</h2><ul>{inspection.issues.map((issue, index) => <li key={index}>{issue.section ?? "Page"}: {issue.message}</li>)}</ul><button type="button" onClick={() => setTab("qa")}>Open diagnostics</button></div>}
@@ -313,7 +326,6 @@ function SectionInspector({ section, composition, width, onChange, onPreview }: 
   const contract = getSectionContract(section.component);
   const systemMotion = useMotionPolicy();
   const [clientAdaptation,setClientAdaptation]=useState("authored");
-  const [json, setJson] = useState(() => JSON.stringify({ content: section.content, ...("media" in section ? { media: section.media } : {}) }, null, 2));
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const previewPatch = (patch: Record<string, unknown> | null, label: string) => {
@@ -328,13 +340,7 @@ function SectionInspector({ section, composition, width, onChange, onPreview }: 
     if (value === "inherit") delete overrides[key]; else Object.assign(overrides, { [key]: value });
     return { overrides };
   };
-  function clientData(): Record<string, unknown> {
-    const data: unknown = JSON.parse(json);
-    if (!data || typeof data !== "object" || Array.isArray(data) || Object.keys(data).some(key => key !== "content" && key !== "media")) throw new Error("Only content and media can be edited here.");
-    return data as Record<string, unknown>;
-  }
-  function previewClientData() { try { previewPatch(clientData(), "Client content and media"); } catch { previewPatch(null, "Client content and media"); } }
-  const update = (patch: Record<string, unknown>) => { try { const next = transitionSection(section, patch); const reason = sectionChoiceReason(composition, section, next.section); if (reason) throw new Error(reason); onChange(next.section); if("content"in patch||"media"in patch)setJson(JSON.stringify({content:next.section.content,...("media"in next.section?{media:next.section.media}:{})},null,2)); setNotice(next.notice); setError(""); } catch (error) { setError(error instanceof Error ? error.message : "Invalid section."); } };
+  const update = (patch: Record<string, unknown>) => { try { const next = transitionSection(section, patch); const reason = sectionChoiceReason(composition, section, next.section); if (reason) throw new Error(reason); onChange(next.section); setNotice(next.notice); setError(""); } catch (error) { setError(error instanceof Error ? error.message : "Invalid section."); } };
   const replacements = entries.filter(entry => entry.category === contract.category).map(entry => {
     const candidate = adaptSectionToPageLayers(composition, makeSection(entry.id as SectionId, section.id));
     return { entry, candidate, reason: sectionChoiceReason(composition, section, candidate) };
@@ -353,7 +359,7 @@ function SectionInspector({ section, composition, width, onChange, onPreview }: 
     {systemMotion.reduced && section.motion !== "none" ? <p className="lab-layer-note">Effective motion: none under OS reduced motion. Authored behavior and intensity ({section.overrides?.motion ?? "inherit"}) are retained.</p> : null}
     {contract.overrides.filter(key => key !== "motion" || (section.motion !== "none" && !systemMotion.reduced)).map(key => <CapabilityControl key={key} label={`Section ${key === "artDirection" ? "art direction" : key}`} value={section.overrides?.[key] ?? "inherit"} choices={sectionLayerChoices(composition, section, key)} note={key === "artDirection" ? contract.artBehavior : undefined} onPreview={value => previewPatch(value === null ? null : layerPatch(key, value), `Section ${key === "artDirection" ? "art direction" : key}`)} onChange={value => update(layerPatch(key, value))} />)}
     {"treatment" in section && contract.media ? <><Control label="Media geometry" value={section.treatment.geometry} values={contract.media.geometries} onPreview={value => previewPatch(value === null ? null : { treatment: { ...section.treatment, geometry: value } }, "Media geometry")} onChange={value => update({ treatment: { ...section.treatment, geometry: value } })} /><Control label="Media tone" value={section.treatment.tone} values={contract.media.tones} onPreview={value => previewPatch(value === null ? null : { treatment: { ...section.treatment, tone: value } }, "Media tone")} onChange={value => update({ treatment: { ...section.treatment, tone: value } })} /></> : null}
-  </div><p role="status">{notice}</p><MediaControls section={section} onChange={update}/><details><summary>Client content and media</summary><label className="composition-json-label">Strict section data<textarea rows={14} value={json} onChange={event => setJson(event.target.value)} spellCheck={false} /></label><button type="button" onPointerEnter={event => { if (event.pointerType !== "touch") previewClientData(); }} onPointerLeave={() => previewPatch(null, "Client content and media")} onFocus={previewClientData} onBlur={() => previewPatch(null, "Client content and media")} onClick={() => { try { update(clientData()); } catch (error) { setError(error instanceof Error ? error.message : "Invalid JSON."); } }}>Apply client data</button><button type="button" onClick={() => setJson(JSON.stringify({ content: section.content, ...("media" in section ? { media: section.media } : {}) }, null, 2))}>Read current data</button><p role="alert">{error}</p></details>
+  </div><p role="status">{notice}</p><p role="alert">{error}</p>
     <details><summary>Section capability contract</summary><pre>{JSON.stringify(contract, null, 2)}</pre></details>
   </Panel>;
 }

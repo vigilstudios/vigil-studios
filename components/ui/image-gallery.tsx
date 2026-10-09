@@ -1,4 +1,5 @@
 "use client";
+import { ControlIcon } from "@/design-engine/presentation/PresentationContext";
 import { isVideoAsset } from "@/design-engine/media/source";
 import { useRef, useState } from "react";
 import type { SectionInstance } from "@/design-engine/composition/schemas";
@@ -77,7 +78,7 @@ export function ImageGallery(section: SectionInstance<"work.image-gallery">) {
                     aria-label={`Inspect ${work.title}`}
                     onClick={(event) => inspect(work.id, event.currentTarget)}
                   >
-                    {isVideoAsset(work.image) ? "View video" : "View image"}
+                    <ControlIcon/> {isVideoAsset(work.image) ? "View video" : "View image"}
                   </button>
                 )}
                 <ItemAction

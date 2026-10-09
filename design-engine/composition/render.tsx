@@ -1,3 +1,5 @@
+import { PresentationSurface } from "../presentation/PresentationSurface";
+import { resolvePresentation } from "../presentation/schema";
 import { EditorialConversion, SignalConversion } from "../sections/endings/Conversion";
 import { InquiryContact } from "../sections/endings/InquiryContact";
 import { SitemapFooter, CompactFooter, SplitFooter, BannerFooter } from "../sections/endings/Footers";
@@ -224,9 +226,9 @@ export function CompositionPreview({ composition: input, fonts, iconPack, embedd
   const overlay = composition.sections.some(section => "placement" in section && section.placement === "overlay");
   const slot = (section: SectionInstance) => {
     const layers = resolveCreativeLayers(composition.site, composition.overrides, section.overrides);
-    return <div className="de-composition-slot" key={`${section.id}-${section.component}-${section.structure}-${JSON.stringify(section.content)}`} data-section={section.component} data-section-id={section.id} data-hero-section={getSectionContract(section.component).category === "hero" ? "true" : undefined}>
+    return <div className="de-composition-slot" key={`${section.id}-${section.component}-${section.structure}`} data-section={section.component} data-section-id={section.id} data-hero-section={getSectionContract(section.component).category === "hero" ? "true" : undefined}>
       <DesignThemeProvider theme={composition.site.brand.theme} overrides={{ color: composition.site.brand.colors }} {...layers} fonts={fonts} className={getSectionContract(section.component).category === "navigation" ? "de-navigation-root" : ""}>
-        {getSectionContract(section.component).category === "navigation" ? <div id={section.id}>{renderSection(section)}</div> : renderSection(section)}
+        <PresentationSurface value={resolvePresentation(composition.site.presentation, composition.presentation, section.presentation)} navigation={getSectionContract(section.component).category === "navigation"}>{getSectionContract(section.component).category === "navigation" ? <div id={section.id}>{renderSection(section)}</div> : renderSection(section)}</PresentationSurface>
       </DesignThemeProvider>
     </div>;
   };

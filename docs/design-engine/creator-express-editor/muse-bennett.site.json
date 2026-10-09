@@ -1,0 +1,1189 @@
+{
+  "version": 1,
+  "id": "site-draft",
+  "title": "Muse Bennett · Creator Express",
+  "settings": {
+    "brand": {
+      "theme": "neutral"
+    },
+    "typography": "luxury",
+    "artDirection": "publication",
+    "motion": "restrained",
+    "icons": {
+      "id": "core",
+      "strokeWidth": 1.5
+    }
+  },
+  "navigation": {
+    "homePageId": "page-home",
+    "includeDrafts": true
+  },
+  "globals": {},
+  "pages": [
+    {
+      "id": "page-home",
+      "title": "Muse Bennett",
+      "slug": "/",
+      "pageType": "home",
+      "parentId": null,
+      "order": 0,
+      "showInNavigation": true,
+      "status": "draft",
+      "sections": [
+        {
+          "id": "opening",
+          "component": "hero.scene-poster",
+          "overrides": {},
+          "contextualActions": {
+            "primary": {
+              "enabled": true,
+              "label": "Let's collaborate",
+              "action": {
+                "type": "section",
+                "pageId": "page-home",
+                "sectionId": "approach-6"
+              },
+              "presentation": {
+                "variant": "secondary",
+                "icon": "mail",
+                "hover": "icon-slide",
+                "shape": "square"
+              }
+            }
+          },
+          "content": {
+            "title": "Muse Bennett",
+            "eyebrow": "Creator · Influencer · Artist",
+            "description": "Everyday stories and product reviews. Neutral / Light. Illustrative creator demo.",
+            "reference": "Creator · Neutral / Light",
+            "caption": "Collabs / Product Reviews / Everyday Stories",
+            "action": {
+              "label": "Let's collaborate",
+              "href": "#approach"
+            }
+          },
+          "media": {
+            "image": {
+              "src": "/design-engine-creators/neutral-light-hero.webp",
+              "alt": "A creator setting up a camera at a desk, viewed from behind with their face hidden. neutral light; AI-generated creator demo photograph.",
+              "width": 1536,
+              "height": 1024,
+              "focal": {
+                "x": 50,
+                "y": 50
+              },
+              "mobileFocal": {
+                "x": 50,
+                "y": 50
+              },
+              "srcSet": "/design-engine-creators/neutral-light-hero-640.webp 640w, /design-engine-creators/neutral-light-hero.webp 1536w",
+              "sizes": "(max-width:700px) 100vw, 70vw"
+            }
+          },
+          "treatment": {
+            "geometry": "full-bleed",
+            "tone": "natural"
+          },
+          "alignment": "center",
+          "position": "middle",
+          "voice": "loud",
+          "ink": "light",
+          "motion": "none",
+          "structure": "scene-poster",
+          "presentation": {
+            "headingMode": "original",
+            "buttons": {
+              "hover": "icon-slide",
+              "shape": "square"
+            }
+          }
+        },
+        {
+          "id": "approach-3",
+          "component": "about.creator-profile",
+          "overrides": {},
+          "motion": "none",
+          "density": "open",
+          "surface": "transparent",
+          "alignment": "left",
+          "structure": "split",
+          "imageSide": "left",
+          "photoStyle": "clean",
+          "imageShape": "portrait",
+          "content": {
+            "title": "Hi, I'm Muse.",
+            "name": "Muse Bennett",
+            "role": "Lifestyle creator & everyday storyteller",
+            "location": "Brooklyn, NY",
+            "eyebrow": "Creator · Neutral / Light",
+            "biography": "I'm a creator who finds inspiration in the everyday: a good coffee, a slow morning, a new place and the things that make life feel like you.\n\nHere you'll find little glimpses of my world, honest product finds and stories made with a camera always close by. I partner with brands that feel like a natural part of that story.",
+            "signature": "See you around, MB",
+            "image": {
+              "src": "/design-engine-creators/neutral-light-hero.webp",
+              "alt": "A creator setting up a camera at a desk, viewed from behind with their face hidden. neutral light; AI-generated creator demo photograph.",
+              "width": 1536,
+              "height": 1024,
+              "focal": {
+                "x": 50,
+                "y": 50
+              },
+              "mobileFocal": {
+                "x": 50,
+                "y": 50
+              },
+              "srcSet": "/design-engine-creators/neutral-light-hero-640.webp 640w, /design-engine-creators/neutral-light-hero.webp 1536w",
+              "sizes": "(max-width:700px) 100vw, 70vw"
+            },
+            "secondaryImage": {
+              "src": "/design-engine-creators/neutral-light-coffee.webp",
+              "alt": "Coffee and a partly eaten breakfast at a café table. neutral light; AI-generated creator demo photograph.",
+              "width": 1536,
+              "height": 1024,
+              "focal": {
+                "x": 50,
+                "y": 50
+              },
+              "mobileFocal": {
+                "x": 50,
+                "y": 50
+              },
+              "srcSet": "/design-engine-creators/neutral-light-coffee-640.webp 640w, /design-engine-creators/neutral-light-coffee.webp 1536w",
+              "sizes": "(max-width:700px) 100vw, 70vw"
+            },
+            "interests": [
+              {
+                "id": "rituals",
+                "label": "Lifestyle"
+              },
+              {
+                "id": "wellness",
+                "label": "Wellness"
+              },
+              {
+                "id": "style",
+                "label": "Foodie"
+              }
+            ]
+          },
+          "interestShape": "square"
+        },
+        {
+          "id": "approach-2",
+          "component": "work.apple-cards",
+          "sectionWidth": "full",
+          "overrides": {},
+          "content": {
+            "title": "Life, through my lens.",
+            "introduction": "A few frames from the things I reach for, places I return to and small moments worth keeping.",
+            "eyebrow": "The everyday edit",
+            "works": [
+              {
+                "id": "a2",
+                "title": "The daily ritual",
+                "note": "Everyday stories, thoughtful product edits and life behind the camera. Creator · Neutral / Light. Illustrative creator demo.",
+                "category": "Product finds",
+                "image": {
+                  "src": "/design-engine-creators/neutral-light-product.webp",
+                  "alt": "A hand arranging an unbranded skincare bottle and balm on fabric. neutral light; AI-generated creator demo photograph.",
+                  "width": 1024,
+                  "height": 1536,
+                  "focal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "mobileFocal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "srcSet": "/design-engine-creators/neutral-light-product-640.webp 640w, /design-engine-creators/neutral-light-product.webp 1024w",
+                  "sizes": "(max-width:700px) 100vw, 70vw",
+                  "caption": "AI-generated creator demo photograph."
+                }
+              },
+              {
+                "id": "a3",
+                "title": "From my point of view",
+                "note": "Everyday stories, thoughtful product edits and life behind the camera. Creator · Neutral / Light. Illustrative creator demo.",
+                "category": "Behind the scenes",
+                "image": {
+                  "src": "/design-engine-creators/neutral-light-pov.webp",
+                  "alt": "A creator's hands reviewing a photograph on a digital camera at a desk. neutral light; AI-generated creator demo photograph.",
+                  "width": 1536,
+                  "height": 1024,
+                  "focal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "mobileFocal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "srcSet": "/design-engine-creators/neutral-light-pov-640.webp 640w, /design-engine-creators/neutral-light-pov.webp 1536w",
+                  "sizes": "(max-width:700px) 100vw, 70vw",
+                  "caption": "AI-generated creator demo photograph."
+                }
+              },
+              {
+                "id": "a4",
+                "title": "Everyday essentials",
+                "note": "Everyday stories, thoughtful product edits and life behind the camera. Creator · Neutral / Light. Illustrative creator demo.",
+                "category": "Daily essentials",
+                "image": {
+                  "src": "/design-engine-creators/neutral-light-objects.webp",
+                  "alt": "A compact camera, earbuds, notebook, coffee and tote on a tabletop. neutral light; AI-generated creator demo photograph.",
+                  "width": 1254,
+                  "height": 1254,
+                  "focal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "mobileFocal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "srcSet": "/design-engine-creators/neutral-light-objects-640.webp 640w, /design-engine-creators/neutral-light-objects.webp 1254w",
+                  "sizes": "(max-width:700px) 100vw, 70vw",
+                  "caption": "AI-generated creator demo photograph."
+                }
+              },
+              {
+                "id": "a5",
+                "title": "After the workout",
+                "note": "Everyday stories, thoughtful product edits and life behind the camera. Creator · Neutral / Light. Illustrative creator demo.",
+                "category": "Wellness",
+                "image": {
+                  "src": "/design-engine-creators/neutral-light-gym.webp",
+                  "alt": "Dumbbells, a gym bag, towel and water bottle after a workout. neutral light; AI-generated creator demo photograph.",
+                  "width": 1536,
+                  "height": 1024,
+                  "focal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "mobileFocal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "srcSet": "/design-engine-creators/neutral-light-gym-640.webp 640w, /design-engine-creators/neutral-light-gym.webp 1536w",
+                  "sizes": "(max-width:700px) 100vw, 70vw",
+                  "caption": "AI-generated creator demo photograph."
+                }
+              },
+              {
+                "id": "creator-coffee",
+                "title": "Coffee, then everything",
+                "note": "Everyday stories, thoughtful product edits and life behind the camera. Creator · Neutral / Light. Illustrative creator demo.",
+                "category": "Food & coffee",
+                "image": {
+                  "src": "/design-engine-creators/neutral-light-coffee.webp",
+                  "alt": "Coffee and a partly eaten breakfast at a café table. neutral light; AI-generated creator demo photograph.",
+                  "width": 1536,
+                  "height": 1024,
+                  "focal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "mobileFocal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "srcSet": "/design-engine-creators/neutral-light-coffee-640.webp 640w, /design-engine-creators/neutral-light-coffee.webp 1536w",
+                  "sizes": "(max-width:700px) 100vw, 70vw"
+                }
+              },
+              {
+                "id": "creator-drive",
+                "title": "Taking the long way home",
+                "note": "Everyday stories, thoughtful product edits and life behind the camera. Creator · Neutral / Light. Illustrative creator demo.",
+                "category": "Car / road trip",
+                "image": {
+                  "src": "/design-engine-creators/neutral-light-drive.webp",
+                  "alt": "The leather interior, sunglasses and keys of a parked vintage coupe. neutral light; AI-generated creator demo photograph.",
+                  "width": 1536,
+                  "height": 1024,
+                  "focal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "mobileFocal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "srcSet": "/design-engine-creators/neutral-light-drive-640.webp 640w, /design-engine-creators/neutral-light-drive.webp 1536w",
+                  "sizes": "(max-width:700px) 100vw, 70vw"
+                }
+              }
+            ]
+          },
+          "surface": "transparent",
+          "density": "open",
+          "skin": "site",
+          "alignment": "left",
+          "structure": "portrait-cards",
+          "motion": "depth-shift",
+          "height": "standard",
+          "inspection": "dialog"
+        },
+        {
+          "id": "approach-4",
+          "component": "proof.social-reach",
+          "sectionWidth": "full",
+          "overrides": {},
+          "motion": "none",
+          "density": "open",
+          "surface": "transparent",
+          "alignment": "center",
+          "structure": "editorial",
+          "statsStyle": "bold",
+          "linkStyle": "icon-label",
+          "content": {
+            "title": "Small moments. A shared connection.",
+            "introduction": "Everyday stories, honest recommendations and a community that keeps showing up.",
+            "eyebrow": "My corner of the internet",
+            "basis": "Illustrative layout metrics. Replace with verified audience data and reporting periods before publishing.",
+            "stats": [
+              {
+                "id": "following",
+                "value": "128K",
+                "label": "Followers",
+                "platform": "Instagram"
+              },
+              {
+                "id": "views",
+                "value": "2.4M",
+                "label": "Video views",
+                "platform": "TikTok",
+                "period": "Last 30 days"
+              },
+              {
+                "id": "reach",
+                "value": "860K",
+                "label": "Accounts reached",
+                "platform": "Instagram",
+                "period": "Last 30 days"
+              }
+            ],
+            "socials": [
+              {
+                "id": "instagram",
+                "platform": "Instagram",
+                "handle": "@yourhandle",
+                "href": "https://www.instagram.com/",
+                "icon": "instagram"
+              },
+              {
+                "id": "tiktok",
+                "platform": "TikTok",
+                "handle": "@yourhandle",
+                "href": "https://www.tiktok.com/",
+                "icon": "tiktok"
+              },
+              {
+                "id": "youtube",
+                "platform": "YouTube",
+                "handle": "Your channel",
+                "href": "https://www.youtube.com/",
+                "icon": "youtube"
+              }
+            ]
+          },
+          "linkShape": "square",
+          "statsLayout": "grid",
+          "statSurface": "transparent",
+          "statAlignment": "center",
+          "linksAlignment": "center",
+          "statsColumns": 3,
+          "statSize": 56,
+          "statGap": 28,
+          "statPadding": 24,
+          "socialIconSize": 22,
+          "linkGap": 16
+        },
+        {
+          "id": "approach-1",
+          "component": "work.expand-rail",
+          "sectionWidth": "full",
+          "overrides": {},
+          "content": {
+            "title": "Good things, shared naturally.",
+            "introduction": "Product stories, everyday rituals and a personal point of view. A closer look at the brands in my creative world.",
+            "eyebrow": "Brand work",
+            "works": [
+              {
+                "id": "a2",
+                "title": "Essence x Moo",
+                "note": "A considered skincare edit, photographed in soft light with the little details left in.",
+                "category": "Product finds",
+                "image": {
+                  "src": "/design-engine-creators/neutral-light-product.webp",
+                  "alt": "A hand arranging an unbranded skincare bottle and balm on fabric. neutral light; AI-generated creator demo photograph.",
+                  "width": 1024,
+                  "height": 1536,
+                  "focal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "mobileFocal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "srcSet": "/design-engine-creators/neutral-light-product-640.webp 640w, /design-engine-creators/neutral-light-product.webp 1024w",
+                  "sizes": "(max-width:700px) 100vw, 70vw",
+                  "caption": "AI-generated creator demo photograph."
+                }
+              },
+              {
+                "id": "a5",
+                "title": "Fit Culture",
+                "note": "Movement, routine and the essentials that come along for the workout.",
+                "category": "Wellness",
+                "image": {
+                  "src": "/design-engine-creators/neutral-light-gym.webp",
+                  "alt": "Dumbbells, a gym bag, towel and water bottle after a workout. neutral light; AI-generated creator demo photograph.",
+                  "width": 1536,
+                  "height": 1024,
+                  "focal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "mobileFocal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "srcSet": "/design-engine-creators/neutral-light-gym-640.webp 640w, /design-engine-creators/neutral-light-gym.webp 1536w",
+                  "sizes": "(max-width:700px) 100vw, 70vw",
+                  "caption": "AI-generated creator demo photograph."
+                }
+              },
+              {
+                "id": "creator-coffee",
+                "title": "Bordeaux",
+                "note": "Coffee, a slow breakfast and the kind of place you want to tell a friend about.",
+                "category": "Food & coffee",
+                "image": {
+                  "src": "/design-engine-creators/neutral-light-coffee.webp",
+                  "alt": "Coffee and a partly eaten breakfast at a café table. neutral light; AI-generated creator demo photograph.",
+                  "width": 1536,
+                  "height": 1024,
+                  "focal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "mobileFocal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "srcSet": "/design-engine-creators/neutral-light-coffee-640.webp 640w, /design-engine-creators/neutral-light-coffee.webp 1536w",
+                  "sizes": "(max-width:700px) 100vw, 70vw"
+                }
+              }
+            ]
+          },
+          "surface": "transparent",
+          "density": "open",
+          "structure": "label-rails",
+          "motion": "depth-shift",
+          "height": "portrait",
+          "railWidth": "compact"
+        },
+        {
+          "id": "approach",
+          "component": "services.service-field-atlas",
+          "sectionWidth": "full",
+          "overrides": {},
+          "structure": "authored",
+          "motion": "media-reveal",
+          "treatment": {
+            "geometry": "contained",
+            "tone": "natural"
+          },
+          "content": {
+            "eyebrow": "Ways to work together",
+            "title": "Your story. My point of view.",
+            "introduction": "Let’s find the format that feels right for your brand, from a quick product story to a thoughtful creative partnership.",
+            "plates": [
+              {
+                "id": "plate-0",
+                "title": "Brand partnerships",
+                "image": {
+                  "src": "/design-engine-creators/neutral-light-hero.webp",
+                  "alt": "A creator setting up a camera at a desk, viewed from behind with their face hidden. neutral light; AI-generated creator demo photograph.",
+                  "width": 1536,
+                  "height": 1024,
+                  "focal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "mobileFocal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "srcSet": "/design-engine-creators/neutral-light-hero-640.webp 640w, /design-engine-creators/neutral-light-hero.webp 1536w",
+                  "sizes": "(max-width:700px) 100vw, 70vw"
+                },
+                "caption": "A shared idea, brought into the everyday.",
+                "application": "Sponsored stories, campaign concepts and ongoing collaborations.",
+                "detail": {
+                  "label": "Let’s talk",
+                  "href": "#approach-6"
+                }
+              },
+              {
+                "id": "plate-1",
+                "title": "Product photography",
+                "image": {
+                  "src": "/design-engine-creators/neutral-light-product.webp",
+                  "alt": "A hand arranging an unbranded skincare bottle and balm on fabric. neutral light; AI-generated creator demo photograph.",
+                  "width": 1024,
+                  "height": 1536,
+                  "focal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "mobileFocal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "srcSet": "/design-engine-creators/neutral-light-product-640.webp 640w, /design-engine-creators/neutral-light-product.webp 1024w",
+                  "sizes": "(max-width:700px) 100vw, 70vw"
+                },
+                "caption": "Honest details and thoughtful styling, in a frame that feels lived in.",
+                "application": "Product stills, detail shots and content for your channels.",
+                "detail": {
+                  "label": "Let’s talk",
+                  "href": "#approach-6"
+                }
+              },
+              {
+                "id": "plate-2",
+                "title": "UGC & short-form video",
+                "image": {
+                  "src": "/design-engine-creators/neutral-light-pov.webp",
+                  "alt": "A creator's hands reviewing a photograph on a digital camera at a desk. neutral light; AI-generated creator demo photograph.",
+                  "width": 1536,
+                  "height": 1024,
+                  "focal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "mobileFocal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "srcSet": "/design-engine-creators/neutral-light-pov-640.webp 640w, /design-engine-creators/neutral-light-pov.webp 1536w",
+                  "sizes": "(max-width:700px) 100vw, 70vw"
+                },
+                "caption": "Camera-ready concepts with a natural voice and a clear point of view.",
+                "application": "Reels, TikTok concepts, tutorials and product demonstrations.",
+                "detail": {
+                  "label": "Let’s talk",
+                  "href": "#approach-6"
+                }
+              },
+              {
+                "id": "plate-3",
+                "title": "Lifestyle storytelling",
+                "image": {
+                  "src": "/design-engine-creators/neutral-light-objects.webp",
+                  "alt": "A compact camera, earbuds, notebook, coffee and tote on a tabletop. neutral light; AI-generated creator demo photograph.",
+                  "width": 1254,
+                  "height": 1254,
+                  "focal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "mobileFocal": {
+                    "x": 50,
+                    "y": 50
+                  },
+                  "srcSet": "/design-engine-creators/neutral-light-objects-640.webp 640w, /design-engine-creators/neutral-light-objects.webp 1254w",
+                  "sizes": "(max-width:700px) 100vw, 70vw"
+                },
+                "caption": "Coffee runs, wellness rituals and the things that make a day feel like mine.",
+                "application": "Editorial moments, event coverage and daily-life content.",
+                "detail": {
+                  "label": "Let’s talk",
+                  "href": "#approach-6"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "approach-5",
+          "component": "proof.moving-chorus",
+          "overrides": {},
+          "structure": "authored",
+          "evidenceMode": "illustrative",
+          "motion": "marquee",
+          "content": {
+            "title": "A few words from the other side.",
+            "introduction": "A space for collaborator feedback. These sample cards are ready for approved quotes, names and brand credits.",
+            "voices": [
+              {
+                "id": "fixture-voices-0",
+                "provenance": {
+                  "status": "demo",
+                  "source": "Editable testimonial placeholder",
+                  "context": "No real endorsement is claimed. Replace with approved collaborator feedback.",
+                  "disclosure": "Sample card · attribution pending",
+                  "timeframe": "Not yet supplied",
+                  "attribution": "Approved collaborator attribution pending"
+                },
+                "quote": "Add an approved collaborator quote about the creative process and the story you made together.",
+                "author": {
+                  "name": "Collaborator 01",
+                  "role": "Approved attribution pending",
+                  "organization": "Brand name"
+                }
+              },
+              {
+                "id": "fixture-voices-1",
+                "provenance": {
+                  "status": "demo",
+                  "source": "Editable testimonial placeholder",
+                  "context": "No real endorsement is claimed. Replace with approved collaborator feedback.",
+                  "disclosure": "Sample card · attribution pending",
+                  "timeframe": "Not yet supplied",
+                  "attribution": "Approved collaborator attribution pending"
+                },
+                "quote": "Add an approved brand quote about the content, the details and the finished campaign.",
+                "author": {
+                  "name": "Collaborator 02",
+                  "role": "Approved attribution pending",
+                  "organization": "Brand name"
+                }
+              },
+              {
+                "id": "fixture-voices-2",
+                "provenance": {
+                  "status": "demo",
+                  "source": "Editable testimonial placeholder",
+                  "context": "No real endorsement is claimed. Replace with approved collaborator feedback.",
+                  "disclosure": "Sample card · attribution pending",
+                  "timeframe": "Not yet supplied",
+                  "attribution": "Approved collaborator attribution pending"
+                },
+                "quote": "Add an approved partner quote about working with Muse and the experience behind the scenes.",
+                "author": {
+                  "name": "Collaborator 03",
+                  "role": "Approved attribution pending",
+                  "organization": "Brand name"
+                }
+              }
+            ]
+          },
+          "layout": "ribbon",
+          "columns": "two",
+          "visualStyle": "editorial",
+          "alignment": "center",
+          "quoteScale": "standard",
+          "authorTreatment": "text-only",
+          "surface": "transparent",
+          "direction": "left",
+          "speed": "slow",
+          "intensity": "expressive",
+          "pauseOnHover": "no",
+          "pauseOnFocus": "yes",
+          "edgeFade": "soft",
+          "gap": "regular",
+          "cardSettings": {
+            "width": 420,
+            "minHeight": 260,
+            "padding": 32,
+            "gap": 28,
+            "quoteSize": 24,
+            "design": "outline",
+            "shape": "square",
+            "hover": "enlarge",
+            "horizontal": "left",
+            "vertical": "spread",
+            "portraitSize": 64,
+            "portraitFrame": "square",
+            "portraitAlignment": "left",
+            "order": [
+              "quote",
+              "name",
+              "role",
+              "company"
+            ]
+          }
+        },
+        {
+          "id": "approach-6",
+          "component": "contact.inquiry",
+          "overrides": {},
+          "motion": "none",
+          "density": "open",
+          "surface": "transparent",
+          "measure": "wide",
+          "content": {
+            "title": "An idea worth sharing?",
+            "introduction": "Tell me what you have in mind. Brand collaborations, product stories or a creative idea that needs a fresh point of view — I’d love to hear it.",
+            "eyebrow": "Let’s make something",
+            "details": [
+              {
+                "id": "inquiries",
+                "title": "Collaboration enquiries",
+                "destination": {
+                  "type": "email",
+                  "email": "hello@example.com"
+                },
+                "note": "Replace with Muse’s confirmed business email."
+              }
+            ],
+            "socials": [
+              {
+                "id": "instagram",
+                "title": "Instagram",
+                "destination": {
+                  "type": "external",
+                  "url": "https://www.instagram.com/"
+                }
+              },
+              {
+                "id": "tiktok",
+                "title": "TikTok",
+                "destination": {
+                  "type": "external",
+                  "url": "https://www.tiktok.com/"
+                }
+              },
+              {
+                "id": "youtube",
+                "title": "YouTube",
+                "destination": {
+                  "type": "external",
+                  "url": "https://www.youtube.com/"
+                }
+              }
+            ],
+            "location": "Brooklyn, NY · open to creative collaborations",
+            "hours": "Email and profile details are placeholders until confirmed.",
+            "form": {
+              "title": "Tell me about your idea",
+              "description": "Share your brand, the format and a little about the story you want to tell.",
+              "submitLabel": "Send enquiry",
+              "successMessage": "Your inquiry was received.",
+              "unavailableMessage": "Online inquiries are not connected yet. Please use the contact options.",
+              "submission": {
+                "mode": "unavailable"
+              },
+              "fields": [
+                {
+                  "id": "name",
+                  "label": "Your name",
+                  "type": "text",
+                  "required": true,
+                  "autocomplete": "name"
+                },
+                {
+                  "id": "email",
+                  "label": "Email",
+                  "type": "email",
+                  "required": true,
+                  "autocomplete": "email"
+                },
+                {
+                  "id": "company",
+                  "label": "Brand or organization",
+                  "type": "text",
+                  "required": true,
+                  "autocomplete": "organization"
+                },
+                {
+                  "id": "inquiry",
+                  "label": "Inquiry type",
+                  "type": "select",
+                  "required": true,
+                  "options": [
+                    "Brand collaboration",
+                    "Sponsorship",
+                    "General inquiry"
+                  ]
+                },
+                {
+                  "id": "budget",
+                  "label": "Budget range (optional)",
+                  "type": "select",
+                  "required": false,
+                  "options": [
+                    "To discuss",
+                    "Under $5,000",
+                    "$5,000–$15,000",
+                    "$15,000+"
+                  ]
+                },
+                {
+                  "id": "message",
+                  "label": "Project or inquiry details",
+                  "type": "textarea",
+                  "required": true
+                },
+                {
+                  "id": "consent",
+                  "label": "I agree to be contacted about this inquiry.",
+                  "type": "checkbox",
+                  "required": true
+                }
+              ]
+            },
+            "image": {
+              "src": "/design-engine-creators/neutral-light-objects.webp",
+              "alt": "A compact camera, earbuds, notebook, coffee and tote on a tabletop. neutral light; AI-generated creator demo photograph.",
+              "width": 1254,
+              "height": 1254,
+              "focal": {
+                "x": 50,
+                "y": 50
+              },
+              "mobileFocal": {
+                "x": 50,
+                "y": 50
+              },
+              "srcSet": "/design-engine-creators/neutral-light-objects-640.webp 640w, /design-engine-creators/neutral-light-objects.webp 1254w",
+              "sizes": "(max-width:700px) 100vw, 70vw"
+            }
+          },
+          "structure": "split",
+          "appearance": "editorial",
+          "alignment": "left",
+          "imagePlacement": "right"
+        }
+      ],
+      "seo": {
+        "title": "Muse Bennett — lifestyle creator",
+        "description": "Everyday stories, considered product edits and creative collaborations with Muse Bennett."
+      },
+      "slots": {
+        "navigation": {
+          "mode": "replace",
+          "section": {
+            "id": "navigation",
+            "component": "navigation.meridian",
+            "overrides": {},
+            "actions": [
+              {
+                "path": [
+                  "content",
+                  "home"
+                ],
+                "action": {
+                  "type": "page",
+                  "pageId": "page-home"
+                }
+              },
+              {
+                "path": [
+                  "content",
+                  "links",
+                  0,
+                  "href"
+                ],
+                "action": {
+                  "type": "section",
+                  "pageId": "page-home",
+                  "sectionId": "approach-3"
+                }
+              },
+              {
+                "path": [
+                  "content",
+                  "links",
+                  1,
+                  "href"
+                ],
+                "action": {
+                  "type": "section",
+                  "pageId": "page-home",
+                  "sectionId": "approach-2"
+                }
+              },
+              {
+                "path": [
+                  "content",
+                  "links",
+                  2,
+                  "href"
+                ],
+                "action": {
+                  "type": "section",
+                  "pageId": "page-home",
+                  "sectionId": "approach-4"
+                }
+              },
+              {
+                "path": [
+                  "content",
+                  "links",
+                  3,
+                  "href"
+                ],
+                "action": {
+                  "type": "section",
+                  "pageId": "page-home",
+                  "sectionId": "approach-1"
+                }
+              },
+              {
+                "path": [
+                  "content",
+                  "links",
+                  4,
+                  "href"
+                ],
+                "action": {
+                  "type": "section",
+                  "pageId": "page-home",
+                  "sectionId": "approach"
+                }
+              },
+              {
+                "path": [
+                  "content",
+                  "links",
+                  5,
+                  "href"
+                ],
+                "action": {
+                  "type": "section",
+                  "pageId": "page-home",
+                  "sectionId": "approach-5"
+                }
+              },
+              {
+                "path": [
+                  "content",
+                  "links",
+                  6,
+                  "href"
+                ],
+                "action": {
+                  "type": "section",
+                  "pageId": "page-home",
+                  "sectionId": "approach-6"
+                }
+              }
+            ],
+            "structure": "NX02",
+            "motion": "none",
+            "settings": {
+              "brand": "center",
+              "primary": "split",
+              "actions": "right",
+              "position": "overlay",
+              "background": "solid",
+              "contrast": "brand",
+              "density": "compact",
+              "scroll": "solidify",
+              "heroContrast": "brand",
+              "cta": false,
+              "utilities": false
+            },
+            "content": {
+              "brand": "MB",
+              "home": "/",
+              "edition": "Independent edition / 2026",
+              "note": "Everyday stories, thoughtful finds and creative collaborations.",
+              "sceneLabel": "Muse’s everyday edit",
+              "prompt": "A little life behind the camera.",
+              "links": [
+                {
+                  "label": "About",
+                  "href": "/#approach-3"
+                },
+                {
+                  "label": "Featured",
+                  "href": "/#approach-2"
+                },
+                {
+                  "label": "Socials",
+                  "href": "/#approach-4"
+                },
+                {
+                  "label": "Brand Work",
+                  "href": "/#approach-1"
+                },
+                {
+                  "label": "Services",
+                  "href": "/#approach"
+                },
+                {
+                  "label": "Testimonials",
+                  "href": "/#approach-5"
+                },
+                {
+                  "label": "Contact",
+                  "href": "/#approach-6"
+                }
+              ],
+              "action": {
+                "label": "Let’s collaborate",
+                "href": "#approach-6"
+              },
+              "utilities": []
+            }
+          }
+        },
+        "footer": {
+          "mode": "replace",
+          "section": {
+            "id": "approach-7",
+            "component": "footer.sitemap",
+            "overrides": {},
+            "motion": "none",
+            "density": "open",
+            "surface": "transparent",
+            "measure": "wide",
+            "navigationDepth": "two-level",
+            "content": {
+              "brand": "MUSE BENNETT",
+              "statement": "Everyday stories. Thoughtful finds. A little life behind the camera.",
+              "copyright": "© {year} Muse Bennett. All rights reserved.",
+              "navigationLabel": "Find your way around",
+              "groups": [
+                {
+                  "id": "explore",
+                  "title": "Explore",
+                  "links": [
+                    {
+                      "id": "about",
+                      "title": "About me",
+                      "destination": {
+                        "type": "section",
+                        "pageId": "page-home",
+                        "sectionId": "approach-3"
+                      }
+                    },
+                    {
+                      "id": "featured",
+                      "title": "The everyday edit",
+                      "destination": {
+                        "type": "section",
+                        "pageId": "page-home",
+                        "sectionId": "approach-2"
+                      }
+                    },
+                    {
+                      "id": "brand-work",
+                      "title": "Brand work",
+                      "destination": {
+                        "type": "section",
+                        "pageId": "page-home",
+                        "sectionId": "approach-1"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "connect",
+                  "title": "Connect",
+                  "links": [
+                    {
+                      "id": "socials",
+                      "title": "My socials",
+                      "destination": {
+                        "type": "section",
+                        "pageId": "page-home",
+                        "sectionId": "approach-4"
+                      }
+                    },
+                    {
+                      "id": "services",
+                      "title": "Work with me",
+                      "destination": {
+                        "type": "section",
+                        "pageId": "page-home",
+                        "sectionId": "approach"
+                      }
+                    },
+                    {
+                      "id": "contact",
+                      "title": "Let’s collaborate",
+                      "destination": {
+                        "type": "section",
+                        "pageId": "page-home",
+                        "sectionId": "approach-6"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "socials": [
+                {
+                  "id": "instagram",
+                  "title": "Instagram",
+                  "destination": {
+                    "type": "external",
+                    "url": "https://www.instagram.com/"
+                  }
+                },
+                {
+                  "id": "youtube",
+                  "title": "YouTube",
+                  "destination": {
+                    "type": "external",
+                    "url": "https://www.youtube.com/"
+                  }
+                }
+              ],
+              "legal": []
+            },
+            "structure": "brand-left"
+          }
+        }
+      },
+      "previousRoutes": [],
+      "navLabel": "Home",
+      "presentation": {
+        "heading": {
+          "titleSize": 64,
+          "eyebrowSize": 12,
+          "descriptionSize": 18,
+          "bodySize": 16,
+          "titleLineHeight": 1.08,
+          "bodyLineHeight": 1.65,
+          "eyebrowGap": 16,
+          "descriptionGap": 24,
+          "titleWidth": 1080,
+          "descriptionWidth": 800
+        },
+        "buttons": {
+          "shape": "square",
+          "hover": "icon-slide",
+          "size": "medium"
+        },
+        "controls": {
+          "shape": "square",
+          "treatment": "bare",
+          "size": 44,
+          "hover": "lift",
+          "mediaIcon": "arrow-up-right",
+          "previousIcon": "arrow-left",
+          "nextIcon": "arrow-right"
+        },
+        "viewport": {
+          "height": "natural",
+          "padding": 88,
+          "alignment": "center"
+        },
+        "motion": {
+          "entrance": "fade",
+          "exit": "none",
+          "duration": 650,
+          "delay": 0,
+          "easing": "smooth",
+          "distance": 28,
+          "blur": 8,
+          "scale": 0.96,
+          "stagger": 90,
+          "sequence": "heading-first",
+          "threshold": 0.06,
+          "replay": false,
+          "mediaHover": "zoom",
+          "ctaHover": "icon-slide"
+        }
+      }
+    }
+  ]
+}

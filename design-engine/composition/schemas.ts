@@ -1,3 +1,4 @@
+import { presentationSchema, type PresentationSettings } from "../presentation/schema";
 import { creatorSectionSchemas } from "./creator-schemas";
 import { endingSectionSchemas } from "./ending-schemas";
 import { importSectionSchemas } from "./import-schemas";
@@ -21,6 +22,7 @@ export const creativeOverrideSchema = z.object({
 }).strict();
 const color = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Composition colors use six-digit hex.");
 export const siteSchema = z.object({
+  presentation: presentationSchema.optional(),
   brand: z.object({ theme: z.enum(["neutral", "editorial", "technical"]), colors: z.object({
     background: color.optional(), surface: color.optional(), surfaceElevated: color.optional(), foreground: color.optional(),
     muted: color.optional(), accent: color.optional(), accentForeground: color.optional(), border: color.optional(),
@@ -75,9 +77,9 @@ export type SectionWidth = z.infer<typeof sectionWidthSchema>;
 export type SectionId = keyof typeof sectionSchemas;
 export type SectionPayload<K extends SectionId> = z.infer<(typeof sectionSchemas)[K]>;
 export type SectionInstance<K extends SectionId = SectionId> = {
-  [Id in K]: SectionPayload<Id> & { id: string; component: Id; sectionWidth?: SectionWidth; overrides?: CreativeOverrides; actions?: ActionBinding[]; contextualActions?: ContextualActions; navigationSource?: NavigationSource }
+  [Id in K]: SectionPayload<Id> & { id: string; component: Id; sectionWidth?: SectionWidth; presentation?: PresentationSettings; overrides?: CreativeOverrides; actions?: ActionBinding[]; contextualActions?: ContextualActions; navigationSource?: NavigationSource }
 }[K];
-export type PageComposition = { id: string; label: string; site: SiteConfiguration; overrides?: CreativeOverrides; sections: SectionInstance[] };
+export type PageComposition = { id: string; label: string; site: SiteConfiguration; overrides?: CreativeOverrides; presentation?: PresentationSettings; sections: SectionInstance[] };
 
 /** Metadata is kept separate from executable schemas; neither accepts undeclared fields. */
 export function parseSection(input: unknown): SectionInstance {
@@ -88,13 +90,13 @@ export function parseSection(input: unknown): SectionInstance {
     void lens; void structure;
     input = {...retained,component:"work.liquid-glass",structure:"liquid-lens",skin:"site",alignment:"center",height:"section",entry:"none",gap:"tight"};
   }
-  const envelope = z.object({ id: text.regex(/^[a-z][a-z0-9-]*$/), component: z.enum(Object.keys(sectionSchemas) as [SectionId, ...SectionId[]]), sectionWidth: sectionWidthSchema.optional(), overrides: creativeOverrideSchema.optional(), actions: z.array(actionBindingSchema).optional(), contextualActions: contextualActionsSchema.optional(), navigationSource: navigationSourceSchema.optional() }).passthrough().parse(input);
-  const { id, component, sectionWidth, overrides, actions, contextualActions, navigationSource, ...payload } = envelope;
+  const envelope = z.object({ id: text.regex(/^[a-z][a-z0-9-]*$/), component: z.enum(Object.keys(sectionSchemas) as [SectionId, ...SectionId[]]), sectionWidth: sectionWidthSchema.optional(), presentation: presentationSchema.optional(), overrides: creativeOverrideSchema.optional(), actions: z.array(actionBindingSchema).optional(), contextualActions: contextualActionsSchema.optional(), navigationSource: navigationSourceSchema.optional() }).passthrough().parse(input);
+  const { id, component, sectionWidth, presentation, overrides, actions, contextualActions, navigationSource, ...payload } = envelope;
   if (navigationSource && !component.startsWith("navigation.") && !component.startsWith("footer.")) throw new Error("Only Navigation and Footer consume site destinations.");
   if (!component.startsWith("navigation.") && actions?.some(binding => binding.path[1] === "home")) throw new Error("Only Navigation supports a home destination binding.");
   if (navigationSource && actions?.some(binding => binding.path[1] === "links")) throw new Error("Site-derived menu links are owned by the Site Tree. Remove legacy link bindings or use authored destinations.");
   if (actions && new Set(actions.map(binding => JSON.stringify(binding.path))).size !== actions.length) throw new Error("Action paths must be unique.");
-  const section = { id, component, ...(sectionWidth ? { sectionWidth } : {}), overrides, ...(contextualActions ? { contextualActions } : {}), ...(actions ? { actions } : {}), ...(navigationSource ? { navigationSource } : {}), ...sectionSchemas[component].parse(payload) } as SectionInstance;
+  const section = { id, component, ...(sectionWidth ? { sectionWidth } : {}), ...(presentation ? { presentation } : {}), overrides, ...(contextualActions ? { contextualActions } : {}), ...(actions ? { actions } : {}), ...(navigationSource ? { navigationSource } : {}), ...sectionSchemas[component].parse(payload) } as SectionInstance;
   validateContextualActions(section, contextualActions);
   return section;
 }

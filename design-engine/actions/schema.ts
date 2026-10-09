@@ -1,8 +1,10 @@
 import { z } from "zod";
+import { buttonShapes, hoverEffects } from "../presentation/schema";
 import { actionSchema } from "../site/action-schema";
 import { coreIconNames } from "../icons/names";
 
 export const actionPresentationSchema = z.object({
+  shape: z.enum(buttonShapes).optional(), hover: z.enum(hoverEffects).optional(),
   variant: z.enum(["primary", "secondary", "outline", "ghost", "text", "underline", "inverse"]).optional(),
   size: z.enum(["small", "medium", "large", "display"]).optional(),
   icon: z.enum(coreIconNames).nullable().optional(),

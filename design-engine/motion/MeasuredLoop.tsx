@@ -12,7 +12,7 @@ export function loopGeometry(width:number,viewport:number,speed:LoopSpeed,mobile
  * Measurement happens on resize/font changes, never on animation frames. The repeated
  * group includes its trailing gap, so translating exactly one group is periodic.
  */
-export function MeasuredLoop({items,direction,speed,intensity,paused,pauseOnHover,edgeFade,gap,axis="horizontal"}:{axis?:"horizontal"|"vertical";items:readonly ReactNode[];direction:"left"|"right";speed:LoopSpeed;intensity:"subtle"|"standard"|"expressive";paused:boolean;pauseOnHover:boolean;edgeFade:"none"|"soft";gap:"compact"|"regular"|"spacious"}) {
+export function MeasuredLoop({items,direction,speed,intensity,paused,pauseOnHover,edgeFade,gap,axis="horizontal",hoverCards=false}:{axis?:"horizontal"|"vertical";items:readonly ReactNode[];direction:"left"|"right";speed:LoopSpeed;intensity:"subtle"|"standard"|"expressive";paused:boolean;pauseOnHover:boolean;edgeFade:"none"|"soft";gap:"compact"|"regular"|"spacious";hoverCards?:boolean}) {
  const viewport=useRef<HTMLDivElement>(null), group=useRef<HTMLDivElement>(null);
  const [copies,setCopies]=useState(2), [visible,setVisible]=useState(false);
  const pageVisible=usePageVisible(), policy=useMotionPolicy();
@@ -38,7 +38,7 @@ export function MeasuredLoop({items,direction,speed,intensity,paused,pauseOnHove
   return ()=>{disposed=true;cancelAnimationFrame(frame);resize.disconnect();intersection.disconnect();document.fonts.removeEventListener("loadingdone",queue);};
  },[speed,intensity,policy.reduced,policy.distance,axis]);
  return <div ref={viewport} className="de-measured-loop" aria-hidden="true" data-axis={axis} data-running={visible && pageVisible && !paused && !policy.reduced} data-direction={direction} data-hover-pause={pauseOnHover} data-fade={edgeFade} data-gap={gap}>
- <div className="de-measured-loop-track" inert>
+ <div className="de-measured-loop-track" inert={hoverCards ? undefined : true}>
  {Array.from({length:policy.reduced?1:copies},(_,copy)=><div key={copy} ref={copy===0?group:undefined} className="de-measured-loop-group" data-loop-copy={copy}>{items.map((item,i)=><div key={i} className="de-measured-loop-item">{item}</div>)}</div>)}
  </div></div>;
 }

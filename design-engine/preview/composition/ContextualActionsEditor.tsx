@@ -88,7 +88,7 @@ function actionForHref(site: SiteDefinition, href: string): Action | undefined {
   if (pageId) return sectionId ? {type:"section",pageId,sectionId} : {type:"page",pageId};
 }
 export function ActionPresentationControls({ capability, value, onChange, onPreview }: { capability: PresentationCapability; value: ActionPresentation; onChange: (value: ActionPresentation) => void; onPreview?: (value: ActionPresentation | null) => void }) {
-  const names: Record<string, string> = { variant: "CTA visual style", size: "CTA size", alignment: "CTA alignment", width: "CTA width", surface: "CTA surface" };
+  const names: Record<string, string> = { variant: "CTA visual style", size: "CTA size", alignment: "CTA alignment", width: "CTA width", surface: "CTA surface", shape: "CTA shape", hover: "CTA hover" };
   function patch(key: keyof ActionPresentation, selected: string): ActionPresentation {
     const next = { ...value };
     if (!selected) delete next[key]; else Object.assign(next, { [key]: selected });
@@ -98,7 +98,7 @@ export function ActionPresentationControls({ capability, value, onChange, onPrev
     {Object.entries(capability).filter(([key, options]) => names[key] && options && options.length > 1).map(([key, options]) => <CapabilityControl key={key} label={names[key]} value={String(value[key as keyof ActionPresentation] ?? "")} choices={[{value:"",label:"Component default"}, ...options!.map(option => ({value:String(option)}))]} onChange={selected => onChange(patch(key as keyof ActionPresentation, selected))} onPreview={selected => onPreview?.(selected === null ? null : patch(key as keyof ActionPresentation, selected))}/>)}
     {capability.icon && <CapabilityControl label="CTA icon" value={value.icon === undefined ? "" : value.icon ?? "none"} choices={[{value:"",label:"Component default"},{value:"none",label:"No icon"}, ...capability.icon.map(value => ({value:String(value)}))]} onChange={selected => onChange(selected === "none" ? {...value,icon:null} : patch("icon",selected))} onPreview={selected => onPreview?.(selected === null ? null : selected === "none" ? {...value,icon:null} : patch("icon",selected))}/> }
     {value.icon && capability.iconPosition && <CapabilityControl label="CTA icon position" value={value.iconPosition ?? "trailing"} choices={capability.iconPosition.map(value => ({value:String(value)}))} onChange={selected => onChange(patch("iconPosition",selected))} onPreview={selected => onPreview?.(selected === null ? null : patch("iconPosition",selected))}/>}
-    <p>Shape follows the active art direction and brand radius.</p>
+    <p>Component defaults inherit the page button settings. Choose a local style to override them.</p>
   </div>;
 }
 

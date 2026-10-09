@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { presentationSchema } from "../presentation/schema";
 import { siteSchema, creativeOverrideSchema, parseSection, type SectionInstance, type PageComposition } from "../composition/schemas";
 import { getSectionContract } from "../composition/catalog";
 import { pageTypes } from "../registry/types";
@@ -20,6 +21,7 @@ export const sitePageSchema = z.object({
   slug: z.string().max(180), routeOverride: z.string().max(2000).optional(),
   pageType: z.enum(pageTypes), parentId: identity.nullable(), order: z.number().int().nonnegative(),
   showInNavigation: z.boolean(), status: z.enum(["draft", "published"]),
+  presentation: presentationSchema.optional(),
   sections: z.array(section).max(20), overrides: creativeOverrideSchema.optional(),
   seo: z.object({ title: z.string().max(180).optional(), description: z.string().max(500).optional(), noIndex: z.boolean().optional() }).strict(),
   slots: z.object({ navigation: slot, footer: slot }).strict(),
@@ -41,11 +43,11 @@ export function effectiveSections(site: SiteDefinition, page: SitePage): Section
 export function pageComposition(site: SiteDefinition, pageId: string): PageComposition {
   const page = site.pages.find(page => page.id === pageId);
   if (!page) throw new Error(`Page ${pageId} does not exist.`);
-  return { id: page.id, label: page.title, site: site.settings, overrides: page.overrides, sections: effectiveSections(site, page) };
+  return { id: page.id, label: page.title, site: site.settings, overrides: page.overrides, presentation: page.presentation, sections: effectiveSections(site, page) };
 }
 /** Legacy QA compositions migrate without copying shared defaults into every page. */
 export function siteFromComposition(composition: PageComposition): SiteDefinition {
-  const page: SitePage = { id: "page-home", title: composition.label, slug: "/", pageType: "home", parentId: null, order: 0, showInNavigation: true, status: "draft", sections: structuredClone(composition.sections), overrides: composition.overrides, seo: {}, slots: { navigation: { mode: "inherit" }, footer: { mode: "inherit" } }, previousRoutes: [] };
+  const page: SitePage = { id: "page-home", title: composition.label, slug: "/", pageType: "home", parentId: null, order: 0, showInNavigation: true, status: "draft", sections: structuredClone(composition.sections), overrides: composition.overrides, presentation: composition.presentation, seo: {}, slots: { navigation: { mode: "inherit" }, footer: { mode: "inherit" } }, previousRoutes: [] };
   for (const name of ["navigation", "footer"] as const) {
     const instance = page.sections.find(section => getSectionContract(section.component).category === name);
     if (instance) { page.slots[name] = { mode: "replace", section: instance }; page.sections = page.sections.filter(section => section !== instance); }
