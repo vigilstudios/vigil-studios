@@ -1491,3 +1491,10 @@
 
 .de-root[data-typography] .de-moving-chorus .de-chorus-voice[data-portrait-frame] .de-proof-picture img { border-radius:0; }
 .de-root[data-typography] .de-moving-chorus[data-equal-height] .de-chorus-voice { min-height:max(var(--de-card-height,0px),var(--de-card-equal-height,0px)); }
+
+/* The heading shares the selected alignment with its testimonial wall. */
+.de-root .de-proof-e06[data-align] .de-proof-intro { text-align:var(--de-proof-heading-align);margin-inline:var(--de-proof-heading-margin); }
+.de-proof-e06[data-align=left] { --de-proof-heading-align:left;--de-proof-heading-margin:0 auto; }
+.de-proof-e06[data-align=center] { --de-proof-heading-align:center;--de-proof-heading-margin:auto; }
+.de-proof-e06[data-align=right] { --de-proof-heading-align:right;--de-proof-heading-margin:auto 0; }
+.de-root .de-proof-e06[data-align] .de-proof-intro > :is(h2,p) { margin-inline:var(--de-proof-heading-margin); }

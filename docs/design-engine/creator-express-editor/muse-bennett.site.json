@@ -848,7 +848,32 @@
           "structure": "split",
           "appearance": "editorial",
           "alignment": "left",
-          "imagePlacement": "right"
+          "imagePlacement": "right",
+          "formAppearance": {
+            "treatment": "minimal",
+            "shape": "square",
+            "fieldStyle": "underline",
+            "fieldShape": "square",
+            "columns": 2,
+            "alignment": "center",
+            "headingAlignment": "left",
+            "maxWidth": 1080,
+            "padding": 0,
+            "gap": 28,
+            "fieldHeight": 52,
+            "textareaRows": 5,
+            "titleSize": 36,
+            "labelSize": 12,
+            "textSize": 16,
+            "labelCase": "uppercase",
+            "submit": {
+              "shape": "square",
+              "variant": "outline",
+              "hover": "color",
+              "icon": "arrow-up-right",
+              "size": "medium"
+            }
+          }
         }
       ],
       "seo": {
