@@ -1490,3 +1490,4 @@
 .de-root[data-typography] .de-moving-chorus .de-chorus-voice .de-chorus-quotation { width:100%; }
 
 .de-root[data-typography] .de-moving-chorus .de-chorus-voice[data-portrait-frame] .de-proof-picture img { border-radius:0; }
+.de-root[data-typography] .de-moving-chorus[data-equal-height] .de-chorus-voice { min-height:max(var(--de-card-height,0px),var(--de-card-equal-height,0px)); }

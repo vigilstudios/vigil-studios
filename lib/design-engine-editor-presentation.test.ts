@@ -49,6 +49,19 @@ describe("Editor presentation and saved draft compatibility", () => {
   expect(()=>parseSection({...section,cardSettings:{order:["quote","quote"]}})).toThrow();
   expect(parseSection({...section,cardSettings:{order:["name","quote"],design:"transparent"}}).component).toBe(section.component);
  });
+ it("preserves optional equal-height testimonial cards through a saved-site round trip",()=>{
+  const site=deserializeSite(JSON.stringify(muse));
+  const page=site.pages[0];
+  const index=page.sections.findIndex(section=>section.component==="proof.moving-chorus");
+  const original=page.sections[index];
+  expect(original.component).toBe("proof.moving-chorus");
+  for(const equalHeight of [true,false]) {
+   page.sections[index]=parseSection({...original,cardSettings:{equalHeight,minHeight:280}});
+   const restored=deserializeSite(serializeSite(site)).pages[0].sections[index];
+   expect(restored.component==="proof.moving-chorus" && restored.cardSettings).toEqual({equalHeight,minHeight:280});
+  }
+  expect(()=>parseSection({...original,cardSettings:{equalHeight:"yes"}})).toThrow();
+ });
  it("removes the pause button, forced eyebrow and read-all disclosure while retaining accessible quotes",()=>{
   const section=makeSection("proof.moving-chorus","voices");
   if(section.component!=="proof.moving-chorus")throw Error("Wrong fixture");

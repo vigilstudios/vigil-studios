@@ -132,6 +132,7 @@ export const chorusOptions = {
 export const chorusDefaults = { layout:"ribbon", columns:"three", visualStyle:"typographic", alignment:"center", quoteScale:"standard", authorTreatment:"text-only", surface:"transparent", direction:"left", speed:"slow", intensity:"standard", pauseOnHover:"yes", pauseOnFocus:"yes", edgeFade:"soft", gap:"regular" } as const;
 export const chorusConfiguration = Object.entries(chorusOptions).map(([name,options])=>({name,options}));
 export const chorusCardSchema = z.object({
+ equalHeight:z.boolean().optional(),
  width:z.number().min(220).max(900).optional(), minHeight:z.number().min(0).max(800).optional(), padding:z.number().min(0).max(100).optional(), gap:z.number().min(0).max(100).optional(), quoteSize:z.number().min(14).max(64).optional(),
  design:z.enum(["transparent","outline","solid","editorial"]).optional(), shape:z.enum(["square","soft","rounded"]).optional(), hover:z.enum(["none","lift","enlarge"]).optional(),
  horizontal:z.enum(["left","center","right"]).optional(), vertical:z.enum(["start","center","end","spread"]).optional(),
