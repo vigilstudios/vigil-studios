@@ -2,6 +2,8 @@ import { EditorialConversion, SignalConversion } from "../sections/endings/Conve
 import { InquiryContact } from "../sections/endings/InquiryContact";
 import { SitemapFooter, CompactFooter, SplitFooter, BannerFooter } from "../sections/endings/Footers";
 import { ExpandRailGallery, CardRailGallery } from "../sections/endings/Galleries";
+import { SocialReach } from "../sections/creators/SocialReach";
+import { CreatorProfile } from "../sections/creators/CreatorProfile";
 import { ImageExpansionSlider } from "../../components/ui/image-expansion";
 import { ImageGallery } from "../../components/ui/image-gallery";
 import AppleCardCarousel from "../../components/ui/carousel-08";
@@ -116,6 +118,8 @@ function renderSectionBody(section: SectionInstance): ReactNode {
     case "footer.compact": return <CompactFooter {...section}/>;
     case "footer.split": return <SplitFooter {...section}/>;
     case "footer.banner": return <BannerFooter {...section}/>;
+    case "proof.social-reach": return <SocialReach {...section}/>;
+    case "about.creator-profile": return <CreatorProfile {...section}/>;
     case "work.expand-rail": return <ExpandRailGallery {...section}/>;
     case "work.card-rail": return <CardRailGallery {...section}/>;
     case "work.image-expansion": return <ImageExpansionSlider {...section}/>;

@@ -1,0 +1,140 @@
+[
+  {
+    "id": "pink-light-gym",
+    "palette": "pink-light",
+    "role": "gym",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator lifestyle website photograph. An unposed overhead candid snapshot of dumbbells, a half-unzipped gym bag, towel and water bottle beside a gym bench after a workout. No people or readable brands. Style: authentic early 2000s compact digital camera photo, subtle sensor noise, direct on-camera flash, slightly imperfect tilted framing, believable textures, snapshot rather than styled advertising. Palette: soft pink blush accessories and rose accents; bright daytime setting with soft ambient light and gentle flash. Single photograph, landscape 3:2 framing. No text overlays, borders, watermarks, collages or fake UI.",
+    "source": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-71c19700-29e6-46b1-b45c-4c14379d12df.png"
+  },
+  {
+    "id": "pink-light-coffee",
+    "palette": "pink-light",
+    "role": "coffee",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator lifestyle website photograph. An unposed handheld candid snapshot of iced coffee, a partly eaten croissant and breakfast plate on a small caf\u00e9 table. A casually placed bag is at the edge. No readable brands. Style: authentic early 2000s compact digital camera photo, subtle sensor noise, direct on-camera flash, slightly imperfect tilted framing, believable textures, snapshot rather than styled advertising. Palette: soft pink blush accessories and rose accents; bright daytime setting with soft ambient light and gentle flash. Single photograph, landscape 3:2 framing. No text overlays, borders, watermarks, collages or fake UI.",
+    "source": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-08c29e3f-6d8a-4269-a851-9faf8909d6ea.png",
+    "generationSource": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-4d90027d-8e75-4512-bae7-dadb9fd49584.png",
+    "editPrompt": "Edit Image 1 into a single candid 3:2 landscape digital-camera photograph. Preserve its setting, objects, palette, flash lighting and natural sensor grain. No text, brands, borders or collage. Critical framing rule: every person's eyes, forehead and upper face must be completely outside the photograph. No full faces anywhere, including background or reflections. Frame from chin or neck down, with hands and torso visible. Keep the same woman in her existing pink outfit, but lower the camera framing to show ONLY her chin/neck, torso and hands beside the coffee and breakfast. Upper edge cuts below her mouth. Preserve caf\u00e9, pink accessories and food.",
+    "editReferences": [
+      "originals/pink-light-coffee.png"
+    ],
+    "visualReview": "Inspected final photo: no full face or upper face visible; matching creator skin tone and clothing."
+  },
+  {
+    "id": "pink-light-drive",
+    "palette": "pink-light",
+    "role": "drive",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator lifestyle website photograph. An unposed handheld candid snapshot from the passenger side of a parked vintage coupe, leather seats, console, sunglasses and keys; glimpse of the road trip outside. No visible logos, no driver, no readable brands. Style: authentic early 2000s compact digital camera photo, subtle sensor noise, direct on-camera flash, slightly imperfect tilted framing, believable textures, snapshot rather than styled advertising. Palette: soft pink blush accessories and rose accents; bright daytime setting with soft ambient light and gentle flash. Single photograph, landscape 3:2 framing. No text overlays, borders, watermarks, collages or fake UI.",
+    "source": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-5c9bff56-9e62-423f-a6d7-a0b7e8ed69aa.png"
+  },
+  {
+    "id": "pink-dark-gym",
+    "palette": "pink-dark",
+    "role": "gym",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator lifestyle website photograph. An unposed overhead candid snapshot of dumbbells, a half-unzipped gym bag, towel and water bottle beside a gym bench after a workout. No people or readable brands. Style: authentic early 2000s compact digital camera photo, subtle sensor noise, direct on-camera flash, slightly imperfect tilted framing, believable textures, snapshot rather than styled advertising. Palette: soft pink blush accessories and rose accents; moody evening setting with flash pop and dark shadows. Single photograph, landscape 3:2 framing. No text overlays, borders, watermarks, collages or fake UI.",
+    "source": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-0458dc11-0412-4198-b793-effe6b4cf57f.png"
+  },
+  {
+    "id": "pink-dark-coffee",
+    "palette": "pink-dark",
+    "role": "coffee",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator lifestyle website photograph. An unposed handheld candid snapshot of iced coffee, a partly eaten croissant and breakfast plate on a small caf\u00e9 table. A casually placed bag is at the edge. No readable brands. Style: authentic early 2000s compact digital camera photo, subtle sensor noise, direct on-camera flash, slightly imperfect tilted framing, believable textures, snapshot rather than styled advertising. Palette: soft pink blush accessories and rose accents; moody evening setting with flash pop and dark shadows. Single photograph, landscape 3:2 framing. No text overlays, borders, watermarks, collages or fake UI.",
+    "source": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-d27550b2-3ec8-44d4-8bb4-3882c58e9302.png",
+    "generationSource": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-d8910049-fb05-47e6-810a-cecc2bcc5363.png",
+    "editPrompt": "Edit Image 1 into a single candid 3:2 landscape digital-camera photograph. Preserve its setting, objects, palette, flash lighting and natural sensor grain. No text, brands, borders or collage. Critical framing rule: every person's eyes, forehead and upper face must be completely outside the photograph. No full faces anywhere, including background or reflections. Frame from chin or neck down, with hands and torso visible. The seated creator is an adult Black woman with rich dark brown skin, wearing dark knit clothing. Show her neck, torso and hands holding the coffee, with her entire head outside the upper edge. Preserve pink bag, evening caf\u00e9, breakfast and flash aesthetic.",
+    "editReferences": [
+      "originals/pink-dark-coffee.png"
+    ],
+    "visualReview": "Inspected final photo: no full face or upper face visible; matching creator skin tone and clothing."
+  },
+  {
+    "id": "pink-dark-drive",
+    "palette": "pink-dark",
+    "role": "drive",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator lifestyle website photograph. An unposed handheld candid snapshot from the passenger side of a parked vintage coupe, leather seats, console, sunglasses and keys; glimpse of the road trip outside. No visible logos, no driver, no readable brands. Style: authentic early 2000s compact digital camera photo, subtle sensor noise, direct on-camera flash, slightly imperfect tilted framing, believable textures, snapshot rather than styled advertising. Palette: soft pink blush accessories and rose accents; moody evening setting with flash pop and dark shadows. Single photograph, landscape 3:2 framing. No text overlays, borders, watermarks, collages or fake UI.",
+    "source": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-3248a6b3-28ea-44be-b380-9e3eb755ffdf.png"
+  },
+  {
+    "id": "neutral-light-gym",
+    "palette": "neutral-light",
+    "role": "gym",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator lifestyle website photograph. An unposed overhead candid snapshot of dumbbells, a half-unzipped gym bag, towel and water bottle beside a gym bench after a workout. No people or readable brands. Style: authentic early 2000s compact digital camera photo, subtle sensor noise, direct on-camera flash, slightly imperfect tilted framing, believable textures, snapshot rather than styled advertising. Palette: neutral cream taupe brown accents; bright daytime setting with soft ambient light and gentle flash. Single photograph, landscape 3:2 framing. No text overlays, borders, watermarks, collages or fake UI.",
+    "source": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-ba0c72aa-842b-453d-8af3-f9c5882719d1.png",
+    "generationSource": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-3ae06d3f-697d-46fa-8844-c7eb2e07ba42.png",
+    "editPrompt": "Edit Image 1 into a single candid 3:2 landscape digital-camera photograph. Preserve its setting, objects, palette, flash lighting and natural sensor grain. No text, brands, borders or collage. Critical framing rule: every person's eyes, forehead and upper face must be completely outside the photograph. No full faces anywhere, including background or reflections. Frame from chin or neck down, with hands and torso visible. Image 2 is the creator reference: adult Black woman, deep brown skin, cream sleeve. Add only this creator's realistic dark brown foreground hand and wrist reaching for the water bottle. Preserve the gym equipment, bag, towel and composition. No heads or faces.",
+    "editReferences": [
+      "originals/neutral-light-gym.png",
+      "originals/neutral-light-hero.png"
+    ],
+    "visualReview": "Inspected final photo: no full face or upper face visible; matching creator skin tone and clothing."
+  },
+  {
+    "id": "neutral-light-coffee",
+    "palette": "neutral-light",
+    "role": "coffee",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator lifestyle website photograph. An unposed handheld candid snapshot of iced coffee, a partly eaten croissant and breakfast plate on a small caf\u00e9 table. A casually placed bag is at the edge. No readable brands. Style: authentic early 2000s compact digital camera photo, subtle sensor noise, direct on-camera flash, slightly imperfect tilted framing, believable textures, snapshot rather than styled advertising. Palette: neutral cream taupe brown accents; bright daytime setting with soft ambient light and gentle flash. Single photograph, landscape 3:2 framing. No text overlays, borders, watermarks, collages or fake UI.",
+    "source": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-cb0b00e9-310a-40a7-bb97-d247bf8138e4.png",
+    "generationSource": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-722805fc-8058-47dc-be20-ef8c470aa392.png",
+    "editPrompt": "Edit Image 1 into a single candid 3:2 landscape digital-camera photograph. Preserve its setting, objects, palette, flash lighting and natural sensor grain. No text, brands, borders or collage. Critical framing rule: every person's eyes, forehead and upper face must be completely outside the photograph. No full faces anywhere, including background or reflections. Frame from chin or neck down, with hands and torso visible. Image 2 is the creator reference: adult Black woman with deep brown skin and tight curly hair, cream knit clothing. Match her skin tone and clothing in Image 1. Frame her from neck down so her head is entirely outside the upper edge. Her dark brown hands hold the iced coffee. Preserve breakfast table, cream/taupe bag and warm daytime caf\u00e9.",
+    "editReferences": [
+      "originals/neutral-light-coffee.png",
+      "originals/neutral-light-hero.png"
+    ],
+    "visualReview": "Inspected final photo: no full face or upper face visible; matching creator skin tone and clothing."
+  },
+  {
+    "id": "neutral-light-drive",
+    "palette": "neutral-light",
+    "role": "drive",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator lifestyle website photograph. An unposed handheld candid snapshot from the passenger side of a parked vintage coupe, leather seats, console, sunglasses and keys; glimpse of the road trip outside. No visible logos, no driver, no readable brands. Style: authentic early 2000s compact digital camera photo, subtle sensor noise, direct on-camera flash, slightly imperfect tilted framing, believable textures, snapshot rather than styled advertising. Palette: neutral cream taupe brown accents; bright daytime setting with soft ambient light and gentle flash. Single photograph, landscape 3:2 framing. No text overlays, borders, watermarks, collages or fake UI.",
+    "source": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-89e3fce1-7bba-4e68-946d-c7e4b0a5f24e.png",
+    "generationSource": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-30951779-6422-4132-a6e5-5141c0bc2af6.png",
+    "editPrompt": "Edit Image 1 into a single candid 3:2 landscape digital-camera photograph. Preserve its setting, objects, palette, flash lighting and natural sensor grain. No text, brands, borders or collage. Critical framing rule: every person's eyes, forehead and upper face must be completely outside the photograph. No full faces anywhere, including background or reflections. Frame from chin or neck down, with hands and torso visible. Image 2 is the creator reference: adult Black woman, deep brown skin, cream sleeve. Add only this creator's realistic dark brown foreground hand and wrist picking up the keys from the console. Keep parked car, leather interior, sunglasses and road trip scenery. No heads, faces or human reflections.",
+    "editReferences": [
+      "originals/neutral-light-drive.png",
+      "originals/neutral-light-hero.png"
+    ],
+    "visualReview": "Inspected final photo: no full face or upper face visible; matching creator skin tone and clothing."
+  },
+  {
+    "id": "neutral-dark-gym",
+    "palette": "neutral-dark",
+    "role": "gym",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator lifestyle website photograph. An unposed overhead candid snapshot of dumbbells, a half-unzipped gym bag, towel and water bottle beside a gym bench after a workout. No people or readable brands. Style: authentic early 2000s compact digital camera photo, subtle sensor noise, direct on-camera flash, slightly imperfect tilted framing, believable textures, snapshot rather than styled advertising. Palette: neutral cream taupe brown accents; moody evening setting with flash pop and dark shadows. Single photograph, landscape 3:2 framing. No text overlays, borders, watermarks, collages or fake UI.",
+    "source": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-c664d118-2256-419d-944e-af91f0d6a39c.png",
+    "generationSource": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-1f4cbab6-4f4c-426d-a869-e7ad338525ea.png",
+    "editPrompt": "Edit Image 1 into a single candid 3:2 landscape digital-camera photograph. Preserve its setting, objects, palette, flash lighting and natural sensor grain. No text, brands, borders or collage. Critical framing rule: every person's eyes, forehead and upper face must be completely outside the photograph. No full faces anywhere, including background or reflections. Frame from chin or neck down, with hands and torso visible. Image 2 is the creator reference: adult Black man, deep brown skin, charcoal sweater sleeve. Add only this creator's realistic dark brown foreground hand and wrist reaching for the water bottle. Preserve the gym equipment, bag, towel and composition. No heads or faces.",
+    "editReferences": [
+      "originals/neutral-dark-gym.png",
+      "originals/neutral-dark-hero.png"
+    ],
+    "visualReview": "Inspected final photo: no full face or upper face visible; matching creator skin tone and clothing."
+  },
+  {
+    "id": "neutral-dark-coffee",
+    "palette": "neutral-dark",
+    "role": "coffee",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator lifestyle website photograph. An unposed handheld candid snapshot of iced coffee, a partly eaten croissant and breakfast plate on a small caf\u00e9 table. A casually placed bag is at the edge. No readable brands. Style: authentic early 2000s compact digital camera photo, subtle sensor noise, direct on-camera flash, slightly imperfect tilted framing, believable textures, snapshot rather than styled advertising. Palette: neutral cream taupe brown accents; moody evening setting with flash pop and dark shadows. Single photograph, landscape 3:2 framing. No text overlays, borders, watermarks, collages or fake UI.",
+    "source": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-50a66121-3970-4320-bf81-d82b68f98c1b.png",
+    "generationSource": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-816de009-b1f5-4d10-8128-eb80a73df659.png",
+    "editPrompt": "Edit Image 1 into a single candid 3:2 landscape digital-camera photograph. Preserve its setting, objects, palette, flash lighting and natural sensor grain. No text, brands, borders or collage. Critical framing rule: every person's eyes, forehead and upper face must be completely outside the photograph. No full faces anywhere, including background or reflections. Frame from chin or neck down, with hands and torso visible. Image 2 is the creator reference: adult Black MAN with deep brown skin and charcoal chunky knit sweater. Replace the seated caf\u00e9 woman in Image 1 with this MALE creator wearing that dark sweater. Frame shoulders/neck down, entire head outside upper edge, masculine torso and dark brown hands holding iced coffee. Preserve caf\u00e9 food, dark neutral accessories and evening camera flash.",
+    "editReferences": [
+      "originals/neutral-dark-coffee.png",
+      "originals/neutral-dark-hero.png"
+    ],
+    "visualReview": "Inspected final photo: no full face or upper face visible; matching creator skin tone and clothing."
+  },
+  {
+    "id": "neutral-dark-drive",
+    "palette": "neutral-dark",
+    "role": "drive",
+    "prompt": "Use case: photorealistic-natural. Asset type: creator lifestyle website photograph. An unposed handheld candid snapshot from the passenger side of a parked vintage coupe, leather seats, console, sunglasses and keys; glimpse of the road trip outside. No visible logos, no driver, no readable brands. Style: authentic early 2000s compact digital camera photo, subtle sensor noise, direct on-camera flash, slightly imperfect tilted framing, believable textures, snapshot rather than styled advertising. Palette: neutral cream taupe brown accents; moody evening setting with flash pop and dark shadows. Single photograph, landscape 3:2 framing. No text overlays, borders, watermarks, collages or fake UI.",
+    "source": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-d3918985-ecb1-4173-b44e-fd40c3bda119.png",
+    "generationSource": "/Users/belierjavier/.codex/generated_images/01a11dee-b52a-7330-8805-0d5651ef93d2/exec-da6f43b9-2004-4561-a719-22f52bec4c81.png",
+    "editPrompt": "Edit Image 1 into a single candid 3:2 landscape digital-camera photograph. Preserve its setting, objects, palette, flash lighting and natural sensor grain. No text, brands, borders or collage. Critical framing rule: every person's eyes, forehead and upper face must be completely outside the photograph. No full faces anywhere, including background or reflections. Frame from chin or neck down, with hands and torso visible. Image 2 is the creator reference: adult Black man, deep brown skin, charcoal sweater sleeve. Add only this creator's realistic dark brown foreground hand and wrist picking up the keys from the console. Keep parked car, leather interior, sunglasses and road trip scenery. No heads, faces or human reflections.",
+    "editReferences": [
+      "originals/neutral-dark-drive.png",
+      "originals/neutral-dark-hero.png"
+    ],
+    "visualReview": "Inspected final photo: no full face or upper face visible; matching creator skin tone and clothing."
+  }
+]

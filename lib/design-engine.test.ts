@@ -15,7 +15,7 @@ import { DesignMedia } from "@/design-engine/primitives/DesignPrimitives";
 describe("Professional Design Engine component factory", () => {
   it("has unique, serializable definitions and discoverable categories", () => {
     expect(new Set(designComponents.map((item) => item.id)).size).toBe(designComponents.length);
-    expect(designComponents).toHaveLength(124);
+    expect(designComponents).toHaveLength(126);
     expect(findDesignComponents({ category: "primitive" })).toHaveLength(13);
     expect(findDesignComponents({ category: "motion" })).toHaveLength(12);
     expect(findDesignComponents({ category: "icon" })).toHaveLength(1);
@@ -26,7 +26,7 @@ describe("Professional Design Engine component factory", () => {
     for (const item of designComponents) {
       expect(item.previewVariants.length).toBeGreaterThan(0);
       expect(new Set(item.previewVariants.map((variant) => variant.id)).size).toBe(item.previewVariants.length);
-      expect(item.status).toBe("sourceConcept" in item ? (/^(?:[SMCPE]|NX|HX|H09$|H12$|H16$)/.test(item.sourceConcept) || item.sourceConcept.startsWith("external-") || item.sourceConcept.startsWith("readiness-")) ? "production" : "review" : "experimental");
+      expect(item.status).toBe("sourceConcept" in item ? (/^(?:[SMCPE]|NX|HX|H09$|H12$|H16$)/.test(item.sourceConcept) || item.sourceConcept.startsWith("external-") || item.sourceConcept.startsWith("readiness-") || item.sourceConcept.startsWith("creator-")) ? "production" : "review" : "experimental");
       for (const variant of item.previewVariants) {
         for (const [key, value] of Object.entries(variant.config)) {
           expect(item.configurations.find((config) => config.name === key)?.options).toContain(value);

@@ -1,7 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
 import { isVideoAsset } from "@/design-engine/media/source";
-import { Sun, Moon } from "lucide-react";
 import type { SectionInstance } from "@/design-engine/composition/schemas";
 import { Plate } from "@/design-engine/sections/work/shared";
 import { ItemAction } from "@/design-engine/actions/SectionActions";
@@ -17,8 +16,7 @@ export function ImageExpansionSlider(
   section: SectionInstance<"work.image-expansion">,
 ) {
   const [category, setCategory] = useState<string | null>(null),
-    [selected, setSelected] = useState(section.content.works[0].id),
-    [themeOverride, setThemeOverride] = useState<"dark" | "light" | null>(null);
+    [selected, setSelected] = useState(section.content.works[0].id);
   const rail = useRef<HTMLDivElement>(null),
     policy = useMotionPolicy();
   const categories = [
@@ -34,8 +32,7 @@ export function ImageExpansionSlider(
   const index = Math.max(
       0,
       works.findIndex((work) => work.id === selected),
-    ),
-    theme = themeOverride ?? section.colorMode;
+    );
   const { inspect, modal } = useGalleryInspection(works);
   function choose(next: number) {
     const idx = (next + works.length) % works.length;
@@ -61,7 +58,6 @@ export function ImageExpansionSlider(
     <GalleryFrame section={section} kind="expansion">
       <div
         className="vm-expansion-shell"
-        data-tone={theme}
         data-ratio={section.ratio}
       >
         <GalleryHeading section={section} />
@@ -89,18 +85,7 @@ export function ImageExpansionSlider(
               </>
             )}
           </div>
-          {section.skin === "reference" && (
-            <button
-              type="button"
-              className="vm-round vm-theme"
-              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} gallery`}
-              onClick={() =>
-                setThemeOverride(theme === "dark" ? "light" : "dark")
-              }
-            >
-              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
-          )}
+
         </div>
         <div
           ref={rail}

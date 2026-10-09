@@ -1,5 +1,5 @@
 import manifest from "../../public/design-engine-creators/manifest.json";
-import { parseSection, type SectionInstance } from "../composition/schemas";
+import { parseSection, sectionSchemas, type SectionInstance } from "../composition/schemas";
 import type { SectionImage } from "../media/types";
 
 /** Demo imagery lives at the Lab boundary; reusable production renderers own no client assets. */
@@ -10,16 +10,20 @@ export const creatorImagePackages = [
   { id: "creator-neutral-dark", set: "neutral-dark", label: "Creator · Neutral / Dark", brand: "DAILY FRAME / NIGHT", title: "Find the story in the quiet.", background: "#211e1b", foreground: "#f0e9df", accent: "#c8ae8e" },
 ] as const;
 export type CreatorImagePackage = (typeof creatorImagePackages)[number];
-export type CreatorImageRole = "hero" | "product" | "pov" | "objects";
-export const creatorImageRoles: readonly CreatorImageRole[] = ["hero", "product", "pov", "objects"];
+export type CreatorImageRole = "hero" | "product" | "pov" | "objects" | "gym" | "coffee" | "drive";
+export const creatorImageRoles: readonly CreatorImageRole[] = ["hero", "product", "pov", "objects", "gym", "coffee", "drive"];
+
+export const creatorRoleLabels: Record<CreatorImageRole, string> = {
+  hero: "Behind the camera", product: "Product ritual", pov: "Creator POV", objects: "Everyday essentials",
+  gym: "Gym snapshot", coffee: "Food & coffee", drive: "Car / road trip",
+};
 
 export function creatorPackageFor(id: string): CreatorImagePackage | undefined {
   return creatorImagePackages.find(pack => pack.id === id);
 }
 
 export function supportsCreatorPackage(id: string) {
-  return /^(navigation|hero|work|commerce)\./.test(id) ||
-    ["primitive.media", "primitive.media-frame", "motion.media-reveal"].includes(id);
+  return id in sectionSchemas || ["primitive.media", "primitive.media-frame", "motion.media-reveal"].includes(id);
 }
 
 export function creatorImage(pack: CreatorImagePackage, role: CreatorImageRole, thumbnail = false): SectionImage {
@@ -69,13 +73,15 @@ export function adaptCreatorSection(section: SectionInstance, pack: CreatorImage
     product: "The daily ritual",
     pov: "From my point of view",
     objects: "Everyday essentials",
+    gym: "After the workout", coffee: "Coffee, then everything", drive: "Taking the long way home",
   };
   function roleFor(path: readonly (string | number)[]): CreatorImageRole {
     if (commerce) return "product";
     if (objectHero) return "product";
     if (path.includes("before")) return "hero";
     if (path.includes("after")) return "pov";
-    if (work) {
+    if (path.includes("secondaryImage")) return "coffee";
+    if (path.some(part => typeof part === "number")) {
       const index = path.find(part => typeof part === "number");
       return creatorImageRoles[typeof index === "number" ? index % creatorImageRoles.length : 0];
     }
@@ -103,13 +109,25 @@ export function adaptCreatorSection(section: SectionInstance, pack: CreatorImage
       if ("note" in result) result.note = context.note;
       if ("narrative" in result) result.narrative = context.note;
       if ("detail" in result) result.detail = context.note;
-      if ("category" in result) result.category = "Creator journal";
+      if ("category" in result) result.category = ({ hero: "Behind the scenes", product: "Product finds", pov: "Behind the scenes", objects: "Daily essentials", gym: "Wellness", coffee: "Food & coffee", drive: "On the road" } as const)[role];
       if ("caption" in result) result.caption = titles[role];
     }
     if (commerce && result.kind === "image" && "label" in result) result.label = "Creator product photograph";
     return result;
   }
   const content = media(section.content) as Record<string, unknown>;
+  // Complete small demo photo collections with every role while retaining existing record IDs.
+  if (["work.gallery-hanging", "work.expand-rail", "work.card-rail", "work.image-expansion", "work.image-gallery", "work.apple-cards", "work.liquid-glass", "work.media-cabinet"].includes(section.component)) {
+    const key = section.component === "work.media-cabinet" ? "records" : "works";
+    const records = content[key] as Record<string, unknown>[];
+    for (let index = records.length; index < creatorImageRoles.length; index++) {
+      const role = creatorImageRoles[index];
+      let id = `creator-${role}`;
+      while (records.some(record => record.id === id)) id += "-photo";
+      records.push({ id, title: titles[role], category: creatorRoleLabels[role], note: context.note,
+        ...(key === "records" ? { kind: "image" } : {}), image: creatorImage(pack, role) });
+    }
+  }
   const copy: Record<string, string> = {
     brand: context.brand, masthead: context.brand, title: commerce ? "The daily edit." : context.title,
     description: context.note, introduction: context.note, abstract: context.note,
@@ -124,7 +142,7 @@ export function adaptCreatorSection(section: SectionInstance, pack: CreatorImage
     if (Array.isArray(content.links)) {
       content.links = content.links.map((link: Record<string, unknown>, index: number) => {
         const example = context.links[index % context.links.length];
-        return { ...link, label: example.label, ...(Array.isArray(link.children) ? {
+        return { ...link, label: index < context.links.length ? example.label : `${example.label} ${Math.floor(index / context.links.length) + 1}`, ...(Array.isArray(link.children) ? {
           children: link.children.map((child: Record<string, unknown>, i: number) => ({
             ...child, label: example.children?.[i % example.children.length] ?? example.label,
           })),
@@ -138,6 +156,13 @@ export function adaptCreatorSection(section: SectionInstance, pack: CreatorImage
     }
   } else if (section.component.startsWith("hero.") && content.action && typeof content.action === "object") {
     content.action = { ...content.action, label: context.cta };
+  }
+  if (section.component === "about.creator-profile") content.title = section.content.title;
+  if (section.component === "story.open-letter") {
+    content.salutation = `Dear fellow everyday storytellers · ${pack.label},`;
+    content.signature = context.brand;
+    content.signoff = "See you in the next frame,";
+    content.paragraphs = [context.note, "A good story starts with a small detail: a coffee before the gym, a product that earns its place in your routine, or the view on a spontaneous drive. I share those moments and the people behind them."];
   }
   if (section.component === "hero.comparison") {
     content.beforeLabel = "Behind the camera";

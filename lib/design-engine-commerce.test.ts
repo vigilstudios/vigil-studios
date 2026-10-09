@@ -21,10 +21,10 @@ import { designComponents } from "../design-engine/registry/components";
 
 describe("Collection 007 creative-only commerce contracts", () => {
   it("keeps original studies independent from production registrations", () => {
-    expect(designComponents).toHaveLength(124);
+    expect(designComponents).toHaveLength(126);
     expect(
       designComponents.filter((c) => c.status === "production"),
-    ).toHaveLength(89);
+    ).toHaveLength(91);
     expect(designComponents.some((c) => c.id.startsWith("commerce-study."))).toBe(
       false,
     );

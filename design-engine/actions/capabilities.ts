@@ -28,6 +28,8 @@ const product = (group: string, path: string[]) => section("Product/collection d
 
 /** Individually audited inventory, including composition-capable experimental predecessors. */
 const authoredActionCapabilities: Record<string, ActionCapabilities> = {
+  "proof.social-reach": section("Optional collaboration or media-kit action follows metrics and native social profile destinations."),
+  "about.creator-profile": story("A personal collaboration action follows the biography and interests."),
   "cta.editorial": capability("Two optional conversion actions stay with the measured proposition.", regular, [], regular),
   "cta.signal": capability("Primary and optional secondary conversion actions occupy opaque copy, never unreadable imagery.", {...regular,size:["small","medium","large","display"]}, [], regular),
   "contact.inquiry": capability("Optional booking/email/management and media-kit actions complement a contact directory and real submission boundary.", regular, [], regular),

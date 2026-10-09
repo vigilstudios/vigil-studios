@@ -1,3 +1,5 @@
+import { makeCreatorSection } from "../creator-fixtures";
+import { creatorSectionIds, type CreatorSectionId } from "../../composition/creator-schemas";
 import { makeEndingSection } from "../ending-fixtures";
 import { endingSectionIds, type EndingSectionId } from "../../composition/ending-schemas";
 import { makeExpansionSection, expansionIds, type ExpansionId } from "../navigation-hero-fixtures";
@@ -33,6 +35,7 @@ const intro = { title: "A landscape worth understanding.", description: "We turn
 
 /** Review assets and copy are imported here only, never by reusable implementations. */
 export function makeSection<K extends SectionId>(component: K, id: string): SectionInstance<K> {
+  if((creatorSectionIds as readonly string[]).includes(component)) return makeCreatorSection(component as CreatorSectionId,id) as unknown as SectionInstance<K>;
   if(endingSectionIds.includes(component as EndingSectionId)) return makeEndingSection(component as EndingSectionId,id) as unknown as SectionInstance<K>;
   if((importSectionIds as readonly string[]).includes(component)) return makeImportSection(component as ImportSectionId,id) as unknown as SectionInstance<K>;
   if((expansionIds as readonly string[]).includes(component)) return makeExpansionSection(component as ExpansionId,id) as SectionInstance<K>;

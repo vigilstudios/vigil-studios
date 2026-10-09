@@ -42,6 +42,7 @@ export function configurationVisible(section: SectionInstance, name: string) {
 
 /** Shared finite-choice visibility for Design and Composition; inactive authored values persist. */
 export function configurationChoiceVisible(component:string,values:Readonly<Record<string,unknown>>,name:string){
+ if(component === "about.creator-profile" && name === "imageSide" && values.structure === "centered") return false;
  if(component === "proof.moving-chorus" && name === "columns" && values.layout === "ribbon") return false;
  if(component === "work.gallery-hanging" && values.layout === "hanging" && ["ratio","captions","density"].includes(name)) return false;
  if(component === "proof.moving-chorus" && values.motion === "none" && ["layout","columns","direction","speed","intensity","pauseOnHover","pauseOnFocus","edgeFade","gap"].includes(name)) return false;

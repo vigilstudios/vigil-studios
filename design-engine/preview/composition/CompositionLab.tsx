@@ -1,4 +1,5 @@
 "use client";
+import { CreatorContentEditor } from "./CreatorContentEditor";
 import { EndingContentEditor } from "./EndingContentEditor";
 import {getDesignComponent} from "../../registry/components";
 import type {DesignComponentDefinition} from "../../registry/types";
@@ -245,6 +246,7 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
   const sectionControls = <>
     <p className="lab-layer-note">Page: {site.pages.find(page => page.id === pageId)?.title}. Inherited Navigation edits update the shared global section; create a page override in Site for independent changes.</p><div className="composition-selection"><label className="composition-control">Selected section<select aria-label="Selected section" value={current?.id ?? ""} onChange={event => selectSection(event.target.value)}>{composition.sections.map(section => <option key={section.id} value={section.id}>{entryTitle(section.component)} · {section.id}</option>)}</select></label><button type="button" disabled={!current} onClick={() => current && findSection(current.id)}>Find in preview ↗</button></div>
     {current && <ActionEditor key={`${pageId}-${current.id}-${current.component}`} site={site} section={current} onChange={updateSection} onPreview={candidate => setSectionPreview(candidate ? { base: current, candidate, label: "Contextual actions" } : null)} onSiteChange={commitSite} onOpenPages={() => setTab("pages")}/>}
+    {current && <CreatorContentEditor key={`${pageId}-${current.id}-${current.component}-${clientEditVersion}`} section={current} onChange={updateSection}/>}
     {current && <EndingContentEditor key={`${pageId}-${current.id}-${current.component}-${clientEditVersion}`} site={site} section={current} onChange={updateSection}/>}
     {project && current && <ProjectSectionControls key={`${pageId}-${current.id}`} section={current} assets={project.assets} sources={project.sources} onChange={section => { try { updateSection(transitionSection(current, { content: section.content, ...("media" in section ? { media: section.media } : {}) }).section); setClientEditVersion(value => value + 1); setSiteError(""); } catch (failure) { setSiteError(failure instanceof Error ? failure.message : "Invalid client data."); } }}/>}
     {current ? <SectionInspector key={`${fixture}-${current.id}-${current.component}-${clientEditVersion}`} section={current} composition={composition} width={device === "mobile" ? 390 : device === "tablet" ? 768 : 1440} onChange={updateSection} onPreview={(candidate, label) => setSectionPreview(previous => candidate ? { base: current, candidate, label } : previous?.label === label ? null : previous)} /> : <p>Add a registered section to begin.</p>}

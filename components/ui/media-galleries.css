@@ -143,30 +143,15 @@
   font: inherit;
 }
 .vm-expansion-shell {
-  --vm-bg: #0a0a0c;
-  --vm-fg: white;
-  --vm-muted: #a1a1aa;
-  --vm-border: #27272a;
-  background: var(--vm-bg);
-  color: var(--vm-fg);
-  border: 1px solid var(--vm-border);
-  border-radius: calc(var(--vm-radius) * 1.25);
-  padding: 2.5rem;
-  box-shadow: 0 25px 50px -12px #0006;
+  background: transparent;
+  color: inherit;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
   overflow: hidden;
 }
-.vm-expansion-shell[data-tone="light"] {
-  --vm-bg: #f4f4f5;
-  --vm-fg: #18181b;
-  --vm-muted: #52525b;
-  --vm-border: #d4d4d8;
-}
-.vm-expansion[data-skin="site"] .vm-expansion-shell {
-  --vm-bg: var(--de-surface);
-  --vm-fg: var(--de-foreground);
-  --vm-muted: var(--de-muted);
-  --vm-border: var(--de-border);
-}
+.vm-expansion { --vm-border: var(--de-border, #ddd); }
 .vm-expansion .vm-heading {
   margin-bottom: 1.5rem;
 }
@@ -664,9 +649,7 @@
   }
 }
 @container (max-width:700px) {
-  .vm-expansion-shell {
-    padding: 1.5rem;
-  }
+  .vm-expansion-shell { padding: 0; }
   .vm-expansion-card {
     flex-basis: 100%;
     aspect-ratio: 1.5;

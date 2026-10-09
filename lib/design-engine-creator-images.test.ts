@@ -8,11 +8,11 @@ import { adaptSectionExample, adaptationDataPatch } from "../design-engine/previ
 import { makeSection } from "../design-engine/preview/composition/fixtures";
 
 describe("Creator photo package delivery", () => {
-  it("ships all four roles in all four sets with accurate full-size and thumbnail dimensions", async () => {
-    expect(manifest.assets).toHaveLength(16);
+  it("ships all seven roles in all four sets with accurate full-size and thumbnail dimensions", async () => {
+    expect(manifest.assets).toHaveLength(28);
     for (const pack of creatorImagePackages) {
       expect(manifest.assets.filter(asset => asset.set === pack.set).map(asset => asset.role).sort())
-        .toEqual(["hero", "objects", "pov", "product"]);
+        .toEqual(["coffee", "drive", "gym", "hero", "objects", "pov", "product"]);
     }
     for (const asset of manifest.assets) {
       const bytes = await readFile(`public${asset.src}`);
@@ -31,7 +31,7 @@ describe("Creator photo package delivery", () => {
     const section = adaptSectionExample(makeSection("work.media-cabinet", "work"), pack.id);
     const serialized = JSON.stringify(section.content);
     expect(serialized).not.toMatch(/design-engine-study|\.mp4|"kind":"video"/);
-    for (const role of ["hero", "product", "pov", "objects"]) expect(serialized).toContain(`${pack.set}-${role}`);
+    for (const role of ["hero", "product", "pov", "objects", "gym", "coffee", "drive"]) expect(serialized).toContain(`${pack.set}-${role}`);
   });
 
   it.each(creatorImagePackages)("$id keeps comparison views registered and removes stale responsive sources", pack => {

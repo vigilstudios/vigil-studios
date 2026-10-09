@@ -24,7 +24,7 @@ describe("Collection 004 studies and separate implementations", () => {
     }
     expect(storySections.map(s => s.sourceConcept)).toEqual(["S01", "S03", "S06"]);
     expect(storySections.every(s => s.status === "production")).toBe(true);
-    expect(designComponents.filter(s => String(s.status) === "production")).toHaveLength(89);
+    expect(designComponents.filter(s => String(s.status) === "production")).toHaveLength(91);
   });
   it("renders all strict client adaptations, extremes and variants with body semantics", () => {
     for (const entry of storySections) for (const adaptation of adaptationIds) for (const length of ["short", "standard", "long"] as const) for (const structure of entry.composition.variants) {

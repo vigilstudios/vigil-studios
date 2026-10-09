@@ -1,3 +1,4 @@
+import { makeCreatorSection } from "./creator-fixtures";
 import { makeEndingSection } from "./ending-fixtures";
 import { creatorPackageFor, creatorImage } from "./creator-image-packages";
 import {
@@ -174,6 +175,7 @@ export function renderDesignPreview(
     </div>
   );
   switch (id) {
+    case "proof.social-reach": case "about.creator-profile": return renderPreviewSection(makeCreatorSection(id,"individual-creator",config));
     case "cta.editorial": case "cta.signal": case "contact.inquiry":
     case "footer.sitemap": case "footer.compact": case "footer.split": case "footer.banner":
     case "work.expand-rail": case "work.card-rail": case "work.image-expansion": case "work.image-gallery": case "work.apple-cards": case "work.liquid-glass": return renderPreviewSection(makeEndingSection(id,"individual-ending",config));

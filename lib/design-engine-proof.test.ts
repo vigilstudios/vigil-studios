@@ -23,10 +23,10 @@ import { inspectComposition } from "../design-engine/composition/validation";
 import { designComponents } from "../design-engine/registry/components";
 describe("Collection 008 creative evidence boundary", () => {
   it("preserves the original creative study snapshot alongside the expanded production inventory", () => {
-    expect(designComponents).toHaveLength(124);
+    expect(designComponents).toHaveLength(126);
     expect(
       designComponents.filter((c) => c.status === "production"),
-    ).toHaveLength(89);
+    ).toHaveLength(91);
     expect(proofStudies).toHaveLength(12);
     expect(
       new Set(proofStudies.map((s) => s.typography[0])).size,

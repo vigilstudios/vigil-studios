@@ -1,4 +1,5 @@
 "use client";
+import { creatorImagePackages, creatorImageRoles, creatorImage, creatorRoleLabels } from "../creator-image-packages";
 import type { SectionInstance } from "../../composition/schemas";
 import { editableMedia, patchMediaValue } from "../../media/editing";
 import { isVideoAsset } from "../../media/source";
@@ -37,6 +38,20 @@ export function MediaControls({
         return (
           <fieldset key={label}>
             <legend>{label}</legend>
+            {!videoRecord && path.at(-1) !== "logo" && <label>
+              Creator photograph
+              <select aria-label={`Creator photograph · ${label}`} value={creatorImagePackages.flatMap(pack => creatorImageRoles.map(role => ({ id: `${pack.id}/${role}`, src: creatorImage(pack, role, path.includes("thumbnail")).src }))).find(asset => asset.src === value.src)?.id ?? ""}
+                onChange={event => {
+                  const [id, role] = event.target.value.split("/");
+                  const pack = creatorImagePackages.find(pack => pack.id === id);
+                  if (!pack || !creatorImageRoles.includes(role as typeof creatorImageRoles[number])) return;
+                  patch({ ...Object.fromEntries(Object.keys(value).map(key => [key, undefined])), ...creatorImage(pack, role as typeof creatorImageRoles[number], path.includes("thumbnail")), ...(value.caption ? { caption: value.caption } : {}) });
+                }}>
+                <option value="" disabled>Choose a creator photo</option>
+                {creatorImagePackages.map(pack => <optgroup key={pack.id} label={pack.label}>{creatorImageRoles.map(role => <option key={role} value={`${pack.id}/${role}`}>{creatorRoleLabels[role]}</option>)}</optgroup>)}
+              </select>
+            </label>}
+
             {!videoRecord && (
               <label>
                 Media type

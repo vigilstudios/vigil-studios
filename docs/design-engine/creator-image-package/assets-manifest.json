@@ -1,6 +1,6 @@
 {
-  "id": "creators-v1",
-  "generatedOn": "2026-10-07",
+  "id": "creators-v2",
+  "generatedOn": "2026-10-08",
   "assets": [
     {
       "id": "pink-light-hero",
@@ -305,6 +305,234 @@
       "sha256": "834b2b9c4140a18d0a0bd563dd31117d8a7914934ca8842932b749975c7ea180",
       "generator": "built-in imagegen",
       "source": "originals/neutral-dark-objects.png"
+    },
+    {
+      "id": "pink-light-gym",
+      "set": "pink-light",
+      "role": "gym",
+      "src": "/design-engine-creators/pink-light-gym.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "Dumbbells, a gym bag, towel and water bottle after a workout. pink light; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/pink-light-gym-640.webp 640w, /design-engine-creators/pink-light-gym.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/pink-light-gym-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 355524,
+      "sha256": "fda48385cebbe50ebf5a14d150820e8bb6fb0c4ae32b82088840c43b00e7b3bc",
+      "generator": "built-in imagegen",
+      "source": "originals/pink-light-gym.png"
+    },
+    {
+      "id": "pink-light-coffee",
+      "set": "pink-light",
+      "role": "coffee",
+      "src": "/design-engine-creators/pink-light-coffee.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "Coffee and a partly eaten breakfast at a café table. pink light; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/pink-light-coffee-640.webp 640w, /design-engine-creators/pink-light-coffee.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/pink-light-coffee-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 223722,
+      "sha256": "71380fe2220114e35aed31746f0ff0cf1e56f7ae9856188d787d0ecaecded4c5",
+      "generator": "built-in imagegen",
+      "source": "originals/pink-light-coffee.png"
+    },
+    {
+      "id": "pink-light-drive",
+      "set": "pink-light",
+      "role": "drive",
+      "src": "/design-engine-creators/pink-light-drive.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "The leather interior, sunglasses and keys of a parked vintage coupe. pink light; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/pink-light-drive-640.webp 640w, /design-engine-creators/pink-light-drive.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/pink-light-drive-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 199498,
+      "sha256": "ebb176167f68bc56d82a39feb498888ed982a60fe193c003ef6525665ac83ae9",
+      "generator": "built-in imagegen",
+      "source": "originals/pink-light-drive.png"
+    },
+    {
+      "id": "pink-dark-gym",
+      "set": "pink-dark",
+      "role": "gym",
+      "src": "/design-engine-creators/pink-dark-gym.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "Dumbbells, a gym bag, towel and water bottle after a workout. pink dark; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/pink-dark-gym-640.webp 640w, /design-engine-creators/pink-dark-gym.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/pink-dark-gym-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 226222,
+      "sha256": "a3244714503c7aea385387969e80d4e2528bca93db0a8c904ee201afaaef6c8c",
+      "generator": "built-in imagegen",
+      "source": "originals/pink-dark-gym.png"
+    },
+    {
+      "id": "pink-dark-coffee",
+      "set": "pink-dark",
+      "role": "coffee",
+      "src": "/design-engine-creators/pink-dark-coffee.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "Coffee and a partly eaten breakfast at a café table. pink dark; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/pink-dark-coffee-640.webp 640w, /design-engine-creators/pink-dark-coffee.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/pink-dark-coffee-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 139298,
+      "sha256": "a3f2e2bcb1c2f8d00e34368cae7110d31668add9c293fe15b38468ac86c3941f",
+      "generator": "built-in imagegen",
+      "source": "originals/pink-dark-coffee.png"
+    },
+    {
+      "id": "pink-dark-drive",
+      "set": "pink-dark",
+      "role": "drive",
+      "src": "/design-engine-creators/pink-dark-drive.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "The leather interior, sunglasses and keys of a parked vintage coupe. pink dark; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/pink-dark-drive-640.webp 640w, /design-engine-creators/pink-dark-drive.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/pink-dark-drive-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 211496,
+      "sha256": "40a7ef90b2f401c52418a07498abf7b7829a273f0cbe2a0028deb04459c5e5f4",
+      "generator": "built-in imagegen",
+      "source": "originals/pink-dark-drive.png"
+    },
+    {
+      "id": "neutral-light-gym",
+      "set": "neutral-light",
+      "role": "gym",
+      "src": "/design-engine-creators/neutral-light-gym.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "Dumbbells, a gym bag, towel and water bottle after a workout. neutral light; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/neutral-light-gym-640.webp 640w, /design-engine-creators/neutral-light-gym.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/neutral-light-gym-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 189300,
+      "sha256": "ab96fa43def7b2956ec26d86c06db35688c8ca62e308842d7dd515d50b8619a3",
+      "generator": "built-in imagegen",
+      "source": "originals/neutral-light-gym.png"
+    },
+    {
+      "id": "neutral-light-coffee",
+      "set": "neutral-light",
+      "role": "coffee",
+      "src": "/design-engine-creators/neutral-light-coffee.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "Coffee and a partly eaten breakfast at a café table. neutral light; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/neutral-light-coffee-640.webp 640w, /design-engine-creators/neutral-light-coffee.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/neutral-light-coffee-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 229158,
+      "sha256": "93150989aebf80837be39cc8a98962b8e8581d8eba11d40fc650aee6cc9be6f0",
+      "generator": "built-in imagegen",
+      "source": "originals/neutral-light-coffee.png"
+    },
+    {
+      "id": "neutral-light-drive",
+      "set": "neutral-light",
+      "role": "drive",
+      "src": "/design-engine-creators/neutral-light-drive.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "The leather interior, sunglasses and keys of a parked vintage coupe. neutral light; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/neutral-light-drive-640.webp 640w, /design-engine-creators/neutral-light-drive.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/neutral-light-drive-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 157816,
+      "sha256": "8710f4031316e9c276aab9d9bc2e5aeaa08a13c5bbe2584d874b83e316ccc101",
+      "generator": "built-in imagegen",
+      "source": "originals/neutral-light-drive.png"
+    },
+    {
+      "id": "neutral-dark-gym",
+      "set": "neutral-dark",
+      "role": "gym",
+      "src": "/design-engine-creators/neutral-dark-gym.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "Dumbbells, a gym bag, towel and water bottle after a workout. neutral dark; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/neutral-dark-gym-640.webp 640w, /design-engine-creators/neutral-dark-gym.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/neutral-dark-gym-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 218464,
+      "sha256": "a8851572da15eb20432d8ffdb15a1fae5aed28ef33afbc76a2cc6fbebb4cd9e6",
+      "generator": "built-in imagegen",
+      "source": "originals/neutral-dark-gym.png"
+    },
+    {
+      "id": "neutral-dark-coffee",
+      "set": "neutral-dark",
+      "role": "coffee",
+      "src": "/design-engine-creators/neutral-dark-coffee.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "Coffee and a partly eaten breakfast at a café table. neutral dark; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/neutral-dark-coffee-640.webp 640w, /design-engine-creators/neutral-dark-coffee.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/neutral-dark-coffee-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 145420,
+      "sha256": "9107db10cb39d601d61cd1060aabd8c7dba199ab74a91beea7f89f95adf73c8d",
+      "generator": "built-in imagegen",
+      "source": "originals/neutral-dark-coffee.png"
+    },
+    {
+      "id": "neutral-dark-drive",
+      "set": "neutral-dark",
+      "role": "drive",
+      "src": "/design-engine-creators/neutral-dark-drive.webp",
+      "width": 1536,
+      "height": 1024,
+      "alt": "The leather interior, sunglasses and keys of a parked vintage coupe. neutral dark; AI-generated creator demo photograph.",
+      "srcSet": "/design-engine-creators/neutral-dark-drive-640.webp 640w, /design-engine-creators/neutral-dark-drive.webp 1536w",
+      "thumbnail": {
+        "src": "/design-engine-creators/neutral-dark-drive-240.webp",
+        "width": 240,
+        "height": 160
+      },
+      "bytes": 133736,
+      "sha256": "9fb3044a07951a1a8706a0ac2c06262a0de9a101858f19d5f726f8f148b66f54",
+      "generator": "built-in imagegen",
+      "source": "originals/neutral-dark-drive.png"
     }
   ]
 }

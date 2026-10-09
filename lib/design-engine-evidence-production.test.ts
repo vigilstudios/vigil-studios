@@ -19,7 +19,7 @@ import { renderDesignPreview } from "../design-engine/preview/render";
 const chorus=()=>makeEvidenceSection("proof.moving-chorus","voices");
 describe("Pass 008 production evidence",()=>{
  it("productizes all twelve approved concepts independently with current-pass lifecycle evidence",()=>{
-  const entries:readonly DesignComponentDefinition[]=designComponents.filter(c=>c.category === "proof");expect(entries.map(c=>c.id)).toEqual([...evidenceSectionIds]);
+  const entries:readonly DesignComponentDefinition[]=designComponents.filter(c=>(evidenceSectionIds as readonly string[]).includes(c.id));expect(entries.map(c=>c.id)).toEqual([...evidenceSectionIds]);
   for(const [i,entry] of entries.entries()) {expect(collection008Review[`E${String(i+1).padStart(2,"0")}`].status).toBe("Approved");expect(entry.status).toBe("production");expect(entry.version).toBe(entry.id === "proof.moving-chorus" ? "1.1.0" : "1.0.0");expect(entry.productionEvidence).toBeDefined();expect(entry.composition?.evidence?.integrity).toContain("publication-source-required");}
  });
  it.each(evidenceSectionIds)("%s has narrow schemas, three honest contexts and canonical readable evidence",component=>{

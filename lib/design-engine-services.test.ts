@@ -38,8 +38,8 @@ describe("Collection 006 services and capabilities review",()=>{
   expect(serviceStudySchemas.C12.safeParse(scope.content).success).toBe(false);
  });
  it("keeps studies separate from their production inventory and preserves earlier human decisions",()=>{
-  expect(designComponents).toHaveLength(124);
-  expect(designComponents.filter(c=>c.status==="production")).toHaveLength(89);
+  expect(designComponents).toHaveLength(126);
+  expect(designComponents.filter(c=>c.status==="production")).toHaveLength(91);
   expect(designComponents.filter(c=>"sourceConcept" in c && serviceStudies.some(s=>s.id===c.sourceConcept))).toHaveLength(12);
   expect(collection004Review.S05.status).toBe("Rejected");
   expect(collection004Review.S04.status).toBe("Promising / Revision Required");

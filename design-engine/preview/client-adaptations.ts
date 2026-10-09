@@ -195,12 +195,7 @@ export function adaptSectionExample(
     throw Error(`Unsupported client adaptation: ${id}/${adaptation}`);
   const creator = creatorPackageFor(adaptation);
   if (creator) {
-    const choices = clientAdaptationsFor(id as DesignComponentId)
-      .filter(choice => choice.value !== "authored" && !creatorPackageFor(choice.value));
-    const baseline = choices.find(choice => choice.value === (
-      id.startsWith("commerce.") ? "beauty" : id.startsWith("work.") ? "urban" : "architecture"
-    )) ?? choices[0];
-    return adaptCreatorSection(adaptSectionExample(section, baseline.value, length), creator);
+    return adaptCreatorSection(section, creator);
   }
   let data: SectionInstance;
   if (endingSectionIds.includes(id as EndingSectionId))

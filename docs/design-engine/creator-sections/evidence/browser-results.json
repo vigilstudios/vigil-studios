@@ -1,0 +1,1018 @@
+{
+  "checks": [
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "scrapbook",
+      "pack": "creator-pink-light",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "split",
+      "pack": "creator-pink-light",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "centered",
+      "pack": "creator-pink-light",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "cards",
+      "pack": "creator-pink-light",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "editorial",
+      "pack": "creator-pink-light",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "compact",
+      "pack": "creator-pink-light",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "work.image-expansion",
+      "structure": "tabbed-cards",
+      "pack": "creator-pink-light",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "scrapbook",
+      "pack": "creator-pink-dark",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "split",
+      "pack": "creator-pink-dark",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "centered",
+      "pack": "creator-pink-dark",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "cards",
+      "pack": "creator-pink-dark",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "editorial",
+      "pack": "creator-pink-dark",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "compact",
+      "pack": "creator-pink-dark",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "work.image-expansion",
+      "structure": "tabbed-cards",
+      "pack": "creator-pink-dark",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "scrapbook",
+      "pack": "creator-neutral-light",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "split",
+      "pack": "creator-neutral-light",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "centered",
+      "pack": "creator-neutral-light",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "cards",
+      "pack": "creator-neutral-light",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "editorial",
+      "pack": "creator-neutral-light",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "compact",
+      "pack": "creator-neutral-light",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "work.image-expansion",
+      "structure": "tabbed-cards",
+      "pack": "creator-neutral-light",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "scrapbook",
+      "pack": "creator-neutral-dark",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "split",
+      "pack": "creator-neutral-dark",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "centered",
+      "pack": "creator-neutral-dark",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "cards",
+      "pack": "creator-neutral-dark",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "editorial",
+      "pack": "creator-neutral-dark",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "compact",
+      "pack": "creator-neutral-dark",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "work.image-expansion",
+      "structure": "tabbed-cards",
+      "pack": "creator-neutral-dark",
+      "width": 1440
+    },
+    {
+      "case": "long-content",
+      "component": "about.creator-profile",
+      "width": 1440
+    },
+    {
+      "case": "long-content",
+      "component": "proof.social-reach",
+      "width": 1440
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "scrapbook",
+      "pack": "creator-pink-light",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "split",
+      "pack": "creator-pink-light",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "centered",
+      "pack": "creator-pink-light",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "cards",
+      "pack": "creator-pink-light",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "editorial",
+      "pack": "creator-pink-light",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "compact",
+      "pack": "creator-pink-light",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "work.image-expansion",
+      "structure": "tabbed-cards",
+      "pack": "creator-pink-light",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "scrapbook",
+      "pack": "creator-pink-dark",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "split",
+      "pack": "creator-pink-dark",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "centered",
+      "pack": "creator-pink-dark",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "cards",
+      "pack": "creator-pink-dark",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "editorial",
+      "pack": "creator-pink-dark",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "compact",
+      "pack": "creator-pink-dark",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "work.image-expansion",
+      "structure": "tabbed-cards",
+      "pack": "creator-pink-dark",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "scrapbook",
+      "pack": "creator-neutral-light",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "split",
+      "pack": "creator-neutral-light",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "centered",
+      "pack": "creator-neutral-light",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "cards",
+      "pack": "creator-neutral-light",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "editorial",
+      "pack": "creator-neutral-light",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "compact",
+      "pack": "creator-neutral-light",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "work.image-expansion",
+      "structure": "tabbed-cards",
+      "pack": "creator-neutral-light",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "scrapbook",
+      "pack": "creator-neutral-dark",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "split",
+      "pack": "creator-neutral-dark",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "centered",
+      "pack": "creator-neutral-dark",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "cards",
+      "pack": "creator-neutral-dark",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "editorial",
+      "pack": "creator-neutral-dark",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "compact",
+      "pack": "creator-neutral-dark",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "work.image-expansion",
+      "structure": "tabbed-cards",
+      "pack": "creator-neutral-dark",
+      "width": 768
+    },
+    {
+      "case": "long-content",
+      "component": "about.creator-profile",
+      "width": 768
+    },
+    {
+      "case": "long-content",
+      "component": "proof.social-reach",
+      "width": 768
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "scrapbook",
+      "pack": "creator-pink-light",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "split",
+      "pack": "creator-pink-light",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "centered",
+      "pack": "creator-pink-light",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "cards",
+      "pack": "creator-pink-light",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "editorial",
+      "pack": "creator-pink-light",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "compact",
+      "pack": "creator-pink-light",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "work.image-expansion",
+      "structure": "tabbed-cards",
+      "pack": "creator-pink-light",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "scrapbook",
+      "pack": "creator-pink-dark",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "split",
+      "pack": "creator-pink-dark",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "centered",
+      "pack": "creator-pink-dark",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "cards",
+      "pack": "creator-pink-dark",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "editorial",
+      "pack": "creator-pink-dark",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "compact",
+      "pack": "creator-pink-dark",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "work.image-expansion",
+      "structure": "tabbed-cards",
+      "pack": "creator-pink-dark",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "scrapbook",
+      "pack": "creator-neutral-light",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "split",
+      "pack": "creator-neutral-light",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "centered",
+      "pack": "creator-neutral-light",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "cards",
+      "pack": "creator-neutral-light",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "editorial",
+      "pack": "creator-neutral-light",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "compact",
+      "pack": "creator-neutral-light",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "work.image-expansion",
+      "structure": "tabbed-cards",
+      "pack": "creator-neutral-light",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "scrapbook",
+      "pack": "creator-neutral-dark",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "split",
+      "pack": "creator-neutral-dark",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "centered",
+      "pack": "creator-neutral-dark",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "cards",
+      "pack": "creator-neutral-dark",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "editorial",
+      "pack": "creator-neutral-dark",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "compact",
+      "pack": "creator-neutral-dark",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "work.image-expansion",
+      "structure": "tabbed-cards",
+      "pack": "creator-neutral-dark",
+      "width": 390
+    },
+    {
+      "case": "long-content",
+      "component": "about.creator-profile",
+      "width": 390
+    },
+    {
+      "case": "long-content",
+      "component": "proof.social-reach",
+      "width": 390
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "scrapbook",
+      "pack": "creator-pink-light",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "split",
+      "pack": "creator-pink-light",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "centered",
+      "pack": "creator-pink-light",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "cards",
+      "pack": "creator-pink-light",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "editorial",
+      "pack": "creator-pink-light",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "compact",
+      "pack": "creator-pink-light",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "work.image-expansion",
+      "structure": "tabbed-cards",
+      "pack": "creator-pink-light",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "scrapbook",
+      "pack": "creator-pink-dark",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "split",
+      "pack": "creator-pink-dark",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "centered",
+      "pack": "creator-pink-dark",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "cards",
+      "pack": "creator-pink-dark",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "editorial",
+      "pack": "creator-pink-dark",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "compact",
+      "pack": "creator-pink-dark",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "work.image-expansion",
+      "structure": "tabbed-cards",
+      "pack": "creator-pink-dark",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "scrapbook",
+      "pack": "creator-neutral-light",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "split",
+      "pack": "creator-neutral-light",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "centered",
+      "pack": "creator-neutral-light",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "cards",
+      "pack": "creator-neutral-light",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "editorial",
+      "pack": "creator-neutral-light",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "compact",
+      "pack": "creator-neutral-light",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "work.image-expansion",
+      "structure": "tabbed-cards",
+      "pack": "creator-neutral-light",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "scrapbook",
+      "pack": "creator-neutral-dark",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "split",
+      "pack": "creator-neutral-dark",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "about.creator-profile",
+      "structure": "centered",
+      "pack": "creator-neutral-dark",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "cards",
+      "pack": "creator-neutral-dark",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "editorial",
+      "pack": "creator-neutral-dark",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "proof.social-reach",
+      "structure": "compact",
+      "pack": "creator-neutral-dark",
+      "width": 320
+    },
+    {
+      "case": "responsive-layout",
+      "component": "work.image-expansion",
+      "structure": "tabbed-cards",
+      "pack": "creator-neutral-dark",
+      "width": 320
+    },
+    {
+      "case": "long-content",
+      "component": "about.creator-profile",
+      "width": 320
+    },
+    {
+      "case": "long-content",
+      "component": "proof.social-reach",
+      "width": 320
+    },
+    {
+      "case": "accessibility",
+      "component": "about.creator-profile",
+      "pack": "creator-pink-light"
+    },
+    {
+      "case": "accessibility",
+      "component": "proof.social-reach",
+      "pack": "creator-pink-light"
+    },
+    {
+      "case": "accessibility",
+      "component": "about.creator-profile",
+      "pack": "creator-pink-dark"
+    },
+    {
+      "case": "accessibility",
+      "component": "proof.social-reach",
+      "pack": "creator-pink-dark"
+    },
+    {
+      "case": "accessibility",
+      "component": "about.creator-profile",
+      "pack": "creator-neutral-light"
+    },
+    {
+      "case": "accessibility",
+      "component": "proof.social-reach",
+      "pack": "creator-neutral-light"
+    },
+    {
+      "case": "accessibility",
+      "component": "about.creator-profile",
+      "pack": "creator-neutral-dark"
+    },
+    {
+      "case": "accessibility",
+      "component": "proof.social-reach",
+      "pack": "creator-neutral-dark"
+    },
+    {
+      "case": "editor-client",
+      "id": "proof.social-reach",
+      "pack": "creator-pink-light"
+    },
+    {
+      "case": "editor-client",
+      "id": "proof.social-reach",
+      "pack": "creator-pink-dark"
+    },
+    {
+      "case": "editor-client",
+      "id": "proof.social-reach",
+      "pack": "creator-neutral-light"
+    },
+    {
+      "case": "editor-client",
+      "id": "proof.social-reach",
+      "pack": "creator-neutral-dark"
+    },
+    {
+      "case": "editor-client",
+      "id": "about.creator-profile",
+      "pack": "creator-pink-light"
+    },
+    {
+      "case": "editor-client",
+      "id": "about.creator-profile",
+      "pack": "creator-pink-dark"
+    },
+    {
+      "case": "editor-client",
+      "id": "about.creator-profile",
+      "pack": "creator-neutral-light"
+    },
+    {
+      "case": "editor-client",
+      "id": "about.creator-profile",
+      "pack": "creator-neutral-dark"
+    },
+    {
+      "case": "editor-client",
+      "id": "story.open-letter",
+      "pack": "creator-pink-light"
+    },
+    {
+      "case": "editor-client",
+      "id": "story.open-letter",
+      "pack": "creator-pink-dark"
+    },
+    {
+      "case": "editor-client",
+      "id": "story.open-letter",
+      "pack": "creator-neutral-light"
+    },
+    {
+      "case": "editor-client",
+      "id": "story.open-letter",
+      "pack": "creator-neutral-dark"
+    },
+    {
+      "case": "editor-client",
+      "id": "services.delivery-journey",
+      "pack": "creator-pink-light"
+    },
+    {
+      "case": "editor-client",
+      "id": "services.delivery-journey",
+      "pack": "creator-pink-dark"
+    },
+    {
+      "case": "editor-client",
+      "id": "services.delivery-journey",
+      "pack": "creator-neutral-light"
+    },
+    {
+      "case": "editor-client",
+      "id": "services.delivery-journey",
+      "pack": "creator-neutral-dark"
+    },
+    {
+      "case": "editor-client",
+      "id": "proof.progress-trail",
+      "pack": "creator-pink-light"
+    },
+    {
+      "case": "editor-client",
+      "id": "proof.progress-trail",
+      "pack": "creator-pink-dark"
+    },
+    {
+      "case": "editor-client",
+      "id": "proof.progress-trail",
+      "pack": "creator-neutral-light"
+    },
+    {
+      "case": "editor-client",
+      "id": "proof.progress-trail",
+      "pack": "creator-neutral-dark"
+    },
+    {
+      "case": "editor-client",
+      "id": "contact.inquiry",
+      "pack": "creator-pink-light"
+    },
+    {
+      "case": "editor-client",
+      "id": "contact.inquiry",
+      "pack": "creator-pink-dark"
+    },
+    {
+      "case": "editor-client",
+      "id": "contact.inquiry",
+      "pack": "creator-neutral-light"
+    },
+    {
+      "case": "editor-client",
+      "id": "contact.inquiry",
+      "pack": "creator-neutral-dark"
+    },
+    {
+      "case": "editor-client",
+      "id": "footer.compact",
+      "pack": "creator-pink-light"
+    },
+    {
+      "case": "editor-client",
+      "id": "footer.compact",
+      "pack": "creator-pink-dark"
+    },
+    {
+      "case": "editor-client",
+      "id": "footer.compact",
+      "pack": "creator-neutral-light"
+    },
+    {
+      "case": "editor-client",
+      "id": "footer.compact",
+      "pack": "creator-neutral-dark"
+    },
+    {
+      "case": "social-edit-add-remove"
+    },
+    {
+      "case": "about-edit-media-persistence"
+    },
+    {
+      "case": "28-delivered-photos"
+    }
+  ],
+  "errors": []
+}

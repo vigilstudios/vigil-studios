@@ -76,7 +76,7 @@ try {
   await page.screenshot({ path: `${output}/composition-creator-dark.png` });
   await page.goto(`${url}/design-engine-creators/index.html`);
   await page.setViewportSize({ width: 1440, height: 1800 });
-  if (await loaded(page) !== 16) throw Error("Incomplete visual index");
+  if (await loaded(page) !== 28) throw Error("Incomplete visual index");
   await page.screenshot({ path: `${output}/contact-sheet.png`, fullPage: true });
   for (const width of [768, 390]) {
     await page.setViewportSize({ width, height: 1000 });
