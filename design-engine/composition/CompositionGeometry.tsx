@@ -1,6 +1,7 @@
 "use client";
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 import type { SectionInstance } from "./schemas";
+import { initializeNavigationInk } from "./navigation-ink";
 /** Measures closed chrome once per geometry change, independent of Hero implementation. */
 export function CompositionGeometry({
   navigation,
@@ -32,15 +33,9 @@ export function CompositionGeometry({
         "[data-hero-section] [data-ink]",
       );
       // Palette variables exist inside the section's theme, below this wrapper.
-      if (scene)
-        header.style.setProperty(
-          "--de-navigation-auto-ink",
-          scene.dataset.ink === "light" ? "var(--de-palette-light)" : "var(--de-palette-dark)",
-        );
-      else header.style.removeProperty("--de-navigation-auto-ink");
-      const scale =
-        element.getBoundingClientRect().width / element.offsetWidth || 1;
-      let height = Math.ceil(header.getBoundingClientRect().height / scale);
+      initializeNavigationInk(header, scene ? scene.dataset.ink === "light" : undefined);
+      // Layout height excludes entrance zoom/translation and preview scaling.
+      let height = header.offsetHeight;
       if (position === "edge" && element.offsetWidth > 760) height = 0;
       // Compact scroll changes paint, not the reserved Hero/content geometry.
       if (system?.dataset.scrolled !== "true") maxHeight = height;

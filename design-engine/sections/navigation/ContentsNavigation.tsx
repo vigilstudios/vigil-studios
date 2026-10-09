@@ -1,5 +1,6 @@
 "use client";
 import { PrimaryAction } from "../../actions/SectionActions";
+import { NavigationMotion } from "../../presentation/NavigationMotion";
 import { useEffect, useId, useRef, useState } from "react";
 import type { SectionInstance } from "../../composition/schemas";
 import { BrandMark } from "./BrandMark";
@@ -16,7 +17,7 @@ export function ContentsNavigation({ content: c, structure }: SectionInstance<"n
     return () => { document.body.style.overflow = previous; };
   }, [open]);
   const close = () => dialog.current?.close();
-  return <nav className="de-contents-nav" aria-label="Primary navigation">
+  return <NavigationMotion><nav className="de-contents-nav" aria-label="Primary navigation">
     <a className="de-accent de-navigation-brand" href={c.home} aria-label={`${c.brand} home`}><BrandMark brand={c.brand} logo={c.logo}/></a><span className="de-mono">{c.edition}</span>
     <button ref={trigger} type="button" aria-haspopup="dialog" aria-expanded={open} aria-controls={id} onClick={() => { dialog.current?.showModal(); setOpen(true); }}>Contents <VigilIcon name="menu" decorative /></button>
     <dialog ref={dialog} id={id} className="de-contents-nav__sheet" aria-labelledby={`${id}-title`} onClose={() => { setOpen(false); trigger.current?.focus(); }}>
@@ -25,5 +26,5 @@ export function ContentsNavigation({ content: c, structure }: SectionInstance<"n
         <aside><p className="de-text">{c.note}</p><PrimaryAction fallback={c.action} onClick={close}/></aside>
       </div>
     </dialog>
-  </nav>;
+  </nav></NavigationMotion>;
 }

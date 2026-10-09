@@ -26,7 +26,7 @@ export function PresentationControls({ value = {}, inherited = {}, onChange, sco
         <p>{scope === "section" ? "A selected CTA animation applies to every CTA in this section. Inherit uses individual button styles and parent defaults." : "CTA animations provide defaults for buttons without individual hover styles. Inherit uses parent or button defaults."}</p>
         {value.motion?.ctaHover === "icon-slide" && <p>Icon slide moves the CTA icon. Choose an icon in the CTA settings to see this effect.</p>}
       </>}
-      {navigation && <p>Navigation stays in place; its button and media hover settings still apply.</p>}<p>System reduced motion keeps content static. Use Replay in the toolbar to inspect transitions.</p>
+      {navigation && <p>Navigation uses these entrance and exit settings. Sticky headers stay in view while scrolling; choose their scroll behavior in Design.</p>}<p>System reduced motion keeps content static. Use Replay in the toolbar to inspect transitions.</p>
     </section>;
   }
   const heading = { ...headingDefaults, ...inherited.heading, ...value.heading };

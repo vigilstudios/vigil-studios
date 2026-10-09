@@ -1,5 +1,6 @@
 "use client";
 import { PrimaryAction } from "../../actions/SectionActions";
+import { NavigationMotion } from "../../presentation/NavigationMotion";
 
 import { useId, useRef, useState } from "react";
 import { BrandMark, type NavigationLogo } from "./BrandMark";
@@ -20,7 +21,7 @@ export function PrimaryNavigation({ brand, logo, home = "#top", links, action, d
   const menuId = useId();
   const trigger = useRef<HTMLButtonElement>(null);
   return (
-    <nav className={`de-nav de-nav--${density}`} aria-label="Primary navigation" onKeyDown={event => { if (event.key === "Escape" && open) { setOpen(false); trigger.current?.focus(); } }}>
+    <NavigationMotion><nav className={`de-nav de-nav--${density}`} aria-label="Primary navigation" onKeyDown={event => { if (event.key === "Escape" && open) { setOpen(false); trigger.current?.focus(); } }}>
       <DesignContainer className="de-nav__inner">
         <a className="de-nav__brand de-navigation-brand" href={home} aria-label={`${brand} home`}><BrandMark brand={brand} logo={logo}/></a>
         <button ref={trigger} className="de-nav__menu-button" type="button" aria-expanded={open} aria-controls={menuId} onClick={() => setOpen(!open)}>
@@ -31,6 +32,6 @@ export function PrimaryNavigation({ brand, logo, home = "#top", links, action, d
           <PrimaryAction fallback={action} onClick={() => setOpen(false)}/>
         </div>
       </DesignContainer>
-    </nav>
+    </nav></NavigationMotion>
   );
 }

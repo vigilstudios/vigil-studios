@@ -1,5 +1,6 @@
 "use client";
 import { useSectionActions } from "../../actions/ActionContext";
+import { NavigationMotion } from "../../presentation/NavigationMotion";
 import { PrimaryAction } from "../../actions/SectionActions";
 import "./reveal.css";
 import "./palette.css";
@@ -112,8 +113,7 @@ export function NavigationShell({
     let closedHeight = 0;
     const measure = () => {
       if (!root.checkVisibility()) return;
-      const scale = root.getBoundingClientRect().width / root.offsetWidth || 1;
-      const height = Math.ceil(header.getBoundingClientRect().height / scale);
+      const height = header.offsetHeight;
       if (!root.dataset.scrolled || root.dataset.scrolled === "false")
         closedHeight = height;
       closedHeight = Math.max(closedHeight, height);
@@ -424,6 +424,7 @@ export function NavigationShell({
       data-actions={c.actions}
     >
       <div className="de-nx-nav-slot">
+        <NavigationMotion>
         <nav
           ref={nav}
           className="de-nx-navigation"
@@ -453,6 +454,7 @@ export function NavigationShell({
           <Header {...parts} />
           {panel}
         </nav>
+        </NavigationMotion>
       </div>
       <div className="de-nx-nav-spacer" aria-hidden="true" />
     </div>

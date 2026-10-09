@@ -7,7 +7,7 @@
 /* A separate zero-height chrome slot keeps every dropdown and floater out of page layout. */
 .de-nx-composition{display:contents}
 .de-nx-nav-slot{position:relative;height:0;z-index:100;pointer-events:none}
-.de-nx-nav-slot>.de-nx-navigation{pointer-events:auto;position:relative;top:auto;left:auto;right:auto;isolation:isolate}
+.de-nx-nav-slot .de-nx-navigation{pointer-events:auto;position:relative;top:auto;left:auto;right:auto;isolation:isolate}
 .de-nx-nav-spacer{height:var(--de-nx-header-height,88px)}
 .de-navigation-system[data-position=overlay] .de-nx-nav-spacer,.de-navigation-system[data-position=floating] .de-nx-nav-spacer,.de-navigation-system[data-position=edge] .de-nx-nav-spacer{display:none}
 .de-navigation-system:not([data-scroll=static]) .de-nx-nav-slot{position:sticky;top:0}
