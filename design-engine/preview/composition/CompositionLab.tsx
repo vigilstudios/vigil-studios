@@ -1,6 +1,7 @@
 "use client";
 import { ComponentPresentationControls, TestimonialPortraitControls } from "./ComponentPresentationControls";
 import { PresentationControls } from "./PresentationControls";
+import { ComponentMotionControls } from "./ComponentMotionControls";
 import { resolvePresentation } from "../../presentation/schema";
 import { ClientDataEditor, type ClientDataDraft } from "./ClientDataEditor";
 import { ContentFields } from "./ContentFields";
@@ -284,7 +285,7 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
       {siteError && <span role="alert">{siteError}</span>}
       <span className={`composition-health ${inspection.issues.length ? "composition-health--error" : ""}`}><button type="button" onClick={() => setTab("qa")}>{inspection.issues.length ? `${inspection.issues.length} issues` : "Compatible"}</button></span>
     </>}
-    inspectorTabs={[{ id: "design", label: "Design", content: sectionControls }, { id: "content", label: "Content", content: contentControls }, { id: "motion", label: "Motion", content: <>{selectionControls}{current && <PresentationControls key={`motion-${pageId}-${current.id}-${current.component}`} motionOnly value={current.presentation} inherited={resolvePresentation(composition.site.presentation,composition.presentation)} navigation={current.component.startsWith("navigation." )} onChange={presentation => updateSection(transitionSection(current,{presentation}).section)}/>}</> }]} inspectorTab={inspectorTab} onInspectorTabChange={setInspectorTab}
+    inspectorTabs={[{ id: "design", label: "Design", content: sectionControls }, { id: "content", label: "Content", content: contentControls }, { id: "motion", label: "Motion", content: <>{selectionControls}{current && <><PresentationControls key={`motion-${pageId}-${current.id}-${current.component}`} motionOnly value={current.presentation} inherited={resolvePresentation(composition.site.presentation,composition.presentation)} navigation={current.component.startsWith("navigation." )} onChange={presentation => updateSection(transitionSection(current,{presentation}).section)}/><ComponentMotionControls key={`component-motion-${pageId}-${current.id}-${current.component}`} section={current} onChange={updateSection}/></>}</> }]} inspectorTab={inspectorTab} onInspectorTabChange={setInspectorTab}
     tabs={[
       ...(project ? [{ id: "project", label: "Project", content: project.context }] : []),
       { id: "sections", label: "Sections", content: sectionList },

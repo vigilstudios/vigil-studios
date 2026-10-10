@@ -97,3 +97,6 @@
 @container (max-width:420px) { .de-social-reach[data-links=icons] .de-creator-socials > a { width:auto; } }
 
 .de-social-reach[data-stats=quiet] .de-creator-stat-value { font-size:var(--de-stat-size,clamp(1.5rem,3cqw,2.5rem))!important; }
+.de-stat-count-up { position:relative;display:inline-grid;font-variant-numeric:tabular-nums; }
+.de-stat-count-up > :is(.de-stat-count-up-reserve,.de-stat-count-up-display) { grid-area:1/1; }
+.de-stat-count-up-reserve { visibility:hidden; }
