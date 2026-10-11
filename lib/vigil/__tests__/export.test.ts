@@ -1,10 +1,13 @@
 import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import JSZip from "jszip";
 import { buildSiteExport, ExportUnavailableError } from "../services/export";
 import type { Website } from "../types";
+
+vi.mock("@/lib/supabase/admin",()=>({createAdminClient:()=>({})}));
+vi.mock("@/lib/vigil/express/export",()=>({expressRepositoryFiles:async (_client: unknown,slug: string)=>slug==="restaurant"?[{path:"site/index.html",content:"<html>Published restaurant</html>"}]:null}));
 
 const base: Website = {
   id: "w1",

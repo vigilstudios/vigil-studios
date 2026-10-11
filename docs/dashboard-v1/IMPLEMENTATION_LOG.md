@@ -1026,3 +1026,8 @@ Production-config build reads still report Supabase's egress restriction, so
 live authenticated service restoration is not claimed. Unpublished Professional
 changes remain excluded. Scope, evidence and remaining limits are documented in
 `RUNTIME-AUDIT-2026-10-08.md`.
+
+
+## 2026-10-11 — Lab client workspaces and Express catalog
+
+Added project-bound Professional editor routes and provisioning-time design workspace creation, plus a separate staff Express library with creation, duplication, metadata editing, private draft saves, publishing, recoverable removal and restoration. Public previews, template selections and checkout use published snapshots. Customer repositories retain their own copies. Luxe imports the latest authored browser composition; legacy templates retain HTML editing. Migration 0030 exposes only published template snapshots publicly; migration 0028/0029 mirror already-applied production history.

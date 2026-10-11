@@ -27,7 +27,7 @@ import { archiveCustomer, permanentlyDeleteCustomer, restoreCustomer } from "@/l
 import { slugify } from "@/lib/vigil/format";
 import type { ChangeRequestStatus, DomainStatus, ProjectStatus, SubscriptionStatus, Updates, WebsiteStatus } from "@/lib/vigil/types";
 import { Constants } from "@/types/database.types";
-import { isAvailableExpressTemplateSlug } from "@/lib/constants";
+import { isPublishedExpressSlug } from "@/lib/vigil/express/library";
 import { assertProductionDeployAllowed } from "@/lib/vigil/project-reviews";
 import { assertWebsiteRepositoryReady } from "@/lib/vigil/services/repository";
 import { creativeWorkspaceJobKey } from "@/lib/vigil/creative/enqueue";
@@ -46,8 +46,7 @@ const templateSlugSchema = z
   .trim()
   .max(80)
   .optional()
-  .or(z.literal(""))
-  .refine((slug) => !slug || isAvailableExpressTemplateSlug(slug), "Choose an available template from the list.");
+  .or(z.literal(""));
 
 function issuesOf(error: z.ZodError): Record<string, string[]> {
   const out: Record<string, string[]> = {};
@@ -237,6 +236,7 @@ export async function createProject(orgId: string, formData: FormData): Promise<
     if (!parsed.success) throw new ValidationError("Check the highlighted fields.", issuesOf(parsed.error));
     const v = parsed.data;
     const supabase = await createClient();
+    if (v.template_slug && !await isPublishedExpressSlug(v.template_slug, supabase)) throw new ValidationError("Choose a published Express variant.");
     const { data: project, error } = await supabase
       .from("projects")
       .insert({ organization_id: orgId, name: v.name, kind: v.kind, status: "intake", template_slug: v.template_slug || null, created_by: staff.user.id })
@@ -320,6 +320,11 @@ export async function updateWebsiteFields(websiteId: string, formData: FormData)
     if (!parsed.success) throw new ValidationError("Check the highlighted fields.", issuesOf(parsed.error));
     const v = parsed.data;
     const supabase = await createClient();
+    if (v.template_slug && !await isPublishedExpressSlug(v.template_slug, supabase)) {
+      const { data: current, error: currentError } = await supabase.from("websites").select("template_slug").eq("id", websiteId).maybeSingle();
+      if (currentError) throw currentError;
+      if (current?.template_slug !== v.template_slug) throw new ValidationError("Choose a published Express variant.");
+    }
     const { error } = await supabase
       .from("websites")
       .update({

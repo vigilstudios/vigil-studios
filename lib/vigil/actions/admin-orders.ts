@@ -12,7 +12,7 @@ import { requireAdminOrThrow, requireStaffOrThrow } from "@/lib/vigil/auth/sessi
 import { button, escapeHtml, layout, sendEmail } from "@/lib/vigil/email";
 import { enqueueJob, JOB_KINDS, runDueJobs } from "@/lib/vigil/jobs";
 import { syncCatalogToProvider, type SyncReport } from "@/lib/vigil/services/catalog";
-import { isAvailableExpressTemplateSlug } from "@/lib/constants";
+import { isPublishedExpressSlug } from "@/lib/vigil/express/library";
 
 async function appUrl(): Promise<string> {
   const configured = process.env.NEXT_PUBLIC_APP_URL;
@@ -28,7 +28,7 @@ const createOrderSchema = z.object({
   email: z.string().trim().email("Enter the customer's email."),
   contact_name: z.string().trim().max(120).optional().or(z.literal("")),
   project_kind: z.enum(["express", "professional", "custom"]),
-  template_slug: z.string().trim().max(80).optional().or(z.literal("")).refine((slug) => !slug || isAvailableExpressTemplateSlug(slug), "Choose an available template from the list."),
+  template_slug: z.string().trim().max(80).optional().or(z.literal("")),
   plan_code: z.string().trim().min(1, "Choose a plan."),
   build_amount: z.string().trim().optional().or(z.literal("")),
   notes: z.string().trim().max(2000).optional().or(z.literal("")),
@@ -51,6 +51,7 @@ export async function createCheckoutLink(_prev: CreateOrderState, formData: Form
       throw new ValidationError("Check the highlighted fields.", issues);
     }
     const v = parsed.data;
+    if (v.template_slug && !await isPublishedExpressSlug(v.template_slug)) throw new ValidationError("Choose a published Express variant.");
     const supabase = await createClient();
 
     const { data: plan, error: planError } = await supabase.from("plans").select("id, name").eq("code", v.plan_code).maybeSingle();

@@ -6,7 +6,7 @@ import { Chip, Container, Eyebrow, Section, SectionIntro } from "@/components/si
 import { planBullets, planHasVirtue } from "@/lib/vigil/plan-presentation";
 import { VirtueOrb } from "@/components/vigil/VirtueOrb";
 import { GetStartedSection } from "@/sections/GetStartedSection";
-import { EXPRESS_TEMPLATES } from "@/lib/constants";
+import { publishedExpressTemplates } from "@/lib/vigil/express/library";
 import { BUILD_COPY, PLAN_COPY } from "@/lib/site-copy";
 import { formatMoney } from "@/lib/vigil/format";
 import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
@@ -27,6 +27,7 @@ const PLATFORM = [
 ];
 
 export default async function ProductsPage() {
+  const templates = await publishedExpressTemplates();
   const { plans, builds } = await getPublicPricing();
   return (
     <>
@@ -65,7 +66,7 @@ export default async function ProductsPage() {
             <Link href="/express" className="btn-primary min-h-11 !px-5 !py-2 text-sm font-semibold">Explore the designs <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
             <Link href="/professional" className="btn-secondary min-h-11 !px-5 !py-2 text-sm font-semibold">Start Professional <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
             <p className="text-sm text-[color:var(--text-secondary)]">
-              {EXPRESS_TEMPLATES.filter((t) => t.status === "available").length} industries ready today · {EXPRESS_TEMPLATES.filter((t) => t.status === "coming").length} under construction
+              {templates.filter((t) => t.status === "available").length} industries ready today · {templates.filter((t) => t.status === "coming").length} under construction
             </p>
           </div>
         </Container>

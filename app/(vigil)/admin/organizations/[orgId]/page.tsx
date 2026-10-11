@@ -32,11 +32,12 @@ import { getProjectAssets } from "@/lib/vigil/queries/onboarding";
 import { parseBrief } from "@/lib/vigil/onboarding/brief";
 import { BriefSummary } from "@/components/vigil/BriefSummary";
 import { Constants } from "@/types/database.types";
-import { AVAILABLE_EXPRESS_TEMPLATES } from "@/lib/constants";
+import { publishedExpressTemplates } from "@/lib/vigil/express/library";
 
 export const metadata: Metadata = { title: "Customer" };
 
 export default async function OrganizationDetailPage({ params }: { params: Promise<{ orgId: string }> }) {
+  const templates = await publishedExpressTemplates();
   const staff = await requireStaff();
   const { orgId } = await params;
   const [detail, catalog] = await Promise.all([getOrganizationDetail(orgId), getCatalog()]);
@@ -191,7 +192,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
           </select>
           <select name="template_slug" aria-label="Template slug" className={inputClass} defaultValue="">
             <option value="">No template</option>
-            {AVAILABLE_EXPRESS_TEMPLATES.map((template) => (
+            {templates.map((template) => (
               <option key={template.slug} value={template.slug}>
                 {template.slug} · {template.industry}
               </option>

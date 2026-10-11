@@ -1034,4 +1034,36 @@ begin
   perform test.logout();
 end $$;
 
+-- Library drafts stay private, including from the customer's organization.
+do $$
+declare variant uuid; project uuid; site uuid;
+begin
+ perform test.login('00000000-0000-0000-0000-00000000000c');
+ insert into public.express_variants(slug,draft,published,published_revision) values('library-test','{"variant":"Private edit"}','{"variant":"Published"}',1) returning id into variant;
+ insert into public.express_variants(slug,draft) values('unpublished-test','{"variant":"Draft only"}');
+ perform test.ok(test.count('select 1 from public.express_variants')=2,'library: staff can manage variants');
+ perform test.logout();
+ perform test.login_anon();
+ perform test.fails('select draft from public.express_variants','library: anonymous cannot read drafts');
+ perform test.ok(test.count('select 1 from public.published_express_variants')=1,'library: only published templates are public');
+ perform test.ok((select published->>'variant' from public.published_express_variants where slug='library-test')='Published','library: draft changes do not leak into published snapshot');
+ perform test.logout();
+ perform test.login('00000000-0000-0000-0000-00000000000a');
+ perform test.ok(test.count('select 1 from public.express_variants')=0,'library: customer cannot see template drafts');
+ perform test.fails('insert into public.express_variants(slug,draft) values(''forbidden'',''{}'')','library: customer cannot create variants');
+ perform test.logout();
+ perform test.login('00000000-0000-0000-0000-00000000000c');
+ update public.express_variants set archived_at=now() where id=variant;
+ perform test.ok(test.count('select 1 from public.published_express_variants')=0,'library: removal hides published variant');
+ update public.express_variants set archived_at=null where id=variant;
+ perform test.ok(test.count('select 1 from public.published_express_variants')=1,'library: restore recovers published variant');
+ insert into public.projects(organization_id,name,kind) values('10000000-0000-0000-0000-00000000000a','Professional test','professional') returning id into project;
+ insert into public.websites(organization_id,project_id,name) values('10000000-0000-0000-0000-00000000000a',project,'Professional test') returning id into site;
+ insert into public.design_workspaces(project_id,website_id,organization_id,site_definition,engine_version) values(project,site,'10000000-0000-0000-0000-00000000000a','{}','v1-test');
+ perform test.fails('update public.design_workspaces set organization_id=''10000000-0000-0000-0000-00000000000b''','professional: workspace cannot move to a different customer');
+ perform test.logout();
+ perform test.login('00000000-0000-0000-0000-00000000000a');
+ perform test.ok(test.count('select 1 from public.design_workspaces')=0,'professional: internal editor is hidden from customers');
+ perform test.logout();
+end $$;
 drop schema test cascade;

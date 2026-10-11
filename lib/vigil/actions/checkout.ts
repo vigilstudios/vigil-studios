@@ -6,7 +6,7 @@ import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 import { ProviderNotConfiguredError, ValidationError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
 import { checkoutIssues, checkoutSchema } from "@/lib/vigil/checkout-schema";
 import { sendWelcome, startCheckout } from "@/lib/vigil/services/orders";
-import { isAvailableExpressTemplateSlug } from "@/lib/constants";
+import { isPublishedExpressSlug } from "@/lib/vigil/express/library";
 import { clientIp, enforceRateLimit, limitKey, RATE_LIMITS } from "@/lib/vigil/rate-limit";
 import type { Json } from "@/types/database.types";
 
@@ -50,7 +50,7 @@ export async function beginCheckout(_prev: CheckoutState, formData: FormData): P
       // only exist behind a staff-created link; an Express order must name a
       // template that is actually for sale.
       if (projectKind === "custom") throw new ValidationError("Custom builds start from a link Vigil sends you. Write to hello@vigilstudios.co and we will prepare one.");
-      if (projectKind === "express" && (!templateSlug || !isAvailableExpressTemplateSlug(templateSlug))) throw new ValidationError("Choose a template from the catalogue to start an Express order.");
+      if (projectKind === "express" && (!templateSlug || !await isPublishedExpressSlug(templateSlug, admin))) throw new ValidationError("Choose a template from the catalogue to start an Express order.");
       if (projectKind !== "express") templateSlug = null;
     }
     if (v.order_id && v.checkout_token) {

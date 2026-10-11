@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
+import { publishedExpressTemplates } from "@/lib/vigil/express/library";
 import { ExpressCatalogue } from "@/components/express/ExpressCatalogue";
 
 const title = "Vigil Express | Vigil Studios";
@@ -21,7 +22,8 @@ export const metadata: Metadata = {
 };
 
 export default async function ExpressPage() {
-  const { builds } = await getPublicPricing();
+  const [{ builds }, templates] = await Promise.all([getPublicPricing(), publishedExpressTemplates()]);
   const build = builds.find((item) => item.kind === "express");
-  return <ExpressCatalogue amountCents={build?.amountCents ?? null} currency={build?.currency ?? "usd"} />;
+  if (!templates.length) return <div className="container py-24"><h1 className="text-4xl">New designs are on the way.</h1><p className="mt-4">Check back soon for our Express catalog.</p></div>;
+  return <ExpressCatalogue templates={templates} amountCents={build?.amountCents ?? null} currency={build?.currency ?? "usd"} />;
 }

@@ -55,6 +55,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  experimental: { serverActions: { bodySizeLimit: "3mb" } },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
@@ -83,7 +84,7 @@ const nextConfig: NextConfig = {
   // tracing cannot see. Jobs run from the cron route, admin actions and the
   // checkout success page, so every server function ships the build (~3 MB).
   outputFileTracingIncludes: {
-    "/**": ["./node_modules/pdfjs-dist/legacy/build/**", "./node_modules/pdf-parse/dist/**"],
+    "/**": ["./node_modules/pdfjs-dist/legacy/build/**", "./node_modules/pdf-parse/dist/**", "./public/design-engine-runtime/**", "./public/design-engine-creators/**", "./public/express-templates/**", "./public/express-library-media/**"],
   },
 };
 

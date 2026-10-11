@@ -50,7 +50,7 @@ import { ProjectSectionControls, type SourceValue } from "./ProjectControls";
 import { mapAssetSources, type WorkspaceAsset } from "@/lib/vigil/professional/document";
 
 export type ComposerProject = { id: string; site: SiteDefinition; assets: WorkspaceAsset[]; sources: SourceValue[];
-  context: ReactNode; save: (site: SiteDefinition) => Promise<void>; deploy: () => Promise<void> };
+  context: ReactNode; save: (site: SiteDefinition) => Promise<void>; deploy?: () => Promise<void>; publish?: (site: SiteDefinition) => Promise<void>; saveLabel?: string; publishLabel?: string; contextLabel?: string };
 
 const entries = designComponents.filter(entry => "composition" in entry);
 const compositionGroups = compositionOptionGroups(compositionFixtures, entries);
@@ -87,7 +87,7 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
   async function saveProject() {
     if (!project || saving) return;
     setSaving(true);
-    try { await project.save(site); setSavedDocument(serializeSite(site)); setStorageNotice("Project saved."); }
+    try { await project.save(site); setSavedDocument(serializeSite(site)); setStorageNotice(project.saveLabel ? "Draft saved." : "Project saved."); }
     catch (failure) { setStorageNotice(failure instanceof Error ? failure.message : "Save failed. Your edits remain here."); }
     finally { setSaving(false); }
   }
@@ -295,7 +295,7 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
   return <div className="composition-lab" onInputCapture={event => { typingInput.current.at = event.timeStamp; }} onKeyDown={event => { if (event.key === "Escape") { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); } }}><LabEditor title="Composition Lab" workspaceSwitch={workspaceSwitch} resetKey={fixture} canvasWidth={shownDevice === "mobile" ? 390 : shownDevice === "tablet" ? 768 : 1440} activeTab={tab} onTabChange={value => { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); setTab(value); }} onReplay={replayMotion} history={{ undo: () => restoreChange("undo"), redo: () => restoreChange("redo"), undoCount: history.past.length, redoCount: history.future.length, limit: siteHistoryLimit }}
     viewportControl={<Control label="Viewport" value={device} values={["desktop", "tablet", "mobile"]} onChange={setDevice} onPreview={setPreviewDevice} />}
     toolbar={<>
-      {project && <><button type="button" disabled={saving} onClick={saveProject}>{saving ? "Saving…" : dirty ? "Save project · unsaved" : "Save project"}</button><button type="button" disabled={dirty || saving} title={dirty ? "Save the current edits before deployment" : "Export this saved project and deploy its preview"} onClick={async () => { try { await project.deploy(); setStorageNotice("Preview job queued. Open Project to follow deployment status."); } catch (failure) { setStorageNotice(failure instanceof Error ? failure.message : "Could not deploy preview."); } }}>Deploy preview</button><span role="status">{storageNotice}</span></>}
+      {project && <><button type="button" disabled={saving} onClick={saveProject}>{saving ? "Saving…" : `${project.saveLabel ?? "Save project"}${dirty ? " · unsaved" : ""}`}</button>{project.deploy && <button type="button" disabled={dirty || saving} title={dirty ? "Save the current edits before deployment" : "Export this saved project and deploy its preview"} onClick={async () => { try { await project.deploy?.(); setStorageNotice("Preview job queued. Open Project to follow deployment status."); } catch (failure) { setStorageNotice(failure instanceof Error ? failure.message : "Could not deploy preview."); } }}>Deploy preview</button>}{project.publish && <button type="button" disabled={saving} onClick={async () => { setSaving(true); try { await project.publish?.(site); setSavedDocument(serializeSite(site)); setStorageNotice("Variant published."); } catch (failure) { setStorageNotice(failure instanceof Error ? failure.message : "Publish failed."); } finally { setSaving(false); } }}>{project.publishLabel ?? "Publish"}</button>}<span role="status">{storageNotice}</span></>}
       <button type="button" onClick={() => setTab("pages")}>Site Tree · {site.pages.find(page => page.id === pageId)?.title}</button>
       <details ref={presetPicker} className="composition-preset-picker" onKeyDown={event => { if (event.key === "Escape" && presetPicker.current) { presetPicker.current.open = false; presetPicker.current.querySelector("summary")?.focus(); } }}>
         <summary>Demo <span>{compositionGroups.flatMap(group => group.options).find(option => option.value === fixture)?.label ?? "Blank canvas"}</span></summary>
@@ -314,7 +314,7 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
     </>}
     inspectorTabs={[{ id: "design", label: "Design", content: sectionControls }, { id: "content", label: "Content", content: contentControls }, { id: "motion", label: "Motion", content: <>{selectionControls}{current && <><PresentationControls key={`motion-${pageId}-${current.id}-${current.component}`} motionOnly value={current.presentation} inherited={resolvePresentation(composition.site.presentation,composition.presentation)} navigation={current.component.startsWith("navigation." )} onChange={presentation => updateSection(transitionSection(current,{presentation}).section)}/><ComponentMotionControls key={`component-motion-${pageId}-${current.id}-${current.component}`} section={current} onChange={updateSection}/></>}</> }]} inspectorTab={inspectorTab} onInspectorTabChange={setInspectorTab}
     tabs={[
-      ...(project ? [{ id: "project", label: "Project", content: project.context }] : []),
+      ...(project ? [{ id: "project", label: project.contextLabel ?? "Project", content: project.context }] : []),
       { id: "sections", label: "Sections", content: sectionList },
       { id: "pages", label: "Pages", content: <><SiteTree site={site} pageId={pageId} onChange={commitSite} onImport={next => { setClientDrafts({}); commitSite(next); }} onSelect={selectPage}/>{pageControls}</> },
       { id: "site", label: "Site", content: siteControls },

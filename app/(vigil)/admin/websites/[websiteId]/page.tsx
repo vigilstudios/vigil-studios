@@ -9,7 +9,7 @@ import { formatDateTime, titleCase } from "@/lib/vigil/format";
 import { websiteTransitions } from "@/lib/vigil/lifecycle";
 import { getCreativeWorkspace, getWebsiteDetail } from "@/lib/vigil/queries/admin";
 import { CreativeWorkspaceCard } from "@/components/vigil/CreativeWorkspaceCard";
-import { AVAILABLE_EXPRESS_TEMPLATES } from "@/lib/constants";
+import { publishedExpressTemplates } from "@/lib/vigil/express/library";
 import { createClient } from "@/lib/supabase/server";
 import { getExpressPreviewReview } from "@/lib/vigil/express-preview-review";
 import { getReviewDeployReadiness } from "@/lib/vigil/project-reviews";
@@ -17,6 +17,7 @@ import { getReviewDeployReadiness } from "@/lib/vigil/project-reviews";
 export const metadata: Metadata = { title: "Website" };
 
 export default async function WebsiteDetailPage({ params }: { params: Promise<{ websiteId: string }> }) {
+  const templates = await publishedExpressTemplates();
   await requireStaff();
   const { websiteId } = await params;
   const detail = await getWebsiteDetail(websiteId);
@@ -54,6 +55,7 @@ export default async function WebsiteDetailPage({ params }: { params: Promise<{ 
           <div className="mt-3">
             <TransitionSelect current={w.status} options={websiteTransitions[w.status]} action={setWebsiteStatus.bind(null, w.id)} withReason />
           </div>
+          {w.project?.kind === "professional" && <Link className="btn-primary mt-4 inline-flex" href={`/admin/lab/project/${w.project.id}`}>Open design workspace</Link>}
           <h3 className="mt-5 text-sm font-semibold">Repository &amp; publishing</h3>
           <p className="mt-1 text-xs text-[color:var(--text-secondary)]">The private customer repository is created once. Deploy live publishes the latest main branch to Vercel and connects any attached domain.</p>
           <div className="mt-2 flex flex-wrap items-start gap-2">
@@ -102,7 +104,8 @@ export default async function WebsiteDetailPage({ params }: { params: Promise<{ 
               <label className={labelClass} htmlFor="template_slug">Template slug</label>
               <select id="template_slug" name="template_slug" defaultValue={w.template_slug ?? ""} className={inputClass}>
                 <option value="">No template</option>
-                {AVAILABLE_EXPRESS_TEMPLATES.map((template) => (
+                {w.template_slug && !templates.some(template => template.slug === w.template_slug) && <option value={w.template_slug}>{w.template_slug} · removed from catalog</option>}
+                {templates.map((template) => (
                   <option key={template.slug} value={template.slug}>
                     {template.slug} · {template.industry}
                   </option>

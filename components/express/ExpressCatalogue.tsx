@@ -14,12 +14,9 @@ import {
   Monitor,
   Smartphone,
 } from "lucide-react";
-import { EXPRESS_TEMPLATES } from "@/lib/constants";
-import accentsBySlug from "@/lib/express-accents.json";
+import type { ExpressTemplate } from "@/lib/vigil/express/document";
 import styles from "./ExpressCatalogue.module.css";
 
-const ACCENTS = accentsBySlug as Record<string, string>;
-type ExpressTemplate = (typeof EXPRESS_TEMPLATES)[number];
 type ViewMode = "desktop" | "mobile";
 
 type IndustryGroup = {
@@ -27,8 +24,8 @@ type IndustryGroup = {
   variants: ExpressTemplate[];
 };
 
-function groupTemplates(): IndustryGroup[] {
-  return EXPRESS_TEMPLATES.reduce<IndustryGroup[]>((groups, template) => {
+function groupTemplates(templates: ExpressTemplate[]): IndustryGroup[] {
+  return templates.reduce<IndustryGroup[]>((groups, template) => {
     const existing = groups.find((group) => group.industry === template.industry);
     if (existing) existing.variants.push(template);
     else groups.push({ industry: template.industry, variants: [template] });
@@ -38,7 +35,6 @@ function groupTemplates(): IndustryGroup[] {
 
 // Catalogue order is the order in EXPRESS_TEMPLATES (finished templates
 // first, ones under construction last).
-const INDUSTRIES = groupTemplates();
 const MOBILE_VIEWPORT_QUERY = "(max-width: 767px)";
 const slideVariants = {
   enter: (direction: number) => ({
@@ -91,7 +87,7 @@ function PreviewPeek({
   side: "previous" | "next";
   onSelect: () => void;
 }) {
-  const accent = ACCENTS[template.slug] ?? template.accent;
+  const accent = template.accent;
 
   return (
     <motion.button
@@ -115,8 +111,8 @@ function PreviewPeek({
   );
 }
 
-export function ExpressCatalogue({ amountCents = null, currency = "usd" }: { amountCents?: number | null; currency?: string } = {}) {
-  const industries = INDUSTRIES;
+export function ExpressCatalogue({ amountCents = null, currency = "usd", templates }: { amountCents?: number | null; currency?: string; templates: ExpressTemplate[] }) {
+  const industries = groupTemplates(templates);
   const [industryIndex, setIndustryIndex] = useState(0);
   const [variantIndex, setVariantIndex] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -135,8 +131,8 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd" }: { amo
   const nextIndex = (industryIndex + 1) % industries.length;
   const previous = industries[previousIndex].variants[0];
   const next = industries[nextIndex].variants[0];
-  const accent = ACCENTS[active.slug] ?? active.accent;
-  const href = `/express-templates/${active.slug}.html`;
+  const accent = active.accent;
+  const href = active.previewUrl ?? `/express-templates/${active.slug}.html`;
 
   useEffect(() => {
     const rail = industryTabsRef.current;

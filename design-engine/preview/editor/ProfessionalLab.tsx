@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { DesktopLabShell } from "./DesktopLabShell";
 import { DesignLab } from "../DesignLab";
@@ -11,7 +12,7 @@ export function ProfessionalLab({ initialWorkspace = "design" }: { initialWorksp
 
   const workspaceSwitch = <div className="lab-workspace-switch" aria-label="Lab workspace">{(["design", "composition"] as const).map(value => <button key={value} type="button" aria-pressed={workspace === value} onClick={() => {
     setWorkspace(value); window.history.replaceState(null, "", `/admin/lab?workspace=${value}`);
-  }}>{value === "design" ? "Design" : "Composition"}</button>)}</div>;
+  }}>{value === "design" ? "Design" : "Composition"}</button>)}<Link href="/admin/lab/projects">Client projects</Link><Link href="/admin/lab/express">Express catalog</Link></div>;
 
   return <DesktopLabShell>
       <div hidden={workspace !== "design"}><DesignLab workspaceSwitch={workspaceSwitch} /></div>

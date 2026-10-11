@@ -3,7 +3,8 @@ import "server-only";
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import JSZip from "jszip";
-import { EXPRESS_TEMPLATES } from "@/lib/constants";
+import { expressRepositoryFiles } from "@/lib/vigil/express/export";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { GitHubRepositoryProvider } from "@/lib/vigil/providers/github";
 import type { Website } from "@/lib/vigil/types";
 
@@ -25,7 +26,6 @@ export interface SiteSource {
   collect(website: Website): Promise<SiteFile[] | null>;
 }
 
-const templateSlugs = new Set(EXPRESS_TEMPLATES.map((t) => t.slug));
 
 /** Current customer-owned source in GitHub, used in production exports. */
 export const githubRepositorySource: SiteSource = {
@@ -42,10 +42,8 @@ export const githubRepositorySource: SiteSource = {
 export const expressTemplateSource: SiteSource = {
   name: "express-template",
   async collect(website) {
-    if (!website.template_slug || !templateSlugs.has(website.template_slug)) return null;
-    const file = path.join(process.cwd(), "public", "express-templates", `${website.template_slug}.html`);
-    const html = await readFile(file, "utf8");
-    return [{ path: "site/index.html", content: html }];
+    if (!website.template_slug) return null;
+    return expressRepositoryFiles(createAdminClient(), website.template_slug);
   },
 };
 

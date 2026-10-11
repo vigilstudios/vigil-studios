@@ -6,7 +6,7 @@ import { Card, CardRow } from "@/components/site/Cards";
 import { Chip, Container, Eyebrow, Section, SectionIntro } from "@/components/site/primitives";
 import { Reveal } from "@/components/site/Reveal";
 import { GetStartedSection } from "@/sections/GetStartedSection";
-import { EXPRESS_TEMPLATES } from "@/lib/constants";
+import { publishedExpressTemplates } from "@/lib/vigil/express/library";
 import { BUILD_COPY, WEBSITES_PAGE } from "@/lib/site-copy";
 import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
 
@@ -23,11 +23,12 @@ const KINDS = ["express", "professional", "custom"] as const;
  * checkout; prices deliberately live on /pricing, this page links there.
  */
 export default async function WebsitesPage() {
+  const templates = await publishedExpressTemplates();
   const { builds } = await getPublicPricing();
   const byKind = Object.fromEntries(builds.map((b) => [b.kind, b])) as Partial<Record<(typeof KINDS)[number], (typeof builds)[number]>>;
   const nameOf = (kind: (typeof KINDS)[number]) => byKind[kind]?.name ?? { express: "Vigil Express", professional: "Professional Site", custom: "Custom Build" }[kind];
-  const available = EXPRESS_TEMPLATES.filter((t) => t.status === "available");
-  const coming = EXPRESS_TEMPLATES.filter((t) => t.status === "coming");
+  const available = templates.filter((t) => t.status === "available");
+  const coming = templates.filter((t) => t.status === "coming");
 
   return (
     <>

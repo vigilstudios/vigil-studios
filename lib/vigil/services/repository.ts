@@ -1,15 +1,12 @@
 import "server-only";
 
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-import { EXPRESS_TEMPLATES } from "@/lib/constants";
+import { expressRepositoryFiles } from "@/lib/vigil/express/export";
 import { NotFoundError, ValidationError } from "@/lib/vigil/auth/errors";
 import { slugify } from "@/lib/vigil/format";
 import { GitHubRepositoryProvider } from "@/lib/vigil/providers/github";
 import type { DbClient } from "@/lib/vigil/types";
 import { findProviderLink, upsertProviderLink } from "./provider-links";
 
-const templateSlugs = new Set(EXPRESS_TEMPLATES.map((template) => template.slug));
 
 export async function assertWebsiteRepositoryReady(admin: DbClient, websiteId: string): Promise<void> {
   const repository = await findProviderLink(admin, {
@@ -51,12 +48,12 @@ export async function provisionWebsiteRepository(
   if (!organization) throw new NotFoundError("The website organization was not found.");
 
   const repoName = repositoryName(organization.slug, websiteId);
-  const html = await initialHtml(website.template_slug, organization.name);
+  const siteFiles = website.template_slug ? await expressRepositoryFiles(admin, website.template_slug) : [{ path: "site/index.html", content: await initialHtml(null, organization.name) }];
   const repository = await provider.ensureRepository({
     name: repoName,
     description: `${organization.name} website, managed by Vigil Studios`,
     files: [
-      { path: "site/index.html", content: html },
+      ...siteFiles,
       { path: "content/.gitkeep", content: "" },
       { path: ".gitignore", content: ".DS_Store\n.env\n.env.*\n.vercel\nnode_modules\n" },
       { path: "README.md", content: repositoryReadme(organization.name, website.template_slug) },
@@ -86,10 +83,6 @@ function repositoryName(orgSlug: string, websiteId: string): string {
 }
 
 async function initialHtml(templateSlug: string | null, organizationName: string): Promise<string> {
-  if (templateSlug) {
-    if (!templateSlugs.has(templateSlug)) throw new ValidationError(`Unknown Express template “${templateSlug}”.`);
-    return readFile(path.join(process.cwd(), "public", "express-templates", `${templateSlug}.html`), "utf8");
-  }
   const safeName = organizationName.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!);
   return `<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${safeName}</title></head><body><main><h1>${safeName}</h1><p>Your new website is being built.</p></main></body></html>\n`;
 }

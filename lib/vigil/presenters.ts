@@ -82,7 +82,6 @@ export function templateName(slug: string | null): string {
 
 export type PreviewSource = { kind: "live" | "template"; src: string; address: string } | { kind: "none" };
 
-const templateHtmlSlugs = new Set(EXPRESS_TEMPLATES.map((t) => t.slug));
 
 /**
  * What the site preview should show: the live site once it has a real
@@ -103,8 +102,8 @@ export function previewSource(website: { live_url: string | null; preview_url: s
     }
   }
   const slug = website?.template_slug ?? fallbackSlug;
-  if (slug && templateHtmlSlugs.has(slug)) {
-    return { kind: "template", src: `/express-templates/${slug}.html`, address: `${slug}.preview` };
+  if (slug && /^[a-z0-9][a-z0-9-]{0,79}$/.test(slug)) {
+    return { kind: "template", src: `/express-preview/${slug}`, address: `${slug}.preview` };
   }
   return { kind: "none" };
 }

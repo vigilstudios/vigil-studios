@@ -1,4 +1,5 @@
 import "server-only";
+import { ensureDesignWorkspace } from "@/lib/vigil/professional/workspace";
 import { CREATOR_CAMPAIGN, creatorCodeOffer, matchesCreatorPromoCode } from "@/lib/creator-campaign";
 
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -192,6 +193,7 @@ export async function provisionOrder(admin: DbClient, orderId: string, provider:
   if (order.status === "provisioned" && order.organization_id && order.project_id) {
     const { data: provisionedSite, error: siteLookupError } = await admin.from("websites").select("id").eq("project_id", order.project_id).single();
     if (siteLookupError) throw siteLookupError;
+    if (order.project_kind === "professional") await ensureDesignWorkspace(admin, order.project_id);
     return { organizationId: order.organization_id, websiteId: provisionedSite.id, projectKind: order.project_kind, alreadyProvisioned: true };
   }
   if (order.status !== "paid") throw new ValidationError(`Order ${orderId} is ${order.status}, not paid.`);
@@ -237,6 +239,8 @@ export async function provisionOrder(admin: DbClient, orderId: string, provider:
     if (siteError) throw siteError;
     site = createdSite;
   }
+
+  if (order.project_kind === "professional") await ensureDesignWorkspace(admin, projectId);
 
   // 4. Subscription: from the provider's checkout session when we have one,
   //    otherwise a manual active row (staff-created orders paid off-platform).

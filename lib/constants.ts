@@ -85,13 +85,13 @@ export const EXPRESS_TEMPLATES: {
   },
   {
     slug: "creator",
-    variant: "Muse",
+    variant: "Luxe",
     industry: "Creator",
-    example: "The Muse Edit",
+    example: "Muse Bennett",
     description:
-      "Editorial and expressive, with cinematic imagery, social-first storytelling, a living portfolio, and a polished home for brand partnerships.",
-    accent: "#f2b8c6",
-    status: "coming",
+      "A warm, refined creator portfolio with cinematic imagery, social reach, and a polished home for brand partnerships.",
+    accent: "#bfa483",
+    status: "available",
   },
 ];
 

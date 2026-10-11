@@ -8,7 +8,7 @@ import { requireStaff } from "@/lib/vigil/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatMoney, titleCase } from "@/lib/vigil/format";
 import { describePrice } from "@/lib/vigil/billing-periods";
-import { AVAILABLE_EXPRESS_TEMPLATES } from "@/lib/constants";
+import { publishedExpressTemplates } from "@/lib/vigil/express/library";
 import { NewOrderForm } from "./NewOrderForm";
 
 export const metadata: Metadata = { title: "Orders" };
@@ -16,6 +16,7 @@ export const metadata: Metadata = { title: "Orders" };
 const tone = (s: string) => (s === "provisioned" ? "good" : s === "paid" ? "info" : s === "pending" ? "warn" : s === "failed" ? "bad" : "neutral");
 
 export default async function OrdersPage() {
+  const templates = await publishedExpressTemplates();
   await requireStaff("/admin/orders");
   const supabase = await createClient();
   const [{ data: orders }, { data: plans }] = await Promise.all([
@@ -30,7 +31,7 @@ export default async function OrdersPage() {
 
       <Panel title="Send a checkout link">
         <p className="text-xs text-[color:var(--text-secondary)]">Create a private checkout for a custom quote, a Professional customer who prefers a prepared order, or an Express site scoped on a call. They pay on the link; the account provisions itself.</p>
-        <NewOrderForm plans={plans ?? []} templates={AVAILABLE_EXPRESS_TEMPLATES.map((t) => ({ slug: t.slug, name: t.industry }))} />
+        <NewOrderForm plans={plans ?? []} templates={templates.map((t) => ({ slug: t.slug, name: `${t.industry} · ${t.variant}` }))} />
       </Panel>
 
       <Table>

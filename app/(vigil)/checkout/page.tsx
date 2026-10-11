@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { EXPRESS_TEMPLATES } from "@/lib/constants";
+import { publishedExpressTemplates } from "@/lib/vigil/express/library";
 import { getCheckoutCatalog } from "@/lib/vigil/queries/checkout";
 import { CheckoutForm } from "./CheckoutForm";
 import { CheckoutShell } from "./CheckoutShell";
@@ -17,7 +17,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
   const params = await searchParams;
   const projectKind = params.build === "professional" ? "professional" : "express";
   const slug = params.template ?? params.client_reference_id ?? null;
-  const template = projectKind === "express" && slug ? EXPRESS_TEMPLATES.find((t) => t.slug === slug && t.status === "available") ?? null : null;
+  const template = projectKind === "express" && slug ? (await publishedExpressTemplates()).find((t) => t.slug === slug && t.status === "available") ?? null : null;
   const catalog = await getCheckoutCatalog();
   const build = catalog.builds.find((b) => b.kind === projectKind) ?? null;
 
@@ -34,7 +34,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
         build={build?.synced ? { name: build.name, amountCents: build.amount_cents, currency: build.currency } : null}
         projectKind={projectKind}
         templateSlug={template?.slug ?? null}
-        templateName={template?.industry ?? null}
+        templateName={template ? `${template.industry} · ${template.variant}` : null}
         initial={{ planCode: params.plan, billingPeriod: params.period, promotionCode: params.promo }}
         locked={null}
         termsUrl={process.env.NEXT_PUBLIC_TERMS_URL ?? null}

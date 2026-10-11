@@ -1,32 +1,11 @@
-# Three Creator Express variant handoffs
+# Creator Express variants
 
-The staff editor is at https://www.vigilstudios.co/admin/lab?workspace=composition. Sign in with a staff account and use a desktop/laptop. The Admin sidebar also has **Lab**. Design is for trying individual components; **Composition** is the complete site document to export.
+Luxe is the first published Creator variant. Its authored handoff is `luxe.site.json`; Muse Bennett remains the fictional creator in the example. Editorial is reserved for the planned newsletter variant.
 
-1. In Composition, start with **Blank canvas** or a **Demo**. A demo is a starting point, not a finished Express template.
-2. In **Layout**, add/reorder sections. In **Section**, select a section, choose its structure and supported settings, and configure actions. **Client adaptation** loads example content; **Client content and media → Strict section data → Apply client data** lets you replace ordinary content/media for sections without direct fields. Imported CTA/contact/footer/gallery sections also have direct content controls. In **Site**, choose site typography, art direction, brand colors and motion. Use page/section overrides only for intentional exceptions.
-3. In **Pages**, build the real site tree, set home/page labels/routes, and configure navigation visibility. Use **Site** to share a footer globally or create page overrides. Bind internal links to Page/Section IDs through the action editor rather than typing route URLs.
-4. Check **QA** for compatibility and broken actions. Preview desktop, tablet and mobile. Contact/newsletter delivery requires a host adapter; leave it unconnected or use email draft until one is specified.
-5. In **Pages → Portable site document**, enter **Creator variant 01** in **Variant name** and click **Export site JSON**. This downloads `creator-variant-01.site.json`, with the variant name and the full typed Site Definition. It contains every page/section, configuration, media reference, creative layer, global footer and action target. It is the editable code handoff; no JSX copying is required.
-6. Build a genuinely different second design, export **Creator variant 02**, then repeat for **Creator variant 03**. Export before loading another demo, clearing the canvas or importing another variant. **Save local draft** saves only the current working site in this browser, not a three-variant library.
-7. To resume a variant, open its JSON file, copy its contents into **Pages → Portable site document → Import / inspect JSON**, then click **Confirm replace site**. Schema/identity validation runs before the current document is replaced.
+Manage production variants at `/admin/lab/express`. Open a component variant in the Lab, change Catalog settings to rename it, Save draft privately, and Publish variant when it is ready. New variants can start blank or duplicate any existing variant. Remove archives a variant; Removed variants provides Restore. Stable slugs survive renaming.
 
-## Save them in the repository
+The component library remains at `/admin/lab`. Professional customers have project-bound documents at `/admin/lab/project/[projectId]`, listed under `/admin/lab/projects` and linked from Website operations. These documents never share the scratch Composition draft or Express template state.
 
-Move the downloaded files into this directory:
+The six original HTML templates retain their authored designs in a source editor with a sandboxed preview. New component variants and Luxe use the full design/content/motion editor and component library. Embedded original template images were extracted without alteration into immutable public media files to keep drafts and save requests small. Customer repository seeds include those assets, or a pinned Design Engine runtime and selected library media for component variants.
 
-```
-docs/express/creator-variants/
-  creator-variant-01.site.json
-  creator-variant-02.site.json
-  creator-variant-03.site.json
-  NOTES.md
-  README.md
-```
-
-The live browser downloads to your computer; it cannot write directly into your local Git checkout. This directory belongs to the `vigil-studios` repository at `/Users/belierjavier/Desktop/Vigil Studios/Websites/vigil-studios`. Downloading JSON does not publish an Express site.
-
-In `NOTES.md`, give each variant a display name, intended creator/audience, what distinguishes its layout, required pages/sections, image/video replacements, fonts/colors, CTA destinations, form behavior and anything that must remain fixed. JSON references media URLs but does not bundle the image/video bytes. Provide client-owned/licensed source assets, or identify which retained review assets should be replaced. Screenshots at desktop and mobile help show your intended result but do not replace JSON.
-
-To hand them back, attach the three JSON files and notes/assets here, or say: **“Use the three saved files in `docs/express/creator-variants` to create Creator Express variants 1–3.”** I can then validate them, adapt client fields/assets, implement the actual Express template/site outputs and run responsive/action/form QA. If you want them versioned before the conversion, ask me to commit the three JSON files and notes; naming/exporting alone does not create a Git commit.
-
-No variant designs are generated by this document. The three final files are your authored compositions.
+`scripts/seed-express-library.ts` is a one-time idempotent import, run with the linked service environment. It never overwrites an existing staff draft. Older creator-neutral, studio and field-note JSON files are historical starting points; production edits live in the database.

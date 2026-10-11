@@ -254,45 +254,6 @@ export type Database = {
           },
         ]
       }
-      customer_deletion_log: {
-        Row: {
-          archived_at: string | null
-          billing_email: string | null
-          cleanup: Json
-          deleted_at: string
-          deleted_by: string | null
-          former_organization_id: string
-          id: string
-          organization_name: string
-          organization_slug: string
-          snapshot: Json
-        }
-        Insert: {
-          archived_at?: string | null
-          billing_email?: string | null
-          cleanup?: Json
-          deleted_at?: string
-          deleted_by?: string | null
-          former_organization_id: string
-          id?: string
-          organization_name: string
-          organization_slug: string
-          snapshot?: Json
-        }
-        Update: {
-          archived_at?: string | null
-          billing_email?: string | null
-          cleanup?: Json
-          deleted_at?: string
-          deleted_by?: string | null
-          former_organization_id?: string
-          id?: string
-          organization_name?: string
-          organization_slug?: string
-          snapshot?: Json
-        }
-        Relationships: []
-      }
       creative_workspaces: {
         Row: {
           asset_counts: Json
@@ -399,7 +360,45 @@ export type Database = {
           },
         ]
       }
-
+      customer_deletion_log: {
+        Row: {
+          archived_at: string | null
+          billing_email: string | null
+          cleanup: Json
+          deleted_at: string
+          deleted_by: string | null
+          former_organization_id: string
+          id: string
+          organization_name: string
+          organization_slug: string
+          snapshot: Json
+        }
+        Insert: {
+          archived_at?: string | null
+          billing_email?: string | null
+          cleanup?: Json
+          deleted_at?: string
+          deleted_by?: string | null
+          former_organization_id: string
+          id?: string
+          organization_name: string
+          organization_slug: string
+          snapshot?: Json
+        }
+        Update: {
+          archived_at?: string | null
+          billing_email?: string | null
+          cleanup?: Json
+          deleted_at?: string
+          deleted_by?: string | null
+          former_organization_id?: string
+          id?: string
+          organization_name?: string
+          organization_slug?: string
+          snapshot?: Json
+        }
+        Relationships: []
+      }
       deployments: {
         Row: {
           commit_ref: string | null
@@ -468,6 +467,95 @@ export type Database = {
             foreignKeyName: "deployments_website_id_fkey"
             columns: ["website_id"]
             isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      design_workspaces: {
+        Row: {
+          created_at: string
+          engine_version: string
+          generated_files: Json
+          id: string
+          organization_id: string
+          pending_files: Json
+          project_id: string
+          repository_commit: string | null
+          repository_revision: number | null
+          revision: number
+          site_definition: Json
+          sync_error: string | null
+          sync_token: string | null
+          sync_until: string | null
+          updated_at: string
+          updated_by: string | null
+          website_id: string
+        }
+        Insert: {
+          created_at?: string
+          engine_version: string
+          generated_files?: Json
+          id?: string
+          organization_id: string
+          pending_files?: Json
+          project_id: string
+          repository_commit?: string | null
+          repository_revision?: number | null
+          revision?: number
+          site_definition: Json
+          sync_error?: string | null
+          sync_token?: string | null
+          sync_until?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          website_id: string
+        }
+        Update: {
+          created_at?: string
+          engine_version?: string
+          generated_files?: Json
+          id?: string
+          organization_id?: string
+          pending_files?: Json
+          project_id?: string
+          repository_commit?: string | null
+          repository_revision?: number | null
+          revision?: number
+          site_definition?: Json
+          sync_error?: string | null
+          sync_token?: string | null
+          sync_until?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_workspaces_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_workspaces_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_workspaces_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_workspaces_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: true
             referencedRelation: "websites"
             referencedColumns: ["id"]
           },
@@ -614,6 +702,56 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      express_variants: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          draft: Json
+          id: string
+          published: Json | null
+          published_revision: number | null
+          revision: number
+          slug: string
+          sort_order: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          draft: Json
+          id?: string
+          published?: Json | null
+          published_revision?: number | null
+          revision?: number
+          slug: string
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          draft?: Json
+          id?: string
+          published?: Json | null
+          published_revision?: number | null
+          revision?: number
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "express_variants_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2371,14 +2509,54 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      published_express_variants: {
+        Row: {
+          published: Json | null
+          slug: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          published?: Json | null
+          slug?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          published?: Json | null
+          slug?: string | null
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accept_invitation: { Args: { p_invite: string }; Returns: string }
       accept_pending_invites: { Args: never; Returns: number }
+      allocate_order_project: {
+        Args: {
+          p_customer_ref?: string
+          p_order_id: string
+          p_provider: Database["public"]["Enums"]["provider"]
+          p_slug: string
+        }
+        Returns: Json
+      }
+      apply_provider_subscription: {
+        Args: {
+          p_customer_ref: string
+          p_external_id: string
+          p_price_ref: string
+          p_provider: Database["public"]["Enums"]["provider"]
+          p_snapshot: Json
+        }
+        Returns: Json
+      }
       archive_customer: {
         Args: { p_actor_id: string; p_organization_id: string }
         Returns: undefined
+      }
+      claim_design_sync: {
+        Args: { p_project_id: string; p_token: string }
+        Returns: boolean
       }
       claim_jobs: {
         Args: { p_lease_seconds?: number; p_limit?: number; p_worker: string }

@@ -217,6 +217,17 @@ describe("completeCheckout + provisionOrder", () => {
     expect(fake.rows("subscriptions")).toHaveLength(1);
   });
 
+  it("creates one isolated design workspace for a Professional purchase", async () => {
+    const fake = seed();
+    fake.rows("orders").push({ id: "professional-order", status: "paid", email: "professional@example.test", business_name: "Professional Client", project_kind: "professional", plan_id: PLAN, metadata: {} });
+    await provisionOrder(fake.asClient(), "professional-order", new NullBillingProvider(), "https://app.test");
+    const project = fake.rows("projects")[0], website = fake.rows("websites")[0];
+    expect(fake.rows("design_workspaces")).toHaveLength(1);
+    expect(fake.rows("design_workspaces")[0]).toMatchObject({ project_id: project.id, website_id: website.id, organization_id: project.organization_id, site_definition: { id: `project-${project.id}`, title: project.name } });
+    await provisionOrder(fake.asClient(), "professional-order", new NullBillingProvider(), "https://app.test");
+    expect(fake.rows("design_workspaces")).toHaveLength(1);
+  });
+
   it("refuses to provision an unpaid order and picks a free slug", async () => {
     const fake = seed();
     fake.rows("organizations").push({ id: "org_1", slug: "cigar-lounge", name: "Cigar Lounge" });

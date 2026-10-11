@@ -12,7 +12,7 @@ import { CREATOR_CAMPAIGN as campaign, creatorBuildOffer } from "@/lib/creator-c
 import { WEBSITE_TIERS } from "@/lib/vigil/site-tiers";
 import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
 import { formatMoney } from "@/lib/vigil/format";
-import { EXPRESS_TEMPLATES } from "@/lib/constants";
+import { publishedExpressTemplates } from "@/lib/vigil/express/library";
 import styles from "./creators.module.css";
 
 const title = "Websites for Creators & Personal Brands | Vigil Studios";
@@ -25,9 +25,10 @@ export const metadata: Metadata = {
 };
 
 export default async function CreatorsPage() {
+  const templates = await publishedExpressTemplates();
   const { builds, plans } = await getPublicPricing();
   const basic = plans.find((plan) => plan.code === "basic");
-  const creatorTemplate = EXPRESS_TEMPLATES.find((template) => template.slug === "creator");
+  const creatorTemplate = templates.find((template) => template.slug === "creator");
   return <div className={styles.page}>
     <CampaignTracking campaign={campaign.id} event="creator_campaign_visit" />
     <HeroCollage id="creator-hero" className={styles.hero} headingId="creator-title" titleClassName={styles.title} subtitleClassName={styles.heroLead}

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
-import { EXPRESS_TEMPLATES } from "@/lib/constants";
+import { publishedExpressTemplates } from "@/lib/vigil/express/library";
 import { getCheckoutCatalog } from "@/lib/vigil/queries/checkout";
 import { CheckoutForm } from "../CheckoutForm";
 import { CheckoutShell } from "../CheckoutShell";
@@ -33,7 +33,7 @@ export default async function TokenCheckoutPage({ params, searchParams }: { para
 
   const catalog = await getCheckoutCatalog();
   const buildRow = catalog.builds.find((b) => b.kind === order.project_kind) ?? null;
-  const template = order.template_slug ? EXPRESS_TEMPLATES.find((t) => t.slug === order.template_slug) ?? null : null;
+  const template = order.template_slug ? (await publishedExpressTemplates()).find((t) => t.slug === order.template_slug) ?? null : null;
   const buildAmount = order.build_amount_cents ?? buildRow?.amount_cents ?? null;
 
   return (
