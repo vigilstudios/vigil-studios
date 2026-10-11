@@ -168,8 +168,6 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
       }
       aria-labelledby="catalogue-title"
     >
-      <div className={styles.ambient} aria-hidden="true" />
-
       <div className={styles.shell}>
         <header className={styles.header}>
           <div className={styles.heading}>
@@ -292,6 +290,9 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
           aria-labelledby={`industry-tab-${industryIndex}`}
           aria-live="polite"
         >
+          <div className={styles.previewBackground} aria-hidden="true">
+            <div className={styles.ambient} />
+          </div>
           <AnimatePresence initial={false}>
             <PreviewPeek
               key={`previous-${previous.slug}`}
