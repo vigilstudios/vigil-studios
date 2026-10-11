@@ -17,13 +17,14 @@ export function CalibrationLab({ toolbar, workspaceSwitch }: { toolbar?: ReactNo
   const [device, setDevice] = useState("desktop");
   const [compare, setCompare] = useState(false);
   const [replay, setReplay] = useState(0);
+  function replayMotion() { setAudition(null); setReplay(value => value + 1); }
   const [tab, setTab] = useState("study");
   const [audition, setAudition] = useState<{ structure?:RetestId; typography?:TypographyProfileId; art?:ArtDirectionId; motion?:MotionDirection; theme?:DesignThemeId; device?:string } | null>(null);
   const preview = <K extends keyof NonNullable<typeof audition>>(key:K,value:string|null) => setAudition(value===null?null:{[key]:value});
   const shownDevice = audition?.device ?? device;
   const selected = retestStudies.find(s => s.id === structure)!;
   const render = (type: TypographyProfileId, direction: ArtDirectionId, temporary = false) => <DesignThemeProvider theme={temporary ? (audition?.theme ?? theme) : theme} typography={type} artDirection={direction} motion={temporary ? (audition?.motion ?? motion) : motion}><RetestStudy key={`${structure}-${replay}-${motion}`} id={temporary ? (audition?.structure ?? structure) : structure} /></DesignThemeProvider>;
-  return <LabEditor title="Design Lab" workspaceSwitch={workspaceSwitch} canvasWidth={shownDevice === "mobile" ? 390 : shownDevice === "tablet" ? 768 : 1440} resetKey={structure} activeTab={tab} onTabChange={value=>{setAudition(null);setTab(value);}} toolbar={toolbar}
+  return <LabEditor title="Design Lab" workspaceSwitch={workspaceSwitch} canvasWidth={shownDevice === "mobile" ? 390 : shownDevice === "tablet" ? 768 : 1440} resetKey={structure} activeTab={tab} onTabChange={value=>{setAudition(null);setTab(value);}} toolbar={toolbar} onReplay={replayMotion}
     tabs={[
       { id: "study", label: "Study", content: <><header className="calibration-intro"><h2>Same structure. Different creative direction.</h2><p>Calibration studies only. Original approvals are preserved in Figma. These are not registered components.</p></header><div className="calibration-controls">
       <CapabilityControl label="Component Structure" value={structure} choices={retestStudies.map(s=>({value:s.id,label:`${s.id} · ${s.name}`}))} onPreview={value=>setAudition(value===null?null:{structure:value as RetestId,motion:"none"})} onChange={value=>{setStructure(value as RetestId);setMotion("none");}} />
@@ -32,7 +33,7 @@ export function CalibrationLab({ toolbar, workspaceSwitch }: { toolbar?: ReactNo
       <CapabilityControl label="Motion" value={motion} choices={selected.motionCapability.values.map(value => ({ value }))} note={selected.motionCapability.reason} onPreview={value=>preview("motion",value)} onChange={value => setMotion(value as MotionDirection)} />
       <CapabilityControl label="Theme / Brand Tokens" value={theme} choices={designThemes.map(p=>({value:p.id,label:p.name}))} onPreview={value=>preview("theme",value)} onChange={value=>setTheme(value as DesignThemeId)} />
       <CapabilityControl label="Viewport" value={device} choices={[{value:"desktop",label:"Desktop"},{value:"tablet",label:"Tablet · 768px"},{value:"mobile",label:"Mobile · 390px"}]} onPreview={value=>preview("device",value)} onChange={setDevice} />
-      {selected.motionCapability.values.length > 1 ? <button type="button" onClick={()=>setReplay(replay+1)}>Replay motion</button> : null}
+      {selected.motionCapability.values.length > 1 ? <button type="button" onClick={replayMotion}>Replay motion</button> : null}
       <button type="button" aria-pressed={compare} onClick={()=>setCompare(!compare)}>Compare Editorial / Poster</button>
     </div>
     <p className="calibration-note">{selected.feedback}</p>

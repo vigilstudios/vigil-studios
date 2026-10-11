@@ -6,16 +6,17 @@ import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties
 export type LabEditorTab = { id: string; label: string; content: ReactNode };
 
 /** Internal chrome only. Scaling the artboard preserves its authored container width. */
-export function LabEditor({ title, toolbar, viewportControl, workspaceSwitch, tabs, activeTab, onTabChange, canvasWidth, resetKey, inspectorTabs, inspectorTab = "design", onInspectorTabChange, children }: {
+export function LabEditor({ title, toolbar, viewportControl, workspaceSwitch, tabs, activeTab, onTabChange, canvasWidth, resetKey, onReplay, inspectorTabs, inspectorTab = "design", onInspectorTabChange, children }: {
   title: string; toolbar?: ReactNode; viewportControl?: ReactNode; workspaceSwitch?: ReactNode; tabs: LabEditorTab[]; activeTab: string;
   inspectorTabs?: LabEditorTab[]; inspectorTab?: string; onInspectorTabChange?: (id: string) => void;
-  onTabChange: (id: string) => void; canvasWidth: number; resetKey?: string; children: ReactNode;
+  onTabChange: (id: string) => void; canvasWidth: number; resetKey?: string; onReplay?: () => void; children: ReactNode;
 }) {
   const [visible, setVisible] = useState(true);
   const [fullPreview, setFullPreview] = useState(false);
   const [exitPosition, setExitPosition] = useState({ x: 24, y: 24 });
   const previewPosition = useRef({ top: 0, left: 0 });
   const fullButton = useRef<HTMLButtonElement>(null);
+  const previewControls = useRef<HTMLDivElement>(null);
   const exitDrag = useRef<{ x: number; y: number; originX: number; originY: number } | null>(null);
   const [width, setWidth] = useState(340);
   const [density, setDensity] = useState("compact");
@@ -99,8 +100,15 @@ export function LabEditor({ title, toolbar, viewportControl, workspaceSwitch, ta
   function enterPreview() {
     previewPosition.current = { top: canvas.current?.scrollTop ?? 0, left: canvas.current?.scrollLeft ?? 0 };
     setFullPreview(true);
+    onReplay?.();
   }
   function leavePreview() { setFullPreview(false); }
+  function controlPosition(x: number, y: number) {
+    return {
+      x: Math.max(8, Math.min(x, window.innerWidth - (previewControls.current?.offsetWidth ?? 180) - 8)),
+      y: Math.max(8, Math.min(y, window.innerHeight - (previewControls.current?.offsetHeight ?? 44) - 8)),
+    };
+  }
   useLayoutEffect(() => {
     if (fullPreview) { canvas.current?.scrollTo({ top: 0, left: 0 }); canvas.current?.focus(); }
     else {
@@ -111,7 +119,8 @@ export function LabEditor({ title, toolbar, viewportControl, workspaceSwitch, ta
   useEffect(() => {
     if (!fullPreview) return;
     const escape = (event: KeyboardEvent) => { if (event.key === "Escape" && !document.querySelector("dialog[open]")) { event.preventDefault(); setFullPreview(false); } };
-    const resize = () => setExitPosition(previous => ({ x: Math.max(8,Math.min(previous.x,window.innerWidth-180)), y:Math.max(8,Math.min(previous.y,window.innerHeight-52)) }));
+    const resize = () => setExitPosition(previous => controlPosition(previous.x, previous.y));
+    resize();
     window.addEventListener("keydown",escape); window.addEventListener("resize",resize);
     return () => { window.removeEventListener("keydown",escape); window.removeEventListener("resize",resize); };
   }, [fullPreview]);
@@ -166,8 +175,9 @@ export function LabEditor({ title, toolbar, viewportControl, workspaceSwitch, ta
       }}>{tab.label}</button>)}</div>
       <div className="lab-panel-content">{inspectorTabs.map(tab => <div key={tab.id} id={`${panelId}-inspector-${tab.id}`} role="tabpanel" aria-labelledby={`${panelId}-inspector-${tab.id}-tab`} hidden={inspectorTab !== tab.id}>{tab.content}</div>)}</div>
     </aside>}
-    {fullPreview && <div className="lab-preview-return" style={{ left: exitPosition.x, top: exitPosition.y }}>
-      <button type="button" aria-label="Move preview exit control" title="Drag to move; arrow keys reposition" className="lab-preview-grip" onPointerDown={event => { event.currentTarget.setPointerCapture(event.pointerId); exitDrag.current={x:event.clientX,y:event.clientY,originX:exitPosition.x,originY:exitPosition.y}; }} onPointerMove={event => { if (!exitDrag.current) return; const drag=exitDrag.current; setExitPosition({x:Math.max(8,Math.min(window.innerWidth-180,drag.originX+event.clientX-drag.x)),y:Math.max(8,Math.min(window.innerHeight-52,drag.originY+event.clientY-drag.y))}); }} onPointerUp={() => {exitDrag.current=null;}} onPointerCancel={() => {exitDrag.current=null;}} onKeyDown={event => { if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key))return;event.preventDefault();setExitPosition(previous=>({x:Math.max(8,Math.min(window.innerWidth-180,previous.x+(event.key==="ArrowLeft"?-20:event.key==="ArrowRight"?20:0))),y:Math.max(8,Math.min(window.innerHeight-52,previous.y+(event.key==="ArrowUp"?-20:event.key==="ArrowDown"?20:0)))})); }}>⠿</button>
+    {fullPreview && <div ref={previewControls} className="lab-preview-return" role="group" aria-label="Full preview controls" style={{ left: exitPosition.x, top: exitPosition.y }}>
+      <button type="button" aria-label="Move preview exit control" title="Drag to move; arrow keys reposition" className="lab-preview-grip" onPointerDown={event => { event.currentTarget.setPointerCapture(event.pointerId); exitDrag.current={x:event.clientX,y:event.clientY,originX:exitPosition.x,originY:exitPosition.y}; }} onPointerMove={event => { if (!exitDrag.current) return; const drag=exitDrag.current; setExitPosition(controlPosition(drag.originX+event.clientX-drag.x,drag.originY+event.clientY-drag.y)); }} onPointerUp={() => {exitDrag.current=null;}} onPointerCancel={() => {exitDrag.current=null;}} onKeyDown={event => { if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key))return;event.preventDefault();setExitPosition(previous=>controlPosition(previous.x+(event.key==="ArrowLeft"?-20:event.key==="ArrowRight"?20:0),previous.y+(event.key==="ArrowUp"?-20:event.key==="ArrowDown"?20:0))); }}>⠿</button>
+      {onReplay && <button type="button" onClick={onReplay}>Replay animations</button>}
       <button type="button" onClick={leavePreview}>Exit preview <span>Esc</span></button>
     </div>}
   </section>;

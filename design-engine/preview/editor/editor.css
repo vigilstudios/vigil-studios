@@ -157,7 +157,7 @@
 .lab-editor[data-full-preview=true] .lab-artboard { box-shadow:none; }
 .lab-editor[data-full-preview=true] .lab-canvas-measure { display:none; }
 .lab-editor[data-full-preview=true] [data-lab-selected],.lab-editor[data-full-preview=true] [data-lab-preview] { outline:none!important;box-shadow:none!important; }
-.lab-preview-return { position:absolute;z-index:20;display:flex;align-items:center;gap:4px;padding:5px;background:#161616;color:#fff;border:1px solid #ffffff38;border-radius:8px;box-shadow:0 5px 25px #0004;font:12px/1.4 system-ui; }
+.lab-preview-return { position:absolute;z-index:20;display:flex;align-items:center;gap:4px;padding:5px;background:#161616;color:#fff;border:1px solid #ffffff38;border-radius:8px;box-shadow:0 5px 25px #0004;font:12px/1.4 system-ui;white-space:nowrap; }
 .lab-preview-return button { background:#161616!important;color:#fff!important;border:0!important; }
 .lab-preview-return button span { opacity:.6;font-size:10px;margin-left:5px; }
 .lab-preview-grip { cursor:move!important;touch-action:none;font-size:18px!important; }

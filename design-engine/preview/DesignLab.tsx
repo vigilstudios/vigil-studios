@@ -683,6 +683,7 @@ export function DesignLab({
       title="Design Lab"
       workspaceSwitch={workspaceSwitch}
       resetKey={selected?.id}
+      onReplay={() => { setAudition(null); setReplay(value => value + 1); }}
       canvasWidth={(shown?.device ?? device) === "mobile" ? 390 : (shown?.device ?? device) === "tablet" ? 768 : 1440}
       activeTab={tab}
       onTabChange={value => { setAudition(null); setTab(value); }}
@@ -691,7 +692,7 @@ export function DesignLab({
       toolbar={
         <>
           {workspace}
-          <button type="button" onClick={() => setReplay((value) => value + 1)}>
+          <button type="button" onClick={() => { setAudition(null); setReplay(value => value + 1); }}>
             Replay preview
           </button>
         </>

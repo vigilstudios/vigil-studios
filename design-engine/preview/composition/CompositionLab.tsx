@@ -122,6 +122,7 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
   const [previewDevice, setPreviewDevice] = useState<string | null>(null);
   const shownDevice = previewDevice ?? device;
   const [replay, setReplay] = useState(0);
+  function replayMotion() { setSectionPreview(null); setLayerPreview(null); setPreviewStyle(null); setPreviewDevice(null); setReplay(value => value + 1); }
   const [tab, setTab] = useState("sections");
   const [inspect, setInspect] = useState(true);
   const [previewStyle, setPreviewStyle] = useState<SectionId | null>(null);
@@ -265,7 +266,7 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
     <ClientDataEditor key={`json-${pageId}-${current.id}-${current.component}`} section={current} draft={clientDrafts[`${pageId}-${current.id}-${current.component}`]} onChange={updateSection} onDraft={draft => setClientDrafts(previous => ({ ...previous, [`${pageId}-${current.id}-${current.component}`]: draft }))}/>
   </>}</>;
   const qaControls = <><Panel title="Compatibility"><div aria-live="polite" role="status">{inspection.issues.length ? <ul className="composition-issues">{inspection.issues.map((issue, index) => <li key={index}><strong>{issue.section ?? "Page"}</strong>: {issue.message}</li>)}</ul> : <p>Declared capabilities are compatible. Review content, contrast and media at each width.</p>}</div>{transitions.length ? <ul className="composition-transitions">{transitions.map((notice,index)=><li key={index}><strong>{notice.section}</strong>: {notice.message}</li>)}</ul> : null}</Panel><Panel title="Site action diagnostics"><p role="alert">{siteError}</p>{actionWarnings.length ? <ul>{actionWarnings.map((issue, index) => <li key={index}>{issue.pageId ?? "Site"} / {issue.sectionId ?? "Navigation"}: {issue.message}</li>)}</ul> : <p>No broken typed actions.</p>}</Panel><details><summary>Site Definition / JSON</summary><pre>{JSON.stringify(site, null, 2)}</pre></details><p className="composition-footnote">Images are retained generated review studies. Client projects supply their own content, licensed media and font bindings. Footers can be shared globally or overridden per page.</p></>;
-  return <div className="composition-lab" onKeyDown={event => { if (event.key === "Escape") { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); } }}><LabEditor title="Composition Lab" workspaceSwitch={workspaceSwitch} resetKey={fixture} canvasWidth={shownDevice === "mobile" ? 390 : shownDevice === "tablet" ? 768 : 1440} activeTab={tab} onTabChange={value => { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); setTab(value); }}
+  return <div className="composition-lab" onKeyDown={event => { if (event.key === "Escape") { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); } }}><LabEditor title="Composition Lab" workspaceSwitch={workspaceSwitch} resetKey={fixture} canvasWidth={shownDevice === "mobile" ? 390 : shownDevice === "tablet" ? 768 : 1440} activeTab={tab} onTabChange={value => { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); setTab(value); }} onReplay={replayMotion}
     viewportControl={<Control label="Viewport" value={device} values={["desktop", "tablet", "mobile"]} onChange={setDevice} onPreview={setPreviewDevice} />}
     toolbar={<>
       {project && <><button type="button" disabled={saving} onClick={saveProject}>{saving ? "Saving…" : dirty ? "Save project · unsaved" : "Save project"}</button><button type="button" disabled={dirty || saving} title={dirty ? "Save the current edits before deployment" : "Export this saved project and deploy its preview"} onClick={async () => { try { await project.deploy(); setStorageNotice("Preview job queued. Open Project to follow deployment status."); } catch (failure) { setStorageNotice(failure instanceof Error ? failure.message : "Could not deploy preview."); } }}>Deploy preview</button><span role="status">{storageNotice}</span></>}
@@ -281,7 +282,7 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
       }} /></div></details>
       <button type="button" onClick={() => { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); clearDialog.current?.showModal(); }}>Clear canvas</button>
       <button type="button" aria-pressed={inspect} onClick={() => setInspect(value => !value)}>{inspect ? "Select on canvas" : "Interact with preview"}</button>
-      <button type="button" title="Replay motion" onClick={() => { setSectionPreview(null); setLayerPreview(null); setReplay(value => value + 1); }}>Replay</button>
+      <button type="button" title="Replay motion" onClick={replayMotion}>Replay</button>
       {siteError && <span role="alert">{siteError}</span>}
       <span className={`composition-health ${inspection.issues.length ? "composition-health--error" : ""}`}><button type="button" onClick={() => setTab("qa")}>{inspection.issues.length ? `${inspection.issues.length} issues` : "Compatible"}</button></span>
     </>}
