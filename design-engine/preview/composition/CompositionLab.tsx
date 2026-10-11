@@ -41,6 +41,7 @@ import { resolveRoutes } from "../../site/routes";
 import { siteFromComposition, pageComposition, type SiteDefinition } from "../../site/model";
 import { applyPageComposition, updatePage } from "../../site/operations";
 import { deserializeSite, serializeSite, parseSiteDefinition, siteDraftKey } from "../../site/persistence";
+import { createSiteHistory, recordSiteChange, undoSiteChange, redoSiteChange, locateSiteHistory, restoreSiteHistory, serializeSiteHistory, siteHistoryKey, siteHistoryLimit } from "../../site/history";
 import { materializeComposition, navigationIssues } from "../../site/navigation";
 import { actionIssues } from "../../site/actions";
 import { SiteTree, SiteStructureControls } from "./SiteTree";
@@ -74,7 +75,9 @@ function CategoryChoices({ groups, value, kind, onChange }: {
 
 export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?: ReactNode; project?: ComposerProject }) {
   const systemMotion = useMotionPolicy();
-  const [site, setSite] = useState<SiteDefinition>(() => project?.site ?? siteFromComposition(makeBlankComposition()));
+  const [history, setHistory] = useState(() => createSiteHistory(project?.site ?? siteFromComposition(makeBlankComposition())));
+  const typingInput = useRef<{ element: Element | null; id: number; at: number }>({ element: null, id: 0, at: 0 });
+  const site = useMemo(() => deserializeSite(history.present.document), [history.present.document]);
   const [pageId, setPageId] = useState(project?.site.navigation.homePageId ?? "page-home");
   const [saving, setSaving] = useState(false);
   const [clientDrafts, setClientDrafts] = useState<Record<string, ClientDataDraft | undefined>>({});
@@ -98,36 +101,59 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
   const [storageReady, setStorageReady] = useState(false);
   const [storageNotice, setStorageNotice] = useState("");
   const [siteError, setSiteError] = useState("");
-  function setComposition(value: SetStateAction<PageComposition>) {
-    try { const next = typeof value === "function" ? value(composition) : value; setSite(previous => applyPageComposition(previous, pageId, typeof value === "function" ? value(pageComposition(previous, pageId)) : next)); setSiteError(""); }
-    catch (error) { setSiteError(error instanceof Error ? error.message : "Invalid site edit."); }
-  }
-  function commitSite(next: SiteDefinition) { try { setSite(parseSiteDefinition(next)); setSiteError(""); } catch (error) { setSiteError(error instanceof Error ? error.message : "Invalid site definition."); } }
-  useEffect(() => {
-    if (project) return;
-    const timer = setTimeout(() => {
-      try { const json = localStorage.getItem(siteDraftKey); if (json) { const saved = deserializeSite(json); setSite(saved); setPageId(saved.navigation.homePageId); } setStorageReady(true); }
-      catch { setStorageNotice("Saved draft could not be loaded. It is preserved; export or import a valid document, then choose Save local draft to replace it."); }
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [project]);
-  useEffect(() => {
-    if (project || !storageReady) return;
-    const timer = setTimeout(() => { try { localStorage.setItem(siteDraftKey, serializeSite(site)); setStorageNotice("Local draft saved. Export JSON for repository storage."); } catch { setStorageNotice("Local draft could not be saved. Export JSON to retain your work."); } }, 250);
-    return () => clearTimeout(timer);
-  }, [site, storageReady, project]);
   const [fixture, setFixture] = useState("blank-canvas");
   const [selected, setSelected] = useState("");
   const [device, setDevice] = useState("desktop");
   const [previewDevice, setPreviewDevice] = useState<string | null>(null);
   const shownDevice = previewDevice ?? device;
   const [replay, setReplay] = useState(0);
-  function replayMotion() { setSectionPreview(null); setLayerPreview(null); setPreviewStyle(null); setPreviewDevice(null); setReplay(value => value + 1); }
   const [tab, setTab] = useState("sections");
   const [inspect, setInspect] = useState(true);
   const [previewStyle, setPreviewStyle] = useState<SectionId | null>(null);
   const [sectionPreview, setSectionPreview] = useState<{ base: SectionInstance; candidate: SectionInstance; label: string } | null>(null);
   const [layerPreview, setLayerPreview] = useState<{ base: PageComposition; candidate: PageComposition; scope: "site" | "page"; label: string } | null>(null);
+  function setComposition(value: SetStateAction<PageComposition>) {
+    try { const next = typeof value === "function" ? value(composition) : value; commitSite(applyPageComposition(site, pageId, next)); }
+    catch (error) { setSiteError(error instanceof Error ? error.message : "Invalid site edit."); }
+  }
+  function commitSite(next: SiteDefinition) {
+    try {
+      const validated = parseSiteDefinition(next), input = document.activeElement;
+      const textInput = input instanceof HTMLTextAreaElement || input instanceof HTMLInputElement && ["text", "number", "email", "url", "search", "tel"].includes(input.type);
+      if (typingInput.current.element !== input) typingInput.current = { ...typingInput.current, element: input, id: typingInput.current.id + 1 };
+      const typing = textInput && typingInput.current.at > 0 ? { key: `${pageId}:${selected}:${typingInput.current.id}`, at: typingInput.current.at } : undefined;
+      setHistory(previous => recordSiteChange(previous, validated, { pageId, sectionId: selected || composition.sections[0]?.id || "" }, typing));
+      setSiteError("");
+    } catch (error) { setSiteError(error instanceof Error ? error.message : "Invalid site definition."); }
+  }
+  function restoreChange(direction: "undo" | "redo") {
+    const next = direction === "undo" ? undoSiteChange(history) : redoSiteChange(history);
+    if (next === history) return;
+    setHistory(next); setPageId(next.present.pageId); setSelected(next.present.sectionId);
+    setClientDrafts({}); setSiteError(""); setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); setPreviewDevice(null);
+    if (next.present.pageId !== pageId) setFixture("site-page");
+    setReplay(value => value + 1);
+  }
+  useEffect(() => {
+    if (project) return;
+    const timer = setTimeout(() => {
+      try { const json = localStorage.getItem(siteDraftKey); if (json) { const saved = deserializeSite(json); let restored = createSiteHistory(saved); try { restored = restoreSiteHistory(localStorage.getItem(siteHistoryKey), saved); } catch { /* The current draft remains usable when history storage is unavailable. */ } setHistory(restored); setPageId(restored.present.pageId); setSelected(restored.present.sectionId); } setStorageReady(true); }
+      catch { setStorageNotice("Saved draft could not be loaded. It is preserved; export or import a valid document, then choose Save local draft to replace it."); }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [project]);
+  useEffect(() => {
+    if (project || !storageReady) return;
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(siteDraftKey, history.present.document);
+        try { localStorage.setItem(siteHistoryKey, serializeSiteHistory(history)); setStorageNotice("Local draft and change history saved. Export JSON for repository storage."); }
+        catch { setStorageNotice("Local draft saved. Undo history remains available until this editor closes; browser storage is full or unavailable."); }
+      } catch { setStorageNotice("Local draft could not be saved. Export JSON to retain your work."); }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [history, storageReady, project]);
+  function replayMotion() { setSectionPreview(null); setLayerPreview(null); setPreviewStyle(null); setPreviewDevice(null); setReplay(value => value + 1); }
   const clearDialog = useRef<HTMLDialogElement>(null);
   const preview = useRef<HTMLDivElement>(null);
   const presetPicker = useRef<HTMLDetailsElement>(null);
@@ -152,7 +178,7 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
     renderedAudition = mapAssetSources(renderedAudition, project.assets);
   }
   const inspection = { ...authoredInspection, issues: [...authoredInspection.issues, ...pageWarnings, ...navWarnings] };
-  function selectPage(id: string) { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); setPageId(id); setSelected(""); setFixture("site-page"); setReplay(value => value + 1); }
+  function selectPage(id: string) { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); setPageId(id); setSelected(""); setHistory(previous => locateSiteHistory(previous, { pageId: id, sectionId: "" })); setFixture("site-page"); setReplay(value => value + 1); }
   function layerIssues(candidate: PageComposition, scope: "site" | "page") {
     if (scope === "page") return inspectComposition(candidate).issues;
     return site.pages.flatMap(page => inspectComposition(page.id === pageId ? candidate : { ...pageComposition(site, page.id), site: candidate.site }).issues.map(issue => ({ ...issue, message: `${page.title}: ${issue.message}` })));
@@ -266,7 +292,7 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
     <ClientDataEditor key={`json-${pageId}-${current.id}-${current.component}`} section={current} draft={clientDrafts[`${pageId}-${current.id}-${current.component}`]} onChange={updateSection} onDraft={draft => setClientDrafts(previous => ({ ...previous, [`${pageId}-${current.id}-${current.component}`]: draft }))}/>
   </>}</>;
   const qaControls = <><Panel title="Compatibility"><div aria-live="polite" role="status">{inspection.issues.length ? <ul className="composition-issues">{inspection.issues.map((issue, index) => <li key={index}><strong>{issue.section ?? "Page"}</strong>: {issue.message}</li>)}</ul> : <p>Declared capabilities are compatible. Review content, contrast and media at each width.</p>}</div>{transitions.length ? <ul className="composition-transitions">{transitions.map((notice,index)=><li key={index}><strong>{notice.section}</strong>: {notice.message}</li>)}</ul> : null}</Panel><Panel title="Site action diagnostics"><p role="alert">{siteError}</p>{actionWarnings.length ? <ul>{actionWarnings.map((issue, index) => <li key={index}>{issue.pageId ?? "Site"} / {issue.sectionId ?? "Navigation"}: {issue.message}</li>)}</ul> : <p>No broken typed actions.</p>}</Panel><details><summary>Site Definition / JSON</summary><pre>{JSON.stringify(site, null, 2)}</pre></details><p className="composition-footnote">Images are retained generated review studies. Client projects supply their own content, licensed media and font bindings. Footers can be shared globally or overridden per page.</p></>;
-  return <div className="composition-lab" onKeyDown={event => { if (event.key === "Escape") { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); } }}><LabEditor title="Composition Lab" workspaceSwitch={workspaceSwitch} resetKey={fixture} canvasWidth={shownDevice === "mobile" ? 390 : shownDevice === "tablet" ? 768 : 1440} activeTab={tab} onTabChange={value => { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); setTab(value); }} onReplay={replayMotion}
+  return <div className="composition-lab" onInputCapture={event => { typingInput.current.at = event.timeStamp; }} onKeyDown={event => { if (event.key === "Escape") { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); } }}><LabEditor title="Composition Lab" workspaceSwitch={workspaceSwitch} resetKey={fixture} canvasWidth={shownDevice === "mobile" ? 390 : shownDevice === "tablet" ? 768 : 1440} activeTab={tab} onTabChange={value => { setPreviewStyle(null); setSectionPreview(null); setLayerPreview(null); setTab(value); }} onReplay={replayMotion} history={{ undo: () => restoreChange("undo"), redo: () => restoreChange("redo"), undoCount: history.past.length, redoCount: history.future.length, limit: siteHistoryLimit }}
     viewportControl={<Control label="Viewport" value={device} values={["desktop", "tablet", "mobile"]} onChange={setDevice} onPreview={setPreviewDevice} />}
     toolbar={<>
       {project && <><button type="button" disabled={saving} onClick={saveProject}>{saving ? "Saving…" : dirty ? "Save project · unsaved" : "Save project"}</button><button type="button" disabled={dirty || saving} title={dirty ? "Save the current edits before deployment" : "Export this saved project and deploy its preview"} onClick={async () => { try { await project.deploy(); setStorageNotice("Preview job queued. Open Project to follow deployment status."); } catch (failure) { setStorageNotice(failure instanceof Error ? failure.message : "Could not deploy preview."); } }}>Deploy preview</button><span role="status">{storageNotice}</span></>}

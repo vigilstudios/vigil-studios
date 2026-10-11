@@ -1,4 +1,8 @@
 /* Viewport and zoom remain a single, uncompressed group in both Lab workspaces. */
+.lab-editor-history { display:flex;flex:none;align-items:center;gap:3px; }
+.lab-editor-history button { width:30px;padding:0!important;font-size:19px!important; }
+.lab-editor-history span { color:var(--text-secondary);font:10px monospace;white-space:nowrap;margin-left:3px; }
+
 .lab-editor-toolbar .lab-editor-view {
   gap: 16px;
 }

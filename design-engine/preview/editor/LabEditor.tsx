@@ -2,14 +2,16 @@
 import "./toolbar.css";
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { historyShortcut } from "./history-input";
 
 export type LabEditorTab = { id: string; label: string; content: ReactNode };
+export type LabEditorHistory = { undo: () => void; redo: () => void; undoCount: number; redoCount: number; limit: number };
 
 /** Internal chrome only. Scaling the artboard preserves its authored container width. */
-export function LabEditor({ title, toolbar, viewportControl, workspaceSwitch, tabs, activeTab, onTabChange, canvasWidth, resetKey, onReplay, inspectorTabs, inspectorTab = "design", onInspectorTabChange, children }: {
+export function LabEditor({ title, toolbar, viewportControl, workspaceSwitch, tabs, activeTab, onTabChange, canvasWidth, resetKey, onReplay, history, inspectorTabs, inspectorTab = "design", onInspectorTabChange, children }: {
   title: string; toolbar?: ReactNode; viewportControl?: ReactNode; workspaceSwitch?: ReactNode; tabs: LabEditorTab[]; activeTab: string;
   inspectorTabs?: LabEditorTab[]; inspectorTab?: string; onInspectorTabChange?: (id: string) => void;
-  onTabChange: (id: string) => void; canvasWidth: number; resetKey?: string; onReplay?: () => void; children: ReactNode;
+  onTabChange: (id: string) => void; canvasWidth: number; resetKey?: string; onReplay?: () => void; history?: LabEditorHistory; children: ReactNode;
 }) {
   const [visible, setVisible] = useState(true);
   const [fullPreview, setFullPreview] = useState(false);
@@ -128,9 +130,22 @@ export function LabEditor({ title, toolbar, viewportControl, workspaceSwitch, ta
   const changeVisibility = () => { setVisible(value => !value); showButton.current?.focus(); };
 
   return <section className="lab-editor" aria-label={`${title} editor`} data-density={density} data-controls={visible ? "visible" : "hidden"} data-full-preview={fullPreview}
+    onKeyDownCapture={event => {
+      if (!history || fullPreview || document.querySelector("dialog[open]")) return;
+      const editable = event.target instanceof Element && Boolean(event.target.closest("input,textarea,select,[contenteditable]:not([contenteditable='false'])"));
+      const action = historyShortcut(event, editable);
+      if (!action) return;
+      event.preventDefault();
+      if (action === "undo" ? history.undoCount > 0 : history.redoCount > 0) history[action]();
+    }}
     style={{ "--lab-panel-width": `${width}px`, "--lab-right-space": `${rightSpace}px`, "--lab-left-space": `${leftSpace}px`, "--lab-stage-width": `${stageWidth * scale}px` } as CSSProperties}>
     <header className="lab-editor-toolbar" hidden={fullPreview}>
       <div className="lab-editor-title"><span className="lab-editor-mark" aria-hidden="true">◈</span><h1>Lab</h1>{workspaceSwitch}</div>
+      {history && <div className="lab-editor-history" role="group" aria-label={`Change history · up to ${history.limit} changes`}>
+        <button type="button" aria-label="Undo" title={`Undo · ${history.undoCount} available · Cmd/Ctrl+Z`} disabled={!history.undoCount} onClick={history.undo}>↶</button>
+        <button type="button" aria-label="Redo" title={`Redo · ${history.redoCount} available · Cmd/Ctrl+Shift+Z or Ctrl+Y`} disabled={!history.redoCount} onClick={history.redo}>↷</button>
+        <span title={`Up to ${history.limit} recent changes`}>{history.undoCount}/{history.limit}</span>
+      </div>}
       <div className="lab-editor-tools">{toolbar}</div>
       <div className="lab-editor-view">
         {viewportControl && <div className="lab-editor-viewport">{viewportControl}</div>}

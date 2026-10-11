@@ -9,8 +9,10 @@ const omitted = new Set(["id", "src", "poster", "destination", "provenance", "ki
 export function ContentTextField({ label, value, onChange, multiline = false, type = "text", bare = false }: {
   label: string; value: string; onChange: (value: string) => void; multiline?: boolean; type?: "text" | "number"; bare?: boolean;
 }) {
-  const [pending, setPending] = useState<{ value: string; base: string } | null>(null);
-  const shown = pending?.base === value ? pending.value : value;
+  const [pending, setPending] = useState({ value, base: value });
+  // Accept canonical changes (including undo) before an old invalid draft can reappear.
+  if (pending.base !== value) setPending({ value, base: value });
+  const shown = pending.base === value ? pending.value : value;
   const change = (next: string) => { setPending({ value: next, base: value }); onChange(next); };
   const input = multiline ? <textarea aria-label={label} rows={4} value={shown} onChange={event => change(event.target.value)}/> : <input aria-label={label} type={type} value={shown} onChange={event => change(event.target.value)}/>;
   return bare ? input : <label className="composition-content-field">{label}{input}</label>;

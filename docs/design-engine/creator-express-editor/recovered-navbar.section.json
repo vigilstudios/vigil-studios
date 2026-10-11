@@ -1,0 +1,184 @@
+{
+  "id": "navigation",
+  "component": "navigation.meridian",
+  "presentation": {
+    "motion": {
+      "entrance": "slide-down",
+      "exit": "slide-down",
+      "duration": 650,
+      "delay": 0,
+      "easing": "smooth",
+      "distance": 28,
+      "blur": 8,
+      "scale": 0.96,
+      "stagger": 90,
+      "sequence": "together",
+      "threshold": 0.06,
+      "replay": false,
+      "mediaHover": "zoom"
+    },
+    "motionMode": "override"
+  },
+  "overrides": {},
+  "actions": [
+    {
+      "path": [
+        "content",
+        "home"
+      ],
+      "action": {
+        "type": "page",
+        "pageId": "page-home"
+      }
+    },
+    {
+      "path": [
+        "content",
+        "links",
+        0,
+        "href"
+      ],
+      "action": {
+        "type": "section",
+        "pageId": "page-home",
+        "sectionId": "approach-3"
+      }
+    },
+    {
+      "path": [
+        "content",
+        "links",
+        1,
+        "href"
+      ],
+      "action": {
+        "type": "section",
+        "pageId": "page-home",
+        "sectionId": "approach-2"
+      }
+    },
+    {
+      "path": [
+        "content",
+        "links",
+        2,
+        "href"
+      ],
+      "action": {
+        "type": "section",
+        "pageId": "page-home",
+        "sectionId": "approach-4"
+      }
+    },
+    {
+      "path": [
+        "content",
+        "links",
+        3,
+        "href"
+      ],
+      "action": {
+        "type": "section",
+        "pageId": "page-home",
+        "sectionId": "approach-1"
+      }
+    },
+    {
+      "path": [
+        "content",
+        "links",
+        4,
+        "href"
+      ],
+      "action": {
+        "type": "section",
+        "pageId": "page-home",
+        "sectionId": "approach"
+      }
+    },
+    {
+      "path": [
+        "content",
+        "links",
+        5,
+        "href"
+      ],
+      "action": {
+        "type": "section",
+        "pageId": "page-home",
+        "sectionId": "approach-5"
+      }
+    },
+    {
+      "path": [
+        "content",
+        "links",
+        6,
+        "href"
+      ],
+      "action": {
+        "type": "section",
+        "pageId": "page-home",
+        "sectionId": "approach-6"
+      }
+    }
+  ],
+  "structure": "NX02",
+  "motion": "none",
+  "settings": {
+    "brand": "center",
+    "primary": "split",
+    "actions": "right",
+    "position": "overlay",
+    "background": "solid",
+    "contrast": "brand",
+    "density": "compact",
+    "scroll": "solidify",
+    "heroContrast": "brand",
+    "cta": false,
+    "utilities": false
+  },
+  "content": {
+    "brand": "MB",
+    "home": "/",
+    "edition": "Independent edition / 2026",
+    "note": "Everyday stories, thoughtful finds and creative collaborations.",
+    "sceneLabel": "Muse’s everyday edit",
+    "prompt": "A little life behind the camera.",
+    "links": [
+      {
+        "label": "About",
+        "href": "/#approach-3"
+      },
+      {
+        "label": "Featured",
+        "href": "/#approach-2"
+      },
+      {
+        "label": "Socials",
+        "href": "/#approach-4"
+      },
+      {
+        "label": "Brand Work",
+        "href": "/#approach-1"
+      },
+      {
+        "label": "Services",
+        "href": "/#approach"
+      },
+      {
+        "label": "Testimonials",
+        "href": "/#approach-5"
+      },
+      {
+        "label": "Contact",
+        "href": "/#approach-6"
+      }
+    ],
+    "action": {
+      "label": "Let’s collaborate",
+      "href": "#approach-6"
+    },
+    "utilities": []
+  }
+}
