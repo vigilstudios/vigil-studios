@@ -1,0 +1,10 @@
+{
+  "name": "@vigil/next-eslint-glob",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Only the globSync directory lookup used by the pinned Next ESLint plugin",
+  "main": "index.cjs",
+  "dependencies": {
+    "tinyglobby": "0.2.17"
+  }
+}
