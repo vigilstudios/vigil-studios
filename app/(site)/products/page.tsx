@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Check, CreditCard, Globe, Lock, MonitorSmartphone, RefreshCw, Shield } from "lucide-react";
+import { WebsiteFitCallout } from "@/components/site/WebsiteFitCallout";
 import { Footer } from "@/components/layout/Footer";
 import { Chip, Container, Eyebrow, Section, SectionIntro } from "@/components/site/primitives";
 import { planBullets, planHasVirtue } from "@/lib/vigil/plan-presentation";
 import { VirtueOrb } from "@/components/vigil/VirtueOrb";
 import { GetStartedSection } from "@/sections/GetStartedSection";
 import { publishedExpressTemplates } from "@/lib/vigil/express/library";
-import { BUILD_COPY, PLAN_COPY } from "@/lib/site-copy";
+import { BUILD_COPY, PLAN_COPY, WEBSITE_PACKAGE_LINKS } from "@/lib/site-copy";
 import { formatMoney } from "@/lib/vigil/format";
 import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
 
@@ -44,12 +45,12 @@ export default async function ProductsPage() {
 
       <Section id="websites" alt>
         <Container>
-          <SectionIntro eyebrow="Websites" title="Built for you, by a person." lead="Express brings a curated single page. Professional brings a tailored multi-page composition. Custom brings bespoke design and advanced functionality. We build around your brand and goals." />
+          <SectionIntro eyebrow="Websites" title="Built for you, by a person." lead="Express brings a curated single page. Professional brings a tailored multi-page composition. Growth brings bespoke design and advanced functionality. We build around your brand and goals." />
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {builds.map((b) => {
               const copy = BUILD_COPY[b.kind];
               return (
-                <div key={b.kind} className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-6">
+                <div key={b.kind} className="flex flex-col rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-6">
                   <h3 className="text-lg font-semibold tracking-tight">{b.name}</h3>
                   <p className="text-sm text-[color:var(--text-secondary)]">{copy?.tagline ?? b.description}</p>
                   <p className="mt-4 text-2xl font-semibold tracking-tight">{b.amountCents != null ? formatMoney(b.amountCents, b.currency).replace(/\.00$/, "") : "Quoted"}</p>
@@ -58,17 +59,15 @@ export default async function ProductsPage() {
                       <li key={x} className="flex items-start gap-2"><Check className="mt-1 h-3.5 w-3.5 shrink-0 text-[color:var(--accent)]" /> {x}</li>
                     ))}
                   </ul>
+                  <div className="mt-auto pt-6">
+                    <Link href={WEBSITE_PACKAGE_LINKS[b.kind].href} className="btn-secondary inline-flex min-h-11 w-full !px-4 !py-2 text-sm font-semibold">{WEBSITE_PACKAGE_LINKS[b.kind].label} <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+                  </div>
                 </div>
               );
             })}
           </div>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link href="/find-your-fit" className="btn-primary min-h-11 !px-5 !py-2 text-sm font-semibold">Find my website fit <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
-            <Link href="/express" className="btn-secondary min-h-11 !px-5 !py-2 text-sm font-semibold">Browse Express designs <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
-            <p className="text-sm text-[color:var(--text-secondary)]">
-              {templates.filter((t) => t.status === "available").length} industries ready today · {templates.filter((t) => t.status === "coming").length} under construction
-            </p>
-          </div>
+          <WebsiteFitCallout />
+          <p className="mt-4 text-center text-xs text-[color:var(--text-secondary)]">{templates.filter((t) => t.status === "available").length} industries ready today · {templates.filter((t) => t.status === "coming").length} under construction</p>
         </Container>
       </Section>
 

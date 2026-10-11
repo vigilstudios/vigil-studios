@@ -25,8 +25,12 @@ export function StarCursor() {
       const node = target instanceof Element ? target : null;
       if (!node) return "";
       if (node.closest("input, textarea, select, [contenteditable], [data-cursor='native']")) return "native";
-      if (node.closest(".btn-primary, .section-accent, [data-cursor='dark']")) return "is-dark";
-      if (node.closest("a, button, [role='button'], summary, label, [data-cursor='light']")) return "is-light";
+      // The nearest surface wins: a dark card inside a green section needs
+      // a white pointer, while its green primary button still needs black.
+      const surface = node.closest("[data-cursor], .btn-primary, .section-accent");
+      if (surface?.getAttribute("data-cursor") === "light") return "is-light";
+      if (surface?.matches(".btn-primary, .section-accent, [data-cursor='dark']")) return "is-dark";
+      if (node.closest("a, button, [role='button'], summary, label")) return "is-light";
       return "";
     };
     const onMove = (e: PointerEvent) => {

@@ -4,6 +4,7 @@ import { Chip, Container, Eyebrow, Section } from "@/components/site/primitives"
 import { Card, CardRow } from "@/components/site/Cards";
 import { Reveal } from "@/components/site/Reveal";
 import { EXPRESS_TEMPLATES } from "@/lib/constants";
+import { WebsiteFitCallout } from "@/components/site/WebsiteFitCallout";
 import { START } from "@/lib/site-copy";
 import { formatMoney } from "@/lib/vigil/format";
 import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
@@ -19,7 +20,7 @@ export async function StartSection() {
   const available = EXPRESS_TEMPLATES.filter((t) => t.status === "available").map((t) => t.industry);
   const coming = EXPRESS_TEMPLATES.filter((t) => t.status === "coming").length;
   return (
-    <Section id="start" fill accent className="-mt-[100svh] isolate overflow-hidden md:py-20!">
+    <Section id="start" fill accent className="-mt-[100svh] isolate overflow-hidden md:pt-28! md:pb-20!">
       <Container>
         <Reveal>
           <div className="mx-auto max-w-2xl text-center">
@@ -32,7 +33,7 @@ export async function StartSection() {
             const stage = START.stages[b.kind];
             return (
               <Card key={b.kind}>
-                <div className="flex h-full flex-col rounded-2xl border border-[rgba(255,255,255,0.1)] bg-[color:var(--bg-primary)] p-5 text-[color:var(--text-primary)] lg:p-6 transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-[rgba(255,255,255,0.3)]">
+                <div data-cursor="light" className="flex h-full flex-col rounded-2xl border border-[rgba(255,255,255,0.1)] bg-[color:var(--bg-primary)] p-5 text-[color:var(--text-primary)] lg:p-6 transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-[rgba(255,255,255,0.3)]">
                   <Eyebrow tone={stage.tone}>{stage.stage}</Eyebrow>
                   <h3 className="text-xl font-semibold tracking-tight">{b.name}</h3>
                   <p className="mt-1.5 text-[14px] leading-6 text-[color:var(--text-secondary)]">{stage.body}</p>
@@ -56,7 +57,7 @@ export async function StartSection() {
                     </div>
                   ) : null}
                   <div className="mt-auto pt-5">
-                    <Link href={stage.cta.href} className="btn-primary inline-flex min-h-11 w-full !px-4 !py-2 text-sm font-semibold">
+                    <Link href={stage.cta.href} className="btn-secondary inline-flex min-h-11 w-full !px-4 !py-2 text-sm font-semibold">
                       {stage.cta.label} <ArrowRight className="ml-1.5 h-4 w-4" />
                     </Link>
                   </div>
@@ -66,7 +67,7 @@ export async function StartSection() {
           })}
         </CardRow>
         <Reveal delay={0.2}>
-          <p className="mx-auto mt-5 max-w-2xl text-center text-sm leading-6 text-[#062b13]/80">{START.note}</p>
+          <WebsiteFitCallout />
         </Reveal>
       </Container>
     </Section>

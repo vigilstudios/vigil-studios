@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Check, Minus } from "lucide-react";
+import { WebsiteFitCallout } from "@/components/site/WebsiteFitCallout";
+import { CalendlyPopup } from "@/components/CalendlyModal";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardRow } from "@/components/site/Cards";
 import { Chip, Container, Eyebrow, Section, SectionIntro } from "@/components/site/primitives";
@@ -56,6 +58,7 @@ export default async function WebsitesPage() {
               })}
             </CardRow>
           </Reveal>
+          <Reveal delay={0.2}><WebsiteFitCallout /></Reveal>
         </Container>
       </Section>
 
@@ -95,9 +98,15 @@ export default async function WebsitesPage() {
                   ) : null}
 
                   <div className="mt-8 flex flex-wrap items-center gap-3">
-                    <Link href={pkg.cta.href} className={kind === "custom" ? "btn-secondary min-h-11 !px-5 !py-2 text-sm" : "btn-primary min-h-11 !px-5 !py-2 text-sm font-semibold"}>
-                      {pkg.cta.label} <ArrowRight className="ml-1.5 h-4 w-4" />
-                    </Link>
+                    {kind === "custom" ? (
+                      <CalendlyPopup className="btn-primary min-h-11 !px-5 !py-2 text-sm font-semibold">
+                        {pkg.cta.label} <ArrowRight className="ml-1.5 h-4 w-4" />
+                      </CalendlyPopup>
+                    ) : (
+                      <Link href={pkg.cta.href} className="btn-primary min-h-11 !px-5 !py-2 text-sm font-semibold">
+                        {pkg.cta.label} <ArrowRight className="ml-1.5 h-4 w-4" />
+                      </Link>
+                    )}
                     <Link href="/pricing" className="inline-flex items-center gap-1 text-sm font-medium text-[color:var(--accent)]">
                       See the price <ArrowRight className="h-4 w-4" />
                     </Link>
