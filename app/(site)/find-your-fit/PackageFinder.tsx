@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { ArrowLeft, ArrowRight, Check, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, RotateCcw } from "lucide-react";
 import { CampaignLink } from "@/components/creators/CampaignLink";
+import { VirtueOrb } from "@/components/vigil/VirtueOrb";
 import { CalendlyPopup } from "@/components/CalendlyModal";
 import { formatMoney } from "@/lib/vigil/format";
 import type { PublicBuild } from "@/lib/vigil/queries/public-pricing";
@@ -55,8 +56,8 @@ export function PackageFinder({ builds, preference, selectedPlanName }: { builds
         <div className={styles.result} key="result">
           <div className={styles.confetti} aria-hidden="true">{Array.from({ length: 36 }, (_, index) => <i key={index} style={{ "--x": `${(index * 37) % 100}%`, "--delay": `${(index % 9) * 0.08}s`, "--drift": `${((index % 7) - 3) * 35}px`, "--color": ["#16d45a", "#b9ffcc", "#a594ff", "#ffe185"][index % 4] } as CSSProperties} />)}</div>
           <div className={styles.resultCard}>
-            <span className={styles.successIcon} aria-hidden="true"><Sparkles size={28} /></span>
-            <p className={styles.eyebrow}>Your next chapter starts here</p>
+            <div className={styles.resultOrb}><VirtueOrb size="md" state="done" label="Virtue, your website guide" /></div>
+            <p className={styles.eyebrow}>Virtue’s recommendation</p>
             <h1 ref={heading} tabIndex={-1} className={styles.resultTitle}>You found your fit.<br /><span>{name}.</span></h1>
             <p className={styles.resultLead}>{tier.summary}</p>
             <ul className={styles.reasons}>{recommendation.reasons.map((reason) => <li key={reason}><Check size={17} aria-hidden="true" /><span>{reason}</span></li>)}</ul>
@@ -73,10 +74,17 @@ export function PackageFinder({ builds, preference, selectedPlanName }: { builds
         </div>
       ) : (
         <div className={styles.guide}>
-          <header className={styles.intro}><p className={styles.eyebrow}>Find your website fit</p><h1>One project. The right starting point.</h1><p>Express, Professional or Growth. Three short questions about what you need, then a recommendation made for you.</p></header>
-          <div className={styles.question} key={step}>
+          <aside className={styles.intro}>
+            <VirtueOrb size="lg" label="Virtue, your website guide" />
+            <p className={styles.eyebrow}>Find your website fit</p>
+            <h1>Let&apos;s find the right fit for you.</h1>
+            <p className={styles.guideCopy}>I&apos;m Virtue. Tell me a little about your project, and I&apos;ll help you choose Express, Professional or Growth. This takes about a minute.</p>
             <div className={styles.progress} aria-label={`Question ${step + 1} of 3`}>{[0, 1, 2].map((index) => <span key={index} className={index <= step ? styles.progressActive : ""} />)}</div>
-            <p className={styles.step}>Question {step + 1} of 3{step === 2 ? " · Select all that apply" : " · Select one"}</p>
+            <p className={styles.step}>Question {step + 1} of 3</p>
+            {selectedPlanName ? <p className={styles.guideCopy}>Your {selectedPlanName} subscription preference is selected. First, let&apos;s find your website build.</p> : null}
+          </aside>
+          <div className={styles.question} key={step}>
+            <p className={styles.step}>{step === 2 ? "Select all that apply" : "Select one"}</p>
             <h2 ref={heading} tabIndex={-1}>{titles[step]}</h2><p className={styles.description}>{descriptions[step]}</p>
             {step < 2 ? <div className={styles.options} role="radiogroup" aria-label={titles[step]}>{(step === 0 ? pageOptions : designOptions).map((option) => <label key={option.id} className={styles.option}><input type="radio" name={step === 0 ? "pages" : "design"} value={option.id} checked={(step === 0 ? pages : design) === option.id} onChange={() => step === 0 ? setPages(option.id as PageScope) : setDesign(option.id as DesignScope)} /><span><strong>{option.label}</strong><small>{option.detail}</small></span></label>)}</div> : <div className={styles.options} role="group" aria-label={titles[step]}>{PACKAGE_FEATURES.map((option) => <label key={option.id} className={styles.option}><input type="checkbox" checked={features.includes(option.id)} onChange={() => setFeatures((current) => current.includes(option.id) ? current.filter((item) => item !== option.id) : [...current, option.id])} /><span><strong>{option.label}</strong><small>{option.detail}</small></span></label>)}</div>}
             <div className={styles.controls}><button type="button" className={styles.back} onClick={() => setStep((current) => current - 1)} disabled={step === 0}><ArrowLeft size={16} /> Back</button><button type="button" className={styles.primary} disabled={!ready} onClick={() => setStep((current) => current + 1)}>{step === 2 ? "Reveal my fit" : "Continue"} <ArrowRight size={17} /></button></div>

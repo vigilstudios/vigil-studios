@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Footer } from "@/components/layout/Footer";
 import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
 import { BILLING_PERIODS } from "@/lib/vigil/billing-periods";
 import { PackageFinder } from "./PackageFinder";
@@ -14,5 +13,5 @@ export default async function FindYourFitPage({ searchParams }: { searchParams: 
   const [{ builds, plans }, params] = await Promise.all([getPublicPricing(), searchParams]);
   const plan = plans.find((item) => item.code === params.plan);
   const period = BILLING_PERIODS.find((item) => item.key === params.period);
-  return <><PackageFinder builds={builds} preference={{ plan: plan?.code, period: period?.key }} selectedPlanName={plan?.name} /><Footer /></>;
+  return <PackageFinder builds={builds} preference={{ plan: plan?.code, period: period?.key }} selectedPlanName={plan?.name} />;
 }
