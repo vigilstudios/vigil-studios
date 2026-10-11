@@ -1,3 +1,5 @@
+import { entranceReadyAt } from "./entrance-timing";
+
 export const countUpDefaults = { effect: "count-up", duration: 1400, delay: 0, stagger: 100, easing: "ease-out", replay: false } as const;
 export type CountUpSettings = { effect?: "none" | "count-up"; duration?: number; delay?: number; stagger?: number; easing?: "linear" | "ease-out"; replay?: boolean };
 
@@ -25,11 +27,14 @@ export function observeCountUp(target: HTMLElement, value: string, settings: Cou
   function play() {
     if (focusRoot.contains(document.activeElement)) return;
     started = true;
-    const start = performance.now() + (settings.delay ?? countUpDefaults.delay);
+    const requestedStart = performance.now() + (settings.delay ?? countUpDefaults.delay);
+    let start: number | undefined;
     target.textContent = metric!.at(0);
     const tick = (time: number) => {
       if (disposed) return;
-      const progress = Math.min(1, Math.max(0, (time - start) / duration));
+      const ready = entranceReadyAt(target);
+      if (start === undefined && Number.isFinite(ready)) start = Math.max(requestedStart, ready);
+      const progress = start === undefined ? 0 : Math.min(1, Math.max(0, (time - start) / duration));
       const eased = settings.easing === "linear" ? progress : 1 - (1 - progress) ** 3;
       target.textContent = metric!.at(eased);
       if (progress < 1) frame = requestAnimationFrame(tick);

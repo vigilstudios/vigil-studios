@@ -18,7 +18,7 @@ export function SectionActions({ primary, secondary, className = "" }: { primary
   if ((!first || !first.enabled) && !(!first && primary) && (!second || !second.enabled) && !(!second && secondary)) return null;
   const alignment = first?.enabled ? first.presentation?.alignment : second?.enabled ? second.presentation?.alignment : undefined;
   const editorial = capability?.primary?.variant?.[0] === "text";
-  return <div className={`de-action-group ${className}`} data-action-align={alignment}>
+  return <div className={`de-action-group ${className}`} data-action-align={alignment} data-de-motion-piece="content">
     <SlotLink slot={first} fallback={primary} presentation={{ variant: editorial ? "underline" : undefined }}/>
     <SlotLink slot={second} fallback={secondary} presentation={{ variant: "text" }}/>
   </div>;

@@ -9,6 +9,7 @@ import { serializeSite, deserializeSite } from "../design-engine/site/persistenc
 import { siteFromComposition } from "../design-engine/site/model";
 import { makeBlankComposition } from "../design-engine/preview/composition/fixtures";
 import { ComponentMotionControls } from "../design-engine/preview/composition/ComponentMotionControls";
+import { clearEntranceTiming, setEntranceReadyAt } from "../design-engine/motion/entrance-timing";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -50,6 +51,20 @@ function fixture(value = "128K") {
 }
 
 describe("Count-up viewport lifecycle", () => {
+  it("waits for its containing piece's staggered entrance before counting", () => {
+    const f = fixture();
+    const parent = {} as HTMLElement;
+    Object.assign(f.target, { parentElement: parent });
+    setEntranceReadyAt(parent, Infinity);
+    observeCountUp(f.target, "128K", { duration: 1000, easing: "linear" });
+    f.emit(true); f.step(500);
+    expect(f.target.textContent).toBe("0K");
+    setEntranceReadyAt(parent, 1500);
+    f.step(1000); expect(f.target.textContent).toBe("0K");
+    f.step(2000); expect(f.target.textContent).toBe("64K");
+    f.step(2500); expect(f.target.textContent).toBe("128K");
+    clearEntranceTiming(parent);
+  });
   it("waits for visibility and delay, advances by elapsed time and lands on the exact value", () => {
     const f = fixture();
     observeCountUp(f.target, "128K", { duration: 1000, delay: 200, easing: "linear" });
