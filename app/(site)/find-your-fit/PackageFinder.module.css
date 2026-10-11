@@ -71,3 +71,27 @@
   .intro { position: sticky; top: 112px; }
   .disclaimer { grid-column: 2; }
 }
+
+.priceReference { margin-top: 16px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; line-height: 1.7; color: var(--text-secondary); }
+.priceReference strong { color: var(--text-primary); font-weight: 550; }
+.field { display: grid; gap: 8px; margin-top: 18px; font-size: 13px; color: var(--text-primary); }
+.field input { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary); color-scheme: dark; }
+.field input:focus-visible, .plan summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.field small { font-size: 11px; line-height: 1.6; color: var(--text-secondary); }
+.plan { text-align: left; border-top: 1px solid var(--border); margin: 18px 0; font-size: 12px; line-height: 1.7; }
+.plan summary { padding: 12px 0; cursor: pointer; color: var(--accent); }
+.plan > div { padding: 0 0 12px; }
+.plan strong { display: block; margin-top: 10px; font-weight: 600; }
+.plan ul, .cautions ul { padding-left: 18px; list-style: disc; }
+.plan p, .plan li { color: var(--text-secondary); }
+.cautions { text-align: left; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; font-size: 12px; line-height: 1.7; }
+.cautions strong { display: block; margin-bottom: 6px; font-weight: 600; }
+.cautions li + li { margin-top: 6px; }
+@media (max-width: 600px) {
+  .compactIntro { display: grid; grid-template-columns: 56px minmax(0, 1fr); column-gap: 16px; align-items: center; }
+  .compactIntro > :first-child { grid-row: 1 / 4; width: 56px !important; height: 56px !important; }
+  .compactIntro h1, .compactIntro .guideCopy { display: none; }
+  .compactIntro .eyebrow { margin: 0 0 6px; }
+  .compactIntro .progress { grid-column: 2; margin: 0 0 6px; }
+  .compactIntro .step { grid-column: 2; margin: 0; }
+}
