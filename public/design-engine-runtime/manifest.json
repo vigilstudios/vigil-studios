@@ -1,5 +1,5 @@
 {
-  "version": "v1-668569baa1f769ee050e",
+  "version": "v1-e248d072d400a8158144",
   "schemaVersion": 1,
   "files": [
     {
@@ -20,7 +20,7 @@
     },
     {
       "path": "client.css",
-      "sha256": "019b7fac74b30241c208feec457ebe51451eacdbe69dffba5deb1f98dcbdbf48"
+      "sha256": "db832481e7e166648c9153efd09e71e0569b19c2f6ce399323de4dcb7fd2d346"
     },
     {
       "path": "client.js",
