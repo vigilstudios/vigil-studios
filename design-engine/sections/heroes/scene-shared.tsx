@@ -7,7 +7,7 @@ export type SceneSection = SectionInstance<
 export function SceneMedia({ section }: { section: SceneSection }) {
   return (
     <>
-      <div className="hx-image">
+      <div className="hx-image" data-de-motion-media="true">
         <TreatedImage
           image={section.media.image}
           treatment={section.treatment}

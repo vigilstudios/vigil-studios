@@ -15,6 +15,7 @@ export function FadeReveal({ children, distance = 20, duration = 0.55, className
   const reduced = policy.reduced;
   return (
     <motion.div
+      data-de-native-reveal="true"
       className={className}
       initial={reduced ? false : { opacity: 0, y: distance * policy.distance }}
       animate={reduced ? { opacity: 1, y: 0 } : undefined}

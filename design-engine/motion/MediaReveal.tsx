@@ -3,6 +3,7 @@
 import { useRef, type ReactNode } from "react";
 import { motion, useInView } from "framer-motion";
 import { useMotionPolicy } from "./MotionPolicy";
+import { usePresentation } from "../presentation/PresentationContext";
 
 export function MediaReveal({
   children,
@@ -16,6 +17,7 @@ export function MediaReveal({
   className?: string;
 }) {
   const policy = useMotionPolicy();
+  const staticImages = usePresentation().imageMotion === "static";
   const ref = useRef<HTMLDivElement>(null);
   // Observe the unclipped box: a completely clipped target has no visible intersection.
   const visible = useInView(ref, { once: true, amount: 0.2 });
@@ -28,7 +30,7 @@ export function MediaReveal({
   return (
     <div ref={ref} className={`de-motion-media ${className}`}>
       {/* Replace the animated DOM when policy changes, cancelling an in-flight clip immediately. */}
-      {policy.reduced ? (
+      {policy.reduced || staticImages ? (
         <div className="de-motion-media__surface">{children}</div>
       ) : (
         <motion.div

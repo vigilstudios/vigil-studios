@@ -95,7 +95,8 @@
             "buttons": {
               "hover": "icon-slide",
               "shape": "square"
-            }
+            },
+            "imageMotion": "static"
           }
         },
         {

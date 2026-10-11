@@ -37,7 +37,7 @@ export function MediaAsset({
       />
     );
   return (
-    <picture className={className} style={style}>
+    <picture className={className} style={style} data-de-motion-media="true">
       {asset.mobileSrc && (
         <source media="(max-width:700px)" srcSet={asset.mobileSrc} />
       )}

@@ -1,4 +1,9 @@
 .de-presentation { min-width: 0; }
+/* Native reveals containing media must not move or conceal static images.
+   Shared presentation motion still targets their text and controls separately. */
+.de-presentation[data-image-motion="static"] [data-de-native-reveal]:has(:is(img,picture,video,canvas,[data-de-motion-media])) {
+  opacity:1!important;transform:none!important;filter:none!important;clip-path:none!important;
+}
 .de-presentation[data-heading-uniform] :is(h1,h2) { font-size: var(--de-shared-title) !important; line-height: var(--de-shared-title-leading,1.1) !important; max-width: min(100%,var(--de-shared-title-width,100%)) !important; text-wrap: balance; }
 .de-presentation[data-heading-uniform] :is(.de-eyebrow,.de-accent,.de-proof-eyebrow,.vm-eyebrow,.hx-eyebrow,.de-service-kicker) { font-size: var(--de-shared-eyebrow) !important; }
 .de-presentation[data-heading-uniform] :is(.de-text,.de-hero__description,.hx-description,.de-creator-biography p) { font-size: var(--de-shared-body,var(--de-body-size)) !important; line-height: var(--de-shared-leading,1.65) !important; }

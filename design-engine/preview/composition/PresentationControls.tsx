@@ -16,6 +16,10 @@ export function PresentationControls({ value = {}, inherited = {}, onChange, sco
     const set = (key: keyof MotionSettings, next: unknown) => patch("motion", { ...value.motion, [key]: next });
     return <section className="composition-presentation"><h2>{scope === "section" ? "Section motion" : `${scope === "site" ? "Site" : "Page"} motion defaults`}</h2>
       {scope === "section" ? choices("Motion inheritance",value.motionMode ?? "inherit",["inherit","override","none"], next => onChange({ ...value, motionMode: next as PresentationSettings["motionMode"], ...(next === "override" && !value.motion ? { motion: { ...settings, ctaHover: undefined } } : {}) })) : <label><input type="checkbox" checked={!!value.motion} onChange={event => patch("motion", event.target.checked ? { ...motionDefaults, ...inherited.motion, ctaHover: undefined } : undefined)}/>Enable transition defaults</label>}
+      <label>Image transitions<select aria-label="Image transitions" value={value.imageMotion ?? "inherit"} onChange={event => patch("imageMotion", event.target.value === "inherit" ? undefined : event.target.value as PresentationSettings["imageMotion"])}>
+        <option value="inherit">Inherit · {inherited.imageMotion === "static" ? "Stay static" : "Follow section motion"}</option><option value="animate">Follow section motion</option><option value="static">Stay static</option>
+      </select></label>
+      <p>Stay static keeps images visible during entrance and exit transitions while text and CTAs animate. Media hover is controlled separately.</p>
       {(scope === "section" ? value.motionMode === "override" : !!value.motion) && <>
         {choices("Into view",settings.entrance,entranceEffects,next => set("entrance",next))}
         {choices("Out of view",settings.exit,entranceEffects,next => set("exit",next))}

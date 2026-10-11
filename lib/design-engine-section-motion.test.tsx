@@ -9,9 +9,10 @@ afterEach(() => vi.unstubAllGlobals());
 
 // A DOM tree with nested authored groups, rather than a flat selector stub.
 type Piece = {
-  name: string; kind: "heading" | "media" | "content" | "group"; children: Piece[]; textContent: string; parentElement: Piece | null;
+  name: string; kind: "heading" | "media" | "content" | "group" | "image"; children: Piece[]; textContent: string; parentElement: Piece | null;
   animate: ReturnType<typeof vi.fn<(frames: Keyframe[], options: KeyframeAnimationOptions) => { cancel: ReturnType<typeof vi.fn>; onfinish: (() => void) | null }>>;
   closest: (selector: string) => object | null; contains: (other: unknown) => boolean; matches: () => boolean; querySelector: () => null; querySelectorAll: (selector: string) => Piece[];
+  checkVisibility: () => boolean;
 };
 function node(name: string, kind: Piece["kind"] = "group", children: Piece[] = [], hidden = false): Piece {
   const element: Piece = {
@@ -19,11 +20,12 @@ function node(name: string, kind: Piece["kind"] = "group", children: Piece[] = [
     animate: vi.fn<(frames: Keyframe[], options: KeyframeAnimationOptions) => { cancel: ReturnType<typeof vi.fn>; onfinish: (() => void) | null }>(() => ({ cancel: vi.fn(), onfinish: null })),
     closest: (selector: string): object | null => hidden && selector.includes("[inert]") ? element : null,
     contains: (other: unknown): boolean => children.some(child => child === other || child.contains(other)),
-    matches: () => false, querySelector: () => null,
+    matches: () => false, querySelector: () => null, checkVisibility: () => true,
     querySelectorAll: (selector: string): Piece[] => {
       const all = children.flatMap(child => [child, ...child.querySelectorAll("*")]);
       if (selector === "*") return all;
-      if (selector.startsWith("header")) return all.filter(child => child.kind === "heading");
+      if (selector.startsWith("picture,img")) return all.filter(child => child.kind === "image");
+      if (selector.startsWith("header") || selector.startsWith(".de-nx-navigation")) return all.filter(child => child.kind === "heading");
       if (selector.startsWith(".de-creator-photos")) return all.filter(child => child.kind === "media");
       return all.filter(child => child.kind === "content");
     },
@@ -53,6 +55,47 @@ function fixture() {
 }
 
 describe("Complete section motion coverage", () => {
+  it("keeps navigation logos static while the adjacent wordmark and links animate", () => {
+    const f = fixture();
+    const image = node("Brand logo", "image"), wordmark = node("Brand name");
+    f.heading[0].children.push(image, wordmark);
+    observePresentationMotion(f.host, { entrance: "fade", stagger: 0 }, true, true);
+    f.emit(true);
+    expect(image.animate).not.toHaveBeenCalled();
+    expect(f.heading[0].animate).not.toHaveBeenCalled();
+    expect(f.section.animate).not.toHaveBeenCalled();
+    expect(wordmark.animate).toHaveBeenCalledOnce();
+    expect(f.heading[1].animate).toHaveBeenCalledOnce();
+  });
+  it.each([0, 90])("keeps images and all their ancestors static with %sms stagger, but animates captions and copy", stagger => {
+    const f = fixture();
+    const image = node("Image", "image");
+    image.parentElement = f.media; f.media.children.push(image);
+    const mixedImage = node("Card photo", "image");
+    mixedImage.parentElement = f.fallback; f.fallback.children.push(mixedImage);
+    const cleanup = observePresentationMotion(f.host, { entrance: "blur-slide", exit: "fade", stagger, replay: true }, false, true);
+    f.emit(true); f.emit(false); f.emit(true);
+    for (const protectedNode of [f.section, f.media, f.fallback, image, mixedImage]) expect(protectedNode.animate).not.toHaveBeenCalled();
+    expect(f.heading[0].animate).toHaveBeenCalledTimes(3);
+    expect(f.content[0].animate).toHaveBeenCalledTimes(3);
+    expect(f.media.children[0].animate).toHaveBeenCalledTimes(3);
+    expect(f.fallback.children[0].animate).toHaveBeenCalledTimes(3);
+    cleanup?.();
+  });
+  it("does not create an animation or observer for an image-only static component", () => {
+    const f = fixture();
+    f.section.children.splice(0, f.section.children.length, node("Only image", "image"));
+    expect(observePresentationMotion(f.host, { entrance: "fade" }, false, true)).toBeUndefined();
+    expect(f.section.animate).not.toHaveBeenCalled();
+    expect(f.observe).not.toHaveBeenCalled();
+  });
+  it("returns to the whole-section transition when images follow section motion", () => {
+    const f = fixture();
+    f.media.children.push(node("Image", "image"));
+    observePresentationMotion(f.host, { entrance: "fade", stagger: 0 }, false, false);
+    f.emit(true);
+    expect(f.section.animate).toHaveBeenCalledOnce();
+  });
   it("covers biography, pills and unmarked content without animating ancestors twice", () => {
     const f = fixture();
     const pieces = sectionMotionPieces(f.section as unknown as HTMLElement);

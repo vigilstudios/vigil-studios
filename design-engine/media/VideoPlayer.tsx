@@ -136,6 +136,7 @@ export function VideoPlayer({
       style={style}
       data-preview={preview || undefined}
       data-controls={controls}
+      data-de-motion-media="true"
     >
       {failed ? (
         <span className="de-video-unavailable" role="status">

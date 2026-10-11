@@ -13,8 +13,8 @@ export function PresentationSurface({ value, navigation = false, children }: { v
   useEffect(() => {
     const host = root.current, settings: MotionSettings = JSON.parse(motion);
     if (!host || policy.systemReduced) return;
-    return observePresentationMotion(host, settings, navigation);
-  }, [motion, navigation, policy.systemReduced]);
+    return observePresentationMotion(host, settings, navigation, value.imageMotion === "static");
+  }, [motion, navigation, policy.systemReduced, value.imageMotion]);
   const heading = value.heading, controls = value.controls, viewport = value.viewport;
   const height = { half: 50, "three-quarter": 75, viewport: 100, "one-and-half": 150, custom: viewport?.minimum ?? 100 };
   const minimum = viewport?.height && viewport.height !== "natural" ? height[viewport.height] : undefined;
@@ -36,5 +36,5 @@ export function PresentationSurface({ value, navigation = false, children }: { v
     ...(viewport?.padding !== undefined ? { "--de-section-space": `${viewport.padding}px` } : {}),
     "--de-vertical-align": { start: "flex-start", center: "center", end: "flex-end" }[viewport?.alignment ?? "center"],
   } as CSSProperties;
-  return <PresentationProvider value={value}><div ref={root} className="de-presentation" style={style} data-heading-uniform={!navigation && heading && Object.keys(heading).length > 0 || undefined} data-controls-icon={controls?.icon ? controls.iconPosition ?? "leading" : undefined} data-controls-shape={controls?.shape} data-controls-treatment={controls?.treatment} data-controls-hover={controls?.hover} data-media-hover={policy.systemReduced ? "none" : value.motion?.mediaHover} data-viewport-active={!navigation && !!minimum || undefined}>{children}</div></PresentationProvider>;
+  return <PresentationProvider value={value}><div ref={root} className="de-presentation" style={style} data-image-motion={value.imageMotion ?? "animate"} data-heading-uniform={!navigation && heading && Object.keys(heading).length > 0 || undefined} data-controls-icon={controls?.icon ? controls.iconPosition ?? "leading" : undefined} data-controls-shape={controls?.shape} data-controls-treatment={controls?.treatment} data-controls-hover={controls?.hover} data-media-hover={policy.systemReduced ? "none" : value.motion?.mediaHover} data-viewport-active={!navigation && !!minimum || undefined}>{children}</div></PresentationProvider>;
 }

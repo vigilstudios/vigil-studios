@@ -41,6 +41,7 @@ export const presentationSchema = z.object({
   heading: headingSchema.optional(), headingMode: z.enum(["inherit", "override", "original"]).optional(),
   buttons: buttonDefaultsSchema.optional(), controls: controlSchema.optional(),
   motion: motionSettingsSchema.optional(), motionMode: z.enum(["inherit", "override", "none"]).optional(),
+  imageMotion: z.enum(["animate", "static"]).optional(),
   viewport: viewportSchema.optional(),
 }).strict();
 export type HeadingSettings = z.infer<typeof headingSchema>;
@@ -63,6 +64,7 @@ export function resolvePresentation(site?: PresentationSettings, page?: Presenta
     buttons: merge("buttons"), controls: merge("controls"), viewport: merge("viewport"),
     motion: section?.motionMode === "none" ? { ...parentMotion, entrance: "none", exit: "none", mediaHover: "none", ctaHover: "none", stagger: 0 } : section?.motionMode === "override" ? merge("motion") : parentMotion,
     motionMode: section?.motionMode,
+    imageMotion: section?.imageMotion ?? page?.imageMotion ?? site?.imageMotion,
     ctaAnimationOverride: sectionCTAAnimation(section),
   };
 }

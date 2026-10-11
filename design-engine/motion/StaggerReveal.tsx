@@ -14,6 +14,7 @@ export function StaggerReveal({ children, interval = 0.12, className = "" }: {
   const reduced = policy.reduced;
   return (
     <motion.div
+      data-de-native-reveal="true"
       className={className}
       initial={reduced ? false : "hidden"}
       animate={reduced ? "visible" : undefined}
@@ -29,6 +30,7 @@ export function StaggerItem({ children, className = "" }: { children: ReactNode;
   const reduced = policy.reduced;
   return (
     <motion.div
+      data-de-native-reveal="true"
       className={className}
       variants={{
         hidden: reduced ? {} : { opacity: 0, y: 14 * policy.distance },

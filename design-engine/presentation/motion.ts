@@ -4,21 +4,28 @@ import { clearEntranceTiming, setEntranceReadyAt } from "../motion/entrance-timi
 const excludedContent = "[inert],[aria-hidden='true'],dialog,script,style,template";
 
 /** Keep authored groups intact, while covering every visible content branch. */
-export function sectionMotionPieces(section: HTMLElement) {
+export function sectionMotionPieces(section: HTMLElement, staticImages = false, navigation = false) {
   const eligible = (node: HTMLElement) => !node.closest(excludedContent);
-  const heading = [...section.querySelectorAll<HTMLElement>("header > :is(h1,h2,p,span),.hx-copy > :is(h1,p),.hx-poster-context > p,[data-de-motion-piece='heading']")].filter(node => eligible(node) && !node.closest("nav"));
+  const heading = [...section.querySelectorAll<HTMLElement>(navigation
+    ? ".de-nx-navigation > :not(dialog):not(.de-nx-panel),.de-nav__inner > *,.de-island-nav > :not(.de-island-nav__panel),.de-contents-nav > :not(dialog)"
+    : "header > :is(h1,h2,p,span),.hx-copy > :is(h1,p),.hx-poster-context > p,[data-de-motion-piece='heading']")].filter(node => eligible(node) && (navigation ? node.checkVisibility() : !node.closest("nav")));
+  if (navigation && !staticImages) return { heading, media: [] as HTMLElement[], body: [] as HTMLElement[] };
+  // Decorative images can be aria-hidden but are still painted. Protect them too.
+  const images = staticImages ? [...section.querySelectorAll<HTMLElement>("picture,img,video,canvas,[data-de-motion-media]")].filter(node => !node.closest("[inert],dialog")) : [];
+  const containsImage = (node: HTMLElement) => images.some(image => image === node || node.contains(image));
   const media = [...section.querySelectorAll<HTMLElement>(".de-creator-photos,.vm-apple-card,.de-gallery-card,.de-expand-panels,.de-moving-chorus,.de-inquiry-media,.de-service-atlas figure,[data-de-motion-piece='media']")].filter(eligible);
   const content = [...section.querySelectorAll<HTMLElement>("[data-de-motion-piece='content']")].filter(eligible);
-  const selected = [...new Set([...heading, ...media, ...content])];
+  const selected = [...new Set([...heading, ...media, ...content])].filter(node => !containsImage(node));
   const outer = selected.filter(node => !selected.some(parent => parent !== node && parent.contains(node)));
   const body: HTMLElement[] = [];
   function collect(node: HTMLElement) {
     if (!eligible(node)) return;
+    if (images.includes(node)) return;
     if (outer.includes(node)) {
       if (!heading.includes(node) && !media.includes(node)) body.push(node);
       return;
     }
-    if (node === section || outer.some(piece => node.contains(piece))) {
+    if (node === section || containsImage(node) || outer.some(piece => node.contains(piece))) {
       [...node.children].forEach(child => collect(child as HTMLElement));
     } else if (node.textContent?.trim() || node.matches("img,picture,video,canvas,svg,input,textarea,select,button") || node.querySelector("img,picture,video,canvas,svg,input,textarea,select,button")) {
       // A section's remaining body, form, links or controls belong to the same rules.
@@ -43,19 +50,19 @@ export function motionFrame(effect: string, settings: MotionSettings = {}): Keyf
 }
 
 /** Animate paint inside a stable navigation anchor; sticky/scroll geometry never moves. */
-export function observePresentationMotion(host: HTMLElement, settings: MotionSettings, navigation = false): (() => void) | undefined {
+export function observePresentationMotion(host: HTMLElement, settings: MotionSettings, navigation = false, staticImages = false): (() => void) | undefined {
   if ((!settings.entrance || settings.entrance === "none") && (!settings.exit || settings.exit === "none")) return;
-  const section = host.querySelector<HTMLElement>(navigation ? ".de-navigation-motion" : ".de-section-layout > section,.de-section-layout > div");
+  const section = host.querySelector<HTMLElement>(navigation ? ".de-navigation-motion" : ".de-section-layout > :is(section,div,footer,header,nav)");
   const anchor = navigation ? host.querySelector<HTMLElement>(".de-navigation-motion-anchor") : host;
   if (!section?.animate || !anchor) return;
-  const { heading, media, body } = navigation ? {
-    heading: [...section.querySelectorAll<HTMLElement>(".de-nx-navigation > :not(dialog):not(.de-nx-panel),.de-nav__inner > *,.de-island-nav > :not(.de-island-nav__panel),.de-contents-nav > :not(dialog)")].filter(node => !node.closest(excludedContent) && node.checkVisibility()),
-    media: [] as HTMLElement[], body: [] as HTMLElement[],
-  } : sectionMotionPieces(section);
-  const pieces = (settings.stagger ?? 0) > 0 && heading.length + media.length + body.length > 0 ? [...heading, ...body, ...media] : [section];
+  const { heading, media, body } = sectionMotionPieces(section, staticImages, navigation);
+  // Static images prohibit animating the section or any ancestor that contains one,
+  // even when the content has no stagger or only a native mixed media/card group.
+  const pieces = staticImages || (settings.stagger ?? 0) > 0 && heading.length + media.length + body.length > 0 ? [...heading, ...body, ...media] : [section];
   if (pieces[0] !== section && settings.sequence === "media-first") pieces.splice(0, pieces.length, ...media, ...heading, ...body);
   if (settings.sequence === "reverse") pieces.reverse();
   const targets = [...new Set(pieces)].filter(node => !pieces.some(parent => parent !== node && parent.contains(node)));
+  if (!targets.length) return;
   let entered = false, animations: Animation[] = [], active = false;
   const cancel = () => { animations.forEach(animation => animation.cancel()); animations = []; targets.forEach(clearEntranceTiming); };
   if (!navigation && settings.entrance && settings.entrance !== "none") targets.forEach(target => setEntranceReadyAt(target, Infinity));
