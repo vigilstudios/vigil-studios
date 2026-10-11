@@ -31,7 +31,7 @@ export function VirtueHero() {
           />
         </div>
         <div className={clsx("mt-6 flex flex-col gap-3 transition-opacity duration-700 sm:flex-row", spoken ? "opacity-100" : "opacity-0")}>
-          <Link href="/express" className="btn-primary min-h-12 !px-6 text-sm font-semibold">Explore Express designs <ArrowRight className="ml-2 h-4 w-4" /></Link>
+          <Link href="/find-your-fit" className="btn-primary min-h-12 !px-6 text-sm font-semibold">Find my website fit <ArrowRight className="ml-2 h-4 w-4" /></Link>
           <a href="#today" className="btn-secondary min-h-12 !px-6 text-sm">What she does today</a>
         </div>
       </div>

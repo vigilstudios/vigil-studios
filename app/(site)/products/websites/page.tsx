@@ -12,7 +12,7 @@ import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
 
 export const metadata: Metadata = {
   title: "Websites | Vigil Studios",
-  description: "Vigil Express, Professional and Custom: what each website is for, who it suits, and how you start. Built by people, run on the Vigil platform, yours to keep.",
+  description: "Vigil Express, Professional and Growth: what each website is for, who it suits, and how you start. Built by people, run on the Vigil platform, yours to keep.",
   alternates: { canonical: "/products/websites" },
 };
 
@@ -26,7 +26,7 @@ export default async function WebsitesPage() {
   const templates = await publishedExpressTemplates();
   const { builds } = await getPublicPricing();
   const byKind = Object.fromEntries(builds.map((b) => [b.kind, b])) as Partial<Record<(typeof KINDS)[number], (typeof builds)[number]>>;
-  const nameOf = (kind: (typeof KINDS)[number]) => byKind[kind]?.name ?? { express: "Vigil Express", professional: "Professional Site", custom: "Custom Build" }[kind];
+  const nameOf = (kind: (typeof KINDS)[number]) => byKind[kind]?.name ?? { express: "Vigil Express", professional: "Professional Site", custom: "Growth Site" }[kind];
   const available = templates.filter((t) => t.status === "available");
   const coming = templates.filter((t) => t.status === "coming");
 

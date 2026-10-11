@@ -1,5 +1,6 @@
 "use client";
 
+import { PACKAGE_FINDER_HREF } from "@/lib/vigil/package-finder";
 import { useState } from "react";
 import Link from "next/link";
 import { clsx } from "clsx";
@@ -22,7 +23,7 @@ const money = (cents: number, currency: string) => formatMoney(cents, currency).
  * toggle. Numbers are the rows the checkout sells; this component never
  * invents one. Prices roll to the new figure when the period changes.
  */
-export function PricingTable({ plans, planHref = "/express", bullets = 6 }: { plans: PublicPlan[]; planHref?: string; bullets?: number }) {
+export function PricingTable({ plans, planHref = PACKAGE_FINDER_HREF, bullets = 6 }: { plans: PublicPlan[]; planHref?: string; bullets?: number }) {
   const periods = BILLING_PERIODS.filter((per) => plans.some((p) => p.prices[per.key] != null));
   const [periodKey, setPeriodKey] = useState<BillingPeriodKey>(periods[0]?.key ?? "month");
   const period = BILLING_PERIODS.find((p) => p.key === periodKey) ?? BILLING_PERIODS[0];
@@ -58,7 +59,7 @@ export function PricingTable({ plans, planHref = "/express", bullets = 6 }: { pl
         </div>
       ) : null}
 
-      <p className="mx-auto mt-5 max-w-3xl text-center text-xs leading-5 text-[color:var(--text-secondary)]">A recurring service plan, separate from your website build. Virtue guides setup on every plan. Ongoing Virtue automation, Lead Hub and Insights are in development for eligible plans; confirm allowances with the team.</p>
+      <p className="mx-auto mt-5 max-w-3xl text-center text-xs leading-5 text-[color:var(--text-secondary)]">A recurring service plan, separate from your website build. Virtue guides setup on every plan. Ongoing Virtue automation, Lead Hub and Insights are in development for eligible plans; confirm allowances with the team. Choose a subscription preference below, then find the website build that fits your project.</p>
 
       <CardRow className="mt-6 md:grid-cols-2 xl:grid-cols-4">
         {plans.map((p) => {
@@ -98,7 +99,7 @@ export function PricingTable({ plans, planHref = "/express", bullets = 6 }: { pl
               </ul>
               <div className="mt-auto pt-6">
                 <Link href={`${planHref}${planHref.includes("?") ? "&" : "?"}plan=${p.code}&period=${periodKey}`} className={clsx("inline-flex min-h-11 w-full items-center justify-center rounded-lg text-sm font-semibold transition-colors", featured ? "btn-primary !px-4 !py-2" : "btn-secondary !px-4 !py-2")}>
-                  Choose {p.name} <ArrowRight className="ml-1.5 h-4 w-4" />
+                  Find my fit <ArrowRight className="ml-1.5 h-4 w-4" />
                 </Link>
               </div>
             </Card>

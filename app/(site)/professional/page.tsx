@@ -1,27 +1,11 @@
-import type { Metadata } from "next";
-import { Footer } from "@/components/layout/Footer";
-import { Container, Section } from "@/components/site/primitives";
-import { getCheckoutCatalog } from "@/lib/vigil/queries/checkout";
-import { ProfessionalWalkthrough } from "./ProfessionalWalkthrough";
+import { redirect } from "next/navigation";
+import { PACKAGE_FINDER_HREF } from "@/lib/vigil/package-finder";
 
-export const metadata: Metadata = {
-  title: "Start a Professional Site | Vigil Studios",
-  description: "Explore a premium multi-page website tailored from Vigil’s design systems. See the scope, check your fit and start Professional online.",
-  alternates: { canonical: "/professional" },
-};
-
-export default async function ProfessionalPage() {
-  const catalog = await getCheckoutCatalog();
-  const build = catalog.builds.find((item) => item.kind === "professional") ?? null;
-
-  return (
-    <>
-      <Section className="pt-28 sm:pt-36">
-        <Container>
-          <ProfessionalWalkthrough amountCents={build?.amount_cents ?? null} currency={build?.currency ?? "usd"} checkoutAvailable={Boolean(build?.synced)} />
-        </Container>
-      </Section>
-      <Footer />
-    </>
-  );
+export default async function ProfessionalPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(await searchParams)) {
+    if (Array.isArray(value)) value.forEach((item) => params.append(key, item));
+    else if (value) params.set(key, value);
+  }
+  redirect(`${PACKAGE_FINDER_HREF}${params.size ? `?${params}` : ""}`);
 }

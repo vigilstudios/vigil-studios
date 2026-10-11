@@ -92,14 +92,14 @@ export function Navigation() {
           <Link href="/login" className={quiet}>
             Sign in
           </Link>
-          <Link href="/#start" className={loud}>
+          <Link href="/find-your-fit" className={loud}>
             {getStarted}
           </Link>
         </div>
 
         {/* Phone */}
         <div className="flex items-center justify-end gap-4 md:hidden">
-          <Link href="/#start" className={loud} onClick={() => setIsOpen(false)}>
+          <Link href="/find-your-fit" className={loud} onClick={() => setIsOpen(false)}>
             {getStarted}
           </Link>
           <button onClick={() => setIsOpen(!isOpen)} aria-label={isOpen ? "Close menu" : "Open menu"} aria-expanded={isOpen} className="-mr-2 rounded-lg p-1.5 text-[color:var(--text-primary)] transition-colors hover:bg-[color:var(--bg-surface-soft)]">

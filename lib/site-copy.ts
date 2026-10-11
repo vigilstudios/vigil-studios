@@ -3,6 +3,7 @@
  * the database and lib/constants). One place to tune the voice: plain, warm,
  * no exclamation marks.
  */
+import { PACKAGE_FINDER_HREF, PACKAGE_FINDER_LABEL } from "@/lib/vigil/package-finder";
 import { WEBSITE_TIERS } from "@/lib/vigil/site-tiers";
 
 export const TAGLINE = "Keeping watch over your business online.";
@@ -11,13 +12,13 @@ export const TAGLINE = "Keeping watch over your business online.";
 export const HERO = {
   title: TAGLINE,
   line: "Websites built for you · kept running by Vigil · guided by Virtue",
-  primary: { label: "Find your starting point", href: "#start" },
+  primary: { label: PACKAGE_FINDER_LABEL, href: PACKAGE_FINDER_HREF },
   secondary: { label: "Book a call" },
 };
 
 /** The Products menu, in the order a customer buys them: build, plan, upgrade; the catalogue last. */
 export const PRODUCT_LINKS = [
-  { label: "Websites", blurb: "Express, tailored Professional, bespoke Custom: find your fit", href: "/products/websites" },
+  { label: "Websites", blurb: "Express, tailored Professional, bespoke Growth: find your fit", href: "/products/websites" },
   { label: "Vigil", blurb: "The platform under every website: hosting, domain, updates, plans", href: "/products/vigil" },
   { label: "Virtue", blurb: "The AI employee inside it", href: "/products/virtue" },
   { label: "Express Catalogue", blurb: "Curated industry designs, customized around your brand", href: "/express" },
@@ -28,7 +29,7 @@ export const PILLARS = [
     key: "websites",
     tone: "accent" as const,
     title: "A website built for you",
-    body: "Express for a polished single page, Professional for a tailored multi-page experience, Custom for bespoke design and advanced functionality. Built for your business.",
+    body: "Express for a polished single page, Professional for a tailored multi-page experience, Growth for bespoke design and advanced functionality. Built for your business.",
     href: "/products/websites",
     cta: "Websites",
   },
@@ -52,9 +53,9 @@ export const PILLARS = [
 
 /** The five steps of "How it works", each tagged with whose step it is. The scenes that illustrate them live in sections/HowItWorksSection.tsx. */
 export const HOW_IT_WORKS = [
-  { n: 1, who: "Yours", title: "Choose your website and plan", body: "Express, Professional or Custom, plus a separate recurring plan to keep it running. Choose a curated single page, tailored multi-page site or bespoke build." },
+  { n: 1, who: "Yours", title: "Choose your website and plan", body: "Express, Professional or Growth, plus a separate recurring plan to keep it running. Choose a curated single page, tailored multi-page site or bespoke build." },
   { n: 2, who: "Yours · with Virtue", title: "Choose how to onboard", body: "A kickoff call with a person, or Virtue\u2019s guided brief. Either way, everything you tell us is saved as you go." },
-  { n: 3, who: "Ours", title: "We build", body: "We customize Express, compose Professional around your brand, or develop your scoped Custom build. Express gets a first look within two business days of completed onboarding." },
+  { n: 3, who: "Ours", title: "We build", body: "We customize Express, compose Professional around your brand, or develop your scoped Growth build. Express gets a first look within two business days of completed onboarding." },
   { n: 4, who: "Yours", title: "You review", body: "Say what to change, in a sentence, from your dashboard. One round on Express, two on Professional." },
   { n: 5, who: "Ours · from then on", title: "Live, and growing", body: "Your site goes live on your domain. Vigil keeps it running; ongoing changes and additional features depend on your subscription." },
 ];
@@ -93,21 +94,21 @@ export const BUILD_COPY = {
 /** "Start where you are": one card per build, keyed by build_prices.kind. Names and prices come from the database. */
 export const START = {
   eyebrow: "Start where you are",
-  title: "Every business starts somewhere. Pick the website that fits today.",
+  title: "Every business starts somewhere. Find the website that fits yours.",
   lead: "Just opening, established, or building something bigger: there is a Vigil website for each stage, all on the same platform with guided setup.",
   stages: {
-    express: { stage: "Just getting online", tone: "accent" as const, body: "A polished single page from a curated industry design, customized with your brand and content.", bullets: ["One proven industry design, made yours", "Your words, photos and colours", "First look within two business days of onboarding"], cta: { label: "Explore the designs", href: "/express" }, primary: true },
-    professional: { stage: "Established and growing", tone: "teal" as const, body: "A premium multi-page experience composed from our design systems and art-directed around your brand.", bullets: ["Up to 8 tailored primary pages", "Standard booking, payment and third-party integrations", "CMS where appropriate, two revision rounds"], cta: { label: "Start Professional", href: "/professional" }, primary: false },
-    custom: { stage: "Something bigger in mind", tone: "violet" as const, body: "Bespoke visual direction, original interactions or advanced functionality beyond our existing design systems.", bullets: ["Original components, motion and visual direction", "Custom apps, commerce and complex integrations as scoped", "Scoped and quoted after a short call"], cta: { label: "Book a call", href: "#get-started" }, primary: false },
+    express: { stage: "Just getting online", tone: "accent" as const, body: "A polished single page from a curated industry design, customized with your brand and content.", bullets: ["One proven industry design, made yours", "Your words, photos and colours", "First look within two business days of onboarding"], cta: { label: PACKAGE_FINDER_LABEL, href: PACKAGE_FINDER_HREF }, primary: false },
+    professional: { stage: "Established and growing", tone: "teal" as const, body: "A premium multi-page experience composed from our design systems and art-directed around your brand.", bullets: ["Up to 8 tailored primary pages", "Standard booking, payment and third-party integrations", "CMS where appropriate, two revision rounds"], cta: { label: PACKAGE_FINDER_LABEL, href: PACKAGE_FINDER_HREF }, primary: false },
+    custom: { stage: "Something bigger in mind", tone: "violet" as const, body: "Bespoke visual direction, original interactions or advanced functionality beyond our existing design systems.", bullets: ["Original components, motion and visual direction", "Custom apps, commerce and complex integrations as scoped", "Scoped and quoted after a short call"], cta: { label: PACKAGE_FINDER_LABEL, href: PACKAGE_FINDER_HREF }, primary: false },
   },
-  note: "Choose Express for speed, Professional for tailored multi-page depth, or Custom when your project needs original design or advanced functionality.",
+  note: "Answer three short questions to find your fit: Express, Professional or Growth. Your project needs shape the recommendation.",
 };
 
 /** The close: one line, three ways in, and the good news that pops up around the viewport while the reader decides. */
 export const GET_STARTED = {
   title: "Ready when you are.",
   line: "No builders to learn · no settings to babysit · someone always watching",
-  primary: { label: "Find your starting point", href: "#start" },
+  primary: { label: PACKAGE_FINDER_LABEL, href: PACKAGE_FINDER_HREF },
   call: "Book a call",
   email: "hello@vigilstudios.co",
   emailLabel: "Email us",
@@ -142,7 +143,7 @@ export const WEBSITES_PAGE = {
       goodFor: ["Opening soon and need to be findable", "A Facebook page or a listing, but no website", "Replacing a do-it-yourself builder site", "One location and one clear next step: call, book or visit"],
       notFor: "Multi-page architecture, unrestricted layout changes, bespoke art direction or customer accounts.",
       timeline: "First look within two business days of completed onboarding; one revision round.",
-      cta: { label: "Explore the designs", href: "/express" },
+      cta: { label: PACKAGE_FINDER_LABEL, href: PACKAGE_FINDER_HREF },
     },
     professional: {
       stage: "Established and growing",
@@ -151,7 +152,7 @@ export const WEBSITES_PAGE = {
       goodFor: ["Tailored art direction, typography and page hierarchy", "Booking through Calendly, Acuity, Square, Vagaro, Fresha or similar", "Forms, simple payments, analytics, maps, reviews and marketing tools", "Blogs, portfolios, case studies, teams, services or locations"],
       notFor: "New bespoke components or interaction systems, custom apps, portals, native booking, advanced ecommerce or complex integrations without a separate scope.",
       timeline: "Purchase online, then book a kickoff call or complete the guided brief; two revision rounds.",
-      cta: { label: "Start Professional", href: "/professional" },
+      cta: { label: PACKAGE_FINDER_LABEL, href: PACKAGE_FINDER_HREF },
     },
     custom: {
       stage: "Something bigger in mind",
@@ -160,7 +161,7 @@ export const WEBSITES_PAGE = {
       goodFor: ["Original visual direction, components or motion", "Native booking or operational workflows", "A members area, dashboard or customer portal", "Advanced ecommerce or marketplace functionality", "Custom APIs and multi-system automation"],
       notFor: "Projects that fit Express or Professional without bespoke design or advanced development.",
       timeline: "Timeline and revisions agreed in the scope.",
-      cta: { label: "Book a call", href: "#get-started" },
+      cta: { label: PACKAGE_FINDER_LABEL, href: PACKAGE_FINDER_HREF },
     },
   },
   glance: [
@@ -175,7 +176,7 @@ export const WEBSITES_PAGE = {
     { label: "Ongoing service", express: "Separate Vigil plan required", professional: "Separate Vigil plan required", custom: "Separate Vigil plan required" },
     { label: "First look", express: WEBSITE_TIERS.express.firstLook, professional: WEBSITE_TIERS.professional.firstLook, custom: WEBSITE_TIERS.custom.firstLook },
     { label: "Revision rounds", express: "One", professional: "Two", custom: "As scoped" },
-    { label: "How you start", express: "Choose a design, check out", professional: "Fit guide, then online checkout", custom: "Scope call, then a quote" },
+    { label: "How you start", express: "Choose a design, check out", professional: "Website fit guide, then online checkout", custom: "Scope call, then a quote" },
   ],
   platformNote: "Every Vigil-hosted website needs a separate recurring plan. Hosting, domain connection and security are managed by Vigil; website changes and additional tools depend on the plan you choose. The build does not include a subscription.",
 };
@@ -183,7 +184,7 @@ export const WEBSITES_PAGE = {
 export const VIGIL_PAGE = {
   title: "The platform under every website.",
   lead: "Vigil is the dashboard you sign into and the team behind it. It hosts your website, keeps the domain connected and the certificate current, applies updates, takes your requests and sends one receipt. You see outcomes in plain words, never a hosting console.",
-  primary: { label: "Find your starting point", href: "/#start" },
+  primary: { label: PACKAGE_FINDER_LABEL, href: PACKAGE_FINDER_HREF },
   secondary: { label: "See the plans", href: "/pricing?tab=subscriptions" },
   experience: [
     { title: "You sign in, you do not configure", body: "There are no settings to get wrong. Every page tells you what is true right now and, if something needs you, what to do next." },
@@ -194,11 +195,11 @@ export const VIGIL_PAGE = {
 };
 
 export const FAQ = [
-  { q: "Which website package should I choose?", a: "Express is a polished single page with a curated design direction. Professional is a premium multi-page composition tailored around your brand. Custom is for original components, bespoke interactions or advanced functionality beyond our existing design systems. Each build needs a separate Vigil plan for hosting." },
-  { q: "How is Professional designed for my business?", a: "We compose your site from Vigil’s premium design systems, selecting navigation, heroes, story, services, media, product presentation and social proof to suit your brand. Typography, art direction, imagery, page layouts, nested navigation and contextual calls to action make the experience your own. Compatible motion is configured where supported. New component invention is scoped under Custom." },
-  { q: "Do you use templates?", a: "Express uses a curated industry foundation with a proven layout, customized with your brand and content. Professional offers much broader section selection and page composition from our premium design systems. Custom adds bespoke design and development when a project needs something beyond those systems." },
-  { q: "How many pages and revisions are included?", a: "Express includes one page and one consolidated revision round. Professional includes up to eight primary pages and two rounds. Legal and simple utility pages do not count toward those eight; extra primary pages are quoted separately. Nested pages use the same primary-page allowance. Custom pages, revisions and timeline follow the written scope." },
-  { q: "Can you add booking, payments or custom functionality?", a: "Express supports links and embeds compatible with its chosen design. Professional includes standard booking embeds, advanced forms, simple payments, analytics and third-party integrations, plus CMS where appropriate. Native booking, complex commerce, custom APIs, portals and new bespoke components need an agreed add-on or Custom scope before purchase." },
+  { q: "Which website package should I choose?", a: "Express is a polished single page with a curated design direction. Professional is a premium multi-page composition tailored around your brand. Growth is for original components, bespoke interactions or advanced functionality beyond our existing design systems. Each build needs a separate Vigil plan for hosting." },
+  { q: "How is Professional designed for my business?", a: "We compose your site from Vigil’s premium design systems, selecting navigation, heroes, story, services, media, product presentation and social proof to suit your brand. Typography, art direction, imagery, page layouts, nested navigation and contextual calls to action make the experience your own. Compatible motion is configured where supported. New component invention is scoped under Growth." },
+  { q: "Do you use templates?", a: "Express uses a curated industry foundation with a proven layout, customized with your brand and content. Professional offers much broader section selection and page composition from our premium design systems. Growth adds bespoke design and development when a project needs something beyond those systems." },
+  { q: "How many pages and revisions are included?", a: "Express includes one page and one consolidated revision round. Professional includes up to eight primary pages and two rounds. Legal and simple utility pages do not count toward those eight; extra primary pages are quoted separately. Nested pages use the same primary-page allowance. Growth pages, revisions and timeline follow the written scope." },
+  { q: "Can you add booking, payments or custom functionality?", a: "Express supports links and embeds compatible with its chosen design. Professional includes standard booking embeds, advanced forms, simple payments, analytics and third-party integrations, plus CMS where appropriate. Native booking, complex commerce, custom APIs, portals and new bespoke components need an agreed add-on or Growth scope before purchase." },
   { q: "Do I own my website?", a: "Yes. The site-specific code, content and assets built for you are yours under the service agreement. Vigil's platform, shared templates and Virtue stay ours; your site does not depend on them to exist." },
   { q: "What happens if I cancel?", a: "Hosting and the dashboard end at the close of your billing period. You get a clean export of your site and keep your domain. No lock-in, no ransom." },
   { q: "Do I have to deal with DNS or my registrar?", a: "Only if you already own a domain, and even then Virtue gives you the exact records for your registrar with copy buttons and checks them for you. If you need a domain, we register it in your name." },

@@ -72,7 +72,7 @@ export function creatorCodeOffer(kind: string, amountCents: number | null, code?
 export function creatorPromoHref(href: string, search = "", campaign?: string): string {
   if (!href.startsWith("/") || href.startsWith("//")) return href;
   const url = new URL(href, "https://www.vigilstudios.co");
-  if (!["/express", "/professional", "/checkout"].includes(url.pathname)) return href;
+  if (!["/express", "/professional", "/find-your-fit", "/checkout"].includes(url.pathname)) return href;
   const code = new URLSearchParams(search).get("promo");
   if (!CREATOR_CAMPAIGN.promotion.enabled || (campaign !== CREATOR_CAMPAIGN.id && !matchesCreatorPromoCode(code))) return href;
   if (!url.searchParams.has("promo")) url.searchParams.set("promo", CREATOR_CAMPAIGN.promotion.code);

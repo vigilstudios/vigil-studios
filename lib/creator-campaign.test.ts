@@ -18,6 +18,9 @@ describe("creator campaign routing and attribution", () => {
     expect(href).toMatch(/#choose-your-site$/);
     expect(campaignHref(href, attribution)).toBe(href);
   });
+  it("carries the creator promotion through the shared package finder", () => {
+    expect(creatorPromoHref("/find-your-fit?plan=care&period=year", `promo=${CREATOR_CAMPAIGN.promotion.code}`)).toBe(`/find-your-fit?plan=care&period=year&promo=${CREATOR_CAMPAIGN.promotion.code}`);
+  });
   it("does not attach our campaign data to external client sites or normal visits", () => {
     expect(campaignHref("https://creator.example/work", attribution)).toBe("https://creator.example/work");
     expect(campaignHref("//other.example", attribution)).toBe("//other.example");

@@ -3,6 +3,7 @@
 import type { CSSProperties } from "react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { CampaignLink } from "@/components/creators/CampaignLink";
+import { withPurchasePreference, type PurchasePreference } from "@/lib/vigil/package-finder";
 import { formatMoney } from "@/lib/vigil/format";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -111,7 +112,7 @@ function PreviewPeek({
   );
 }
 
-export function ExpressCatalogue({ amountCents = null, currency = "usd", templates }: { amountCents?: number | null; currency?: string; templates: ExpressTemplate[] }) {
+export function ExpressCatalogue({ amountCents = null, currency = "usd", templates, preference = {} }: { amountCents?: number | null; currency?: string; templates: ExpressTemplate[]; preference?: PurchasePreference }) {
   const industries = groupTemplates(templates);
   const [industryIndex, setIndustryIndex] = useState(0);
   const [variantIndex, setVariantIndex] = useState(0);
@@ -414,7 +415,7 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
                         View
                         <ArrowUpRight size={17} />
                       </a>
-                      <CampaignLink href={`/checkout?template=${active.slug}`} className={styles.enquire} placement="express_catalogue" event="creator_checkout_cta_click">
+                      <CampaignLink href={withPurchasePreference(`/checkout?template=${active.slug}`, preference)} className={styles.enquire} placement="express_catalogue" event="creator_checkout_cta_click">
                         Buy{amountCents !== null ? ` · ${formatMoney(amountCents, currency).replace(/\.00$/, "")}` : ""}
                       </CampaignLink>
                     </>

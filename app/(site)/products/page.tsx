@@ -63,8 +63,8 @@ export default async function ProductsPage() {
             })}
           </div>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link href="/express" className="btn-primary min-h-11 !px-5 !py-2 text-sm font-semibold">Explore the designs <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
-            <Link href="/professional" className="btn-secondary min-h-11 !px-5 !py-2 text-sm font-semibold">Start Professional <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+            <Link href="/find-your-fit" className="btn-primary min-h-11 !px-5 !py-2 text-sm font-semibold">Find my website fit <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+            <Link href="/express" className="btn-secondary min-h-11 !px-5 !py-2 text-sm font-semibold">Browse Express designs <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
             <p className="text-sm text-[color:var(--text-secondary)]">
               {templates.filter((t) => t.status === "available").length} industries ready today · {templates.filter((t) => t.status === "coming").length} under construction
             </p>
@@ -121,7 +121,7 @@ export default async function ProductsPage() {
               <h2 className="text-2xl font-semibold tracking-tight">The employee who lives in your dashboard.</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)]">Virtue guides setup for every customer. Ongoing lead follow-up, missed-call text-back and reviews are in development for eligible Growth and Priority subscriptions.</p>
             </div>
-            <Link href="/products/virtue" className="btn-primary min-h-11 shrink-0 !px-5 !py-2 text-sm font-semibold">Meet Virtue <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+            <Link href="/products/virtue" className="btn-secondary min-h-11 shrink-0 !px-5 !py-2 text-sm font-semibold">Meet Virtue <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
           </div>
         </Container>
       </Section>

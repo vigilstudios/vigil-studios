@@ -62,4 +62,4 @@ async function load(): Promise<{ plans: PublicPlan[]; builds: PublicBuild[] }> {
   return { plans: out, builds: buildList };
 }
 
-export const getPublicPricing = unstable_cache(load, ["public-pricing-v4-catalog-prices"], { revalidate: 300, tags: ["pricing"] });
+export const getPublicPricing = unstable_cache(load, ["public-pricing-v5-growth-finder"], { revalidate: 300, tags: ["pricing"] });

@@ -2,7 +2,7 @@
  * Canonical website-build boundaries. Prices remain database rows and Vigil
  * subscription entitlements remain in plan_features; this file defines what
  * the one-time website build itself promises. The bespoke/Growth-level tier
- * retains the existing Custom Build name and `custom` catalog key. Recurring
+ * uses the Growth Site name and retains the `custom` catalog key. Recurring
  * Vigil Growth is a separate product, not a website-build entitlement.
  */
 export const WEBSITE_TIERS = {
@@ -61,7 +61,7 @@ export const WEBSITE_TIERS = {
   },
   custom: {
     kind: "custom",
-    name: "Custom Build",
+    name: "Growth Site",
     summary: "Bespoke design and advanced functionality, scoped around your ambitions.",
     description: "For a visual identity or experience that calls for invention: original design systems, components, motion, specialized functionality or complex integrations beyond our existing premium systems. We reuse proven infrastructure where useful and scope the bespoke work around your project.",
     firstLook: "Agreed in the written scope",

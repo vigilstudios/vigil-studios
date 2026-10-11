@@ -133,7 +133,7 @@ export default async function VigilPage() {
                 <h2 className="text-2xl font-semibold tracking-tight">The employee who lives in this dashboard.</h2>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)]">She guides setup on every plan. Ongoing lead follow-up, missed-call text-back and reviews are in development for eligible Growth and Priority subscriptions.</p>
               </div>
-              <Link href="/products/virtue" className="btn-primary min-h-11 shrink-0 !px-5 !py-2 text-sm font-semibold">Meet Virtue <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+              <Link href="/products/virtue" className="btn-secondary min-h-11 shrink-0 !px-5 !py-2 text-sm font-semibold">Meet Virtue <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
             </div>
           </Reveal>
         </Container>
