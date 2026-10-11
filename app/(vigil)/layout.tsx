@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
 import { PromoBanner } from "@/components/creators/PromoBanner";
-import { Space_Grotesk, Inter } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
+import { inter } from "@/lib/site-fonts";
 import "@/app/globals.css";
 import "@/components/vigil/vigil.css";
 import { themeBootstrapScript } from "@/components/vigil/ThemeSwitch";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });

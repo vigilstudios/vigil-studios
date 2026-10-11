@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next"
-import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { inter } from "@/lib/site-fonts";
 import "@/app/globals.css";
 import { CREATOR_CAMPAIGN } from "@/lib/creator-campaign";
 import { PromoBanner } from "@/components/creators/PromoBanner";
@@ -17,12 +18,6 @@ import {
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });

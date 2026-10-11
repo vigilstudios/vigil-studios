@@ -1031,3 +1031,5 @@ changes remain excluded. Scope, evidence and remaining limits are documented in
 ## 2026-10-11 — Lab client workspaces and Express catalog
 
 Added project-bound Professional editor routes and provisioning-time design workspace creation, plus a separate staff Express library with creation, duplication, metadata editing, private draft saves, publishing, recoverable removal and restoration. Public previews, template selections and checkout use published snapshots. Customer repositories retain their own copies. Luxe imports the latest authored browser composition; legacy templates retain HTML editing. Migration 0030 exposes only published template snapshots publicly; migration 0028/0029 mirror already-applied production history.
+
+Release validation uncovered extensionless Google Inter download URLs on the clean CI runner. Inter 4.1 is now bundled from its official distribution with its OFL license and shared by both root layouts; the existing CSS variable and font weights are preserved. Production uses the documented Webpack build option. Builds without Supabase configuration safely render an empty catalog rather than failing during prerendering.
