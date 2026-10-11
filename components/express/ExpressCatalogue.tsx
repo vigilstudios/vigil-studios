@@ -12,6 +12,7 @@ import {
   Hammer,
   Lock,
   Monitor,
+  RotateCcw,
   Smartphone,
 } from "lucide-react";
 import type { ExpressTemplate } from "@/lib/vigil/express/document";
@@ -33,8 +34,7 @@ function groupTemplates(templates: ExpressTemplate[]): IndustryGroup[] {
   }, []);
 }
 
-// Catalogue order is the order in EXPRESS_TEMPLATES (finished templates
-// first, ones under construction last).
+// Preserve the published library's catalogue order.
 const MOBILE_VIEWPORT_QUERY = "(max-width: 767px)";
 const slideVariants = {
   enter: (direction: number) => ({
@@ -117,6 +117,7 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
   const [variantIndex, setVariantIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>("desktop");
+  const [replayVersion, setReplayVersion] = useState(0);
   const industryTabsRef = useRef<HTMLDivElement>(null);
   const isMobileViewport = useSyncExternalStore(
     subscribeToMobileViewport,
@@ -147,7 +148,7 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
       railBounds.left -
       (rail.clientWidth - selectedBounds.width) / 2;
     rail.scrollTo({ left: centeredLeft, behavior: "smooth" });
-  }, [industryIndex]);
+  }, [industryIndex, isMobileViewport]);
 
   function selectIndustry(nextIndustry: number, forcedDirection?: number) {
     if (nextIndustry === industryIndex) return;
@@ -175,94 +176,113 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
             <p>Vigil Express</p>
             <h1 id="catalogue-title">Choose your starting point.</h1>
           </div>
+          <p className={styles.description}>
+            A polished single page from a curated industry design, customized with
+            your brand, content and imagery. One design direction and one revision
+            round; a separate recurring Vigil plan is required. First look within
+            two business days of completed onboarding.
+          </p>
+        </header>
 
-          <div className={styles.viewSwitch} aria-label="Preview size">
-            {(["desktop", "mobile"] as const).map((mode) => (
+        <div className={styles.controls}>
+          <div
+            ref={industryTabsRef}
+            className={styles.industryTabs}
+            role="tablist"
+            aria-label="Industries"
+          >
+            {industries.map((industry, index) => (
               <button
-                key={mode}
+                key={industry.industry}
                 type="button"
-                aria-pressed={effectiveViewMode === mode}
-                disabled={isMobileViewport && mode === "desktop"}
-                title={
-                  isMobileViewport && mode === "desktop"
-                    ? "Desktop preview is available on larger screens"
-                    : undefined
-                }
-                onClick={() => setViewMode(mode)}
+                role="tab"
+                id={`industry-tab-${index}`}
+                aria-selected={industryIndex === index}
+                aria-controls="template-stage"
+                onClick={() => selectIndustry(index)}
               >
-                {mode === "desktop" ? <Monitor size={16} /> : <Smartphone size={16} />}
-                <span>{mode === "desktop" ? "Desktop" : "Mobile"}</span>
-                {effectiveViewMode === mode && (
+                <span>{industry.industry}</span>
+                {industryIndex === index && (
                   <motion.span
-                    layoutId="view-mode"
-                    className={styles.switchIndicator}
-                    transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                    layoutId="industry-tab"
+                    className={styles.industryIndicator}
+                    transition={{ type: "spring", stiffness: 380, damping: 34 }}
                   />
                 )}
               </button>
             ))}
           </div>
-        </header>
 
-        <p className="mb-4 max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)]">A polished single page from a curated industry design, customized with your brand, content and imagery. One design direction and one revision round; a separate recurring Vigil plan is required. First look within two business days of completed onboarding.</p>
-
-        <div
-          ref={industryTabsRef}
-          className={styles.industryTabs}
-          role="tablist"
-          aria-label="Industries"
-        >
-          {industries.map((industry, index) => (
-            <button
-              key={industry.industry}
-              type="button"
-              role="tab"
-              id={`industry-tab-${index}`}
-              aria-selected={industryIndex === index}
-              aria-controls="template-stage"
-              onClick={() => selectIndustry(index)}
-            >
-              <span>{industry.industry}</span>
-              {industryIndex === index && (
-                <motion.span
-                  layoutId="industry-tab"
-                  className={styles.industryIndicator}
-                  transition={{ type: "spring", stiffness: 380, damping: 34 }}
-                />
-              )}
-            </button>
-          ))}
-        </div>
-
-        <div className={styles.variantRow}>
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={group.industry}
-              className={styles.variantTabs}
-              role="tablist"
-              aria-label={`${group.industry} variants`}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.24 }}
-            >
-              {group.variants.map((variant, index) => (
-                <button
-                  key={variant.slug}
-                  type="button"
-                  role="tab"
-                  aria-selected={variantIndex === index}
-                  aria-controls="template-stage"
-                  onClick={() => {
-                    setDirection(index >= variantIndex ? 1 : -1);
-                    setVariantIndex(index);
-                  }}
-                >
-                  {variant.variant}
-                </button>
-              ))}
-            </motion.div>
-          </AnimatePresence>
+          <div className={styles.variantRow}>
+            <div className={styles.previewTools}>
+              <div className={styles.viewSwitch} role="group" aria-label="Preview size">
+                {(["desktop", "mobile"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    aria-label={mode === "desktop" ? "Desktop" : "Mobile"}
+                    aria-pressed={effectiveViewMode === mode}
+                    disabled={isMobileViewport && mode === "desktop"}
+                    title={
+                      isMobileViewport && mode === "desktop"
+                        ? "Desktop preview is available on larger screens"
+                        : `${mode === "desktop" ? "Desktop" : "Mobile"} preview`
+                    }
+                    onClick={() => setViewMode(mode)}
+                  >
+                    {mode === "desktop" ? <Monitor size={16} /> : <Smartphone size={16} />}
+                    <span>{mode === "desktop" ? "Desktop" : "Mobile"}</span>
+                    {effectiveViewMode === mode && (
+                      <motion.span
+                        layoutId="view-mode"
+                        className={styles.switchIndicator}
+                        transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                      />
+                    )}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                className={styles.replayButton}
+                aria-label="Replay animations"
+                title="Restart the preview and replay its animations"
+                disabled={active.status === "coming"}
+                onClick={() => setReplayVersion((version) => version + 1)}
+              >
+                <RotateCcw size={16} />
+                <span>Replay</span>
+              </button>
+            </div>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={group.industry}
+                className={styles.variantTabs}
+                role="tablist"
+                aria-label={`${group.industry} variants`}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.24 }}
+              >
+                {group.variants.map((variant, index) => (
+                  <button
+                    key={variant.slug}
+                    type="button"
+                    role="tab"
+                    aria-selected={variantIndex === index}
+                    aria-controls="template-stage"
+                    onClick={() => {
+                      setDirection(index >= variantIndex ? 1 : -1);
+                      setVariantIndex(index);
+                    }}
+                  >
+                    {variant.variant}
+                  </button>
+                ))}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
 
         <div
@@ -346,6 +366,7 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
                       </div>
                     ) : (
                       <iframe
+                        key={replayVersion}
                         src={href}
                         title={`${active.industry}, ${active.variant} preview`}
                         tabIndex={-1}
