@@ -5,7 +5,8 @@ import { useEffect, useRef } from "react";
 /**
  * The pointer is the Vigil star on fine-pointer devices: green on the page,
  * white over links and buttons, black over green surfaces (green buttons,
- * green sections). Text fields keep the native cursor. The native cursor
+ * green sections). Text fields and embedded previews keep the native cursor.
+ * The native cursor
  * is hidden through the `star-cursor` class on <html>, which is only set
  * once this has mounted, so nothing is ever without a pointer.
  */
@@ -23,7 +24,7 @@ export function StarCursor() {
     const tone = (target: EventTarget | null) => {
       const node = target instanceof Element ? target : null;
       if (!node) return "";
-      if (node.closest("input, textarea, select, [contenteditable]")) return "native";
+      if (node.closest("input, textarea, select, [contenteditable], [data-cursor='native']")) return "native";
       if (node.closest(".btn-primary, .section-accent, [data-cursor='dark']")) return "is-dark";
       if (node.closest("a, button, [role='button'], summary, label, [data-cursor='light']")) return "is-light";
       return "";
@@ -42,12 +43,16 @@ export function StarCursor() {
     const onDown = () => el.classList.add("is-down");
     const onUp = () => el.classList.remove("is-down");
     window.addEventListener("pointermove", onMove, { passive: true });
+    // Parent pointermove events stop inside an iframe. Hide at the boundary,
+    // and restore on the next parent target when the pointer returns.
+    window.addEventListener("pointerover", onMove, { passive: true });
     window.addEventListener("pointerdown", onDown, { passive: true });
     window.addEventListener("pointerup", onUp, { passive: true });
     document.addEventListener("mouseleave", onLeave);
     return () => {
       root.classList.remove("star-cursor");
       window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerover", onMove);
       window.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointerup", onUp);
       document.removeEventListener("mouseleave", onLeave);

@@ -331,6 +331,7 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
 
                 <motion.div
                   layout
+                  data-cursor="native"
                   className={`${styles.browser} ${
                     effectiveViewMode === "desktop" ? styles.desktop : styles.mobile
                   }`}
