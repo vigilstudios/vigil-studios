@@ -45,13 +45,17 @@ export async function saveLeadPreferences(websiteId:string,form:FormData):Promis
 export async function registerWebsiteContact(websiteId:string,form:FormData):Promise<ActionResult>{
  try{
   await requireStaff();const client=await createClient(),v=preferences(form);
-  const origins=String(form.get("origins")??"").split(/\s+/).filter(Boolean);
-  if(origins.length>10)throw new ValidationError("Register at most 10 verified origins.");
-  const enabled=form.get("enabled")==="on";
-  if(enabled&&(!process.env.TURNSTILE_SECRET_KEY||!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY||!process.env.RESEND_API_KEY))
-   throw new ValidationError("Configure Turnstile and Resend before activating contact submissions.");
-  const {error}=await client.rpc("configure_website_contact",{p_website:z.string().uuid().parse(websiteId),p_recipient:v.recipient,p_booking:v.booking??undefined,p_origins:origins,p_enabled:enabled});
-  if(error)throw new ValidationError(error.message);
+  const id=z.string().uuid().parse(websiteId);
+  const {error}=await client.rpc("configure_website_contact",{p_website:id,p_recipient:v.recipient,p_booking:v.booking??undefined});
+  if(error)throw new ValidationError("Contact preferences could not be saved.");
+  revalidatePath(`/admin/websites/${websiteId}/contact`);revalidatePath("/dashboard/leads");return {ok:true,data:undefined};
+ }catch(error){return toActionError(error);}
+}
+export async function setContactAutomation(websiteId:string,form:FormData):Promise<ActionResult>{
+ try{
+  await requireStaff();const client=await createClient();
+  const {error}=await client.rpc("set_website_contact_automation",{p_website:z.string().uuid().parse(websiteId),p_automatic:z.enum(["automatic","paused"]).parse(form.get("mode"))==="automatic"});
+  if(error)throw new ValidationError("Contact automation could not be updated.");
   revalidatePath(`/admin/websites/${websiteId}/contact`);revalidatePath("/dashboard/leads");return {ok:true,data:undefined};
  }catch(error){return toActionError(error);}
 }

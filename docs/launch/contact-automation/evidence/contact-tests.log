@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /private/tmp/vigil-contact-automation-release
+
+
+ Test Files  2 passed (2)
+      Tests  64 passed (64)
+   Start at  00:09:07
+   Duration  528ms (transform 307ms, setup 0ms, import 259ms, tests 308ms, environment 0ms)
+

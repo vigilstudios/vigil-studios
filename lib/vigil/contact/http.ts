@@ -1,4 +1,5 @@
 import "server-only";
+import { websiteContactCredentials } from "./credentials";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -10,6 +11,7 @@ export class ContactError extends Error {
 }
 export type ContactDependencies = {
   admin: () => DbClient;
+  credentials?: (admin:DbClient,websiteId:string)=>Promise<{secret:string;siteKey:string}|null>;
   secret: () => string | undefined;
   siteKey: () => string | undefined;
   verify: (token: string, hostname: string, ip: string, secret: string) => Promise<boolean>;
@@ -24,7 +26,7 @@ export async function verifyTurnstile(token: string, hostname: string, ip: strin
   return result.success === true && result.hostname === hostname && result.action === "contact";
 }
 const defaults: ContactDependencies = {
-  admin: createAdminClient, secret: () => process.env.TURNSTILE_SECRET_KEY,
+  credentials: websiteContactCredentials, admin: createAdminClient, secret: () => process.env.TURNSTILE_SECRET_KEY,
   siteKey: () => process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY, verify: verifyTurnstile,
 };
 function configured(deps: ContactDependencies) {
@@ -83,8 +85,10 @@ export async function handleContact(request: Request, websiteId: string, deps = 
   try {
     if (!z.string().uuid().safeParse(websiteId).success) throw new ContactError(404, "Contact form unavailable.");
     if (!origin) throw new ContactError(403, "Open the form on its registered website.");
-    const { secret, siteKey } = configured(deps);
+    const legacy = deps.credentials ? null : configured(deps);
     const admin = deps.admin();
+    const keys = deps.credentials ? await deps.credentials(admin,websiteId) : legacy;
+    const {secret,siteKey}=configured({...deps,secret:()=>keys?.secret,siteKey:()=>keys?.siteKey});
     const settings = await registration(admin, websiteId, origin);
     headers["Access-Control-Allow-Origin"] = origin;
     headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS";

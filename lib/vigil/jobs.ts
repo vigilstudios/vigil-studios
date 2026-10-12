@@ -7,6 +7,7 @@ import { notifyCustomerDeployment } from "./services/deployment-notifications";
 import { beginDomainVerification, verifyDomain } from "./services/domain";
 import { provisionOrder } from "./services/orders";
 import { provisionWebsiteRepository } from "./services/repository";
+import { provisionWebsiteContact } from "./contact/provision";
 import { notifyWebsiteLead } from "./contact/notify";
 import { CREATIVE_WORKSPACE_JOB_KIND, creativeWorkspaceJobKey, shouldAutoGenerate } from "./creative/enqueue";
 import { generateCreativeWorkspace, markCreativeWorkspaceQueued } from "./creative/service";
@@ -22,6 +23,7 @@ import { generateCreativeWorkspace, markCreativeWorkspaceQueued } from "./creati
 export const JOB_KINDS = {
   websiteProvision: "website.provision",
   leadNotify: "lead.notify",
+  websiteContactConfigure: "website.contact.configure",
   websiteDeploy: "website.deploy",
   websiteRepository: "website.repository",
   websiteCreativeWorkspace: CREATIVE_WORKSPACE_JOB_KIND,
@@ -49,6 +51,7 @@ export function registerJobHandler(kind: string, handler: JobHandler): void {
 }
 
 const builtInHandlers: Record<JobKind, JobHandler> = {
+  [JOB_KINDS.websiteContactConfigure]: async ({admin,job}) => provisionWebsiteContact(admin,job),
   [JOB_KINDS.leadNotify]: async ({admin,job}) => notifyWebsiteLead(admin,job),
   [JOB_KINDS.websiteProvision]: async ({ admin, job }) => {
     if (!job.website_id) throw new Error("website.provision requires website_id");

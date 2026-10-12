@@ -2537,6 +2537,51 @@ export type Database = {
         }
         Relationships: []
       }
+      website_contact_automation: {
+        Row: {
+          automatic: boolean
+          generation: number
+          last_error: string | null
+          organization_id: string
+          status: string
+          updated_at: string
+          website_id: string
+        }
+        Insert: {
+          automatic?: boolean
+          generation?: number
+          last_error?: string | null
+          organization_id: string
+          status?: string
+          updated_at?: string
+          website_id: string
+        }
+        Update: {
+          automatic?: boolean
+          generation?: number
+          last_error?: string | null
+          organization_id?: string
+          status?: string
+          updated_at?: string
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_contact_automation_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_contact_automation_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: true
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       website_contact_settings: {
         Row: {
           allowed_origins: string[]
@@ -2744,6 +2789,10 @@ export type Database = {
         }
         Returns: string
       }
+      claim_contact_setup: {
+        Args: { p_generation: number; p_token: string; p_website: string }
+        Returns: Json
+      }
       claim_design_sync: {
         Args: { p_project_id: string; p_token: string }
         Returns: boolean
@@ -2789,7 +2838,30 @@ export type Database = {
         }
         Returns: undefined
       }
+      contact_setup_failed: {
+        Args: {
+          p_error: string
+          p_generation: number
+          p_status: string
+          p_token: string
+          p_website: string
+        }
+        Returns: undefined
+      }
+      contact_widget_credentials: { Args: { p_website: string }; Returns: Json }
       decline_invitation: { Args: { p_invite: string }; Returns: undefined }
+      finish_contact_setup: {
+        Args: {
+          p_account: string
+          p_generation: number
+          p_origins: string[]
+          p_secret: string
+          p_sitekey: string
+          p_token: string
+          p_website: string
+        }
+        Returns: boolean
+      }
       list_my_invitations: {
         Args: never
         Returns: {
@@ -2815,6 +2887,10 @@ export type Database = {
         }
         Returns: number
       }
+      mark_contact_widget_creation: {
+        Args: { p_token: string; p_website: string }
+        Returns: undefined
+      }
       notify_review_staff: {
         Args: {
           p_body?: string
@@ -2837,6 +2913,7 @@ export type Database = {
         Args: { p_key: string; p_limit: number; p_window_seconds: number }
         Returns: boolean
       }
+      reconcile_contact_setup: { Args: { p_limit?: number }; Returns: number }
       resolve_entitlements: {
         Args: { p_org: string }
         Returns: {
@@ -2848,6 +2925,10 @@ export type Database = {
       }
       restore_customer: {
         Args: { p_actor_id: string; p_organization_id: string }
+        Returns: undefined
+      }
+      set_website_contact_automation: {
+        Args: { p_automatic: boolean; p_website: string }
         Returns: undefined
       }
     }
@@ -2950,6 +3031,30 @@ export type Database = {
   }
   vigil: {
     Tables: {
+      contact_secret_refs: {
+        Row: {
+          creation_started_at: string | null
+          lease_token: string | null
+          lease_until: string | null
+          vault_secret_id: string | null
+          website_id: string
+        }
+        Insert: {
+          creation_started_at?: string | null
+          lease_token?: string | null
+          lease_until?: string | null
+          vault_secret_id?: string | null
+          website_id: string
+        }
+        Update: {
+          creation_started_at?: string | null
+          lease_token?: string | null
+          lease_until?: string | null
+          vault_secret_id?: string | null
+          website_id?: string
+        }
+        Relationships: []
+      }
       rate_limits: {
         Row: {
           hits: number
@@ -2989,8 +3094,17 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      contact_service_only: { Args: never; Returns: undefined }
+      contact_verified_origins: {
+        Args: { p_website: string }
+        Returns: string[]
+      }
       current_email: { Args: never; Returns: string }
       decline_invitation: { Args: { p_invite: string }; Returns: undefined }
+      ensure_contact_recipient: {
+        Args: { p_website: string }
+        Returns: boolean
+      }
       has_org_role: {
         Args: {
           p_org: string
@@ -3050,6 +3164,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      queue_contact_setup: { Args: { p_website: string }; Returns: undefined }
       rate_limit: {
         Args: { p_key: string; p_limit: number; p_window_seconds: number }
         Returns: boolean

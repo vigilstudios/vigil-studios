@@ -2,6 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 import { runDueJobs } from "@/lib/vigil/jobs";
+import { reconcileContactSetup } from "@/lib/vigil/contact/provision";
 import { reconcileOrders } from "@/lib/vigil/services/reconcile";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +37,7 @@ async function handle(request: NextRequest) {
 
   try {
     const admin = createAdminClient();
+    await reconcileContactSetup(admin).catch(() => console.error("Contact setup reconciliation could not run; queued jobs will continue."));
     const outcomes = await runDueJobs(admin, { worker, limit });
     const reconcile = request.nextUrl.searchParams.get("reconcile") === "0" ? null : await reconcileOrders(admin).catch((error) => ({ error: error instanceof Error ? error.message : String(error) }));
     return NextResponse.json({ worker, ran: outcomes.length, outcomes, reconcile });

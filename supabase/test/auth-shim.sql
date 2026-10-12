@@ -22,6 +22,7 @@ create schema if not exists extensions;
 create table if not exists auth.users (
   id                 uuid primary key,
   email              text,
+  email_confirmed_at timestamptz,
   raw_user_meta_data jsonb not null default '{}'::jsonb,
   created_at         timestamptz not null default now()
 );
@@ -123,3 +124,13 @@ create table if not exists storage.objects (
 alter table storage.objects enable row level security;
 grant usage on schema storage to anon, authenticated, service_role;
 grant all on storage.buckets, storage.objects to anon, authenticated, service_role;
+
+-- Local functional Vault shim only: does not test encryption. Real Supabase Vault encrypts at rest.
+create schema vault;
+create table vault.secrets(id uuid primary key default gen_random_uuid(), secret text, name text unique, description text);
+create view vault.decrypted_secrets as select id,secret as decrypted_secret,name,description from vault.secrets;
+create function vault.create_secret(value text,secret_name text,secret_description text) returns uuid language plpgsql as $$declare vid uuid;begin insert into vault.secrets(secret,name,description) values(value,secret_name,secret_description) returning id into vid;return vid;end$$;
+create function vault.update_secret(vid uuid,value text) returns void language sql as $$update vault.secrets set secret=value where id=vid$$;
+revoke all on schema vault from public,anon,authenticated,service_role;
+revoke all on all tables in schema vault from public,anon,authenticated,service_role;
+revoke all on all functions in schema vault from public,anon,authenticated,service_role;

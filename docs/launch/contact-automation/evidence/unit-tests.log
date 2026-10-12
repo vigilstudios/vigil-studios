@@ -1,0 +1,13 @@
+
+> vigil-studios@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.11 /private/tmp/vigil-contact-automation-release
+
+
+ Test Files  91 passed (91)
+      Tests  2160 passed (2160)
+   Start at  00:09:56
+   Duration  61.10s (transform 12.22s, setup 0ms, import 60.61s, tests 94.68s, environment 12ms)
+
