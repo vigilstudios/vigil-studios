@@ -59,7 +59,7 @@ export function BlogLibrary({
           <span className="sr-only">Find a post</span>
           <input
             type="search"
-            className={inputClass}
+            className={inputClass.replace("text-[13px]", "text-base")}
             placeholder="Find a post…"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
