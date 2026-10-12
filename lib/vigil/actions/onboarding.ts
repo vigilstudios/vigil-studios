@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import type { z } from "zod";
+import { BLOG_IMAGE_BUCKET } from "@/lib/vigil/blog/media-contract";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/vigil/audit";
@@ -172,13 +173,28 @@ export async function removeProjectAsset(assetId: string): Promise<ActionResult<
   try {
     const ctx = await requireOrgContextOrThrow();
     const supabase = await createClient();
-    const { data: asset, error } = await supabase.from("project_assets").select("id, object_path, organization_id").eq("id", assetId).maybeSingle();
+    const { data: asset, error } = await supabase.from("project_assets").select("id, object_path, organization_id, bucket_id").eq("id", assetId).maybeSingle();
     if (error) throw error;
     if (!asset || asset.organization_id !== ctx.organization.id) throw new NotFoundError("File not found.");
+    let blogPath: string | null = null;
+    if (asset.bucket_id === BLOG_IMAGE_BUCKET) {
+      await assertOrgRole(ctx, ["owner", "manager"]);
+      const { data: image, error: imageError } = await supabase.from("website_blog_images").select("object_path").eq("id", assetId).eq("organization_id", ctx.organization.id).maybeSingle();
+      if (imageError) throw imageError;
+      // Never use customer-editable project asset metadata for a service-role delete.
+      blogPath = image?.object_path ?? null;
+    }
     const { error: delError } = await supabase.from("project_assets").delete().eq("id", assetId);
+    if (delError?.code === "23503") throw new ValidationError("Remove this image from its Blog posts and save them before deleting the file.");
     if (delError) throw delError;
-    await supabase.storage.from(PROJECT_ASSETS_BUCKET).remove([asset.object_path]).catch(() => undefined);
+    if (blogPath) {
+      const { error: cleanupError } = await createAdminClient().storage.from(BLOG_IMAGE_BUCKET).remove([blogPath]);
+      if (cleanupError) throw new ValidationError("The image was removed from the library, but storage cleanup needs a retry. Contact Vigil for help.");
+    } else if (asset.bucket_id !== BLOG_IMAGE_BUCKET) {
+      await supabase.storage.from(PROJECT_ASSETS_BUCKET).remove([asset.object_path]).catch(() => undefined);
+    }
     revalidatePath("/dashboard/onboarding");
+    revalidatePath("/dashboard/files");
     return { ok: true, data: undefined };
   } catch (error) {
     return toActionError(error);

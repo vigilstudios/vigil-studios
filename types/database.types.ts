@@ -2537,6 +2537,36 @@ export type Database = {
         }
         Relationships: []
       }
+      website_blog_image_refs: {
+        Row: {
+          image_id: string
+          post_id: string
+        }
+        Insert: {
+          image_id: string
+          post_id: string
+        }
+        Update: {
+          image_id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_blog_image_refs_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "website_blog_images"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_blog_image_refs_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "website_blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       website_blog_images: {
         Row: {
           height: number

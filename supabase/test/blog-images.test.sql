@@ -40,6 +40,10 @@ select public.save_website_blog_post('ba000000-0000-4000-8000-000000000021','wit
 select blog_test.ok((select media->'images'->0->>'alt'='Image description' and not(media->'images'->0 ? 'url') from public.website_blog_posts where slug='with-images'),'trusted images save and untrusted URLs are stripped');
 select public.save_website_blog_post('ba000000-0000-4000-8000-000000000021','with-images','Images','','Updated body',true,p_post:=(select id from public.website_blog_posts where slug='with-images'),p_expected:=(select updated_at from public.website_blog_posts where slug='with-images'));
 select blog_test.ok((select jsonb_array_length(media->'images')=1 from public.website_blog_posts where slug='with-images'),'older text clients preserve existing media');
+select blog_test.fails($q$delete from public.project_assets where id='ba000000-0000-4000-8000-000000000041'$q$,'cannot delete an image attached to a Blog post');
+select public.save_website_blog_post('ba000000-0000-4000-8000-000000000021','with-images','Images','','Updated body',false,p_post:=(select id from public.website_blog_posts where slug='with-images'),p_expected:=(select updated_at from public.website_blog_posts where slug='with-images'),p_media:='{"cover":null,"images":[]}');
+delete from public.project_assets where id='ba000000-0000-4000-8000-000000000041';
+select blog_test.ok((select count(*)=0 from public.website_blog_images),'detached image can be removed through the library');
 set local role anon;
 select blog_test.fails($q$select * from public.website_blog_images$q$,'anonymous cannot read draft image registry');
 select blog_test.ok((select count(*)=0 from storage.objects where bucket_id='blog-images'),'anonymous cannot read private images');
