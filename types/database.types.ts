@@ -2626,6 +2626,7 @@ export type Database = {
           media: Json
           organization_id: string
           published_at: string | null
+          review_sample: boolean
           slug: string
           status: string
           title: string
@@ -2641,6 +2642,7 @@ export type Database = {
           media?: Json
           organization_id: string
           published_at?: string | null
+          review_sample?: boolean
           slug: string
           status?: string
           title: string
@@ -2656,6 +2658,7 @@ export type Database = {
           media?: Json
           organization_id?: string
           published_at?: string | null
+          review_sample?: boolean
           slug?: string
           status?: string
           title?: string

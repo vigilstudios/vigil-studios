@@ -5,6 +5,7 @@ import {FakeAdmin} from './fake-admin';
 const site='ba000000-0000-4000-8000-000000000021',org='ba000000-0000-4000-8000-000000000011';
 function fixture(){
  const fake=new FakeAdmin({websites:[{id:site,status:'live',organization_id:org}],organizations:[{id:org,archived_at:null}],website_blog_posts:[{id:'post',website_id:site,organization_id:org,status:'published',slug:'hello',title:'Hello',excerpt:'Intro',body:'Public body',published_at:'2026-10-12T00:00:00Z',created_by:'private-user'},{id:'draft',website_id:site,organization_id:org,status:'draft',slug:'secret',title:'Private draft',body:'SECRET DRAFT'},{id:'other',website_id:'other-site',organization_id:'other-org',status:'published',slug:'hello',title:'Other tenant'}]});
+ fake.rows('website_blog_posts').forEach(post=>{post.review_sample=false;});
  const admin=fake.asClient(),original=fake.from.bind(fake);
  admin.from=((table:string)=>{const q=original(table),run=q.run.bind(q);let first=0,last=Infinity;Object.assign(q,{range(start:number,end:number){first=start;last=end;return q;}});q.run=()=>{const result=run();return {...result,data:result.data?.slice(first,last+1)??null};};return q;}) as unknown as typeof admin.from;
  admin.rpc=vi.fn(async()=>({data:true,error:null})) as unknown as typeof admin.rpc;
@@ -31,4 +32,10 @@ describe('published Blog media',()=>{
  it('signs only the authorized cover for listings, excludes unused attachments',async()=>{const f=withImages(),body=await(await publicWebsiteBlog(request(),site,()=>f.admin)).json();expect(body.posts[0].images).toEqual([{id:f.id,alt:'Photo',caption:'Caption',url:'https://storage.test/own/photo.webp',width:100,height:100}]);expect(f.sign).toHaveBeenCalledWith(['own/photo.webp'],3600);expect(JSON.stringify(body)).not.toContain('unused');});
  it('never issues image URLs for draft/building sites',async()=>{const f=withImages();f.fake.rows('websites')[0].status='building';await publicWebsiteBlog(request(),site,()=>f.admin);expect(f.sign).not.toHaveBeenCalled();});
  it('ignores a forged cross-tenant image row even if its ID is known',async()=>{const f=withImages();f.fake.rows('website_blog_images')[0].organization_id='other-org';const body=await(await publicWebsiteBlog(request('?slug=hello'),site,()=>f.admin)).json();expect(body.posts[0].images).toBeUndefined();expect(f.sign).not.toHaveBeenCalled();});
+});
+
+describe('explicit sample review visibility',()=>{
+ it('exposes only selected sample drafts while building, never ordinary drafts or other tenants',async()=>{const f=fixture();f.fake.rows('websites')[0].status='building';Object.assign(f.fake.rows('website_blog_posts')[0],{status:'draft',review_sample:true,created_at:'2026-10-12T00:00:00Z'});f.fake.rows('website_blog_posts')[2].review_sample=true;const body=await(await publicWebsiteBlog(request('?review=samples'),site,()=>f.admin)).json();expect(body.posts).toHaveLength(1);expect(body.posts[0].sample).toBe(true);expect(JSON.stringify(body)).not.toContain('SECRET DRAFT');expect(JSON.stringify(body)).not.toContain('Other tenant');expect((await publicWebsiteBlog(request('?review=samples&slug=secret'),site,()=>f.admin)).status).toBe(404);});
+ it.each(['live','paused','suspended'])('hides review samples when website is %s',async(status)=>{const f=fixture();f.fake.rows('websites')[0].status=status;f.fake.rows('website_blog_posts')[0].review_sample=true;expect((await(await publicWebsiteBlog(request('?review=samples'),site,()=>f.admin)).json()).posts).toEqual([]);});
+ it('excludes sample rows from normal production reads even with forged published status',async()=>{const f=fixture();f.fake.rows('website_blog_posts')[0].review_sample=true;expect((await(await publicWebsiteBlog(request(),site,()=>f.admin)).json()).posts).toEqual([]);});
 });

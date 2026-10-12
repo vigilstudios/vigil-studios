@@ -11,6 +11,7 @@ export type NavIcon =
   | "billing"
   | "requests"
   | "review"
+  | "blog"
   | "files"
   | "leads"
   | "insights"

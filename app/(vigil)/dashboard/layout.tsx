@@ -47,14 +47,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
       expressWebsite ? getCustomerExpressPreviewReview(expressWebsite.id) : Promise.resolve(null),
       getUnreadNotifications(viewer.user.id, ctx.organization.id),
     ]);
-    const reviewRelevant = Boolean(
+    const reviewRelevant = !websites.some((site) => site.project_id === professionalProject?.id && site.status === "live") && Boolean(
       projectReviews?.rounds.some((round) => round.status !== "pending") ||
       projects.some((project) => project.kind === "professional" && project.status === "review")
     );
     const onboardingNeedsAttention = needsOnboarding(onboarding?.project);
     const expressReviewNeedsAttention = expressReview?.status === "awaiting_feedback";
     const websiteNeedsAttention = websites.some((site) => ["error", "suspended"].includes(site.status)) || expressReviewNeedsAttention;
-    const awaitingRound = projectReviews?.rounds.find((round) => round.status === "awaiting_feedback") ?? null;
+    const awaitingRound = reviewRelevant ? projectReviews?.rounds.find((round) => round.status === "awaiting_feedback") ?? null : null;
     const reviewNeedsAttention = Boolean(awaitingRound);
     const awaitingLabel = awaitingRound ? reviewRoundDefinition(awaitingRound.number)?.label ?? "Design review" : null;
     const domainNeedsAttention = customerDomainNeedsAttention(domains, websites);
@@ -82,12 +82,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
           ...(onboardingNeedsAttention ? [{ href: "/dashboard/onboarding", label: "Getting set up", icon: "virtue" as const, attention: true }] : []),
           { href: "/dashboard", label: "Overview", icon: "overview", exact: true, attention: anythingNeedsAttention },
           { href: "/dashboard/website", label: "Website", icon: "website", attention: websiteNeedsAttention },
-          ...(reviewRelevant ? [{ href: "/dashboard/review", label: "Design review", icon: "review" as const, attention: reviewNeedsAttention }] : []),
+          ...(hasBlog ? [{ href: "/dashboard/blog", label: "Blog", icon: "blog" as const }] : []),
           { href: "/dashboard/files", label: "Files", icon: "files" },
-          ...(hasBlog ? [{href:"/dashboard/blog",label:"Blog",icon:"files" as const}] : []),
+          { href: "/dashboard/requests", label: "Requests", icon: "requests", locked: !ent.enabled(FEATURES.requests) },
           { href: "/dashboard/domain", label: "Domain", icon: "domain", attention: domainNeedsAttention },
           { href: "/dashboard/billing", label: "Subscription", icon: "billing", attention: subscriptionNeedsAttention },
-          { href: "/dashboard/requests", label: "Requests", icon: "requests", locked: !ent.enabled(FEATURES.requests) },
+          ...(reviewRelevant ? [{ href: "/dashboard/review", label: "Design review", icon: "review" as const, attention: reviewNeedsAttention }] : []),
         ],
       },
       {

@@ -38,6 +38,14 @@ select blog_test.fails($q$select public.save_website_blog_post('ba000000-0000-40
 select blog_test.fails($q$select public.save_website_blog_post('ba000000-0000-4000-8000-000000000021','changed-link','Changed','','Body',true,current_setting('blog_test.post')::uuid,(select updated_at from public.website_blog_posts where id=current_setting('blog_test.post')::uuid))$q$,'published address remains stable');
 select public.save_website_blog_post('ba000000-0000-4000-8000-000000000021','first-post','First post','Introduction','Retained body',false,current_setting('blog_test.post')::uuid,(select updated_at from public.website_blog_posts where id=current_setting('blog_test.post')::uuid));
 select blog_test.ok((select status='draft' and body='Retained body' from public.website_blog_posts),'unpublish retains article');
+select blog_test.fails($q$update public.website_blog_posts set review_sample=true$q$,'customer cannot grant public sample visibility');
+reset role;
+update public.website_blog_posts set review_sample=true where id=current_setting('blog_test.post')::uuid;
+set local role authenticated;
+select public.save_website_blog_post('ba000000-0000-4000-8000-000000000021','first-post','Edited sample','Introduction','Updated sample body',false,current_setting('blog_test.post')::uuid,(select updated_at from public.website_blog_posts where id=current_setting('blog_test.post')::uuid));
+select blog_test.ok((select review_sample and body='Updated sample body' from public.website_blog_posts),'owner can edit staff-selected sample without changing visibility');
+select blog_test.fails($q$select public.save_website_blog_post('ba000000-0000-4000-8000-000000000021','first-post','Sample','Introduction','Body',true,current_setting('blog_test.post')::uuid,(select updated_at from public.website_blog_posts where id=current_setting('blog_test.post')::uuid))$q$,'sample cannot become a published production article');
+
 reset role;
 select set_config('request.jwt.claim.sub','ba000000-0000-4000-8000-000000000002',true);
 set local role authenticated;
