@@ -2537,6 +2537,55 @@ export type Database = {
         }
         Relationships: []
       }
+      website_blog_images: {
+        Row: {
+          height: number
+          id: string
+          object_path: string
+          organization_id: string
+          website_id: string
+          width: number
+        }
+        Insert: {
+          height: number
+          id: string
+          object_path: string
+          organization_id: string
+          website_id: string
+          width: number
+        }
+        Update: {
+          height?: number
+          id?: string
+          object_path?: string
+          organization_id?: string
+          website_id?: string
+          width?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_blog_images_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "project_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_blog_images_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_blog_images_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       website_blog_posts: {
         Row: {
           body: string
@@ -2544,6 +2593,7 @@ export type Database = {
           created_by: string | null
           excerpt: string
           id: string
+          media: Json
           organization_id: string
           published_at: string | null
           slug: string
@@ -2558,6 +2608,7 @@ export type Database = {
           created_by?: string | null
           excerpt?: string
           id?: string
+          media?: Json
           organization_id: string
           published_at?: string | null
           slug: string
@@ -2572,6 +2623,7 @@ export type Database = {
           created_by?: string | null
           excerpt?: string
           id?: string
+          media?: Json
           organization_id?: string
           published_at?: string | null
           slug?: string
@@ -2999,6 +3051,7 @@ export type Database = {
           p_body: string
           p_excerpt: string
           p_expected?: string
+          p_media?: Json
           p_post?: string
           p_publish: boolean
           p_slug: string

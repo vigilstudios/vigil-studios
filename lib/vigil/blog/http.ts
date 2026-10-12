@@ -1,5 +1,7 @@
 import 'server-only';
 import {z} from 'zod';
+import {readBlogMedia,signedBlogImages} from './images';
+import {referencedImages} from './media-contract';
 import {createAdminClient} from '@/lib/supabase/admin';
 import type {DbClient} from '../types';
 export async function publicWebsiteBlog(request:Request,websiteId:string,adminFactory:()=>DbClient=createAdminClient):Promise<Response>{
@@ -17,11 +19,11 @@ export async function publicWebsiteBlog(request:Request,websiteId:string,adminFa
   if(accessError)throw new Error('Scope unavailable');if(!available)return respond({error:'Blog unavailable.'},404);
   // Customer review sites show the honest empty state; author preview is authenticated in the dashboard.
   if(website.status!=='live'||!org||org.archived_at)return slug?respond({error:'Post unavailable.'},404):respond({posts:[],page,total:0});
-  let query=admin.from('website_blog_posts').select(slug?'slug,title,excerpt,body,published_at':'slug,title,excerpt,published_at',{count:'exact'}).eq('website_id',websiteId).eq('organization_id',website.organization_id).eq('status','published');
+  let query=admin.from('website_blog_posts').select(slug?'slug,title,excerpt,body,published_at,media':'slug,title,excerpt,published_at,media',{count:'exact'}).eq('website_id',websiteId).eq('organization_id',website.organization_id).eq('status','published');
   if(slug)query=query.eq('slug',slug);
   const rows=await query.order('published_at',{ascending:false}).order('id',{ascending:false}).range(slug?0:(page-1)*12,slug?0:page*12-1);
   if(rows.error)throw new Error('Posts unavailable');if(slug&&!rows.data?.length)return respond({error:'Post unavailable.'},404);
-  const posts=(rows.data??[]).map(value=>{const p=value as unknown as {slug:string;title:string;excerpt:string;body:string;published_at:string};return {slug:p.slug,title:p.title,excerpt:p.excerpt,published_at:p.published_at,...(slug?{body:p.body}:{})};});
+  const posts=await Promise.all((rows.data??[]).map(async value=>{const p=value as unknown as {slug:string;title:string;excerpt:string;body:string;published_at:string;media:unknown};const media=readBlogMedia(p.media),selected=slug?referencedImages(p.body,media):media.images.filter(i=>i.id===media.cover);const images=await signedBlogImages(admin,websiteId,website.organization_id,selected);return {slug:p.slug,title:p.title,excerpt:p.excerpt,published_at:p.published_at,...(slug?{body:p.body}:{}),...(images.length?{images,cover:media.cover}:{})};}));
   return respond({posts,page,total:rows.count??0});
  }catch{return respond({error:'The blog could not load. Please try again.'},503);}
 }
