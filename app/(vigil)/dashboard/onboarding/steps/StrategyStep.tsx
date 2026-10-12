@@ -7,6 +7,7 @@ import { ChoiceCards, Field, StepFooter, TextArea, TextInput, useAutosave, Virtu
 
 type Props = {
   initial: Strategy | undefined;
+  projectKind?: "professional"|"custom"|"express";
   save: (data: Strategy, completed?: boolean) => Promise<boolean>;
   onSaveState: (state: SaveState) => void;
   onBack: () => void;
@@ -38,7 +39,8 @@ const FEATURE_OPTIONS: { value: Strategy["features"][number]; label: string }[] 
   { value: "email_crm", label: "Email marketing or standard CRM forms" },
   { value: "live_chat", label: "Live chat, WhatsApp or SMS contact" },
   { value: "social", label: "Social links or feeds" },
-  { value: "cms_blog", label: "Blog, portfolio or other CMS content" },
+  { value: "blog", label: "Blog publishing — write, preview and publish posts" },
+  { value: "cms_blog", label: "Editable portfolio or other CMS content" },
   { value: "basic_automation", label: "Simple Zapier or Make trigger" },
   { value: "events", label: "Events" },
   { value: "gallery", label: "Gallery or portfolio" },
@@ -50,7 +52,7 @@ const FEATURE_OPTIONS: { value: Strategy["features"][number]; label: string }[] 
   { value: "other", label: "Something else" },
 ];
 
-export function StrategyStep({ initial, save, onSaveState, onBack, onNext }: Props) {
+export function StrategyStep({ initial, projectKind="professional", save, onSaveState, onBack, onNext }: Props) {
   const [data, setData] = useState<Strategy>(() => initial ?? strategySchema.parse({}));
   const [busy, setBusy] = useState(false);
   const { state, flush } = useAutosave(data, (value) => save(value));
@@ -102,7 +104,7 @@ export function StrategyStep({ initial, save, onSaveState, onBack, onNext }: Pro
         <legend className="text-[13px] font-medium">Which pages do you expect?</legend>
         <p className="mt-1 text-[11px] text-[color:var(--text-secondary)]">This is a starting point. We will confirm the final structure with you.</p>
         <div className="mt-3 max-w-[14rem]">
-          <Field id="estimated-pages" label="Approximate primary pages" optional hint="Professional includes up to 8. Legal and utility pages do not count.">
+          <Field id="estimated-pages" label="Approximate primary pages" optional hint={projectKind==="custom"?"Growth Site page scope is agreed with the team. Legal and utility pages do not count.":"Professional includes up to 8. Legal and utility pages do not count."}>
             <TextInput id="estimated-pages" type="number" min={1} max={100} value={data.estimatedPageCount ?? ""} onChange={(event) => set("estimatedPageCount", event.target.value ? Number(event.target.value) : null)} />
           </Field>
         </div>
@@ -110,7 +112,7 @@ export function StrategyStep({ initial, save, onSaveState, onBack, onNext }: Pro
           {PAGE_OPTIONS.map((option) => <CheckOption key={option.value} checked={data.pages.includes(option.value)} label={option.label} onChange={() => toggle("pages", option.value)} />)}
         </div>
         {data.pages.includes("other") ? <TextArea className="mt-2" rows={2} value={data.otherPages} onChange={(event) => set("otherPages", event.target.value)} maxLength={500} placeholder="Other pages or sections you have in mind" /> : null}
-        {(data.estimatedPageCount ?? 0) > 8 ? <div className="mt-3"><VirtueAside>Professional includes eight primary pages. Our team will review the additional pages and confirm any add-on before work begins.</VirtueAside></div> : null}
+        {projectKind!=="custom"&&(data.estimatedPageCount ?? 0) > 8 ? <div className="mt-3"><VirtueAside>Professional includes eight primary pages. Our team will review the additional pages and confirm any add-on before work begins.</VirtueAside></div> : null}
       </fieldset>
 
       <fieldset>

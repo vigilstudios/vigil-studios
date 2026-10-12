@@ -159,7 +159,7 @@ export function OnboardingWizard(props: WizardProps) {
           ) : step === "kickoff" ? (
             <KickoffStep key="kickoff" initial={brief.kickoff} save={(d, c) => saveSection("kickoff", d, c)} onSaveState={setSaveState} onBack={() => go(prev("kickoff"))} onNext={() => go(next("kickoff"))} onFinishWithCall={send} />
           ) : step === "strategy" ? (
-            <StrategyStep key="strategy" initial={brief.strategy} save={(d, c) => saveSection("strategy", d, c)} onSaveState={setSaveState} onBack={() => go(prev("strategy"))} onNext={() => go(next("strategy"))} />
+            <StrategyStep projectKind={props.projectKind} key="strategy" initial={brief.strategy} save={(d, c) => saveSection("strategy", d, c)} onSaveState={setSaveState} onBack={() => go(prev("strategy"))} onNext={() => go(next("strategy"))} />
           ) : step === "offerings" ? (
             <OfferingsStep key="offerings" initial={brief.offerings} save={(d, c) => saveSection("offerings", d, c)} onSaveState={setSaveState} onBack={() => go(prev("offerings"))} onNext={() => go(next("offerings"))} />
           ) : step === "about" ? (

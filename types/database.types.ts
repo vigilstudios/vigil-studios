@@ -2537,6 +2537,73 @@ export type Database = {
         }
         Relationships: []
       }
+      website_blog_posts: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          excerpt: string
+          id: string
+          organization_id: string
+          published_at: string | null
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+          website_id: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string
+          id?: string
+          organization_id: string
+          published_at?: string | null
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+          website_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string
+          id?: string
+          organization_id?: string
+          published_at?: string | null
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_blog_posts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_blog_posts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_blog_posts_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       website_contact_automation: {
         Row: {
           automatic: boolean
@@ -2927,10 +2994,28 @@ export type Database = {
         Args: { p_actor_id: string; p_organization_id: string }
         Returns: undefined
       }
+      save_website_blog_post: {
+        Args: {
+          p_body: string
+          p_excerpt: string
+          p_expected?: string
+          p_post?: string
+          p_publish: boolean
+          p_slug: string
+          p_title: string
+          p_website: string
+        }
+        Returns: string
+      }
+      set_website_blog_requested: {
+        Args: { p_requested: boolean; p_website: string }
+        Returns: undefined
+      }
       set_website_contact_automation: {
         Args: { p_automatic: boolean; p_website: string }
         Returns: undefined
       }
+      website_blog_available: { Args: { p_website: string }; Returns: boolean }
     }
     Enums: {
       actor_kind: "user" | "staff" | "system" | "provider"
@@ -3183,6 +3268,7 @@ export type Database = {
         Returns: undefined
       }
       shares_org_with: { Args: { p_user: string }; Returns: boolean }
+      website_blog_enabled: { Args: { p_website: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

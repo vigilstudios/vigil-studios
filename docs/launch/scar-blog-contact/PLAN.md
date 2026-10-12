@@ -1,0 +1,16 @@
+# Finish Scar Blog and Contact — 12 October 2026
+
+Founder redirected work to finish Scar before full-site round2 review. Blog starts empty; Scar must be able to create and publish posts herself. Publishing now uses a private editor in her existing Vigil dashboard, linked from the website, instead of developer-maintained files. No invented articles or testimonials.
+
+1. Add tenant-scoped website blog drafts/publishing, private owner/manager/staff editor and draft preview, published-only public read API. Reuse Vigil identity and permissions; no public write endpoint, private credentials, new paid CMS or visitor signup.
+2. Build Scar's Blog listing/empty state and article template in the approved paper/pixel visual language. Keep home art and motion intact. Link Manage blog to authenticated Vigil editor. Published changes become visible without client code edits or redeployment.
+3. Finish Contact as a native page while retaining the homepage form; preserve the reviewed-launch/Turnstile/Lead Hub gate. Verify accessible validation, verification/loading/error states, preserved notes, safe preview, idempotency and optional booking. Add factual contact/privacy information and an intentional unknown-page view where necessary.
+4. Type/build, meaningful two-tenant publishing/draft isolation checks, provider-free contact checks, native browser QA on phone/desktop/direct routes/back/keyboard/reduced motion and homepage regression. Preserve unrelated work; backend release isolated.
+5. Scar changes are a review candidate only: do not push to main/promote production before full-site customer approval. Prepare a reviewable preview and record remaining real content inputs. Round2 must be published and approved before normal Deploy live creates registry/live transition/contact widget.
+6. Once site work is complete, test domain selection and real availability/price disclosure through Scar's dashboard. Domain purchase waits for the selected name, confirmed registration/renewal terms, billing/ownership details and user's price approval; no purchase, charge or binding commitment during read-only testing.
+
+Existing limitations to surface accurately: marked sample testimonials, missing TikTok watch links, no optional booking link supplied, real contact/email acceptance still requires launch and an authorized test recipient. Customer review notification is not sent as an incidental test.
+
+## Shared Blog service scope — founder steering
+
+Professional and Growth Site (existing `custom` build kind) share StrategyStep; Blog page selection already exists. Add explicit `features.blog` publishing checkbox; generic legacy `cms_blog` alone must not activate a blog because it also covers portfolios. Enable journal service per website from explicit onboarding page/feature selection, or a staff-recorded subsequent request without rewriting a completed brief. Reuse for any qualifying tenant, not Scar IDs in shared code. Do not treat the separate recurring Vigil Growth subscription as a website-build entitlement. Check no-request / generic-CMS-only / Express / Professional / Growth / archived / cross-tenant cases in SQL and API tests. Private drafts preserved when service is disabled.

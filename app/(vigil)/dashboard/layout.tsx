@@ -1,3 +1,5 @@
+import { createClient } from "@/lib/supabase/server";
+import { blogSites } from "@/lib/vigil/blog/access";
 import { AccountBlock } from "@/components/vigil/AccountBlock";
 import { AppShell } from "@/components/vigil/AppShell";
 import { LiveDashboardSync } from "@/components/vigil/LiveDashboardSync";
@@ -37,6 +39,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     // Build reviews belong to the Professional project, independently of the
     // ongoing Requests entitlement. Keep the nav quiet until the project is
     // in a state where a customer can reasonably expect a review surface.
+    const hasBlog = (await blogSites(await createClient(),ctx.organization.id)).length>0;
     const professionalProject = projects.find((project) => project.kind === "professional" && !["closed", "cancelled"].includes(project.status));
     const projectReviews = professionalProject ? await getCustomerProjectReviews(professionalProject.id) : null;
     const expressWebsite = websites.find((site) => projects.find((project) => project.id === site.project_id)?.kind === "express");
@@ -81,6 +84,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           { href: "/dashboard/website", label: "Website", icon: "website", attention: websiteNeedsAttention },
           ...(reviewRelevant ? [{ href: "/dashboard/review", label: "Design review", icon: "review" as const, attention: reviewNeedsAttention }] : []),
           { href: "/dashboard/files", label: "Files", icon: "files" },
+          ...(hasBlog ? [{href:"/dashboard/blog",label:"Blog",icon:"files" as const}] : []),
           { href: "/dashboard/domain", label: "Domain", icon: "domain", attention: domainNeedsAttention },
           { href: "/dashboard/billing", label: "Subscription", icon: "billing", attention: subscriptionNeedsAttention },
           { href: "/dashboard/requests", label: "Requests", icon: "requests", locked: !ent.enabled(FEATURES.requests) },

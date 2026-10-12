@@ -1,0 +1,23 @@
+'use client';
+import {useEffect,useState,useTransition} from 'react';
+import {useRouter} from 'next/navigation';
+import Link from 'next/link';
+import {saveBlogPost} from '@/lib/vigil/actions/blog';
+import {blogBlocks} from '@/lib/vigil/blog/contract';
+import {Card,inputClass,labelClass} from './ui';
+import type {Tables} from '@/lib/vigil/types';
+export function BlogEditor({website,post,canWrite}:{website:string;post:Tables<'website_blog_posts'>|null;canWrite:boolean}){
+ const router=useRouter(),[title,setTitle]=useState(post?.title??''),[slug,setSlug]=useState(post?.slug??''),[excerpt,setExcerpt]=useState(post?.excerpt??''),[body,setBody]=useState(post?.body??''),[preview,setPreview]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[pending,start]=useTransition();
+ const [dirty,setDirty]=useState(false);
+ useEffect(()=>{const warn=(event:BeforeUnloadEvent)=>{if(dirty){event.preventDefault();event.returnValue='';}};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[dirty]);
+ function save(publish:boolean){
+  const form=new FormData();for(const [name,value] of Object.entries({title,slug,excerpt,body,intent:publish?'publish':'draft',expected:post?.updated_at??''}))form.set(name,value);
+  setError('');setNotice('');start(async()=>{const result=await saveBlogPost(website,post?.id??null,form);if(!result.ok){setError(result.error);return;}setDirty(false);setNotice(publish?'Published. Articles become public once the website is live.':'Draft saved.');router.replace(`/dashboard/blog/${result.data.id}?website=${website}`);router.refresh();});
+ }
+ return <div><Link href="/dashboard/blog" className="text-sm underline">← All posts</Link><Card className="mt-4"><div className="flex flex-wrap gap-3"><button className="btn-secondary text-sm" onClick={()=>setPreview(v=>!v)}>{preview?'Back to writing':'Preview post'}</button>{canWrite&&<><button className="btn-secondary text-sm" disabled={pending} onClick={()=>save(post?.status==='published')}>{pending?'Saving…':post?.status==='published'?'Save changes':'Save draft'}</button>{post?.status!=='published'?<button className="btn-primary text-sm" disabled={pending} onClick={()=>save(true)}>Publish post</button>:<button className="btn-secondary text-sm" disabled={pending} onClick={()=>save(false)}>Return to draft</button>}</>}</div>
+ {error&&<p className="mt-3 text-sm text-red-500" role="alert">{error}</p>}{notice&&<p className="mt-3 text-sm" role="status">{notice}</p>}
+ {preview?<article className="mx-auto mt-8 max-w-2xl"><p className="text-sm">Private preview · {post?.status??'Draft'}</p><h1 className="mt-3 text-3xl font-semibold break-words">{title||'Your title'}</h1><p className="mt-3 text-[color:var(--text-secondary)]">{excerpt}</p>{blogBlocks(body).map((block,i)=>block.kind==='heading'?<h2 key={i} className="mt-7 text-xl font-semibold break-words">{block.text}</h2>:<p key={i} className="mt-4 whitespace-pre-line break-words leading-7">{block.text}</p>)}</article>:<div className="mt-6 space-y-4"><div><label htmlFor="post-title" className={labelClass}>Title</label><input id="post-title" value={title} maxLength={160} disabled={!canWrite||pending} className={inputClass} onChange={e=>{setTitle(e.target.value);setDirty(true);if(!post?.published_at)setSlug(e.target.value.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,120));}}/></div>
+ <div><label htmlFor="post-slug" className={labelClass}>Post address</label><input id="post-slug" value={slug} maxLength={120} disabled={!canWrite||pending||Boolean(post?.published_at)} className={inputClass} onChange={e=>{setSlug(e.target.value);setDirty(true);}}/><p className="mt-1 text-xs">/blog/{slug||'your-post'} · Published addresses stay fixed so existing links keep working.</p></div>
+ <div><label htmlFor="post-excerpt" className={labelClass}>Short introduction</label><textarea id="post-excerpt" rows={3} value={excerpt} maxLength={400} disabled={!canWrite||pending} className={inputClass} onChange={e=>{setExcerpt(e.target.value);setDirty(true);}}/></div>
+ <div><label htmlFor="post-body" className={labelClass}>Your story</label><textarea id="post-body" rows={18} value={body} maxLength={60000} disabled={!canWrite||pending} className={inputClass} onChange={e=>{setBody(e.target.value);setDirty(true);}}/><p className="mt-2 text-sm">Leave a blank line between paragraphs. Start a section heading with ## and a space. HTML is displayed as text. Save your draft before leaving this page.</p></div></div>}</Card></div>;
+}

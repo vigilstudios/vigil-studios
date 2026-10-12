@@ -1,0 +1,28 @@
+import {describe,expect,it,vi} from 'vitest';
+import {publicWebsiteBlog} from '../blog/http';
+import {blogBlocks,blogInputSchema} from '../blog/contract';
+import {FakeAdmin} from './fake-admin';
+const site='ba000000-0000-4000-8000-000000000021',org='ba000000-0000-4000-8000-000000000011';
+function fixture(){
+ const fake=new FakeAdmin({websites:[{id:site,status:'live',organization_id:org}],organizations:[{id:org,archived_at:null}],website_blog_posts:[{id:'post',website_id:site,organization_id:org,status:'published',slug:'hello',title:'Hello',excerpt:'Intro',body:'Public body',published_at:'2026-10-12T00:00:00Z',created_by:'private-user'},{id:'draft',website_id:site,organization_id:org,status:'draft',slug:'secret',title:'Private draft',body:'SECRET DRAFT'},{id:'other',website_id:'other-site',organization_id:'other-org',status:'published',slug:'hello',title:'Other tenant'}]});
+ const admin=fake.asClient(),original=fake.from.bind(fake);
+ admin.from=((table:string)=>{const q=original(table),run=q.run.bind(q);let first=0,last=Infinity;Object.assign(q,{range(start:number,end:number){first=start;last=end;return q;}});q.run=()=>{const result=run();return {...result,data:result.data?.slice(first,last+1)??null};};return q;}) as unknown as typeof admin.from;
+ admin.rpc=vi.fn(async()=>({data:true,error:null})) as unknown as typeof admin.rpc;
+ return {fake,admin};
+}
+const request=(query='')=>new Request('https://www.vigilstudios.co/api/blog/'+site+query);
+describe('published-only tenant blog API',()=>{
+ it('lists only published posts from the selected website and exposes no private metadata/body',async()=>{const f=fixture();const response=await publicWebsiteBlog(request(),site,()=>f.admin);expect(response.status).toBe(200);expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');expect(await response.json()).toEqual({posts:[{slug:'hello',title:'Hello',excerpt:'Intro',published_at:'2026-10-12T00:00:00Z'}],page:1,total:1});});
+ it('returns one public article without tenant/editor IDs',async()=>{const f=fixture();const response=await publicWebsiteBlog(request('?slug=hello'),site,()=>f.admin);const body=await response.json();expect(body.posts[0].body).toBe('Public body');expect(JSON.stringify(body)).not.toContain('private-user');expect(JSON.stringify(body)).not.toContain('Other tenant');});
+ it('never leaks a known draft slug',async()=>{const f=fixture();const response=await publicWebsiteBlog(request('?slug=secret'),site,()=>f.admin);expect(response.status).toBe(404);expect(await response.text()).not.toContain('SECRET');});
+ it.each(['building','paused','suspended'])('hides posts before approved live launch or while %s',async(status)=>{const f=fixture();f.fake.rows('websites')[0].status=status;expect(await(await publicWebsiteBlog(request(),site,()=>f.admin)).json()).toEqual({posts:[],page:1,total:0});expect((await publicWebsiteBlog(request('?slug=hello'),site,()=>f.admin)).status).toBe(404);});
+ it('requires an explicit eligible site scope',async()=>{const f=fixture();f.admin.rpc=vi.fn(async()=>({data:false,error:null})) as unknown as typeof f.admin.rpc;expect((await publicWebsiteBlog(request(),site,()=>f.admin)).status).toBe(404);});
+ it('does not publish an archived organization',async()=>{const f=fixture();f.fake.rows('organizations')[0].archived_at='2026-10-12';expect((await(await publicWebsiteBlog(request(),site,()=>f.admin)).json()).posts).toEqual([]);});
+ it.each(['?page=-1','?page=1.5','?slug=../secret','?page=10001'])('rejects malformed cursors or slugs %s',async(query)=>{const f=fixture();expect((await publicWebsiteBlog(request(query),site,()=>f.admin)).status).toBe(400);});
+ it('bounds list pages to twelve while keeping total count',async()=>{const f=fixture();const first=f.fake.rows('website_blog_posts')[0];for(let i=0;i<14;i++)f.fake.rows('website_blog_posts').push({...first,id:'post-'+i,slug:'post-'+i});const response=await(await publicWebsiteBlog(request('?page=2'),site,()=>f.admin)).json();expect(response.posts).toHaveLength(3);expect(response.total).toBe(15);});
+ it('fails closed without logging database/provider error details',async()=>{const response=await publicWebsiteBlog(request(),site,()=>{throw new Error('SECRET');});expect(response.status).toBe(503);expect(await response.text()).not.toContain('SECRET');});
+});
+describe('blog text contract',()=>{
+ it('permits incomplete draft body but requires body for publishing',()=>{const input={slug:'draft',title:'Draft',excerpt:'',body:'',publish:false};expect(blogInputSchema.safeParse(input).success).toBe(true);expect(blogInputSchema.safeParse({...input,publish:true}).success).toBe(false);});
+ it('treats markup as text rather than HTML',()=>{expect(blogBlocks('## My heading\n\n<script>alert(1)</script>')).toEqual([{kind:'heading',text:'My heading'},{kind:'paragraph',text:'<script>alert(1)</script>'}]);});
+});

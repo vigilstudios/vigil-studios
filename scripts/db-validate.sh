@@ -43,4 +43,7 @@ target -f "$ROOT/supabase/test/contact.test.sql"
 echo "▸ contact automation assertions"
 target -f "$ROOT/supabase/test/contact-automation.test.sql"
 
+echo "▸ website blog assertions"
+target -f "$ROOT/supabase/test/blog.test.sql"
+
 echo "✓ migrations and RLS assertions passed"
