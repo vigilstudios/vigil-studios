@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
+import { ContactConnectionCheck } from "@/components/vigil/ContactConnectionCheck";
 import { ActionForm } from "@/components/vigil/ActionControls";
 import { Card, PageHeader, inputClass, labelClass } from "@/components/vigil/ui";
 import { requireStaff } from "@/lib/vigil/auth/session";
@@ -15,6 +16,7 @@ export default async function WebsiteContactPage({params}:{params:Promise<{websi
  return <div><Link className="underline text-sm" href={`/admin/websites/${websiteId}`}>← Website</Link><PageHeader title={`${website.name} contact & booking`} description="Contact setup follows website approval and verified domains automatically."/>
  <Card><h2 className="font-semibold">Automatic contact setup</h2><p className="mt-2 text-sm">Website: {website.status}. Setup: {(automation?.status??'waiting_launch').replaceAll('_',' ')}. Submissions: {settings?.enabled?'active':'inactive'}.</p>
  <p className="mt-2 text-sm">{contactConnectionReady()?'Cloudflare and email connection settings are present. Provider access is verified during setup.':'One-time connection needed: add CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_TURNSTILE_API_TOKEN with account-scoped Turnstile Sites Write permission to Vercel Production. Resend must also be configured. Redeploy after connecting.'}</p>
+ <ContactConnectionCheck/>
  {automation?.last_error&&<p className="mt-2 text-sm" role="status">{automation.last_error}</p>}
  <p className="mt-2 text-sm">Approved live websites get a managed widget for their verified production hostnames. Domain changes update the same widget. An interrupted creation requires recovery before another widget can be created.</p>
  <ActionForm action={setContactAutomation.bind(null,websiteId)} submitLabel="Save automation mode" className="mt-4 space-y-3"><label className={labelClass} htmlFor="mode">Contact automation</label><select id="mode" name="mode" defaultValue={automation?.automatic===false?'paused':'automatic'} className={inputClass}><option value="automatic">Automatic / retry setup</option><option value="paused">Paused — disable submissions</option></select></ActionForm></Card>
