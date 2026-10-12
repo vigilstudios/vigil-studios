@@ -74,6 +74,7 @@ export default async function WebsiteDetailPage({ params }: { params: Promise<{ 
               <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">Revision used: {expressReview.changesUsed} of 1</p>
             </div>
           ) : null}
+          <Link className="btn-secondary mt-4 inline-flex" href={`/admin/websites/${w.id}/contact`}>Contact &amp; booking settings</Link>
           <h3 className="mt-5 text-sm font-semibold">Provider links</h3>
           <ul className="mt-1 text-xs">
             {links.map((l) => (

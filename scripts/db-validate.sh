@@ -37,4 +37,7 @@ done
 echo "▸ rls assertions"
 target -f "$ROOT/supabase/test/rls.test.sql"
 
+echo "▸ shared contact assertions"
+target -f "$ROOT/supabase/test/contact.test.sql"
+
 echo "✓ migrations and RLS assertions passed"

@@ -1,0 +1,120 @@
+
+> vigil-studios@0.1.0 prebuild
+> node scripts/verify-image-runtime.mjs && npm run design:runtime && npm run contact:runtime
+
+[image-runtime] {"platform":"darwin","arch":"arm64","node":"v24.19.0","sharp":"0.35.5","librsvg":"2.63.2","libvips":"8.18.7","benignSvgDecode":"passed"}
+
+> vigil-studios@0.1.0 design:runtime
+> node scripts/build-design-runtime.mjs
+
+Pinned Design Engine distribution v1-6093ea37d7b1bf242247 (27 files)
+
+> vigil-studios@0.1.0 contact:runtime
+> node scripts/build-contact-runtime.mjs
+
+Built shared Vigil contact browser adapter v1
+
+> vigil-studios@0.1.0 build
+> next build --webpack
+
+▲ Next.js 16.3.8 (webpack)
+✓ Running next.config.ts took 53ms
+- Experiments (use with caution):
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 8.6s
+  Running TypeScript ...
+  Finished TypeScript in 12.0s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/59) ...
+  Generating static pages using 7 workers (14/59) 
+  Generating static pages using 7 workers (29/59) 
+  Generating static pages using 7 workers (44/59) 
+✓ Generating static pages using 7 workers (59/59) in 657ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)                                           Revalidate  Expire
+┌ ○ /                                                         5m      1y
+├ ○ /_not-found
+├ ƒ /admin
+├ ƒ /admin/audit
+├ ƒ /admin/composition-lab
+├ ƒ /admin/design-lab
+├ ƒ /admin/domains
+├ ƒ /admin/jobs
+├ ƒ /admin/lab
+├ ƒ /admin/lab/express
+├ ƒ /admin/lab/express/[variantId]
+├ ƒ /admin/lab/project/[projectId]
+├ ƒ /admin/lab/projects
+├ ƒ /admin/orders
+├ ƒ /admin/organizations
+├ ƒ /admin/organizations/[orgId]
+├ ƒ /admin/organizations/[orgId]/files
+├ ƒ /admin/plans
+├ ƒ /admin/requests
+├ ƒ /admin/reviews
+├ ƒ /admin/reviews/[projectId]
+├ ƒ /admin/subscriptions
+├ ƒ /admin/websites
+├ ƒ /admin/websites/[websiteId]
+├ ƒ /admin/websites/[websiteId]/contact
+├ ƒ /api/admin/organizations/[orgId]/files.zip
+├ ƒ /api/admin/projects/[projectId]/assets/[assetId]
+├ ƒ /api/contact/[websiteId]
+├ ƒ /api/csp-report
+├ ƒ /api/health
+├ ƒ /api/jobs/run
+├ ƒ /api/webhooks/stripe
+├ ƒ /api/websites/[websiteId]/export
+├ ○ /apple-icon.png
+├ ƒ /auth/callback
+├ ƒ /auth/confirm
+├ ƒ /auth/signout
+├ ƒ /checkout
+├ ƒ /checkout/[token]
+├ ƒ /checkout/success
+├ ○ /creators                                                 5m      1y
+├ ○ /creators/opengraph-image-6942ng
+├ ○ /creators/twitter-image-6942ng
+├ ƒ /dashboard
+├ ƒ /dashboard/billing
+├ ƒ /dashboard/domain
+├ ƒ /dashboard/files
+├ ƒ /dashboard/insights
+├ ƒ /dashboard/leads
+├ ƒ /dashboard/leads/[leadId]
+├ ƒ /dashboard/onboarding
+├ ƒ /dashboard/onboarding/later
+├ ƒ /dashboard/onboarding/welcome
+├ ƒ /dashboard/requests
+├ ƒ /dashboard/review
+├ ƒ /dashboard/settings
+├ ƒ /dashboard/virtue
+├ ƒ /dashboard/website
+├ ƒ /dashboard/welcome
+├ ƒ /express
+├ ƒ /express-preview/[slug]
+├ ƒ /find-your-fit
+├ ○ /icon.svg
+├ ƒ /login
+├ ○ /manifest.webmanifest
+├ ƒ /pricing
+├ ○ /process
+├ ○ /products                                                 5m      1y
+├ ○ /products/vigil                                           5m      1y
+├ ○ /products/virtue
+├ ○ /products/websites                                        5m      1y
+├ ƒ /professional
+├ ○ /robots.txt
+├ ○ /sitemap.xml
+└ ○ /terms
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

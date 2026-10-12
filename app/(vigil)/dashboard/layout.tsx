@@ -89,7 +89,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       {
         label: "Grow",
         items: [
-          { href: "/dashboard/leads", label: "Leads", icon: "leads", locked: !ent.enabled(FEATURES.leads), badge: "Soon" },
+          { href: "/dashboard/leads", label: "Lead Hub", icon: "leads" },
           { href: "/dashboard/insights", label: "Insights", icon: "insights", locked: !ent.enabled(FEATURES.insights), badge: "Soon" },
           { href: "/dashboard/virtue", label: "Virtue", icon: "virtue", locked: !ent.enabled(FEATURES.virtue), badge: "Soon" },
         ],

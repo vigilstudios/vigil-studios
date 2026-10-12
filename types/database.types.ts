@@ -786,6 +786,115 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_events: {
+        Row: {
+          actor_user_id: string | null
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          lead_id: string
+          organization_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          kind: string
+          lead_id: string
+          organization_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          lead_id?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_events_actor_user_id_fkey"
+            columns: ["actor_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_notifications: {
+        Row: {
+          attempts: number
+          first_attempt_at: string | null
+          last_error: string | null
+          lead_id: string
+          message: Json | null
+          organization_id: string
+          provider_id: string | null
+          recipient: string
+          sent_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          first_attempt_at?: string | null
+          last_error?: string | null
+          lead_id: string
+          message?: Json | null
+          organization_id: string
+          provider_id?: string | null
+          recipient: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          first_attempt_at?: string | null
+          last_error?: string | null
+          lead_id?: string
+          message?: Json | null
+          organization_id?: string
+          provider_id?: string | null
+          recipient?: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_notifications_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: true
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           contact: Json
@@ -794,9 +903,13 @@ export type Database = {
           message: string | null
           metadata: Json
           organization_id: string
+          read_at: string | null
           received_at: string
+          search_document: unknown
           source: string | null
           status: Database["public"]["Enums"]["lead_status"]
+          submission_hash: string | null
+          submission_key: string | null
           updated_at: string
           website_id: string | null
         }
@@ -807,9 +920,13 @@ export type Database = {
           message?: string | null
           metadata?: Json
           organization_id: string
+          read_at?: string | null
           received_at?: string
+          search_document?: unknown
           source?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
+          submission_hash?: string | null
+          submission_key?: string | null
           updated_at?: string
           website_id?: string | null
         }
@@ -820,9 +937,13 @@ export type Database = {
           message?: string | null
           metadata?: Json
           organization_id?: string
+          read_at?: string | null
           received_at?: string
+          search_document?: unknown
           source?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
+          submission_hash?: string | null
+          submission_key?: string | null
           updated_at?: string
           website_id?: string | null
         }
@@ -2416,6 +2537,54 @@ export type Database = {
         }
         Relationships: []
       }
+      website_contact_settings: {
+        Row: {
+          allowed_origins: string[]
+          booking_url: string | null
+          daily_limit: number
+          enabled: boolean
+          notification_email: string
+          organization_id: string
+          updated_at: string
+          website_id: string
+        }
+        Insert: {
+          allowed_origins?: string[]
+          booking_url?: string | null
+          daily_limit?: number
+          enabled?: boolean
+          notification_email: string
+          organization_id: string
+          updated_at?: string
+          website_id: string
+        }
+        Update: {
+          allowed_origins?: string[]
+          booking_url?: string | null
+          daily_limit?: number
+          enabled?: boolean
+          notification_email?: string
+          organization_id?: string
+          updated_at?: string
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_contact_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_contact_settings_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: true
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       websites: {
         Row: {
           code_ownership: Database["public"]["Enums"]["code_ownership"]
@@ -2531,6 +2700,14 @@ export type Database = {
     Functions: {
       accept_invitation: { Args: { p_invite: string }; Returns: string }
       accept_pending_invites: { Args: never; Returns: number }
+      acknowledge_lead_notification: {
+        Args: { p_lead: string; p_org: string; p_provider: string }
+        Returns: undefined
+      }
+      add_lead_note: {
+        Args: { p_lead: string; p_note: string }
+        Returns: undefined
+      }
       allocate_order_project: {
         Args: {
           p_customer_ref?: string
@@ -2553,6 +2730,19 @@ export type Database = {
       archive_customer: {
         Args: { p_actor_id: string; p_organization_id: string }
         Returns: undefined
+      }
+      capture_website_lead: {
+        Args: {
+          p_contact: Json
+          p_hash: string
+          p_key: string
+          p_message: string
+          p_origin: string
+          p_page: string
+          p_source: string
+          p_website: string
+        }
+        Returns: string
       }
       claim_design_sync: {
         Args: { p_project_id: string; p_token: string }
@@ -2588,6 +2778,16 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      configure_website_contact: {
+        Args: {
+          p_booking?: string
+          p_enabled?: boolean
+          p_origins?: string[]
+          p_recipient: string
+          p_website: string
+        }
+        Returns: undefined
       }
       decline_invitation: { Args: { p_invite: string }; Returns: undefined }
       list_my_invitations: {
@@ -2678,7 +2878,14 @@ export type Database = {
       feature_value_kind: "boolean" | "limit" | "text"
       file_category: "brand_asset" | "document" | "content" | "deliverable"
       job_status: "queued" | "running" | "succeeded" | "failed" | "canceled"
-      lead_status: "new" | "contacted" | "qualified" | "won" | "lost" | "spam"
+      lead_status:
+        | "new"
+        | "contacted"
+        | "qualified"
+        | "won"
+        | "lost"
+        | "spam"
+        | "booked"
       membership_status: "active" | "suspended"
       order_status:
         | "pending"
@@ -3019,7 +3226,15 @@ export const Constants = {
       feature_value_kind: ["boolean", "limit", "text"],
       file_category: ["brand_asset", "document", "content", "deliverable"],
       job_status: ["queued", "running", "succeeded", "failed", "canceled"],
-      lead_status: ["new", "contacted", "qualified", "won", "lost", "spam"],
+      lead_status: [
+        "new",
+        "contacted",
+        "qualified",
+        "won",
+        "lost",
+        "spam",
+        "booked",
+      ],
       membership_status: ["active", "suspended"],
       order_status: [
         "pending",

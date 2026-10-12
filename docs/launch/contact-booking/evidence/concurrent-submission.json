@@ -1,0 +1,8 @@
+{
+  "environment": "disposable local PostgreSQL",
+  "simultaneous_transactions": 2,
+  "leads": 1,
+  "received_events": 1,
+  "notification_rows": 1,
+  "jobs": 1
+}

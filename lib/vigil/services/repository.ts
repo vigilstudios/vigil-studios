@@ -48,7 +48,7 @@ export async function provisionWebsiteRepository(
   if (!organization) throw new NotFoundError("The website organization was not found.");
 
   const repoName = repositoryName(organization.slug, websiteId);
-  const siteFiles = website.template_slug ? await expressRepositoryFiles(admin, website.template_slug) : [{ path: "site/index.html", content: await initialHtml(null, organization.name) }];
+  const siteFiles = website.template_slug ? await expressRepositoryFiles(admin, website.template_slug, websiteId) : [{ path: "site/index.html", content: await initialHtml(null, organization.name) }];
   const repository = await provider.ensureRepository({
     name: repoName,
     description: `${organization.name} website, managed by Vigil Studios`,

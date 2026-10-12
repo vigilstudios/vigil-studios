@@ -48,3 +48,7 @@
 .de-root .de-ending-form[data-form-custom] .de-ending-field > p { font-size:max(12px,calc(var(--de-form-text-size) - 2px))!important; }
 .de-ending-form[data-form-custom] > [role=status]:empty { display:none; }
 @container inquiry-form (max-width:520px) { .de-ending-form[data-form-custom] .de-ending-fields { grid-template-columns:1fr; } }
+
+.de-ending-booking { font: inherit; line-height: 1.5; }
+.de-ending-booking a { color: inherit; text-decoration: underline; text-underline-offset: .18em; }
+.de-ending-booking a:focus-visible { outline: 2px solid var(--de-form-focus, currentColor); outline-offset: 4px; }

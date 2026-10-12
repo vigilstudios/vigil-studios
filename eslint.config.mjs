@@ -13,6 +13,7 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "public/design-engine-runtime/**",
+    "public/integrations/vigil-contact-v1.js",
   ]),
 ]);
 

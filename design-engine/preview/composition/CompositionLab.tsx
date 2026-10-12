@@ -16,6 +16,7 @@ import {NavigationBrandControls} from "../NavigationBrandControls";
 import { useEffect, useMemo, useRef, useState, type ReactNode, type SetStateAction } from "react";
 import { designComponents } from "../../registry/components";
 import { getSectionContract } from "../../composition/catalog";
+import { WebsiteContactHost } from "../../forms/WebsiteContactHost";
 import { CompositionPreview } from "../../composition/render";
 import { inspectComposition, compositionTransitionNotices } from "../../composition/validation";
 import { MediaControls } from "./MediaControls";
@@ -337,7 +338,7 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
         event.preventDefault(); event.stopPropagation(); setSelected(slot.dataset.sectionId); setTab("sections");
       }}>
         {(pending || editing || layerEditing) && <p className="composition-preview-notice" role="status">{pending ? "Preview · click the style to add" : `Preview · ${layerEditing?.label ?? editing?.label} · click to apply`}</p>}
-        {inspection.issues.length === 0 ? composition.sections.length === 0 && !pending ? <div className="composition-empty-canvas"><h2>Blank canvas</h2><p>Choose a style in Layout, or start from a demo composition.</p><button type="button" onClick={() => setTab("sections")}>Browse layouts</button></div> : <PreviewCanvas key={`${fixture}-${replay}`} authored={<ActionBoundary site={site} composition={renderedComposition}><CompositionPreview key={replay} composition={renderedComposition} /></ActionBoundary>} audition={pending || editing || layerEditing ? <ActionBoundary site={site} composition={renderedAudition}><CompositionPreview key={replay} composition={renderedAudition} /></ActionBoundary> : undefined} /> : <div className="composition-blocked"><h2>Resolve compatibility to preview</h2><ul>{inspection.issues.map((issue, index) => <li key={index}>{issue.section ?? "Page"}: {issue.message}</li>)}</ul><button type="button" onClick={() => setTab("qa")}>Open diagnostics</button></div>}
+        {inspection.issues.length === 0 ? composition.sections.length === 0 && !pending ? <div className="composition-empty-canvas"><h2>Blank canvas</h2><p>Choose a style in Layout, or start from a demo composition.</p><button type="button" onClick={() => setTab("sections")}>Browse layouts</button></div> : <PreviewCanvas key={`${fixture}-${replay}`} authored={<WebsiteContactHost preview><ActionBoundary site={site} composition={renderedComposition}><CompositionPreview key={replay} composition={renderedComposition} /></ActionBoundary></WebsiteContactHost>} audition={pending || editing || layerEditing ? <WebsiteContactHost preview><ActionBoundary site={site} composition={renderedAudition}><CompositionPreview key={replay} composition={renderedAudition} /></ActionBoundary></WebsiteContactHost> : undefined} /> : <div className="composition-blocked"><h2>Resolve compatibility to preview</h2><ul>{inspection.issues.map((issue, index) => <li key={index}>{issue.section ?? "Page"}: {issue.message}</li>)}</ul><button type="button" onClick={() => setTab("qa")}>Open diagnostics</button></div>}
       </div>
   </LabEditor>
     <dialog ref={clearDialog} className="composition-clear-dialog" aria-labelledby="clear-canvas-title" aria-describedby="clear-canvas-description">

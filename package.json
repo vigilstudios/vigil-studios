@@ -13,9 +13,10 @@
     "db:validate": "scripts/db-validate.sh",
     "check": "npm run typecheck && npm run test && npm run db:validate",
     "design:runtime": "node scripts/build-design-runtime.mjs",
-    "prebuild": "node scripts/verify-image-runtime.mjs && npm run design:runtime",
-    "predev": "npm run design:runtime",
-    "test:dependency-security": "node --test scripts/verify-eslint-glob-security.mjs"
+    "prebuild": "node scripts/verify-image-runtime.mjs && npm run design:runtime && npm run contact:runtime",
+    "predev": "npm run design:runtime && npm run contact:runtime",
+    "test:dependency-security": "node --test scripts/verify-eslint-glob-security.mjs",
+    "contact:runtime": "node scripts/build-contact-runtime.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
