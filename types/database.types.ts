@@ -2621,6 +2621,7 @@ export type Database = {
           body: string
           created_at: string
           created_by: string | null
+          deleted_at: string | null
           excerpt: string
           id: string
           media: Json
@@ -2637,6 +2638,7 @@ export type Database = {
           body?: string
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           excerpt?: string
           id?: string
           media?: Json
@@ -2653,6 +2655,7 @@ export type Database = {
           body?: string
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           excerpt?: string
           id?: string
           media?: Json
@@ -3089,6 +3092,15 @@ export type Database = {
           p_publish: boolean
           p_slug: string
           p_title: string
+          p_website: string
+        }
+        Returns: string
+      }
+      set_website_blog_post_deleted: {
+        Args: {
+          p_deleted: boolean
+          p_expected: string
+          p_post: string
           p_website: string
         }
         Returns: string

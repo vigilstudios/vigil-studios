@@ -21,3 +21,15 @@ export async function saveBlogPost(websiteId:string,postId:string|null,form:Form
   if(!data)throw new ValidationError('Your post could not be saved.');revalidatePath('/dashboard/blog');return {ok:true,data:{id:data}};
  }catch(error){return toActionError(error);}
 }
+
+export async function setBlogPostDeleted(websiteId:string,postId:string,expected:string,deleted:boolean):Promise<ActionResult<{id:string}>>{
+ try{
+  const ctx=await requireOrgContextOrThrow();await assertOrgRole(ctx,['owner','manager']);const client=await createClient();
+  const website=z.string().uuid().parse(websiteId),post=z.string().uuid().parse(postId),version=z.string().datetime({offset:true}).parse(expected);
+  const {data:site,error:lookup}=await client.from('websites').select('id').eq('id',website).eq('organization_id',ctx.organization.id).maybeSingle();
+  if(lookup)throw lookup;if(!site)throw new ForbiddenError();
+  const {data,error}=await client.rpc('set_website_blog_post_deleted',{p_website:website,p_post:post,p_expected:version,p_deleted:z.boolean().parse(deleted)});
+  if(error){if(error.code==='40001')throw new ValidationError('This post changed in another window. Reload before continuing.');throw new ValidationError('Your post could not be updated. Please reload and try again.');}
+  if(!data)throw new ValidationError('Post unavailable.');revalidatePath('/dashboard/blog');return {ok:true,data:{id:data}};
+ }catch(error){return toActionError(error);}
+}

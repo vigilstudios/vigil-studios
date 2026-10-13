@@ -46,21 +46,31 @@ select public.save_website_blog_post('ba000000-0000-4000-8000-000000000021','fir
 select blog_test.ok((select review_sample and body='Updated sample body' from public.website_blog_posts),'owner can edit staff-selected sample without changing visibility');
 select blog_test.fails($q$select public.save_website_blog_post('ba000000-0000-4000-8000-000000000021','first-post','Sample','Introduction','Body',true,current_setting('blog_test.post')::uuid,(select updated_at from public.website_blog_posts where id=current_setting('blog_test.post')::uuid))$q$,'sample cannot become a published production article');
 
+-- Trash is reversible, version checked, and cannot be edited until restored.
+select blog_test.fails($q$select public.set_website_blog_post_deleted('ba000000-0000-4000-8000-000000000021',current_setting('blog_test.post')::uuid,'2000-01-01',true)$q$,'stale delete cannot remove a newer article');
+select public.set_website_blog_post_deleted('ba000000-0000-4000-8000-000000000021',current_setting('blog_test.post')::uuid,(select updated_at from public.website_blog_posts where id=current_setting('blog_test.post')::uuid),true);
+select blog_test.ok((select deleted_at is not null from public.website_blog_posts),'trash keeps article content');
+select blog_test.fails($q$select public.save_website_blog_post('ba000000-0000-4000-8000-000000000021','first-post','Changed','','Body',false,current_setting('blog_test.post')::uuid,(select updated_at from public.website_blog_posts where id=current_setting('blog_test.post')::uuid))$q$,'trashed post cannot be edited or republished');
+select public.set_website_blog_post_deleted('ba000000-0000-4000-8000-000000000021',current_setting('blog_test.post')::uuid,(select updated_at from public.website_blog_posts where id=current_setting('blog_test.post')::uuid),false);
+select blog_test.ok((select deleted_at is null from public.website_blog_posts),'owner can restore');
 reset role;
 select set_config('request.jwt.claim.sub','ba000000-0000-4000-8000-000000000002',true);
 set local role authenticated;
 select blog_test.ok((select count(*)=0 from public.website_blog_posts),'cross-tenant drafts hidden even by known post ID');
+select blog_test.fails($q$select public.set_website_blog_post_deleted('ba000000-0000-4000-8000-000000000021',current_setting('blog_test.post')::uuid,now(),true)$q$,'tenant B cannot trash A article');
 select blog_test.fails($q$select public.website_blog_available('ba000000-0000-4000-8000-000000000021')$q$,'tenant B cannot inspect A service scope');
 select public.save_website_blog_post('ba000000-0000-4000-8000-000000000022','first-post','Growth first post','','Body',true);
 reset role;
 select set_config('request.jwt.claim.sub','ba000000-0000-4000-8000-000000000003',true);
 set local role authenticated;
 select blog_test.fails($q$select public.save_website_blog_post('ba000000-0000-4000-8000-000000000021','member-post','Member post','','Body',true)$q$,'ordinary member cannot publish');
+select blog_test.fails($q$select public.set_website_blog_post_deleted('ba000000-0000-4000-8000-000000000021',current_setting('blog_test.post')::uuid,now(),true)$q$,'ordinary member cannot delete');
 reset role;
 select set_config('request.jwt.claim.role','anon',true);
 select set_config('request.jwt.claim.sub','',true);
 set local role anon;
 select blog_test.fails('select * from public.website_blog_posts','anonymous cannot read any table drafts or published rows directly');
+select blog_test.fails($q$select public.set_website_blog_post_deleted('ba000000-0000-4000-8000-000000000021',current_setting('blog_test.post')::uuid,now(),true)$q$,'anonymous cannot delete');
 select blog_test.fails($q$select public.save_website_blog_post('ba000000-0000-4000-8000-000000000021','anon','Anon','','Body',true)$q$,'anonymous cannot write');
 reset role;
 update public.organizations set archived_at=now() where id='ba000000-0000-4000-8000-000000000012';

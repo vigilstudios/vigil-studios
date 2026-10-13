@@ -1,6 +1,8 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- Private, expiring image URLs are normalized by the upload service. */
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import {useRouter} from "next/navigation";
+import {setBlogPostDeleted} from "@/lib/vigil/actions/blog";
 import Link from "next/link";
 import {
   LayoutList,
@@ -16,7 +18,7 @@ export type LibraryPost = {
   excerpt: string;
   status: string;
   updated_at: string;
-  review_sample: boolean;
+  deleted_at: string | null;
   coverUrl?: string;
   coverAlt?: string;
 };
@@ -37,23 +39,22 @@ export function BlogLibrary({
   posts: LibraryPost[];
   canWrite: boolean;
 }) {
+  const router=useRouter();const [pending,start]=useTransition();const [error,setError]=useState("");const [trash,setTrash]=useState(false);
   const [view, setView] = useState<"table" | "feed">("table"),
     [search, setSearch] = useState("");
   const visible = posts.filter((post) =>
-    `${post.title} ${post.excerpt}`
+    Boolean(post.deleted_at)===trash && `${post.title} ${post.excerpt}`
       .toLowerCase()
       .includes(search.toLowerCase()),
   );
-  const status = (post: LibraryPost) =>
-    post.review_sample
-      ? "Sample · Review preview"
-      : post.status === "published"
-        ? "Published"
-        : "Draft";
+  const status = (post: LibraryPost) => post.deleted_at ? "In trash" : post.status === "published" ? "Published" : "Draft";
+  const restore=(post:LibraryPost)=>start(async()=>{setError("");const result=await setBlogPostDeleted(post.website_id,post.id,post.updated_at,false);if(!result.ok){setError(result.error);return;}router.refresh();});
   const href = (post: LibraryPost) =>
     `/dashboard/blog/${post.id}?website=${post.website_id}`;
   return (
     <>
+      {error&&<p role="alert" className="mb-4 text-sm text-red-500">{error}</p>}
+      <div className="mb-4 flex gap-4" role="group" aria-label="Post collection"><button aria-pressed={!trash} onClick={()=>setTrash(false)}>All posts</button><button aria-pressed={trash} onClick={()=>setTrash(true)}>Trash ({posts.filter(p=>p.deleted_at).length})</button></div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <label className="w-full max-w-sm">
           <span className="sr-only">Find a post</span>
@@ -106,7 +107,7 @@ export function BlogLibrary({
                 <p className="mt-1 max-w-2xl text-sm text-[color:var(--text-secondary)]">
                   {site.status === "live"
                     ? "Published posts appear on your website as soon as you save."
-                    : "Prepare your articles here. Sample drafts update the design preview; approved articles appear after launch."}
+                    : "Published articles appear in the site review. Drafts stay private. Your articles become public after launch."}
                 </p>
               </div>
               {canWrite && (
@@ -126,7 +127,7 @@ export function BlogLibrary({
                     : "Your journal starts here. Write your first post when you’re ready."}
                 </p>
               </Card>
-            ) : view === "table" ? (
+            ) : trash ? <Card>{items.map(post=><div key={post.id} className="flex items-center justify-between gap-4 py-4"><div><h3 className="font-medium">{post.title}</h3><p className="text-sm text-[color:var(--text-secondary)]">Removed from your website. Restoring keeps its previous publishing status and photos.</p></div>{canWrite&&<button className="btn-secondary text-sm" disabled={pending} onClick={()=>restore(post)}>Restore post</button>}</div>)}</Card> : view === "table" ? (
               <div className="overflow-x-auto rounded-2xl border border-[color:var(--border)]">
                 <table className="w-full text-left text-sm">
                   <caption className="sr-only">{site.name} blog posts</caption>
