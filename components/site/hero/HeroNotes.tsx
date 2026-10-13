@@ -60,7 +60,10 @@ export function HeroNotes({ good = false, items, avoid, count }: { good?: boolea
     const goodItems = itemsRef.current, avoidBox = avoidRef.current, counts = countRef.current;
     startCursor();
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const phone = () => host.clientWidth < 760;
+    let width = host.clientWidth, height = host.clientHeight;
+    const resize = new ResizeObserver(() => { width = host.clientWidth; height = host.clientHeight; });
+    resize.observe(host);
+    const phone = () => width < 760;
     const slots: Slot[] = [];
     let deck: number[] = [];
     const pool: Pair[] = goodItems ? goodItems.map((t) => [t, t]) : PAIRS;
@@ -71,7 +74,7 @@ export function HeroNotes({ good = false, items, avoid, count }: { good?: boolea
     // an ellipse around the mark (which sits at 50 % / 45 %), never over the words below it, never off the edge;
     // with an avoid box, anywhere in the viewport except that box
     const place = () => {
-      const w = host.clientWidth, h = host.clientHeight;
+      const w = width, h = height;
       if (avoidBox) {
         for (let i = 0; i < 12; i++) {
           const x = rnd(w * 0.06, w * 0.94), y = rnd(h * 0.12, h * 0.94);
@@ -105,7 +108,7 @@ export function HeroNotes({ good = false, items, avoid, count }: { good?: boolea
       host.appendChild(el);
       // keep the whole note on screen (a phone is narrower than the ellipse plus a note)
       const hw = el.offsetWidth / 2 + 12;
-      p.x = Math.min(Math.max(p.x, hw), host.clientWidth - hw);
+      p.x = Math.min(Math.max(p.x, hw), width - hw);
       Object.assign(slot, { el, bad: problem, good: handled, t0: t, x: p.x, y: p.y, dx: rnd(-6, 6), dy: rnd(-4, 4), ph: rnd(0, 6.28), par: rnd(10, 26), hw, flipped: false, struck: false });
       el.style.transform = `translate(${p.x}px,${p.y}px) translate(-50%,-50%) scale(.6)`;
     };
@@ -115,11 +118,11 @@ export function HeroNotes({ good = false, items, avoid, count }: { good?: boolea
       while (slots.length > n) slots.pop()!.el?.remove();
     };
 
-    let raf = 0, visible = true, hidden = document.hidden, covered = false;
+    let raf = 0, visible = false, hidden = document.hidden, covered = false, faded = false;
     const start = performance.now();
     const frame = (now: number) => {
       raf = 0;
-      if (!visible || hidden || covered) return;
+      if (!visible || hidden || covered || faded) return;
       tickCursor(now);
       const t = (now - start) / 1000;
       ensure(t);
@@ -139,7 +142,7 @@ export function HeroNotes({ good = false, items, avoid, count }: { good?: boolea
         else if (a < holdEnd + T.out) { const f = ease((a - holdEnd) / T.out); scale = 1 - 0.15 * f; opacity = 1 - f; s.y += 0.6; }
         else { el.remove(); s.el = null; s.t0 = t + rnd(0.4, 1.6); continue; }
         const bob = reduced ? 0 : Math.sin(t * 1.3 + s.ph) * 4;
-        if (!reduced) { s.x = Math.min(Math.max(s.x + s.dx / 60, s.hw), host.clientWidth - s.hw); s.y += s.dy / 60; }
+        if (!reduced) { s.x = Math.min(Math.max(s.x + s.dx / 60, s.hw), width - s.hw); s.y += s.dy / 60; }
         el.style.opacity = String(opacity);
         el.style.transform = `translate(${s.x - cursor.x * s.par}px,${s.y + bob - cursor.y * s.par * 0.7}px) translate(-50%,-50%) scale(${scale})`;
       }
@@ -164,13 +167,17 @@ export function HeroNotes({ good = false, items, avoid, count }: { good?: boolea
     });
     // The hero's notes fade with its words as the story begins.
     const unsubscribe = good ? () => {} : subscribeStory((p) => {
-      host.style.opacity = String(1 - rng(rng(p, PHASE.untype[0], PHASE.untype[1]), 0, 0.35));
+      const opacity = 1 - rng(rng(p, PHASE.untype[0], PHASE.untype[1]), 0, 0.35);
+      host.style.opacity = String(opacity);
+      faded = opacity === 0;
+      if (!faded) loop();
     });
     loop();
 
     return () => {
       cancelAnimationFrame(raf);
       io.disconnect();
+      resize.disconnect();
       unwatch();
       unsubscribe();
       document.removeEventListener("visibilitychange", onVisibility);

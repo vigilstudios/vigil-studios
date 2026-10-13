@@ -56,10 +56,17 @@ export class Typer {
   constructor(private el: HTMLElement) {
     this.full = el.dataset.text ?? el.textContent?.trim() ?? "";
     el.dataset.text = this.full;
-    this.text = document.createTextNode("");
-    this.caret = document.createElement("i");
-    this.caret.className = "story-caret story-caret-off";
-    el.replaceChildren(this.text, this.caret);
+    const span = el.querySelector(".story-text"), caret = el.querySelector<HTMLElement>(".story-caret");
+    if (span?.firstChild?.nodeType === 3 && caret) {
+      this.text = span.firstChild as Text;
+      this.caret = caret;
+      this.shown = this.text.length;
+    } else {
+      this.text = document.createTextNode("");
+      this.caret = document.createElement("i");
+      this.caret.className = "story-caret story-caret-off";
+      el.replaceChildren(this.text, this.caret);
+    }
     el.classList.remove("story-typing-pending");
   }
   set(n: number, active: boolean) {

@@ -43,6 +43,8 @@ type OrbProps = {
   getOutputVolume?: () => number;
   /** Render one frame only (prefers-reduced-motion). */
   still?: boolean;
+  /** Pause the render loop when this instance is outside the viewport or in a hidden tab. */
+  active?: boolean;
   className?: string;
 };
 
@@ -62,6 +64,7 @@ export function Orb({
   getInputVolume,
   getOutputVolume,
   still = false,
+  active = true,
   className,
 }: OrbProps) {
   return (
@@ -71,7 +74,7 @@ export function Orb({
         // welcome orb flies in scaled down; measuring its bounding rect at
         // that moment sized the canvas at a quarter of the circle for good.
         resize={{ debounce: resizeDebounce, offsetSize: true }}
-        frameloop={still ? "demand" : "always"}
+        frameloop={still || !active ? "demand" : "always"}
         dpr={[1, 2]}
         gl={{ alpha: true, antialias: true, premultipliedAlpha: true, powerPreference: "low-power" }}
       >

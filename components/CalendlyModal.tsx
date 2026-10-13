@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { useHydrated } from "@/components/ui/useSiteTheme";
 import { createPortal } from "react-dom";
-import { InlineWidget } from "react-calendly";
+import dynamic from "next/dynamic";
+
+const InlineWidget = dynamic(() => import("react-calendly").then((mod) => mod.InlineWidget), { ssr: false });
 import { X } from "lucide-react";
 
 type CalendlyPopupProps = {

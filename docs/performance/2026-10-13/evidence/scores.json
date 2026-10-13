@@ -1,0 +1,59 @@
+{
+  "hosted-mobile.json": {
+    "lighthouseVersion": "13.5.0",
+    "fetchTime": "2026-10-13T22:24:32.852Z",
+    "url": "https://vigil-studios-f6v1q2ldp-vigilstudio-projects.vercel.app/",
+    "scores": {
+      "performance": 96,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 66,
+      "agentic-browsing": 100
+    },
+    "metrics": {
+      "first-contentful-paint": 1434.6815000000001,
+      "largest-contentful-paint": 2641.6815,
+      "total-blocking-time": 101,
+      "speed-index": 2076.3833402894857,
+      "cumulative-layout-shift": 0.028253752851344818
+    }
+  },
+  "hosted-desktop.json": {
+    "lighthouseVersion": "13.5.0",
+    "fetchTime": "2026-10-13T22:25:26.494Z",
+    "url": "https://vigil-studios-f6v1q2ldp-vigilstudio-projects.vercel.app/",
+    "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 66,
+      "agentic-browsing": 100
+    },
+    "metrics": {
+      "first-contentful-paint": 355.59430000000003,
+      "largest-contentful-paint": 560.4933,
+      "total-blocking-time": 0,
+      "speed-index": 522.2811397766912,
+      "cumulative-layout-shift": 0.01364547314158129
+    }
+  },
+  "production-mode-seo.json": {
+    "lighthouseVersion": "13.5.0",
+    "fetchTime": "2026-10-13T22:17:38.648Z",
+    "url": "http://localhost:3101/",
+    "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 96,
+      "seo": 100,
+      "agentic-browsing": 100
+    },
+    "metrics": {
+      "first-contentful-paint": 291.2466,
+      "largest-contentful-paint": 656.8699000000001,
+      "total-blocking-time": 0,
+      "speed-index": 295.8109624102537,
+      "cumulative-layout-shift": 0.012582229518722813
+    }
+  }
+}

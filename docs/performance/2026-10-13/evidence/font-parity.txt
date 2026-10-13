@@ -1,0 +1,2 @@
+Extended ranges: 205 Latin glyphs: 287
+All subset advances and outlines match the original across 400/500/600/700 and opsz 14/32

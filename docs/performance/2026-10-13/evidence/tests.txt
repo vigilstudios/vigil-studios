@@ -1,0 +1,12 @@
+
+> vigil-studios@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.11 /Users/belierjavier/.codex/worktrees/vigil-marketing-performance
+
+
+ Test Files  98 passed (98)
+      Tests  2219 passed (2219)
+   Start at  18:14:08
+   Duration  43.73s (transform 12.20s, setup 0ms, import 55.47s, tests 79.77s, environment 7ms)

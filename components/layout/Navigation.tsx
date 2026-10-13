@@ -4,7 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  loadMotionRuntime,
+  useMotionIntent,
+} from "@/components/site/motion-runtime";
 import { ProductsMenu } from "@/components/layout/ProductsMenu";
 import { PRODUCT_LINKS } from "@/lib/site-copy";
 
@@ -15,11 +18,13 @@ import { PRODUCT_LINKS } from "@/lib/site-copy";
  * reaches it (on the home page that is a full hero later; elsewhere a few
  * pixels in), so the labels never get lost in what scrolls under them.
  */
-export const NAV_LABEL = "font-mono text-[10.5px] uppercase tracking-[0.16em] transition-colors";
+export const NAV_LABEL =
+  "font-mono text-[10.5px] uppercase tracking-[0.16em] transition-colors";
 const quiet = `${NAV_LABEL} text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]`;
 const loud = `${NAV_LABEL} text-[color:var(--text-primary)]`;
 
 export function Navigation() {
+  const motion = useMotionIntent();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const home = usePathname() === "/";
@@ -37,9 +42,13 @@ export function Navigation() {
         return;
       }
       // Home: the first section is the pinned story; the bar stays clear until the section after it reaches the bar.
-      const next = (container ?? document).querySelector("main > section + section") as HTMLElement | null;
+      const next = (container ?? document).querySelector(
+        "main > section + section",
+      ) as HTMLElement | null;
       const navHeight = navRef.current?.offsetHeight ?? 64;
-      setIsScrolled(next ? next.getBoundingClientRect().top <= navHeight : scrollTop > 50);
+      setIsScrolled(
+        next ? next.getBoundingClientRect().top <= navHeight : scrollTop > 50,
+      );
     };
     target.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll);
@@ -57,7 +66,10 @@ export function Navigation() {
 
   const getStarted = (
     <span className="inline-flex items-center gap-2">
-      <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--accent)] shadow-[0_0_8px_var(--accent)]" aria-hidden />
+      <span
+        className="h-1.5 w-1.5 rounded-full bg-[color:var(--accent)] shadow-[0_0_8px_var(--accent)]"
+        aria-hidden
+      />
       Get started
     </span>
   );
@@ -75,7 +87,12 @@ export function Navigation() {
       }`}
     >
       <div className="grid h-11 grid-cols-[1fr_auto] items-center px-5 md:h-16 md:grid-cols-[1fr_auto_1fr] md:px-10">
-        <Link href="/" className={loud} aria-label="Vigil Studios home">
+        <Link
+          prefetch={false}
+          href="/"
+          className={loud}
+          aria-label="Vigil Studios home"
+        >
           Vigil Studios
         </Link>
 
@@ -83,63 +100,104 @@ export function Navigation() {
         <div className="hidden h-full items-center gap-[34px] md:flex">
           <ProductsMenu />
           {pages.map((item) => (
-            <Link key={item.href} href={item.href} className={quiet}>
+            <Link
+              prefetch={false}
+              key={item.href}
+              href={item.href}
+              className={quiet}
+            >
               {item.label}
             </Link>
           ))}
         </div>
         <div className="hidden items-center justify-end gap-[30px] md:flex">
-          <Link href="/login" className={quiet}>
+          <Link prefetch={false} href="/login" className={quiet}>
             Sign in
           </Link>
-          <Link href="/find-your-fit" className={loud}>
+          <Link prefetch={false} href="/find-your-fit" className={loud}>
             {getStarted}
           </Link>
         </div>
 
         {/* Phone */}
         <div className="flex items-center justify-end gap-4 md:hidden">
-          <Link href="/find-your-fit" className={loud} onClick={() => setIsOpen(false)}>
+          <Link
+            prefetch={false}
+            href="/find-your-fit"
+            className={loud}
+            onClick={() => setIsOpen(false)}
+          >
             {getStarted}
           </Link>
-          <button onClick={() => setIsOpen(!isOpen)} aria-label={isOpen ? "Close menu" : "Open menu"} aria-expanded={isOpen} className="-mr-2 rounded-lg p-1.5 text-[color:var(--text-primary)] transition-colors hover:bg-[color:var(--bg-surface-soft)]">
+          <button
+            onClick={() => {
+              void loadMotionRuntime().catch(() => {});
+              setIsOpen(!isOpen);
+            }}
+            aria-label={isOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isOpen}
+            className="-mr-2 rounded-lg p-1.5 text-[color:var(--text-primary)] transition-colors hover:bg-[color:var(--bg-surface-soft)]"
+          >
             {isOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
       </div>
 
       {/* Phone menu */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden border-b border-[color:var(--border)] bg-[color:var(--bg-secondary)] md:hidden">
-            <div className="flex flex-col gap-5 px-5 py-6">
-              <div>
-                <Link href="/products" onClick={() => setIsOpen(false)} className={loud}>
-                  Products
-                </Link>
-                <ul className="mt-3 flex flex-col gap-1 border-l border-[color:var(--border)] pl-4">
-                  {PRODUCT_LINKS.map((item) => (
-                    <li key={item.href}>
-                      <Link href={item.href} onClick={() => setIsOpen(false)} className="flex flex-col py-1.5">
-                        <span className="text-sm font-medium text-[color:var(--text-primary)]">{item.label}</span>
-                        <span className="text-[12px] text-[color:var(--text-secondary)]">{item.blurb}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              {pages.map((item) => (
-                <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)} className={loud}>
-                  {item.label}
-                </Link>
-              ))}
-              <Link href="/login" onClick={() => setIsOpen(false)} className={loud}>
-                Sign in
+      {motion ? (
+        <motion.MobileMenuPanel open={isOpen}>
+          <div className="flex flex-col gap-5 px-5 py-6">
+            <div>
+              <Link
+                prefetch={false}
+                href="/products"
+                onClick={() => setIsOpen(false)}
+                className={loud}
+              >
+                Products
               </Link>
+              <ul className="mt-3 flex flex-col gap-1 border-l border-[color:var(--border)] pl-4">
+                {PRODUCT_LINKS.map((item) => (
+                  <li key={item.href}>
+                    <Link
+                      prefetch={false}
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className="flex flex-col py-1.5"
+                    >
+                      <span className="text-sm font-medium text-[color:var(--text-primary)]">
+                        {item.label}
+                      </span>
+                      <span className="text-[12px] text-[color:var(--text-secondary)]">
+                        {item.blurb}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            {pages.map((item) => (
+              <Link
+                prefetch={false}
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className={loud}
+              >
+                {item.label}
+              </Link>
+            ))}
+            <Link
+              prefetch={false}
+              href="/login"
+              onClick={() => setIsOpen(false)}
+              className={loud}
+            >
+              Sign in
+            </Link>
+          </div>
+        </motion.MobileMenuPanel>
+      ) : null}
     </nav>
   );
 }
