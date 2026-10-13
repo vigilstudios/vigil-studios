@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../public/fonts/inter/inter-extended.css";
 
 @theme inline {
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -1001,4 +1002,19 @@ html.star-cursor label {
   .creator-promo-banner { grid-template-columns: minmax(0,1fr); }
   .creator-promo-track, .creator-promo-pause { display: none; }
   .creator-promo-static { display: flex; align-items: center; justify-content: center; width: 100%; gap: 5px; padding: 0 12px; line-height: 1.4; text-align: center; }
+}
+
+/* Skip offscreen room layout/paint while retaining content for navigation,
+ * search and accessibility. The browser remembers each room's actual size once
+ * approached. Sticky story/contact stages remain outside this containment. */
+@supports (content-visibility: auto) {
+  .home-deferred-section {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto 1000px;
+  }
+  @media (min-width: 768px) {
+    .home-deferred-section {
+      contain-intrinsic-block-size: auto calc(100svh - 192px);
+    }
+  }
 }

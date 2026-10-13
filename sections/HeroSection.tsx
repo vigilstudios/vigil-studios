@@ -32,7 +32,7 @@ export function HeroSection() {
 
       <div className="absolute inset-x-0 top-[66%] z-[5] px-6 text-center md:top-[71%]">
         <HeroWords title={HERO.title} line={HERO.line}>
-          <Link href={HERO.primary.href} className="btn-primary h-10 !px-4 text-[13px] font-semibold sm:!px-[18px]">
+          <Link prefetch={false} href={HERO.primary.href} className="btn-primary h-10 !px-4 text-[13px] font-semibold sm:!px-[18px]">
             {HERO.primary.label} <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
           </Link>
           <CalendlyPopup className="inline-flex h-10 items-center justify-center rounded-lg border border-[color:var(--accent)] px-4 text-[13px] font-semibold text-[color:var(--accent)] transition-colors hover:bg-[rgba(16,212,90,0.1)] sm:px-[18px]">

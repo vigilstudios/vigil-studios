@@ -1,0 +1,78 @@
+[
+  {
+    "name": "native-startup",
+    "early": {
+      "title": "Keeping watch over ",
+      "owner": "bootstrap",
+      "typeStart": "634.8999998569489",
+      "wireOwner": "bootstrap",
+      "wireStart": "138.5"
+    },
+    "adopted": {
+      "typeStart": "634.8999998569489",
+      "wireStart": "138.5"
+    },
+    "errors": [],
+    "focusPreserved": "/express"
+  },
+  {
+    "name": "desktop",
+    "startup": {
+      "contexts": [
+        "2d",
+        "2d",
+        "2d"
+      ],
+      "scriptBytes": 187635,
+      "title": "Keeping watch over your business online."
+    },
+    "cardCount": 3,
+    "offscreenDraws": {
+      "before": 100,
+      "after": 100
+    },
+    "errors": [],
+    "hydrationErrors": [],
+    "checks": "wireframe rotation/reduced motion, breakup, story orb, offscreen pause, booking open/close, navigation, FAQ"
+  },
+  {
+    "name": "phone",
+    "startup": {
+      "contexts": [
+        "2d",
+        "2d",
+        "2d"
+      ],
+      "scriptBytes": 187635,
+      "title": "Keeping watch over your business online."
+    },
+    "cardCount": 3,
+    "offscreenDraws": {
+      "before": 74,
+      "after": 74
+    },
+    "errors": [],
+    "hydrationErrors": [],
+    "checks": "wireframe rotation/reduced motion, breakup, story orb, offscreen pause, booking open/close, navigation, FAQ"
+  },
+  {
+    "name": "reduced-motion",
+    "startup": {
+      "contexts": [
+        "2d",
+        "2d",
+        "2d"
+      ],
+      "scriptBytes": 187635,
+      "title": "Keeping watch over your business online."
+    },
+    "cardCount": 3,
+    "offscreenDraws": {
+      "before": 7,
+      "after": 7
+    },
+    "errors": [],
+    "hydrationErrors": [],
+    "checks": "wireframe rotation/reduced motion, breakup, story orb, offscreen pause, booking open/close, navigation, FAQ"
+  }
+]

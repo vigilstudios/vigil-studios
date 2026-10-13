@@ -1060,3 +1060,20 @@ Home, Pricing and Products website cards now link to their corresponding build: 
 Cursor contrast now follows the nearest marked surface: dark homepage cards use white even inside the green band, while green surfaces/buttons still use black and inputs/embedded previews retain native cursors. Added top clearance for the fixed homepage navigation when viewing the larger package group.
 
 Validation: changed-file lint, production build/typecheck and Chrome checks of package-specific links, checkout/quote actions, cursor computed white fill on dark cards and responsive callout placement. No schema or pricing changes.
+
+## 2026-10-13 — Marketing performance while retaining motion
+
+Reduced home startup work with an exact-edge native wireframe projection,
+pre-hydration native animation clocks adopted by React, deferred scroll/motion
+and shader runtimes, offscreen drawing pauses, a glyph-equivalent 49 KB Inter
+subset with complete-character fallback, deferred booking widget and route
+prefetch, and below-fold rendering containment. Original typewriter cadence,
+shader visuals, easing, spring lift, scroll story and live catalog remain.
+
+Cold-cache clean Vercel preview: desktop 100 performance / 100 accessibility /
+100 best practices; mobile 96 / 100 / 100. Production-mode SEO remains 100;
+protected previews have an expected noindex SEO deduction. Full suite: 98 files /
+2,219 tests; production build with TypeScript, changed-code lint, four original
+Three.js geometry parity tests, font outline/advance parity and desktop/phone/
+reduced-motion interaction checks. Report and evidence:
+`docs/performance/2026-10-13/REPORT.md`. Production has not been published.

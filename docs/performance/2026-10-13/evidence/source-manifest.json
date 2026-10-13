@@ -1,0 +1,146 @@
+{
+  "branch": "codex/marketing-performance",
+  "base": "bdd2e00602ec8130eb506126ca941368110a4b1c",
+  "files": [
+    {
+      "path": "app/globals.css",
+      "sha256": "59463b166208dd8ff4e360539dcb1169c6a087a607ff3359872ba846aa90e143"
+    },
+    {
+      "path": "components/CalendlyModal.tsx",
+      "sha256": "697f4803053b6777ba209a419ea4fc11f0d565b07f1cbe08a209936d4d1dc818"
+    },
+    {
+      "path": "components/creators/CampaignLink.tsx",
+      "sha256": "da782ed906aaeb13f045af1463d9dd7b16956e4842682b61b454d6aac3eb2462"
+    },
+    {
+      "path": "components/creators/PromoBanner.tsx",
+      "sha256": "9d9126d980d2db4c10c7c1b7e7964f009533d43f8dac202327b8a193e4da777b"
+    },
+    {
+      "path": "components/layout/Navigation.tsx",
+      "sha256": "61d1de8c284cad83a68a938b91e45a43bd79b05300b4445c4c4c4fcc1935a66f"
+    },
+    {
+      "path": "components/layout/ProductsMenu.tsx",
+      "sha256": "3c8755f15264038349cb85ea940633be940e8dd2076a220ca03c4dd0fc8b5b9c"
+    },
+    {
+      "path": "components/site/Cards.tsx",
+      "sha256": "97f4582ee46193f3d6e72c9e6f8dc9062955e6503f873363b94f186f79d5e820"
+    },
+    {
+      "path": "components/site/MotionRuntime.tsx",
+      "sha256": "890fa0db3446b217c9311bd57ab021aacdb6768ab3ea2479c1855d8692ea6ea0"
+    },
+    {
+      "path": "components/site/Reveal.tsx",
+      "sha256": "0277bb54ea5831fc671e7f94ecc502ab22d6aec5c58bab64f31ffb2f38f53895"
+    },
+    {
+      "path": "components/site/hero/HeroNotes.tsx",
+      "sha256": "850b6ef4ae8254c6a733488b3ace83be02c7a342035e8680f1f135891a4eb063"
+    },
+    {
+      "path": "components/site/hero/HeroWords.tsx",
+      "sha256": "f5ecd297648514543817de173193da91b8dc8916586bb7ea0d842ace43687f2a"
+    },
+    {
+      "path": "components/site/hero/WireMark.tsx",
+      "sha256": "2f88f7ec5b9010cc0f437aa167adc4b73b47846f565afcbf8066e7dfff034c13"
+    },
+    {
+      "path": "components/site/hero/typing-bootstrap.ts",
+      "sha256": "93c25ccdfda963ef19f2af59a26a29abe240dff7441eecb9bc243bb741d8f083"
+    },
+    {
+      "path": "components/site/hero/wire-bootstrap.ts",
+      "sha256": "b6e3428c578fa9c7813cdd2e85e91201a9689261fde182edb1bfb3a6399c4768"
+    },
+    {
+      "path": "components/site/hero/wire-geometry.ts",
+      "sha256": "1b98fc8b762a78484bfaa739ecec174f570de0fec60e6714f4f44562313938f4"
+    },
+    {
+      "path": "components/site/motion-runtime.ts",
+      "sha256": "157758e13b1ad37330a339f2780bd11ec900de02546dc92a0b65ed037876c3be"
+    },
+    {
+      "path": "components/site/story/HowItWorksScene.tsx",
+      "sha256": "e28696cd41397bd656a9498088fef4f1c2b55cb74c1dc5404febfe97088b9b66"
+    },
+    {
+      "path": "components/site/story/StoryOrb.tsx",
+      "sha256": "266c09901706ef8879178e22efe4a7eeb306d67bd320911aee6bc3a0267a886b"
+    },
+    {
+      "path": "components/site/story/StoryScene.tsx",
+      "sha256": "b507b5bf72f092d795d1adc1f0c131b73f1bb1debbdce620357bd46baba0cd0e"
+    },
+    {
+      "path": "components/site/story/progress.ts",
+      "sha256": "9ddeedc101411bd21d6ecde4e8a129cd7a891d9855043195168d3ec8b4cda0ca"
+    },
+    {
+      "path": "components/ui/orb.tsx",
+      "sha256": "4b87282369c6226e6b7395ed332f3e24bc98b210fada4cb926f659f5533534c3"
+    },
+    {
+      "path": "components/vigil/VirtueOrb.tsx",
+      "sha256": "c5819459a4da6dc89130548d1d085b48ba846e0bd1b90830de7b5565509c2e86"
+    },
+    {
+      "path": "docs/dashboard-v1/IMPLEMENTATION_LOG.md",
+      "sha256": "20e6173052b89e97d4319248fd7705cccdead93949821d61860b1f6370dac40c"
+    },
+    {
+      "path": "lib/site-fonts.ts",
+      "sha256": "19de216860598e14ff1e0903c51293b38cc67134ae2c839353b10b68c8228c10"
+    },
+    {
+      "path": "lib/site/__tests__/wire-geometry.test.ts",
+      "sha256": "af067d32cea7ab1fb1fbf4ae0e0536e7fced5a8fb5b9c46f2aad48a87bad9377"
+    },
+    {
+      "path": "public/fonts/inter/InterVariable-latin.woff2",
+      "sha256": "882703b0a4393a0891a7b3346ac1cd6c41b76020ab7a841022a1523c6d2474c4"
+    },
+    {
+      "path": "public/fonts/inter/README.md",
+      "sha256": "fb6a308816e609b4d0c0cf2c150f861ab43c8226f44812aa80e2efd4b3fd28e2"
+    },
+    {
+      "path": "public/fonts/inter/inter-extended.css",
+      "sha256": "d5a8a1ed92b359ee69b9c15d077ab7d0c913dd74a89d0ac92e2d9475f7c38441"
+    },
+    {
+      "path": "scripts/marketing-performance-browser.mjs",
+      "sha256": "14825a30f22ce2eeaba95a5ae47a5cb2fa5aa854acb40a0542fddb7bb282e2a0"
+    },
+    {
+      "path": "scripts/subset-site-font.py",
+      "sha256": "df7d99c234019fc043905c0faa29401905843fe5f369a3edcb611dabb7547c2f"
+    },
+    {
+      "path": "sections/FAQSection.tsx",
+      "sha256": "2c897952d088618ac2a1d3bea816140fe7ce9896e91fe5fa86d07173c24f6f58"
+    },
+    {
+      "path": "sections/HeroSection.tsx",
+      "sha256": "08ead648274dce1c6dcc282311e702b7dc49fec7544b11b5d0b38969b1ec4d54"
+    },
+    {
+      "path": "sections/HowItWorksSection.tsx",
+      "sha256": "9e44fe59b4aea2a85d4d174aa22ff0d23c5340ede0306298cd9336f1b2a76a61"
+    },
+    {
+      "path": "sections/StartSection.tsx",
+      "sha256": "4dfd75af783468c8f8a389f45f58fbf96ef6bfc7db6596a03d39b8e26d044ad4"
+    },
+    {
+      "path": "sections/WhyVigilSection.tsx",
+      "sha256": "a3fe0ae4552ca16f37ad9ff2e0601760cf1cc9803f9ee3f3aefbfccd38b273a4"
+    }
+  ]
+}

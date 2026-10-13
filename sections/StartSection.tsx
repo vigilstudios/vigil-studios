@@ -20,7 +20,7 @@ export async function StartSection() {
   const available = EXPRESS_TEMPLATES.filter((t) => t.status === "available").map((t) => t.industry);
   const coming = EXPRESS_TEMPLATES.filter((t) => t.status === "coming").length;
   return (
-    <Section id="start" fill accent className="-mt-[100svh] isolate overflow-hidden md:pt-28! md:pb-20!">
+    <Section id="start" fill accent className="home-deferred-section -mt-[100svh] isolate overflow-hidden md:pt-28! md:pb-20!">
       <Container>
         <Reveal>
           <div className="mx-auto max-w-2xl text-center">

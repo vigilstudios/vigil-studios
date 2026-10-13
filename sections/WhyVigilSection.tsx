@@ -5,7 +5,7 @@ import { COMPARISON } from "@/lib/site-copy";
 /** Responsibility, not features: what a builder leaves with you and what Vigil takes on. */
 export function WhyVigilSection() {
   return (
-    <Section id="why-vigil" alt fill>
+    <Section id="why-vigil" alt fill className="home-deferred-section">
       <Container>
         <Reveal>
           <SectionIntro eyebrow="Why not a builder" tone="amber" title="Builders sell tools. Vigil takes responsibility." lead="A site builder hands you software and wishes you luck. Vigil delivers the website and then operates it, so the technical side is never your job." align="center" />

@@ -11,7 +11,7 @@ import { EmailText } from "@/components/site/Email";
 export function FAQSection() {
   const [open, setOpen] = useState<number | null>(0);
   return (
-    <Section id="faq" alt fill>
+    <Section id="faq" alt fill className="home-deferred-section">
       <Container>
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:gap-16">
           <Reveal>
