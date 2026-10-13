@@ -29,7 +29,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
           </Reveal>
           <Reveal delay={0.2}>
             <p className="mx-auto mt-5 max-w-5xl text-center text-xs leading-5 text-[color:var(--text-secondary)]">
-              Every Vigil website needs a plan; Basic is the floor. Prices in USD; annual and three-year plans are paid up front. Cancel any time; your site and domain stay yours.
+              Care and higher include self-service Content Hub editing for configured Professional and Growth websites, plus changes performed by Vigil’s team. Express and Basic keep the Hub locked. Every Vigil website needs a plan; Basic is the floor. Prices in USD; annual and three-year plans are paid up front. Cancel any time; your site and domain stay yours.
             </p>
           </Reveal>
         </Container>

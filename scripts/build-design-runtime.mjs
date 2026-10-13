@@ -7,6 +7,9 @@ import path from "node:path";
 const result = await build({ entryPoints: ["design-engine/runtime/client.tsx"], bundle: true,
   minify: true, write: false, outdir: "runtime", entryNames: "client", jsx: "automatic",
   define: { "process.env.NODE_ENV": '"production"' }, loader: { ".png": "file", ".jpg": "file", ".webp": "file" } });
+await mkdir('lib/vigil/content/generated',{recursive:true});
+const server=await build({entryPoints:['design-engine/runtime/server.tsx'],bundle:true,platform:'node',format:'cjs',minify:true,write:false,jsx:'automatic',define:{'process.env.NODE_ENV':'"production"'},alias:{'@emotion/is-prop-valid':path.resolve('design-engine/runtime/is-prop-valid.ts')},loader:{'.css':'empty','.png':'dataurl','.jpg':'dataurl','.webp':'dataurl'}});
+await writeFile('lib/vigil/content/generated/server.cjs',server.outputFiles[0].contents);
 const files = result.outputFiles.map(file => ({ path: path.basename(file.path), bytes: file.contents }));
 const faces = { fraunces: "fraunces", "bodoni-moda": "bodoni", "public-sans": "public", jost: "jost", anton: "anton", "source-sans-3": "source", "ibm-plex-mono": "plex", "archivo-black": "archivo", recursive: "recursive", "cormorant-garamond": "cormorant" };
 let css = "*{box-sizing:border-box}body{margin:0}button,a{touch-action:manipulation}";

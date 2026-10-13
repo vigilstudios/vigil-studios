@@ -43,3 +43,6 @@ next-env.d.ts
 
 # python venv used for favicon generation
 .venv_favicon/
+
+# Built from the shared production renderer by design:runtime
+/lib/vigil/content/generated/server.cjs

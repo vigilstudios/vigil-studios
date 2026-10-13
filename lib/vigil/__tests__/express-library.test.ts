@@ -39,10 +39,10 @@ describe("Professional workspace saves",()=>{
  it("isolates customer project documents and rejects stale saves",async()=>{
   const site=blankExpressSite("unused","Client");site.id="project-client-a";
   const fake=new FakeAdmin({projects:[{id:"client-a",kind:"professional",organization_id:"org-a"},{id:"client-b",kind:"professional",organization_id:"org-b"}],websites:[{id:"website-a",project_id:"client-a",organization_id:"org-a"},{id:"website-b",project_id:"client-b",organization_id:"org-b"}],design_workspaces:[{project_id:"client-a",revision:1,site_definition:site},{project_id:"client-b",revision:1,site_definition:{...site,id:"project-client-b"}}]});
-  await expect(saveProjectSite(fake.asClient(),"client-b",site,1,"staff")).rejects.toThrow(/different project/);
-  await saveProjectSite(fake.asClient(),"client-a",{...site,title:"Saved"},1,"staff");
+  await expect(saveProjectSite(fake.asClient(),"client-b",site,1,"staff",{},fake.asClient())).rejects.toThrow(/different project/);
+  await saveProjectSite(fake.asClient(),"client-a",{...site,title:"Saved"},1,"staff",{},fake.asClient());
   expect(fake.rows("design_workspaces")[0]).toMatchObject({revision:2,site_definition:{title:"Saved"}});
   expect(fake.rows("design_workspaces")[1]).toMatchObject({revision:1});
-  await expect(saveProjectSite(fake.asClient(),"client-a",site,1,"staff")).rejects.toThrow(/Another editor/);
+  await expect(saveProjectSite(fake.asClient(),"client-a",site,1,"staff",{},fake.asClient())).rejects.toThrow(/Another editor/);
  });
 });

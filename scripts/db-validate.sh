@@ -49,4 +49,7 @@ target -f "$ROOT/supabase/test/blog.test.sql"
 echo "▸ website blog image assertions"
 target -f "$ROOT/supabase/test/blog-images.test.sql"
 
+echo "▸ content hub assertions"
+target -f "$ROOT/supabase/test/content-hub.test.sql"
+
 echo "✓ migrations and RLS assertions passed"

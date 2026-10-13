@@ -57,7 +57,7 @@ export class VercelDeploymentProvider implements DeploymentProvider {
     return { externalId: project.id, previewUrl: project.name ? `https://${project.name}.vercel.app` : null };
   }
 
-  async triggerDeployment(siteExternalId: string, input: { environment: "production" | "preview"; ref?: string; repositoryId?: number | null }) {
+  async triggerDeployment(siteExternalId: string, input: { environment: "production" | "preview"; ref?: string; commitSha?:string; repositoryId?: number | null }) {
     if (!input.repositoryId) throw new ProviderError("vercel", "The GitHub repository id is missing from this website.");
     const deployment = await this.api("/v13/deployments", {
       method: "POST",
@@ -66,7 +66,7 @@ export class VercelDeploymentProvider implements DeploymentProvider {
         name: siteExternalId,
         project: siteExternalId,
         target: input.environment === "production" ? "production" : undefined,
-        gitSource: { type: "github", repoId: input.repositoryId, ref: input.ref ?? "main" },
+        gitSource: { type: "github", repoId: input.repositoryId, ref: input.ref ?? "main",...(input.commitSha?{sha:input.commitSha}:{}) },
       },
     }) as VercelDeployment;
     return normalizeDeployment(deployment);

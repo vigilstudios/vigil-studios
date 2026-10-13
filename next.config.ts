@@ -23,6 +23,7 @@ const supabaseHost = (() => {
  * once a week of reports is clean; the enforced policy below already covers
  * framing.
  */
+const storageHost=supabaseHost?.replace(".supabase.co",".storage.supabase.co");
 const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -31,8 +32,9 @@ const contentSecurityPolicy = [
   `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'"} https://va.vercel-scripts.com https://vercel.live https://assets.calendly.com`,
   "style-src 'self' 'unsafe-inline' https://assets.calendly.com",
   "img-src 'self' data: blob: https:",
+  `media-src 'self' blob: https:`,
   "font-src 'self' data:",
-  `connect-src 'self' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://vercel.live https://calendly.com https://api.calendly.com${supabaseHost ? ` https://${supabaseHost} wss://${supabaseHost}` : ""}`,
+  `connect-src 'self' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://vercel.live https://calendly.com https://api.calendly.com${supabaseHost ? ` https://${supabaseHost} https://${storageHost} wss://${supabaseHost}` : ""}`,
   "frame-src 'self' https:",
   "frame-ancestors 'self'",
   "form-action 'self' https://checkout.stripe.com https://billing.stripe.com",

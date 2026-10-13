@@ -41,7 +41,7 @@ export function selectedAssetUrls(site: SiteDefinition): string[] {
 export function assertPortableSources(site: SiteDefinition, deploying = false): void {
   const visit = (item: unknown, key = "") => {
     if (typeof item === "string") {
-      if (/\/api\/admin\/projects\/|\/storage\/v1\/object\/(?:sign|authenticated)\//i.test(item)) {
+      if (/\/api\/admin\/projects\/|\/storage\/v1\/object\/(?:sign|authenticated)\/|[?&]draft=1/i.test(item)) {
         throw new ValidationError("Select client media from this project's asset library instead of persisting a private or expiring URL.");
       }
       if (deploying && ["src", "mobileSrc", "lightSrc", "darkSrc", "poster"].includes(key) && item && !/^(?:\/_vigil\/assets\/|https?:\/\/|data:image\/)/i.test(item)) {

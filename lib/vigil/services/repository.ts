@@ -1,3 +1,4 @@
+import {ensureDesignWorkspace} from '@/lib/vigil/professional/workspace';
 import "server-only";
 
 import { expressRepositoryFiles } from "@/lib/vigil/express/export";
@@ -39,7 +40,7 @@ export async function provisionWebsiteRepository(
 
   const { data: website, error } = await admin
     .from("websites")
-    .select("id, name, template_slug, organization:organizations!websites_organization_id_fkey(slug, name)")
+    .select("id, name, project_id, template_slug, organization:organizations!websites_organization_id_fkey(slug, name)")
     .eq("id", websiteId)
     .maybeSingle();
   if (error) throw error;
@@ -47,6 +48,8 @@ export async function provisionWebsiteRepository(
   const organization = Array.isArray(website.organization) ? website.organization[0] : website.organization;
   if (!organization) throw new NotFoundError("The website organization was not found.");
 
+  const {data:project,error:projectError}=website.project_id?await admin.from('projects').select('kind').eq('id',website.project_id).single():{data:null,error:null};if(projectError)throw projectError;
+  if(project?.kind==='professional'&&website.project_id)await ensureDesignWorkspace(admin,website.project_id);
   const repoName = repositoryName(organization.slug, websiteId);
   const siteFiles = website.template_slug ? await expressRepositoryFiles(admin, website.template_slug, websiteId) : [{ path: "site/index.html", content: await initialHtml(null, organization.name) }];
   const repository = await provider.ensureRepository({
@@ -66,7 +69,7 @@ export async function provisionWebsiteRepository(
     externalId: String(repository.id),
     entityType: "website",
     entityId: websiteId,
-    metadata: { provider: "github", full_name: repository.fullName, html_url: repository.htmlUrl, default_branch: repository.defaultBranch },
+    metadata: { provider: "github", full_name: repository.fullName, html_url: repository.htmlUrl, default_branch: repository.defaultBranch,project_id:website.project_id,website_id:website.id },
   });
   const { error: updateError } = await admin
     .from("websites")

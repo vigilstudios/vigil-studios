@@ -17,6 +17,9 @@ insert into public.websites(id,organization_id,project_id,name,status) values
 ('ba000000-0000-4000-8000-000000000022','ba000000-0000-4000-8000-000000000012','ba000000-0000-4000-8000-000000000032','Growth Blog','building'),
 ('ba000000-0000-4000-8000-000000000023','ba000000-0000-4000-8000-000000000011','ba000000-0000-4000-8000-000000000033','Portfolio','building'),
 ('ba000000-0000-4000-8000-000000000024','ba000000-0000-4000-8000-000000000011','ba000000-0000-4000-8000-000000000034','Express','building');
+insert into public.subscriptions(organization_id,website_id,plan_id,status) select organization_id,id,(select id from public.plans where code='care'),'active' from public.websites where id in ('ba000000-0000-4000-8000-000000000021','ba000000-0000-4000-8000-000000000022');
+insert into public.website_content_collections(website_id,organization_id,key,module,label,page_id,section_id,field,adapter) select id,organization_id,'blog','blog','Blog','blog','blog','posts','blog' from public.websites where id in ('ba000000-0000-4000-8000-000000000021','ba000000-0000-4000-8000-000000000022');
+
 
 insert into public.project_assets(id,organization_id,project_id,kind,bucket_id,object_path,file_name,content_type,size_bytes) values
 ('ba000000-0000-4000-8000-000000000041','ba000000-0000-4000-8000-000000000011','ba000000-0000-4000-8000-000000000031','photo','blog-images','ba000000-0000-4000-8000-000000000011/a.webp','a.webp','image/webp',120),
@@ -42,6 +45,8 @@ select public.save_website_blog_post('ba000000-0000-4000-8000-000000000021','wit
 select blog_test.ok((select jsonb_array_length(media->'images')=1 from public.website_blog_posts where slug='with-images'),'older text clients preserve existing media');
 select blog_test.fails($q$delete from public.project_assets where id='ba000000-0000-4000-8000-000000000041'$q$,'cannot delete an image attached to a Blog post');
 select public.save_website_blog_post('ba000000-0000-4000-8000-000000000021','with-images','Images','','Updated body',false,p_post:=(select id from public.website_blog_posts where slug='with-images'),p_expected:=(select updated_at from public.website_blog_posts where slug='with-images'),p_media:='{"cover":null,"images":[]}');
+select blog_test.fails($q$delete from public.project_assets where id='ba000000-0000-4000-8000-000000000041';$q$,'draft detachment retains the prior published image');
+select public.unpublish_website_blog_post('ba000000-0000-4000-8000-000000000021',(select id from public.website_blog_posts where slug='with-images'),(select updated_at from public.website_blog_posts where slug='with-images'));
 delete from public.project_assets where id='ba000000-0000-4000-8000-000000000041';
 select blog_test.ok((select count(*)=0 from public.website_blog_images),'detached image can be removed through the library');
 set local role anon;
