@@ -107,3 +107,13 @@ export function previewSource(website: { live_url: string | null; preview_url: s
   }
   return { kind: "none" };
 }
+
+/** A registered preview URL or a live status alone is not a completed launch. */
+export function isWebsiteLive(site: {status: string; live_url: string | null}): boolean {
+  return site.status === "live" && Boolean(site.live_url);
+}
+
+/** Keep previews available for organizations with another website still in build. */
+export function showWebsitePreview(sites: {status: string; live_url: string | null}[]): boolean {
+  return sites.length === 0 || sites.some(site => !isWebsiteLive(site));
+}

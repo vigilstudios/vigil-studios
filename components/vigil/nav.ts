@@ -34,6 +34,8 @@ export type NavItem = {
   desktopOnly?: boolean;
   /** Rendered dimmed with a lock; the page explains why. */
   locked?: boolean;
+  /** Paid feature indicator, independent of current access. */
+  premium?: boolean;
   /** Small trailing tag such as "Soon". */
   badge?: string;
   /** Unresolved work exists in this section. */

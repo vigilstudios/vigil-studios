@@ -25,3 +25,9 @@ html[data-theme="light"] .vigil-frame {
 .vigil-frame ::selection {
   background: color-mix(in srgb, var(--accent) 30%, transparent);
 }
+
+/* Animate the actual browser width; ResizeObserver keeps its iframe at true scale. */
+.site-preview-frame { transition: max-width 360ms cubic-bezier(.22,1,.36,1), border-radius 360ms; }
+.site-preview-viewport { transition: height 360ms cubic-bezier(.22,1,.36,1); }
+.site-preview-frame[data-viewport="mobile"] { border-radius: 16px; }
+@media (prefers-reduced-motion: reduce) { .site-preview-frame, .site-preview-viewport { transition: none; } }
