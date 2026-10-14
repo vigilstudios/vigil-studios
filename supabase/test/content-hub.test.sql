@@ -71,7 +71,17 @@ update public.subscriptions set current_period_end=now()-interval '1 second' whe
 select hub_test.ok(not vigil.content_access('cb000000-0000-4000-8000-000000000021'),'expired cancellation denies authoring while records remain');
 select hub_test.ok((select jsonb_array_length(draft)=1 from public.website_content_collections where id='cb000000-0000-4000-8000-000000000041'),'canceled content retained');
 
+insert into public.website_content_collections(id,website_id,organization_id,key,module,label,page_id,section_id,field,adapter) values
+('cb000000-0000-4000-8000-000000000045','cb000000-0000-4000-8000-000000000023','cb000000-0000-4000-8000-000000000011','basic-lab','portfolio','Portfolio','work','work','projects','professional'),
+('cb000000-0000-4000-8000-000000000046','cb000000-0000-4000-8000-000000000024','cb000000-0000-4000-8000-000000000011','express-forged','portfolio','Portfolio','work','work','projects','professional');
+select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000045',1,current_setting('hub_test.rows')::jsonb,'draft','cb000000-0000-4000-8000-000000000001')$q$,'Basic owner remains locked even through trusted actor-bound RPC');
 insert into public.staff_members(user_id,role) values('cb000000-0000-4000-8000-000000000001','admin');
+insert into public.design_workspaces(project_id,website_id,organization_id,site_definition,engine_version) values('cb000000-0000-4000-8000-000000000033','cb000000-0000-4000-8000-000000000023','cb000000-0000-4000-8000-000000000011','{}','v1-test');
+select public.save_content_design_workspace('cb000000-0000-4000-8000-000000000033',1,'{"title":"Staff Basic build"}',jsonb_build_array(jsonb_build_object('id','cb000000-0000-4000-8000-000000000045','revision',1,'records',current_setting('hub_test.rows')::jsonb)),'cb000000-0000-4000-8000-000000000001','v1-test');
+select hub_test.ok((select revision=2 from public.design_workspaces where project_id='cb000000-0000-4000-8000-000000000033'),'staff-only Lab still builds a paid Professional Basic website');
+select hub_test.ok(not public.website_content_access('cb000000-0000-4000-8000-000000000023'),'Basic Hub guard remains locked even in staff customer view');
+select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000046',1,current_setting('hub_test.rows')::jsonb,'draft','cb000000-0000-4000-8000-000000000001')$q$,'staff Lab cannot enable Express collections');
+
 update public.subscriptions set status='active',current_period_end=now()+interval '30 days' where website_id='cb000000-0000-4000-8000-000000000021';
 insert into public.design_workspaces(project_id,website_id,organization_id,site_definition,engine_version) values('cb000000-0000-4000-8000-000000000031','cb000000-0000-4000-8000-000000000021','cb000000-0000-4000-8000-000000000011','{}','v1-test');
 insert into public.website_content_collections(id,website_id,organization_id,key,module,label,page_id,section_id,field,adapter) values('cb000000-0000-4000-8000-000000000044','cb000000-0000-4000-8000-000000000021','cb000000-0000-4000-8000-000000000011','lab-portfolio','portfolio','Lab Portfolio','work','portfolio','projects','professional');

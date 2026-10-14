@@ -1,0 +1,12 @@
+{
+  "source": "http://127.0.0.1:3105",
+  "revision": 11,
+  "publicApi": 200,
+  "runtime": 200,
+  "publishedVideo": false,
+  "mediaStatus": 404,
+  "contentRange": null,
+  "bodyBytes": 18,
+  "ssrTitle": false,
+  "ssrVideo": false
+}

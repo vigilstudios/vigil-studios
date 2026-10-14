@@ -1,0 +1,12 @@
+{
+  "source": "https://www.vigilstudios.co",
+  "revision": 15,
+  "publicApi": 200,
+  "runtime": 200,
+  "publishedVideo": true,
+  "mediaStatus": 206,
+  "contentRange": "bytes 0-63/1024215",
+  "bodyBytes": 64,
+  "ssrTitle": true,
+  "ssrVideo": true
+}
