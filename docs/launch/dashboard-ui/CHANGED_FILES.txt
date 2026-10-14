@@ -23,3 +23,5 @@ lib/vigil/__tests__/dashboard-operations.test.ts
 lib/vigil/presenters.ts
 lib/vigil/site-observability.ts
 docs/launch/dashboard-ui/CHANGED_FILES.txt
+lib/vigil/providers/github.ts
+lib/vigil/__tests__/github.test.ts

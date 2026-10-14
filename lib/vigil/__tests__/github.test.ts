@@ -108,3 +108,33 @@ describe("GitHubRepositoryProvider.commitFiles", () => {
     expect(request).not.toHaveBeenCalled();
   });
 });
+
+
+describe("GitHubRepositoryProvider.collectSiteFiles", () => {
+  it("exports empty repository placeholders alongside the site source", async () => {
+    const request = vi.fn()
+      .mockResolvedValueOnce(json({ default_branch: "main" }))
+      .mockResolvedValueOnce(json({ tree: [
+        { path: "site/index.html", type: "blob", url: "https://api.github.com/repos/vigil/client-acme/git/blobs/html", size: 13 },
+        { path: "content/.gitkeep", type: "blob", url: "https://api.github.com/repos/vigil/client-acme/git/blobs/empty", size: 0 },
+        { path: ".vigil/internal.json", type: "blob", url: "https://api.github.com/repos/vigil/client-acme/git/blobs/internal", size: 1 },
+      ] }))
+      .mockResolvedValueOnce(json({ encoding: "base64", content: Buffer.from("<html></html>").toString("base64") }))
+      .mockResolvedValueOnce(json({ encoding: "base64", content: "" }));
+    const files = await new GitHubRepositoryProvider("gh_token", "vigil", "organization", request).collectSiteFiles("vigil/client-acme");
+    expect(files.map(f => f.path)).toEqual(["site/index.html", "content/.gitkeep"]);
+    expect(files[0].content.toString()).toBe("<html></html>");
+    expect(files[1].content.byteLength).toBe(0);
+    expect(request).toHaveBeenCalledTimes(4);
+  });
+
+  it("continues to reject missing or malformed blob content", async () => {
+    for (const blob of [{encoding:"base64"}, {encoding:"base64",content:42}, {encoding:"utf-8",content:""}]) {
+      const request = vi.fn()
+        .mockResolvedValueOnce(json({default_branch:"main"}))
+        .mockResolvedValueOnce(json({tree:[{path:"content/.gitkeep",type:"blob",url:"https://api.github.com/repos/vigil/client-acme/git/blobs/empty",size:0}]}))
+        .mockResolvedValueOnce(json(blob));
+      await expect(new GitHubRepositoryProvider("gh_token", "vigil", "organization", request).collectSiteFiles("vigil/client-acme")).rejects.toThrow("could not return");
+    }
+  });
+});
