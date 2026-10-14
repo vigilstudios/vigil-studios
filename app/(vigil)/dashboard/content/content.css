@@ -361,3 +361,21 @@
     font-size:22px;
   }
 }
+
+/* A testimonial photo is an avatar; an absent photo leaves room for the quote. */
+.hub-entry-testimonials img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  aspect-ratio: 1;
+  margin: 16px 16px 0;
+}
+.hub-entry-testimonials .hub-entry-copy {
+  min-height: 150px;
+}
+.hub-table .hub-entry-testimonials img {
+  margin: 12px 0 12px 12px;
+}
+.hub-table .hub-entry-testimonials .hub-entry-copy {
+  min-height: 0;
+}
