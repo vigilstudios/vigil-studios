@@ -1,3 +1,4 @@
+import {isSameOriginRequest} from '@/lib/vigil/auth/origin';
 import {requirePublicSupabaseEnv} from '@/lib/supabase/env';
 import {randomUUID} from 'node:crypto';
 import {z} from 'zod';
@@ -11,7 +12,7 @@ import {enforceRateLimit,RATE_LIMITS} from '@/lib/vigil/rate-limit';
 export const runtime='nodejs';
 const headers={'Cache-Control':'no-store'};
 async function context(request:Request,websiteId:string){
- if(request.headers.get('origin')!==new URL(request.url).origin)throw new ForbiddenError();
+ if(!request.headers.get('origin')||!isSameOriginRequest(request))throw new ForbiddenError();
  const ctx=await requireOrgContextOrThrow();await assertOrgRole(ctx,['owner','manager']);const client=await createClient(),collection=z.string().uuid().parse(new URL(request.url).searchParams.get('collection')),c=await authorizeCollection(client,ctx.organization.id,collection);if(c.website_id!==websiteId||!['portfolio','gallery','testimonials','products','services'].includes(c.module))throw new ForbiddenError();return {ctx,client,collection,admin:createAdminClient()};
 }
 export async function POST(request:Request,{params}:{params:Promise<{websiteId:string}>}){
