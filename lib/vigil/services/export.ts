@@ -142,6 +142,7 @@ export type ExportContext = {
   organizationName: string;
   exportedBy: string;
   exportedAt?: Date;
+  contentFiles?:SiteFile[];
 };
 
 /** Build the zip. Throws ExportUnavailableError when no source has files for this site. */
@@ -159,6 +160,7 @@ export async function buildSiteExport(website: Website, ctx: ExportContext): Pro
     throw new ExportUnavailableError("There is no published build of this site to export yet.");
   }
 
+  files=[...files,...(ctx.contentFiles??[])];
   const exportedAt = ctx.exportedAt ?? new Date();
   const zip = new JSZip();
   for (const f of files) zip.file(f.path, f.content);

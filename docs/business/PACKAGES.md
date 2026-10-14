@@ -57,6 +57,8 @@ Current language reference · 6 October 2026. This supersedes historical package
 
 ## Recurring plans
 
+Self-service Content Hub is included with Care and higher for Professional and Growth Site builds, where editable collections are configured. Express websites and Basic plans show a locked Hub with upgrade guidance. Care and higher also include changes performed by Vigil’s team; self-service editing does not create a new subscription, price, allowance or support promise.
+
 Every Vigil-hosted website requires an active recurring plan, separately from the one-time build. Basic is the hosting floor. The build does not bundle ongoing service. Cancel at the end of the paid period; exports and ownership follow the service agreement.
 
 The read-only live catalog audit on 6 October 2026 confirmed these names (not the historical aliases Basic Hosting or Vigilance Care):
@@ -64,8 +66,8 @@ The read-only live catalog audit on 6 October 2026 confirmed these names (not th
 | Code | Current catalog name | Enabled service features |
 | --- | --- | --- |
 | `basic` | Vigil Basic | Managed hosting and domain management |
-| `care` | Vigil Care | Hosting/domain plus website change requests |
-| `growth` | Vigil Growth | Care features; eligible for Lead Hub, Insights and Virtue |
+| `care` | Vigil Care | Hosting/domain, self-service Content Hub on eligible Professional/Growth websites, and team-performed website change requests |
+| `growth` | Vigil Growth | Care content editing and team-performed changes; eligible for Lead Hub, Insights and Virtue |
 | `priority` | Vigil Priority | Same enabled customer feature families as Growth; different file allowance |
 
 Virtue's guided onboarding is available for every customer. Ongoing Virtue automation, Lead Hub and Insights remain in development, as shown by their dashboard coming-soon routes. An enabled catalog entitlement is eligibility, not proof that a workflow has launched. Keep that status visible in marketing and before checkout.

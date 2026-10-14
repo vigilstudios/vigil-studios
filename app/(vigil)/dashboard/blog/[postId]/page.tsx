@@ -1,6 +1,6 @@
 import {createAdminClient} from '@/lib/supabase/admin';
 import {readBlogMedia,signedBlogImages} from '@/lib/vigil/blog/images';
-import {notFound} from 'next/navigation';
+import {notFound,redirect} from 'next/navigation';
 import {z} from 'zod';
 import {requireOrgContext} from '@/lib/vigil/auth/session';
 import {createClient} from '@/lib/supabase/server';
@@ -9,7 +9,7 @@ import {PageHeader} from '@/components/vigil/ui';
 import {BlogEditor} from '@/components/vigil/BlogEditor';
 export default async function BlogPostEditor({params,searchParams}:{params:Promise<{postId:string}>;searchParams:Promise<{website?:string}>}){
  const ctx=await requireOrgContext('/dashboard/blog'),client=await createClient(),{postId}=await params,{website}=await searchParams;
- const sites=await blogSites(client,ctx.organization.id),site=sites.find(s=>s.id===website);if(!site)notFound();
+ const sites=await blogSites(client,ctx.organization.id),site=sites.find(s=>s.id===website);if(!site){const {data:owned}=website?await client.from('websites').select('id').eq('id',website).eq('organization_id',ctx.organization.id).maybeSingle():{data:null};if(owned)redirect(`/dashboard/content?website=${encodeURIComponent(owned.id)}`);notFound();}
  if(postId!=='new'&&!z.string().uuid().safeParse(postId).success)notFound();
  const {data:post,error}=postId==='new'?{data:null,error:null}:await client.from('website_blog_posts').select('*').eq('id',z.string().uuid().parse(postId)).eq('website_id',site.id).eq('organization_id',ctx.organization.id).is('deleted_at',null).maybeSingle();if(error)throw error;if(postId!=='new'&&!post)notFound();
  const media=readBlogMedia(post?.media),images=await signedBlogImages(createAdminClient(),site.id,ctx.organization.id,media.images);

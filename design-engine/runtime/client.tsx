@@ -1,4 +1,4 @@
-import { createRoot } from "react-dom/client";
+import { createRoot,hydrateRoot } from "react-dom/client";
 import { SitePagePreview } from "../site/render";
 import { parseSiteDefinition } from "../site/persistence";
 import { resolveRoutes } from "../site/routes";
@@ -13,7 +13,8 @@ const path = location.pathname.replace(/\/$/, "") || "/";
 const explicitPage = document.getElementById("root")?.dataset.vigilPage;
 const page = site.pages.find(page => explicitPage ? page.id === explicitPage : resolveRoutes(site).get(page.id) === path);
 if (page) {
-  createRoot(document.getElementById("root")!).render(<SitePagePreview site={site} pageId={page.id} embedded={false} contactEndpoint={contact}/>);
+  const root=document.getElementById('root')!,view=<SitePagePreview site={site} pageId={page.id} embedded={false} contactEndpoint={contact}/>;
+  if(root.dataset.vigilSsr==='true')hydrateRoot(root,view);else createRoot(root).render(view);
 } else {
   document.getElementById("root")!.textContent = "This page is unavailable.";
 }

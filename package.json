@@ -16,7 +16,8 @@
     "prebuild": "node scripts/verify-image-runtime.mjs && npm run design:runtime && npm run contact:runtime",
     "predev": "npm run design:runtime && npm run contact:runtime",
     "test:dependency-security": "node --test scripts/verify-eslint-glob-security.mjs",
-    "contact:runtime": "node scripts/build-contact-runtime.mjs"
+    "contact:runtime": "node scripts/build-contact-runtime.mjs",
+    "pretest": "npm run design:runtime"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

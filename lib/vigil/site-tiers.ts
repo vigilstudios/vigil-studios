@@ -42,7 +42,7 @@ export const WEBSITE_TIERS = {
       "Brand-led composition from premium design systems",
       "Advanced forms and standard booking integrations",
       "Standard payments, maps, reviews, social and marketing integrations",
-      "CMS for blogs, portfolios, services or similar content where appropriate",
+      "CMS for configured blogs, portfolios and supported content; self-service editing with Care or higher",
       "Analytics, conversion tracking and SEO foundations",
       "Performance optimization and two revision rounds",
     ],

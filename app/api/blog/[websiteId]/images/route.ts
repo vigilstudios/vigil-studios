@@ -1,3 +1,4 @@
+import {isSameOriginRequest} from '@/lib/vigil/auth/origin';
 import {randomUUID} from 'node:crypto';
 import {z} from 'zod';
 import {createClient} from '@/lib/supabase/server';
@@ -11,7 +12,7 @@ export const runtime='nodejs';
 export async function POST(request:Request,{params}:{params:Promise<{websiteId:string}>}){
  const headers={'Cache-Control':'no-store'};
  try{
-  if(request.headers.get('origin')!==new URL(request.url).origin)throw new ForbiddenError();
+  if(!request.headers.get('origin')||!isSameOriginRequest(request))throw new ForbiddenError();
   const ctx=await requireOrgContextOrThrow();await assertOrgRole(ctx,['owner','manager']);
   const website=z.string().uuid().parse((await params).websiteId),client=await createClient();
   const {data:site,error}=await client.from('websites').select('project_id,organization_id').eq('id',website).eq('organization_id',ctx.organization.id).maybeSingle();

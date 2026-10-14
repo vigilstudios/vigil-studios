@@ -40,7 +40,7 @@ export class GitHubRepositoryProvider {
     private readonly request: typeof fetch = fetch
   ) {}
 
-  async ensureRepository(input: { name: string; description: string; files: { path: string; content: Buffer | string }[] }): Promise<GitHubRepository> {
+  async ensureRepository(input: { name: string; description: string; files: { path: string; content: Buffer | string }[]; deletions?:string[] }): Promise<GitHubRepository> {
     if (!this.token || !this.owner) throw new ProviderNotConfiguredError("GitHub repository provisioning");
     const existing = await this.getRepository(input.name);
     let repository = existing;
@@ -104,16 +104,17 @@ export class GitHubRepositoryProvider {
    * since `parent` was read, GitHub refuses and the caller re-reads and
    * decides again, so two workers cannot silently stack commits.
    */
-  async commitFiles(fullName: string, input: { branch: string; parentSha: string; baseTreeSha: string; message: string; files: { path: string; content: Buffer | string }[] }): Promise<{ commitSha: string; treeSha: string }> {
+  async commitFiles(fullName: string, input: { branch: string; parentSha: string; baseTreeSha: string; message: string; files: { path: string; content: Buffer | string }[]; deletions?:string[] }): Promise<{ commitSha: string; treeSha: string }> {
     if (!this.token) throw new ProviderNotConfiguredError("GitHub repository access");
     const repoPath = this.repoPath(fullName);
-    const tree: { path: string; mode: "100644"; type: "blob"; sha: string }[] = [];
+    const tree: { path: string; mode: "100644"; type: "blob"; sha: string|null }[] = [];
     for (const file of input.files) {
       assertRepositoryPath(file.path);
       const blob = await this.api(`/repos/${repoPath}/git/blobs`, { method: "POST", body: { content: Buffer.from(file.content).toString("base64"), encoding: "base64" } }) as { sha?: string };
       if (!blob.sha) throw new ProviderError("github", `GitHub did not return a blob for ${file.path}.`, { retryable: true });
       tree.push({ path: file.path, mode: "100644", type: "blob", sha: blob.sha });
     }
+    for(const file of input.deletions??[]){assertRepositoryPath(file);tree.push({path:file,mode:"100644",type:"blob",sha:null});}
     const created = await this.api(`/repos/${repoPath}/git/trees`, { method: "POST", body: { base_tree: input.baseTreeSha, tree } }) as { sha?: string };
     if (!created.sha) throw new ProviderError("github", "GitHub did not return a tree.", { retryable: true });
     const commit = await this.api(`/repos/${repoPath}/git/commits`, { method: "POST", body: { message: input.message, tree: created.sha, parents: [input.parentSha] } }) as { sha?: string };

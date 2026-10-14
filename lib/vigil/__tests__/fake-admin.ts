@@ -94,9 +94,10 @@ export class FakeAdmin {
         filters.push((r) => r[col] != null && String(r[col]) <= val);
         return builder;
       },
-      not(col: string, op: string, val: string) {
+      not(col: string, op: string, val: unknown) {
+        if(op==="is")filters.push(r=>val===null?r[col]!=null:r[col]!==val);
         if (op === "in") {
-          const list = val.replace(/^\(|\)$/g, "").split(",").map((s) => s.trim());
+          const list = String(val).replace(/^\(|\)$/g, "").split(",").map((s) => s.trim());
           filters.push((r) => !list.includes(String(r[col])));
         }
         return builder;
@@ -178,6 +179,11 @@ export class FakeAdmin {
   }
 
   async rpc(name: string, args: Record<string, unknown>) {
+    if(name==='save_content_design_workspace'){
+      const workspace=this.rows('design_workspaces').find(r=>r.project_id===args.p_project&&r.revision===args.p_expected);
+      if(!workspace)return {data:null,error:{code:'40001',message:'Stale workspace'}};
+      workspace.site_definition=args.p_site;workspace.revision=Number(workspace.revision)+1;return {data:workspace.revision,error:null};
+    }
     if (name === "claim_jobs") {
       const now = Date.now();
       const due = this.rows("provisioning_jobs")

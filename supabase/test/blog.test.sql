@@ -17,6 +17,9 @@ insert into public.websites(id,organization_id,project_id,name,status) values
 ('ba000000-0000-4000-8000-000000000022','ba000000-0000-4000-8000-000000000012','ba000000-0000-4000-8000-000000000032','Growth Blog','building'),
 ('ba000000-0000-4000-8000-000000000023','ba000000-0000-4000-8000-000000000011','ba000000-0000-4000-8000-000000000033','Portfolio','building'),
 ('ba000000-0000-4000-8000-000000000024','ba000000-0000-4000-8000-000000000011','ba000000-0000-4000-8000-000000000034','Express','building');
+insert into public.subscriptions(organization_id,website_id,plan_id,status) select organization_id,id,(select id from public.plans where code='care'),'active' from public.websites where id in ('ba000000-0000-4000-8000-000000000021','ba000000-0000-4000-8000-000000000022');
+insert into public.website_content_collections(website_id,organization_id,key,module,label,page_id,section_id,field,adapter) select id,organization_id,'blog','blog','Blog','blog','blog','posts','blog' from public.websites where id in ('ba000000-0000-4000-8000-000000000021','ba000000-0000-4000-8000-000000000022');
+
 select blog_test.ok(vigil.website_blog_enabled('ba000000-0000-4000-8000-000000000021'),'Professional explicit Blog page enabled');
 select blog_test.ok(vigil.website_blog_enabled('ba000000-0000-4000-8000-000000000022'),'Growth Site explicit blog feature enabled');
 select blog_test.ok(not vigil.website_blog_enabled('ba000000-0000-4000-8000-000000000023'),'generic CMS selection does not invent a blog request');
@@ -75,7 +78,7 @@ select blog_test.fails($q$select public.save_website_blog_post('ba000000-0000-40
 reset role;
 update public.organizations set archived_at=now() where id='ba000000-0000-4000-8000-000000000012';
 select blog_test.ok(not vigil.website_blog_enabled('ba000000-0000-4000-8000-000000000022'),'archived organization blog unavailable');
-update public.projects set brief='{}' where id='ba000000-0000-4000-8000-000000000031';
+update public.website_content_collections set enabled=false where website_id='ba000000-0000-4000-8000-000000000021';
 select blog_test.ok(not vigil.website_blog_enabled('ba000000-0000-4000-8000-000000000021'),'unchecking request disables service without removing content');
 select blog_test.ok((select count(*)=2 from public.website_blog_posts),'scope removal retains both tenants articles');
 rollback;

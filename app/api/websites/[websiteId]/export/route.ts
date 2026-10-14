@@ -1,3 +1,4 @@
+import {contentExportFiles} from '@/lib/vigil/content/export';
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logAuditEvent } from "@/lib/vigil/audit";
@@ -29,6 +30,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const result = await buildSiteExport(website, {
       organizationName: ctx.organization.name,
       exportedBy: ctx.profile.email,
+      contentFiles:await contentExportFiles(supabase,website.id,ctx.organization.id),
     });
 
     await logAuditEvent(supabase, {

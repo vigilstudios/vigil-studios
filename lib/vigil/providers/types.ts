@@ -162,7 +162,7 @@ export type DomainConfigSnapshot = {
 export interface DeploymentProvider {
   readonly name: ProviderName;
   provisionSite(input: ProvisionSiteInput): Promise<{ externalId: string; previewUrl: string | null }>;
-  triggerDeployment(siteExternalId: string, input: { environment: "production" | "preview"; ref?: string; repositoryId?: number | null }): Promise<DeploymentSnapshot>;
+  triggerDeployment(siteExternalId: string, input: { environment: "production" | "preview"; ref?: string; commitSha?:string; repositoryId?: number | null }): Promise<DeploymentSnapshot>;
   getDeployment(externalId: string): Promise<DeploymentSnapshot | null>;
   addDomain(
     siteExternalId: string,

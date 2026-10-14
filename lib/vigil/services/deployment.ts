@@ -1,3 +1,4 @@
+import {syncProjectRepository} from '@/lib/vigil/professional/export';
 import type { DbClient } from "@/lib/vigil/types";
 import { assertTransition, websiteTransitions } from "@/lib/vigil/lifecycle";
 import { getDeploymentProvider } from "@/lib/vigil/providers/registry";
@@ -100,9 +101,18 @@ export async function deployWebsite(
     entityType: "website",
     entityId: websiteId,
   });
+  const {data:workspace,error:workspaceError}=await admin.from('design_workspaces').select('project_id,revision,repository_revision,repository_commit').eq('website_id',websiteId).maybeSingle();if(workspaceError)throw workspaceError;
+  if(workspace&&environment==='production'){
+    if(workspace.repository_revision!==workspace.revision||!workspace.repository_commit)throw new ValidationError('Deploy and review the latest saved design as a preview before production.');
+    const {data:latest,error:previewError}=await admin.from('deployments').select('id,url').eq('website_id',websiteId).eq('environment','preview').eq('status','ready').order('created_at',{ascending:false}).limit(1).maybeSingle();if(previewError)throw previewError;
+    const previewLink=latest?await findProviderLink(admin,{provider:providerEnum(provider.name),resourceKind:'deployment',entityType:'deployment',entityId:latest.id}):null;
+    if((previewLink?.metadata as {source_commit?:string}|undefined)?.source_commit!==workspace.repository_commit)throw new ValidationError('The reviewed preview must match the exact saved design source before production.');
+  }
+  const exported=workspace?environment==='preview'?await syncProjectRepository(admin,workspace.project_id):{branch:(repository?.metadata as {default_branch?:string}|undefined)?.default_branch??'main',commitSha:workspace.repository_commit!}:null;
   const snapshot = await provider.triggerDeployment(siteExternalId, {
     environment,
-    ref: "main",
+    ref: exported?.branch??"main",
+    ...(exported?{commitSha:exported.commitSha}:{}),
     repositoryId: repository ? Number(repository.external_id) : null,
   });
   const providerName = providerEnum(provider.name);
@@ -130,6 +140,7 @@ export async function deployWebsite(
     externalId: snapshot.externalId,
     entityType: "deployment",
     entityId: deployment.id,
+    ...(exported?{metadata:{source_commit:exported.commitSha,design_revision:workspace?.revision??null}}:{}),
   });
 
   let domainIds: string[] = [];

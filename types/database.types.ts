@@ -2627,6 +2627,7 @@ export type Database = {
           media: Json
           organization_id: string
           published_at: string | null
+          published_snapshot: Json | null
           review_sample: boolean
           slug: string
           status: string
@@ -2644,6 +2645,7 @@ export type Database = {
           media?: Json
           organization_id: string
           published_at?: string | null
+          published_snapshot?: Json | null
           review_sample?: boolean
           slug: string
           status?: string
@@ -2661,6 +2663,7 @@ export type Database = {
           media?: Json
           organization_id?: string
           published_at?: string | null
+          published_snapshot?: Json | null
           review_sample?: boolean
           slug?: string
           status?: string
@@ -2780,6 +2783,319 @@ export type Database = {
             foreignKeyName: "website_contact_settings_website_id_fkey"
             columns: ["website_id"]
             isOneToOne: true
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      website_content_addresses: {
+        Row: {
+          collection_id: string
+          record_id: string
+          slug: string
+        }
+        Insert: {
+          collection_id: string
+          record_id: string
+          slug: string
+        }
+        Update: {
+          collection_id?: string
+          record_id?: string
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_content_addresses_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "website_content_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      website_content_collections: {
+        Row: {
+          adapter: string
+          config: Json
+          draft: Json
+          enabled: boolean
+          field: string
+          id: string
+          key: string
+          label: string
+          module: string
+          organization_id: string
+          page_id: string
+          published: Json
+          published_revision: number | null
+          revision: number
+          section_id: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+          website_id: string
+        }
+        Insert: {
+          adapter: string
+          config?: Json
+          draft?: Json
+          enabled?: boolean
+          field: string
+          id?: string
+          key: string
+          label: string
+          module: string
+          organization_id: string
+          page_id: string
+          published?: Json
+          published_revision?: number | null
+          revision?: number
+          section_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+          website_id: string
+        }
+        Update: {
+          adapter?: string
+          config?: Json
+          draft?: Json
+          enabled?: boolean
+          field?: string
+          id?: string
+          key?: string
+          label?: string
+          module?: string
+          organization_id?: string
+          page_id?: string
+          published?: Json
+          published_revision?: number | null
+          revision?: number
+          section_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_content_collections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_content_collections_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_content_collections_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      website_content_history: {
+        Row: {
+          actor_id: string | null
+          collection_id: string
+          created_at: string
+          id: string
+          intent: string
+          organization_id: string
+          records: Json
+          revision: number
+          website_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          collection_id: string
+          created_at?: string
+          id?: string
+          intent: string
+          organization_id: string
+          records: Json
+          revision: number
+          website_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          collection_id?: string
+          created_at?: string
+          id?: string
+          intent?: string
+          organization_id?: string
+          records?: Json
+          revision?: number
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_content_history_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_content_history_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "website_content_collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_content_history_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_content_history_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      website_content_media: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          ready: boolean
+          type: string
+          website_id: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          organization_id: string
+          ready?: boolean
+          type: string
+          website_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          ready?: boolean
+          type?: string
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_content_media_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "project_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_content_media_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_content_media_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      website_content_media_refs: {
+        Row: {
+          collection_id: string
+          media_id: string
+        }
+        Insert: {
+          collection_id: string
+          media_id: string
+        }
+        Update: {
+          collection_id?: string
+          media_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_content_media_refs_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "website_content_collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_content_media_refs_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "website_content_media"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      website_content_runtimes: {
+        Row: {
+          binding_keys: string[]
+          created_at: string
+          created_by: string | null
+          engine_version: string
+          id: string
+          organization_id: string
+          site_definition: Json
+          website_id: string
+        }
+        Insert: {
+          binding_keys: string[]
+          created_at?: string
+          created_by?: string | null
+          engine_version: string
+          id: string
+          organization_id: string
+          site_definition: Json
+          website_id: string
+        }
+        Update: {
+          binding_keys?: string[]
+          created_at?: string
+          created_by?: string | null
+          engine_version?: string
+          id?: string
+          organization_id?: string
+          site_definition?: Json
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_content_runtimes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_content_runtimes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_content_runtimes_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
             referencedRelation: "websites"
             referencedColumns: ["id"]
           },
@@ -3069,8 +3385,27 @@ export type Database = {
         Returns: boolean
       }
       reconcile_contact_setup: { Args: { p_limit?: number }; Returns: number }
+      reserve_content_media: {
+        Args: {
+          p_collection: string
+          p_id: string
+          p_name: string
+          p_size: number
+          p_type: string
+        }
+        Returns: string
+      }
       resolve_entitlements: {
         Args: { p_org: string }
+        Returns: {
+          feature_code: string
+          plan_code: string
+          source: string
+          value: Json
+        }[]
+      }
+      resolve_website_entitlements: {
+        Args: { p_website: string }
         Returns: {
           feature_code: string
           plan_code: string
@@ -3081,6 +3416,17 @@ export type Database = {
       restore_customer: {
         Args: { p_actor_id: string; p_organization_id: string }
         Returns: undefined
+      }
+      save_content_design_workspace: {
+        Args: {
+          p_actor: string
+          p_collections: Json
+          p_engine: string
+          p_expected: number
+          p_project: string
+          p_site: Json
+        }
+        Returns: number
       }
       save_website_blog_post: {
         Args: {
@@ -3095,6 +3441,16 @@ export type Database = {
           p_website: string
         }
         Returns: string
+      }
+      save_website_content: {
+        Args: {
+          p_actor: string
+          p_collection: string
+          p_expected: number
+          p_intent: string
+          p_records: Json
+        }
+        Returns: number
       }
       set_website_blog_post_deleted: {
         Args: {
@@ -3113,7 +3469,20 @@ export type Database = {
         Args: { p_automatic: boolean; p_website: string }
         Returns: undefined
       }
+      unpublish_website_blog_post: {
+        Args: { p_expected: string; p_post: string; p_website: string }
+        Returns: string
+      }
       website_blog_available: { Args: { p_website: string }; Returns: boolean }
+      website_blog_delivery: {
+        Args: { p_review?: boolean; p_website: string }
+        Returns: boolean
+      }
+      website_content_access: { Args: { p_website: string }; Returns: boolean }
+      website_content_delivery: {
+        Args: { p_review?: boolean; p_website: string }
+        Returns: boolean
+      }
     }
     Enums: {
       actor_kind: "user" | "staff" | "system" | "provider"
@@ -3282,6 +3651,7 @@ export type Database = {
         Args: { p_website: string }
         Returns: string[]
       }
+      content_access: { Args: { p_website: string }; Returns: boolean }
       current_email: { Args: never; Returns: string }
       decline_invitation: { Args: { p_invite: string }; Returns: undefined }
       ensure_contact_recipient: {
@@ -3366,7 +3736,25 @@ export type Database = {
         Returns: undefined
       }
       shares_org_with: { Args: { p_user: string }; Returns: boolean }
+      validate_content_records: {
+        Args: {
+          p_module: string
+          p_publish: boolean
+          p_rows: Json
+          p_website: string
+        }
+        Returns: undefined
+      }
       website_blog_enabled: { Args: { p_website: string }; Returns: boolean }
+      website_features: {
+        Args: { p_website: string }
+        Returns: {
+          feature_code: string
+          plan_code: string
+          source: string
+          value: Json
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

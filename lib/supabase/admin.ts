@@ -38,7 +38,7 @@ export function createAdminClient() {
     // then provisionOrder) returned the stale row and provisioning failed
     // with "order is pending, not paid". A fresh AbortController signal per
     // call opts out of that memoization; no-store keeps the Data Cache out.
-    global: { fetch: (input, init) => fetch(input, { ...init, cache: "no-store", signal: new AbortController().signal }) },
+    global: { fetch: (input, init) => fetch(input, { ...init, cache: "no-store", signal: init?.signal ? AbortSignal.any([init.signal, new AbortController().signal]) : new AbortController().signal }) },
   });
 }
 

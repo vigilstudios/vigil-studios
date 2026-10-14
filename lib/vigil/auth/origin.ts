@@ -27,7 +27,7 @@ export function requestOrigin(request: NextRequest): string {
  * 127.0.0.1. Older browsers omit Origin on same-origin form posts, and a
  * cross-site fetch always carries sec-fetch-site.
  */
-export function isSameOriginRequest(request: NextRequest): boolean {
+export function isSameOriginRequest(request: Pick<Request, "headers">): boolean {
   if (request.headers.get("sec-fetch-site") === "cross-site") return false;
   const origin = request.headers.get("origin");
   if (!origin) return true;
