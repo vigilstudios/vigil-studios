@@ -10,7 +10,7 @@
 .library-heading { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:20px; }
 .library-heading h2 { font-size:20px!important; font-weight:600; }
 .library-heading p { margin-top:4px; max-width:680px; font-size:13px; line-height:1.7; color:var(--text-secondary); }
-.library-table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:16px; }
+.library-table-wrap { position:relative; overflow-x:auto; border:1px solid var(--border); border-radius:16px; }
 .library-table { width:100%; text-align:left; font-size:13px; border-collapse:separate; border-spacing:0; }
 .library-table thead { background:var(--bg-surface-soft); font-size:11px; color:var(--text-secondary); }
 .library-table th { padding:12px 20px; font-weight:500; white-space:nowrap; }
