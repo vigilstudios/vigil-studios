@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-10-14T21:54:36.042Z",
+  "run": "34cb1bd4-6501-4d91-be11-46885988f86d",
+  "originalName": "Video 1 (Night of Laughter).MOV",
+  "bytes": 95274457,
+  "type": "video/quicktime",
+  "chunkBytes": 6291456,
+  "transport": "TUS using direct Storage hostname",
+  "actor": "existing server administrator credential; transport test only",
+  "uploaded": true,
+  "downloadedBytes": 95274457,
+  "originalSha256": "455eeea91ff4684c36bc8b3a47fe830384e18984674c180947e1b9a8dd90526d",
+  "downloadedSha256": "455eeea91ff4684c36bc8b3a47fe830384e18984674c180947e1b9a8dd90526d",
+  "checksumMatches": true,
+  "anonymousStatus": 400,
+  "privateTestObjectRemoved": true,
+  "customerAssetsAdded": 0,
+  "emailsSent": 0
+}
