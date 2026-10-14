@@ -14,7 +14,7 @@ export async function contentSites(client:DbClient,org:string){
 }
 export async function contentCollections(client:DbClient,website:string,org:string,mode:'draft'|'published'='draft'):Promise<BoundCollection[]>{
  const {data,error}=await client.from('website_content_collections').select('*').eq('website_id',website).eq('organization_id',org).eq('enabled',true).order('key');if(error)throw error;
- return (data??[]).map(c=>{const contentModule=moduleSchema.parse(c.module);return {id:c.id,binding:bindingSchema.parse({version:c.version,key:c.key,module:contentModule,label:c.label,pageId:c.page_id,sectionId:c.section_id,field:c.field,adapter:c.adapter}),config:c.config as unknown as AdapterConfig,records:contentModule==='blog'?[]:parseRecords(contentModule,c[mode]),revision:c.revision,publishedRevision:c.published_revision};});
+ return (data??[]).map(c=>{const contentModule=moduleSchema.parse(c.module);return {id:c.id,binding:bindingSchema.parse({version:c.version,key:c.key,module:contentModule,label:c.label,pageId:c.page_id,sectionId:c.section_id,field:c.field,adapter:c.adapter}),config:c.config as unknown as AdapterConfig,records:contentModule==='blog'?[]:parseRecords(contentModule,c[mode]),publishedRecords:contentModule==='blog'?[]:parseRecords(contentModule,c.published),revision:c.revision,publishedRevision:c.published_revision};});
 }
 export async function authorizeCollection(client:DbClient,org:string,id:string){
  const {data:c,error}=await client.from('website_content_collections').select('id,website_id,organization_id,module,adapter,enabled').eq('id',z.string().uuid().parse(id)).eq('organization_id',org).maybeSingle();if(error)throw error;

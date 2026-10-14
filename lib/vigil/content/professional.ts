@@ -6,7 +6,7 @@ import { payloadSchemas } from './contract';
 
 type ObjectValue = Record<string,unknown>;
 export type AdapterConfig={templates:Record<string,ObjectValue>;singleton?:boolean;sourceIds:Record<string,string>;editableFields?:string[];featuredSlotBudget?:number;autoDiscovered?:boolean;maxMedia?:number;hasDetailLinks?:boolean};
-export type BoundCollection={id:string;binding:ContentBinding;config:AdapterConfig;records:ContentRecord[];revision:number;publishedRevision:number|null};
+export type BoundCollection={id:string;binding:ContentBinding;config:AdapterConfig;records:ContentRecord[];publishedRecords?:ContentRecord[];revision:number;publishedRevision:number|null};
 const object=(v:unknown):ObjectValue=>v&&typeof v==='object'&&!Array.isArray(v)?v as ObjectValue:{};
 const str=(v:unknown)=>typeof v==='string'?v:'';
 const slug=(v:string)=>v.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,110)||'entry';

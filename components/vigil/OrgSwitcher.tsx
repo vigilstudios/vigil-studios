@@ -1,5 +1,6 @@
 "use client";
 
+import {useDraftNavigation} from "./DraftNavigation";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronsUpDown } from "lucide-react";
@@ -16,6 +17,7 @@ export function OrgSwitcher({
   staffView?: boolean;
 }) {
   const router = useRouter();
+  const {request}=useDraftNavigation();
   const [pending, startTransition] = useTransition();
   const active = organizations.find((o) => o.id === activeId);
 
@@ -36,10 +38,10 @@ export function OrgSwitcher({
         disabled={pending}
         onChange={(e) => {
           const id = e.target.value;
-          startTransition(async () => {
+          request(()=>startTransition(async () => {
             await switchOrganization(id);
             router.refresh();
-          });
+          }));
         }}
         className="w-full appearance-none truncate rounded-md bg-transparent py-1 pl-1 pr-6 text-[13px] font-semibold hover:bg-[color:var(--bg-surface-soft)]"
       >
