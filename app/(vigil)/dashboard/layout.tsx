@@ -82,7 +82,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           ...(showWebsitePreview(websites) ? [{ href: "/dashboard/website", label: "Website Preview", icon: "website" as const, attention: websiteNeedsAttention }] : []),
           { href: "/dashboard/content", label: "Content Hub", icon: "blog", premium: true },
           { href: "/dashboard/files", label: "Files", icon: "files" },
-          { href: "/dashboard/requests", label: "Requests", icon: "requests", locked: !ent.enabled(FEATURES.requests) },
+          { href: "/dashboard/requests", label: "Requests", icon: "requests", premium: true, locked: !ent.enabled(FEATURES.requests) },
           { href: "/dashboard/domain", label: "Domain", icon: "domain", attention: domainNeedsAttention },
           { href: "/dashboard/billing", label: "Subscription", icon: "billing", attention: subscriptionNeedsAttention },
           ...(reviewRelevant ? [{ href: "/dashboard/review", label: "Design review", icon: "review" as const, attention: reviewNeedsAttention }] : []),
@@ -92,8 +92,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
         label: "Grow",
         items: [
           { href: "/dashboard/leads", label: "Lead Hub", icon: "leads", premium: true },
-          { href: "/dashboard/insights", label: "Insights", icon: "insights", locked: !ent.enabled(FEATURES.insights), badge: "Soon" },
-          { href: "/dashboard/virtue", label: "Virtue", icon: "virtue", locked: !ent.enabled(FEATURES.virtue), badge: "Soon" },
+          { href: "/dashboard/insights", label: "Insights", icon: "insights", premium: true, locked: !ent.enabled(FEATURES.insights), badge: "Soon" },
+          { href: "/dashboard/virtue", label: "Virtue", icon: "virtue", premium: true, locked: !ent.enabled(FEATURES.virtue), badge: "Soon" },
         ],
       },
       {

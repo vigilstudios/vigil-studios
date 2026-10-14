@@ -14,6 +14,8 @@ export default async function InsightsPage() {
       title="Insights"
       description="Plain-language reporting on how your website and follow-up are performing, without dashboards to configure."
       planHint={enabled ? undefined : "Available on Vigil Growth and Priority."}
+      previewKind="insights"
+      availability="coming_soon"
       comingSoon={enabled}
     />
   );

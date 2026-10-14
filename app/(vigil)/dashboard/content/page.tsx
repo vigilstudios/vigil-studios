@@ -3,6 +3,7 @@ import {requireOrgContext} from '@/lib/vigil/auth/session';
 import {createClient} from '@/lib/supabase/server';
 import {createAdminClient} from '@/lib/supabase/admin';
 import {contentSites,contentCollections} from '@/lib/vigil/content/service';
+import {standaloneMediaPreviews} from '@/lib/vigil/content/preview';
 import {mediaPreviews} from '@/lib/vigil/content/media';
 import {readBlogMedia,signedBlogImages} from '@/lib/vigil/blog/images';
 import {ContentHub} from '@/components/vigil/ContentHub';
@@ -13,6 +14,7 @@ export default async function ContentDashboard({searchParams}:{searchParams:Prom
  if(website&&!sites.some(s=>s.id===website))notFound();
  const collections=site?.access?await contentCollections(client,site.id,ctx.organization.id):[],admin=createAdminClient();
  const previews=site?.access?await mediaPreviews(admin,site.id,ctx.organization.id,collections.flatMap(c=>c.records)):{};
+ if(site?.access)Object.assign(previews,standaloneMediaPreviews(collections.filter(c=>c.binding.adapter==='standalone').flatMap(c=>c.records),site));
  const {data:posts,error}=site?.access&&collections.some(c=>c.binding.module==='blog')?await client.from('website_blog_posts').select('id,website_id,title,excerpt,status,updated_at,published_at,media,deleted_at').eq('website_id',site.id).eq('organization_id',ctx.organization.id).order('updated_at',{ascending:false}):{data:[],error:null};if(error)throw error;
  const library=await Promise.all((posts??[]).map(async post=>{const media=readBlogMedia(post.media),[cover]=await signedBlogImages(admin,post.website_id,ctx.organization.id,media.images.filter(image=>image.id===media.cover));return {...post,coverUrl:cover?.url,coverAlt:cover?.alt};}));
  const canWrite=Boolean(ctx.staffRole)||['owner','manager'].includes(ctx.role);
