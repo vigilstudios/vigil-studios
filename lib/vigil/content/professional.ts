@@ -88,11 +88,11 @@ export function recordsFromLab(site:SiteDefinition,collection:BoundCollection):C
  const section=site.pages.find(p=>p.id===collection.binding.pageId)?.sections.find(s=>s.id===collection.binding.sectionId);
  if(!section)return collection.records;
  const value=(section.content as ObjectValue)[collection.binding.field],raws=Array.isArray(value)?value:[value];
- return raws.filter(Boolean).map((raw,i)=>{const objectRaw=object(raw),source=str(objectRaw.id??objectRaw.productId??object(objectRaw.product).productId),existing=collection.records.find(r=>collection.config.sourceIds[r.id]===source)||collection.records[i],id=existing?.id??stableId(`${collection.binding.key}:${source||i}`);
+ const editedRecords=raws.filter(Boolean).map((raw,i)=>{const objectRaw=object(raw),source=str(objectRaw.id??objectRaw.productId??object(objectRaw.product).productId),existing=collection.records.find(r=>collection.config.sourceIds[r.id]===source)||collection.records.filter(r=>!r.deleted)[i],id=existing?.id??stableId(`${collection.binding.key}:${source||i}`);
   const ownedMedia=existing&&'media' in existing.data?existing.data.media.flatMap(m=>[m.id,m.posterId].filter(Boolean)):[];
   const portableRaw=JSON.parse(JSON.stringify(objectRaw,(_key,value)=>typeof value==='string'&&ownedMedia.some(mediaId=>value.includes(`/media/${mediaId}?`))?value.replace(/&draft=1(?=&|$)/g,''):value));
   const record=recordFromRaw(collection.binding.module as Exclude<ContentModule,'blog'>,portableRaw,id,existing?.slug??slug(str(objectRaw.title)||`${collection.binding.field}-${i}`));
-  if(existing&&'media' in record.data&&'media' in existing.data){const oldMedia=existing.data.media;record.data.media=record.data.media.map((m,j)=>oldMedia[j]?.id?{...oldMedia[j],alt:m.alt,caption:m.caption}:m);}
+  if(existing&&'media' in record.data&&'media' in existing.data){const oldMedia=existing.data.media;record.data.media=record.data.media.map((m,j)=>{const old=oldMedia[j];if(!old?.id||!m.src.includes(`/media/${old.id}?`))return m;const next={...old,alt:m.alt,caption:m.caption};if(old.posterId&&!m.poster?.includes(`/media/${old.posterId}?`)){delete next.posterId;next.poster=m.poster;}return next;});}
   return {...record,featured:existing?.featured??false,...(existing&&'placeholder' in existing.data&&'placeholder' in record.data?{data:{...record.data,placeholder:existing.data.placeholder}}:{})};
  });
 }
