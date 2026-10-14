@@ -94,3 +94,15 @@ export function formatMb(bytes: number): string {
 export function filePath(organizationId: string, projectId: string, contentType: string, random: string): string {
   return `${organizationId}/${projectId}/${random}.${FILE_TYPES[contentType]?.ext ?? "bin"}`;
 }
+
+export const FILE_FILTERS = ['all', 'images', 'videos', 'documents', 'other'] as const;
+export type FileFilter = typeof FILE_FILTERS[number];
+export function fileMediaType(contentType: string): Exclude<FileFilter, 'all'> {
+  if (contentType.startsWith('image/')) return 'images';
+  if (contentType.startsWith('video/')) return 'videos';
+  if (contentType === 'application/pdf') return 'documents';
+  return 'other';
+}
+export function filterFiles<T extends { content_type: string }>(assets: T[], filter: FileFilter): T[] {
+  return filter === 'all' ? assets : assets.filter(asset => fileMediaType(asset.content_type) === filter);
+}

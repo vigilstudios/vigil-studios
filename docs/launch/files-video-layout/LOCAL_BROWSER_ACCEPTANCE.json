@@ -1,0 +1,29 @@
+{
+  "desktopBefore": {
+    "bottomGap": 24,
+    "dropCenter": "center",
+    "height": 1221,
+    "top": 143.5,
+    "width": 1745
+  },
+  "desktopAfter": {
+    "bottomGap": 24,
+    "mainTop": 56,
+    "scroll": 1221,
+    "top": 80
+  },
+  "mobile": {
+    "width": 390,
+    "pageWidth": 390,
+    "layout": "normal flow",
+    "videoRows": 11
+  },
+  "filters": {
+    "all": 77,
+    "images": 60,
+    "videos": 11,
+    "documents": 6,
+    "other": 0,
+    "emptyStatePassed": true
+  }
+}

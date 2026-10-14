@@ -4,6 +4,13 @@ import * as tus from "tus-js-client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { RESUMABLE_THRESHOLD_BYTES } from "@/lib/vigil/files";
 
+/** Hosted projects use Storage's direct hostname; custom and local URLs keep their origin. */
+export function storageUploadEndpoint(base: string): string {
+  const url = new URL(`${base.replace(/\/$/, "")}/storage/v1/upload/resumable`);
+  if (/^[a-z0-9-]+\.supabase\.co$/i.test(url.hostname)) url.hostname = url.hostname.replace('.supabase.co', '.storage.supabase.co');
+  return url.href;
+}
+
 /**
  * Browser-direct upload to a private bucket. Small files use the plain
  * upload; anything larger goes through Supabase's resumable (TUS) endpoint in
@@ -31,7 +38,7 @@ export async function uploadToBucket(
   if (!base) throw new Error("Uploads are not configured.");
   await new Promise<void>((resolve, reject) => {
     const upload = new tus.Upload(file, {
-      endpoint: `${base}/storage/v1/upload/resumable`,
+      endpoint: storageUploadEndpoint(base),
       retryDelays: [0, 1000, 3000, 5000, 10000],
       headers: { authorization: `Bearer ${token}`, "x-upsert": "false" },
       uploadDataDuringCreation: true,

@@ -1,0 +1,15 @@
+app/(vigil)/dashboard/files/FilesLibrary.tsx
+app/(vigil)/dashboard/files/files.css
+docs/launch/files-video-layout/LOCAL_BROWSER_ACCEPTANCE.json
+docs/launch/files-video-layout/LOCAL_CHECKS.txt
+docs/launch/files-video-layout/ORIGINAL_VIDEO_UPLOAD_PROOF.json
+docs/launch/files-video-layout/PLAN.md
+docs/launch/files-video-layout/REPORT.md
+docs/launch/files-video-layout/ROOT_CAUSE.json
+docs/launch/files-video-layout/STORAGE_LIMIT_FIX.json
+docs/launch/files-video-layout/evidence/local-files-desktop.png
+docs/launch/files-video-layout/evidence/local-files-mobile.png
+lib/vigil/__tests__/files-upload.test.ts
+lib/vigil/file-upload-error.ts
+lib/vigil/files.ts
+lib/vigil/storage-upload.ts

@@ -1,0 +1,20 @@
+{
+  "file": "Video 1 (Night of Laughter).MOV",
+  "bytes": 95274457,
+  "observedBrowserFailure": {
+    "protocol": "TUS",
+    "status": 413,
+    "response": "Maximum size exceeded"
+  },
+  "globalUploadLimitBeforeBytes": 52428800,
+  "privateBucketFileLimitBytes": 524288000,
+  "mime": "video/quicktime",
+  "mimeAllowed": true,
+  "accountUi": {
+    "maxCount": 80,
+    "usageCount": 77,
+    "maxFileMiB": 500,
+    "maxTotalGiB": 10
+  },
+  "resolution": "Align the provider global ceiling with the existing private bucket/app allowance; keep account limits and allowed MIME types unchanged."
+}
