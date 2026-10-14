@@ -36,9 +36,10 @@ export default async function RequestsPage() {
   if (!ent.enabled(FEATURES.requests)) {
     return (
       <GatedFeature
-        title="Website updates"
+        title="Requests"
         description="Care and higher plans include website updates and content changes: you tell Vigil what to change, and it gets done."
-        planHint="Available on Vigil Care, Growth and Priority."
+        planHint="Included with Care and higher"
+        previewKind="requests"
       />
     );
   }

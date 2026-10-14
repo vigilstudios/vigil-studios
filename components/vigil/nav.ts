@@ -32,7 +32,7 @@ export type NavItem = {
   exact?: boolean;
   /** Internal workspaces that require a desktop viewport. */
   desktopOnly?: boolean;
-  /** Rendered dimmed with a lock; the page explains why. */
+  /** Rendered dimmed with a premium crown; the page explains why. */
   locked?: boolean;
   /** Paid feature indicator, independent of current access. */
   premium?: boolean;

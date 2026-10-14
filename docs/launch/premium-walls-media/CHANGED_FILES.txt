@@ -1,0 +1,16 @@
+app/(vigil)/dashboard/content/content.css
+app/(vigil)/dashboard/content/page.tsx
+app/(vigil)/dashboard/insights/page.tsx
+app/(vigil)/dashboard/layout.tsx
+app/(vigil)/dashboard/requests/page.tsx
+app/(vigil)/dashboard/virtue/page.tsx
+components/vigil/AppFrame.tsx
+components/vigil/ContentHub.tsx
+components/vigil/GatedFeature.tsx
+components/vigil/PremiumWall.tsx
+components/vigil/premium.css
+components/vigil/nav.ts
+lib/vigil/content/service.ts
+lib/vigil/content/preview.ts
+lib/vigil/__tests__/content-preview.test.ts
+lib/vigil/__tests__/premium-wall.test.tsx

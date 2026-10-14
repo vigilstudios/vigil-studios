@@ -239,55 +239,6 @@
   gap:10px;
   border-radius:8px;
 }
-.hub-wall {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  min-height:60vh;
-  text-align:center;
-  width:100%;
-  border:1px solid var(--border);
-  background:var(--bg-surface);
-  border-radius:12px;
-  padding:48px 24px;
-}
-.hub-wall-icon {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:64px;
-  height:64px;
-  border-radius:18px;
-  background:color-mix(in srgb,var(--accent) 12%,transparent);
-  color:var(--accent);
-  margin-bottom:22px;
-}
-.hub-wall .hub-eyebrow {
-  font-size:10px;
-  font-weight:600;
-  letter-spacing:.14em;
-  text-transform:uppercase;
-  color:var(--accent);
-  margin:0 0 10px;
-}
-.hub-wall h2 {
-  font-size:24px;
-  font-weight:600;
-  letter-spacing:-.03em;
-}
-.hub-wall p {
-  max-width:460px;
-  font-size:13px;
-  line-height:1.8;
-  margin:14px 0 24px;
-  color:var(--text-secondary);
-}
-.hub-wall .hub-wall-note {
-  font-size:11px;
-  margin:22px 0 0;
-  max-width:400px;
-}
 .hub-empty {
   border:1px dashed var(--border);
   border-radius:12px;
@@ -352,13 +303,6 @@
   }
   .hub-tools label {
     flex-basis:100%;
-  }
-  .hub-wall {
-    min-height:65vh;
-    padding:32px 20px;
-  }
-  .hub-wall h2 {
-    font-size:22px;
   }
 }
 

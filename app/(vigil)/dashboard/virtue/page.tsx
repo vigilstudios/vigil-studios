@@ -14,6 +14,8 @@ export default async function VirtuePage() {
       title="Virtue"
       description="Virtue is the AI employee inside Vigil: lead follow-up, missed-call text-back, reviews and reactivation, configured for your business."
       planHint={enabled ? undefined : "Included with Vigil Growth and Priority."}
+      previewKind="virtue"
+      availability="coming_soon"
       comingSoon={enabled}
     />
   );

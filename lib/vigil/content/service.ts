@@ -9,7 +9,7 @@ import {applyBindings,discoverBindings,type BoundCollection,type AdapterConfig} 
 import {publicRecords} from './media';
 import {projectDocument} from '@/lib/vigil/professional/document';
 export async function contentSites(client:DbClient,org:string){
- const {data,error}=await client.from('websites').select('id,name,status,project_id,live_url').eq('organization_id',org).order('created_at');if(error)throw error;
+ const {data,error}=await client.from('websites').select('id,name,status,project_id,live_url,preview_url').eq('organization_id',org).order('created_at');if(error)throw error;
  return Promise.all((data??[]).map(async site=>{const [access,project]=await Promise.all([client.rpc('website_content_access',{p_website:site.id}),client.from('projects').select('kind').eq('id',site.project_id!).maybeSingle()]);if(access.error)throw access.error;if(project.error)throw project.error;return {...site,access:access.data===true,kind:project.data?.kind};}));
 }
 export async function contentCollections(client:DbClient,website:string,org:string,mode:'draft'|'published'='draft'):Promise<BoundCollection[]>{
