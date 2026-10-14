@@ -1,0 +1,61 @@
+{
+  "source": "3954ad5dc0a29e1aafa0a7c723ace47ed2f4a250",
+  "tool": "PageSpeed Insights / Lighthouse13.5.0",
+  "captures": [
+    {
+      "capturedAt": "2026-10-14T04:27:09Z",
+      "deployment": "dpl_6k4NJRHVWL4kfcASXBND87ZcXQTi",
+      "url": "https://pagespeed.web.dev/analysis/https-vigil-490498f3-mblw1vik3-vigilstudio-projects-vercel-app/14jszzajwi?form_factor=desktop",
+      "desktop": {
+        "performance": 89,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "seo": 69,
+        "fcpSeconds": 0.5,
+        "lcpSeconds": 0.7,
+        "tbtMs": 240,
+        "cls": 0,
+        "speedIndexSeconds": 1.6
+      },
+      "mobile": {
+        "performance": 91,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "seo": 69,
+        "fcpSeconds": 2.4,
+        "lcpSeconds": 3.0,
+        "tbtMs": 10,
+        "cls": 0,
+        "speedIndexSeconds": 2.7
+      }
+    },
+    {
+      "capturedAt": "2026-10-14T04:32:02Z",
+      "deployment": "dpl_7cCGEKJ8APnsURRdPc4y5fM75dUV",
+      "url": "https://pagespeed.web.dev/analysis/https-vigil-490498f3-git-codex-scar-blog-contact-vigilstudio-projects-vercel-app/r07kd3cl9m?form_factor=desktop",
+      "desktop": {
+        "performance": 96,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "seo": 69,
+        "fcpSeconds": 0.5,
+        "lcpSeconds": 0.6,
+        "tbtMs": 150,
+        "cls": 0,
+        "speedIndexSeconds": 1.3
+      },
+      "mobile": {
+        "performance": 95,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "seo": 69,
+        "fcpSeconds": 1.5,
+        "lcpSeconds": 2.9,
+        "tbtMs": 0,
+        "cls": 0.005,
+        "speedIndexSeconds": 2.4
+      }
+    }
+  ],
+  "note": "Both fresh captures retained; no field data. Final review alias meets the desktop93 gate. SEO69 reflects intentional Preview noindex; synthetic score varies."
+}

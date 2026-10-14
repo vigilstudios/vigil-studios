@@ -1,0 +1,121 @@
+{
+  "checkedAt": "2026-10-14T04:44:02.268Z",
+  "website": {
+    "id": "490498f3-fa5f-4c08-a6d3-4943cb055795",
+    "status": "building",
+    "preview_url": "https://vigil-490498f3-git-codex-scar-blog-contact-vigilstudio-projects.vercel.app/",
+    "live_url": null,
+    "organization_id": "a019d40a-8e36-41d5-970e-cd20ab26b104",
+    "project_id": "a75a4703-3251-4ed0-9ac4-fb8387c5c452"
+  },
+  "collections": [
+    {
+      "module": "blog",
+      "revision": 1,
+      "publishedRevision": null,
+      "records": 0,
+      "published": 0,
+      "placeholders": 0
+    },
+    {
+      "module": "gallery",
+      "revision": 1,
+      "publishedRevision": 1,
+      "records": 56,
+      "published": 56,
+      "placeholders": 0
+    },
+    {
+      "module": "portfolio",
+      "revision": 1,
+      "publishedRevision": 1,
+      "records": 10,
+      "published": 10,
+      "placeholders": 0
+    },
+    {
+      "module": "testimonials",
+      "revision": 1,
+      "publishedRevision": 1,
+      "records": 6,
+      "published": 6,
+      "placeholders": 6
+    }
+  ],
+  "posts": [
+    {
+      "id": "c485a59b-9ebc-48e0-9768-498487441341",
+      "slug": "a-little-cafe-day",
+      "title": "A little café day, a few good details.",
+      "status": "published",
+      "media": {
+        "cover": "33232bca-5c02-4803-8cd7-5a858dd128cc",
+        "images": [
+          {
+            "id": "33232bca-5c02-4803-8cd7-5a858dd128cc",
+            "alt": "Scar sitting at a café table by a window",
+            "caption": "A little place worth slowing down for."
+          },
+          {
+            "id": "ac14b144-2c2a-4c7d-bb27-5407e55515fd",
+            "alt": "Two iced coffees on a café table",
+            "caption": "Coffee, conversation and the details in between."
+          }
+        ]
+      },
+      "deleted_at": null
+    },
+    {
+      "id": "948d7977-29bc-4884-93ae-599966d77b65",
+      "slug": "a-pink-afternoon",
+      "title": "A pink afternoon, saved in the camera roll.",
+      "status": "published",
+      "media": {
+        "cover": "0cade55e-5a7c-44ba-8e66-44463858d9fa",
+        "images": [
+          {
+            "id": "0cade55e-5a7c-44ba-8e66-44463858d9fa",
+            "alt": "Scar enjoying a picnic in the park",
+            "caption": "A soft afternoon and a few favorite things."
+          }
+        ]
+      },
+      "deleted_at": null
+    },
+    {
+      "id": "f610a9bd-4224-4d08-ab5e-a99e0a46d1f9",
+      "slug": "behind-the-little-stories",
+      "title": "Behind the little stories.",
+      "status": "published",
+      "media": {
+        "cover": "8d71e7f1-54a2-47bc-ae09-abcf7b181bf6",
+        "images": [
+          {
+            "id": "8d71e7f1-54a2-47bc-ae09-abcf7b181bf6",
+            "alt": "A camera filming Scar outside a storefront",
+            "caption": "The little details that help tell a story."
+          }
+        ]
+      },
+      "deleted_at": null
+    }
+  ],
+  "domains": 0,
+  "contact": {
+    "enabled": false,
+    "booking_url": null
+  },
+  "contactAutomation": {
+    "status": "waiting_launch"
+  },
+  "reviewRounds": [
+    {
+      "round_number": 2,
+      "status": "pending"
+    },
+    {
+      "round_number": 1,
+      "status": "approved"
+    }
+  ]
+}

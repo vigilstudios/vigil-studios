@@ -1,6 +1,6 @@
 # Content Hub implementation — 13 October 2026
 
-Status: IN PROGRESS. Founder instruction overrides the prompt's older Basic policy: Care and higher receive self-service Content Hub on Professional/custom (Growth Site); Express and Basic are locked. No prices or payment products change. Existing paid prelaunch authoring remains scoped to its website.
+Status: IMPLEMENTED AND RELEASED. Shared Vigil is live; Scar remains verified Ready Preview pending actual second full-site approval. Founder instruction overrides the prompt's older Basic policy: Care and higher receive self-service Content Hub on Professional/custom (Growth Site); Express and Basic are locked. No prices or payment products change. Existing paid prelaunch authoring remains scoped to its website.
 
 ## Inspected baseline
 
@@ -19,3 +19,7 @@ Shared isolated branch `codex/content-hub`, `/tmp/vigil-content-hub-release`, st
 ## Release boundaries
 
 No customer messages, appointments, domains, payment products, fake approvals or lifecycle changes. Additional videos were requested once; integration proceeds with existing authorized assets. No subagents. A failed publish retains the prior publication. Rollback disables affected bindings/routes and reverts application source while retaining records and audit history; no destructive down migration.
+
+## Completion evidence
+
+Application release6ce58a7, staff-Lab compatibility releasee78eb12; additive migrations40–43 applied after disposable database validation. Shared2235 unit tests and all required build/type/lint/SQL/hosted CI gates passed. Scar3954ad5 passes both build modes and21 renderer tests, hosted76routes/317resources audit, desktop/mobile browser checks and fresh final review PageSpeed96desktop/95mobile (earlier immutable89/91 retained). All test organizations/websites/subscriptions/uploaded objects/users were removed. See REPORT.md and evidence/.

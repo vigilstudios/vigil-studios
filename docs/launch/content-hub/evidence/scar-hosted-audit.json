@@ -1,0 +1,2424 @@
+{
+  "base": "https://vigil-490498f3-mblw1vik3-vigilstudio-projects.vercel.app/",
+  "checkedAt": "2026-10-14T04:27:25.337Z",
+  "pages": [
+    {
+      "path": "/",
+      "status": 200,
+      "ms": 1612,
+      "bytes": 195913,
+      "title": "Scarlen Lopez — NYC Content Creator &amp; Marketer",
+      "description": "NYC content creator and marketer sharing beauty, lifestyle, events and brand stories. Explore Scarlen Lopez’s collaborations, photography and journal.",
+      "canonical": "https://vigil-490498f3.vercel.app/",
+      "issues": []
+    },
+    {
+      "path": "/about",
+      "status": 200,
+      "ms": 858,
+      "bytes": 167723,
+      "title": "About Scarlen Lopez — NYC Creator &amp; Marketer",
+      "description": "Hi, I’m Scar - an NYC-based content creator and marketing graduate who loves turning everyday moments into stories that inspire connection. I blend creativity with strategy to create content that feels authentic to my audience and helps brands build meaningful relationships.",
+      "canonical": "https://vigil-490498f3.vercel.app/about",
+      "issues": []
+    },
+    {
+      "path": "/blog",
+      "status": 200,
+      "ms": 717,
+      "bytes": 165457,
+      "title": "Journal — Stories &amp; Ideas by Scarlen Lopez",
+      "description": "Stories, creative ideas and everyday moments from Scarlen Lopez, a New York City content creator and marketer.",
+      "canonical": "https://vigil-490498f3.vercel.app/blog",
+      "issues": []
+    },
+    {
+      "path": "/blog/a-little-cafe-day",
+      "status": 200,
+      "ms": 523,
+      "bytes": 165168,
+      "title": "A little café day, a few good details. — Scarlen Lopez",
+      "description": "Coffee, conversation and the little details that turn an ordinary afternoon into a story.",
+      "canonical": "https://vigil-490498f3.vercel.app/blog/a-little-cafe-day",
+      "issues": []
+    },
+    {
+      "path": "/blog/a-pink-afternoon",
+      "status": 200,
+      "ms": 423,
+      "bytes": 164097,
+      "title": "A pink afternoon, saved in the camera roll. — Scarlen Lopez",
+      "description": "A soft afternoon, a little color and a moment worth saving in the camera roll.",
+      "canonical": "https://vigil-490498f3.vercel.app/blog/a-pink-afternoon",
+      "issues": []
+    },
+    {
+      "path": "/blog/behind-the-little-stories",
+      "status": 200,
+      "ms": 535,
+      "bytes": 164733,
+      "title": "Behind the little stories. — Scarlen Lopez",
+      "description": "A little space for creative ideas, thoughtful details and the stories behind the finished work.",
+      "canonical": "https://vigil-490498f3.vercel.app/blog/behind-the-little-stories",
+      "issues": []
+    },
+    {
+      "path": "/contact",
+      "status": 200,
+      "ms": 1569,
+      "bytes": 161501,
+      "title": "Contact Scarlen Lopez — Collaborations &amp; Content",
+      "description": "Connect with NYC content creator Scarlen Lopez for brand collaborations, events and creative projects. Email scarcollabs@gmail.com or send an inquiry.",
+      "canonical": "https://vigil-490498f3.vercel.app/contact",
+      "issues": []
+    },
+    {
+      "path": "/gallery",
+      "status": 200,
+      "ms": 2305,
+      "bytes": 161865,
+      "title": "Photo Gallery — Scarlen Lopez",
+      "description": "Events, everyday New York and moments behind the camera, in photos and clips from Scarlen Lopez’s camera roll.",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery",
+      "issues": []
+    },
+    {
+      "path": "/gallery/acne-studios-cart",
+      "status": 200,
+      "ms": 337,
+      "bytes": 161992,
+      "title": "pop-up stop — Photo Gallery — Scarlen Lopez",
+      "description": "A pink Acne Studios cart at a pop-up",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/acne-studios-cart",
+      "issues": []
+    },
+    {
+      "path": "/gallery/after-work-routine",
+      "status": 200,
+      "ms": 347,
+      "bytes": 162090,
+      "title": "after work routine — Photo Gallery — Scarlen Lopez",
+      "description": "Scar’s after-work routine, from 6 to 11pm",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/after-work-routine",
+      "issues": []
+    },
+    {
+      "path": "/gallery/barbie-dunkin",
+      "status": 200,
+      "ms": 276,
+      "bytes": 162052,
+      "title": "barbie girl — Photo Gallery — Scarlen Lopez",
+      "description": "Scar inside a life-size Barbie × Dunkin’ box",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/barbie-dunkin",
+      "issues": []
+    },
+    {
+      "path": "/gallery/bloom-pop",
+      "status": 200,
+      "ms": 405,
+      "bytes": 162139,
+      "title": "cherry pop — Photo Gallery — Scarlen Lopez",
+      "description": "A Bloom Pop cherry soda held up in front of the pink Bloom van",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/bloom-pop",
+      "issues": []
+    },
+    {
+      "path": "/gallery/cafe",
+      "status": 200,
+      "ms": 296,
+      "bytes": 162004,
+      "title": "coffee date — Photo Gallery — Scarlen Lopez",
+      "description": "Scar laughing at a café table with an iced drink",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/cafe",
+      "issues": []
+    },
+    {
+      "path": "/gallery/cafe-catch-up",
+      "status": 200,
+      "ms": 552,
+      "bytes": 162381,
+      "title": "omg i forgot to tell you — Photo Gallery — Scarlen Lopez",
+      "description": "Friends at an outdoor café table: “this and ‘omg I forgot to tell you’”",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/cafe-catch-up",
+      "issues": []
+    },
+    {
+      "path": "/gallery/cameras",
+      "status": 200,
+      "ms": 393,
+      "bytes": 162039,
+      "title": "the tools — Photo Gallery — Scarlen Lopez",
+      "description": "Pink, white and black compact cameras on a woven mat",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/cameras",
+      "issues": []
+    },
+    {
+      "path": "/gallery/certificate",
+      "status": 200,
+      "ms": 347,
+      "bytes": 162178,
+      "title": "proud moment — Photo Gallery — Scarlen Lopez",
+      "description": "Scar holding a certificate beside a colleague at an awards lunch",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/certificate",
+      "issues": []
+    },
+    {
+      "path": "/gallery/chalk-note",
+      "status": 200,
+      "ms": 338,
+      "bytes": 162216,
+      "title": "found on the sidewalk — Photo Gallery — Scarlen Lopez",
+      "description": "Chalk on the sidewalk reading “I hope you’re here to stay”",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/chalk-note",
+      "issues": []
+    },
+    {
+      "path": "/gallery/charm-bar",
+      "status": 200,
+      "ms": 244,
+      "bytes": 162232,
+      "title": "an afternoon in nyc — Photo Gallery — Scarlen Lopez",
+      "description": "An afternoon in New York at a charm bar and permanent jewelry studio",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/charm-bar",
+      "issues": []
+    },
+    {
+      "path": "/gallery/cherry-blossoms",
+      "status": 200,
+      "ms": 337,
+      "bytes": 162008,
+      "title": "blossom season — Photo Gallery — Scarlen Lopez",
+      "description": "Scar framed by cherry blossom branches",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/cherry-blossoms",
+      "issues": []
+    },
+    {
+      "path": "/gallery/clinique-eye-cream",
+      "status": 200,
+      "ms": 322,
+      "bytes": 162051,
+      "title": "eye cream check — Photo Gallery — Scarlen Lopez",
+      "description": "Trying Clinique’s All About Eyes cream",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/clinique-eye-cream",
+      "issues": []
+    },
+    {
+      "path": "/gallery/conference-hall",
+      "status": 200,
+      "ms": 312,
+      "bytes": 162100,
+      "title": "full house — Photo Gallery — Scarlen Lopez",
+      "description": "Scar in a packed conference hall lit pink and purple",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/conference-hall",
+      "issues": []
+    },
+    {
+      "path": "/gallery/creating-content",
+      "status": 200,
+      "ms": 313,
+      "bytes": 162288,
+      "title": "do not disturb — Photo Gallery — Scarlen Lopez",
+      "description": "A pink pixel pop-up graphic reading “Can’t talk, creating content”",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/creating-content",
+      "issues": []
+    },
+    {
+      "path": "/gallery/creators-needed",
+      "status": 200,
+      "ms": 402,
+      "bytes": 162216,
+      "title": "you’ve got mail — Photo Gallery — Scarlen Lopez",
+      "description": "A pink envelope graphic reading “Content creators needed!”",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/creators-needed",
+      "issues": []
+    },
+    {
+      "path": "/gallery/dilly-dally-day",
+      "status": 200,
+      "ms": 397,
+      "bytes": 162062,
+      "title": "dilly dally day — Photo Gallery — Scarlen Lopez",
+      "description": "A “dilly dally day” at a gold charm shop",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/dilly-dally-day",
+      "issues": []
+    },
+    {
+      "path": "/gallery/event-bts",
+      "status": 200,
+      "ms": 566,
+      "bytes": 161960,
+      "title": "behind the phone — Photo Gallery — Scarlen Lopez",
+      "description": "Filming guests around an event table",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/event-bts",
+      "issues": []
+    },
+    {
+      "path": "/gallery/flower-cart",
+      "status": 200,
+      "ms": 569,
+      "bytes": 161959,
+      "title": "fresh flowers — Photo Gallery — Scarlen Lopez",
+      "description": "Pink flowers on a pop-up flower cart",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/flower-cart",
+      "issues": []
+    },
+    {
+      "path": "/gallery/fortune",
+      "status": 200,
+      "ms": 289,
+      "bytes": 162098,
+      "title": "a little fortune — Photo Gallery — Scarlen Lopez",
+      "description": "A fortune cookie message held between manicured fingers",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/fortune",
+      "issues": []
+    },
+    {
+      "path": "/gallery/hello-gorgeous",
+      "status": 200,
+      "ms": 256,
+      "bytes": 162266,
+      "title": "hello gorgeous — Photo Gallery — Scarlen Lopez",
+      "description": "Scar on a bench under a “Hello gorgeous” neon sign and a wall of pink flowers",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/hello-gorgeous",
+      "issues": []
+    },
+    {
+      "path": "/gallery/her-conference",
+      "status": 200,
+      "ms": 291,
+      "bytes": 162097,
+      "title": "her conference — Photo Gallery — Scarlen Lopez",
+      "description": "Scar sitting on a sofa on the Her Conference stage",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/her-conference",
+      "issues": []
+    },
+    {
+      "path": "/gallery/her-conference-card",
+      "status": 200,
+      "ms": 361,
+      "bytes": 162225,
+      "title": "create, inspire — Photo Gallery — Scarlen Lopez",
+      "description": "Scar’s Her Conference punch card with instant photos of her",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/her-conference-card",
+      "issues": []
+    },
+    {
+      "path": "/gallery/her-conference-pair",
+      "status": 200,
+      "ms": 409,
+      "bytes": 162076,
+      "title": "front row — Photo Gallery — Scarlen Lopez",
+      "description": "Two photos of Scar on the Her Conference stage",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/her-conference-pair",
+      "issues": []
+    },
+    {
+      "path": "/gallery/iced-coffees",
+      "status": 200,
+      "ms": 275,
+      "bytes": 162167,
+      "title": "two please — Photo Gallery — Scarlen Lopez",
+      "description": "Two iced coffees on a café table between vases of pink flowers",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/iced-coffees",
+      "issues": []
+    },
+    {
+      "path": "/gallery/le-ann-studio",
+      "status": 200,
+      "ms": 310,
+      "bytes": 162069,
+      "title": "le ann studio — Photo Gallery — Scarlen Lopez",
+      "description": "A flower wall with the Le Ann luxury studio sign",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/le-ann-studio",
+      "issues": []
+    },
+    {
+      "path": "/gallery/lemonade-market",
+      "status": 200,
+      "ms": 418,
+      "bytes": 162197,
+      "title": "market day — Photo Gallery — Scarlen Lopez",
+      "description": "Fresh-squeezed lemonade from Naija Lemonade at an outdoor market",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/lemonade-market",
+      "issues": []
+    },
+    {
+      "path": "/gallery/matcha-run",
+      "status": 200,
+      "ms": 366,
+      "bytes": 161993,
+      "title": "matcha run — Photo Gallery — Scarlen Lopez",
+      "description": "Scar mid-selfie with a matcha and earphones",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/matcha-run",
+      "issues": []
+    },
+    {
+      "path": "/gallery/matcha-run-2",
+      "status": 200,
+      "ms": 381,
+      "bytes": 162033,
+      "title": "earphones in — Photo Gallery — Scarlen Lopez",
+      "description": "Scar with a matcha, looking over her shoulder",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/matcha-run-2",
+      "issues": []
+    },
+    {
+      "path": "/gallery/matcha-run-3",
+      "status": 200,
+      "ms": 332,
+      "bytes": 161994,
+      "title": "on the go — Photo Gallery — Scarlen Lopez",
+      "description": "Scar with a matcha, glancing at the camera",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/matcha-run-3",
+      "issues": []
+    },
+    {
+      "path": "/gallery/matcha-run-4",
+      "status": 200,
+      "ms": 366,
+      "bytes": 161877,
+      "title": "one more — Photo Gallery — Scarlen Lopez",
+      "description": "Scar with a matcha, mid-turn",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/matcha-run-4",
+      "issues": []
+    },
+    {
+      "path": "/gallery/mirror-pretty",
+      "status": 200,
+      "ms": 246,
+      "bytes": 162235,
+      "title": "you’re like really pretty — Photo Gallery — Scarlen Lopez",
+      "description": "A mirror selfie, captioned “you’re like really pretty”",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/mirror-pretty",
+      "issues": []
+    },
+    {
+      "path": "/gallery/monument",
+      "status": 200,
+      "ms": 294,
+      "bytes": 162166,
+      "title": "weekend trip — Photo Gallery — Scarlen Lopez",
+      "description": "Scar crouching under a blossoming tree by the Washington Monument",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/monument",
+      "issues": []
+    },
+    {
+      "path": "/gallery/monument-grass",
+      "status": 200,
+      "ms": 368,
+      "bytes": 162269,
+      "title": "sunny days — Photo Gallery — Scarlen Lopez",
+      "description": "Scar sitting on the grass under cherry blossoms by the Washington Monument",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/monument-grass",
+      "issues": []
+    },
+    {
+      "path": "/gallery/nyc-creator-day",
+      "status": 200,
+      "ms": 332,
+      "bytes": 162307,
+      "title": "just another day — Photo Gallery — Scarlen Lopez",
+      "description": "A beauty event in a pink boutique: “just another day as a NYC creator”",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/nyc-creator-day",
+      "issues": []
+    },
+    {
+      "path": "/gallery/on-set",
+      "status": 200,
+      "ms": 358,
+      "bytes": 161881,
+      "title": "on set — Photo Gallery — Scarlen Lopez",
+      "description": "A Canon camera’s screen mid-shoot",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/on-set",
+      "issues": []
+    },
+    {
+      "path": "/gallery/orange-selfie",
+      "status": 200,
+      "ms": 298,
+      "bytes": 161967,
+      "title": "hi from me — Photo Gallery — Scarlen Lopez",
+      "description": "Scar taking a selfie in an orange top",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/orange-selfie",
+      "issues": []
+    },
+    {
+      "path": "/gallery/picnic",
+      "status": 200,
+      "ms": 315,
+      "bytes": 162084,
+      "title": "picnic season — Photo Gallery — Scarlen Lopez",
+      "description": "Scar at a long picnic table set with flowers in the park",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/picnic",
+      "issues": []
+    },
+    {
+      "path": "/gallery/picnic-collage",
+      "status": 200,
+      "ms": 298,
+      "bytes": 162215,
+      "title": "content girlies — Photo Gallery — Scarlen Lopez",
+      "description": "Scar at the picnic table, with instant photos of friends pinned around her",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/picnic-collage",
+      "issues": []
+    },
+    {
+      "path": "/gallery/picnic-toast",
+      "status": 200,
+      "ms": 318,
+      "bytes": 162040,
+      "title": "cheers! — Photo Gallery — Scarlen Lopez",
+      "description": "Friends raising glasses over a picnic in the park",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/picnic-toast",
+      "issues": []
+    },
+    {
+      "path": "/gallery/pink-boutique",
+      "status": 200,
+      "ms": 440,
+      "bytes": 162057,
+      "title": "shop with me — Photo Gallery — Scarlen Lopez",
+      "description": "Browsing a pink boutique full of shoes and bags",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/pink-boutique",
+      "issues": []
+    },
+    {
+      "path": "/gallery/pink-dress",
+      "status": 200,
+      "ms": 257,
+      "bytes": 161966,
+      "title": "dressed for it — Photo Gallery — Scarlen Lopez",
+      "description": "Scar in a pink mini dress at an event",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/pink-dress",
+      "issues": []
+    },
+    {
+      "path": "/gallery/pink-wall",
+      "status": 200,
+      "ms": 301,
+      "bytes": 162339,
+      "title": "pink everything — Photo Gallery — Scarlen Lopez",
+      "description": "Scar posing in front of a pink “Hello gorgeous” wall with gold and pink balloons",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/pink-wall",
+      "issues": []
+    },
+    {
+      "path": "/gallery/pinterest-nails",
+      "status": 200,
+      "ms": 333,
+      "bytes": 162153,
+      "title": "scrolling on pinterest — Photo Gallery — Scarlen Lopez",
+      "description": "Scrolling Pinterest for nail inspiration on an iPad",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/pinterest-nails",
+      "issues": []
+    },
+    {
+      "path": "/gallery/pop-up-selfie",
+      "status": 200,
+      "ms": 334,
+      "bytes": 162094,
+      "title": "pop-up day — Photo Gallery — Scarlen Lopez",
+      "description": "A mirror selfie between the curtains of a pop-up shop",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/pop-up-selfie",
+      "issues": []
+    },
+    {
+      "path": "/gallery/portfolio-about",
+      "status": 200,
+      "ms": 428,
+      "bytes": 162112,
+      "title": "the about page — Photo Gallery — Scarlen Lopez",
+      "description": "The About me page of Scar’s portfolio on a laptop",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/portfolio-about",
+      "issues": []
+    },
+    {
+      "path": "/gallery/portfolio-connect",
+      "status": 200,
+      "ms": 492,
+      "bytes": 162142,
+      "title": "say hi — Photo Gallery — Scarlen Lopez",
+      "description": "The Connect with me page of Scar’s portfolio on a laptop",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/portfolio-connect",
+      "issues": []
+    },
+    {
+      "path": "/gallery/portfolio-cover",
+      "status": 200,
+      "ms": 283,
+      "bytes": 162195,
+      "title": "building my portfolio — Photo Gallery — Scarlen Lopez",
+      "description": "The cover of Scar’s creative portfolio open on a laptop",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/portfolio-cover",
+      "issues": []
+    },
+    {
+      "path": "/gallery/portfolio-videos",
+      "status": 200,
+      "ms": 327,
+      "bytes": 162159,
+      "title": "video examples — Photo Gallery — Scarlen Lopez",
+      "description": "The video content page of Scar’s portfolio on a laptop",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/portfolio-videos",
+      "issues": []
+    },
+    {
+      "path": "/gallery/red-camera",
+      "status": 200,
+      "ms": 249,
+      "bytes": 162030,
+      "title": "say cheese — Photo Gallery — Scarlen Lopez",
+      "description": "Scar holding up a red digital camera that shows her photo",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/red-camera",
+      "issues": []
+    },
+    {
+      "path": "/gallery/sip-and-treat",
+      "status": 200,
+      "ms": 335,
+      "bytes": 162423,
+      "title": "sip &amp; treat — Photo Gallery — Scarlen Lopez",
+      "description": "The welcome sign for the Sip &amp; Treat influencer event, framed by pink and white balloons",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/sip-and-treat",
+      "issues": []
+    },
+    {
+      "path": "/gallery/soho",
+      "status": 200,
+      "ms": 274,
+      "bytes": 161944,
+      "title": "soho afternoons — Photo Gallery — Scarlen Lopez",
+      "description": "A busy SoHo street on a sunny afternoon",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/soho",
+      "issues": []
+    },
+    {
+      "path": "/gallery/subway",
+      "status": 200,
+      "ms": 340,
+      "bytes": 161848,
+      "title": "on my way — Photo Gallery — Scarlen Lopez",
+      "description": "A selfie on a subway platform",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/subway",
+      "issues": []
+    },
+    {
+      "path": "/gallery/summer-fridays",
+      "status": 200,
+      "ms": 299,
+      "bytes": 162257,
+      "title": "summer fridays — Photo Gallery — Scarlen Lopez",
+      "description": "A Summer Fridays flat lay with scrunchies, a pouch and beauty products",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/summer-fridays",
+      "issues": []
+    },
+    {
+      "path": "/gallery/umberto-giannini",
+      "status": 200,
+      "ms": 425,
+      "bytes": 162098,
+      "title": "hair day — Photo Gallery — Scarlen Lopez",
+      "description": "Trying Umberto Giannini hair care for the first time",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/umberto-giannini",
+      "issues": []
+    },
+    {
+      "path": "/gallery/white-dress",
+      "status": 200,
+      "ms": 271,
+      "bytes": 161996,
+      "title": "into the woods — Photo Gallery — Scarlen Lopez",
+      "description": "Scar in a white dress on a woodland path",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/white-dress",
+      "issues": []
+    },
+    {
+      "path": "/gallery/woodland-walk",
+      "status": 200,
+      "ms": 404,
+      "bytes": 162100,
+      "title": "golden hour walk — Photo Gallery — Scarlen Lopez",
+      "description": "Scar walking down a woodland path in a white dress",
+      "canonical": "https://vigil-490498f3.vercel.app/gallery/woodland-walk",
+      "issues": []
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "ms": 429,
+      "bytes": 160271,
+      "title": "Contact &amp; Privacy — Scarlen Lopez",
+      "description": "How Scarlen Lopez’s website handles contact inquiries, services and questions about information you share.",
+      "canonical": "https://vigil-490498f3.vercel.app/privacy",
+      "issues": []
+    },
+    {
+      "path": "/work",
+      "status": 200,
+      "ms": 1469,
+      "bytes": 166172,
+      "title": "Creative Work &amp; Brand Collaborations — Scarlen Lopez",
+      "description": "Explore Scarlen Lopez’s brand collaborations, event content, marketing projects and creative portfolio from New York City and beyond.",
+      "canonical": "https://vigil-490498f3.vercel.app/work",
+      "issues": []
+    },
+    {
+      "path": "/work/beauty-finds",
+      "status": 200,
+      "ms": 481,
+      "bytes": 167919,
+      "title": "Beauty Finds — Creative Work — Scarlen Lopez",
+      "description": "Products, places and beauty experiences through Scar’s perspective.",
+      "canonical": "https://vigil-490498f3.vercel.app/work/beauty-finds",
+      "issues": []
+    },
+    {
+      "path": "/work/cut",
+      "status": 200,
+      "ms": 391,
+      "bytes": 168192,
+      "title": "CUT AND CROPPED — Creative Work — Scarlen Lopez",
+      "description": "Scar explores custom Italian charm bracelets and colorful details at CUTANDCROPPED in SoHo.",
+      "canonical": "https://vigil-490498f3.vercel.app/work/cut",
+      "issues": []
+    },
+    {
+      "path": "/work/events-bts",
+      "status": 200,
+      "ms": 326,
+      "bytes": 167940,
+      "title": "Events + BTS — Creative Work — Scarlen Lopez",
+      "description": "Behind-the-scenes moments and social-first recaps created while the energy is happening.",
+      "canonical": "https://vigil-490498f3.vercel.app/work/events-bts",
+      "issues": []
+    },
+    {
+      "path": "/work/grwm-lifestyle",
+      "status": 200,
+      "ms": 407,
+      "bytes": 167999,
+      "title": "GRWM + Lifestyle — Creative Work — Scarlen Lopez",
+      "description": "Personal routines and everyday stories that feel like catching up with a friend.",
+      "canonical": "https://vigil-490498f3.vercel.app/work/grwm-lifestyle",
+      "issues": []
+    },
+    {
+      "path": "/work/kofee",
+      "status": 200,
+      "ms": 318,
+      "bytes": 168190,
+      "title": "KOFEE — Creative Work — Scarlen Lopez",
+      "description": "A coffee-and-pastry stop at KOFEE in Mott Haven, with cozy café details through Scar’s point of view.",
+      "canonical": "https://vigil-490498f3.vercel.app/work/kofee",
+      "issues": []
+    },
+    {
+      "path": "/work/mock-ads",
+      "status": 200,
+      "ms": 355,
+      "bytes": 169727,
+      "title": "Beauty ad concepts — Creative Work — Scarlen Lopez",
+      "description": "A set of mock product ads, each built around the brand’s own look: Bubble’s Talkback Watermelon lip serum, e.l.f.’s Sheer Red, Bounce Curl’s EdgeLift brush and a summer whip.",
+      "canonical": "https://vigil-490498f3.vercel.app/work/mock-ads",
+      "issues": []
+    },
+    {
+      "path": "/work/newyork-presbyterian",
+      "status": 200,
+      "ms": 280,
+      "bytes": 170021,
+      "title": "NewYork-Presbyterian — Creative Work — Scarlen Lopez",
+      "description": "Scar created two social media posts with the NewYork-Presbyterian Marketing Department and wrote educational, professional captions celebrating the Community Affairs Department’s work in the community, including events she helped organize.",
+      "canonical": "https://vigil-490498f3.vercel.app/work/newyork-presbyterian",
+      "issues": []
+    },
+    {
+      "path": "/work/quirk",
+      "status": 200,
+      "ms": 314,
+      "bytes": 168246,
+      "title": "Quirk Haus — Creative Work — Scarlen Lopez",
+      "description": "A closer look at the charms, jewelry and little details of Quirk Haus, through Scar’s point of view.",
+      "canonical": "https://vigil-490498f3.vercel.app/work/quirk",
+      "issues": []
+    },
+    {
+      "path": "/work/rhode",
+      "status": 200,
+      "ms": 330,
+      "bytes": 168714,
+      "title": "Rhode — Creative Work — Scarlen Lopez",
+      "description": "Rhode is a minimalist skincare brand focused on clean beauty and simplicity. The goal was an engaging motion flyer that reflects Rhode’s sleek aesthetic, so Scar used neutral tones, minimalist layouts and soft animations to match the brand’s identity.",
+      "canonical": "https://vigil-490498f3.vercel.app/work/rhode",
+      "issues": []
+    },
+    {
+      "path": "/work/school-work",
+      "status": 200,
+      "ms": 388,
+      "bytes": 170564,
+      "title": "Campus design work — Creative Work — Scarlen Lopez",
+      "description": "Event posters and a presentation graphic from Scar’s time at Utica University, including the “Impactful Black Content Creators You Should Follow in 2024” presentation she gave as DEIB Marketing Assistant, and a redesign of Stephen King’s IT book cover.",
+      "canonical": "https://vigil-490498f3.vercel.app/work/school-work",
+      "issues": []
+    }
+  ],
+  "resources": [
+    {
+      "path": "/assets/icons/pixel-sparkle-02-small.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/fonts/body-0.woff2",
+      "status": 200,
+      "type": "font/woff2"
+    },
+    {
+      "path": "/assets/fonts/pixel-0.woff2",
+      "status": 200,
+      "type": "font/woff2"
+    },
+    {
+      "path": "/assets/fonts/wordmark-web.woff2",
+      "status": 200,
+      "type": "font/woff2"
+    },
+    {
+      "path": "/assets/react-DQh-z_pC.js",
+      "status": 200,
+      "type": "application/javascript; charset=utf-8"
+    },
+    {
+      "path": "/assets/jsx-runtime-zi5O7g8j.js",
+      "status": 200,
+      "type": "application/javascript; charset=utf-8"
+    },
+    {
+      "path": "/assets/react-dom-DpYMfR7K.js",
+      "status": 200,
+      "type": "application/javascript; charset=utf-8"
+    },
+    {
+      "path": "/assets/index-Do_lf0Bd.js",
+      "status": 200,
+      "type": "application/javascript; charset=utf-8"
+    },
+    {
+      "path": "/assets/useScrollFade-DhIB6fL9.js",
+      "status": 200,
+      "type": "application/javascript; charset=utf-8"
+    },
+    {
+      "path": "/assets/ContentData-Bsnd2kqT.js",
+      "status": 200,
+      "type": "application/javascript; charset=utf-8"
+    },
+    {
+      "path": "/assets/vigil-contact-CHS_Opw2.js",
+      "status": 200,
+      "type": "application/javascript; charset=utf-8"
+    },
+    {
+      "path": "/assets/ContactForm-CNp9Fcww.js",
+      "status": 200,
+      "type": "application/javascript; charset=utf-8"
+    },
+    {
+      "path": "/assets/seo-R6qUVFpP.js",
+      "status": 200,
+      "type": "application/javascript; charset=utf-8"
+    },
+    {
+      "path": "/assets/icons/gift-01-closed.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/home-01-closed-door.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/about-profile-03-love.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/portfolio-briefcase-01-closed.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/mail-01-sealed.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/folder-01-closed.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/camera-01-ready.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/testimonials-01-quote.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/blog-newspaper-01-folded.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/hero/scar-body.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/about/handwritten-arrow-nyc.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/about/scar-head9.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/about/handwritten-underline-creating.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/blog-newspaper-03-page-turn.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/home-03-love-home.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/camera-03-photo-print.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/about/tiny-pixel-heart-personal-note.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/portfolio-briefcase-03-sparkle.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/folder-03-love-letter.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/mail-03-new-love.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/camera/tape-translucent-blush.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/camera/tape-translucent-blush2.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/gallery/her-conference-card-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/picnic-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/camera/tape-translucent-blush1.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/gallery/cameras-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/iced-coffees-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/cherry-blossoms-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/camera/paper-border-editable-torn-perimeter.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/camera/paper-border-editable-torn-perimeter1.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/gallery/pink-wall-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/camera/paper-border-editable-torn-perimeter2.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/collaborations/quirk-tiktok-poster.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/kofee-tiktok-poster.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/cut-tiktok-poster.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/camera/beauty-finds-poster.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/camera/events-bts-poster.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/camera/grwm-lifestyle-poster.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/work/internship-backpacks.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/work/school-black-creators.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/work/mock-rhode.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/work/mock-bubble.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/icons/heart-01-classic.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/heart-tint-berry.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/heart-tint-rose.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/icons/heart-tint-blush.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/hero/bubble-stepped-paper-and-speech-tail.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/selected/paper-third-story-edge.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/selected/paper-second-story-edge.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/selected/tape-pink-translucent.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/selected/paper-main-torn-editorial-sheet.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/selected/paper-pink-offset-edge.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/selected/white-torn-photo-outline.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/selected/tape-pink-at-print-edge.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/selected/paper-video-print.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/services/torn-tag-pink-edge.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/services/attached-cord.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/selected/paper-collaboration-ticket.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/hero/nyc-torn-manhattan-skyline.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/hero/torn-newsprint.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/hero/newsprint-columns.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/hero/paper-torn-blush-backing.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/hero/photo-cameras-img5201.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/hero/photo-picnic-afternoon-img5099.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/hero/paper-bottom-torn-white-strip.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/hero/photo-beauty-event-img5980.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/hero/photo-cherry-blossom-img5395.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/hero/tape-translucent-pink.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/hero/nyc-statue-of-liberty.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/about/decorative-collage.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/hero/scar-head.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/intro/intro-1.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/intro/intro-3.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/intro/intro-2.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/intro/intro-4.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/quirk-2.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/quirk-1.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/quirk-3.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/quirk-4.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/quirk-5.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/quirk-6.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/quirk-7.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/kofee-2.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/kofee-1.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/selected/jewelry-tray-crop-of-source-image-a6-f65-dbf2.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/kofee-3.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/kofee-5.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/kofee-4.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/quirk-tiktok.mp4",
+      "status": 200,
+      "type": "video/mp4"
+    },
+    {
+      "path": "/assets/selected/jewelry-tray-crop-of-source-image-a6-f65-dbf1.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/cut-2.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/kofee-tiktok.mp4",
+      "status": 200,
+      "type": "video/mp4"
+    },
+    {
+      "path": "/assets/collaborations/cut-1.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/cut-4.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/cut-3.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/cut-5.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/selected/jewelry-tray-crop-of-source-image-a6-f65-dbf.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/collaborations/cut-tiktok.mp4",
+      "status": 200,
+      "type": "video/mp4"
+    },
+    {
+      "path": "/assets/camera/beauty-finds.mp4",
+      "status": 200,
+      "type": "video/mp4"
+    },
+    {
+      "path": "/assets/services/bag-1.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/camera/grwm-lifestyle.mp4",
+      "status": 200,
+      "type": "video/mp4"
+    },
+    {
+      "path": "/assets/camera/events-bts.mp4",
+      "status": 200,
+      "type": "video/mp4"
+    },
+    {
+      "path": "/assets/services/bag-2.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/services/bag-4.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/services/bag-3.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/services/bag-6.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/services/bag-5.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/services/bag-7.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/services/bag-8.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/services/bag-9.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/services/bag-photo-closed.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/services/bag-photo-open.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/contact/stationery-editable-torn-edge.svg",
+      "status": 200,
+      "type": "image/svg+xml"
+    },
+    {
+      "path": "/assets/gallery/picnic-collage-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/hello-gorgeous-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "https://www.vigilstudios.co/api/blog/490498f3-fa5f-4c08-a6d3-4943cb055795/media/33232bca-5c02-4803-8cd7-5a858dd128cc?slug=a-little-cafe-day&review=published",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/red-camera-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "https://www.vigilstudios.co/api/blog/490498f3-fa5f-4c08-a6d3-4943cb055795/media/0cade55e-5a7c-44ba-8e66-44463858d9fa?slug=a-pink-afternoon&review=published",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/sip-and-treat-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/her-conference-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "https://www.vigilstudios.co/api/blog/490498f3-fa5f-4c08-a6d3-4943cb055795/media/8d71e7f1-54a2-47bc-ae09-abcf7b181bf6?slug=behind-the-little-stories&review=published",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/pink-dress-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/summer-fridays-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/conference-hall-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/chalk-note-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/barbie-dunkin-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/on-set-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/monument-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/work/school-it-back.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/work/school-it-front.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/work/school-metoo.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/work/internship-night-out.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/work/mock-elf.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/work/mock-bounce-curl.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/work/mock-summer-whip.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/bloom-pop-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/pink-boutique-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/nyc-creator-day-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/charm-bar-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/cafe-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/pinterest-nails-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/le-ann-studio-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/mirror-pretty-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/acne-studios-cart-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/after-work-routine-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/picnic-toast-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/white-dress-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/pop-up-selfie-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/portfolio-cover-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/clinique-eye-cream-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/soho-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/dilly-dally-day-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/event-bts-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/creating-content-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/orange-selfie-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/monument-grass-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/her-conference-pair-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/lemonade-market-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/portfolio-about-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/umberto-giannini-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/certificate-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/flower-cart-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/creators-needed-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/portfolio-videos-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/subway-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/woodland-walk-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/cafe-catch-up-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/fortune-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/portfolio-connect-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/matcha-run-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/matcha-run-2-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/gallery/matcha-run-3-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/fonts/handwritten-web.woff2",
+      "status": 200,
+      "type": "font/woff2"
+    },
+    {
+      "path": "/assets/gallery/matcha-run-4-720.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/fonts/handwritten-optimized.woff2",
+      "status": 200,
+      "type": "font/woff2"
+    },
+    {
+      "path": "/assets/fonts/wordmark-optimized.woff2",
+      "status": 200,
+      "type": "font/woff2"
+    },
+    {
+      "path": "/assets/responsive/hero/nyc-torn-manhattan-skyline-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/nyc-torn-manhattan-skyline-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/nyc-torn-manhattan-skyline-960.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/nyc-torn-manhattan-skyline-1536.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/photo-beauty-event-img5980-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/photo-beauty-event-img5980-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/photo-beauty-event-img5980-960.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/photo-beauty-event-img5980-963.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/photo-picnic-afternoon-img5099-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/photo-picnic-afternoon-img5099-817.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/photo-cameras-img5201-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/photo-picnic-afternoon-img5099-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/photo-cameras-img5201-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "https://www.vigilstudios.co/api/blog/490498f3-fa5f-4c08-a6d3-4943cb055795/media/ac14b144-2c2a-4c7d-bb27-5407e55515fd?slug=a-little-cafe-day&review=published",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/photo-cameras-img5201-743.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/photo-cherry-blossom-img5395-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/photo-cherry-blossom-img5395-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/photo-cherry-blossom-img5395-893.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/nyc-statue-of-liberty-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/nyc-statue-of-liberty-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/nyc-statue-of-liberty-1024.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/testimonials01-quote1-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/nyc-statue-of-liberty-960.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/testimonials01-quote1-384.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/blog-newspaper01-folded1-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/camera01-ready1-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/camera01-ready1-384.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/blog-newspaper01-folded1-384.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/folder01-closed1-384.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/mail01-sealed1-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/mail01-sealed1-384.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/folder01-closed1-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/about-profile03-love1-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/portfolio-briefcase01-closed1-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/portfolio-briefcase01-closed1-384.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/about-profile03-love1-384.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/pixel-sparkle02-small1-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/pixel-sparkle02-small1-384.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/home01-closed-door1-384.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/home01-closed-door1-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/scar-body-900.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/scar-head-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/scar-body-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/scar-body-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/scar-head-cta-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/scar-head-900.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/scar-head-cta-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/scar-head-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-1-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-1-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/hero/scar-head-cta-900.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-1-856.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-2-960.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-2-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-2-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-2-1273.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-3-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-3-1003.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-3-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-3-960.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-4-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-4-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-5-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-4-878.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-5-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-5-724.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-6-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-6-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-7-456.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-7-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/quirk-6-684.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/kofee-1-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/kofee-1-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/kofee-2-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/kofee-2-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/kofee-1-916.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/kofee-2-960.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/kofee-3-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/kofee-3-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/kofee-2-986.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/kofee-3-648.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/kofee-4-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/kofee-4-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/kofee-5-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/kofee-4-908.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/kofee-5-628.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-1-960.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-1-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-1-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-1-1034.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-2-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-2-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-2-954.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-3-960.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-3-1334.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-3-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-4-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-3-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-4-844.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-5-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-4-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-5-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/collaborations/cut-5-843.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/intro/intro-1-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/intro/intro-1-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/intro/intro-1-654.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/intro/intro-2-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/intro/intro-2-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/intro/intro-3-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/intro/intro-2-672.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/intro/intro-3-594.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/intro/intro-4-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/intro/intro-4-578.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/services/bag-1-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/services/bag-1-656.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/services/bag-1-640.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/services/bag-2-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/services/bag-2-411.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/services/bag-5-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/services/bag-4-435.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/services/bag-3-314.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/services/bag-4-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/services/bag-6-295.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/services/bag-7-242.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/services/bag-5-396.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/services/bag-8-320.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/services/bag-8-407.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/assets/responsive/services/bag-9-252.webp",
+      "status": 200,
+      "type": "image/webp"
+    }
+  ],
+  "internalLinks": [
+    "/",
+    "/#contact",
+    "/#kind-words",
+    "/#services",
+    "/about",
+    "/blog",
+    "/blog/a-little-cafe-day",
+    "/blog/a-pink-afternoon",
+    "/blog/behind-the-little-stories",
+    "/contact",
+    "/gallery",
+    "/privacy",
+    "/work",
+    "/work/beauty-finds",
+    "/work/cut",
+    "/work/events-bts",
+    "/work/grwm-lifestyle",
+    "/work/kofee",
+    "/work/mock-ads",
+    "/work/newyork-presbyterian",
+    "/work/quirk",
+    "/work/rhode",
+    "/work/school-work"
+  ],
+  "errors": [
+    {
+      "path": "/does-not-exist",
+      "status": 404,
+      "location": null
+    },
+    {
+      "path": "/blog/missing-post",
+      "status": 404,
+      "location": null
+    },
+    {
+      "path": "/gallery/missing-photo",
+      "status": 404,
+      "location": null
+    },
+    {
+      "path": "/work/missing-project",
+      "status": 404,
+      "location": null
+    },
+    {
+      "path": "/blog/sample-a-little-cafe-day",
+      "status": 308,
+      "location": "/blog/a-little-cafe-day"
+    },
+    {
+      "path": "/blog/",
+      "status": 308,
+      "location": "/blog"
+    },
+    {
+      "path": "/kind-words",
+      "status": 308,
+      "location": "/#kind-words"
+    }
+  ],
+  "robots": "User-agent: *\nAllow: /\n",
+  "sitemap": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"/>",
+  "summary": {
+    "routes": 76,
+    "resources": 317,
+    "routeIssues": [],
+    "brokenResources": [],
+    "initialHtmlArticles": 3
+  }
+}

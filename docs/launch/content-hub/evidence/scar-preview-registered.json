@@ -1,0 +1,29 @@
+{
+  "website": "490498f3-fa5f-4c08-a6d3-4943cb055795",
+  "source": "3954ad5dc0a29e1aafa0a7c723ace47ed2f4a250",
+  "deployment": "dpl_7cCGEKJ8APnsURRdPc4y5fM75dUV",
+  "target": "preview",
+  "before": {
+    "id": "490498f3-fa5f-4c08-a6d3-4943cb055795",
+    "status": "building",
+    "preview_url": "https://vigil-490498f3-exc4c7ww8-vigilstudio-projects.vercel.app",
+    "live_url": null,
+    "project_id": "a75a4703-3251-4ed0-9ac4-fb8387c5c452"
+  },
+  "after": {
+    "status": "building",
+    "preview_url": "https://vigil-490498f3-git-codex-scar-blog-contact-vigilstudio-projects.vercel.app/",
+    "live_url": null
+  },
+  "reviewRounds": [
+    {
+      "round_number": 2,
+      "status": "pending"
+    },
+    {
+      "round_number": 1,
+      "status": "approved"
+    }
+  ],
+  "customerNotificationGenerated": false
+}

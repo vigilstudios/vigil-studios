@@ -1,0 +1,90 @@
+{
+  "run": "b4a3be59-ad6d-4728-b914-6c2c61b7ad25",
+  "organizations": [
+    "a264fa49-c169-4652-89fe-3f20f88f744d",
+    "edaf996a-130a-45af-b266-9297e64303b5"
+  ],
+  "websites": [
+    "034af16c-d81c-4deb-be62-a488f9671a02",
+    "7ddedd76-c445-481d-9aef-739be9887adb",
+    "a750127c-6de4-40ee-87e1-503f15a715bd",
+    "7bc145a2-8d52-4b4e-af55-4a56c23d0546"
+  ],
+  "users": [
+    "0cf8c0e5-b78e-4785-886d-568f2705d815",
+    "d65d6f9d-440b-49c0-adc0-cd41be4ab8c2",
+    "fe771804-9f5a-465e-a5dd-4c397ca22fb2"
+  ],
+  "assets": [
+    {
+      "id": "0b55bad8-2075-453c-8a1e-64557cbebdac",
+      "bucket": "content-media",
+      "path": "a264fa49-c169-4652-89fe-3f20f88f744d/9ee58bec-5268-4819-a09c-a5f222c7451f/0b55bad8-2075-453c-8a1e-64557cbebdac.mp4"
+    },
+    {
+      "id": "3f4227ba-44a5-48b4-89b3-61d0e116a5ca",
+      "bucket": "content-media",
+      "path": "a264fa49-c169-4652-89fe-3f20f88f744d/9ee58bec-5268-4819-a09c-a5f222c7451f/3f4227ba-44a5-48b4-89b3-61d0e116a5ca.mp4"
+    },
+    {
+      "id": "ef63fa13-8f01-45a1-8618-bc5012cb1830",
+      "bucket": "content-media",
+      "path": "a264fa49-c169-4652-89fe-3f20f88f744d/9ee58bec-5268-4819-a09c-a5f222c7451f/ef63fa13-8f01-45a1-8618-bc5012cb1830.webp"
+    }
+  ],
+  "removed": [
+    {
+      "table": "website_content_collections",
+      "count": 4
+    },
+    {
+      "table": "website_content_runtimes",
+      "count": 1
+    },
+    {
+      "table": "website_content_media",
+      "count": 3
+    },
+    {
+      "table": "design_workspaces",
+      "count": 2
+    },
+    {
+      "table": "storage.objects",
+      "count": 3
+    },
+    {
+      "table": "project_assets",
+      "count": 3
+    },
+    {
+      "table": "websites",
+      "count": 4
+    },
+    {
+      "table": "projects",
+      "count": 4
+    },
+    {
+      "table": "subscriptions",
+      "count": 4
+    },
+    {
+      "table": "organizations",
+      "count": 2
+    },
+    {
+      "table": "auth.users",
+      "count": 1
+    },
+    {
+      "table": "auth.users",
+      "count": 1
+    },
+    {
+      "table": "auth.users",
+      "count": 1
+    }
+  ],
+  "completedAt": "2026-10-14T04:41:02.392Z"
+}
