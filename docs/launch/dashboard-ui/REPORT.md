@@ -27,3 +27,10 @@ Traffic, performance and SEO reporting have no connected customer read-side data
 Shared Vigil only. No database migrations/backfill, dependency changes or Scar repository changes. Rollback is a normal revert of this UI change followed by the existing shared deployment pipeline. Content entitlement, upload, publishing, optimistic concurrency, runtime integration and export contracts remain unchanged. Scar's production approval gate and Preview remain intact.
 
 See PLAN.md and evidence/ for the implementation scope and screenshots. The earlier Content Hub implementation/release evidence remains in ../content-hub/REPORT.md.
+
+
+## Source export follow-up
+
+Live acceptance found a pre-existing GitHub adapter error on the Express Basic test account: a zero-byte `content/.gitkeep` blob was rejected as missing content. The adapter now accepts an empty base64 string while still rejecting missing/non-string content and incorrect encodings. Two regression cases cover complete source collection with an empty placeholder and malformed payload rejection. No repository contents, customer records or export permissions are changed.
+
+The initial UI revision merged through PR #6 to shared source 13d50f6 and is Ready Production. Both feature CI runs and main run 38589783499 passed. Live browser checks confirm theme accent #10d45a, Hub width 1312 px with no max-width cap, Website Preview container 760→390→760 px and Overview preview 503→390 px. Scar remains Building, no live URL and review pending. The existing Express Basic test account confirms hidden Website Preview, direct-route redirect to Overview, recorded operation charts, export button relocation and the centered upgrade wall.

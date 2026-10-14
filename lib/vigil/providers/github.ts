@@ -75,7 +75,7 @@ export class GitHubRepositoryProvider {
     if (entries.reduce((sum, entry) => sum + (entry.size ?? 0), 0) > 50 * 1024 * 1024) throw new ProviderError("github", "The site export is larger than 50 MB.");
     return Promise.all(entries.map(async (entry) => {
       const blob = await this.api(new URL(entry.url).pathname) as { content?: string; encoding?: string };
-      if (blob.encoding !== "base64" || !blob.content) throw new ProviderError("github", `GitHub could not return ${entry.path}.`);
+      if (blob.encoding !== "base64" || typeof blob.content !== "string") throw new ProviderError("github", `GitHub could not return ${entry.path}.`);
       return { path: /^readme\.md$/i.test(entry.path) ? "PROJECT-README.md" : entry.path, content: Buffer.from(blob.content.replace(/\n/g, ""), "base64") };
     }));
   }
