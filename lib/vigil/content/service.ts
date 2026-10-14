@@ -6,6 +6,7 @@ import type {Json} from '@/types/database.types';
 import {ForbiddenError,ValidationError} from '@/lib/vigil/auth/errors';
 import {moduleSchema,bindingSchema,parseRecords,publicationIssues,type ContentRecord} from './contract';
 import {applyBindings,discoverBindings,type BoundCollection,type AdapterConfig} from './professional';
+import {publicRecords} from './media';
 import {projectDocument} from '@/lib/vigil/professional/document';
 export async function contentSites(client:DbClient,org:string){
  const {data,error}=await client.from('websites').select('id,name,status,project_id,live_url').eq('organization_id',org).order('created_at');if(error)throw error;
@@ -26,7 +27,7 @@ export async function validateDelivery(admin:DbClient,website:string,org:string,
  if(collection.binding.adapter==='standalone'&&collection.config.featuredSlotBudget&&records.filter(r=>!r.deleted&&r.featured&&'media' in r.data&&r.data.media.some(m=>m.type==='video')).length!==collection.config.featuredSlotBudget)throw new ValidationError(`Choose exactly ${collection.config.featuredSlotBudget} featured videos for the existing homepage slots. New entries can remain in the full collection.`);
  if(collection.binding.adapter==='professional'){
   const {data:workspace,error}=await admin.from('design_workspaces').select('site_definition,project_id').eq('website_id',website).eq('organization_id',org).maybeSingle();if(error)throw error;if(!workspace)throw new ValidationError('The website binding needs attention from Vigil. Your published content is unchanged.');
-  try{applyBindings(projectDocument(workspace.site_definition,workspace.project_id),collections.filter(c=>c.binding.adapter==='professional'&&(c.id===collectionId||c.publishedRevision!==null)).map(c=>({...c,records:c.id===collectionId?records:c.records})),true);}catch{throw new ValidationError('These entries do not fit the website section. Check required fields and the number of entries. Your published version is unchanged.');}
+  try{applyBindings(projectDocument(workspace.site_definition,workspace.project_id),collections.filter(c=>c.binding.adapter==='professional'&&(c.id===collectionId||c.publishedRevision!==null)).map(c=>({...c,records:publicRecords(c.id===collectionId?records:c.records,website,c.id,true)})),true);}catch{throw new ValidationError('These entries do not fit the website section. Check required fields and the number of entries. Your published version is unchanged.');}
  }
 }
 export async function saveCollection(client:DbClient,org:string,actor:string,id:string,expected:number,input:unknown,intent:'draft'|'publish'|'unpublish'|'trash'){

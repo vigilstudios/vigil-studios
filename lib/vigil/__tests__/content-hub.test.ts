@@ -1,4 +1,6 @@
-import {describe,it,expect} from 'vitest';
+import {publicRecords} from '../content/media';
+vi.mock('server-only',()=>({}));
+import {describe,it,expect,vi} from 'vitest';
 import {discoverBindings,applyBindings,recordsFromLab} from '../content/professional';
 import {parseRecords,publicationIssues,payloadSchemas} from '../content/contract';
 import {siteFromComposition} from '@/design-engine/site/model';
@@ -32,6 +34,8 @@ describe('configured content adapters',()=>{
   const document=site([makeEndingSection('work.card-rail','cards')]),collections=discoverBindings(document,website);collections[0].records[0].data.title='Indexable customer title';
   const html=renderPage(applyBindings(document,collections),'page-home','https://vigil.example/api/contact/site');expect(html).toContain('Indexable customer title');expect(html).toContain('de-');
  });
+ it('validates newly uploaded video IDs through the same publication URLs used by the runtime',()=>{const document=site([makeCollectionSection('work.open-index','work')]),[collection]=discoverBindings(document,website);collection.records[0].data=payloadSchemas.portfolio.parse({...collection.records[0].data,media:[{id:website,type:'video',src:'',posterId:'ad000000-0000-4000-8000-000000000002',alt:'Owned clip',caption:''}]});const applied=applyBindings(document,[{...collection,records:publicRecords(collection.records,website,'ad000000-0000-4000-8000-000000000003',true)}]);const html=renderPage(applied,'page-home','https://vigil.example/api/contact/site');expect(html).toContain('/api/content/');expect(html).toContain('<video');});
+ it('retains uploaded media IDs when saving authenticated Lab preview references',()=>{const document=site([makeCollectionSection('work.open-index','work')]),[collection]=discoverBindings(document,website);collection.records[0].data=payloadSchemas.portfolio.parse({...collection.records[0].data,media:[{id:website,type:'image',src:'',alt:'Owned photo',caption:''}]});const previewRows=publicRecords(collection.records,website,'ad000000-0000-4000-8000-000000000003',true);const previewSite=applyBindings(document,[{...collection,records:previewRows.map(r=>({...r,data:'media' in r.data?{...r.data,media:r.data.media.map(m=>({...m,src:m.id?m.src+'&draft=1':m.src}))}:r.data}))}]);const rows=recordsFromLab(previewSite,collection);expect('media' in rows[0].data&&rows[0].data.media[0]).toMatchObject({id:website,src:''});});
  it('hides an explicitly unpublished surface while retaining other design sections',()=>{const document=site([makeCollectionSection('work.open-index','work'),makeEndingSection('work.card-rail','cards')]),collections=discoverBindings(document,website);const rendered=applyBindings(document,[{...collections[0],records:[]}],true);expect(rendered.pages[0].sections.map(s=>s.id)).toEqual(['cards']);expect(document.pages[0].sections).toHaveLength(2);});
  it('rejects publication that violates the real section collection constraints',()=>{
   const document=site([makeCollectionSection('work.open-index','work')]),[collection]=discoverBindings(document,website);expect(()=>applyBindings(document,[{...collection,records:[]}])).toThrow();
