@@ -102,7 +102,7 @@ export function BlogLibrary({
                   id={`blog-site-${site.id}`}
                   className="text-xl font-semibold"
                 >
-                  {site.name}
+                  {sites.length === 1 ? "Blog posts" : `${site.name} · Blog posts`}
                 </h2>
                 <p className="mt-1 max-w-2xl text-sm text-[color:var(--text-secondary)]">
                   {site.status === "live"

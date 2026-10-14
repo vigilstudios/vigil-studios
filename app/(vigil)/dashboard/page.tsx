@@ -1,3 +1,5 @@
+import { WebsiteOperations } from "@/components/vigil/WebsiteOperations";
+import { isWebsiteLive, showWebsitePreview } from "@/lib/vigil/presenters";
 import { PLAN_FEATURE_LABELS } from "@/lib/vigil/plan-presentation";
 import { WEBSITE_TIERS } from "@/lib/vigil/site-tiers";
 import type { Metadata } from "next";
@@ -47,9 +49,13 @@ export default async function OverviewPage() {
     resolveEntitlements(orgId),
   ]);
 
+  const liveSites = websites.filter(isWebsiteLive);
+  const liveDeployments = await Promise.all(liveSites.map(site => getRecentDeployments(site.id, 12)));
+  const canExport = ctx.role === "owner" || ctx.role === "manager" || ctx.isImpersonating;
   const website = websites[0] ?? null;
-  const deployments = website ? await getRecentDeployments(website.id, 1) : [];
-  const lastPublish = deployments[0] ?? null;
+  const deployments = website ? await getRecentDeployments(website.id, 12) : [];
+  const latestDeployment = deployments[0] ?? null;
+  const lastPublish = deployments.find(d => d.environment === "production" && d.status === "ready") ?? null;
   const domain = domains.find((d) => d.id === website?.primary_domain_id) ?? domains.find((d) => d.website_id === website?.id) ?? domains[0] ?? null;
   const project = projects.find((p) => !["closed", "cancelled"].includes(p.status)) ?? projects[0] ?? null;
   const projectReview = project?.kind === "professional" ? await getCustomerProjectReviews(project.id) : null;
@@ -66,7 +72,7 @@ export default async function OverviewPage() {
   const subStatus = subscription ? describeSubscriptionStatus(subscription.status) : null;
   const effectiveStatus = project ? effectiveProjectStatus(project.status, {
     intakeCompleted: Boolean(project.intake_completed_at),
-    previewReady: Boolean(lastPublish?.environment === "preview" && lastPublish.status === "ready"),
+    previewReady: Boolean(latestDeployment?.environment === "preview" && latestDeployment.status === "ready"),
     websiteLive: Boolean(website?.status === "live" && website.live_url),
   }) : null;
   const projectStatus = effectiveStatus ? describeProjectStatus(effectiveStatus) : null;
@@ -122,9 +128,11 @@ export default async function OverviewPage() {
         <OnboardingCard brief={onboarding.brief} completedAt={onboarding.project.intake_completed_at} businessName={onboarding.brief.basics?.businessName || ctx.organization.name} projectKind={onboarding.project.kind} />
       ) : null}
 
+      {liveSites.map((site, index) => <WebsiteOperations key={site.id} site={site} domain={domains.find(d => d.id === site.primary_domain_id) ?? domains.find(d => d.website_id === site.id) ?? null} deployments={liveDeployments[index]} canExport={canExport} canRequest={ent.enabled(FEATURES.requests)} />)}
+
       <div className="grid gap-4 lg:grid-cols-12">
         {/* Website */}
-        <Panel className="lg:col-span-5 lg:row-span-2" title="Website" action={<Link href="/dashboard/website" className="text-xs text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">Details</Link>}>
+        <Panel className="lg:col-span-5 lg:row-span-2" title="Website" action={showWebsitePreview(websites) ? <Link href="/dashboard/website" className="text-xs text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">Website Preview</Link> : undefined}>
           {preview.kind === "none" ? (
             <div className="flex aspect-[16/10] items-center justify-center rounded-lg border border-dashed border-[color:var(--border)] text-xs text-[color:var(--text-secondary)]">
               A preview appears once your site is being built

@@ -33,12 +33,11 @@ export function SiteFrame({
   const [host, setHost] = useState<HTMLDivElement | null>(null);
   const width = useElementWidth(host);
 
-  // The card's aspect follows the desktop viewport; the phone is centred in
-  // the same box so switching modes never changes the card height.
-  const boxHeight = width > 0 ? Math.round((width * DESKTOP.height) / DESKTOP.width) : 0;
   const frame = mode === "desktop" ? DESKTOP : MOBILE;
-  const scale = width > 0 ? (mode === "desktop" ? width / DESKTOP.width : Math.min(boxHeight / MOBILE.height, width / MOBILE.width)) : 0;
-  const shown = { width: Math.round(frame.width * scale), height: Math.round(frame.height * scale) };
+  // The outer browser includes its two one-pixel borders.
+  const shownWidth = Math.max(0, Math.min(width, frame.width) - 2);
+  const scale = shownWidth > 0 ? shownWidth / frame.width : 0;
+  const boxHeight = width > 0 ? Math.round(frame.height * scale) : 0;
 
   let hostname = address ?? "";
   if (!address) {
@@ -50,7 +49,8 @@ export function SiteFrame({
   }
 
   return (
-    <div className={clsx("overflow-hidden rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-secondary)]", className)}>
+    <div ref={setHost} className="w-full min-w-0">
+    <div className={clsx("site-preview-frame mx-auto w-full overflow-hidden rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-secondary)]", className)} data-viewport={mode} style={{ maxWidth: mode === "mobile" ? MOBILE.width : DESKTOP.width }}>
       <div className="flex h-8 items-center gap-2 border-b border-[color:var(--border)] px-2.5">
         <span className="flex gap-1" aria-hidden>
           <i className="h-2 w-2 rounded-full bg-[color:var(--border)]" />
@@ -68,11 +68,10 @@ export function SiteFrame({
         </div>
       </div>
 
-      <div ref={setHost} className="relative w-full bg-[#0b0b0b]" style={{ height: boxHeight || undefined, aspectRatio: boxHeight ? undefined : `${DESKTOP.width} / ${DESKTOP.height}` }}>
+      <div className="site-preview-viewport relative w-full bg-[color:var(--bg-primary)]" style={{ height: boxHeight || undefined, aspectRatio: boxHeight ? undefined : `${frame.width} / ${frame.height}` }}>
         {scale > 0 ? (
           <div
-            className={clsx("absolute overflow-hidden bg-white", mode === "mobile" && "rounded-[14px] border border-[color:var(--border)] shadow-2xl")}
-            style={{ width: shown.width, height: shown.height, left: (width - shown.width) / 2, top: (boxHeight - shown.height) / 2 }}
+            className="absolute inset-0 overflow-hidden bg-white"
           >
             {/* Clipping without a scroll container: the page scrolls inside its own iframe. */}
             <iframe
@@ -86,6 +85,7 @@ export function SiteFrame({
           </div>
         ) : null}
       </div>
+    </div>
     </div>
   );
 }

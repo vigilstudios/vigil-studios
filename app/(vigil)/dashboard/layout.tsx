@@ -1,3 +1,4 @@
+import { isWebsiteLive, showWebsitePreview } from "@/lib/vigil/presenters";
 import { AccountBlock } from "@/components/vigil/AccountBlock";
 import { AppShell } from "@/components/vigil/AppShell";
 import { LiveDashboardSync } from "@/components/vigil/LiveDashboardSync";
@@ -44,7 +45,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       expressWebsite ? getCustomerExpressPreviewReview(expressWebsite.id) : Promise.resolve(null),
       getUnreadNotifications(viewer.user.id, ctx.organization.id),
     ]);
-    const reviewRelevant = !websites.some((site) => site.project_id === professionalProject?.id && site.status === "live") && Boolean(
+    const reviewRelevant = !websites.some((site) => site.project_id === professionalProject?.id && isWebsiteLive(site)) && Boolean(
       projectReviews?.rounds.some((round) => round.status !== "pending") ||
       projects.some((project) => project.kind === "professional" && project.status === "review")
     );
@@ -78,8 +79,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
         items: [
           ...(onboardingNeedsAttention ? [{ href: "/dashboard/onboarding", label: "Getting set up", icon: "virtue" as const, attention: true }] : []),
           { href: "/dashboard", label: "Overview", icon: "overview", exact: true, attention: anythingNeedsAttention },
-          { href: "/dashboard/website", label: "Website", icon: "website", attention: websiteNeedsAttention },
-          { href: "/dashboard/content", label: "Content Hub", icon: "blog" },
+          ...(showWebsitePreview(websites) ? [{ href: "/dashboard/website", label: "Website Preview", icon: "website" as const, attention: websiteNeedsAttention }] : []),
+          { href: "/dashboard/content", label: "Content Hub", icon: "blog", premium: true },
           { href: "/dashboard/files", label: "Files", icon: "files" },
           { href: "/dashboard/requests", label: "Requests", icon: "requests", locked: !ent.enabled(FEATURES.requests) },
           { href: "/dashboard/domain", label: "Domain", icon: "domain", attention: domainNeedsAttention },
@@ -90,7 +91,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       {
         label: "Grow",
         items: [
-          { href: "/dashboard/leads", label: "Lead Hub", icon: "leads" },
+          { href: "/dashboard/leads", label: "Lead Hub", icon: "leads", premium: true },
           { href: "/dashboard/insights", label: "Insights", icon: "insights", locked: !ent.enabled(FEATURES.insights), badge: "Soon" },
           { href: "/dashboard/virtue", label: "Virtue", icon: "virtue", locked: !ent.enabled(FEATURES.virtue), badge: "Soon" },
         ],

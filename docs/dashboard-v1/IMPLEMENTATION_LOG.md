@@ -1088,3 +1088,7 @@ and start the native intro immediately, preserving its 30 ms / 12 ms character
 rates, 250 ms gap, CTA fade and native-to-React clock adoption. No animation or
 feature is removed. The separate Supabase preview integration reports a remote
 migration-history mismatch; this marketing release changes no database files.
+
+## 2026-10-14 — Content Hub dashboard UI continuation
+
+Aligned Content Hub with shared dashboard theme tokens and full width; centered the crown upgrade wall and added navigation crown indicators. Renamed Website Preview, hid completed launch previews and moved each live website's operations/export tools to Overview. SiteFrame now transitions its actual phone container width and height with reduced-motion support. Recorded availability/DNS/SSL and production releases drive accessible charts; unconnected traffic/performance/SEO sources remain explicit empty states. See `docs/launch/dashboard-ui/REPORT.md` for validation, release boundaries and screenshots.

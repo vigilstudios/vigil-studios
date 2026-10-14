@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { isWebsiteLive, showWebsitePreview } from "@/lib/vigil/presenters";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Calendar, FileCode2, Globe, HeartPulse, MonitorSmartphone, PenLine, ShieldCheck } from "lucide-react";
@@ -16,7 +18,7 @@ import { previewSource, projectStepIndex, projectSteps } from "@/lib/vigil/prese
 import { getCustomerExpressPreviewReview, getOrgProjects, getOrgWebsites, getRecentDeployments } from "@/lib/vigil/queries/dashboard";
 import { getCustomerProjectReviews } from "@/lib/vigil/queries/reviews";
 
-export const metadata: Metadata = { title: "Website" };
+export const metadata: Metadata = { title: "Website Preview" };
 
 export default async function WebsitePage() {
   const ctx = await requireOrgContext("/dashboard/website");
@@ -25,6 +27,7 @@ export default async function WebsitePage() {
     getOrgProjects(ctx.organization.id),
     resolveEntitlements(ctx.organization.id),
   ]);
+  if (!showWebsitePreview(websites)) redirect("/dashboard");
   const canRequest = ent.enabled(FEATURES.requests);
   const canExport = ctx.role === "owner" || ctx.role === "manager" || ctx.isImpersonating;
   const reviewData = await Promise.all(projects.filter((project) => project.kind === "professional").map((project) => getCustomerProjectReviews(project.id)));
@@ -59,7 +62,7 @@ export default async function WebsitePage() {
       <DeploymentStatusRefresh active={websites.some((site) => ["provisioning", "building"].includes(site.status))} />
       <Header canRequest={canRequest} reviewAvailable={reviewAvailable} />
       {await Promise.all(
-        websites.map(async (site) => {
+        websites.filter(site => !isWebsiteLive(site)).map(async (site) => {
           const lifecycleStatus = describeWebsiteStatus(site.status);
           const status = !site.live_url && site.preview_url
             ? { label: "Preview ready", tone: "good" as const, hint: "Your shareable build preview is ready to view." }
@@ -69,7 +72,6 @@ export default async function WebsitePage() {
           const project = projects.find((p) => p.id === site.project_id) ?? null;
           const expressReview = project?.kind === "express" ? await getCustomerExpressPreviewReview(site.id) : null;
           const preview = previewSource(site, project?.template_slug ?? null);
-          const isLive = site.status === "live";
           const exportable = site.export_eligible && site.code_ownership === "customer_owned";
 
           return (
@@ -138,9 +140,9 @@ export default async function WebsitePage() {
                 <AttributeWidget
                   icon={<ShieldCheck className="h-4 w-4" />}
                   label="SSL and security"
-                  value={isLive ? "Active" : "Pending"}
-                  tone={isLive ? "good" : "neutral"}
-                  hint={isLive ? "Certificate issued and renewed by Vigil" : "Activates when the site goes live"}
+                  value="Not checked here"
+                  tone="neutral"
+                  hint="View recorded certificate checks on the Domain page"
                 />
                 <AttributeWidget
                   icon={<Calendar className="h-4 w-4" />}
@@ -199,8 +201,8 @@ function Header({ canRequest, reviewAvailable }: { canRequest: boolean; reviewAv
   return (
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight sm:text-xl">Website</h1>
-        <p className="mt-0.5 text-xs text-[color:var(--text-secondary)]">Status of the website Vigil hosts and operates for you.</p>
+        <h1 className="text-lg font-semibold tracking-tight sm:text-xl">Website Preview</h1>
+        <p className="mt-0.5 text-xs text-[color:var(--text-secondary)]">Review your website as it takes shape. Once live, its status and tools move to Overview.</p>
       </div>
       <div className="flex flex-wrap gap-2">
         {reviewAvailable ? <Link href="/dashboard/review" className="btn-primary !px-3 !py-2 text-xs">Open design review</Link> : null}
