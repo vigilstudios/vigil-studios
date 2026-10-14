@@ -240,6 +240,7 @@ function NavLink({ item, active, collapsed }: { item: NavItem; active: boolean; 
       )}
     >
       <Icon className="h-4 w-4 shrink-0" />
+      {collapsed ? <span className="sr-only">{item.label}</span> : null}
       {collapsed && (item.premium || item.locked) ? <Crown className="absolute right-0.5 bottom-0.5 h-2.5 w-2.5 text-[color:var(--accent)]" aria-label={item.locked ? "Upgrade to access" : "Premium feature"} /> : null}
       {collapsed && item.attention ? <span className="absolute right-2 top-1.5 h-2 w-2 rounded-full bg-[color:var(--accent)] ring-2 ring-[color:var(--bg-secondary)]" aria-label="Needs attention" /> : null}
       {!collapsed ? (
