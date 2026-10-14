@@ -1,0 +1,29 @@
+{
+  "mode": "apply",
+  "websiteId": "490498f3-fa5f-4c08-a6d3-4943cb055795",
+  "sourceSha": "2a73e23d67046c7db61349f7b1be50e27d5beea3",
+  "manifestSha256": "95cc9ae2e4e3a42088b3efe188bbbd25f2b520d65057e70faffa641fc9f9c89d",
+  "collections": [
+    {
+      "key": "portfolio",
+      "module": "portfolio",
+      "records": 10,
+      "existingRevision": 1,
+      "action": "preserved"
+    },
+    {
+      "key": "gallery",
+      "module": "gallery",
+      "records": 56,
+      "existingRevision": 1,
+      "action": "preserved"
+    },
+    {
+      "key": "testimonials",
+      "module": "testimonials",
+      "records": 6,
+      "existingRevision": 1,
+      "action": "preserved"
+    }
+  ]
+}
