@@ -34,7 +34,8 @@ export function SiteFrame({
   const width = useElementWidth(host);
 
   const frame = mode === "desktop" ? DESKTOP : MOBILE;
-  const shownWidth = Math.min(width, frame.width);
+  // The outer browser includes its two one-pixel borders.
+  const shownWidth = Math.max(0, Math.min(width, frame.width) - 2);
   const scale = shownWidth > 0 ? shownWidth / frame.width : 0;
   const boxHeight = width > 0 ? Math.round(frame.height * scale) : 0;
 
