@@ -32,7 +32,7 @@ export async function PATCH(request:Request,{params}:{params:Promise<{websiteId:
  try{const {websiteId}=await params,{ctx,admin}=await context(request,websiteId),{id}=z.object({id:z.string().uuid()}).strict().parse(await request.json());
   const {data:media,error}=await admin.from('website_content_media').select('id,type').eq('id',id).eq('website_id',websiteId).eq('organization_id',ctx.organization.id).maybeSingle();if(error||!media)throw new ForbiddenError();
   const {data:asset,error:assetError}=await admin.from('project_assets').select('object_path,size_bytes,content_type').eq('id',id).eq('organization_id',ctx.organization.id).eq('bucket_id','content-media').single();if(assetError)throw assetError;
-  const {data:info,error:infoError}=await admin.storage.from('content-media').info(asset.object_path);if(infoError||!info||Number(info.metadata?.size)!==asset.size_bytes||info.metadata?.mimetype!==asset.content_type)throw new ValidationError('Upload is incomplete or does not match the selected file. Try again.');
+  const {data:info,error:infoError}=await admin.storage.from('content-media').info(asset.object_path);if(infoError||!info||Number(info.size)!==asset.size_bytes||info.contentType!==asset.content_type)throw new ValidationError('Upload is incomplete or does not match the selected file. Try again.');
   const {error:readyError}=await admin.from('website_content_media').update({ready:true}).eq('id',id).eq('website_id',websiteId);if(readyError)throw readyError;
   const {data:signed,error:signError}=await admin.storage.from('content-media').createSignedUrl(asset.object_path,900);if(signError)throw signError;
   return Response.json({media:{id,type:media.type,src:'',alt:'',caption:''},url:signed.signedUrl},{headers});
