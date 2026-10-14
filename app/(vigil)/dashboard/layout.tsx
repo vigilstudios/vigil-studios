@@ -1,3 +1,5 @@
+import {contentSites} from "@/lib/vigil/content/service";
+import {createClient} from "@/lib/supabase/server";
 import { isWebsiteLive, showWebsitePreview } from "@/lib/vigil/presenters";
 import { AccountBlock } from "@/components/vigil/AccountBlock";
 import { AppShell } from "@/components/vigil/AppShell";
@@ -35,6 +37,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       getOrgDomains(ctx.organization.id),
       getOrgSubscription(ctx.organization.id),
     ]);
+    const contentAccess = (await contentSites(await createClient(),ctx.organization.id)).some(site=>site.access);
     // Build reviews belong to the Professional project, independently of the
     // ongoing Requests entitlement. Keep the nav quiet until the project is
     // in a state where a customer can reasonably expect a review surface.
@@ -80,7 +83,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           ...(onboardingNeedsAttention ? [{ href: "/dashboard/onboarding", label: "Getting set up", icon: "virtue" as const, attention: true }] : []),
           { href: "/dashboard", label: "Overview", icon: "overview", exact: true, attention: anythingNeedsAttention },
           ...(showWebsitePreview(websites) ? [{ href: "/dashboard/website", label: "Website Preview", icon: "website" as const, attention: websiteNeedsAttention }] : []),
-          { href: "/dashboard/content", label: "Content Hub", icon: "blog", premium: true },
+          { href: "/dashboard/content", label: "Content Hub", icon: "blog", premium: true, locked: !contentAccess },
           { href: "/dashboard/files", label: "Files", icon: "files" },
           { href: "/dashboard/requests", label: "Requests", icon: "requests", premium: true, locked: !ent.enabled(FEATURES.requests) },
           { href: "/dashboard/domain", label: "Domain", icon: "domain", attention: domainNeedsAttention },
@@ -91,9 +94,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
       {
         label: "Grow",
         items: [
-          { href: "/dashboard/leads", label: "Lead Hub", icon: "leads", premium: true },
-          { href: "/dashboard/insights", label: "Insights", icon: "insights", premium: true, locked: !ent.enabled(FEATURES.insights), badge: "Soon" },
-          { href: "/dashboard/virtue", label: "Virtue", icon: "virtue", premium: true, locked: !ent.enabled(FEATURES.virtue), badge: "Soon" },
+          { href: "/dashboard/leads", label: "Lead Hub", icon: "leads" },
+          { href: "/dashboard/insights", label: "Insights", icon: "insights", locked: true, disabled: true, badge: "Soon" },
+          { href: "/dashboard/virtue", label: "Virtue", icon: "virtue", locked: true, disabled: true, badge: "Soon" },
         ],
       },
       {

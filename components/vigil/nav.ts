@@ -34,6 +34,8 @@ export type NavItem = {
   desktopOnly?: boolean;
   /** Rendered dimmed with a premium crown; the page explains why. */
   locked?: boolean;
+  /** Coming-soon destination: visible with a lock, without a navigation target. */
+  disabled?: boolean;
   /** Paid feature indicator, independent of current access. */
   premium?: boolean;
   /** Small trailing tag such as "Soon". */

@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
+import {DraftNavigationProvider} from "./DraftNavigation";
 import { AppFrame } from "./AppFrame";
 import { SIDEBAR_COOKIE, type NavGroup } from "./nav";
 
@@ -20,8 +21,8 @@ export async function AppShell({
   const cookieStore = await cookies();
   const initialCollapsed = cookieStore.get(SIDEBAR_COOKIE)?.value === "collapsed";
   return (
-    <AppFrame groups={groups} homeHref={homeHref} workspace={workspace} account={account} initialCollapsed={initialCollapsed}>
+    <DraftNavigationProvider><AppFrame groups={groups} homeHref={homeHref} workspace={workspace} account={account} initialCollapsed={initialCollapsed}>
       {children}
-    </AppFrame>
+    </AppFrame></DraftNavigationProvider>
   );
 }

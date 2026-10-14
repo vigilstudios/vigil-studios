@@ -19,6 +19,7 @@ import {
   LayoutDashboard,
   ListChecks,
   Crown,
+  Lock,
   Menu,
   MonitorSmartphone,
   PanelLeftClose,
@@ -223,38 +224,12 @@ function findActive(groups: NavGroup[], pathname: string): NavItem | undefined {
     .sort((a, b) => b.href.length - a.href.length)[0];
 }
 
-function NavLink({ item, active, collapsed }: { item: NavItem; active: boolean; collapsed: boolean }) {
+export function NavLink({ item, active, collapsed }: { item: NavItem; active: boolean; collapsed: boolean }) {
   const Icon = icons[item.icon] ?? Briefcase;
-  return (
-    <Link
-      href={item.href}
-      aria-current={active ? "page" : undefined}
-      title={collapsed ? item.label : undefined}
-      className={clsx(
-        "group relative flex h-10 items-center rounded-md text-[13px] font-medium transition-colors md:h-9",
-        collapsed ? "justify-center px-0" : "gap-2.5 px-2",
-        active
-          ? "bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] text-[color:var(--accent)]"
-          : "text-[color:var(--text-secondary)] hover:bg-[color:var(--bg-surface-soft)] hover:text-[color:var(--text-primary)]",
-        item.locked && !active && "opacity-60"
-      )}
-    >
-      <Icon className="h-4 w-4 shrink-0" />
-      {collapsed ? <span className="sr-only">{item.label}</span> : null}
-      {collapsed && (item.premium || item.locked) ? <Crown className="absolute right-0.5 bottom-0.5 h-2.5 w-2.5 text-[color:var(--accent)]" aria-label={item.locked ? "Upgrade to access" : "Premium feature"} /> : null}
-      {collapsed && item.attention ? <span className="absolute right-2 top-1.5 h-2 w-2 rounded-full bg-[color:var(--accent)] ring-2 ring-[color:var(--bg-secondary)]" aria-label="Needs attention" /> : null}
-      {!collapsed ? (
-        <>
-          <span className="min-w-0 flex-1 truncate">{item.label}</span>
-          {item.attention ? <span className="h-2 w-2 shrink-0 rounded-full bg-[color:var(--accent)]" aria-label="Needs attention" title="Needs attention" /> : null}
-          {item.premium || item.locked ? <Crown className="h-3.5 w-3.5 shrink-0 text-[color:var(--accent)]" aria-label={item.locked ? "Upgrade to access" : "Premium feature"} /> : null}
-          {item.badge ? (
-            <span className="rounded-full bg-[color:var(--bg-surface-soft)] px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-[color:var(--text-secondary)]">{item.badge}</span>
-          ) : null}
-        </>
-      ) : null}
-    </Link>
-  );
+  const classes=clsx("group relative flex h-10 items-center rounded-md text-[13px] font-medium transition-colors md:h-9",collapsed ? "justify-center px-0" : "gap-2.5 px-2",active&&!item.disabled ? "bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] text-[color:var(--accent)]" : "text-[color:var(--text-secondary)]",!item.disabled&&"hover:bg-[color:var(--bg-surface-soft)] hover:text-[color:var(--text-primary)]");
+  const indicator=item.disabled ? <Lock className={collapsed?"absolute right-0.5 bottom-0.5 h-2.5 w-2.5 opacity-70":"h-3 w-3 shrink-0 opacity-70"} aria-label="Coming soon"/> : item.premium||item.locked ? <Crown className={collapsed?"absolute right-0.5 bottom-0.5 h-2.5 w-2.5 text-[color:var(--accent)]":"h-3.5 w-3.5 shrink-0 text-[color:var(--accent)]"} aria-label={item.locked?"Upgrade to access":"Premium feature"}/> : null;
+  const children=<><Icon className={clsx("h-4 w-4 shrink-0",item.locked&&!item.disabled&&"text-[color:var(--accent)]",item.disabled&&"opacity-60")}/>{collapsed?<span className="sr-only">{item.label}</span>:<span className={clsx("min-w-0 flex-1 truncate",item.locked&&"text-[color:var(--text-secondary)] opacity-60")}>{item.label}</span>}{item.attention?<span className={collapsed?"absolute right-2 top-1.5 h-2 w-2 rounded-full bg-[color:var(--accent)]":"h-2 w-2 shrink-0 rounded-full bg-[color:var(--accent)]"} aria-label="Needs attention"/>:null}{indicator}{!collapsed&&item.badge?<span className="rounded-full bg-[color:var(--bg-surface-soft)] px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-[color:var(--text-secondary)]">{item.badge}</span>:null}</>;
+  return item.disabled?<span role="link" aria-disabled="true" title={`${item.label} · Coming soon`} className={classes}>{children}</span>:<Link href={item.href} aria-current={active?"page":undefined} title={collapsed?item.label:undefined} className={classes}>{children}</Link>;
 }
 
 const noop = () => () => {};

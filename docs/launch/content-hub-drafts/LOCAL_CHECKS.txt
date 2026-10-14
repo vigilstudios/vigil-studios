@@ -1,0 +1,193 @@
+### typecheck
+
+> vigil-studios@0.1.0 typecheck
+> next typegen && tsc --noEmit
+
+Generating route types...
+✓ Types generated successfully
+
+
+### lint
+
+> vigil-studios@0.1.0 lint
+> eslint
+
+
+
+### test
+
+> vigil-studios@0.1.0 pretest
+> npm run design:runtime
+
+
+> vigil-studios@0.1.0 design:runtime
+> node scripts/build-design-runtime.mjs
+
+Pinned Design Engine distribution v1-45574d54d2e934929153 (27 files)
+
+> vigil-studios@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.11 /private/tmp/vigil-content-hub-release
+
+
+ Test Files  106 passed (106)
+      Tests  2262 passed (2262)
+   Start at  15:56:59
+   Duration  43.19s (transform 12.62s, setup 0ms, import 52.75s, tests 94.81s, environment 8ms)
+
+
+
+### test-dependency-security
+
+> vigil-studios@0.1.0 test:dependency-security
+> node --test scripts/verify-eslint-glob-security.mjs
+
+✔ installed Next plugin uses the pinned local adapter and no braces package remains (7.71625ms)
+✔ Next rootDir preserves directory matching without expanding literal directories (38.799166ms)
+✔ replacement still enforces Next's no-html-link-for-pages rule with globbed rootDir (261.151375ms)
+✔ deep brace and parenthesis patterns do not exhaust the replacement's stack (812.306208ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1215.891792
+
+
+### build
+
+> vigil-studios@0.1.0 prebuild
+> node scripts/verify-image-runtime.mjs && npm run design:runtime && npm run contact:runtime
+
+[image-runtime] {"platform":"darwin","arch":"arm64","node":"v24.19.0","sharp":"0.35.5","librsvg":"2.63.2","libvips":"8.18.7","benignSvgDecode":"passed"}
+
+> vigil-studios@0.1.0 design:runtime
+> node scripts/build-design-runtime.mjs
+
+Pinned Design Engine distribution v1-45574d54d2e934929153 (27 files)
+
+> vigil-studios@0.1.0 contact:runtime
+> node scripts/build-contact-runtime.mjs
+
+Built shared Vigil contact browser adapter v1
+
+> vigil-studios@0.1.0 build
+> next build --webpack
+
+▲ Next.js 16.3.8 (webpack)
+✓ Running next.config.ts took 91ms
+- Experiments (use with caution):
+  ✓ inlineCss
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 9.2s
+  Running TypeScript ...
+  Finished TypeScript in 6.4s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/61) ...
+  Generating static pages using 7 workers (15/61) 
+  Generating static pages using 7 workers (30/61) 
+  Generating static pages using 7 workers (45/61) 
+✓ Generating static pages using 7 workers (61/61) in 545ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)                                                Revalidate  Expire
+┌ ○ /                                                              5m      1y
+├ ○ /_not-found
+├ ƒ /admin
+├ ƒ /admin/audit
+├ ƒ /admin/composition-lab
+├ ƒ /admin/design-lab
+├ ƒ /admin/domains
+├ ƒ /admin/jobs
+├ ƒ /admin/lab
+├ ƒ /admin/lab/express
+├ ƒ /admin/lab/express/[variantId]
+├ ƒ /admin/lab/project/[projectId]
+├ ƒ /admin/lab/projects
+├ ƒ /admin/orders
+├ ƒ /admin/organizations
+├ ƒ /admin/organizations/[orgId]
+├ ƒ /admin/organizations/[orgId]/files
+├ ƒ /admin/plans
+├ ƒ /admin/requests
+├ ƒ /admin/reviews
+├ ƒ /admin/reviews/[projectId]
+├ ƒ /admin/subscriptions
+├ ƒ /admin/websites
+├ ƒ /admin/websites/[websiteId]
+├ ƒ /admin/websites/[websiteId]/contact
+├ ƒ /api/admin/organizations/[orgId]/files.zip
+├ ƒ /api/admin/projects/[projectId]/assets/[assetId]
+├ ƒ /api/blog/[websiteId]
+├ ƒ /api/blog/[websiteId]/images
+├ ƒ /api/blog/[websiteId]/media/[imageId]
+├ ƒ /api/contact/[websiteId]
+├ ƒ /api/content/[websiteId]
+├ ƒ /api/content/[websiteId]/export
+├ ƒ /api/content/[websiteId]/media/[mediaId]
+├ ƒ /api/content/[websiteId]/runtime/[runtimeId]/[pageId]
+├ ƒ /api/content/[websiteId]/uploads
+├ ƒ /api/csp-report
+├ ƒ /api/health
+├ ƒ /api/jobs/run
+├ ƒ /api/webhooks/stripe
+├ ƒ /api/websites/[websiteId]/export
+├ ○ /apple-icon.png
+├ ƒ /auth/callback
+├ ƒ /auth/confirm
+├ ƒ /auth/signout
+├ ƒ /checkout
+├ ƒ /checkout/[token]
+├ ƒ /checkout/success
+├ ○ /creators                                                      5m      1y
+├ ○ /creators/opengraph-image-6942ng
+├ ○ /creators/twitter-image-6942ng
+├ ƒ /dashboard
+├ ƒ /dashboard/billing
+├ ƒ /dashboard/blog
+├ ƒ /dashboard/blog/[postId]
+├ ƒ /dashboard/content
+├ ƒ /dashboard/domain
+├ ƒ /dashboard/files
+├ ƒ /dashboard/insights
+├ ƒ /dashboard/leads
+├ ƒ /dashboard/leads/[leadId]
+├ ƒ /dashboard/onboarding
+├ ƒ /dashboard/onboarding/later
+├ ƒ /dashboard/onboarding/welcome
+├ ƒ /dashboard/requests
+├ ƒ /dashboard/review
+├ ƒ /dashboard/settings
+├ ƒ /dashboard/virtue
+├ ƒ /dashboard/website
+├ ƒ /dashboard/welcome
+├ ƒ /express
+├ ƒ /express-preview/[slug]
+├ ƒ /find-your-fit
+├ ○ /icon.svg
+├ ƒ /login
+├ ○ /manifest.webmanifest
+├ ƒ /pricing
+├ ○ /process
+├ ○ /products                                                      5m      1y
+├ ○ /products/vigil                                                5m      1y
+├ ○ /products/virtue
+├ ○ /products/websites                                             5m      1y
+├ ƒ /professional
+├ ○ /robots.txt
+├ ○ /sitemap.xml
+└ ○ /terms
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
