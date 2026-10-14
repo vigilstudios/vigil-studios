@@ -9,7 +9,7 @@ describe('retained content export',()=>{
   const scoped:string[]=[];const tables:Record<string,unknown[]>={website_content_collections:[{key:'work',module:'portfolio',label:'Portfolio',enabled:false,revision:4,published_revision:3,draft:[row],published:[{...row,deleted:false,data:{...row.data,title:'Published title'}}]}],website_blog_posts:[],project_assets:[{id:asset,file_name:'photo.jpg',content_type:'image/jpeg',size_bytes:123}]};
   const client={from:(table:string)=>{const q={select:()=>q,eq:(field:string,value:string)=>{scoped.push(`${table}:${field}:${value}`);return q;},in:()=>q,then:(resolve:(value:unknown)=>unknown)=>Promise.resolve({data:tables[table],error:null}).then(resolve)};return q;}} as unknown as DbClient;
   const files=await contentExportFiles(client,id,'owner-org'),raw=files.map(f=>f.content).join(''),snapshot=JSON.parse(String(files[0].content));
-  expect(snapshot.collections[0].draft[0].deleted).toBe(true);expect(snapshot.collections[0].published[0].data.title).toBe('Published title');expect(raw).toContain(`media/${asset}`);expect(raw).not.toContain('/api/content');expect(raw).not.toContain('config');
+  expect(snapshot.collections[0].draft[0].deleted).toBe(true);expect(snapshot.collections[0].published[0].data.title).toBe('Published title');expect(raw).toContain(`media/${asset}`);expect(raw).not.toContain('/api/content');expect(snapshot.collections[0]).not.toHaveProperty('config');
   expect(scoped).toContain(`website_content_collections:website_id:${id}`);expect(scoped).toContain('website_content_collections:organization_id:owner-org');expect(scoped).toContain('project_assets:organization_id:owner-org');
  });
 });
