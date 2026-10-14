@@ -71,8 +71,16 @@ const nextConfig: NextConfig = {
   },
   compress: true,
   async redirects() {
-    // Virtue moved under Products when the products menu arrived.
-    return [{ source: "/virtue", destination: "/products/virtue", permanent: true }];
+    return [
+      // Keep QR scans attributable on the homepage without caching the destination forever.
+      {
+        source: "/card",
+        destination: "/?utm_source=business_card&utm_medium=qr&utm_campaign=business_cards",
+        permanent: false,
+      },
+      // Virtue moved under Products when the products menu arrived.
+      { source: "/virtue", destination: "/products/virtue", permanent: true },
+    ];
   },
   poweredByHeader: false,
   // Dev only: the dev server blocks cross-origin dev resources, and
