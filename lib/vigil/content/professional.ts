@@ -95,6 +95,8 @@ export function recordsFromLab(site:SiteDefinition,collection:BoundCollection):C
   if(existing&&'media' in record.data&&'media' in existing.data){const oldMedia=existing.data.media;record.data.media=record.data.media.map((m,j)=>{const old=oldMedia[j];if(!old?.id||!m.src.includes(`/media/${old.id}?`))return m;const next={...old,alt:m.alt,caption:m.caption};if(old.posterId&&!m.poster?.includes(`/media/${old.posterId}?`)){delete next.posterId;next.poster=m.poster;}return next;});}
   return {...record,featured:existing?.featured??false,...(existing&&'placeholder' in existing.data&&'placeholder' in record.data?{data:{...record.data,placeholder:existing.data.placeholder}}:{})};
  });
+ const retained=collection.records.filter(old=>!editedRecords.some(r=>r.id===old.id)).map(old=>({...old,deleted:true}));
+ return [...editedRecords,...retained];
 }
 
 function editableFields(kind:ContentModule,rows:ObjectValue[]):string[]{
