@@ -34,9 +34,10 @@ export async function saveCollection(client:DbClient,org:string,actor:string,id:
  const current=(await contentCollections(admin,c.website_id,org)).find(v=>v.id===id);
  if(contentModule==='testimonials'&&current?.records.some(old=>'placeholder' in old.data&&old.data.placeholder&&records.some(r=>r.id===old.id&&'placeholder' in r.data&&!r.data.placeholder)))throw new ForbiddenError('Review placeholders must remain marked until Vigil confirms publication permission.');
  if(current?.binding.adapter==='professional'&&records.some(r=>'media' in r.data&&r.data.media.length>(current.config.maxMedia??1)))throw new ValidationError('This website entry supports one primary media item. Replace it rather than appending extra media.');
+ if(intent==='trash'){const published=(await contentCollections(admin,c.website_id,org,'published')).find(v=>v.id===id);if(published)await validateDelivery(admin,c.website_id,org,id,published.records.filter(r=>!records.some(n=>n.id===r.id&&n.deleted)));}
  if(intent==='publish'){const issues=publicationIssues(contentModule,records);if(issues.length)throw new ValidationError(issues[0]);await validateDelivery(admin,c.website_id,org,id,records);}
- const {data,error}=await admin.rpc('save_website_content',{p_collection:id,p_expected:expected,p_records:records as unknown as Json,p_intent:intent,p_actor:actor});
- if(error){if(error.code==='40001')throw new ValidationError('Someone saved this collection in another window. Reload before saving; your changes remain here.');throw new ValidationError('Content could not be saved. Check your access and fields, then try again.');}return {revision:data!};
+ const {data,error}=await admin.rpc('save_website_content',{p_collection:id,p_expected:expected,p_records:records as unknown as Json,p_intent:intent,p_actor:actor}).abortSignal(AbortSignal.timeout(15000));
+ if(error){if((error.code==='PT409'||error.code==='40001'))throw new ValidationError('Someone saved this collection in another window. Reload before saving; your changes remain here.');throw new ValidationError('Content could not be saved. Check your access and fields, then try again.');}return {revision:data!};
 }
 /** Explicit, idempotent backfill from a validated site document. Existing collections are never overwritten. */
 export async function ensureProfessionalBindings(admin:DbClient,website:string,org:string,site:Parameters<typeof discoverBindings>[0]){

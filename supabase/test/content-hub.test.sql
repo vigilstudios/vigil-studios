@@ -1,4 +1,15 @@
 begin;
+do $$declare f regprocedure;begin
+ foreach f in array array[
+ 'public.save_website_content(uuid,integer,jsonb,text,uuid)'::regprocedure,
+ 'public.save_content_design_workspace(uuid,integer,jsonb,jsonb,uuid,text)'::regprocedure,
+ 'public.save_website_blog_post(uuid,text,text,text,text,boolean,uuid,timestamp with time zone,jsonb)'::regprocedure,
+ 'public.set_website_blog_post_deleted(uuid,uuid,timestamp with time zone,boolean)'::regprocedure,
+ 'public.unpublish_website_blog_post(uuid,uuid,timestamp with time zone)'::regprocedure] loop
+  if position('PT409' in pg_get_functiondef(f))=0 then raise exception 'Expected HTTP conflict: %',f;end if;
+ end loop;
+end$$;
+
 create schema hub_test;
 create function hub_test.ok(value boolean,label text) returns void language plpgsql as $$begin if value is distinct from true then raise exception 'FAIL: %',label;end if;raise notice 'ok - content: %',label;end$$;
 create function hub_test.fails(command text,label text) returns void language plpgsql as $$begin begin execute command;exception when others then raise notice 'ok - content: % (refused)',label;return;end;raise exception 'FAIL: % was permitted',label;end$$;

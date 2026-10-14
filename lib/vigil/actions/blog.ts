@@ -17,7 +17,7 @@ export async function saveBlogPost(websiteId:string,postId:string|null,form:Form
   const media=blogMediaSchema.safeParse(JSON.parse(String(form.get('media')??'{"cover":null,"images":[]}')));if(!media.success)throw new ValidationError('Check your images.');
   const v=parsed.data,expected=String(form.get('expected')??'');
   const {data,error}=await client.rpc('save_website_blog_post',{p_website:website,p_slug:v.slug,p_title:v.title,p_excerpt:v.excerpt,p_body:v.body,p_publish:v.publish,p_media:media.data,...(postId?{p_post:z.string().uuid().parse(postId),p_expected:z.string().datetime({offset:true}).parse(expected)}:{})});
-  if(error){if(error.code==='40001')throw new ValidationError('This post changed in another window. Reload before saving.');if(error.code==='23505')throw new ValidationError('Another post already uses that address.');throw new ValidationError('Your post could not be saved. Check the fields and keep the published address unchanged.');}
+  if(error){if((error.code==='PT409'||error.code==='40001'))throw new ValidationError('This post changed in another window. Reload before saving.');if(error.code==='23505')throw new ValidationError('Another post already uses that address.');throw new ValidationError('Your post could not be saved. Check the fields and keep the published address unchanged.');}
   if(!data)throw new ValidationError('Your post could not be saved.');revalidatePath('/dashboard/content');revalidatePath('/dashboard/blog');return {ok:true,data:{id:data}};
  }catch(error){return toActionError(error);}
 }
@@ -29,11 +29,11 @@ export async function setBlogPostDeleted(websiteId:string,postId:string,expected
   const {data:site,error:lookup}=await client.from('websites').select('id').eq('id',website).eq('organization_id',ctx.organization.id).maybeSingle();
   if(lookup)throw lookup;if(!site)throw new ForbiddenError();
   const {data,error}=await client.rpc('set_website_blog_post_deleted',{p_website:website,p_post:post,p_expected:version,p_deleted:z.boolean().parse(deleted)});
-  if(error){if(error.code==='40001')throw new ValidationError('This post changed in another window. Reload before continuing.');throw new ValidationError('Your post could not be updated. Please reload and try again.');}
+  if(error){if((error.code==='PT409'||error.code==='40001'))throw new ValidationError('This post changed in another window. Reload before continuing.');throw new ValidationError('Your post could not be updated. Please reload and try again.');}
   if(!data)throw new ValidationError('Post unavailable.');revalidatePath('/dashboard/content');revalidatePath('/dashboard/blog');return {ok:true,data:{id:data}};
  }catch(error){return toActionError(error);}
 }
 
 export async function unpublishBlogPost(websiteId:string,postId:string,expected:string):Promise<ActionResult<{id:string}>>{
- try{const ctx=await requireOrgContextOrThrow();await assertOrgRole(ctx,['owner','manager']);const client=await createClient();const {data:site}=await client.from('websites').select('id').eq('id',websiteId).eq('organization_id',ctx.organization.id).maybeSingle();if(!site)throw new ForbiddenError();const {data,error}=await client.rpc('unpublish_website_blog_post',{p_website:z.string().uuid().parse(websiteId),p_post:z.string().uuid().parse(postId),p_expected:z.string().datetime({offset:true}).parse(expected)});if(error)throw new ValidationError(error.code==='40001'?'This post changed. Reload before continuing.':'Post could not be unpublished.');revalidatePath('/dashboard/content');revalidatePath('/dashboard/content');revalidatePath('/dashboard/blog');return {ok:true,data:{id:data!}};}catch(error){return toActionError(error);}
+ try{const ctx=await requireOrgContextOrThrow();await assertOrgRole(ctx,['owner','manager']);const client=await createClient();const {data:site}=await client.from('websites').select('id').eq('id',websiteId).eq('organization_id',ctx.organization.id).maybeSingle();if(!site)throw new ForbiddenError();const {data,error}=await client.rpc('unpublish_website_blog_post',{p_website:z.string().uuid().parse(websiteId),p_post:z.string().uuid().parse(postId),p_expected:z.string().datetime({offset:true}).parse(expected)});if(error)throw new ValidationError((error.code==='PT409'||error.code==='40001')?'This post changed. Reload before continuing.':'Post could not be unpublished.');revalidatePath('/dashboard/content');revalidatePath('/dashboard/blog');return {ok:true,data:{id:data!}};}catch(error){return toActionError(error);}
 }

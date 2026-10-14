@@ -27,6 +27,7 @@ describe('configured content adapters',()=>{
   (edited.pages[0].sections[0].content as {projects:{title:string}[]}).projects[0].title='Edited in Lab';const records=recordsFromLab(edited,collection);
   expect(records[0].id).toBe(collection.records[0].id);expect(records[0].data.title).toBe('Edited in Lab');expect(applyBindings(document,[{...collection,records}]).settings).toEqual(document.settings);
  });
+ it('retains design-owned item geometry from the frozen site document',()=>{const document=site([makeCollectionSection('work.open-index','work')]),collections=discoverBindings(document,website);const record=(document.pages[0].sections[0].content as {projects:{image:{focal:{x:number;y:number}}}[]}).projects[0];record.image.focal={x:25,y:75};const applied=applyBindings(document,collections);expect((applied.pages[0].sections[0].content as {projects:{image:{focal:{x:number;y:number}}}[]}).projects[0].image.focal).toEqual({x:25,y:75});});
  it('renders publication content into initial HTML using the actual production renderer',()=>{
   const document=site([makeEndingSection('work.card-rail','cards')]),collections=discoverBindings(document,website);collections[0].records[0].data.title='Indexable customer title';
   const html=renderPage(applyBindings(document,collections),'page-home','https://vigil.example/api/contact/site');expect(html).toContain('Indexable customer title');expect(html).toContain('de-');

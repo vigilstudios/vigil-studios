@@ -74,7 +74,10 @@ export function applyBindings(site:SiteDefinition,collections:BoundCollection[],
  const next=structuredClone(site);
  for(const c of collections){const page=next.pages.find(p=>p.id===c.binding.pageId),section=page?.sections.find(s=>s.id===c.binding.sectionId);if(!section)continue;
   if(hideEmpty&&!c.records.some(r=>!r.deleted)){page!.sections=page!.sections.filter(s=>s.id!==c.binding.sectionId);continue;}
-  const rows=c.records.filter(r=>!r.deleted).map(r=>overlayRaw(c.binding.module,r,c.config));
+  const fieldValue=(section.content as ObjectValue)[c.binding.field],scaffolds=Array.isArray(fieldValue)?fieldValue:[fieldValue];
+  const config={...c.config,templates:{...c.config.templates}};
+  for(const record of c.records){const sourceId=c.config.sourceIds?.[record.id]??`item-${record.id}`,scaffold=scaffolds.map(object).find(raw=>str(raw.id??raw.productId??object(raw.product).productId)===sourceId||str(raw.slug??object(raw.product).slug)===record.slug);if(scaffold)config.templates[record.id]=scaffold;else if(!config.templates[record.id]&&scaffolds[0])config.templates[record.id]=object(scaffolds[0]);}
+  const rows=c.records.filter(r=>!r.deleted).map(r=>overlayRaw(c.binding.module,r,config));
   (section.content as ObjectValue)[c.binding.field]=c.config.singleton?rows[0]:rows;
  }
  return parseSiteDefinition(next);

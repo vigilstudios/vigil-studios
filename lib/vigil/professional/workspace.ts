@@ -90,7 +90,7 @@ export async function saveProjectSite(client: DbClient, projectId: string, input
   const portable=applyBindings(site,bound.map(c=>({...c,records:publicRecords(changes.find(v=>v.id===c.id)!.records,website.id,c.id,true)})));
   assertPortableSources(portable);
   const {data,error}=await admin.rpc('save_content_design_workspace',{p_project:project.id,p_expected:revision,p_site:portable as unknown as Json,p_collections:changes as unknown as Json,p_actor:userId,p_engine:(await runtimeManifest()).version});
-  if(error)throw new ValidationError(error.code==='40001'?"Another editor saved this project or its bound content. Reload before saving; your unsaved changes remain here.":"The workspace could not be saved.");
+  if(error)throw new ValidationError((error.code==='PT409'||error.code==='40001')?"Another editor saved this project or its bound content. Reload before saving; your unsaved changes remain here.":"The workspace could not be saved.");
   const current=await ensureProfessionalBindings(admin,website.id,project.organization_id,portable);
   return {revision:data!,contentRevisions:Object.fromEntries(current.filter(c=>c.binding.adapter==='professional').map(c=>[c.id,c.revision]))};
 }

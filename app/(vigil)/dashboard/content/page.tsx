@@ -1,3 +1,4 @@
+import {notFound} from 'next/navigation';
 import {requireOrgContext} from '@/lib/vigil/auth/session';
 import {createClient} from '@/lib/supabase/server';
 import {createAdminClient} from '@/lib/supabase/admin';
@@ -9,6 +10,7 @@ import {PageHeader} from '@/components/vigil/ui';
 import './content.css';
 export default async function ContentDashboard({searchParams}:{searchParams:Promise<{website?:string}>}){
  const ctx=await requireOrgContext('/dashboard/content'),client=await createClient(),sites=await contentSites(client,ctx.organization.id),{website}=await searchParams,site=sites.find(s=>s.id===website)??sites[0];
+ if(website&&!sites.some(s=>s.id===website))notFound();
  const collections=site?.access?await contentCollections(client,site.id,ctx.organization.id):[],admin=createAdminClient();
  const previews=site?.access?await mediaPreviews(admin,site.id,ctx.organization.id,collections.flatMap(c=>c.records)):{};
  const {data:posts,error}=site?.access&&collections.some(c=>c.binding.module==='blog')?await client.from('website_blog_posts').select('id,website_id,title,excerpt,status,updated_at,published_at,media,deleted_at').eq('website_id',site.id).eq('organization_id',ctx.organization.id).order('updated_at',{ascending:false}):{data:[],error:null};if(error)throw error;
