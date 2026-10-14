@@ -8,7 +8,7 @@ export const HERO_TYPING_BOOTSTRAP = String.raw`
   const text = h.querySelector('.story-text')?.firstChild, sub = s.querySelector('.story-text')?.firstChild;
   const caret = h.querySelector('.story-caret'), subCaret = s.querySelector('.story-caret');
   if (!text || !sub || text.nodeType !== 3 || sub.nodeType !== 3 || !caret || !subCaret) return;
-  const start = performance.now() + 450, total = title.length * 30 + 250 + line.length * 12;
+  const start = performance.now(), total = title.length * 30 + 250 + line.length * 12;
   h.dataset.typeStart = String(start);
   h.dataset.typeOwner = 'bootstrap';
   let n1 = -1, n2 = -1;

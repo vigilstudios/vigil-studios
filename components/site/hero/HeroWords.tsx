@@ -43,7 +43,7 @@ export function HeroWords({
       T_SUB = 12,
       T_GAP = 250;
     const total = h1.full.length * T_H1 + T_GAP + sub.full.length * T_SUB;
-    const start = Number(h1El.dataset.typeStart) || performance.now() + 450;
+    const start = Number(h1El.dataset.typeStart) || performance.now();
     h1El.dataset.typeOwner = "react";
     let typed = 0,
       raf = 0,

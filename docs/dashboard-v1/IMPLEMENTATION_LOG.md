@@ -1077,3 +1077,14 @@ protected previews have an expected noindex SEO deduction. Full suite: 98 files 
 Three.js geometry parity tests, font outline/advance parity and desktop/phone/
 reduced-motion interaction checks. Report and evidence:
 `docs/performance/2026-10-13/REPORT.md`. Production has not been published.
+
+## 2026-10-13 — Live mobile rendering follow-up
+
+Google's live PageSpeed run confirmed desktop 100 / 100 / 96 / 100 and mobile
+88 / 100 / 96 / 100 after the initial release. Its mobile trace attributes the
+remaining delay to render-blocking styles and headline paint; blocking time is
+60 ms. Inline the same production CSS to remove the extra stylesheet round trips
+and start the native intro immediately, preserving its 30 ms / 12 ms character
+rates, 250 ms gap, CTA fade and native-to-React clock adoption. No animation or
+feature is removed. The separate Supabase preview integration reports a remote
+migration-history mismatch; this marketing release changes no database files.
