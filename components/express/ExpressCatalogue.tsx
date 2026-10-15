@@ -17,6 +17,7 @@ import {
   RotateCcw,
   Smartphone,
 } from "lucide-react";
+import { CREATOR_CAMPAIGN, creatorCodeOffer, creatorPromoHref } from "@/lib/creator-campaign";
 import type { ExpressTemplate } from "@/lib/vigil/express/document";
 import styles from "./ExpressCatalogue.module.css";
 
@@ -28,15 +29,20 @@ type IndustryGroup = {
 };
 
 function groupTemplates(templates: ExpressTemplate[]): IndustryGroup[] {
-  return templates.reduce<IndustryGroup[]>((groups, template) => {
+  const groups = templates.reduce<IndustryGroup[]>((groups, template) => {
     const existing = groups.find((group) => group.industry === template.industry);
     if (existing) existing.variants.push(template);
     else groups.push({ industry: template.industry, variants: [template] });
     return groups;
   }, []);
+  if (CREATOR_CAMPAIGN.promotion.enabled) {
+    const creator = groups.findIndex((group) => group.industry.toLowerCase() === "creator");
+    if (creator > 0) groups.unshift(...groups.splice(creator, 1));
+  }
+  return groups;
 }
 
-// Preserve the published library's catalogue order.
+// Keep the published relative order, with the active creator offer first.
 const MOBILE_VIEWPORT_QUERY = "(max-width: 767px)";
 const slideVariants = {
   enter: (direction: number) => ({
@@ -80,36 +86,65 @@ function readableAccentText(hex: string) {
   return luminance > 0.42 ? "#07120a" : "#ffffff";
 }
 
-// Render at a real device viewport, then scale every pixel together. Measuring
-// the content box also accounts for borders and arbitrary host screen widths.
-function ScaledViewport({ mode, children }: { mode: ViewMode; children: ReactNode }) {
+// Fit a real device viewport into the space between controls and footer.
+// Both axes constrain the size, so a portrait preview never pushes actions out.
+function DevicePreview({ mode, address, children }: { mode: ViewMode; address: string; children: ReactNode }) {
+  const frameRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const [bounds, setBounds] = useState({ width: 0, height: 0 });
   const width = mode === "desktop" ? 1200 : 390;
   const height = mode === "desktop" ? 700 : 844;
 
   useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setBounds({ width: entry.contentRect.width, height: entry.contentRect.height });
+    });
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     const viewport = viewportRef.current;
     if (!viewport) return;
-    const updateScale = (renderedWidth: number) => {
-      viewport.style.setProperty("--preview-scale", String(renderedWidth / width));
-    };
-    updateScale(Number.parseFloat(getComputedStyle(viewport).width));
-    const observer = new ResizeObserver(([entry]) => updateScale(entry.contentRect.width));
+    const observer = new ResizeObserver(([entry]) => {
+      // Uniform scaling also holds during the frame's width/height transition.
+      const scale = Math.min(entry.contentRect.width / width, entry.contentRect.height / height);
+      viewport.style.setProperty("--preview-scale", String(scale));
+    });
     observer.observe(viewport);
     return () => observer.disconnect();
-  }, [width]);
+  }, [width, height]);
+
+  const chrome = bounds.width < 768 ? 28 : 36;
+  const scale = Math.max(0, Math.min(
+    Math.max(0, bounds.width - 78) / width,
+    Math.max(0, bounds.height - chrome - 2) / height,
+    mode === "desktop" ? 0.85 : 340 / 390,
+  ));
 
   return (
-    <div
-      ref={viewportRef}
-      className={styles.viewport}
-      style={{
-        aspectRatio: `${width} / ${height}`,
-        "--preview-width": `${width}px`,
-        "--preview-height": `${height}px`,
-      } as CSSProperties}
-    >
-      {children}
+    <div ref={frameRef} className={styles.deviceSpace}>
+      <div
+        data-cursor="native"
+        data-device={mode}
+        className={styles.browser}
+        style={{ width: width * scale + 2, height: height * scale + chrome + 2, "--chrome-height": `${chrome}px` } as CSSProperties}
+      >
+        <div className={styles.browserBar}>
+          <span className={styles.browserDots} aria-hidden="true"><i /><i /><i /></span>
+          <span className={styles.browserAddress}>{address}.preview</span>
+          <span className={styles.viewportLabel}>{width} px</span>
+        </div>
+        <div
+          ref={viewportRef}
+          className={styles.viewport}
+          style={{ "--preview-width": `${width}px`, "--preview-height": `${height}px` } as CSSProperties}
+        >
+          {children}
+        </div>
+      </div>
     </div>
   );
 }
@@ -147,7 +182,7 @@ function PreviewPeek({
   );
 }
 
-export function ExpressCatalogue({ amountCents = null, currency = "usd", templates, preference = {} }: { amountCents?: number | null; currency?: string; templates: ExpressTemplate[]; preference?: PurchasePreference }) {
+export function ExpressCatalogue({ amountCents = null, currency = "usd", templates, preference = {}, promoCode }: { amountCents?: number | null; currency?: string; templates: ExpressTemplate[]; preference?: PurchasePreference; promoCode?: string }) {
   const industries = groupTemplates(templates);
   const [industryIndex, setIndustryIndex] = useState(0);
   const [variantIndex, setVariantIndex] = useState(0);
@@ -170,6 +205,10 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
   const next = industries[nextIndex].variants[0];
   const accent = active.accent;
   const href = active.previewUrl ?? `/express-templates/${active.slug}.html`;
+  const isCreator = group.industry.toLowerCase() === "creator";
+  const code = isCreator && CREATOR_CAMPAIGN.promotion.enabled ? CREATOR_CAMPAIGN.promotion.code : promoCode;
+  const offer = creatorCodeOffer("express", amountCents, code);
+  const buyHref = creatorPromoHref(withPurchasePreference(`/checkout?template=${active.slug}`, preference), code ? `promo=${encodeURIComponent(code)}` : "");
 
   useEffect(() => {
     const rail = industryTabsRef.current;
@@ -218,156 +257,141 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
           </p>
         </header>
 
-        <div className={styles.controls}>
-          <div
-            ref={industryTabsRef}
-            className={styles.industryTabs}
-            role="tablist"
-            aria-label="Industries"
-          >
-            {industries.map((industry, index) => (
-              <button
-                key={industry.industry}
-                type="button"
-                role="tab"
-                id={`industry-tab-${index}`}
-                aria-selected={industryIndex === index}
-                aria-controls="template-stage"
-                onClick={() => selectIndustry(index)}
-              >
-                <span>{industry.industry}</span>
-                {industryIndex === index && (
-                  <motion.span
-                    layoutId="industry-tab"
-                    className={styles.industryIndicator}
-                    transition={{ type: "spring", stiffness: 380, damping: 34 }}
-                  />
-                )}
-              </button>
-            ))}
-          </div>
-
-          <div className={styles.variantRow}>
-            <div className={styles.viewSwitch} role="group" aria-label="Preview size">
-              {(["desktop", "mobile"] as const).map((mode) => (
+        <div className={styles.viewer}>
+          <div className={styles.controls}>
+            <div
+              ref={industryTabsRef}
+              className={styles.industryTabs}
+              role="tablist"
+              aria-label="Industries"
+            >
+              {industries.map((industry, index) => (
                 <button
-                  key={mode}
+                  key={industry.industry}
                   type="button"
-                  aria-label={mode === "desktop" ? "Desktop" : "Mobile"}
-                  aria-pressed={effectiveViewMode === mode}
-                  title={`${mode === "desktop" ? "Desktop" : "Mobile"} preview`}
-                  onClick={() => setViewMode(mode)}
+                  role="tab"
+                  id={`industry-tab-${index}`}
+                  aria-selected={industryIndex === index}
+                  aria-controls="template-stage"
+                  onClick={() => selectIndustry(index)}
                 >
-                  {mode === "desktop" ? <Monitor size={14} /> : <Smartphone size={14} />}
-                  <span className={styles.deviceLabel}>{mode === "desktop" ? "Desktop" : "Mobile"}</span>
-                  {effectiveViewMode === mode && (
+                  <span>{industry.industry}</span>
+                  {industry.industry.toLowerCase() === "creator" && CREATOR_CAMPAIGN.promotion.enabled && (
+                    <span className={styles.dealTag}>{CREATOR_CAMPAIGN.promotion.percentOff}% off</span>
+                  )}
+                  {industryIndex === index && (
                     <motion.span
-                      layoutId="view-mode"
-                      className={styles.switchIndicator}
-                      transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                      layoutId="industry-tab"
+                      className={styles.industryIndicator}
+                      transition={{ type: "spring", stiffness: 380, damping: 34 }}
                     />
                   )}
                 </button>
               ))}
             </div>
-            <label className={styles.variantSelect}>
-              <span className={styles.variantName}>{active.variant}</span>
-              {group.variants.length > 1 && <ChevronDown size={13} aria-hidden="true" />}
-              <select
-                aria-label={`${group.industry} variant`}
-                value={variantIndex}
-                disabled={group.variants.length < 2}
-                onChange={(event) => {
-                  const index = Number(event.target.value);
-                  setDirection(index >= variantIndex ? 1 : -1);
-                  setVariantIndex(index);
-                }}
-              >
-                {group.variants.map((variant, index) => (
-                  <option key={variant.slug} value={index}>{variant.variant}</option>
+
+            <div className={styles.variantRow}>
+              <div className={styles.viewSwitch} role="group" aria-label="Preview size">
+                {(["desktop", "mobile"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    aria-label={mode === "desktop" ? "Desktop" : "Mobile"}
+                    aria-pressed={effectiveViewMode === mode}
+                    title={`${mode === "desktop" ? "Desktop" : "Mobile"} preview`}
+                    onClick={() => setViewMode(mode)}
+                  >
+                    {mode === "desktop" ? <Monitor size={14} /> : <Smartphone size={14} />}
+                    <span className={styles.deviceLabel}>{mode === "desktop" ? "Desktop" : "Mobile"}</span>
+                    {effectiveViewMode === mode && (
+                      <motion.span
+                        layoutId="view-mode"
+                        className={styles.switchIndicator}
+                        transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                      />
+                    )}
+                  </button>
                 ))}
-              </select>
-            </label>
-            <button
-              type="button"
-              className={styles.replayButton}
-              aria-label="Replay animations"
-              title="Restart the preview and replay its animations"
-              disabled={active.status === "coming"}
-              onClick={() => setReplayVersion((version) => version + 1)}
-            >
-              <RotateCcw size={14} />
-              <span>Motion</span>
-            </button>
-          </div>
-        </div>
-
-        <div
-          id="template-stage"
-          className={styles.stage}
-          role="tabpanel"
-          aria-labelledby={`industry-tab-${industryIndex}`}
-          aria-live="polite"
-        >
-          <div className={styles.previewBackground} aria-hidden="true">
-            <div className={styles.ambient} />
-          </div>
-          <AnimatePresence initial={false}>
-            <PreviewPeek
-              key={`previous-${previous.slug}`}
-              template={previous}
-              side="previous"
-              onSelect={() => selectIndustry(previousIndex, -1)}
-            />
-            <PreviewPeek
-              key={`next-${next.slug}`}
-              template={next}
-              side="next"
-              onSelect={() => selectIndustry(nextIndex, 1)}
-            />
-          </AnimatePresence>
-
-          <AnimatePresence initial={false} custom={direction}>
-            <motion.div
-              key={active.slug}
-              custom={direction}
-              variants={slideVariants}
-              className={styles.activeSlide}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: 0.62, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <div className={styles.previewFrame}>
-                <button
-                  type="button"
-                  className={`${styles.carouselButton} ${styles.carouselPrevious}`}
-                  onClick={() => selectIndustry(previousIndex, -1)}
-                  aria-label={`Previous industry: ${previous.industry}`}
+              </div>
+              <label className={styles.variantSelect}>
+                <span className={styles.variantName}>{active.variant}</span>
+                {group.variants.length > 1 && <ChevronDown size={13} aria-hidden="true" />}
+                <select
+                  aria-label={`${group.industry} variant`}
+                  value={variantIndex}
+                  disabled={group.variants.length < 2}
+                  onChange={(event) => {
+                    const index = Number(event.target.value);
+                    setDirection(index >= variantIndex ? 1 : -1);
+                    setVariantIndex(index);
+                  }}
                 >
-                  <ArrowLeft size={19} />
-                </button>
+                  {group.variants.map((variant, index) => (
+                    <option key={variant.slug} value={index}>{variant.variant}</option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                className={styles.replayButton}
+                aria-label="Replay animations"
+                title="Restart the preview and replay its animations"
+                disabled={active.status === "coming"}
+                onClick={() => setReplayVersion((version) => version + 1)}
+              >
+                <RotateCcw size={14} />
+                <span>Motion</span>
+              </button>
+            </div>
+          </div>
 
-                <div
-                  data-cursor="native"
-                  className={`${styles.browser} ${
-                    effectiveViewMode === "desktop" ? styles.desktop : styles.mobile
-                  }`}
-                >
-                  <div className={styles.browserBar}>
-                    <span className={styles.browserDots} aria-hidden="true">
-                      <i />
-                      <i />
-                      <i />
-                    </span>
-                    <span className={styles.browserAddress}>
-                      {active.slug}.preview
-                    </span>
-                    <span className={styles.viewportLabel}>
-                      {effectiveViewMode === "desktop" ? "1200 px" : "390 px"}
-                    </span>
-                  </div>
-                  <ScaledViewport mode={effectiveViewMode}>
+          <div
+            id="template-stage"
+            className={styles.stage}
+            role="tabpanel"
+            aria-labelledby={`industry-tab-${industryIndex}`}
+            aria-live="polite"
+          >
+            <div className={styles.previewBackground} aria-hidden="true">
+              <div className={styles.ambient} />
+            </div>
+            <AnimatePresence initial={false}>
+              <PreviewPeek
+                key={`previous-${previous.slug}`}
+                template={previous}
+                side="previous"
+                onSelect={() => selectIndustry(previousIndex, -1)}
+              />
+              <PreviewPeek
+                key={`next-${next.slug}`}
+                template={next}
+                side="next"
+                onSelect={() => selectIndustry(nextIndex, 1)}
+              />
+            </AnimatePresence>
+
+            <AnimatePresence initial={false} custom={direction}>
+              <motion.div
+                key={active.slug}
+                custom={direction}
+                variants={slideVariants}
+                className={styles.activeSlide}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.62, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <div className={styles.previewFrame}>
+                  <button
+                    type="button"
+                    className={`${styles.carouselButton} ${styles.carouselPrevious}`}
+                    onClick={() => selectIndustry(previousIndex, -1)}
+                    aria-label={`Previous industry: ${previous.industry}`}
+                  >
+                    <ArrowLeft size={19} />
+                  </button>
+
+                  <DevicePreview mode={effectiveViewMode} address={active.slug}>
                     {active.status === "coming" ? (
                       <div className={styles.construction} role="status">
                         <span className={styles.constructionBadge}>
@@ -390,54 +414,53 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
                         loading="eager"
                       />
                     )}
-                  </ScaledViewport>
-                </div>
+                  </DevicePreview>
 
-                <button
-                  type="button"
-                  className={`${styles.carouselButton} ${styles.carouselNext}`}
-                  onClick={() => selectIndustry(nextIndex, 1)}
-                  aria-label={`Next industry: ${next.industry}`}
-                >
-                  <ArrowRight size={19} />
-                </button>
-              </div>
-
-              <div className={styles.slideFooter}>
-                <div className={styles.templateIdentity}>
-                  <p>
-                    {active.industry} / {active.variant}
-                  </p>
-                  <h2>{active.example}</h2>
+                  <button
+                    type="button"
+                    className={`${styles.carouselButton} ${styles.carouselNext}`}
+                    onClick={() => selectIndustry(nextIndex, 1)}
+                    aria-label={`Next industry: ${next.industry}`}
+                  >
+                    <ArrowRight size={19} />
+                  </button>
                 </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+          <div className={styles.slideFooter}>
+            <div className={styles.templateIdentity}>
+              <p>
+                {active.industry} / {active.variant}{offer.percentOff ? ` · ${offer.percentOff}% off` : ""}
+              </p>
+              <h2>{active.example}</h2>
+            </div>
 
-                <div className={styles.actions}>
-                  {active.status === "coming" ? (
-                    <>
-                      <span className={styles.locked} aria-disabled="true">
-                        <Lock size={15} />
-                        View
-                      </span>
-                      <span className={`${styles.locked} ${styles.enquire}`} aria-disabled="true">
-                        <Lock size={15} />
-                        Coming soon
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <a href={href} target="_blank" rel="noopener noreferrer">
-                        View
-                        <ArrowUpRight size={17} />
-                      </a>
-                      <CampaignLink href={withPurchasePreference(`/checkout?template=${active.slug}`, preference)} className={styles.enquire} placement="express_catalogue" event="creator_checkout_cta_click">
-                        Buy{amountCents !== null ? ` · ${formatMoney(amountCents, currency).replace(/\.00$/, "")}` : ""}
-                      </CampaignLink>
-                    </>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+            <div className={styles.actions}>
+              {active.status === "coming" ? (
+                <>
+                  <span className={styles.locked} aria-disabled="true">
+                    <Lock size={15} />
+                    View
+                  </span>
+                  <span className={`${styles.locked} ${styles.enquire}`} aria-disabled="true">
+                    <Lock size={15} />
+                    Coming soon
+                  </span>
+                </>
+              ) : (
+                <>
+                  <a href={href} target="_blank" rel="noopener noreferrer">
+                    View
+                    <ArrowUpRight size={17} />
+                  </a>
+                  <CampaignLink href={buyHref} className={styles.enquire} placement="express_catalogue" event="creator_checkout_cta_click">
+                    Buy{offer.amountCents !== null ? ` · ${formatMoney(offer.amountCents, currency).replace(/\.00$/, "")}` : ""}
+                  </CampaignLink>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </section>
