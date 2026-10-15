@@ -4,8 +4,12 @@ import type {ContentRecord} from './contract';
 export async function mediaPreviews(admin:DbClient,website:string,org:string,records:ContentRecord[]){
  const ids=[...new Set(records.flatMap(r=>'media' in r.data?r.data.media.flatMap(m=>[m.id,m.posterId].filter((s):s is string=>Boolean(s))):[]))];if(!ids.length)return {};
  const {data:media,error}=await admin.from('website_content_media').select('id').eq('website_id',website).eq('organization_id',org).eq('ready',true).in('id',ids);if(error)throw error;
- const {data:assets,error:assetError}=await admin.from('project_assets').select('id,object_path').eq('organization_id',org).eq('bucket_id','content-media').in('id',(media??[]).map(m=>m.id));if(assetError)throw assetError;
- const {data:signed,error:signError}=await admin.storage.from('content-media').createSignedUrls((assets??[]).map(a=>a.object_path),900);if(signError)throw signError;return Object.fromEntries((assets??[]).flatMap(a=>{const url=signed?.find(s=>s.path===a.object_path)?.signedUrl;return url?[[a.id,url]]:[];}));
+ const {data:assets,error:assetError}=await admin.from('project_assets').select('id,object_path,bucket_id').eq('organization_id',org).in('bucket_id',['content-media','project-assets']).in('id',(media??[]).map(m=>m.id));if(assetError)throw assetError;
+ const groups=await Promise.all(['content-media','project-assets'].map(async bucket=>{
+  const rows=(assets??[]).filter(a=>a.bucket_id===bucket);if(!rows.length)return [];
+  const {data:signed,error}=await admin.storage.from(bucket).createSignedUrls(rows.map(a=>a.object_path),900);if(error)throw error;
+  return rows.flatMap(a=>{const url=signed?.find(s=>s.path===a.object_path)?.signedUrl;return url?[[a.id,url]]:[];});
+ }));return Object.fromEntries(groups.flat());
 }
 export function publicRecords(records:ContentRecord[],website:string,collection:string,review:boolean){
  const mediaUrl=(id:string,record:string)=>`https://www.vigilstudios.co/api/content/${website}/media/${id}?collection=${collection}&record=${record}${review?'&review=published':''}`;

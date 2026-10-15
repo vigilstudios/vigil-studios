@@ -1,0 +1,73 @@
+{
+  "checkedAt": "2026-10-15T02:45:18.968Z",
+  "website": {
+    "id": "490498f3-fa5f-4c08-a6d3-4943cb055795",
+    "status": "building",
+    "preview_url": "https://vigil-490498f3-git-codex-scar-blog-contact-vigilstudio-projects.vercel.app/",
+    "live_url": null,
+    "project_id": "a75a4703-3251-4ed0-9ac4-fb8387c5c452"
+  },
+  "collections": [
+    {
+      "module": "blog",
+      "revision": 1,
+      "publishedRevision": null,
+      "records": 0,
+      "published": 0
+    },
+    {
+      "module": "gallery",
+      "revision": 8,
+      "publishedRevision": 8,
+      "records": 56,
+      "published": 56
+    },
+    {
+      "module": "portfolio",
+      "revision": 3,
+      "publishedRevision": 3,
+      "records": 12,
+      "published": 10
+    },
+    {
+      "module": "testimonials",
+      "revision": 1,
+      "publishedRevision": 1,
+      "records": 6,
+      "published": 6
+    }
+  ],
+  "posts": [
+    {
+      "id": "948d7977-29bc-4884-93ae-599966d77b65",
+      "status": "published"
+    },
+    {
+      "id": "c485a59b-9ebc-48e0-9768-498487441341",
+      "status": "published"
+    },
+    {
+      "id": "f610a9bd-4224-4d08-ab5e-a99e0a46d1f9",
+      "status": "published"
+    }
+  ],
+  "rounds": [
+    {
+      "round_number": 1,
+      "status": "approved"
+    },
+    {
+      "round_number": 2,
+      "status": "pending"
+    }
+  ],
+  "domains": 0,
+  "contact": {
+    "enabled": false,
+    "booking_url": null
+  },
+  "automation": {
+    "status": "waiting_launch"
+  },
+  "fingerprint": "b3e9bdcb302203dab521b2885736624d79d271598d38a41667e534f4ac42eb3f"
+}

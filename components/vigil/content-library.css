@@ -59,3 +59,5 @@
 .hub-publication-options button { margin-top:12px; }
 @media(max-width:1100px){.library-feed{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(max-width:640px){.library-search{max-width:none;}.library-search-layout{gap:12px;}.library-heading{gap:16px;}.hub-changes-bar .hub-actions{width:100%;}.hub-changes-bar .hub-actions button{flex:1;}.library-feed{grid-template-columns:1fr;}}
+
+.library-filters button {border-radius:0!important;}

@@ -93,6 +93,45 @@ select hub_test.fails($q$select public.save_content_design_workspace('cb000000-0
 select hub_test.ok((select revision=2 and site_definition->>'title'='Lab design' from public.design_workspaces where project_id='cb000000-0000-4000-8000-000000000031') and (select draft->0->'data'->>'title'='Newer Hub edit' from public.website_content_collections where id='cb000000-0000-4000-8000-000000000044'),'failed Lab save rolls back design and retains Hub edits');
 reset role;
 
+-- Existing Files media is linked by stable ID, without consuming another asset/quota slot.
+insert into public.website_content_collections(id,website_id,organization_id,key,module,label,page_id,section_id,field,adapter) values
+('cb000000-0000-4000-8000-000000000047','cb000000-0000-4000-8000-000000000021','cb000000-0000-4000-8000-000000000011','reuse-gallery','gallery','Gallery','gallery','gallery','items','standalone');
+insert into public.project_assets(id,project_id,organization_id,kind,bucket_id,object_path,file_name,content_type,size_bytes) values
+('cb000000-0000-4000-8000-000000000052','cb000000-0000-4000-8000-000000000031','cb000000-0000-4000-8000-000000000011','video','project-assets','cb000000-0000-4000-8000-000000000011/cb000000-0000-4000-8000-000000000031/original.mov','original.mov','video/quicktime',1024),
+('cb000000-0000-4000-8000-000000000053','cb000000-0000-4000-8000-000000000031','cb000000-0000-4000-8000-000000000011','photo','project-assets','cb000000-0000-4000-8000-000000000011/cb000000-0000-4000-8000-000000000031/poster.jpg','poster.jpg','image/jpeg',100),
+('cb000000-0000-4000-8000-000000000054','cb000000-0000-4000-8000-000000000033','cb000000-0000-4000-8000-000000000011','video','project-assets','cb000000-0000-4000-8000-000000000011/cb000000-0000-4000-8000-000000000033/other.mov','other.mov','video/quicktime',1024),
+('cb000000-0000-4000-8000-000000000055','cb000000-0000-4000-8000-000000000031','cb000000-0000-4000-8000-000000000011','document','project-assets','cb000000-0000-4000-8000-000000000011/cb000000-0000-4000-8000-000000000031/doc.pdf','doc.pdf','application/pdf',100);
+insert into storage.objects(bucket_id,name,metadata) select bucket_id,object_path,jsonb_build_object('size',size_bytes,'mimetype',content_type) from public.project_assets where id in ('cb000000-0000-4000-8000-000000000052','cb000000-0000-4000-8000-000000000054','cb000000-0000-4000-8000-000000000055');
+select set_config('hub_test.asset_count',(select count(*)::text from public.project_assets),true);
+select set_config('hub_test.asset_bytes',(select sum(size_bytes)::text from public.project_assets),true);
+select set_config('request.jwt.claims','{"sub":"cb000000-0000-4000-8000-000000000001","role":"authenticated"}',true);set local role authenticated;
+select hub_test.fails($q$select public.attach_content_library_media('cb000000-0000-4000-8000-000000000047','cb000000-0000-4000-8000-000000000054')$q$,'same organization different project file denied');
+select hub_test.fails($q$select public.attach_content_library_media('cb000000-0000-4000-8000-000000000047','cb000000-0000-4000-8000-000000000055')$q$,'document cannot become playable content');
+select hub_test.fails($q$select public.attach_content_library_media('cb000000-0000-4000-8000-000000000047','cb000000-0000-4000-8000-000000000053')$q$,'unuploaded Files row denied');
+select hub_test.fails($q$select public.attach_content_library_media('cb000000-0000-4000-8000-000000000043','cb000000-0000-4000-8000-000000000052')$q$,'Blog cannot borrow collection media authority');
+select hub_test.fails($q$select public.attach_content_library_media('cb000000-0000-4000-8000-000000000045','cb000000-0000-4000-8000-000000000052')$q$,'Basic locked for existing Files too');
+select public.attach_content_library_media('cb000000-0000-4000-8000-000000000047','cb000000-0000-4000-8000-000000000052');
+select public.attach_content_library_media('cb000000-0000-4000-8000-000000000047','cb000000-0000-4000-8000-000000000052');
+reset role;
+select hub_test.ok((select count(*)::text=current_setting('hub_test.asset_count') and sum(size_bytes)::text=current_setting('hub_test.asset_bytes') from public.project_assets),'repeated MOV reuse creates no asset or storage usage duplicate');
+select hub_test.ok((select count(*)=1 from public.website_content_media where id='cb000000-0000-4000-8000-000000000052' and ready and type='video'),'MOV registered once as ready video');
+select hub_test.ok((select jsonb_array_length(published)=0 from public.website_content_collections where id='cb000000-0000-4000-8000-000000000047'),'choosing media does not publish a post');
+select set_config('request.jwt.claims','{"sub":"cb000000-0000-4000-8000-000000000003","role":"authenticated"}',true);set local role authenticated;
+select hub_test.fails($q$select public.attach_content_library_media('cb000000-0000-4000-8000-000000000047','cb000000-0000-4000-8000-000000000052')$q$,'member cannot register existing media');
+reset role;select set_config('request.jwt.claims','{"sub":"cb000000-0000-4000-8000-000000000002","role":"authenticated"}',true);set local role authenticated;
+select hub_test.fails($q$select public.attach_content_library_media('cb000000-0000-4000-8000-000000000047','cb000000-0000-4000-8000-000000000052')$q$,'foreign tenant cannot register existing media');
+reset role;
+update storage.objects set metadata=jsonb_build_object('size',999,'mimetype','video/quicktime') where name like '%/original.mov';
+select set_config('request.jwt.claims','{"sub":"cb000000-0000-4000-8000-000000000001","role":"authenticated"}',true);set local role authenticated;
+select hub_test.fails($q$select public.attach_content_library_media('cb000000-0000-4000-8000-000000000047','cb000000-0000-4000-8000-000000000052')$q$,'storage size mismatch denied');
+reset role;
+update storage.objects set metadata=jsonb_build_object('size',1024,'mimetype','video/quicktime') where name like '%/original.mov';
+select set_config('request.jwt.claims','{"role":"service_role"}',true);set local role service_role;
+select public.save_website_content('cb000000-0000-4000-8000-000000000047',1,'[{"id":"cb000000-0000-4000-8000-000000000062","slug":"reused-mov","deleted":false,"featured":false,"data":{"title":"Reused MOV","media":[{"id":"cb000000-0000-4000-8000-000000000052","type":"video","src":"","alt":"Original video","caption":""}]}}]','draft','cb000000-0000-4000-8000-000000000001');
+select hub_test.ok((select count(*)=1 from public.website_content_media_refs where media_id='cb000000-0000-4000-8000-000000000052'),'saved draft tracks original Files reference');
+select hub_test.fails($q$delete from public.project_assets where id='cb000000-0000-4000-8000-000000000052'$q$,'referenced original asset cannot be deleted');
+reset role;
+
 update public.websites set status='archived' where id='cb000000-0000-4000-8000-000000000022';
 select hub_test.ok(not vigil.content_access('cb000000-0000-4000-8000-000000000022'),'archived website denied');
 select set_config('request.jwt.claims','{"role":"anon"}',true);set local role anon;

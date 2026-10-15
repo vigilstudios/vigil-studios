@@ -14,8 +14,8 @@ export async function GET(request:Request,{params}:{params:Promise<{websiteId:st
   const collections=await contentCollections(admin,websiteId,site.organization_id,draft?'draft':'published'),c=collections.find(c=>c.id===url.searchParams.get('collection')),r=c?.records.find(r=>r.id===url.searchParams.get('record')&&!r.deleted);
   if(!r||!('media' in r.data)||!r.data.media.some(m=>m.id===mediaId||m.posterId===mediaId))return unavailable();
   const {data:m,error:lookup}=await admin.from('website_content_media').select('id').eq('id',mediaId).eq('website_id',websiteId).eq('organization_id',site.organization_id).eq('ready',true).maybeSingle();if(lookup)throw lookup;if(!m)return unavailable();
-  const {data:a,error:assetError}=await admin.from('project_assets').select('object_path').eq('id',m.id).eq('organization_id',site.organization_id).eq('bucket_id','content-media').maybeSingle();if(assetError)throw assetError;if(!a)return unavailable();
-  const {data:signed,error:signError}=await admin.storage.from('content-media').createSignedUrl(a.object_path,60);if(signError)throw signError;
+  const {data:a,error:assetError}=await admin.from('project_assets').select('object_path,bucket_id').eq('id',m.id).eq('organization_id',site.organization_id).in('bucket_id',['content-media','project-assets']).maybeSingle();if(assetError)throw assetError;if(!a)return unavailable();
+  const {data:signed,error:signError}=await admin.storage.from(a.bucket_id).createSignedUrl(a.object_path,60);if(signError)throw signError;
   // Redirect preserves the browser's Range request; Storage serves byte-range video responses.
   return new Response(null,{status:307,headers:{...headers,Location:signed.signedUrl}});
  }catch{return unavailable(503);}

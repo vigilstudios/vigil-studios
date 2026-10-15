@@ -1,0 +1,20 @@
+import {beforeEach,describe,it,expect,vi} from 'vitest';
+import {FakeAdmin} from './fake-admin';
+const m=vi.hoisted(()=>({context:vi.fn(),client:vi.fn(),admin:vi.fn(),collections:vi.fn(),sign:vi.fn(),rpc:vi.fn(),bucket:vi.fn()}));
+vi.mock('@/lib/vigil/auth/session',()=>({requireOrgContextOrThrow:m.context}));
+vi.mock('@/lib/supabase/server',()=>({createClient:m.client}));vi.mock('@/lib/supabase/admin',()=>({createAdminClient:m.admin}));
+vi.mock('@/lib/vigil/content/service',()=>({contentCollections:m.collections}));
+import {GET} from '@/app/api/content/[websiteId]/media/[mediaId]/route';
+import {mediaPreviews} from '@/lib/vigil/content/media';
+const site='ba000000-0000-4000-8000-000000000021',collection='ba000000-0000-4000-8000-000000000022',id='ba000000-0000-4000-8000-000000000023',record='ba000000-0000-4000-8000-000000000024',org='owned-org';
+const params={params:Promise.resolve({websiteId:site,mediaId:id})};let fake:FakeAdmin;
+const request=(draft=false)=>new Request(`https://www.vigilstudios.co/api/content/${site}/media/${id}?collection=${collection}&record=${record}${draft?'&draft=1':''}`);
+beforeEach(()=>{vi.resetAllMocks();fake=new FakeAdmin({websites:[{id:site,organization_id:org}],website_content_media:[{id,website_id:site,organization_id:org,ready:true}],project_assets:[{id,organization_id:org,bucket_id:'project-assets',object_path:'original.mov'}]});const client=fake.asClient();Object.assign(client,{rpc:m.rpc,storage:{from:m.bucket}});m.admin.mockReturnValue(client);m.client.mockResolvedValue(client);m.context.mockResolvedValue({organization:{id:org}});m.bucket.mockReturnValue({createSignedUrl:m.sign,createSignedUrls:vi.fn().mockResolvedValue({data:[{path:'original.mov',signedUrl:'https://private.test/video'}],error:null})});m.rpc.mockResolvedValue({data:true,error:null});m.sign.mockResolvedValue({data:{signedUrl:'https://private.test/video'},error:null});m.collections.mockResolvedValue([{id:collection,records:[{id:record,deleted:false,data:{media:[{id,type:'video',src:'',alt:'Original'}]}}]}]);});
+describe('existing Files delivery retains publication and privacy gates',()=>{
+ it('redirects only the referenced published original and preserves range requests',async()=>{const response=await GET(request(),params);expect(response.status).toBe(307);expect(response.headers.get('location')).toBe('https://private.test/video');expect(response.headers.get('cache-control')).toBe('no-store');expect(m.bucket).toHaveBeenCalledWith('project-assets');expect(m.rpc).toHaveBeenCalledWith('website_content_delivery',{p_website:site,p_review:false});expect(m.collections).toHaveBeenCalledWith(expect.anything(),site,org,'published');});
+ it('never delivers prelaunch or disabled website media publicly',async()=>{m.rpc.mockResolvedValue({data:false,error:null});expect((await GET(request(),params)).status).toBe(404);expect(m.sign).not.toHaveBeenCalled();});
+ it('does not deliver media that is only in another record or draft',async()=>{m.collections.mockResolvedValue([{id:collection,records:[{id:record,deleted:false,data:{media:[]}}]}]);expect((await GET(request(),params)).status).toBe(404);expect(m.sign).not.toHaveBeenCalled();});
+ it('requires the same authenticated organization for draft delivery',async()=>{m.context.mockResolvedValue({organization:{id:'foreign'}});expect((await GET(request(true),params)).status).toBe(404);expect(m.sign).not.toHaveBeenCalled();});
+ it('loads draft media only after authenticated website access',async()=>{expect((await GET(request(true),params)).status).toBe(307);expect(m.rpc).toHaveBeenCalledWith('website_content_access',{p_website:site});expect(m.collections).toHaveBeenCalledWith(expect.anything(),site,org,'draft');});
+ it('resolves draft previews from the original private bucket',async()=>{const rows=[{id:record,slug:'video',deleted:false,featured:false,data:{title:'Video',description:'',category:'',collection:'',media:[{id,type:'video' as const,src:'',alt:'Video',caption:''}]}}];expect(await mediaPreviews(fake.asClient(),site,org,rows)).toEqual({[id]:'https://private.test/video'});expect(m.bucket).toHaveBeenCalledWith('project-assets');});
+});
