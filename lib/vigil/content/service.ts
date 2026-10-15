@@ -5,13 +5,13 @@ import type {DbClient} from '@/lib/vigil/types';
 import type {Json} from '@/types/database.types';
 import {ForbiddenError,ValidationError} from '@/lib/vigil/auth/errors';
 import {moduleSchema,bindingSchema,parseRecords,publicationIssues,type ContentRecord} from './contract';
-import {applyBindings,discoverBindings,type BoundCollection,type AdapterConfig} from './professional';
+import {applyBindings,discoverBindings,configForPublished,type BoundCollection,type AdapterConfig} from './professional';
 import {publicRecords} from './media';
 import {featuredIssues,featuredPolicy} from './featured';
 import {projectDocument} from '@/lib/vigil/professional/document';
 export async function contentSites(client:DbClient,org:string){
  const {data,error}=await client.from('websites').select('id,name,status,project_id,live_url,preview_url').eq('organization_id',org).order('created_at');if(error)throw error;
- return Promise.all((data??[]).map(async site=>{const [access,project]=await Promise.all([client.rpc('website_content_access',{p_website:site.id}),client.from('projects').select('kind').eq('id',site.project_id!).maybeSingle()]);if(access.error)throw access.error;if(project.error)throw project.error;return {...site,access:access.data===true,kind:project.data?.kind};}));
+ return Promise.all((data??[]).map(async site=>{const [access,eligibility,project]=await Promise.all([client.rpc('website_content_access',{p_website:site.id}),client.rpc('website_content_eligibility',{p_website:site.id}),client.from('projects').select('kind').eq('id',site.project_id!).maybeSingle()]);if(access.error)throw access.error;if(eligibility.error)throw eligibility.error;if(project.error)throw project.error;return {...site,access:access.data===true,eligible:eligibility.data===true,kind:project.data?.kind};}));
 }
 export async function contentCollections(client:DbClient,website:string,org:string,mode:'draft'|'published'='draft'):Promise<BoundCollection[]>{
  const {data,error}=await client.from('website_content_collections').select('*').eq('website_id',website).eq('organization_id',org).eq('enabled',true).order('key');if(error)throw error;
@@ -20,15 +20,15 @@ export async function contentCollections(client:DbClient,website:string,org:stri
 export async function authorizeCollection(client:DbClient,org:string,id:string){
  const {data:c,error}=await client.from('website_content_collections').select('id,website_id,organization_id,module,adapter,enabled').eq('id',z.string().uuid().parse(id)).eq('organization_id',org).maybeSingle();if(error)throw error;
  if(!c?.enabled||c.module==='blog')throw new ForbiddenError('This collection is unavailable.');
- const {data:access,error:gate}=await client.rpc('website_content_access',{p_website:c.website_id});if(gate||!access)throw new ForbiddenError('Upgrade to Care or higher on an eligible website to edit content.');
+ const {data:access,error:gate}=await client.rpc('website_content_access',{p_website:c.website_id});if(gate||!access){const {data:eligible}=await client.rpc('website_content_eligibility',{p_website:c.website_id});throw new ForbiddenError(eligible?'Content editing opens when your website is live.':'Upgrade to Care or higher on an eligible website to edit content.');}
  return c;
 }
-export async function validateDelivery(admin:DbClient,website:string,org:string,collectionId:string,records:ContentRecord[]){
- const collections=await contentCollections(admin,website,org,'published');const collection=collections.find(c=>c.id===collectionId);if(!collection)throw new ForbiddenError();
+export async function validateDelivery(admin:DbClient,website:string,org:string,collectionId:string,records:ContentRecord[],publishing=true){
+ const collections=(await contentCollections(admin,website,org)).map(c=>publishing&&c.id===collectionId?c:{...c,config:configForPublished(c.config),records:c.publishedRecords??[]});const collection=collections.find(c=>c.id===collectionId);if(!collection)throw new ForbiddenError();
  const features=featuredIssues(records,featuredPolicy(collection.config,collection.binding.module,collection.binding.adapter),true);if(features.length)throw new ValidationError(features[0]);
  if(collection.binding.adapter==='professional'){
   const {data:workspace,error}=await admin.from('design_workspaces').select('site_definition,project_id').eq('website_id',website).eq('organization_id',org).maybeSingle();if(error)throw error;if(!workspace)throw new ValidationError('The website binding needs attention from Vigil. Your published content is unchanged.');
-  try{applyBindings(projectDocument(workspace.site_definition,workspace.project_id),collections.filter(c=>c.binding.adapter==='professional'&&(c.id===collectionId||c.publishedRevision!==null)).map(c=>({...c,records:publicRecords(c.id===collectionId?records:c.records,website,c.id,true)})),true);}catch{throw new ValidationError('These entries do not fit the website section. Check required fields and the number of entries. Your published version is unchanged.');}
+  try{applyBindings(projectDocument(workspace.site_definition,workspace.project_id),collections.filter(c=>c.binding.adapter==='professional'&&(c.id===collectionId||c.publishedRevision!==null)).map(c=>({...c,config:{...c.config,publishedFeatured:c.id===collectionId&&publishing?undefined:c.config.publishedFeatured},records:publicRecords(c.id===collectionId?records:c.records,website,c.id,true)})),true,'published');}catch{throw new ValidationError('These entries do not fit the website section. Check required fields and the number of entries. Your published version is unchanged.');}
  }
 }
 export async function saveCollection(client:DbClient,org:string,actor:string,id:string,expected:number,input:unknown,intent:'draft'|'publish'|'unpublish'|'trash'){
@@ -37,7 +37,7 @@ export async function saveCollection(client:DbClient,org:string,actor:string,id:
  if(current){const issues=featuredIssues(records,featuredPolicy(current.config,current.binding.module,current.binding.adapter));if(issues.length)throw new ValidationError(issues[0]);}
  if(contentModule==='testimonials'&&current?.records.some(old=>'placeholder' in old.data&&old.data.placeholder&&records.some(r=>r.id===old.id&&'placeholder' in r.data&&!r.data.placeholder)))throw new ForbiddenError('Review placeholders must remain marked until Vigil confirms publication permission.');
  if(current?.binding.adapter==='professional'&&records.some(r=>'media' in r.data&&r.data.media.length>(current.config.maxMedia??1)))throw new ValidationError('This website entry supports one primary media item. Replace it rather than appending extra media.');
- if(intent==='trash'){const published=(await contentCollections(admin,c.website_id,org,'published')).find(v=>v.id===id);if(published)await validateDelivery(admin,c.website_id,org,id,published.records.filter(r=>!records.some(n=>n.id===r.id&&n.deleted)));}
+ if(intent==='trash'){const published=(await contentCollections(admin,c.website_id,org,'published')).find(v=>v.id===id);if(published)await validateDelivery(admin,c.website_id,org,id,published.records.filter(r=>!records.some(n=>n.id===r.id&&n.deleted)),false);}
  if(intent==='publish'){const issues=publicationIssues(contentModule,records);if(issues.length)throw new ValidationError(issues[0]);await validateDelivery(admin,c.website_id,org,id,records);}
  const {data,error}=await admin.rpc('save_website_content',{p_collection:id,p_expected:expected,p_records:records as unknown as Json,p_intent:intent,p_actor:actor}).abortSignal(AbortSignal.timeout(15000));
  if(error){if((error.code==='PT409'||error.code==='40001'))throw new ValidationError('Someone saved this collection in another window. Reload before saving; your changes remain here.');throw new ValidationError('Content could not be saved. Check your access and fields, then try again.');}return {revision:data!};

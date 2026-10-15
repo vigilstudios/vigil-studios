@@ -13,9 +13,9 @@ insert into public.projects(id,organization_id,name,kind,brief) values
 ('ba000000-0000-4000-8000-000000000033','ba000000-0000-4000-8000-000000000011','CMS portfolio only','professional','{"strategy":{"features":["cms_blog"]}}'),
 ('ba000000-0000-4000-8000-000000000034','ba000000-0000-4000-8000-000000000011','Express','express','{"strategy":{"pages":["blog"]}}');
 insert into public.websites(id,organization_id,project_id,name,status) values
-('ba000000-0000-4000-8000-000000000021','ba000000-0000-4000-8000-000000000011','ba000000-0000-4000-8000-000000000031','Professional Blog','building'),
-('ba000000-0000-4000-8000-000000000022','ba000000-0000-4000-8000-000000000012','ba000000-0000-4000-8000-000000000032','Growth Blog','building'),
-('ba000000-0000-4000-8000-000000000023','ba000000-0000-4000-8000-000000000011','ba000000-0000-4000-8000-000000000033','Portfolio','building'),
+('ba000000-0000-4000-8000-000000000021','ba000000-0000-4000-8000-000000000011','ba000000-0000-4000-8000-000000000031','Professional Blog','live'),
+('ba000000-0000-4000-8000-000000000022','ba000000-0000-4000-8000-000000000012','ba000000-0000-4000-8000-000000000032','Growth Blog','live'),
+('ba000000-0000-4000-8000-000000000023','ba000000-0000-4000-8000-000000000011','ba000000-0000-4000-8000-000000000033','Portfolio','live'),
 ('ba000000-0000-4000-8000-000000000024','ba000000-0000-4000-8000-000000000011','ba000000-0000-4000-8000-000000000034','Express','building');
 insert into public.subscriptions(organization_id,website_id,plan_id,status) select organization_id,id,(select id from public.plans where code='care'),'active' from public.websites where id in ('ba000000-0000-4000-8000-000000000021','ba000000-0000-4000-8000-000000000022');
 insert into public.website_content_collections(website_id,organization_id,key,module,label,page_id,section_id,field,adapter) select id,organization_id,'blog','blog','Blog','blog','blog','posts','blog' from public.websites where id in ('ba000000-0000-4000-8000-000000000021','ba000000-0000-4000-8000-000000000022');

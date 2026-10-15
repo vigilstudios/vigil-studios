@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import {Crown, Image as ImageIcon, Plus, Search} from 'lucide-react';
+import {Crown, Lock, Image as ImageIcon, Plus, Search} from 'lucide-react';
 import './premium.css';
 export type PremiumPreviewKind = 'content' | 'requests' | 'insights' | 'virtue';
 
@@ -14,17 +14,17 @@ export function PremiumPreview({kind}:{kind:PremiumPreviewKind}) {
  </div>;
 }
 
-export function PremiumWall({feature,title,description,planHint,note,previewKind='content'}:{feature:string;title?:string;description:string;planHint:string;note?:string;previewKind?:PremiumPreviewKind}) {
+export function PremiumWall({feature,title,description,planHint,note,previewKind='content',mode='paid'}:{feature:string;title?:string;description:string;planHint:string;note?:string;previewKind?:PremiumPreviewKind;mode?:'paid'|'launch'}) {
  const id=`premium-${previewKind}`;
  return <div className="premium-stage">
   <div className="premium-backdrop-preview" aria-hidden="true" inert><PremiumPreview kind={previewKind}/></div>
   <div className="premium-veil" aria-hidden="true"/>
   <div className="premium-overlay"><section className="premium-dialog" role="dialog" aria-modal="false" aria-labelledby={`${id}-title`} aria-describedby={`${id}-description`}>
-   <span className="premium-crown" aria-hidden="true"><Crown size={28}/></span>
+   <span className="premium-crown" aria-hidden="true">{mode==='launch'?<Lock size={28}/>:<Crown size={28}/>}</span>
    <p className="premium-eyebrow">{planHint}</p>
    <h2 id={`${id}-title`}>{title??`Unlock ${feature}`}</h2>
    <p id={`${id}-description`} className="premium-description">{description}</p>
-   <Link href="/dashboard/billing" className="btn-primary premium-upgrade">View upgrade options</Link>
+   {mode==='launch'?<Link href="/dashboard" className="btn-primary premium-upgrade">View website status</Link>:<Link href="/dashboard/billing" className="btn-primary premium-upgrade">View upgrade options</Link>}
    {note?<p className="premium-note">{note}</p>:null}
   </section></div>
  </div>;

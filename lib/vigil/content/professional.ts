@@ -3,15 +3,19 @@ import { parseSiteDefinition } from '@/design-engine/site/persistence';
 import type { SiteDefinition } from '@/design-engine/site/model';
 import type { ContentBinding, ContentModule, ContentRecord, ContentMedia } from './contract';
 import { payloadSchemas } from './contract';
+import {collectionModules,collectionCapabilities} from '@/design-engine/content/settings';
+import {sectionSchemas} from '@/design-engine/composition/schemas';
+import {featuredPolicy,featuredSlots} from './featured';
 
 type ObjectValue = Record<string,unknown>;
-export type AdapterConfig={templates:Record<string,ObjectValue>;singleton?:boolean;sourceIds:Record<string,string>;editableFields?:string[];featuredSlotBudget?:number;featuredLabel?:string;featuredMediaType?:'image'|'video';featuredRequireFull?:boolean;autoDiscovered?:boolean;maxMedia?:number;hasDetailLinks?:boolean};
+export type FeatureConfig=Pick<AdapterConfig,'featuredSlotBudget'|'featuredLabel'|'featuredMediaType'|'featuredRequireFull'|'featuredMinimum'>;
+export type AdapterConfig={templates:Record<string,ObjectValue>;singleton?:boolean;sourceIds:Record<string,string>;editableFields?:string[];featuredSlotBudget?:number;featuredLabel?:string;featuredMediaType?:'image'|'video';featuredRequireFull?:boolean;featuredMinimum?:number;publishedFeatured?:FeatureConfig;autoDiscovered?:boolean;maxMedia?:number;hasDetailLinks?:boolean};
 export type BoundCollection={id:string;binding:ContentBinding;config:AdapterConfig;records:ContentRecord[];publishedRecords?:ContentRecord[];revision:number;publishedRevision:number|null};
 const object=(v:unknown):ObjectValue=>v&&typeof v==='object'&&!Array.isArray(v)?v as ObjectValue:{};
 const str=(v:unknown)=>typeof v==='string'?v:'';
 const slug=(v:string)=>v.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,110)||'entry';
 function stableId(key:string){const hex=createHash('sha256').update(key).digest('hex');return `${hex.slice(0,8)}-${hex.slice(8,12)}-4${hex.slice(13,16)}-a${hex.slice(17,20)}-${hex.slice(20,32)}`;}
-const collectionFields:Record<string,Exclude<ContentModule,'blog'>>={projects:'portfolio',chapters:'portfolio',works:'portfolio',frames:'gallery',photos:'gallery',clips:'gallery',voices:'testimonials',testimony:'testimonials',voice:'testimonials',reviews:'testimonials',products:'products',items:'products',entries:'services',services:'services',capabilities:'services',questions:'faq',faqs:'faq'};
+const collectionFields:Record<string,Exclude<ContentModule,'blog'>>=collectionModules;
 function supported(component:string,field:string,contentModule:ContentModule){return contentModule==='portfolio'||contentModule==='gallery'?component.startsWith('work.'):contentModule==='testimonials'?component.startsWith('proof.'):contentModule==='products'?component.startsWith('commerce.'):contentModule==='services'?component.startsWith('services.'):contentModule==='faq'&&['questions','faqs'].includes(field);}
 function mediaFrom(value:unknown):ContentMedia[]{
  const row=object(value),m=object(row.image??row.scene??row.video??row.media),video=Boolean(row.video)||m.mediaType==='video';
@@ -36,17 +40,18 @@ export function discoverBindings(site:SiteDefinition,websiteId:string):BoundColl
   const content=object(section.content);
   for(const [field,value] of Object.entries(content)){
    const contentModule=collectionFields[field];if(!contentModule||!supported(section.component,field,contentModule))continue;
-   const singleton=['testimony','voice'].includes(field),raws=Array.isArray(value)?value:singleton?[value]:[];
+   const singleton=['testimony','voice','product'].includes(field),raws=Array.isArray(value)?value:singleton?[value]:[];
    // Only semantic collections actually implemented by the section. No generic CMS inference.
    if(raws.length&&!raws.every(raw=>{const v=object(object(raw).product??raw);return contentModule==='testimonials'?typeof v.quote==='string':contentModule==='faq'?typeof v.answer==='string':typeof v.title==='string'||typeof v.name==='string';}))continue;
    const key=`${page.id}-${section.id}-${field}`.slice(0,180),templates:AdapterConfig['templates']={},sourceIds:Record<string,string>={};
-   const records=raws.map((raw,i)=>{const row=object(raw),source=str(row.id??row.productId??object(row.product).productId)||String(i),id=stableId(`${websiteId}:${key}:${source}`),address=slug(str(row.slug??object(row.product).slug)||str(row.title??object(row.product).title)||`${field}-${i+1}`);templates[id]=row;sourceIds[id]=source;return recordFromRaw(contentModule,row,id,str(row.slug??object(row.product).slug)?address:`${address}-${i+1}`);});
-   collections.push({id:'',binding:{version:1,key,module:contentModule,label:contentModule==='portfolio'?'Portfolio':contentModule==='faq'?'FAQ':contentModule[0].toUpperCase()+contentModule.slice(1),pageId:page.id,sectionId:section.id,field,adapter:'professional'},config:{templates,sourceIds,singleton,autoDiscovered:true,maxMedia:raws.some(r=>Array.isArray(object(object(r).product??r).media))?10:1,hasDetailLinks:raws.some(r=>Boolean(object(object(r).product??r).slug)),editableFields:editableFields(contentModule,raws.map(object))},records,revision:1,publishedRevision:null});
+   const records=raws.map((raw,i)=>{const row=object(raw),source=str(row.id??row.productId??object(row.product).productId)||String(i),id=stableId(`${websiteId}:${key}:${source}`),address=slug(str(row.slug??object(row.product).slug)||str(row.title??object(row.product).title)||`${field}-${i+1}`);templates[id]=row;sourceIds[id]=source;const record=recordFromRaw(contentModule,row,id,str(row.slug??object(row.product).slug)?address:`${address}-${i+1}`);const setting=section.contentHub?.[field];return setting&&i<setting.capacity?{...record,featured:true,featuredOrder:i+1}:record;});
+   const setting=section.contentHub?.[field];if(setting?.mediaType){let position=0;for(const record of records){record.featured='media' in record.data&&record.data.media.some(m=>m.type===setting.mediaType)&&position<setting.capacity;delete record.featuredOrder;if(record.featured)record.featuredOrder=++position;}}
+   collections.push({id:'',binding:{version:1,key,module:contentModule,label:contentModule==='portfolio'?'Portfolio':contentModule==='faq'?'FAQ':contentModule[0].toUpperCase()+contentModule.slice(1),pageId:page.id,sectionId:section.id,field,adapter:'professional'},config:{...sectionFeatureConfig(section,field),templates,sourceIds,singleton,autoDiscovered:true,maxMedia:raws.some(r=>Array.isArray(object(object(r).product??r).media))?10:1,hasDetailLinks:raws.some(r=>Boolean(object(object(r).product??r).slug)),editableFields:editableFields(contentModule,raws.map(object))},records,revision:1,publishedRevision:null});
   }
  }
  return collections;
 }
-function imageValue(media:ContentMedia){return {src:media.src,alt:media.alt,width:media.width??1200,height:media.height??900,...(media.caption?{caption:media.caption}:{}),...(media.type==='video'?{mediaType:'video',playback:{autoplay:false,controls:true,muted:true,...(media.poster?{poster:media.poster}:{})}}:{})};}
+function imageValue(media:ContentMedia){return {src:media.src,alt:media.alt,width:media.width??1200,height:media.height??900,...(media.caption?{caption:media.caption}:{}),...(media.type==='video'?{mediaType:'video',playback:{autoplay:false,controls:true,muted:false,...(media.poster?{poster:media.poster}:{})}}:{})};}
 function overlayRaw(contentModule:ContentModule,record:ContentRecord,config:AdapterConfig):ObjectValue{
  const original=config.templates[record.id]??Object.values(config.templates)[0]??{},outer=structuredClone(original),nested=Boolean(outer.product),row=nested?object(outer.product):outer,d=object(record.data);
  if('id' in row)row.id=config.sourceIds[record.id]??`item-${record.id}`;
@@ -65,19 +70,25 @@ function overlayRaw(contentModule:ContentModule,record:ContentRecord,config:Adap
  }
  const media=Array.isArray(d.media)?d.media as ContentMedia[]:[],first=media[0];
  if(first){for(const field of ['image','scene'])if(field in row){const previous=object(row[field]),image:ObjectValue={...previous,...imageValue(first)};if(first.type==='image'&&previous.mediaType==='video'){delete image.mediaType;delete image.playback;}if(previous.src!==first.src){for(const key of ['mobileSrc','srcSet','sizes','mobileFocal'])delete image[key];}row[field]=image;};
-  if('video' in row)row.video={...object(row.video),src:first.src,width:first.width??1200,height:first.height??900,label:first.alt,poster:{src:first.poster??first.src,alt:first.alt,width:first.width??1200,height:first.height??900},playback:{...object(object(row.video).playback),autoplay:false}};
+  if('video' in row)row.video={...object(row.video),src:first.src,width:first.width??1200,height:first.height??900,label:first.alt,poster:{src:first.poster??first.src,alt:first.alt,width:first.width??1200,height:first.height??900},playback:{...object(object(row.video).playback),autoplay:false,muted:false}};
   if(Array.isArray(row.media)){const originalMedia=row.media;row.media=media.map((m,i)=>{const base=object(originalMedia[i]);return m.type==='video'?{...base,kind:'video',id:str(base.id)||`media-${i}`,label:str(base.label)||m.alt.slice(0,80),video:{...object(base.video),src:m.src,width:m.width??1200,height:m.height??900,label:str(object(base.video).label)||m.alt.slice(0,160),poster:{...object(object(base.video).poster),src:m.poster,alt:m.alt,width:m.width??1200,height:m.height??900}}}:{...base,kind:base.kind==='interactive-placeholder'?'interactive-placeholder':'image',id:str(base.id)||`media-${i}`,label:str(base.label)||m.alt.slice(0,80),image:{...object(base.image),...imageValue(m)}};});}
  }
  if(nested)outer.product=row;return outer;
 }
-export function applyBindings(site:SiteDefinition,collections:BoundCollection[],hideEmpty=false):SiteDefinition{
+export function applyBindings(site:SiteDefinition,collections:BoundCollection[],hideEmpty=false,mode:'draft'|'published'='published'):SiteDefinition{
  const next=structuredClone(site);
  for(const c of collections){const page=next.pages.find(p=>p.id===c.binding.pageId),section=page?.sections.find(s=>s.id===c.binding.sectionId);if(!section)continue;
   if(hideEmpty&&!c.records.some(r=>!r.deleted)){page!.sections=page!.sections.filter(s=>s.id!==c.binding.sectionId);continue;}
   const fieldValue=(section.content as ObjectValue)[c.binding.field],scaffolds=Array.isArray(fieldValue)?fieldValue:[fieldValue];
   const config={...c.config,templates:{...c.config.templates}};
   for(const record of c.records){const sourceId=c.config.sourceIds?.[record.id]??`item-${record.id}`,scaffold=scaffolds.map(object).find(raw=>str(raw.id??raw.productId??object(raw.product).productId)===sourceId||str(raw.slug??object(raw.product).slug)===record.slug);if(scaffold)config.templates[record.id]=scaffold;else if(!config.templates[record.id]&&scaffolds[0])config.templates[record.id]=object(scaffolds[0]);}
-  const rows=c.records.filter(r=>!r.deleted).map(r=>overlayRaw(c.binding.module,r,config));
+  const displayConfig=mode==='draft'?{...c.config,...sectionFeatureConfig(section,c.binding.field)}:configForPublished(c.config);
+  const policy=mode==='published'||section.contentHub?.[c.binding.field]?featuredPolicy(displayConfig,c.binding.module,c.binding.adapter):null;
+  if(mode==='published'&&policy)section.contentHub={...section.contentHub,[c.binding.field]:{mode:'featured',capacity:policy.capacity,label:policy.label,...(policy.mediaType?{mediaType:policy.mediaType}:{})}};
+  const displayed=policy?featuredSlots(c.records,policy).filter((r):r is ContentRecord=>Boolean(r)):c.records.filter(r=>!r.deleted);
+  if(mode==='published'&&!policy&&section.contentHub?.[c.binding.field]){const settings={...section.contentHub};delete settings[c.binding.field];section.contentHub=Object.keys(settings).length?settings:undefined;}
+  if(hideEmpty&&!displayed.length){page!.sections=page!.sections.filter(s=>s.id!==c.binding.sectionId);continue;}
+  const rows=displayed.map(r=>overlayRaw(c.binding.module,r,config));
   (section.content as ObjectValue)[c.binding.field]=c.config.singleton?rows[0]:rows;
  }
  return parseSiteDefinition(next);
@@ -88,13 +99,19 @@ export function recordsFromLab(site:SiteDefinition,collection:BoundCollection):C
  const section=site.pages.find(p=>p.id===collection.binding.pageId)?.sections.find(s=>s.id===collection.binding.sectionId);
  if(!section)return collection.records;
  const value=(section.content as ObjectValue)[collection.binding.field],raws=Array.isArray(value)?value:[value];
- const editedRecords=raws.filter(Boolean).map((raw,i)=>{const objectRaw=object(raw),source=str(objectRaw.id??objectRaw.productId??object(objectRaw.product).productId),existing=collection.records.find(r=>collection.config.sourceIds[r.id]===source)||collection.records.filter(r=>!r.deleted)[i],id=existing?.id??stableId(`${collection.binding.key}:${source||i}`);
+ const editedRecords=raws.filter(Boolean).map((raw,i)=>{const objectRaw=object(raw),source=str(objectRaw.id??objectRaw.productId??object(objectRaw.product).productId),existing=source?collection.records.find(r=>collection.config.sourceIds[r.id]===source||`item-${r.id}`===source):collection.records.filter(r=>!r.deleted)[i],id=existing?.id??stableId(`${collection.binding.key}:${source||i}`);
   const ownedMedia=existing&&'media' in existing.data?existing.data.media.flatMap(m=>[m.id,m.posterId].filter(Boolean)):[];
   const portableRaw=JSON.parse(JSON.stringify(objectRaw,(_key,value)=>typeof value==='string'&&ownedMedia.some(mediaId=>value.includes(`/media/${mediaId}?`))?value.replace(/&draft=1(?=&|$)/g,''):value));
   const record=recordFromRaw(collection.binding.module as Exclude<ContentModule,'blog'>,portableRaw,id,existing?.slug??slug(str(objectRaw.title)||`${collection.binding.field}-${i}`));
   if(existing&&'media' in record.data&&'media' in existing.data){const oldMedia=existing.data.media;record.data.media=record.data.media.map((m,j)=>{const old=oldMedia[j];if(!old?.id||!m.src.includes(`/media/${old.id}?`))return m;const next={...old,alt:m.alt,caption:m.caption};if(old.posterId&&!m.poster?.includes(`/media/${old.posterId}?`)){delete next.posterId;next.poster=m.poster;}return next;});}
   return {...record,featured:existing?.featured??false,...(existing?.featuredOrder?{featuredOrder:existing.featuredOrder}:{}),...(existing&&'placeholder' in existing.data&&'placeholder' in record.data?{data:{...record.data,placeholder:existing.data.placeholder}}:{})};
  });
+ const setting=section.contentHub?.[collection.binding.field];
+ if(setting||collection.config.featuredSlotBudget){
+  const chosen=setting?editedRecords.filter(r=>!setting.mediaType||'media' in r.data&&r.data.media.some(m=>m.type===setting.mediaType)).slice(0,setting.capacity).map(r=>r.id):[];
+  const merge=(record:ContentRecord)=>{const updated=editedRecords.find(r=>r.id===record.id)??record,index=chosen.indexOf(record.id);const next={...updated,featured:index>=0};delete next.featuredOrder;if(index>=0)next.featuredOrder=index+1;return next;};
+  return [...editedRecords.filter(r=>!collection.records.some(old=>old.id===r.id)).map(merge),...collection.records.map(merge)];
+ }
  const retained=collection.records.filter(old=>!editedRecords.some(r=>r.id===old.id)).map(old=>({...old,deleted:true}));
  return [...editedRecords,...retained];
 }
@@ -102,4 +119,16 @@ export function recordsFromLab(site:SiteDefinition,collection:BoundCollection):C
 function editableFields(kind:ContentModule,rows:ObjectValue[]):string[]{
  const fields=new Set(['title']);for(const original of rows){const row=object(original.product??original);if(['description','note','summary','narrative','body'].some(k=>k in row))fields.add('description');for(const name of ['category','brand','context','tags'])if(name in row)fields.add(name);if(['image','scene','video','media'].some(k=>k in row))fields.add('media');if('detail' in row||'destination' in row)fields.add('link');}
  if(kind==='testimonials')return ['title','quote','attribution','role','company','media'];if(kind==='faq')return ['title','answer'];if(kind==='products'){fields.add('priceLabel');fields.add('providerRef');}return [...fields];
+}
+
+export function featureConfig(config:FeatureConfig):FeatureConfig{return {featuredSlotBudget:config.featuredSlotBudget??0,featuredLabel:config.featuredLabel,featuredMediaType:config.featuredMediaType,featuredRequireFull:config.featuredRequireFull,featuredMinimum:config.featuredMinimum??0};}
+export function configForPublished(config:AdapterConfig):AdapterConfig{return config.publishedFeatured?{...config,...featureConfig(config.publishedFeatured)}:config;}
+export function sectionFeatureConfig(section:{component:keyof typeof sectionSchemas;contentHub?:import('@/design-engine/content/settings').ContentHubSettings},field:string):FeatureConfig{
+ const setting=section.contentHub?.[field];if(!setting)return {featuredSlotBudget:0,featuredMinimum:0,featuredRequireFull:false,featuredLabel:undefined,featuredMediaType:undefined};
+ const capability=collectionCapabilities(section.component,sectionSchemas[section.component]).find(c=>c.field===field);
+ return {featuredSlotBudget:setting.capacity,featuredLabel:setting.label,featuredMediaType:setting.mediaType,featuredMinimum:capability?.minimum??0,featuredRequireFull:capability?.minimum===setting.capacity};
+}
+export function configFromLab(site:SiteDefinition,collection:BoundCollection):AdapterConfig{
+ const section=site.pages.find(p=>p.id===collection.binding.pageId)?.sections.find(s=>s.id===collection.binding.sectionId);if(!section)return collection.config;
+ return {...collection.config,...sectionFeatureConfig(section,collection.binding.field),publishedFeatured:collection.config.publishedFeatured??featureConfig(collection.config)};
 }

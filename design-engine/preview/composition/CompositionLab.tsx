@@ -1,4 +1,5 @@
 "use client";
+import {ContentHubControls} from "./ContentHubControls";
 import { ComponentPresentationControls, TestimonialPortraitControls } from "./ComponentPresentationControls";
 import { PresentationControls } from "./PresentationControls";
 import { ComponentMotionControls } from "./ComponentMotionControls";
@@ -284,6 +285,7 @@ export function CompositionLab({ workspaceSwitch, project }: { workspaceSwitch?:
   const sectionControls = <>{selectionControls}{current && <ComponentPresentationControls key={`custom-${pageId}-${current.id}`} section={current} onChange={updateSection}/>}{current && <PresentationControls key={`presentation-${pageId}-${current.id}-${current.component}`} value={current.presentation} inherited={resolvePresentation(composition.site.presentation,composition.presentation)} navigation={current.component.startsWith("navigation.")} onChange={presentation => updateSection(transitionSection(current,{presentation}).section)}/>}{current ? <SectionInspector key={`design-${pageId}-${current.id}-${current.component}`} section={current} composition={composition} width={device === "mobile" ? 390 : device === "tablet" ? 768 : 1440} onChange={updateSection} onPreview={(candidate, label) => setSectionPreview(previous => candidate ? { base: current, candidate, label } : previous?.label === label ? null : previous)} /> : <p>Add a section to begin.</p>}</>;
   const contentControls = <>{selectionControls}{current && <>
     <ActionEditor key={`actions-${pageId}-${current.id}-${current.component}`} site={site} section={current} onChange={updateSection} onPreview={candidate => setSectionPreview(candidate ? { base: current, candidate, label: "Contextual actions" } : null)} onSiteChange={commitSite} onOpenPages={() => setTab("pages")}/>
+    <ContentHubControls section={current} onChange={updateSection}/>
     <CreatorContentEditor key={`creator-${pageId}-${current.id}-${current.component}`} section={current} onChange={updateSection}/>
     <EndingContentEditor key={`ending-${pageId}-${current.id}-${current.component}`} site={site} section={current} onChange={updateSection}/>
     {!current.component.startsWith("navigation.") && !["about.creator-profile", "proof.social-reach"].includes(current.component) && !endingSectionIds.includes(current.component as EndingSectionId) && <ContentFields key={`copy-${pageId}-${current.id}-${current.component}`} section={current} onChange={updateSection}/>}

@@ -37,7 +37,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
       getOrgDomains(ctx.organization.id),
       getOrgSubscription(ctx.organization.id),
     ]);
-    const contentAccess = (await contentSites(await createClient(),ctx.organization.id)).some(site=>site.access);
+    const contentWebsites=await contentSites(await createClient(),ctx.organization.id);
+    const contentAccess=contentWebsites.some(site=>site.access),contentLaunchLocked=!contentAccess&&contentWebsites.some(site=>site.eligible);
     // Build reviews belong to the Professional project, independently of the
     // ongoing Requests entitlement. Keep the nav quiet until the project is
     // in a state where a customer can reasonably expect a review surface.
@@ -83,7 +84,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           ...(onboardingNeedsAttention ? [{ href: "/dashboard/onboarding", label: "Getting set up", icon: "virtue" as const, attention: true }] : []),
           { href: "/dashboard", label: "Overview", icon: "overview", exact: true, attention: anythingNeedsAttention },
           ...(showWebsitePreview(websites) ? [{ href: "/dashboard/website", label: "Website Preview", icon: "website" as const, attention: websiteNeedsAttention }] : []),
-          { href: "/dashboard/content", label: "Content Hub", icon: "blog", premium: true, locked: !contentAccess },
+          { href: "/dashboard/content", label: "Content Hub", icon: "blog", premium: true, locked: !contentAccess, launchLocked:contentLaunchLocked },
           { href: "/dashboard/files", label: "Files", icon: "files" },
           { href: "/dashboard/requests", label: "Requests", icon: "requests", premium: true, locked: !ent.enabled(FEATURES.requests) },
           { href: "/dashboard/domain", label: "Domain", icon: "domain", attention: domainNeedsAttention },

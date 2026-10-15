@@ -1,3 +1,4 @@
+import {featuredDisplaySection} from '../content/settings';
 import { PresentationSurface } from "../presentation/PresentationSurface";
 import { resolvePresentation } from "../presentation/schema";
 import { EditorialConversion, SignalConversion } from "../sections/endings/Conversion";
@@ -109,6 +110,7 @@ import type { PageComposition, SectionInstance } from "./schemas";
 
 /** Exhaustive, typed implementation routing. It contains no calibration copy/media. */
 export function renderSection(section: SectionInstance): ReactNode {
+  section=featuredDisplaySection(section);
   return <div className="de-section-layout" data-width={section.sectionWidth ?? "default"}><SectionActionProvider section={section}>{renderSectionBody(section)}</SectionActionProvider></div>;
 }
 function renderSectionBody(section: SectionInstance): ReactNode {

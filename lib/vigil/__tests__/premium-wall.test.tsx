@@ -13,6 +13,14 @@ describe('paid feature presentation',()=>{
   expect(html).not.toContain('Download your content');expect(html).not.toContain('PRIVATE CUSTOMER RECORD');expect(html).not.toContain('/api/content/website/export');
   expect(html).toContain('aria-hidden="true" inert=""');expect(html).toContain('role="dialog"');expect(html).toContain('View upgrade options');
  });
+ it('shows a launch wall without an upsell or download to entitled prelaunch customers',()=>{
+  const html=renderToStaticMarkup(<ContentHub sites={[{id:'website',name:'Customer',access:false,eligible:true,kind:'professional',status:'building'}]} selected="website" canWrite previews={{}} blog={null} collections={[]}/>);
+  expect(html).toContain('Your Content Hub opens at launch');expect(html).toContain('Included in your plan');expect(html).toContain('View website status');expect(html).not.toContain('View upgrade options');expect(html).not.toContain('Download your content');
+ });
+ it('keeps prelaunch staff access editable when the server grants it',()=>{
+  const html=renderToStaticMarkup(<ContentHub sites={[{id:'website',name:'Customer',access:true,eligible:true,kind:'professional',status:'building'}]} selected="website" canWrite previews={{}} blog={null} collections={[]}/>);
+  expect(html).toContain('Download your content');expect(html).not.toContain('premium-stage');
+ });
  it('uses the same dialog for Requests and never upsells an already entitled coming-soon feature',()=>{
   const locked=renderToStaticMarkup(<GatedFeature title="Requests" description="Website updates" planHint="Care and higher"/>);
   expect(locked).toContain('premium-stage');expect(locked).toContain('Unlock Requests');
