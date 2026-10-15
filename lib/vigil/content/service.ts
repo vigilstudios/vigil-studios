@@ -7,6 +7,7 @@ import {ForbiddenError,ValidationError} from '@/lib/vigil/auth/errors';
 import {moduleSchema,bindingSchema,parseRecords,publicationIssues,type ContentRecord} from './contract';
 import {applyBindings,discoverBindings,type BoundCollection,type AdapterConfig} from './professional';
 import {publicRecords} from './media';
+import {featuredIssues,featuredPolicy} from './featured';
 import {projectDocument} from '@/lib/vigil/professional/document';
 export async function contentSites(client:DbClient,org:string){
  const {data,error}=await client.from('websites').select('id,name,status,project_id,live_url,preview_url').eq('organization_id',org).order('created_at');if(error)throw error;
@@ -24,7 +25,7 @@ export async function authorizeCollection(client:DbClient,org:string,id:string){
 }
 export async function validateDelivery(admin:DbClient,website:string,org:string,collectionId:string,records:ContentRecord[]){
  const collections=await contentCollections(admin,website,org,'published');const collection=collections.find(c=>c.id===collectionId);if(!collection)throw new ForbiddenError();
- if(collection.binding.adapter==='standalone'&&collection.config.featuredSlotBudget&&records.filter(r=>!r.deleted&&r.featured&&'media' in r.data&&r.data.media.some(m=>m.type==='video')).length!==collection.config.featuredSlotBudget)throw new ValidationError(`Choose exactly ${collection.config.featuredSlotBudget} featured videos for the existing homepage slots. New entries can remain in the full collection.`);
+ const features=featuredIssues(records,featuredPolicy(collection.config,collection.binding.module,collection.binding.adapter),true);if(features.length)throw new ValidationError(features[0]);
  if(collection.binding.adapter==='professional'){
   const {data:workspace,error}=await admin.from('design_workspaces').select('site_definition,project_id').eq('website_id',website).eq('organization_id',org).maybeSingle();if(error)throw error;if(!workspace)throw new ValidationError('The website binding needs attention from Vigil. Your published content is unchanged.');
   try{applyBindings(projectDocument(workspace.site_definition,workspace.project_id),collections.filter(c=>c.binding.adapter==='professional'&&(c.id===collectionId||c.publishedRevision!==null)).map(c=>({...c,records:publicRecords(c.id===collectionId?records:c.records,website,c.id,true)})),true);}catch{throw new ValidationError('These entries do not fit the website section. Check required fields and the number of entries. Your published version is unchanged.');}
@@ -33,6 +34,7 @@ export async function validateDelivery(admin:DbClient,website:string,org:string,
 export async function saveCollection(client:DbClient,org:string,actor:string,id:string,expected:number,input:unknown,intent:'draft'|'publish'|'unpublish'|'trash'){
  const c=await authorizeCollection(client,org,id),contentModule=moduleSchema.exclude(['blog']).parse(c.module),records=parseRecords(contentModule,input),admin=createAdminClient();
  const current=(await contentCollections(admin,c.website_id,org)).find(v=>v.id===id);
+ if(current){const issues=featuredIssues(records,featuredPolicy(current.config,current.binding.module,current.binding.adapter));if(issues.length)throw new ValidationError(issues[0]);}
  if(contentModule==='testimonials'&&current?.records.some(old=>'placeholder' in old.data&&old.data.placeholder&&records.some(r=>r.id===old.id&&'placeholder' in r.data&&!r.data.placeholder)))throw new ForbiddenError('Review placeholders must remain marked until Vigil confirms publication permission.');
  if(current?.binding.adapter==='professional'&&records.some(r=>'media' in r.data&&r.data.media.length>(current.config.maxMedia??1)))throw new ValidationError('This website entry supports one primary media item. Replace it rather than appending extra media.');
  if(intent==='trash'){const published=(await contentCollections(admin,c.website_id,org,'published')).find(v=>v.id===id);if(published)await validateDelivery(admin,c.website_id,org,id,published.records.filter(r=>!records.some(n=>n.id===r.id&&n.deleted)));}
