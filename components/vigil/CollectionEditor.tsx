@@ -33,7 +33,7 @@ export function CollectionEditor({collection,website,canWrite,previews,persist=s
  function update(id:string,patch:Partial<ContentRecord>){change(records.map(r=>r.id===id?{...r,...patch}:r));}
  function field(name:string,value:unknown){if(current)update(current.id,{data:{...current.data,[name]:value} as ContentRecord['data']});}
  function move(id:string,by:number){const index=records.findIndex(r=>r.id===id),target=index+by;if(target<0||target>=records.length)return;const next=[...records];[next[index],next[target]]=[next[target],next[index]];change(next);}
- function add(){const id=crypto.randomUUID(),slug=`entry-${id.slice(0,8)}`,data=payloadSchemas[contentModule].parse(contentModule==='testimonials'?{title:'',quote:'',attribution:''}:contentModule==='faq'?{title:'',answer:''}:{title:''});change([...records,{id,slug,data,deleted:false,featured:false}]);setActive(id);setFilter('all');}
+ function add(){const id=crypto.randomUUID(),slug=`entry-${id.slice(0,8)}`,data=payloadSchemas[contentModule].parse(contentModule==='testimonials'?{title:'',quote:'',attribution:''}:contentModule==='faq'?{title:'',answer:''}:{title:''});change([{id,slug,data,deleted:false,featured:false},...records]);setActive(id);setFilter('all');}
  async function save(intent:'draft'|'publish'|'unpublish'|'trash',next=records):Promise<boolean>{
   if(pending||uploading){setError('Finish the current save or upload before continuing.');return false;}
   if(intent==='draft'&&sameContent(next,savedRecords))return true;
