@@ -1,0 +1,18 @@
+{
+ "environment":"isolated local UI fixture; removed before release",
+ "customerWrites":0,
+ "postSavesOrPublishes":0,
+ "checks":{
+  "filterButtonsZeroRadiusAndStraightShadow":true,
+  "searchAndVideoFiltering":true,
+  "existingMOVSelectionAttachesInMemoryWithoutUpload":true,
+  "imageOnlyPosterPicker":true,
+  "posterSelectionAttachesToVideo":true,
+  "videoControlsRendered":true,
+  "desktopPickerSpansFullFieldset":true,
+  "desktopPickerAndFieldsetWidth":710,
+  "phoneViewport":390,
+  "phonePickerWidth":316,
+  "phonePickerScrollWidth":314
+ }
+}

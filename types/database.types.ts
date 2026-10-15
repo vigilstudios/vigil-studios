@@ -3247,6 +3247,10 @@ export type Database = {
         Args: { p_actor_id: string; p_organization_id: string }
         Returns: undefined
       }
+      attach_content_library_media: {
+        Args: { p_asset: string; p_collection: string }
+        Returns: undefined
+      }
       capture_website_lead: {
         Args: {
           p_contact: Json
