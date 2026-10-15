@@ -1,0 +1,15 @@
+{
+  "environment": "isolated local SSR collection fixture",
+  "newPost": {
+    "title": "A new event post",
+    "caption": "a night worth remembering",
+    "category": "EVENTS",
+    "marker": "COLLAB",
+    "ordinalAbsent": true
+  },
+  "legacyQuirkCaptionRetained": true,
+  "phoneViewport": 390,
+  "detailWidth": 366,
+  "detailScrollWidth": 366,
+  "customerWrites": 0
+}

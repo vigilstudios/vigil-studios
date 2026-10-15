@@ -1,0 +1,35 @@
+
+> scarlen-lopez-portfolio@0.1.0 test:seo
+> node --test scripts/seo.test.mjs scripts/responsive-images.test.mjs
+
+✔ responsive builder handles spaces, retains transparency and leaves original artwork unchanged (230.573667ms)
+✔ article body, safe literal content, headings, stable image and article metadata are in initial HTML (27.424541ms)
+✔ every native route server renders its content without browser globals (192.818708ms)
+✔ missing article, work, gallery and arbitrary routes return genuine 404 and noindex (2.531709ms)
+✔ preview stays noindex without visible preview banners and production can index (1.631792ms)
+✔ trailing slash and legacy testimonial page use permanent redirects (0.418666ms)
+✔ CMS failure is 503/noindex instead of empty article or false 404 (0.162958ms)
+✔ sitemap includes published dynamic posts and accurate edit dates; preview has no URLs (0.556292ms)
+✔ initial-data script escapes HTML closing tags rather than allowing injected scripts (0.960458ms)
+✔ CMS dollar replacement tokens stay literal in HTML and initial data (1.214042ms)
+✔ homepage Watch and footer anchors all have crawlable destinations (3.732ms)
+✔ transient upstream failure retries a fresh read but retains the actual published content (2.362ms)
+✔ a missing published article is returned immediately without retry or stale fallback (0.689333ms)
+✔ homepage first-render markup and decorative positions are deterministic for hydration (6.326792ms)
+✔ prepaint intro bootstrap preserves hydration markup and skips mobile, reduced motion and deep links (4.52075ms)
+✔ Content Hub records are indexable and retain marked testimonials and original detail addresses (5.593458ms)
+✔ a newly published collection entry has a stable true detail route and SEO metadata (2.759125ms)
+✔ content outage returns 503 instead of presenting stale removed entries as current content (0.082125ms)
+✔ bound edits reach existing curated homepage slots without appending cinematic chapters (2.846083ms)
+✔ unpublished portfolio never falls back to retained static camera clips or collaboration copy (2.772959ms)
+✔ a collection outage shows a clear pause without hydrating stale source records (0.091667ms)
+✔ post print captions are editable independently from titles and card labels omit ordinal prefixes (7.000083ms)
+✔ gallery print captions use media caption independently from the post title (1.399834ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 337.332792

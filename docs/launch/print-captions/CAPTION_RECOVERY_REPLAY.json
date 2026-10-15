@@ -1,0 +1,11 @@
+{
+  "mode": "apply",
+  "website": "490498f3-fa5f-4c08-a6d3-4943cb055795",
+  "collection": "cf22f486-6090-4a87-9584-c08e9083ec0e",
+  "expectedRevision": 7,
+  "sourceSha": "3954ad5dc0a29e1aafa0a7c723ace47ed2f4a250",
+  "manifestSha256": "a69173718cd69769750830dec3451756026b759031792283f83358b0e928464d",
+  "alreadyApplied": true,
+  "draftIds": [],
+  "publishedIds": []
+}

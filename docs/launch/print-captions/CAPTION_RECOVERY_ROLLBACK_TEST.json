@@ -1,0 +1,36 @@
+{
+  "mode": "dry-run",
+  "website": "490498f3-fa5f-4c08-a6d3-4943cb055795",
+  "collection": "cf22f486-6090-4a87-9584-c08e9083ec0e",
+  "expectedRevision": 5,
+  "sourceSha": "3954ad5dc0a29e1aafa0a7c723ace47ed2f4a250",
+  "manifestSha256": "a69173718cd69769750830dec3451756026b759031792283f83358b0e928464d",
+  "alreadyApplied": false,
+  "draftIds": [
+    "c5a202bc-7a0b-4848-a391-b0a60b61761e",
+    "e78a126e-e0c6-4b3e-a92a-0bd3a07c8ef2",
+    "bfccd75c-b0b4-49f5-a33e-a9ee365634ff",
+    "d7878e7e-e1f6-42f8-a1ee-5572654332ff",
+    "454f9023-cf83-4b65-a9c7-fa56b145fc44",
+    "9891a888-1b69-427c-af2d-7ce0a37b0fd0",
+    "f3532170-cb71-4362-a739-056a475fe024",
+    "9a77a223-3713-4239-a633-163ecf92dde2",
+    "733b691f-3769-487f-ae49-c0493d5400cb",
+    "2ea1412b-c06e-47b4-abc1-34c258fb75f1"
+  ],
+  "publishedIds": [
+    "c5a202bc-7a0b-4848-a391-b0a60b61761e",
+    "e78a126e-e0c6-4b3e-a92a-0bd3a07c8ef2",
+    "bfccd75c-b0b4-49f5-a33e-a9ee365634ff",
+    "d7878e7e-e1f6-42f8-a1ee-5572654332ff",
+    "454f9023-cf83-4b65-a9c7-fa56b145fc44",
+    "9891a888-1b69-427c-af2d-7ce0a37b0fd0",
+    "f3532170-cb71-4362-a739-056a475fe024",
+    "9a77a223-3713-4239-a633-163ecf92dde2",
+    "733b691f-3769-487f-ae49-c0493d5400cb",
+    "2ea1412b-c06e-47b4-abc1-34c258fb75f1"
+  ],
+  "resultRevision": 5,
+  "verified": true,
+  "rolledBack": true
+}
