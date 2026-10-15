@@ -1,0 +1,22 @@
+{
+ "environment":"isolated temporary local collection fixture; removed before release",
+ "source":"Original Night of Laughter MOV served by temporary local symlink; original file unchanged",
+ "customerWrites":0,
+ "checks":{
+  "movDuration":49.323,
+  "seekToSeconds":12.5,
+  "decodedFrameReadyState":4,
+  "capturedSecondVideoOnly":true,
+  "normalizedPosterWidth":900,
+  "normalizedPosterHeight":1600,
+  "uploadUsesExistingServerNormalizer":true,
+  "cancelPreservesCurrentPoster":true,
+  "simulatedUploadFailurePreservesCurrentPoster":true,
+  "retryWithAnotherFrameWorks":true,
+  "retriedFrameSeconds":24,
+  "newFrameImageDiffers":true,
+  "phoneViewport":390,
+  "phonePickerWidth":282,
+  "phonePickerScrollWidth":280
+ }
+}

@@ -43,8 +43,10 @@ export const getProjectAssets = cache(async (projectId: string): Promise<SignedA
   if (error) throw error;
   const rows = data ?? [];
   if (rows.length === 0) return [];
-  const { data: signed } = await supabase.storage.from(rows[0].bucket_id).createSignedUrls(rows.map((r) => r.object_path), 60 * 30);
-  const urls = new Map<string, string>();
-  for (const s of signed ?? []) if (s.signedUrl && s.path) urls.set(s.path, s.signedUrl);
-  return rows.map((r) => ({ id: r.id, kind: r.kind, file_name: r.file_name, content_type: r.content_type, size_bytes: r.size_bytes, caption: r.caption, url: urls.get(r.object_path) ?? null, object_path: r.object_path }));
+  const groups = await Promise.all([...new Set(rows.map(r => r.bucket_id))].map(async bucket => {
+    const { data: signed } = await supabase.storage.from(bucket).createSignedUrls(rows.filter(r => r.bucket_id === bucket).map(r => r.object_path), 60 * 30);
+    return (signed ?? []).flatMap(s => s.signedUrl && s.path ? [[`${bucket}:${s.path}`, s.signedUrl] as const] : []);
+  }));
+  const urls = new Map(groups.flat());
+  return rows.map((r) => ({ id: r.id, kind: r.kind, file_name: r.file_name, content_type: r.content_type, size_bytes: r.size_bytes, caption: r.caption, url: urls.get(`${r.bucket_id}:${r.object_path}`) ?? null, object_path: r.object_path }));
 });
