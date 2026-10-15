@@ -1,12 +1,12 @@
 import type {ContentModule,ContentRecord} from './contract';
-export type FeaturedPolicy={capacity:number;label:string;mediaType?:'image'|'video';requireFull:boolean};
-type FeaturedConfig={featuredSlotBudget?:number;featuredLabel?:string;featuredMediaType?:'image'|'video';featuredRequireFull?:boolean};
+export type FeaturedPolicy={capacity:number;label:string;mediaType?:'image'|'video';requireFull:boolean;minimum?:number};
+type FeaturedConfig={featuredSlotBudget?:number;featuredLabel?:string;featuredMediaType?:'image'|'video';featuredRequireFull?:boolean;featuredMinimum?:number};
 /** Only configured delivered sections expose featured slots. Legacy standalone Portfolio slots are videos. */
 export function featuredPolicy(config:FeaturedConfig,module:ContentModule,adapter:string):FeaturedPolicy|null {
  const capacity=config.featuredSlotBudget;
  if(!Number.isInteger(capacity)||!capacity||capacity<1||capacity>500)return null;
  const legacyVideo=adapter==='standalone'&&module==='portfolio';
- return {capacity,label:config.featuredLabel||(legacyVideo?'Homepage videos':'Featured posts'),mediaType:config.featuredMediaType??(legacyVideo?'video':undefined),requireFull:config.featuredRequireFull??legacyVideo};
+ return {capacity,label:config.featuredLabel||(legacyVideo?'Homepage videos':'Featured posts'),mediaType:config.featuredMediaType??(legacyVideo?'video':undefined),requireFull:config.featuredRequireFull??legacyVideo,...(config.featuredMinimum?{minimum:config.featuredMinimum}:{})};
 }
 export function canFeatureRecord(row:ContentRecord,policy:FeaturedPolicy){return !row.deleted&&(!policy.mediaType||'media' in row.data&&row.data.media.some(m=>m.type===policy.mediaType));}
 /** Explicit positions take precedence; old checkbox selections keep their existing relative order. */
@@ -35,6 +35,7 @@ export function featuredIssues(records:ContentRecord[],policy:FeaturedPolicy|nul
  if(selected.some(r=>!canFeatureRecord(r,policy)))return [`Featured positions require ${policy.mediaType==='video'?'a video':'an image'} on each selected post.`];
  const ranks=selected.flatMap(r=>r.featuredOrder===undefined?[]:[r.featuredOrder]);
  if(ranks.some(n=>!Number.isInteger(n)||n<1||n>policy.capacity)||new Set(ranks).size!==ranks.length||records.some(r=>!r.deleted&&!r.featured&&r.featuredOrder!==undefined))return ['Choose a different post for each featured position.'];
+ if(publish&&policy.minimum&&selected.length<policy.minimum)return [`Choose at least ${policy.minimum} featured posts before publishing. You can save an incomplete selection as a draft.`];
  if(publish&&policy.requireFull&&selected.length!==policy.capacity)return [`Fill all ${policy.capacity} featured positions before publishing. You can save an incomplete selection as a draft.`];
  return [];
 }

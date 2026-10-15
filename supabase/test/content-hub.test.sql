@@ -32,10 +32,20 @@ insert into public.website_content_collections(id,website_id,organization_id,key
 ('cb000000-0000-4000-8000-000000000041','cb000000-0000-4000-8000-000000000021','cb000000-0000-4000-8000-000000000011','portfolio','portfolio','Portfolio','work','work','projects','standalone'),
 ('cb000000-0000-4000-8000-000000000042','cb000000-0000-4000-8000-000000000022','cb000000-0000-4000-8000-000000000012','gallery','gallery','Gallery','gallery','gallery','photos','standalone'),
 ('cb000000-0000-4000-8000-000000000043','cb000000-0000-4000-8000-000000000021','cb000000-0000-4000-8000-000000000011','blog','blog','Blog','blog','blog','posts','blog');
-select hub_test.ok(vigil.content_access('cb000000-0000-4000-8000-000000000021'),'paid prelaunch Care authoring preserved');
+select hub_test.ok(vigil.content_access('cb000000-0000-4000-8000-000000000021'),'paid Care eligibility preserved independently of launch');
 select hub_test.ok(vigil.content_access('cb000000-0000-4000-8000-000000000022'),'second tenant Growth Site eligible');
 select hub_test.ok(not vigil.content_access('cb000000-0000-4000-8000-000000000023'),'Basic cannot borrow another websites premium subscription');
 select hub_test.ok(not vigil.content_access('cb000000-0000-4000-8000-000000000024'),'Express denied with Priority and another eligible website');
+-- Before launch customers cannot read or mutate through any authoring boundary.
+select set_config('request.jwt.claims','{"sub":"cb000000-0000-4000-8000-000000000001","role":"authenticated"}',true);set local role authenticated;
+select hub_test.ok(public.website_content_eligibility('cb000000-0000-4000-8000-000000000021') and not public.website_content_access('cb000000-0000-4000-8000-000000000021'),'eligible prelaunch customer receives launch wall');
+select hub_test.ok((select count(*)=0 from public.website_content_collections),'prelaunch collections hidden by RLS');
+select hub_test.fails($q$select public.save_website_blog_post('cb000000-0000-4000-8000-000000000021','blocked','Blocked','Excerpt','Body',false)$q$,'legacy Blog authoring also locked before launch');
+select hub_test.fails($q$select public.reserve_content_media('cb000000-0000-4000-8000-000000000041',gen_random_uuid(),'blocked.mp4','video/mp4',100)$q$,'prelaunch media reservation denied');
+reset role;select set_config('request.jwt.claims','{"role":"service_role"}',true);set local role service_role;
+select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000041',1,'[]','draft','cb000000-0000-4000-8000-000000000001')$q$,'service boundary cannot bypass prelaunch owner gate');
+reset role;
+update public.websites set status='live' where id='cb000000-0000-4000-8000-000000000021';
 select hub_test.ok((select array_agg(module order by module)=array['blog','portfolio'] from public.website_content_collections where website_id='cb000000-0000-4000-8000-000000000021'),'only configured Blog and Portfolio modules');
 select set_config('request.jwt.claims','{"sub":"cb000000-0000-4000-8000-000000000001","role":"authenticated"}',true);set local role authenticated;
 select hub_test.ok((select count(*)=2 from public.website_content_collections),'tenant A sees only its own bindings');
@@ -79,7 +89,9 @@ insert into public.staff_members(user_id,role) values('cb000000-0000-4000-8000-0
 insert into public.design_workspaces(project_id,website_id,organization_id,site_definition,engine_version) values('cb000000-0000-4000-8000-000000000033','cb000000-0000-4000-8000-000000000023','cb000000-0000-4000-8000-000000000011','{}','v1-test');
 select public.save_content_design_workspace('cb000000-0000-4000-8000-000000000033',1,'{"title":"Staff Basic build"}',jsonb_build_array(jsonb_build_object('id','cb000000-0000-4000-8000-000000000045','revision',1,'records',current_setting('hub_test.rows')::jsonb)),'cb000000-0000-4000-8000-000000000001','v1-test');
 select hub_test.ok((select revision=2 from public.design_workspaces where project_id='cb000000-0000-4000-8000-000000000033'),'staff-only Lab still builds a paid Professional Basic website');
-select hub_test.ok(not public.website_content_access('cb000000-0000-4000-8000-000000000023'),'Basic Hub guard remains locked even in staff customer view');
+select set_config('request.jwt.claims','{"sub":"cb000000-0000-4000-8000-000000000001","role":"authenticated"}',true);
+select hub_test.ok(public.website_content_access('cb000000-0000-4000-8000-000000000023'),'staff customer view retains Basic authoring access');
+select set_config('request.jwt.claims','{"role":"service_role"}',true);
 select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000046',1,current_setting('hub_test.rows')::jsonb,'draft','cb000000-0000-4000-8000-000000000001')$q$,'staff Lab cannot enable Express collections');
 
 update public.subscriptions set status='active',current_period_end=now()+interval '30 days' where website_id='cb000000-0000-4000-8000-000000000021';
@@ -109,7 +121,7 @@ select hub_test.fails($q$select public.attach_content_library_media('cb000000-00
 select hub_test.fails($q$select public.attach_content_library_media('cb000000-0000-4000-8000-000000000047','cb000000-0000-4000-8000-000000000055')$q$,'document cannot become playable content');
 select hub_test.fails($q$select public.attach_content_library_media('cb000000-0000-4000-8000-000000000047','cb000000-0000-4000-8000-000000000053')$q$,'unuploaded Files row denied');
 select hub_test.fails($q$select public.attach_content_library_media('cb000000-0000-4000-8000-000000000043','cb000000-0000-4000-8000-000000000052')$q$,'Blog cannot borrow collection media authority');
-select hub_test.fails($q$select public.attach_content_library_media('cb000000-0000-4000-8000-000000000045','cb000000-0000-4000-8000-000000000052')$q$,'Basic locked for existing Files too');
+select hub_test.fails($q$select public.attach_content_library_media('cb000000-0000-4000-8000-000000000045','cb000000-0000-4000-8000-000000000052')$q$,'staff cannot reuse a different project file');
 select public.attach_content_library_media('cb000000-0000-4000-8000-000000000047','cb000000-0000-4000-8000-000000000052');
 select public.attach_content_library_media('cb000000-0000-4000-8000-000000000047','cb000000-0000-4000-8000-000000000052');
 reset role;
@@ -151,6 +163,17 @@ select public.save_website_content('cb000000-0000-4000-8000-000000000048',2,curr
 select hub_test.ok((select revision=3 and published_revision=2 and draft->0->'featured'='false'::jsonb and published->0->>'featuredOrder'='2' from public.website_content_collections where id='cb000000-0000-4000-8000-000000000048'),'incomplete draft remains private and previous positions stay published');
 select public.save_website_content('cb000000-0000-4000-8000-000000000048',3,current_setting('hub_test.feature_partial')::jsonb,'unpublish','cb000000-0000-4000-8000-000000000001');
 select hub_test.ok((select published='[]'::jsonb from public.website_content_collections where id='cb000000-0000-4000-8000-000000000048'),'unpublish still preserves incomplete draft without public slots');
+reset role;
+
+update public.website_content_collections set adapter='professional' where id='cb000000-0000-4000-8000-000000000048';
+-- Changing Lab capacity must preserve the old published policy and rows until Publish.
+select set_config('request.jwt.claims','{"role":"service_role"}',true);set local role service_role;
+select public.save_website_content('cb000000-0000-4000-8000-000000000048',4,current_setting('hub_test.feature_rows')::jsonb,'publish','cb000000-0000-4000-8000-000000000001');
+select set_config('hub_test.one_feature',jsonb_set(current_setting('hub_test.feature_rows')::jsonb #- '{0,featuredOrder}','{0,featured}','false')::text,true);
+select public.save_content_design_workspace('cb000000-0000-4000-8000-000000000031',2,'{"title":"New capacity"}',jsonb_build_array(jsonb_build_object('id','cb000000-0000-4000-8000-000000000048','revision',5,'config','{"featuredSlotBudget":1,"featuredMediaType":"video","featuredRequireFull":true}'::jsonb,'records',current_setting('hub_test.one_feature')::jsonb)),'cb000000-0000-4000-8000-000000000001','v1-test');
+select hub_test.ok((select config->>'featuredSlotBudget'='1' and config->'publishedFeatured'->>'featuredSlotBudget'='2' and published_revision=5 and published->0->>'featuredOrder'='2' from public.website_content_collections where id='cb000000-0000-4000-8000-000000000048'),'Lab saves draft capacity without rewriting published positions');
+select public.save_website_content('cb000000-0000-4000-8000-000000000048',6,current_setting('hub_test.one_feature')::jsonb,'publish','cb000000-0000-4000-8000-000000000001');
+select hub_test.ok((select config->'publishedFeatured'->>'featuredSlotBudget'='1' and published_revision=7 from public.website_content_collections where id='cb000000-0000-4000-8000-000000000048'),'Publish commits policy and selected rows atomically');
 reset role;
 
 update public.websites set status='archived' where id='cb000000-0000-4000-8000-000000000022';

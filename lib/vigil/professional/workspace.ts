@@ -1,7 +1,7 @@
 import "server-only";
 import {createAdminClient} from '@/lib/supabase/admin';
 import {ensureProfessionalBindings,contentCollections} from '@/lib/vigil/content/service';
-import {applyBindings,recordsFromLab} from '@/lib/vigil/content/professional';
+import {applyBindings,recordsFromLab,configFromLab} from '@/lib/vigil/content/professional';
 import {publicRecords} from '@/lib/vigil/content/media';
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -70,7 +70,7 @@ export async function loadProjectWorkspace(client: DbClient, projectId: string) 
   const document=projectDocument(workspace.site_definition,project.id);
   const collections=await ensureProfessionalBindings(createAdminClient(),website.id,project.organization_id,document);
   const bound=collections.filter(c=>c.binding.adapter==='professional');
-  const editorSite=applyBindings(document,bound.map(c=>({...c,records:publicRecords(c.records,website.id,c.id,true).map(r=>({...r,data:'media' in r.data?{...r.data,media:r.data.media.map(m=>({...m,src:m.id?m.src+'&draft=1':m.src,poster:m.posterId?m.poster+'&draft=1':m.poster}))}:r.data}))})));
+  const editorSite=applyBindings(document,bound.map(c=>({...c,records:publicRecords(c.records,website.id,c.id,true).map(r=>({...r,data:'media' in r.data?{...r.data,media:r.data.media.map(m=>({...m,src:m.id?m.src+'&draft=1':m.src,poster:m.posterId?m.poster+'&draft=1':m.poster}))}:r.data}))})),false,'draft');
   return { project, website, contentRevisions:Object.fromEntries(bound.map(c=>[c.id,c.revision])), workspace: { ...workspace, site_definition: editorSite },
     customer: org.data, creative: creative.data, deployments: deployments.data ?? [], repository,
     assets: media, brief: parseBrief(project.brief) };
@@ -85,9 +85,9 @@ export async function saveProjectSite(client: DbClient, projectId: string, input
   const admin=providedAdmin??createAdminClient(),collections=await contentCollections(admin,website.id,project.organization_id);
   const bound=collections.filter(c=>c.binding.adapter==='professional');
   if(bound.some(c=>contentRevisions[c.id]!==c.revision))throw new ValidationError("Content changed in the Hub. Reload the workspace before saving; your unsaved design remains here.");
-  const changes=bound.map(c=>({id:c.id,revision:c.revision,records:recordsFromLab(site,c)}));
+  const changes=bound.map(c=>({id:c.id,revision:c.revision,config:configFromLab(site,c),records:recordsFromLab(site,c)}));
   // Persist portable publication references, never editor signing addresses.
-  const portable=applyBindings(site,bound.map(c=>({...c,records:publicRecords(changes.find(v=>v.id===c.id)!.records,website.id,c.id,true)})));
+  const portable=applyBindings(site,bound.map(c=>({...c,records:publicRecords(changes.find(v=>v.id===c.id)!.records,website.id,c.id,true),config:changes.find(v=>v.id===c.id)!.config})),false,'draft');
   assertPortableSources(portable);
   const {data,error}=await admin.rpc('save_content_design_workspace',{p_project:project.id,p_expected:revision,p_site:portable as unknown as Json,p_collections:changes as unknown as Json,p_actor:userId,p_engine:(await runtimeManifest()).version});
   if(error)throw new ValidationError((error.code==='PT409'||error.code==='40001')?"Another editor saved this project or its bound content. Reload before saving; your unsaved changes remain here.":"The workspace could not be saved.");

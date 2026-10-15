@@ -3487,6 +3487,10 @@ export type Database = {
         Args: { p_review?: boolean; p_website: string }
         Returns: boolean
       }
+      website_content_eligibility: {
+        Args: { p_website: string }
+        Returns: boolean
+      }
     }
     Enums: {
       actor_kind: "user" | "staff" | "system" | "provider"
@@ -3656,6 +3660,13 @@ export type Database = {
         Returns: string[]
       }
       content_access: { Args: { p_website: string }; Returns: boolean }
+      content_authoring_access: {
+        Args: { p_actor: string; p_website: string }
+        Returns: boolean
+      }
+      content_eligible: { Args: { p_website: string }; Returns: boolean }
+      content_feature_config: { Args: { p_config: Json }; Returns: Json }
+      content_viewable: { Args: { p_website: string }; Returns: boolean }
       current_email: { Args: never; Returns: string }
       decline_invitation: { Args: { p_invite: string }; Returns: undefined }
       ensure_contact_recipient: {
