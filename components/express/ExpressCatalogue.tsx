@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { CampaignLink } from "@/components/creators/CampaignLink";
 import { withPurchasePreference, type PurchasePreference } from "@/lib/vigil/package-finder";
@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUpRight,
+  ChevronDown,
   Hammer,
   Lock,
   Monitor,
@@ -79,6 +80,40 @@ function readableAccentText(hex: string) {
   return luminance > 0.42 ? "#07120a" : "#ffffff";
 }
 
+// Render at a real device viewport, then scale every pixel together. Measuring
+// the content box also accounts for borders and arbitrary host screen widths.
+function ScaledViewport({ mode, children }: { mode: ViewMode; children: ReactNode }) {
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const width = mode === "desktop" ? 1200 : 390;
+  const height = mode === "desktop" ? 700 : 844;
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const updateScale = (renderedWidth: number) => {
+      viewport.style.setProperty("--preview-scale", String(renderedWidth / width));
+    };
+    updateScale(Number.parseFloat(getComputedStyle(viewport).width));
+    const observer = new ResizeObserver(([entry]) => updateScale(entry.contentRect.width));
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [width]);
+
+  return (
+    <div
+      ref={viewportRef}
+      className={styles.viewport}
+      style={{
+        aspectRatio: `${width} / ${height}`,
+        "--preview-width": `${width}px`,
+        "--preview-height": `${height}px`,
+      } as CSSProperties}
+    >
+      {children}
+    </div>
+  );
+}
+
 function PreviewPeek({
   template,
   side,
@@ -117,7 +152,7 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
   const [industryIndex, setIndustryIndex] = useState(0);
   const [variantIndex, setVariantIndex] = useState(0);
   const [direction, setDirection] = useState(1);
-  const [viewMode, setViewMode] = useState<ViewMode>("desktop");
+  const [viewMode, setViewMode] = useState<ViewMode | null>(null);
   const [replayVersion, setReplayVersion] = useState(0);
   const industryTabsRef = useRef<HTMLDivElement>(null);
   const isMobileViewport = useSyncExternalStore(
@@ -125,7 +160,7 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
     getMobileViewportSnapshot,
     getServerMobileViewportSnapshot
   );
-  const effectiveViewMode = isMobileViewport ? "mobile" : viewMode;
+  const effectiveViewMode = viewMode ?? (isMobileViewport ? "mobile" : "desktop");
 
   const group = industries[industryIndex];
   const active = group.variants[variantIndex] ?? group.variants[0];
@@ -213,74 +248,57 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
           </div>
 
           <div className={styles.variantRow}>
-            <div className={styles.previewTools}>
-              <div className={styles.viewSwitch} role="group" aria-label="Preview size">
-                {(["desktop", "mobile"] as const).map((mode) => (
-                  <button
-                    key={mode}
-                    type="button"
-                    aria-label={mode === "desktop" ? "Desktop" : "Mobile"}
-                    aria-pressed={effectiveViewMode === mode}
-                    disabled={isMobileViewport && mode === "desktop"}
-                    title={
-                      isMobileViewport && mode === "desktop"
-                        ? "Desktop preview is available on larger screens"
-                        : `${mode === "desktop" ? "Desktop" : "Mobile"} preview`
-                    }
-                    onClick={() => setViewMode(mode)}
-                  >
-                    {mode === "desktop" ? <Monitor size={16} /> : <Smartphone size={16} />}
-                    <span>{mode === "desktop" ? "Desktop" : "Mobile"}</span>
-                    {effectiveViewMode === mode && (
-                      <motion.span
-                        layoutId="view-mode"
-                        className={styles.switchIndicator}
-                        transition={{ type: "spring", stiffness: 420, damping: 34 }}
-                      />
-                    )}
-                  </button>
-                ))}
-              </div>
-              <button
-                type="button"
-                className={styles.replayButton}
-                aria-label="Replay animations"
-                title="Restart the preview and replay its animations"
-                disabled={active.status === "coming"}
-                onClick={() => setReplayVersion((version) => version + 1)}
-              >
-                <RotateCcw size={16} />
-                <span>Replay</span>
-              </button>
+            <div className={styles.viewSwitch} role="group" aria-label="Preview size">
+              {(["desktop", "mobile"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  aria-label={mode === "desktop" ? "Desktop" : "Mobile"}
+                  aria-pressed={effectiveViewMode === mode}
+                  title={`${mode === "desktop" ? "Desktop" : "Mobile"} preview`}
+                  onClick={() => setViewMode(mode)}
+                >
+                  {mode === "desktop" ? <Monitor size={14} /> : <Smartphone size={14} />}
+                  <span className={styles.deviceLabel}>{mode === "desktop" ? "Desktop" : "Mobile"}</span>
+                  {effectiveViewMode === mode && (
+                    <motion.span
+                      layoutId="view-mode"
+                      className={styles.switchIndicator}
+                      transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                    />
+                  )}
+                </button>
+              ))}
             </div>
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={group.industry}
-                className={styles.variantTabs}
-                role="tablist"
-                aria-label={`${group.industry} variants`}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.24 }}
+            <label className={styles.variantSelect}>
+              <span className={styles.variantName}>{active.variant}</span>
+              {group.variants.length > 1 && <ChevronDown size={13} aria-hidden="true" />}
+              <select
+                aria-label={`${group.industry} variant`}
+                value={variantIndex}
+                disabled={group.variants.length < 2}
+                onChange={(event) => {
+                  const index = Number(event.target.value);
+                  setDirection(index >= variantIndex ? 1 : -1);
+                  setVariantIndex(index);
+                }}
               >
                 {group.variants.map((variant, index) => (
-                  <button
-                    key={variant.slug}
-                    type="button"
-                    role="tab"
-                    aria-selected={variantIndex === index}
-                    aria-controls="template-stage"
-                    onClick={() => {
-                      setDirection(index >= variantIndex ? 1 : -1);
-                      setVariantIndex(index);
-                    }}
-                  >
-                    {variant.variant}
-                  </button>
+                  <option key={variant.slug} value={index}>{variant.variant}</option>
                 ))}
-              </motion.div>
-            </AnimatePresence>
+              </select>
+            </label>
+            <button
+              type="button"
+              className={styles.replayButton}
+              aria-label="Replay animations"
+              title="Restart the preview and replay its animations"
+              disabled={active.status === "coming"}
+              onClick={() => setReplayVersion((version) => version + 1)}
+            >
+              <RotateCcw size={14} />
+              <span>Motion</span>
+            </button>
           </div>
         </div>
 
@@ -330,15 +348,11 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
                   <ArrowLeft size={19} />
                 </button>
 
-                <motion.div
-                  layout
+                <div
                   data-cursor="native"
                   className={`${styles.browser} ${
                     effectiveViewMode === "desktop" ? styles.desktop : styles.mobile
                   }`}
-                  transition={{
-                    layout: { type: "spring", stiffness: 210, damping: 28 },
-                  }}
                 >
                   <div className={styles.browserBar}>
                     <span className={styles.browserDots} aria-hidden="true">
@@ -353,7 +367,7 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
                       {effectiveViewMode === "desktop" ? "1200 px" : "390 px"}
                     </span>
                   </div>
-                  <div className={styles.viewport}>
+                  <ScaledViewport mode={effectiveViewMode}>
                     {active.status === "coming" ? (
                       <div className={styles.construction} role="status">
                         <span className={styles.constructionBadge}>
@@ -376,8 +390,8 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
                         loading="eager"
                       />
                     )}
-                  </div>
-                </motion.div>
+                  </ScaledViewport>
+                </div>
 
                 <button
                   type="button"
