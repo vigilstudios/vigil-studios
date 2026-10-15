@@ -26,8 +26,8 @@ describe('configured content adapters',()=>{
  });
  it('writes supported Lab edits back to the same stable collection while preserving record identity',()=>{
   const document=site([makeCollectionSection('work.open-index','work')]),[collection]=discoverBindings(document,website),edited=applyBindings(document,[collection]);
-  (edited.pages[0].sections[0].content as {projects:{title:string}[]}).projects[0].title='Edited in Lab';const records=recordsFromLab(edited,collection);
-  expect(records[0].id).toBe(collection.records[0].id);expect(records[0].data.title).toBe('Edited in Lab');expect(applyBindings(document,[{...collection,records}]).settings).toEqual(document.settings);
+  (edited.pages[0].sections[0].content as {projects:{title:string}[]}).projects[0].title='Edited in Lab';collection.records[0].featured=true;collection.records[0].featuredOrder=2;const records=recordsFromLab(edited,collection);
+  expect(records[0].id).toBe(collection.records[0].id);expect(records[0].data.title).toBe('Edited in Lab');expect(records[0]).toMatchObject({featured:true,featuredOrder:2});expect(applyBindings(document,[{...collection,records}]).settings).toEqual(document.settings);
  });
  it('retains design-owned item geometry from the frozen site document',()=>{const document=site([makeCollectionSection('work.open-index','work')]),collections=discoverBindings(document,website);const record=(document.pages[0].sections[0].content as {projects:{image:{focal:{x:number;y:number}}}[]}).projects[0];record.image.focal={x:25,y:75};const applied=applyBindings(document,collections);expect((applied.pages[0].sections[0].content as {projects:{image:{focal:{x:number;y:number}}}[]}).projects[0].image.focal).toEqual({x:25,y:75});});
  it('renders publication content into initial HTML using the actual production renderer',()=>{

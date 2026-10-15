@@ -132,6 +132,27 @@ select hub_test.ok((select count(*)=1 from public.website_content_media_refs whe
 select hub_test.fails($q$delete from public.project_assets where id='cb000000-0000-4000-8000-000000000052'$q$,'referenced original asset cannot be deleted');
 reset role;
 
+-- Configured featured positions: capacity and independent order are checked even at the RPC boundary.
+insert into public.website_content_collections(id,website_id,organization_id,key,module,label,page_id,section_id,field,adapter,config) values
+('cb000000-0000-4000-8000-000000000048','cb000000-0000-4000-8000-000000000021','cb000000-0000-4000-8000-000000000011','featured-gallery','gallery','Featured videos','home','featured','videos','standalone','{"featuredSlotBudget":2,"featuredMediaType":"video","featuredRequireFull":true}');
+select set_config('hub_test.feature_rows','[{"id":"cb000000-0000-4000-8000-000000000071","slug":"feature-one","featured":true,"featuredOrder":2,"deleted":false,"data":{"title":"One","media":[{"type":"video","src":"/assets/one.mp4","poster":"/assets/one.webp","alt":"One","caption":""}]}},{"id":"cb000000-0000-4000-8000-000000000072","slug":"feature-two","featured":true,"featuredOrder":1,"deleted":false,"data":{"title":"Two","media":[{"type":"video","src":"/assets/two.mp4","poster":"/assets/two.webp","alt":"Two","caption":""}]}},{"id":"cb000000-0000-4000-8000-000000000073","slug":"feature-three","featured":false,"deleted":false,"data":{"title":"Three","media":[{"type":"video","src":"/assets/three.mp4","poster":"/assets/three.webp","alt":"Three","caption":""}]}}]',true);
+select set_config('request.jwt.claims','{"role":"service_role"}',true);set local role service_role;
+select public.save_website_content('cb000000-0000-4000-8000-000000000048',1,current_setting('hub_test.feature_rows')::jsonb,'publish','cb000000-0000-4000-8000-000000000001');
+select hub_test.ok((select published->0->>'slug'='feature-one' and published->0->>'featuredOrder'='2' and published->1->>'featuredOrder'='1' from public.website_content_collections where id='cb000000-0000-4000-8000-000000000048'),'featured order persists independently of full-collection order');
+select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000048',2,jsonb_set(current_setting('hub_test.feature_rows')::jsonb,'{2,featured}','true'),'draft','cb000000-0000-4000-8000-000000000001')$q$,'featured capacity cannot be exceeded by direct RPC');
+select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000048',2,jsonb_set(current_setting('hub_test.feature_rows')::jsonb,'{1,featuredOrder}','2'),'draft','cb000000-0000-4000-8000-000000000001')$q$,'duplicate featured positions refused');
+select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000048',2,jsonb_set(current_setting('hub_test.feature_rows')::jsonb,'{0,featuredOrder}','3'),'draft','cb000000-0000-4000-8000-000000000001')$q$,'position beyond section capacity refused');
+select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000048',2,jsonb_set(current_setting('hub_test.feature_rows')::jsonb,'{0,featuredOrder}','1.5'),'draft','cb000000-0000-4000-8000-000000000001')$q$,'fractional featured position refused');
+select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000048',2,jsonb_set(current_setting('hub_test.feature_rows')::jsonb,'{0,data,media,0,type}','"image"'),'draft','cb000000-0000-4000-8000-000000000001')$q$,'wrong media type for a video slot refused');
+select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000048',2,jsonb_set(current_setting('hub_test.feature_rows')::jsonb,'{2,featuredOrder}','1'),'draft','cb000000-0000-4000-8000-000000000001')$q$,'unfeatured record cannot claim a position');
+select set_config('hub_test.feature_partial',jsonb_set(current_setting('hub_test.feature_rows')::jsonb #- '{0,featuredOrder}','{0,featured}','false')::text,true);
+select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000048',2,current_setting('hub_test.feature_partial')::jsonb,'publish','cb000000-0000-4000-8000-000000000001')$q$,'incomplete fixed-slot publication refused');
+select public.save_website_content('cb000000-0000-4000-8000-000000000048',2,current_setting('hub_test.feature_partial')::jsonb,'draft','cb000000-0000-4000-8000-000000000001');
+select hub_test.ok((select revision=3 and published_revision=2 and draft->0->'featured'='false'::jsonb and published->0->>'featuredOrder'='2' from public.website_content_collections where id='cb000000-0000-4000-8000-000000000048'),'incomplete draft remains private and previous positions stay published');
+select public.save_website_content('cb000000-0000-4000-8000-000000000048',3,current_setting('hub_test.feature_partial')::jsonb,'unpublish','cb000000-0000-4000-8000-000000000001');
+select hub_test.ok((select published='[]'::jsonb from public.website_content_collections where id='cb000000-0000-4000-8000-000000000048'),'unpublish still preserves incomplete draft without public slots');
+reset role;
+
 update public.websites set status='archived' where id='cb000000-0000-4000-8000-000000000022';
 select hub_test.ok(not vigil.content_access('cb000000-0000-4000-8000-000000000022'),'archived website denied');
 select set_config('request.jwt.claims','{"role":"anon"}',true);set local role anon;

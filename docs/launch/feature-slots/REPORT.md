@@ -1,0 +1,11 @@
+# Ordered featured positions and section capacity
+
+Replaces the feature checkbox with numbered selectors and a filled-count panel driven by the delivered binding capacity. Selecting an already featured post swaps positions; selecting another eligible post replaces only that slot. Each post also has a Featured position selector and media requirements. Scar's actual homepage supports three videos, which the UI names Homepage videos; unconfigured sections show no feature controls. Main collection order, including newest-first additions, remains separate.
+
+Optional featuredOrder is backward-compatible with existing checkbox-only selections and retained by Lab edits, public media DTOs and owner export. Scar resolves positions into its existing fixed slots and keeps the full Portfolio order unchanged; no cinematic chapter or layout changes.
+
+Migration45 extends strict record validation for optional positions and adds binding-capacity enforcement on draft/public collection writes. Server and database reject overflow, duplicate/out-of-range positions and ineligible media. Partial selections can be saved privately; the existing fixed-slot publication rule requires all positions before publishing. Previous publication remains intact on failed/incomplete saves. Unpublish remains available. No customer content backfill or data rewrite.
+
+Local validation: 113 files / 2,314 tests, typecheck/lint/production build, disposable migration/SQL/RLS including direct RPC boundary checks; linked dry-run listed only migration45, apply succeeded and actual linked database types were regenerated (no type diff). Scar review and production builds each pass24checks. Isolated browser tests verified legacy order, swap/replacement without list reorder, incomplete draft save, blocked incomplete publication, successful full publication to fake persistence and 390px fit. Hosted release and final receipts follow below.
+
+Rollback: revert application source if necessary; retain the additive migration and ordered metadata to avoid deleting saved customer choices. The old checkbox-only renderer ignores optional positions, so use the compatible adapter when retaining ordered selections. Do not drop the new validation or strip position data as part of a routine rollback. Scar full-site production still requires actual second-review approval.

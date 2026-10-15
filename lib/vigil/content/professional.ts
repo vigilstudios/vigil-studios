@@ -5,7 +5,7 @@ import type { ContentBinding, ContentModule, ContentRecord, ContentMedia } from 
 import { payloadSchemas } from './contract';
 
 type ObjectValue = Record<string,unknown>;
-export type AdapterConfig={templates:Record<string,ObjectValue>;singleton?:boolean;sourceIds:Record<string,string>;editableFields?:string[];featuredSlotBudget?:number;autoDiscovered?:boolean;maxMedia?:number;hasDetailLinks?:boolean};
+export type AdapterConfig={templates:Record<string,ObjectValue>;singleton?:boolean;sourceIds:Record<string,string>;editableFields?:string[];featuredSlotBudget?:number;featuredLabel?:string;featuredMediaType?:'image'|'video';featuredRequireFull?:boolean;autoDiscovered?:boolean;maxMedia?:number;hasDetailLinks?:boolean};
 export type BoundCollection={id:string;binding:ContentBinding;config:AdapterConfig;records:ContentRecord[];publishedRecords?:ContentRecord[];revision:number;publishedRevision:number|null};
 const object=(v:unknown):ObjectValue=>v&&typeof v==='object'&&!Array.isArray(v)?v as ObjectValue:{};
 const str=(v:unknown)=>typeof v==='string'?v:'';
@@ -93,7 +93,7 @@ export function recordsFromLab(site:SiteDefinition,collection:BoundCollection):C
   const portableRaw=JSON.parse(JSON.stringify(objectRaw,(_key,value)=>typeof value==='string'&&ownedMedia.some(mediaId=>value.includes(`/media/${mediaId}?`))?value.replace(/&draft=1(?=&|$)/g,''):value));
   const record=recordFromRaw(collection.binding.module as Exclude<ContentModule,'blog'>,portableRaw,id,existing?.slug??slug(str(objectRaw.title)||`${collection.binding.field}-${i}`));
   if(existing&&'media' in record.data&&'media' in existing.data){const oldMedia=existing.data.media;record.data.media=record.data.media.map((m,j)=>{const old=oldMedia[j];if(!old?.id||!m.src.includes(`/media/${old.id}?`))return m;const next={...old,alt:m.alt,caption:m.caption};if(old.posterId&&!m.poster?.includes(`/media/${old.posterId}?`)){delete next.posterId;next.poster=m.poster;}return next;});}
-  return {...record,featured:existing?.featured??false,...(existing&&'placeholder' in existing.data&&'placeholder' in record.data?{data:{...record.data,placeholder:existing.data.placeholder}}:{})};
+  return {...record,featured:existing?.featured??false,...(existing?.featuredOrder?{featuredOrder:existing.featuredOrder}:{}),...(existing&&'placeholder' in existing.data&&'placeholder' in record.data?{data:{...record.data,placeholder:existing.data.placeholder}}:{})};
  });
  const retained=collection.records.filter(old=>!editedRecords.some(r=>r.id===old.id)).map(old=>({...old,deleted:true}));
  return [...editedRecords,...retained];

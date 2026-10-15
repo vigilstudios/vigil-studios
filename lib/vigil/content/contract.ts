@@ -17,7 +17,7 @@ export const payloadSchemas={
 };
 export type ContentPayload = z.infer<(typeof payloadSchemas)[keyof typeof payloadSchemas]>;
 export type ContentMedia = z.infer<typeof mediaSchema>;
-export const recordSchema = z.object({id:z.string().uuid(),slug:z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/).max(120),data:z.unknown(),deleted:z.boolean().default(false),featured:z.boolean().default(false)}).strict();
+export const recordSchema = z.object({id:z.string().uuid(),slug:z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/).max(120),data:z.unknown(),deleted:z.boolean().default(false),featured:z.boolean().default(false),featuredOrder:z.number().int().min(1).max(500).optional()}).strict();
 export type ContentRecord = Omit<z.infer<typeof recordSchema>,'data'> & {data:ContentPayload};
 export const bindingSchema=z.object({version:z.literal(1),key:z.string().regex(/^[a-z0-9][a-z0-9-]*$/).max(180),module:moduleSchema,pageId:z.string().max(100),sectionId:z.string().max(100),field:z.string().max(100),adapter:z.enum(['professional','standalone','blog']),label:z.string().max(160)}).strict();
 export type ContentBinding=z.infer<typeof bindingSchema>;
