@@ -338,3 +338,5 @@
 .hub-featured-slots select {font-size:12px;min-height:40px;text-overflow:ellipsis;padding:8px;}
 .hub-featured-notice {margin:0 0 16px;padding:12px 16px;border:1px solid var(--border);border-radius:8px;}
 @media(max-width:600px){.hub-featured {padding:14px;}.hub-featured-heading {gap:8px;}.hub-featured-heading p {max-width:220px;}}
+
+.hub-featured-position {min-width:0;}
