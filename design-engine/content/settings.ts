@@ -1,5 +1,5 @@
 import {z} from 'zod';
-export const collectionModules={projects:'portfolio',chapters:'portfolio',works:'portfolio',frames:'gallery',photos:'gallery',clips:'gallery',voices:'testimonials',testimony:'testimonials',voice:'testimonials',reviews:'testimonials',products:'products',product:'products',items:'products',entries:'services',services:'services',capabilities:'services',questions:'faq',faqs:'faq'} as const;
+export const collectionModules={projects:'portfolio',chapters:'portfolio',works:'portfolio',frames:'gallery',photos:'gallery',clips:'gallery',images:'gallery',scenes:'gallery',pieces:'gallery',records:'gallery',voices:'testimonials',testimony:'testimonials',voice:'testimonials',reviews:'testimonials',products:'products',product:'products',items:'products',relatedProducts:'products',entries:'services',services:'services',capabilities:'services',questions:'faq',faqs:'faq'} as const;
 export type CollectionModule=(typeof collectionModules)[keyof typeof collectionModules];
 export const featuredSectionSchema=z.object({mode:z.literal('featured'),capacity:z.number().int().min(1).max(500),label:z.string().trim().min(1).max(160),mediaType:z.enum(['image','video']).optional()}).strict();
 export const contentHubSettingsSchema=z.record(z.string().max(100),featuredSectionSchema);
@@ -13,7 +13,7 @@ export function collectionCapabilities(component:string,schema:z.ZodTypeAny):Col
   const supported=module==='portfolio'||module==='gallery'?component.startsWith('work.'):module==='testimonials'?component.startsWith('proof.'):module==='products'?component.startsWith('commerce.'):module==='services'?component.startsWith('services.'):['questions','faqs'].includes(field);
   if(!supported||!content.shape[field])return [];
   const value=schemaBase(content.shape[field]),singleton=!(value instanceof z.ZodArray);
-  const item=schemaBase(value instanceof z.ZodArray?value.element:value);if(!(item instanceof z.ZodObject))return [];
+  const element=schemaBase(value instanceof z.ZodArray?value.element:value),item=element instanceof z.ZodDiscriminatedUnion?schemaBase(element.options[0]):element;if(!(item instanceof z.ZodObject))return [];
   const nested=item.shape.product&&schemaBase(item.shape.product),shape=nested instanceof z.ZodObject?nested.shape:item.shape;
   if(module==='testimonials'?!shape.quote:module==='faq'?!shape.answer:!shape.title&&!shape.name&&!shape.question)return [];
   const limits=value instanceof z.ZodArray?value._def:null;
