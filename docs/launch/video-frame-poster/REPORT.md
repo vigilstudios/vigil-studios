@@ -1,0 +1,13 @@
+# Choose video poster frames
+
+Each Content Hub video now offers **Choose frame from video** alongside Files/manual poster choices. The inline picker supports native playback, a scrubber and precise time entry, with explicit confirmation and cancellation. Confirmation pauses and captures the decoded video frame as a JPEG bounded to 1600px, then uses the existing authenticated/authorized normalized image upload. The returned image ID becomes that specific video's poster. The video is not copied or uploaded again, and the poster stays an unpublished change until the post is saved/published.
+
+Capture/upload locks conflicting edits and double confirmation. Seeking/undecoded frames cannot be captured; unreadable, tainted, empty and oversized outputs return safe errors. Cancellation uploads no image, and failures preserve the current poster and permit retry. The selected poster has a visible thumbnail.
+
+A necessary integration correction groups Files preview signing by each asset's actual private bucket. Previously it signed all rows against the first row's bucket, so a generated poster in content-media could not preview alongside a project-assets video. Original assets and generated posters now resolve correctly even for matching object paths; one unavailable bucket does not discard other previews.
+
+Local browser acceptance used the original MOV through a temporary local symlink, synthetic two-video collection and existing server image normalizer, with no customer writes. It verified exact seeking to 12.5 seconds, 900 × 1600 normalized capture attached only to the second video, cancellation, upload failure preserving the old image and successful retry at 24 seconds with a different image. Phone picker width 282px / scroll width 280px at a 390px viewport. Temporary fixture/API stub/symlink were removed before release; the original video was unchanged.
+
+No dependency, endpoint, migration or entitlement change. Unit regressions cover capture/loading/size/CORS errors, bounds/times and mixed-bucket Files previews. The initial lint run flagged the event handler's `useFrame` name as a Hook; it was renamed to `confirmFrame` and lint rerun. Full validation and hosted release evidence are alongside this report. Scar's saved posts are not test fixtures and her full site remains Preview pending second-review approval.
+
+Final local validation: 111 files / 2,304 tests, 13 focused capture/Files regressions, typecheck, lint, four dependency-security checks and production build passed. Hosted CI supplies the required PostgreSQL migration/RLS gate for this change without a migration.

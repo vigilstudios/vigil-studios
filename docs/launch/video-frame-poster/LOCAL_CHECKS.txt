@@ -1,0 +1,172 @@
+Node 24; temporary fixture, API stub and symlink removed before production validation.
+
+TYPECHECK
+
+> vigil-studios@0.1.0 typecheck
+> next typegen && tsc --noEmit
+
+Generating route types...
+✓ Types generated successfully
+
+LINT
+
+> vigil-studios@0.1.0 lint
+> eslint
+
+
+FULL TESTS
+
+> vigil-studios@0.1.0 pretest
+> npm run design:runtime
+
+
+> vigil-studios@0.1.0 design:runtime
+> node scripts/build-design-runtime.mjs
+
+Pinned Design Engine distribution v1-45574d54d2e934929153 (27 files)
+
+> vigil-studios@0.1.0 test
+> vitest run --maxWorkers=2
+
+
+ RUN  v4.1.11 /private/tmp/vigil-content-hub-release
+
+
+ Test Files  111 passed (111)
+      Tests  2304 passed (2304)
+   Start at  23:16:59
+   Duration  36.56s (transform 3.74s, setup 0ms, import 18.03s, tests 46.48s, environment 6ms)
+
+
+FOCUSED FINAL
+
+> vigil-studios@0.1.0 pretest
+> npm run design:runtime
+
+
+> vigil-studios@0.1.0 design:runtime
+> node scripts/build-design-runtime.mjs
+
+Pinned Design Engine distribution v1-45574d54d2e934929153 (27 files)
+
+> vigil-studios@0.1.0 test
+> vitest run lib/vigil/__tests__/video-poster.test.ts lib/vigil/__tests__/files-bucket-previews.test.ts
+
+
+ RUN  v4.1.11 /private/tmp/vigil-content-hub-release
+
+
+ Test Files  2 passed (2)
+      Tests  13 passed (13)
+   Start at  23:18:10
+   Duration  234ms (transform 125ms, setup 0ms, import 168ms, tests 16ms, environment 0ms)
+
+
+DEPENDENCY SECURITY
+
+> vigil-studios@0.1.0 test:dependency-security
+> node --test scripts/verify-eslint-glob-security.mjs
+
+✔ installed Next plugin uses the pinned local adapter and no braces package remains (3.585167ms)
+✔ Next rootDir preserves directory matching without expanding literal directories (24.643916ms)
+✔ replacement still enforces Next's no-html-link-for-pages rule with globbed rootDir (103.200416ms)
+✔ deep brace and parenthesis patterns do not exhaust the replacement's stack (565.367625ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 749.711
+
+BUILD
+├ ƒ /admin/design-lab
+├ ƒ /admin/domains
+├ ƒ /admin/jobs
+├ ƒ /admin/lab
+├ ƒ /admin/lab/express
+├ ƒ /admin/lab/express/[variantId]
+├ ƒ /admin/lab/project/[projectId]
+├ ƒ /admin/lab/projects
+├ ƒ /admin/orders
+├ ƒ /admin/organizations
+├ ƒ /admin/organizations/[orgId]
+├ ƒ /admin/organizations/[orgId]/files
+├ ƒ /admin/plans
+├ ƒ /admin/requests
+├ ƒ /admin/reviews
+├ ƒ /admin/reviews/[projectId]
+├ ƒ /admin/subscriptions
+├ ƒ /admin/websites
+├ ƒ /admin/websites/[websiteId]
+├ ƒ /admin/websites/[websiteId]/contact
+├ ƒ /api/admin/organizations/[orgId]/files.zip
+├ ƒ /api/admin/projects/[projectId]/assets/[assetId]
+├ ƒ /api/blog/[websiteId]
+├ ƒ /api/blog/[websiteId]/images
+├ ƒ /api/blog/[websiteId]/media/[imageId]
+├ ƒ /api/contact/[websiteId]
+├ ƒ /api/content/[websiteId]
+├ ƒ /api/content/[websiteId]/export
+├ ƒ /api/content/[websiteId]/library
+├ ƒ /api/content/[websiteId]/media/[mediaId]
+├ ƒ /api/content/[websiteId]/runtime/[runtimeId]/[pageId]
+├ ƒ /api/content/[websiteId]/uploads
+├ ƒ /api/csp-report
+├ ƒ /api/health
+├ ƒ /api/jobs/run
+├ ƒ /api/webhooks/stripe
+├ ƒ /api/websites/[websiteId]/export
+├ ○ /apple-icon.png
+├ ƒ /auth/callback
+├ ƒ /auth/confirm
+├ ƒ /auth/signout
+├ ƒ /checkout
+├ ƒ /checkout/[token]
+├ ƒ /checkout/success
+├ ○ /creators                                                      5m      1y
+├ ○ /creators/opengraph-image-6942ng
+├ ○ /creators/twitter-image-6942ng
+├ ƒ /dashboard
+├ ƒ /dashboard/billing
+├ ƒ /dashboard/blog
+├ ƒ /dashboard/blog/[postId]
+├ ƒ /dashboard/content
+├ ƒ /dashboard/domain
+├ ƒ /dashboard/files
+├ ƒ /dashboard/insights
+├ ƒ /dashboard/leads
+├ ƒ /dashboard/leads/[leadId]
+├ ƒ /dashboard/onboarding
+├ ƒ /dashboard/onboarding/later
+├ ƒ /dashboard/onboarding/welcome
+├ ƒ /dashboard/requests
+├ ƒ /dashboard/review
+├ ƒ /dashboard/settings
+├ ƒ /dashboard/virtue
+├ ƒ /dashboard/website
+├ ƒ /dashboard/welcome
+├ ƒ /express
+├ ƒ /express-preview/[slug]
+├ ƒ /find-your-fit
+├ ○ /icon.svg
+├ ƒ /login
+├ ○ /manifest.webmanifest
+├ ƒ /pricing
+├ ○ /process
+├ ○ /products                                                      5m      1y
+├ ○ /products/vigil                                                5m      1y
+├ ○ /products/virtue
+├ ○ /products/websites                                             5m      1y
+├ ƒ /professional
+├ ○ /robots.txt
+├ ○ /sitemap.xml
+└ ○ /terms
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
