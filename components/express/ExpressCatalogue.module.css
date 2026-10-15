@@ -3,7 +3,6 @@
   /* The layout scrollport already starts below the promotion rail. */
   --catalogue-sticky-top: 65px;
   --catalogue-viewport-offset: calc(var(--creator-promo-height, 0px) + var(--catalogue-sticky-top));
-  --catalogue-controls-height: 106px;
   position: relative;
   box-sizing: border-box;
   width: 100%;
@@ -59,9 +58,20 @@
   line-height: 1.7;
 }
 
-.controls {
+.viewer {
   position: sticky;
   top: var(--catalogue-sticky-top);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  height: calc(100dvh - var(--catalogue-viewport-offset));
+  min-height: 0;
+}
+
+.controls {
+  position: relative;
+  min-width: 0;
   z-index: 10;
   flex-shrink: 0;
   background: color-mix(in srgb, var(--bg-primary) 94%, transparent);
@@ -272,10 +282,13 @@
   position: relative;
   display: grid;
   width: 100%;
-  min-height: calc(100svh - var(--catalogue-viewport-offset) - var(--catalogue-controls-height));
+  min-height: 0;
+  height: 100%;
   min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   place-items: center;
-  padding: 16px 0;
+  padding: 12px 0;
 }
 
 .activeSlide {
@@ -283,6 +296,8 @@
   z-index: 3;
   display: flex;
   grid-area: 1 / 1;
+  min-height: 0;
+  height: 100%;
   width: 100%;
   min-width: 0;
   flex-direction: column;
@@ -293,7 +308,21 @@
   position: relative;
   display: grid;
   width: 100%;
+  height: 100%;
   min-width: 0;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  place-items: center;
+}
+
+.deviceSpace {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   place-items: center;
 }
 
@@ -301,6 +330,8 @@
   display: flex;
   overflow: clip;
   flex-direction: column;
+  flex-shrink: 0;
+  transition: width 450ms cubic-bezier(.22, 1, .36, 1), height 450ms cubic-bezier(.22, 1, .36, 1);
   border: 1px solid color-mix(in srgb, var(--template-accent) 38%, var(--border));
   border-radius: 16px;
   background: #ffffff;
@@ -356,7 +387,8 @@
 
 .viewport {
   position: relative;
-  flex: none;
+  flex: 1;
+  min-height: 0;
   width: 100%;
   /* Clipping must not create a scroll container: iframe anchor/focus
      navigation can otherwise scroll this wrapper and crop its fixed nav. */
@@ -376,23 +408,16 @@
   transform-origin: top left;
 }
 
-.desktop {
-  width: min(calc(100% - 152px), 1020px);
-}
-
-.mobile {
-  width: min(calc(100% - 152px), 340px);
-}
-
 .slideFooter {
   position: relative;
   z-index: 6;
   display: flex;
-  width: min(92vw, 900px);
+  width: min(100%, 1020px);
+  justify-self: center;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding-top: 24px;
+  padding: 12px 0 max(12px, env(safe-area-inset-bottom));
 }
 
 .templateIdentity h2 {
@@ -591,14 +616,6 @@
   right: max(0px, calc((100% - 1020px) / 2 - 64px));
 }
 
-.previewFrame:has(.mobile) .carouselPrevious {
-  left: max(0px, calc(50% - 234px));
-}
-
-.previewFrame:has(.mobile) .carouselNext {
-  right: max(0px, calc(50% - 234px));
-}
-
 @media (min-width: 768px) {
   .catalogue {
     padding-right: 28px;
@@ -617,7 +634,6 @@
 @media (max-width: 767px) {
   .catalogue {
     --catalogue-sticky-top: 45px;
-    --catalogue-controls-height: 98px;
     --chrome-height: 28px;
     padding: 92px 12px 0;
   }
@@ -634,7 +650,13 @@
     font-size: 23px;
   }
 
+  .viewer {
+    width: calc(100% + 24px);
+    margin-left: -12px;
+  }
+
   .variantRow {
+    padding-inline: 12px;
     grid-template-columns: 76px minmax(0, 1fr) 76px;
     gap: 6px;
   }
@@ -680,8 +702,8 @@
   }
 
   .industryTabs {
-    width: calc(100vw - 24px);
-    max-width: calc(100vw - 24px);
+    width: 100%;
+    max-width: 100%;
     justify-content: flex-start;
     margin-right: 0;
     margin-left: 0;
@@ -691,14 +713,6 @@
     min-height: 48px;
     flex: 0 0 auto;
     padding: 0 14px;
-  }
-
-  .desktop {
-    width: calc(100% - 76px);
-  }
-
-  .mobile {
-    width: min(calc(100% - 76px), 340px);
   }
 
   .peek {
@@ -723,7 +737,10 @@
   .slideFooter {
     width: 100%;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+    padding-inline: 12px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-primary);
     text-align: center;
   }
 
@@ -735,7 +752,9 @@
   .actions a,
   .actions .locked {
     flex: 1;
-    max-width: 170px;
+    min-width: 0;
+    max-width: none;
+    white-space: nowrap;
   }
 }
 
@@ -744,21 +763,7 @@
     padding-top: 84px;
   }
 
-  .desktop {
-    width: min(calc(100% - 152px), 744px);
-  }
 
-  .mobile {
-    width: min(calc(100% - 152px), 260px);
-  }
-
-  .previewFrame:has(.mobile) .carouselPrevious {
-    left: max(0px, calc(50% - 194px));
-  }
-
-  .previewFrame:has(.mobile) .carouselNext {
-    right: max(0px, calc(50% - 194px));
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -766,4 +771,17 @@
   .actions a {
     transition: none;
   }
+}
+
+.dealTag {
+  display: inline-flex;
+  margin-left: 6px;
+  padding: 3px 5px;
+  border-radius: 4px;
+  background: #f2c7d7;
+  color: #422b36;
+  font-size: 9px;
+  line-height: 1;
+  font-weight: 700;
+  text-transform: uppercase;
 }

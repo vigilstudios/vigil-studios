@@ -1,105 +1,72 @@
-// Use an installed Playwright or set PLAYWRIGHT_MODULE to its module path.
-const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || "playwright");
-import fs from 'node:fs/promises';
+// Optional QA runner: install Playwright or set PLAYWRIGHT_MODULE to its module path.
 import assert from 'node:assert/strict';
-const base=process.env.BASE_URL||'http://localhost:3018';
-const route=process.env.QA_ROUTE||'/express';
-const out=process.env.QA_OUT||'/tmp/vigil-express-catalogue-qa';
-(async()=>{
- await fs.mkdir(out,{recursive:true});
- const browser=await chromium.launch({channel:'chrome',headless:true});
- const report={base,sizes:[],variants:[],errors:[]};
- const page=await browser.newPage();
- await page.emulateMedia({reducedMotion:'reduce'});
- page.on('pageerror',e=>report.errors.push(e.message));
- for(const [width,height] of [[320,667],[375,812],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1920,1080],[667,375]]){
-  await page.setViewportSize({width,height});
-  await page.goto(`${base}${route}`,{waitUntil:'domcontentloaded'});
-  await page.getByRole('button',{name:'Mobile',exact:true}).waitFor();
-  await page.waitForFunction(()=>Number.parseFloat(document.querySelector('#template-stage iframe')?.parentElement.style.getPropertyValue('--preview-scale'))>0);
-  for(const mode of ['mobile','desktop']){
-   await page.getByRole('button',{name:mode==='mobile'?'Mobile':'Desktop',exact:true}).click();
-   await page.waitForFunction(expected=>document.querySelector('#template-stage iframe')?.clientWidth===expected,mode==='mobile'?390:1200);
-   await page.waitForTimeout(100);
-   console.log(width,height,mode);
-   const measured=await page.locator('#template-stage iframe').evaluate(el=>{
-    const r=el.getBoundingClientRect(),v=el.parentElement.getBoundingClientRect();
-    const group=document.querySelector('[aria-label="Preview size"]');
-    const select=document.querySelector('select[aria-label$=" variant"]');
-    const replay=document.querySelector('[aria-label="Replay animations"]');
-    const controls=[group,select.parentElement,replay].map(e=>e.getBoundingClientRect().toJSON());
-    return {natural:[el.clientWidth,el.clientHeight],frame:r.toJSON(),viewport:v.toJSON(),controls,documentWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,selected:group.querySelector('[aria-pressed="true"]').ariaLabel,motionText:replay.textContent,variant:select.options[select.selectedIndex].textContent};
-   });
-   assert.deepEqual(measured.natural,mode==='mobile'?[390,844]:[1200,700]);
-   assert.equal(measured.selected,mode==='mobile'?'Mobile':'Desktop');
-   assert.ok(Math.abs(measured.frame.width-measured.viewport.width)<.1,'Frame width does not fit');
-   assert.ok(Math.abs(measured.frame.height-measured.viewport.height)<.1,'Frame height does not fit');
-   assert.ok(measured.frame.left>=0 && measured.frame.right<=width,'Frame outside screen');
-   assert.ok(measured.documentWidth<=width && measured.bodyWidth<=width,'Page overflow');
-   assert.equal(measured.motionText,'Motion');
-   const [toggle,variant,motion]=measured.controls;
-   for(const control of measured.controls) assert.equal(control.height,32);
-   assert.ok(Math.abs(toggle.y-variant.y)<1 && Math.abs(toggle.y-motion.y)<1,'Controls not one row');
-   assert.ok(toggle.right<=variant.left && variant.right<=motion.left,'Controls overlap');
-   assert.ok(Math.abs(variant.x+variant.width/2-width/2)<1,'Variant not centered');
-   const surface=await page.locator('#template-stage iframe').elementHandle().then(e=>e.contentFrame());
-   await surface.waitForFunction(()=>document.readyState==='complete');
-   assert.equal(await surface.evaluate(()=>innerWidth),mode==='mobile'?390:1200);
-   assert.equal(await surface.evaluate(()=>innerHeight),mode==='mobile'?844:700);
-   // Actual interaction at the transformed size, including fixed nav and inner scrolling.
-   if(width===390 || width===1440){
-    const toggle=surface.locator('.nav-toggle');
-    if(mode==='mobile' && await toggle.count()){
-     await toggle.click();
-     await surface.waitForFunction(()=>document.querySelector('.mobile-nav').classList.contains('is-open'));
-     await surface.locator('.mobile-nav a[href^="#"]').first().click();
-    } else {
-     await surface.locator('.desktop-nav a[href^="#"]').first().click();
+import fs from 'node:fs/promises';
+const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const base = process.env.BASE_URL || 'http://localhost:3018', out = process.env.QA_OUT || '/tmp/express-viewport-qa';
+(async () => {
+    await fs.mkdir(out, { recursive: true });
+    const b = await chromium.launch({ channel: 'chrome', headless: true });
+    const p = await b.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const errors = [];
+    p.on('pageerror', e => errors.push(e.message));
+    await p.goto(base + '/express', { waitUntil: 'domcontentloaded' });
+    await p.waitForFunction(() => +document.querySelector('#template-stage iframe')?.parentElement.style.getPropertyValue('--preview-scale') > 0);
+    const tabs = await p.getByRole('tab').allTextContents();
+    assert.ok(tabs[0].startsWith('Creator'));
+    assert.ok(tabs[0].includes('15% off'));
+    assert.match(await p.locator('a[href*="template=creator"]').getAttribute('href'), /promo=INFLUENCE/);
+    assert.ok((await p.locator('a[href*="template=creator"]').textContent()).includes('$509.15'));
+    const checks = [];
+    for (const [width, height] of [[320, 667], [375, 812], [390, 844], [430, 932], [640, 800], [667, 375], [768, 1024], [1440, 900]]) {
+        await p.setViewportSize({ width, height });
+        await p.locator('[aria-label="Industries"]').evaluate(() => { const root = document.querySelector('#site-root'); root.scrollTop = root.scrollHeight; });
+        await p.waitForTimeout(650);
+        let footerBottom;
+        for (const mode of ['mobile', 'desktop']) {
+            await p.getByRole('button', { name: mode === 'mobile' ? 'Mobile' : 'Desktop', exact: true }).click();
+            await p.waitForTimeout(650);
+            const r = await p.locator('#template-stage iframe').evaluate(el => { const rect = e => e.getBoundingClientRect().toJSON(); const browser = el.closest('[data-device]'), stage = el.closest('#template-stage'), viewer = stage.parentElement, footer = viewer.lastElementChild, controls = viewer.firstElementChild; return { frame: rect(browser), iframe: rect(el), viewport: rect(el.parentElement), stage: rect(stage), viewer: rect(viewer), footer: rect(footer), controls: rect(controls), rail: rect(document.querySelector('[aria-label="Industries"]')), natural: [el.clientWidth, el.clientHeight], rootWidth: document.documentElement.scrollWidth, buy: rect(footer.querySelector('a[href*="checkout"]')) }; });
+            assert.ok(r.frame.top >= r.stage.top - .1 && r.frame.bottom <= r.stage.bottom + .1, 'Frame exceeds middle area ' + JSON.stringify({ width, height, mode, r }));
+            assert.ok(r.frame.left >= 0 && r.frame.right <= width, 'Frame exceeds width');
+            assert.ok(Math.abs(r.iframe.width - r.viewport.width) < .2 && Math.abs(r.iframe.height - r.viewport.height) < .2, 'Scale ratio does not fill final viewport');
+            assert.equal(r.rootWidth, width);
+            if (width < 768) {
+                assert.ok(Math.abs(r.viewer.left) < 1 && Math.abs(r.viewer.right - width) < 1, 'Viewer not edge to edge');
+                assert.ok(Math.abs(r.rail.left) < 1 && Math.abs(r.rail.right - width) < 1, 'Industry rail not edge to edge');
+                assert.ok(Math.abs(r.viewer.bottom - height) < 1, 'Viewer not viewport bounded');
+                assert.ok(Math.abs(r.footer.bottom - height) < 1, 'Footer not on viewport bottom');
+                assert.ok(r.buy.bottom <= height && r.buy.top >= r.controls.bottom, 'Buy out of view');
+                if (footerBottom)
+                    assert.ok(Math.abs(footerBottom - r.footer.bottom) < 1, 'Footer moved on device switch');
+                footerBottom = r.footer.bottom;
+            }
+            checks.push({ width, height, mode, ...r });
+            console.log(width, height, mode, 'fits');
+            if ([320, 390, 1440].includes(width))
+                await p.screenshot({ path: `${out}/${width}-${mode}.png` });
+        }
     }
-    await surface.waitForFunction(()=>location.hash.length>1);
-    assert.ok(await surface.evaluate(()=>scrollY>0),'Preview did not scroll');
-    assert.equal(await page.locator('#template-stage iframe').evaluate(e=>e.parentElement.scrollTop),0);
-    await page.getByRole('button',{name:'Replay animations'}).click();
-    await page.waitForFunction(()=>document.querySelector('#template-stage iframe')?.contentDocument?.readyState==='complete');
-    const replayed=await page.locator('#template-stage iframe').elementHandle().then(e=>e.contentFrame());
-    assert.equal(await replayed.evaluate(()=>location.hash),'');
-    assert.equal(await replayed.evaluate(()=>scrollY),0);
-   }
-   if([320,390,768,1440].includes(width)){
-    // Scroll the page's actual enclosing scrollport, leaving the controls pinned.
-    await page.locator('[aria-label="Industries"]').evaluate(e=>{
-     let p=e.parentElement;
-     while(p && p!==document.documentElement){
-      if(p.scrollHeight>p.clientHeight && ['auto','scroll'].includes(getComputedStyle(p).overflowY)) {p.scrollTop+=e.getBoundingClientRect().top-100;return;}
-      p=p.parentElement;
-     }
-     window.scrollTo(0,250);
-    });
-    await page.waitForTimeout(250);
-    await page.screenshot({path:`${out}/${width}-${mode}.png`});
-   }
-   report.sizes.push({width,height,mode,...measured});
-   await fs.writeFile(`${out}/browser-results.json`,JSON.stringify(report,null,2));
-  }
- }
- await page.setViewportSize({width:390,height:844});
- await page.goto(`${base}${route}`);
- const industries=await page.getByRole('tab').allTextContents();
- for(const industry of industries){
-  await page.getByRole('tab',{name:industry,exact:true}).click();
-  await page.waitForTimeout(750);
-  const select=page.locator('select[aria-label$=" variant"]');
-  const options=await select.locator('option').allTextContents();
-  for(let i=0;i<options.length;i++){
-   if(options.length>1) await select.selectOption(String(i));
-   await page.waitForFunction(()=>Number.parseFloat(document.querySelector('#template-stage iframe')?.parentElement.style.getPropertyValue('--preview-scale'))>0);
-   assert.ok((await select.locator('..').textContent()).includes(options[i]));
-   const frame=page.locator('#template-stage iframe');
-   assert.equal(await frame.count(),1);
-   report.variants.push({industry,variant:options[i],src:await frame.getAttribute('src')});
-  }
- }
- await fs.writeFile(`${out}/browser-results.json`,JSON.stringify(report,null,2));
- console.log(JSON.stringify({checks:report.sizes.length,variants:report.variants.length,errors:report.errors}));
- await browser.close();
-})().catch(e=>{console.error(e);process.exit(1)});
+    // Sample the actual transition before it has reached its target.
+    await p.setViewportSize({ width: 390, height: 844 });
+    await p.getByRole('button', { name: 'Mobile', exact: true }).click();
+    await p.waitForTimeout(600);
+    const start = await p.locator('[data-device]').boundingBox();
+    await p.getByRole('button', { name: 'Desktop', exact: true }).click();
+    await p.waitForTimeout(80);
+    const middle = await p.locator('[data-device]').boundingBox();
+    await p.waitForTimeout(500);
+    const end = await p.locator('[data-device]').boundingBox();
+    assert.ok(Math.abs(middle.width - start.width) > 1 && Math.abs(middle.width - end.width) > 1, 'Width switched instantly');
+    assert.ok(Math.abs(middle.height - start.height) > 1 && Math.abs(middle.height - end.height) > 1, 'Height switched instantly');
+    await p.emulateMedia({ reducedMotion: 'reduce' });
+    assert.equal(await p.locator('[data-device]').evaluate(e => getComputedStyle(e).transitionDuration), '0s');
+    // Other industries keep regular prices outside the creator offer.
+    await p.getByRole('tab', { name: 'Restaurant and cafe', exact: true }).click();
+    await p.waitForTimeout(800);
+    const buy = p.locator('a[href*="checkout"]');
+    assert.ok((await buy.textContent()).includes('$599'));
+    assert.ok(!(await buy.getAttribute('href')).includes('promo=INFLUENCE'));
+    await fs.writeFile(out + '/results.json', JSON.stringify({ base, checks, transition: { start, middle, end }, errors }, null, 2));
+    console.log(JSON.stringify({ checks: checks.length, errors }));
+    await b.close();
+})().catch(e => { console.error(e); process.exit(1); });
