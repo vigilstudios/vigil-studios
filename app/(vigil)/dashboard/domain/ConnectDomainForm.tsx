@@ -1,16 +1,11 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState } from "react";
 import { startDomainConnection, type DomainState } from "@/lib/vigil/actions/domain";
 import { FormError, inputClass, labelClass } from "@/components/vigil/ui";
 
 export function ConnectDomainForm({ websites }: { websites: { id: string; name: string }[] }) {
   const [state, action, pending] = useActionState<DomainState, FormData>(startDomainConnection, null);
-  const router = useRouter();
-  useEffect(() => {
-    if (state?.ok) router.replace(`/dashboard/domain?flow=own&domain=${encodeURIComponent(state.data.domainId)}`);
-  }, [state, router]);
 
   return (
     <form action={action} className="mt-4 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end" noValidate>
@@ -36,8 +31,8 @@ export function ConnectDomainForm({ websites }: { websites: { id: string; name: 
           <input type="hidden" name="website_id" value={websites[0].id} />
         ) : null}
       </div>
-      <button type="submit" className="btn-primary min-h-11 text-sm" disabled={pending || state?.ok === true}>
-        {pending || state?.ok ? "Preparing guide…" : "Continue to setup"}
+      <button type="submit" className="btn-primary min-h-11 text-sm" disabled={pending}>
+        {pending ? "Preparing guide…" : "Continue to setup"}
       </button>
       <div className="sm:col-span-2">
         <FormError message={state && !state.ok ? state.error : null} />

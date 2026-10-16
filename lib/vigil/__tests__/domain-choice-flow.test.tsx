@@ -68,12 +68,13 @@ describe("one domain path at a time", () => {
     expect(await render({ flow: "find", website: "choose" })).toContain("Which website is this domain for?");
   });
   it("opens the selected existing domain guide without a competing entry form", async () => {
-    mocks.domains = ["first-example.com", "second-example.com"].map((hostname, i) => ({ id: `domain-${i}`, organization_id: "org-a", hostname, status: "pending", source: "customer_owned", website_id: "site-a", verification: {}, verification_token: "token", dns_ok: null, ssl_ok: null, expires_at: null, last_checked_at: null, status_reason: null } as Tables<"domains">));
+    mocks.domains = ["first-example.com", "second-example.com"].map((hostname, i) => ({ id: `domain-${i}`, organization_id: "org-a", hostname, status: "pending", source: "customer_owned", website_id: "site-a", verification: {}, verification_token: "token", dns_ok: null, ssl_ok: null, expires_at: null, last_checked_at: null, status_reason: "The connection details are ready. Add the DNS record below." } as Tables<"domains">));
     const html = await render({ flow: "own", domain: "domain-1" });
     expect(html).toContain("second-example.com");
     expect(html).toContain("Where is the domain managed?");
     expect(html).not.toContain("Continue to setup");
     expect(html).not.toContain("Exact domain name");
+    expect(html).not.toContain("The connection details are ready. Add the DNS record below.");
   });
   it("preserves the owned route when discovery is disabled", async () => {
     vi.stubEnv("DOMAIN_HANDOFF_ENABLED", "false");

@@ -165,12 +165,12 @@ export function DomainGuide({
                     ? domain.sslOk
                       ? "The secure connection is ready. Waiting for the site to answer before we open it."
                       : "Your DNS record is correct. We are creating the secure connection."
-                    : "Checking public DNS. This can take up to 48 hours, and we will email you when it connects."}
+                    : "Checking public DNS. Changes can take up to 48 hours to appear."}
                 </span>
               ) : null}
             </div>
           ) : null}
-          {domain.statusReason && (!verifying || domain.launchReady) ? <p className="text-[11px] text-[color:var(--text-secondary)]">{domain.statusReason}</p> : null}
+          {domain.statusReason && domain.cutoverReady && records.length > 0 && (!verifying || domain.launchReady) ? <p className="text-[11px] text-[color:var(--text-secondary)]">{domain.statusReason}</p> : null}
         </>
       )}
     </div>

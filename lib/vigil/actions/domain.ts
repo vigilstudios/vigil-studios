@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/vigil/audit";
@@ -19,6 +20,7 @@ export type DomainState = ActionResult<{ domainId: string }> | null;
  * provider for the DNS records the customer must set.
  */
 export async function startDomainConnection(_prev: DomainState, formData: FormData): Promise<DomainState> {
+  let domainId: string;
   try {
     const ctx = await requireOrgContextOrThrow();
     await assertOrgRole(ctx, ["owner", "manager"]);
@@ -75,8 +77,11 @@ export async function startDomainConnection(_prev: DomainState, formData: FormDa
     }
 
     revalidatePath("/dashboard/domain");
-    return { ok: true, data: { domainId: data.id } };
+    domainId = data.id;
   } catch (error) {
     return toActionError(error);
   }
+  // Outside the catch: Next uses a redirect exception for both client
+  // navigation and the progressive-enhancement 303 response.
+  redirect(`/dashboard/domain?flow=own&domain=${encodeURIComponent(domainId)}`);
 }

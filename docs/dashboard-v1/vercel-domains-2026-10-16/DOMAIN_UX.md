@@ -44,10 +44,10 @@ before external purchase and keeps automatic Connect disabled afterward.
 
 ## Validation and release
 
-Fresh local suite: 2,389 tests / 119 files, including eight route/choice regressions
+Fresh local suite: 2,392 tests / 120 files, including eleven route/choice and save-navigation regressions
 covering exclusive paths, saved resume, explicit back, website identity and the
 discovery rollback switch. Typecheck, lint and disposable migration/RLS checks
-pass. Build, hosted browser and release receipts follow after verification.
+pass on the initial UI revision. Browser QA found contradictory prelaunch copy and an effect-based navigation race; both are fixed with guarded copy and a server-action redirect to the saved ID. Final checks, hosted browser and release receipts follow after verification.
 
 No schema, provider scope, DNS, registrar purchase, customer launch, review,
 content or contact-activation change is part of this slice.

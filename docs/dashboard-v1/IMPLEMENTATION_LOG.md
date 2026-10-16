@@ -1121,6 +1121,6 @@ review to saved connection intent; owned-domain entry navigates to its guide
 after saving. Back navigation preserves durable choices, returning customers
 resume their progress, and Overview identifies the correct website. Secondary
 connection details are collapsed. No DNS automation or customer launch is added.
-Fresh 2,389 tests / 119 files pass; full validation and release notes are in
+Fresh route and redirect regressions cover the focused flow; final validation and release notes are in
 `vercel-domains-2026-10-16/DOMAIN_UX.md`, including the remaining division of work
 for customer consent and cross-account automation proof.
