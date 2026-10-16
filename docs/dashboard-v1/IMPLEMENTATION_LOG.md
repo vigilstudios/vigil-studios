@@ -1112,3 +1112,15 @@ or authorized separate-account fixture was established, so automatic Connect
 remains disabled. Fresh 2,381 tests / 118 files, typecheck, lint, build and
 disposable migrations/RLS pass. No migration, DNS or customer launch change.
 See `vercel-domains-2026-10-16/CONNECT_FOLLOWUP.md` for release evidence and limits.
+
+## 2026-10-16 — Two domain setup paths
+
+The Domain page now starts with Find your domain / Already own one icon cards,
+then shows only the selected path. Discovery progresses from search to price
+review to saved connection intent; owned-domain entry navigates to its guide
+after saving. Back navigation preserves durable choices, returning customers
+resume their progress, and Overview identifies the correct website. Secondary
+connection details are collapsed. No DNS automation or customer launch is added.
+Fresh 2,389 tests / 119 files pass; full validation and release notes are in
+`vercel-domains-2026-10-16/DOMAIN_UX.md`, including the remaining division of work
+for customer consent and cross-account automation proof.

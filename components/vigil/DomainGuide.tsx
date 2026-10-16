@@ -139,7 +139,7 @@ export function DomainGuide({
                 </p>
               </Step>
               <Step n={5} title="Save, then tell me">
-                <p className="text-[color:var(--text-secondary)]">{guide.after ?? "Changes can take up to 48 hours to spread across the internet."} I keep checking and email you when it connects.</p>
+                <p className="text-[color:var(--text-secondary)]">{guide.after ?? "Changes can take up to 48 hours to spread across the internet."} Vigil checks the connection after you save the records.</p>
                 {guide.helpUrl ? (
                   <a href={guide.helpUrl} target="_blank" rel="noreferrer" className="mt-1 inline-flex min-h-9 items-center gap-1 text-[11px] text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">
                     {guide.name}&apos;s own help article <ExternalLink className="h-3 w-3" />

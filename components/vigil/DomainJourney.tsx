@@ -27,6 +27,7 @@ export function DomainJourney({ websiteId, initial = null, canManage }: { websit
   }, [websiteId]);
   const saved = intent && intent.phase !== "cancelled";
   const searching = !saved || choosing;
+  const step = saved && !choosing ? 2 : quote?.available ? 1 : 0;
   const run = async (work: () => Promise<void>) => {
     setPending(true); setError(null); setNotice("");
     try { await work(); } catch { setError("Something went wrong. Refresh and try again."); } finally { setPending(false); }
@@ -55,14 +56,15 @@ export function DomainJourney({ websiteId, initial = null, canManage }: { websit
     <section aria-labelledby={`${id}-title`} className="min-w-0 space-y-4">
       <h2 id={`${id}-title`} className="flex items-center gap-2 text-base font-semibold"><Globe2 className="h-4 w-4 shrink-0 text-[color:var(--accent)]" aria-hidden="true" />Find your domain</h2>
       <ol aria-label="Domain steps" className="grid grid-cols-3 gap-2 text-xs text-[color:var(--text-secondary)]">
-        {["Find a domain", "Buy on Vercel", "Connect"].map((step, i) => <li key={step} aria-current={i === (saved ? 2 : quote?.available ? 1 : 0) ? "step" : undefined} className="border-t-2 border-[color:var(--border)] pt-2 aria-[current=step]:border-[color:var(--accent)] aria-[current=step]:text-[color:var(--text-primary)]">{i + 1}. {step}</li>)}
+        {["Find a domain", "Buy on Vercel", "Connect"].map((label, i) => <li key={label} aria-current={i === step ? "step" : undefined} className="border-t-2 border-[color:var(--border)] pt-2 aria-[current=step]:border-[color:var(--accent)] aria-[current=step]:text-[color:var(--text-primary)]">{i + 1}. {label}</li>)}
       </ol>
-      <p className="text-sm text-[color:var(--text-secondary)]">Buy directly from Vercel. Your domain, payments, renewals and transfer controls stay in your Vercel account.</p>
+      <p className="text-sm text-[color:var(--text-secondary)]">Your domain and renewals stay in your own Vercel account.</p>
       {!canManage ? <p className="text-sm text-[color:var(--text-secondary)]">You can search availability and prices here. A customer owner or manager must save the choice and authorize the connection from their own account.</p> : null}
-      {saved ? (
+      <h3 className="text-sm font-medium">{["Search for a name", "Review and buy", "Connect your domain"][step]}</h3>
+      {saved && !choosing ? (
         <div className="space-y-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-4">
           <p className="break-all font-semibold">{intent.hostname}</p>
-          <p className="text-sm text-[color:var(--text-secondary)]">Your next step is Connect. This saved choice is not a reservation or confirmation of purchase.</p>
+          <p className="text-sm text-[color:var(--text-secondary)]">Finish your purchase on Vercel, then return here. A saved choice does not confirm a purchase.</p>
           <button type="button" className="btn-primary min-h-11 max-w-full whitespace-normal break-words !px-4 text-xs sm:text-sm disabled:cursor-not-allowed disabled:opacity-50" disabled aria-describedby={`${id}-connection`}>Connect {intent.hostname}</button>
           <p id={`${id}-connection`} className="text-sm text-[color:var(--text-secondary)]">Action required: automatic connection is not available yet. Contact Vigil for help with your Vercel domain. No DNS changes have started.</p>
           <div className="flex flex-wrap gap-x-4 gap-y-3 text-sm">
@@ -75,17 +77,19 @@ export function DomainJourney({ websiteId, initial = null, canManage }: { websit
       ) : null}
       {searching ? (
         <div className="space-y-3">
-          <form onSubmit={event => { event.preventDefault(); void search(); }} className="flex flex-wrap items-end gap-2">
+          {!quote?.available ? <form onSubmit={event => { event.preventDefault(); void search(); }} className="flex flex-wrap items-end gap-2">
             <div className="min-w-0 flex-1 basis-48"><label htmlFor={`${id}-name`} className={labelClass}>Exact domain name</label><input id={`${id}-name`} className={inputClass} placeholder="yourbusiness.com" autoCapitalize="none" autoCorrect="off" spellCheck={false} value={name} onChange={event => { setName(event.target.value); setQuote(null); }} disabled={pending} required /></div>
             <button type="submit" className="btn-secondary min-h-11 text-sm" disabled={pending}>{pending ? "Working…" : "Search"}</button>
-          </form>
+          </form> : null}
           {quote ? <div className="space-y-3 rounded-xl border border-[color:var(--border)] p-4" aria-live="polite">
             <p className="break-all font-semibold">{quote.hostname}</p>
             {quote.available ? <>
               <p className="text-sm">Available{quote.premium ? " · Premium domain" : " · Standard domain"}</p>
               <dl className="grid gap-2 text-sm sm:grid-cols-2"><div><dt className="text-[color:var(--text-secondary)]">Registration · {quote.years} {quote.years === 1 ? "year" : "years"}</dt><dd>{money(quote.registration)} USD</dd></div><div><dt className="text-[color:var(--text-secondary)]">Renewal estimate</dt><dd>{money(quote.renewal)} USD</dd></div></dl>
               <p className="text-xs text-[color:var(--text-secondary)]">Vercel confirms final availability, price and tax. Names are not reserved. We check the quote again before saving.</p>
+              <p className="text-sm text-[color:var(--text-secondary)]">Continue to Vercel to sign in and buy this domain. Connection currently needs Vigil’s help.</p>
               {canManage ? <button type="button" onClick={() => void handoff()} disabled={pending || !loaded} className="btn-primary min-h-11 text-sm">{pending ? "Saving…" : "Continue on Vercel"}<span className="sr-only"> (opens in a new tab)</span></button> : null}
+              <div><button type="button" className="min-h-11 text-sm underline" disabled={pending} onClick={() => setQuote(null)}>Back to search</button></div>
             </> : <p className="text-sm">Unavailable or unsupported by Vercel. Try another name.</p>}
           </div> : null}
           {choosing ? <button type="button" className="min-h-11 text-sm underline" onClick={() => { setChoosing(false); setQuote(null); }}>Keep saved choice</button> : null}
