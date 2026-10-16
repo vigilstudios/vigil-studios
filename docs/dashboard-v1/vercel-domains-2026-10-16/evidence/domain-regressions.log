@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey
+
+
+ Test Files  4 passed (4)
+      Tests  52 passed (52)
+   Start at  03:31:21
+   Duration  332ms (transform 405ms, setup 0ms, import 566ms, tests 37ms, environment 1ms)
+

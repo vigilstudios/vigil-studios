@@ -31,6 +31,10 @@
       "No completed provider authentication test with separate customer fixture credentials.",
       "No actual popup-blocker settings mutation; fallback link verified with saved state.",
       "No browser reduced-motion emulation capability; new journey contains no animation or transition."
-    ]
+    ],
+    "onboardingAutosaveAndContinueWithoutPurchase": true,
+    "overviewSavedNameResume": true,
+    "correctedPreviewAuthOriginVerified": true,
+    "ownedDomainReservedFixtureStagedPending": true
   }
 }

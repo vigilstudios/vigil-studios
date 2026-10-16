@@ -157,6 +157,7 @@ export const REGISTRAR_GUIDES: Record<RegistrarKey, RegistrarGuide> = {
 };
 
 export const REGISTRAR_OPTIONS: { key: RegistrarKey; name: string }[] = [
+  { key: "vercel", name: "Vercel" },
   { key: "godaddy", name: "GoDaddy" },
   { key: "namecheap", name: "Namecheap" },
   { key: "squarespace", name: "Squarespace / Google Domains" },
