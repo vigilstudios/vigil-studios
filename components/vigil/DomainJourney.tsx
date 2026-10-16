@@ -58,7 +58,7 @@ export function DomainJourney({ websiteId, initial = null, canManage }: { websit
         {["Find a domain", "Buy on Vercel", "Connect"].map((step, i) => <li key={step} aria-current={i === (saved ? 2 : quote?.available ? 1 : 0) ? "step" : undefined} className="border-t-2 border-[color:var(--border)] pt-2 aria-[current=step]:border-[color:var(--accent)] aria-[current=step]:text-[color:var(--text-primary)]">{i + 1}. {step}</li>)}
       </ol>
       <p className="text-sm text-[color:var(--text-secondary)]">Buy directly from Vercel. Your domain, payments, renewals and transfer controls stay in your Vercel account.</p>
-      {!canManage ? <p className="text-sm text-[color:var(--text-secondary)]">A customer owner or manager can save a domain choice. Staff viewing this account cannot authorize customer DNS access.</p> : null}
+      {!canManage ? <p className="text-sm text-[color:var(--text-secondary)]">You can search availability and prices here. A customer owner or manager must save the choice and authorize the connection from their own account.</p> : null}
       {saved ? (
         <div className="space-y-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-4">
           <p className="break-all font-semibold">{intent.hostname}</p>
@@ -68,16 +68,16 @@ export function DomainJourney({ websiteId, initial = null, canManage }: { websit
           <div className="flex flex-wrap gap-x-4 gap-y-3 text-sm">
             <a className="inline-flex min-h-11 items-center gap-1 underline" href={vercelDomainUrl(intent.hostname)} target="_blank" rel="noopener noreferrer">Return to Vercel <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" /><span className="sr-only"> (opens in a new tab)</span></a>
             <a className="inline-flex min-h-11 items-center underline" href={`mailto:hello@vigilstudios.co?subject=${encodeURIComponent(`Connect ${intent.hostname}`)}`}>Contact Vigil</a>
-            {canManage ? <button type="button" className="min-h-11 underline" disabled={pending} onClick={() => { setChoosing(true); setQuote(null); }}>Choose another domain</button> : null}
+            <button type="button" className="min-h-11 underline" disabled={pending} onClick={() => { setChoosing(true); setQuote(null); }}>{canManage ? "Choose another domain" : "Search another domain"}</button>
             {canManage ? <button type="button" className="min-h-11 underline" disabled={pending || !loaded} onClick={() => void cancel()}>Decide later</button> : null}
           </div>
         </div>
       ) : null}
-      {searching && canManage ? (
+      {searching ? (
         <div className="space-y-3">
           <form onSubmit={event => { event.preventDefault(); void search(); }} className="flex flex-wrap items-end gap-2">
             <div className="min-w-0 flex-1 basis-48"><label htmlFor={`${id}-name`} className={labelClass}>Exact domain name</label><input id={`${id}-name`} className={inputClass} placeholder="yourbusiness.com" autoCapitalize="none" autoCorrect="off" spellCheck={false} value={name} onChange={event => { setName(event.target.value); setQuote(null); }} disabled={pending} required /></div>
-            <button type="submit" className="btn-secondary min-h-11 text-sm" disabled={pending || !loaded}>{pending ? "Working…" : "Search"}</button>
+            <button type="submit" className="btn-secondary min-h-11 text-sm" disabled={pending}>{pending ? "Working…" : "Search"}</button>
           </form>
           {quote ? <div className="space-y-3 rounded-xl border border-[color:var(--border)] p-4" aria-live="polite">
             <p className="break-all font-semibold">{quote.hostname}</p>
@@ -85,7 +85,7 @@ export function DomainJourney({ websiteId, initial = null, canManage }: { websit
               <p className="text-sm">Available{quote.premium ? " · Premium domain" : " · Standard domain"}</p>
               <dl className="grid gap-2 text-sm sm:grid-cols-2"><div><dt className="text-[color:var(--text-secondary)]">Registration · {quote.years} {quote.years === 1 ? "year" : "years"}</dt><dd>{money(quote.registration)} USD</dd></div><div><dt className="text-[color:var(--text-secondary)]">Renewal estimate</dt><dd>{money(quote.renewal)} USD</dd></div></dl>
               <p className="text-xs text-[color:var(--text-secondary)]">Vercel confirms final availability, price and tax. Names are not reserved. We check the quote again before saving.</p>
-              <button type="button" onClick={() => void handoff()} disabled={pending || !loaded} className="btn-primary min-h-11 text-sm">{pending ? "Saving…" : "Continue on Vercel"}<span className="sr-only"> (opens in a new tab)</span></button>
+              {canManage ? <button type="button" onClick={() => void handoff()} disabled={pending || !loaded} className="btn-primary min-h-11 text-sm">{pending ? "Saving…" : "Continue on Vercel"}<span className="sr-only"> (opens in a new tab)</span></button> : null}
             </> : <p className="text-sm">Unavailable or unsupported by Vercel. Try another name.</p>}
           </div> : null}
           {choosing ? <button type="button" className="min-h-11 text-sm underline" onClick={() => { setChoosing(false); setQuote(null); }}>Keep saved choice</button> : null}
