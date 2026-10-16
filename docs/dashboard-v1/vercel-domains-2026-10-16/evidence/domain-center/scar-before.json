@@ -1,0 +1,35 @@
+{
+  "checkedAt": "2026-10-16T16:32:09.457Z",
+  "websites": [
+    {
+      "id": "490498f3-fa5f-4c08-a6d3-4943cb055795",
+      "organization_id": "a019d40a-8e36-41d5-970e-cd20ab26b104",
+      "status": "building",
+      "live_url": null,
+      "preview_url": "https://vigil-490498f3-dnra0fzpi-vigilstudio-projects.vercel.app",
+      "primary_domain_id": null,
+      "project_id": "a75a4703-3251-4ed0-9ac4-fb8387c5c452"
+    }
+  ],
+  "domains": [],
+  "reviews": [
+    {
+      "round_number": 1,
+      "status": "approved"
+    },
+    {
+      "round_number": 2,
+      "status": "approved"
+    }
+  ],
+  "contact": [
+    {
+      "enabled": false
+    }
+  ],
+  "automation": [
+    {
+      "status": "waiting_launch"
+    }
+  ]
+}
