@@ -1,0 +1,54 @@
+{
+  "checkedAt": "2026-10-16T07:24:20.250Z",
+  "fixtureDatabase": "vudbvrzooxywczzlsksy",
+  "results": [
+    {
+      "name": "real public quote available",
+      "passed": true
+    },
+    {
+      "name": "eight concurrent Continue calls succeed without duplicate intent",
+      "passed": true
+    },
+    {
+      "name": "other tenant cannot read selection",
+      "passed": true
+    },
+    {
+      "name": "customer direct state forgery rejected",
+      "passed": true
+    },
+    {
+      "name": "customer cannot call service-only RPC",
+      "passed": true
+    },
+    {
+      "name": "service RPC checks website organization",
+      "passed": true
+    },
+    {
+      "name": "service RPC checks actor membership",
+      "passed": true
+    },
+    {
+      "name": "stale quote rejected",
+      "passed": true
+    },
+    {
+      "name": "abandonment is durable",
+      "passed": true
+    },
+    {
+      "name": "stale operation cannot affect cancelled selection",
+      "passed": true
+    },
+    {
+      "name": "selection can resume without ownership assertion",
+      "passed": true
+    },
+    {
+      "name": "no domain ownership row, connection job or site publication",
+      "passed": true
+    }
+  ]
+}

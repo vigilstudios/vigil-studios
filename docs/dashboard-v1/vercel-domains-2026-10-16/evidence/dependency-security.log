@@ -1,0 +1,16 @@
+
+> vigil-studios@0.1.0 test:dependency-security
+> node --test scripts/verify-eslint-glob-security.mjs
+
+✔ installed Next plugin uses the pinned local adapter and no braces package remains (3.117292ms)
+✔ Next rootDir preserves directory matching without expanding literal directories (33.305125ms)
+✔ replacement still enforces Next's no-html-link-for-pages rule with globbed rootDir (126.715833ms)
+✔ deep brace and parenthesis patterns do not exhaust the replacement's stack (587.955ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 804.427708

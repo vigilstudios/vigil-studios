@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-10-16T07:27:00Z",
+  "provider": {
+    "signedInExactName": true,
+    "signedOutExactName": true,
+    "loginAndSignupPreserveNext": true,
+    "authenticationCompletedForHandoff": false,
+    "purchased": false,
+    "dnsConsentProven": false
+  },
+  "sharedPreview": {
+    "source": "6058e2205303b471fd2efe71668fcdeb4a6adb1f",
+    "url": "https://vigil-studios-ibv9vg883-vigilstudio-projects.vercel.app",
+    "fixtureDatabase": "vudbvrzooxywczzlsksy",
+    "desktop": {
+      "width": 1710,
+      "overflow": false,
+      "accent": "#10d45a"
+    },
+    "mobile": {
+      "width": 390,
+      "overflow": false
+    },
+    "savedNameResumesAfterReload": true,
+    "onboardingSharedJourney": true,
+    "connectDisabled": true,
+    "noPurchaseAssertion": true,
+    "externalFallbackLinkPresent": true,
+    "keyboardReturnLinkThenContact": true,
+    "limitations": [
+      "No completed provider authentication test with separate customer fixture credentials.",
+      "No actual popup-blocker settings mutation; fallback link verified with saved state.",
+      "No browser reduced-motion emulation capability; new journey contains no animation or transition."
+    ]
+  }
+}

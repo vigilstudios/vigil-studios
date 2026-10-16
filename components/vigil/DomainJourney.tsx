@@ -63,8 +63,8 @@ export function DomainJourney({ websiteId, initial = null, canManage }: { websit
         <div className="space-y-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-4">
           <p className="break-all font-semibold">{intent.hostname}</p>
           <p className="text-sm text-[color:var(--text-secondary)]">Your next step is Connect. This saved choice is not a reservation or confirmation of purchase.</p>
-          <button type="button" className="btn-primary min-h-11 max-w-full whitespace-normal break-all text-sm" disabled aria-describedby={`${id}-connection`}>Connect {intent.hostname}</button>
-          <p id={`${id}-connection`} className="text-sm text-[color:var(--text-secondary)]">Action required: automatic connection is not available yet. Vigil needs a supported way to request your Vercel DNS permission. Contact the team for help before connecting. No DNS changes have been started.</p>
+          <button type="button" className="btn-primary min-h-11 max-w-full whitespace-normal break-words !px-4 text-xs sm:text-sm disabled:cursor-not-allowed disabled:opacity-50" disabled aria-describedby={`${id}-connection`}>Connect {intent.hostname}</button>
+          <p id={`${id}-connection`} className="text-sm text-[color:var(--text-secondary)]">Action required: automatic connection is not available yet. Contact Vigil for help with your Vercel domain. No DNS changes have started.</p>
           <div className="flex flex-wrap gap-x-4 gap-y-3 text-sm">
             <a className="inline-flex min-h-11 items-center gap-1 underline" href={vercelDomainUrl(intent.hostname)} target="_blank" rel="noopener noreferrer">Return to Vercel <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" /><span className="sr-only"> (opens in a new tab)</span></a>
             <a className="inline-flex min-h-11 items-center underline" href={`mailto:hello@vigilstudios.co?subject=${encodeURIComponent(`Connect ${intent.hostname}`)}`}>Contact Vigil</a>

@@ -144,7 +144,7 @@ export function DomainStep({ initial, projectId, websiteId, initialIntent, busin
       {answered === "need" && phase === "ask" ? (
         <div className="space-y-4">
           {websiteId ? <DomainJourney websiteId={websiteId} initial={initialIntent} canManage={canManage} /> : <VirtueAside>Domain search is not available yet. You can decide later or use a domain you own.</VirtueAside>}
-          <StepFooter onBack={() => { set("answer", null); setPhase("ask"); }} onNext={() => continueNext({ later: true })} nextLabel="Continue · decide later" busy={busy} />
+          <StepFooter onBack={() => { set("answer", null); setPhase("ask"); }} onNext={() => continueNext({ later: true })} nextLabel="Continue onboarding" busy={busy} />
         </div>
       ) : null}
 
