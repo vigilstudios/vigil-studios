@@ -1,0 +1,1894 @@
+
+> vigil-studios@0.1.0 db:validate
+> scripts/db-validate.sh
+
+▸ auth shim
+▸ 20260913000000_retire_legacy_portal.sql
+▸ 20260913000001_foundation.sql
+▸ 20260913000002_identity.sql
+▸ 20260913000003_catalog_entitlements.sql
+▸ 20260913000004_websites_domains.sql
+▸ 20260913000005_operations.sql
+▸ 20260913000006_future_products.sql
+▸ 20260914000007_request_attachments.sql
+▸ 20260914000008_commerce.sql
+▸ 20260914000009_project_assets_update.sql
+▸ 20260914000010_billing_periods.sql
+▸ 20260915000011_vigil_express_name.sql
+▸ 20260915000012_delete_organization.sql
+▸ 20260916000013_professional_scope.sql
+▸ 20260916000014_project_reviews.sql
+▸ 20260916000015_customer_retirement.sql
+▸ 20260916000016_customer_retirement_hardening.sql
+▸ 20260916000017_customer_retirement_rpc.sql
+▸ 20260916000018_dashboard_realtime.sql
+▸ 20260917000019_automatic_project_status.sql
+▸ 20260917000020_express_preview_approval.sql
+▸ 20260917000021_grandfather_live_express_reviews.sql
+▸ 20260918000022_security_hardening.sql
+▸ 20260918000023_staff_notes_invites_domains_ratelimits.sql
+▸ 20260918000024_project_files.sql
+▸ 20260920000025_creative_workspaces.sql
+▸ 20260920000026_project_asset_checksums.sql
+▸ 20261006000027_package_positioning.sql
+▸ 20261006000028_professional_pipeline.sql
+▸ 20261006000029_subscription_attribution.sql
+▸ 20261011000030_express_library.sql
+▸ 20261011000031_growth_site_name.sql
+▸ 20261012000032_contact_lead_hub.sql
+▸ 20261012000033_contact_booking_default.sql
+▸ 20261012000034_contact_provisioning.sql
+▸ 20261012000035_website_blog.sql
+▸ 20261012000036_website_blog_images.sql
+▸ 20261012000037_blog_image_references.sql
+▸ 20261012000038_blog_review_samples.sql
+▸ 20261012000039_blog_post_trash.sql
+▸ 20261013000040_content_hub.sql
+▸ 20261013000041_content_media_capability.sql
+▸ 20261013000042_content_conflicts.sql
+▸ 20261014000043_content_staff_lab.sql
+▸ 20261015000044_content_library_media.sql
+▸ 20261015000045_content_feature_slots.sql
+▸ 20261015000046_content_launch_and_lab_features.sql
+▸ 20261016000047_domain_handoff.sql
+▸ rls assertions
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:114: NOTICE:  ok - legacy: projects renamed to legacy_projects
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:114: NOTICE:  ok - legacy: prototype profiles preserved as legacy_profiles
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:114: NOTICE:  ok - legacy: demo client row kept
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:114: NOTICE:  ok - legacy: prototype sign-up trigger function removed
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:114: NOTICE:  ok - legacy: anon can no longer read the old tables
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:125: NOTICE:  ok - profile per auth user
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:125: NOTICE:  ok - profile picks up full_name from metadata
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:137: NOTICE:  ok - anon: no organizations
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:137: NOTICE:  ok - anon: no subscriptions
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:137: NOTICE:  ok - anon: no profiles
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: sees exactly one organization
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot see org B
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: sees only her website
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: provider links hidden
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: jobs hidden
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: webhook inbox hidden
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: staff table hidden
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: catalog is readable
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: sees only herself (no co-members yet)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot create websites (refused: new row violates row-level security policy for table "websites")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot create organizations (refused: new row violates row-level security policy for table "organizations")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot make herself staff (refused: new row violates row-level security policy for table "staff_members")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot change org status (refused: column "status" on organizations is managed by Vigil)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot change org slug (refused: column "slug" on organizations is managed by Vigil)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: can rename her organization
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: update on org B did not apply
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: can start connecting her own domain
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot add a domain to org B (refused: new row violates row-level security policy for table "domains")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot claim a purchased domain (refused: new row violates row-level security policy for table "domains")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot attach her domain to org B's website (refused: website 20000000-0000-0000-0000-00000000000b does not belong to organization 10000000-0000-0000-0000-00000000000a)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot file a request against org B's website (refused: website 20000000-0000-0000-0000-00000000000b does not belong to organization 10000000-0000-0000-0000-00000000000a)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot mark a domain connected (update filtered by RLS)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot insert audit rows directly (refused: new row violates row-level security policy for table "audit_events")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot write audit rows directly, even for her own org (the server does) (refused: audit events are recorded by the server)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot log audit events against org B (refused: audit events are recorded by the server)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - service: audit row names the customer it acted for
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: reads the audit row the server wrote for her org
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: growth plan grants virtue
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: resolved plan is growth
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot resolve entitlements for org B
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: insert does not stamp submitted_at (only the transition does)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot mark her request delivered (refused: customers cannot set request status to delivered)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: cannot assign her request (refused: column "assigned_to" on change_requests is managed by Vigil)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:253: NOTICE:  ok - alice: can close her own request
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:294: NOTICE:  ok - alice: can upload into her organization folder
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:294: NOTICE:  ok - alice: cannot upload into org B's folder (refused: new row violates row-level security policy for table "objects")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:294: NOTICE:  ok - alice: cannot upload outside an organization folder (refused: new row violates row-level security policy for table "objects")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:294: NOTICE:  ok - alice: attachment row recorded
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:294: NOTICE:  ok - alice: attachment path must encode her own organization (refused: new row for relation "change_request_attachments" violates check constraint "change_request_attachments_path_org")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:294: NOTICE:  ok - alice: attachment over 10 MB refused (refused: new row for relation "change_request_attachments" violates check constraint "change_request_attachments_size")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:294: NOTICE:  ok - bob: cannot see org A's objects
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:294: NOTICE:  ok - bob: cannot see org A's attachment rows
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:294: NOTICE:  ok - carol: staff sees the object
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:351: NOTICE:  ok - anon: can read the plan catalog for checkout
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:351: NOTICE:  ok - anon: can read build prices
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:351: NOTICE:  ok - anon: cannot read orders
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:351: NOTICE:  ok - order: checkout token generated
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:351: NOTICE:  ok - alice: cannot see unprovisioned orders
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:351: NOTICE:  ok - carol: staff sees orders
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:351: NOTICE:  ok - alice: can fill in her project brief
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:351: NOTICE:  ok - alice: cannot change project status (refused: column "status" on projects is managed by Vigil)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:351: NOTICE:  ok - alice: can record a project asset
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:351: NOTICE:  ok - alice: can caption her upload
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:351: NOTICE:  ok - alice: cannot move an uploaded object (refused: column "object_path" on project_assets is managed by Vigil)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:351: NOTICE:  ok - bob: cannot see org A's assets
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:351: NOTICE:  ok - service: deleting an organization removes its last owner too
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:376: NOTICE:  ok - bob: sees org B
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:376: NOTICE:  ok - bob: sees himself and his co-member
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:376: NOTICE:  ok - bob: member cannot rename the organization
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:376: NOTICE:  ok - bob: member cannot invite (refused: new row violates row-level security policy for table "organization_invites")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:376: NOTICE:  ok - bob: member cannot start a domain connection (refused: new row violates row-level security policy for table "domains")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:376: NOTICE:  ok - bob: no subscription means no virtue
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: staff sees every organization
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: staff sees provider links
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: staff sees every profile
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: status change wrote an audit row
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: audit row attributes the change to staff
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: staff can change org status
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: even staff cannot queue a job that crosses organizations (refused: website 20000000-0000-0000-0000-00000000000a does not belong to organization 10000000-0000-0000-0000-00000000000b)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: duplicate idempotency key refused (refused: duplicate key value violates unique constraint "provisioning_jobs_idempotency_key_key")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: staff cannot edit the catalog (update filtered by RLS)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:437: NOTICE:  ok - carol: staff cannot grant overrides (refused: new row violates row-level security policy for table "entitlement_overrides")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:437: NOTICE:  ok - dave: admin can set a price
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:437: NOTICE:  ok - dave: override wins over plan default
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:437: NOTICE:  ok - bob: sees the override applied to his org
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:456: NOTICE:  ok - alice: cannot claim jobs (refused: staff or service role only)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:456: NOTICE:  ok - service: claims the one queued job
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:456: NOTICE:  ok - service: a running job is not reclaimed inside its lease
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:456: NOTICE:  ok - service: attempts incremented
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:524: NOTICE:  ok - bob: a customer-sent invite is not accepted on sign-in
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:524: NOTICE:  ok - bob: still sees only his own organization
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:524: NOTICE:  ok - bob: sees the pending invitation with who sent it
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:524: NOTICE:  ok - bob: now sees both organizations
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:524: NOTICE:  ok - bob: joined A as manager
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:524: NOTICE:  ok - bob: accepted invitation leaves the list
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:524: NOTICE:  ok - bob: acceptance is audited
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:524: NOTICE:  ok - bob: cannot accept an invitation addressed to eve (refused: that invitation is no longer open)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:524: NOTICE:  ok - eve: declined invitation leaves the list
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:524: NOTICE:  ok - eve: a declined invitation cannot be accepted later (refused: that invitation is no longer open)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:524: NOTICE:  ok - eve: declining never joins
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:524: NOTICE:  ok - staff-sent invites are trusted
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:524: NOTICE:  ok - alice: staff invitation accepted on sign-in
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:524: NOTICE:  ok - alice: joined B
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:524: NOTICE:  ok - alice: the last owner cannot leave (refused: an organization must keep at least one active owner)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:524: NOTICE:  ok - alice: the last owner cannot be demoted (refused: an organization must keep at least one active owner)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:542: NOTICE:  ok - alice: can edit her own name
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:542: NOTICE:  ok - alice: cannot change her email through the API (refused: column "email" on profiles is managed by Vigil)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:542: NOTICE:  ok - alice: cannot edit another profile
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:606: NOTICE:  ok - professional: exactly two included review rounds are seeded
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:606: NOTICE:  ok - alice: reads her Professional review rounds
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:606: NOTICE:  ok - alice: cannot publish a review submission (refused: only staff can publish review submissions)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:606: NOTICE:  ok - alice: cannot answer a non-current submission (refused: response does not match its submission and review round)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:606: NOTICE:  ok - staff: round two cannot be published before round one approval (refused: full-site review cannot start until design direction is approved)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:606: NOTICE:  ok - staff: publishing makes round one await customer feedback
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:606: NOTICE:  ok - alice: a consolidated response updates the round state
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:606: NOTICE:  ok - alice: cannot add a second response to the same version (refused: only the current review submission can receive a customer response)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:606: NOTICE:  ok - alice: can record an attachment on her consolidated changes
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:606: NOTICE:  ok - eve: cannot see another organization review workflow
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:606: NOTICE:  ok - eve: cannot see another organization review attachments
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:646: NOTICE:  ok - express: exactly one Full-site review round is seeded
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:646: NOTICE:  ok - express: a second request for changes is refused (refused: Express projects include one request for changes)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:646: NOTICE:  ok - express: the revised preview can be approved
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:660: NOTICE:  ok - deployment organization is taken from the website, not the caller
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:737: NOTICE:  ok - member: cannot archive a customer (refused: Admin access required)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:737: NOTICE:  ok - service: an active customer cannot be permanently purged (refused: Archive the customer before permanent deletion)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:737: NOTICE:  ok - archive: organization is closed and timestamped
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:737: NOTICE:  ok - archive: subscription row is canceled
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:737: NOTICE:  ok - archive: project and website are retired
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:737: NOTICE:  ok - archive: paid but unprovisioned orders cannot run later
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:737: NOTICE:  ok - restore: organization status is restored
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:737: NOTICE:  ok - restore: live website restores the project at launched
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:737: NOTICE:  ok - restore: billing remains canceled and requires an explicit new subscription
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:737: NOTICE:  ok - purge: customer, projects, websites, subscriptions and orders are removed
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:737: NOTICE:  ok - purge: provider links are removed
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:737: NOTICE:  ok - purge: one minimal deletion ledger remains
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:788: NOTICE:  ok - automatic lifecycle: completed intake starts the build
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:788: NOTICE:  ok - automatic lifecycle: ready preview starts review
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:788: NOTICE:  ok - automatic lifecycle: live website launches the project
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:788: NOTICE:  ok - automatic lifecycle: published review starts customer review
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:788: NOTICE:  ok - automatic lifecycle: first approval returns to the full build
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:788: NOTICE:  ok - automatic lifecycle: final approval approves the project
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: manager cannot invite an owner (refused: new row violates row-level security policy for table "organization_invites")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: manager cannot add an owner directly (refused: new row violates row-level security policy for table "organization_members")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: manager cannot forge invited_by (refused: new row violates row-level security policy for table "organization_invites")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: manager cannot upgrade an invite to owner (refused: new row violates row-level security policy for table "organization_invites")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: manager can still invite a manager
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: owner can invite an owner
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: no review response, no staff notification (refused: no review response to notify about)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: staff notification link is derived from the round
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: staff notification title is derived, not customer text
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: repeated customer notifications collapse into one per staff member
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: customer cannot write an organization-less audit row (refused: audit events are recorded by the server)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: customer cannot write audit rows for their own organization either (refused: audit events are recorded by the server)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: the review-response trigger still audits the customer action
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: customer cannot pre-set dns_ok / launch_ready on a new domain (refused: new row violates row-level security policy for table "domains")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:881: NOTICE:  ok - hardening: customer can still record a plain owned domain
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:949: NOTICE:  ok - staff: can write and read notes
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:949: NOTICE:  ok - alice: cannot read staff notes about her organization
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:949: NOTICE:  ok - alice: cannot write staff notes (refused: new row violates row-level security policy for table "staff_notes")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:949: NOTICE:  ok - organizations.notes is gone
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:949: NOTICE:  ok - orders.notes is gone
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:949: NOTICE:  ok - alice: cannot choose the verification token
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:949: NOTICE:  ok - alice: one row per hostname per organization (refused: duplicate key value violates unique constraint "domains_org_hostname_key")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:949: NOTICE:  ok - eve: may record the same hostname with her own token; nothing is reserved
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:949: NOTICE:  ok - service: a hostname verified by one organization cannot verify for another (refused: duplicate key value violates unique constraint "domains_hostname_claimed_idx")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:949: NOTICE:  ok - service: a released claim frees the hostname
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:949: NOTICE:  ok - alice: cannot touch the rate limiter (refused: permission denied for function rate_limit)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:949: NOTICE:  ok - service: first hit allowed
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:949: NOTICE:  ok - service: second hit allowed
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:949: NOTICE:  ok - service: third hit refused inside the window
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:949: NOTICE:  ok - service: a new window starts clean
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:998: NOTICE:  ok - files: default library limit is 60
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:998: NOTICE:  ok - files: a file above the per-file ceiling is refused (refused: That file is larger than 500 MB.)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:998: NOTICE:  ok - files: a video within the limits is accepted
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:998: NOTICE:  ok - files: the per-organization count override holds (refused: Your project library is full (1 files). Remove something or ask Vigil for more room.)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:998: NOTICE:  ok - files: video can be switched off per organization (refused: Video uploads are not enabled for this account.)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1035: NOTICE:  ok - creative: staff can record a workspace
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1035: NOTICE:  ok - creative: one record per website (refused: duplicate key value violates unique constraint "creative_workspaces_website_id_key")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1035: NOTICE:  ok - creative: the website must belong to the organization (refused: website 20000000-0000-0000-0000-00000000000a does not belong to organization 10000000-0000-0000-0000-00000000000b)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1035: NOTICE:  ok - creative: status is limited to the known set (refused: new row for relation "creative_workspaces" violates check constraint "creative_workspaces_status")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1035: NOTICE:  ok - alice: generation state is hidden from customers
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1035: NOTICE:  ok - alice: cannot record a workspace (refused: new row violates row-level security policy for table "creative_workspaces")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1035: NOTICE:  ok - service: the job runner updates status
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1068: NOTICE:  ok - library: staff can manage variants
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1068: NOTICE:  ok - library: anonymous cannot read drafts (refused: permission denied for table express_variants)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1068: NOTICE:  ok - library: only published templates are public
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1068: NOTICE:  ok - library: draft changes do not leak into published snapshot
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1068: NOTICE:  ok - library: customer cannot see template drafts
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1068: NOTICE:  ok - library: customer cannot create variants (refused: new row violates row-level security policy for table "express_variants")
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1068: NOTICE:  ok - library: removal hides published variant
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1068: NOTICE:  ok - library: restore recovers published variant
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1068: NOTICE:  ok - professional: workspace cannot move to a different customer (refused: Workspace must belong to its Professional project and website)
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1068: NOTICE:  ok - professional: internal editor is hidden from customers
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/rls.test.sql:1069: NOTICE:  drop cascades to 7 other objects
+DETAIL:  drop cascades to function test.login(uuid,text)
+drop cascades to function test.login_service()
+drop cascades to function test.login_anon()
+drop cascades to function test.logout()
+drop cascades to function test.count(text)
+drop cascades to function test.ok(boolean,text)
+drop cascades to function test.fails(text,text)
+▸ shared contact assertions
+  set_config  
+--------------
+ service_role
+(1 row)
+
+         capture_website_lead         
+--------------------------------------
+ 374c2a38-4aaa-411b-95a8-4495425af519
+(1 row)
+
+         capture_website_lead         
+--------------------------------------
+ 374c2a38-4aaa-411b-95a8-4495425af519
+(1 row)
+
+         capture_website_lead         
+--------------------------------------
+ d69897ea-ed99-471c-a6cd-4e815e3a9fca
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:24: NOTICE:  ok - contact: duplicate submission creates one lead per website
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:25: NOTICE:  ok - contact: exactly one received event
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:26: NOTICE:  ok - contact: outbox committed atomically with lead
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:27: NOTICE:  ok - contact: recipient comes from settings
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:28: NOTICE:  ok - contact: changed duplicate rejected (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:29: NOTICE:  ok - contact: wrong origin cannot route lead (refused)
+ fails 
+-------
+ 
+(1 row)
+
+              set_config              
+--------------------------------------
+ d69897ea-ed99-471c-a6cd-4e815e3a9fca
+(1 row)
+
+  set_config   
+---------------
+ authenticated
+(1 row)
+
+              set_config              
+--------------------------------------
+ ca000000-0000-4000-8000-000000000001
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:35: NOTICE:  ok - contact: tenant A list and search cannot see B
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:36: NOTICE:  ok - contact: tenant A search cannot see B
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:37: NOTICE:  ok - contact: known cross-tenant lead ID cannot be fetched
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:38: NOTICE:  ok - contact: known cross-tenant lead cannot be updated
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:39: NOTICE:  ok - contact: tenant A activity cannot see B
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:40: NOTICE:  ok - contact: tenant A notification details cannot see B
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:41: NOTICE:  ok - contact: tenant A settings cannot see B
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:42: NOTICE:  ok - contact: captured inquiry immutable to customers (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:43: NOTICE:  ok - contact: metadata immutable to customers (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:44: NOTICE:  ok - contact: events cannot be inserted directly (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:45: NOTICE:  ok - contact: cross-tenant note refused (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:46: NOTICE:  ok - contact: owner cannot register origins (refused)
+ fails 
+-------
+ 
+(1 row)
+
+ configure_website_contact 
+---------------------------
+ 
+(1 row)
+
+ add_lead_note 
+---------------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:50: NOTICE:  ok - contact: note and status events recorded
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:51: NOTICE:  ok - contact: read state update permitted
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:52: NOTICE:  ok - contact: queued recipient immutable after settings change
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:53: NOTICE:  ok - contact: customer cannot call service capture function (refused)
+ fails 
+-------
+ 
+(1 row)
+
+ set_config 
+------------
+ 
+(1 row)
+
+ set_config 
+------------
+ anon
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:58: NOTICE:  ok - contact: anonymous cannot query leads
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:59: NOTICE:  ok - contact: anonymous cannot query timeline (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:60: NOTICE:  ok - contact: anonymous cannot query recipients (refused)
+ fails 
+-------
+ 
+(1 row)
+
+  set_config  
+--------------
+ service_role
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:65: NOTICE:  ok - contact: paused site fails closed (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:70: NOTICE:  ok - contact: disabled settings fail closed (refused)
+ fails 
+-------
+ 
+(1 row)
+
+ acknowledge_lead_notification 
+-------------------------------
+ 
+(1 row)
+
+ acknowledge_lead_notification 
+-------------------------------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:73: NOTICE:  ok - contact: provider acknowledgement and event are atomic and idempotent
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:77: NOTICE:  ok - contact: site quota rejects additional submissions (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact.test.sql:78: NOTICE:  ok - contact: service child row identity cannot cross organizations (refused)
+ fails 
+-------
+ 
+(1 row)
+
+▸ contact automation assertions
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:12: NOTICE:  ok - automation: unverified owner never becomes notification destination
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:14: NOTICE:  ok - automation: building website cannot start provider configuration
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:16: NOTICE:  ok - automation: verified owner default starts disabled
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:17: NOTICE:  ok - automation: launch transition queues a durable job
+ ok 
+----
+ 
+(1 row)
+
+ set_config 
+------------
+ 2
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:19: NOTICE:  ok - automation: only verified origins derived
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:20: NOTICE:  ok - automation: arbitrary live_url is not hostname authority
+ ok 
+----
+ 
+(1 row)
+
+  set_config  
+--------------
+ service_role
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:23: NOTICE:  ok - automation: service cannot read private Vault reference table directly (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:24: NOTICE:  ok - automation: service cannot read Vault directly (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:25: NOTICE:  ok - automation: worker acquires lease
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:26: NOTICE:  ok - automation: second worker cannot acquire live lease
+ ok 
+----
+ 
+(1 row)
+
+ contact_setup_failed 
+----------------------
+ 
+(1 row)
+
+ mark_contact_widget_creation 
+------------------------------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:29: NOTICE:  ok - automation: creation cannot start twice (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:30: NOTICE:  ok - automation: current verified revision activates
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:31: NOTICE:  ok - automation: service RPC obtains website credential
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:33: NOTICE:  ok - automation: provider metadata contains no secret
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:34: NOTICE:  ok - automation: state is ready
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:36: NOTICE:  ok - automation: domain change immediately disables capture
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:37: NOTICE:  ok - automation: removed domain cannot linger via old live_url
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:39: NOTICE:  ok - automation: old-domain credentials cannot be served
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:40: NOTICE:  ok - automation: old job is superseded
+ ok 
+----
+ 
+(1 row)
+
+ set_config 
+------------
+ 3
+(1 row)
+
+                                                                 claim_contact_setup                                                                 
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+ {"claimed": true, "origins": ["https://changed.example.com"], "organization_id": "cb000000-0000-4000-8000-000000000011", "creation_started": false}
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:48: NOTICE:  ok - automation: in-flight setup cannot activate superseded origins
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:50: NOTICE:  ok - automation: domain update reuses stored Vault secret
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:51: NOTICE:  ok - automation: stale finish remains disabled
+ ok 
+----
+ 
+(1 row)
+
+ set_config 
+------------
+ 2
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:57: NOTICE:  ok - automation: null lease cannot persist credentials (refused)
+ fails 
+-------
+ 
+(1 row)
+
+                                                              claim_contact_setup                                                              
+-----------------------------------------------------------------------------------------------------------------------------------------------
+ {"claimed": true, "origins": ["https://b.example.com"], "organization_id": "cb000000-0000-4000-8000-000000000012", "creation_started": false}
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:59: NOTICE:  ok - automation: widget association cannot cross websites (refused)
+ fails 
+-------
+ 
+(1 row)
+
+ mark_contact_widget_creation 
+------------------------------
+ 
+(1 row)
+
+ contact_setup_failed 
+----------------------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:62: NOTICE:  ok - automation: uncertain creation marker survives retries
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:64: NOTICE:  ok - automation: failed association rolls back Vault write atomically
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:65: NOTICE:  ok - automation: failed association leaves no usable credential reference
+ ok 
+----
+ 
+(1 row)
+
+  set_config   
+---------------
+ authenticated
+(1 row)
+
+              set_config              
+--------------------------------------
+ cb000000-0000-4000-8000-000000000001
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:70: NOTICE:  ok - automation: tenant reads only its own automation state
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:71: NOTICE:  ok - automation: tenant cannot access Vault (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:72: NOTICE:  ok - automation: tenant cannot access credential references (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:73: NOTICE:  ok - automation: tenant cannot decrypt contact credential (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:74: NOTICE:  ok - automation: owner cannot launch or retry provider work (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:75: NOTICE:  ok - automation: tenant cannot reconcile provider work (refused)
+ fails 
+-------
+ 
+(1 row)
+
+ set_website_contact_automation 
+--------------------------------
+ 
+(1 row)
+
+ configure_website_contact 
+---------------------------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:83: NOTICE:  ok - automation: domain lifecycle preserves staff pause
+ ok 
+----
+ 
+(1 row)
+
+ set_config 
+------------
+ anon
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:86: NOTICE:  ok - automation: anonymous cannot read setup (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/contact-automation.test.sql:87: NOTICE:  ok - automation: anonymous cannot decrypt credential (refused)
+ fails 
+-------
+ 
+(1 row)
+
+▸ website blog assertions
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:23: NOTICE:  ok - blog: Professional explicit Blog page enabled
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:24: NOTICE:  ok - blog: Growth Site explicit blog feature enabled
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:25: NOTICE:  ok - blog: generic CMS selection does not invent a blog request
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:26: NOTICE:  ok - blog: Express not entitled by forged blog choice
+ ok 
+----
+ 
+(1 row)
+
+  set_config   
+---------------
+ authenticated
+(1 row)
+
+              set_config              
+--------------------------------------
+ ba000000-0000-4000-8000-000000000001
+(1 row)
+
+              set_config              
+--------------------------------------
+ af1ff6f4-b304-4f80-bb25-59415a6995b1
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:31: NOTICE:  ok - blog: server derives tenant and author
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:32: NOTICE:  ok - blog: tenant A cannot publish into B (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:33: NOTICE:  ok - blog: no-request site cannot create posts (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:34: NOTICE:  ok - blog: direct writes bypassing validated RPC refused (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:35: NOTICE:  ok - blog: customer cannot enable service outside approved scope (refused)
+ fails 
+-------
+ 
+(1 row)
+
+        save_website_blog_post        
+--------------------------------------
+ af1ff6f4-b304-4f80-bb25-59415a6995b1
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:39: NOTICE:  ok - blog: owner can publish current draft
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:40: NOTICE:  ok - blog: stale editor cannot overwrite (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:41: NOTICE:  ok - blog: published address remains stable (refused)
+ fails 
+-------
+ 
+(1 row)
+
+        save_website_blog_post        
+--------------------------------------
+ af1ff6f4-b304-4f80-bb25-59415a6995b1
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:43: NOTICE:  ok - blog: unpublish retains article
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:44: NOTICE:  ok - blog: customer cannot grant public sample visibility (refused)
+ fails 
+-------
+ 
+(1 row)
+
+        save_website_blog_post        
+--------------------------------------
+ af1ff6f4-b304-4f80-bb25-59415a6995b1
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:49: NOTICE:  ok - blog: owner can edit staff-selected sample without changing visibility
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:50: NOTICE:  ok - blog: sample cannot become a published production article (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:53: NOTICE:  ok - blog: stale delete cannot remove a newer article (refused)
+ fails 
+-------
+ 
+(1 row)
+
+    set_website_blog_post_deleted     
+--------------------------------------
+ af1ff6f4-b304-4f80-bb25-59415a6995b1
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:55: NOTICE:  ok - blog: trash keeps article content
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:56: NOTICE:  ok - blog: trashed post cannot be edited or republished (refused)
+ fails 
+-------
+ 
+(1 row)
+
+    set_website_blog_post_deleted     
+--------------------------------------
+ af1ff6f4-b304-4f80-bb25-59415a6995b1
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:58: NOTICE:  ok - blog: owner can restore
+ ok 
+----
+ 
+(1 row)
+
+              set_config              
+--------------------------------------
+ ba000000-0000-4000-8000-000000000002
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:62: NOTICE:  ok - blog: cross-tenant drafts hidden even by known post ID
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:63: NOTICE:  ok - blog: tenant B cannot trash A article (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:64: NOTICE:  ok - blog: tenant B cannot inspect A service scope (refused)
+ fails 
+-------
+ 
+(1 row)
+
+        save_website_blog_post        
+--------------------------------------
+ b3be3d68-1324-41aa-abbc-12e685997343
+(1 row)
+
+              set_config              
+--------------------------------------
+ ba000000-0000-4000-8000-000000000003
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:69: NOTICE:  ok - blog: ordinary member cannot publish (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:70: NOTICE:  ok - blog: ordinary member cannot delete (refused)
+ fails 
+-------
+ 
+(1 row)
+
+ set_config 
+------------
+ anon
+(1 row)
+
+ set_config 
+------------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:75: NOTICE:  ok - blog: anonymous cannot read any table drafts or published rows directly (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:76: NOTICE:  ok - blog: anonymous cannot delete (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:77: NOTICE:  ok - blog: anonymous cannot write (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:80: NOTICE:  ok - blog: archived organization blog unavailable
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:82: NOTICE:  ok - blog: unchecking request disables service without removing content
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog.test.sql:83: NOTICE:  ok - blog: scope removal retains both tenants articles
+ ok 
+----
+ 
+(1 row)
+
+▸ website blog image assertions
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog-images.test.sql:31: NOTICE:  ok - blog: private bucket has raster-only output limits
+ ok 
+----
+ 
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"ba000000-0000-4000-8000-000000000001","role":"authenticated"}
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog-images.test.sql:34: NOTICE:  ok - blog: image row tenant isolation
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog-images.test.sql:35: NOTICE:  ok - blog: private storage tenant isolation
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog-images.test.sql:36: NOTICE:  ok - blog: browser cannot bypass sanitizer (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog-images.test.sql:37: NOTICE:  ok - blog: browser cannot forge registered image (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog-images.test.sql:38: NOTICE:  ok - blog: known cross-tenant image rejected (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog-images.test.sql:39: NOTICE:  ok - blog: published photo needs alt text (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog-images.test.sql:40: NOTICE:  ok - blog: unattached inline marker rejected (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog-images.test.sql:41: NOTICE:  ok - blog: cover must be an attached image (refused)
+ fails 
+-------
+ 
+(1 row)
+
+        save_website_blog_post        
+--------------------------------------
+ 5ab2dca3-dfdf-4315-b9ac-5ee5a8bf9961
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog-images.test.sql:43: NOTICE:  ok - blog: trusted images save and untrusted URLs are stripped
+ ok 
+----
+ 
+(1 row)
+
+        save_website_blog_post        
+--------------------------------------
+ 5ab2dca3-dfdf-4315-b9ac-5ee5a8bf9961
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog-images.test.sql:45: NOTICE:  ok - blog: older text clients preserve existing media
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog-images.test.sql:46: NOTICE:  ok - blog: cannot delete an image attached to a Blog post (refused)
+ fails 
+-------
+ 
+(1 row)
+
+        save_website_blog_post        
+--------------------------------------
+ 5ab2dca3-dfdf-4315-b9ac-5ee5a8bf9961
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog-images.test.sql:48: NOTICE:  ok - blog: draft detachment retains the prior published image (refused)
+ fails 
+-------
+ 
+(1 row)
+
+     unpublish_website_blog_post      
+--------------------------------------
+ 5ab2dca3-dfdf-4315-b9ac-5ee5a8bf9961
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog-images.test.sql:51: NOTICE:  ok - blog: detached image can be removed through the library
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog-images.test.sql:53: NOTICE:  ok - blog: anonymous cannot read draft image registry (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/blog-images.test.sql:54: NOTICE:  ok - blog: anonymous cannot read private images
+ ok 
+----
+ 
+(1 row)
+
+▸ content hub assertions
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:35: NOTICE:  ok - content: paid Care eligibility preserved independently of launch
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:36: NOTICE:  ok - content: second tenant Growth Site eligible
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:37: NOTICE:  ok - content: Basic cannot borrow another websites premium subscription
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:38: NOTICE:  ok - content: Express denied with Priority and another eligible website
+ ok 
+----
+ 
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"cb000000-0000-4000-8000-000000000001","role":"authenticated"}
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:41: NOTICE:  ok - content: eligible prelaunch customer receives launch wall
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:42: NOTICE:  ok - content: prelaunch collections hidden by RLS
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:43: NOTICE:  ok - content: legacy Blog authoring also locked before launch (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:44: NOTICE:  ok - content: prelaunch media reservation denied (refused)
+ fails 
+-------
+ 
+(1 row)
+
+       set_config        
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:46: NOTICE:  ok - content: service boundary cannot bypass prelaunch owner gate (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:49: NOTICE:  ok - content: only configured Blog and Portfolio modules
+ ok 
+----
+ 
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"cb000000-0000-4000-8000-000000000001","role":"authenticated"}
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:51: NOTICE:  ok - content: tenant A sees only its own bindings
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:52: NOTICE:  ok - content: customer cannot self-enable capabilities (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:53: NOTICE:  ok - content: cross-tenant access resolver denied (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:54: NOTICE:  ok - content: RPC cannot bypass validated renderer publication (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:55: NOTICE:  ok - content: cross-tenant media reservation denied (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:56: NOTICE:  ok - content: storage writes cannot bypass signed reservation (refused)
+ fails 
+-------
+ 
+(1 row)
+
+                                               reserve_content_media                                                
+--------------------------------------------------------------------------------------------------------------------
+ cb000000-0000-4000-8000-000000000011/cb000000-0000-4000-8000-000000000031/cb000000-0000-4000-8000-000000000051.mp4
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:58: NOTICE:  ok - content: reservation consumes existing file allowance
+ ok 
+----
+ 
+(1 row)
+
+       set_config        
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+                                                                                                                  set_config                                                                                                                  
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ [{"id":"cb000000-0000-4000-8000-000000000061","slug":"real-work","deleted":false,"featured":false,"data":{"title":"Original title","description":"Owned content","category":"Work","media":[],"brand":"","context":"","tags":[],"link":""}}]
+(1 row)
+
+ save_website_content 
+----------------------
+                    2
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:62: NOTICE:  ok - content: validated publish records a public revision
+ ok 
+----
+ 
+(1 row)
+
+ save_website_content 
+----------------------
+                    3
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:64: NOTICE:  ok - content: draft save leaves publication unchanged
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:65: NOTICE:  ok - content: stale concurrent editor denied (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:66: NOTICE:  ok - content: unknown payload fields denied (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:67: NOTICE:  ok - content: foreign actor denied even at service boundary (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:68: NOTICE:  ok - content: member remains read-only (refused)
+ fails 
+-------
+ 
+(1 row)
+
+ save_website_content 
+----------------------
+                    4
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:70: NOTICE:  ok - content: Trash reversibly removes public entry
+ ok 
+----
+ 
+(1 row)
+
+ save_website_content 
+----------------------
+                    5
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:72: NOTICE:  ok - content: Restore returns a draft without implicit publication
+ ok 
+----
+ 
+(1 row)
+
+ save_website_content 
+----------------------
+                    6
+(1 row)
+
+ save_website_content 
+----------------------
+                    7
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:75: NOTICE:  ok - content: unpublish cannot release a previously published address (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:76: NOTICE:  ok - content: unpublish retains customer data
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:79: NOTICE:  ok - content: cancellation preserves paid-period authoring
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:81: NOTICE:  ok - content: expired cancellation denies authoring while records remain
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:82: NOTICE:  ok - content: canceled content retained
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:87: NOTICE:  ok - content: Basic owner remains locked even through trusted actor-bound RPC (refused)
+ fails 
+-------
+ 
+(1 row)
+
+ save_content_design_workspace 
+-------------------------------
+                             2
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:91: NOTICE:  ok - content: staff-only Lab still builds a paid Professional Basic website
+ ok 
+----
+ 
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"cb000000-0000-4000-8000-000000000001","role":"authenticated"}
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:93: NOTICE:  ok - content: staff customer view retains Basic authoring access
+ ok 
+----
+ 
+(1 row)
+
+       set_config        
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:95: NOTICE:  ok - content: staff Lab cannot enable Express collections (refused)
+ fails 
+-------
+ 
+(1 row)
+
+       set_config        
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+ save_content_design_workspace 
+-------------------------------
+                             2
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:102: NOTICE:  ok - content: Lab design and shared draft save atomically
+ ok 
+----
+ 
+(1 row)
+
+ save_website_content 
+----------------------
+                    3
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:104: NOTICE:  ok - content: stale Lab cannot overwrite newer Hub draft (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:105: NOTICE:  ok - content: failed Lab save rolls back design and retains Hub edits
+ ok 
+----
+ 
+(1 row)
+
+ set_config 
+------------
+ 6
+(1 row)
+
+ set_config 
+------------
+ 3372
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"cb000000-0000-4000-8000-000000000001","role":"authenticated"}
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:120: NOTICE:  ok - content: same organization different project file denied (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:121: NOTICE:  ok - content: document cannot become playable content (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:122: NOTICE:  ok - content: unuploaded Files row denied (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:123: NOTICE:  ok - content: Blog cannot borrow collection media authority (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:124: NOTICE:  ok - content: staff cannot reuse a different project file (refused)
+ fails 
+-------
+ 
+(1 row)
+
+ attach_content_library_media 
+------------------------------
+ 
+(1 row)
+
+ attach_content_library_media 
+------------------------------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:128: NOTICE:  ok - content: repeated MOV reuse creates no asset or storage usage duplicate
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:129: NOTICE:  ok - content: MOV registered once as ready video
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:130: NOTICE:  ok - content: choosing media does not publish a post
+ ok 
+----
+ 
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"cb000000-0000-4000-8000-000000000003","role":"authenticated"}
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:132: NOTICE:  ok - content: member cannot register existing media (refused)
+ fails 
+-------
+ 
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"cb000000-0000-4000-8000-000000000002","role":"authenticated"}
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:134: NOTICE:  ok - content: foreign tenant cannot register existing media (refused)
+ fails 
+-------
+ 
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"cb000000-0000-4000-8000-000000000001","role":"authenticated"}
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:138: NOTICE:  ok - content: storage size mismatch denied (refused)
+ fails 
+-------
+ 
+(1 row)
+
+       set_config        
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+ save_website_content 
+----------------------
+                    2
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:143: NOTICE:  ok - content: saved draft tracks original Files reference
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:144: NOTICE:  ok - content: referenced original asset cannot be deleted (refused)
+ fails 
+-------
+ 
+(1 row)
+
+                                                                                                                                                                                                                                                                                                                                                                       set_config                                                                                                                                                                                                                                                                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ [{"id":"cb000000-0000-4000-8000-000000000071","slug":"feature-one","featured":true,"featuredOrder":2,"deleted":false,"data":{"title":"One","media":[{"type":"video","src":"/assets/one.mp4","poster":"/assets/one.webp","alt":"One","caption":""}]}},{"id":"cb000000-0000-4000-8000-000000000072","slug":"feature-two","featured":true,"featuredOrder":1,"deleted":false,"data":{"title":"Two","media":[{"type":"video","src":"/assets/two.mp4","poster":"/assets/two.webp","alt":"Two","caption":""}]}},{"id":"cb000000-0000-4000-8000-000000000073","slug":"feature-three","featured":false,"deleted":false,"data":{"title":"Three","media":[{"type":"video","src":"/assets/three.mp4","poster":"/assets/three.webp","alt":"Three","caption":""}]}}]
+(1 row)
+
+       set_config        
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+ save_website_content 
+----------------------
+                    2
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:153: NOTICE:  ok - content: featured order persists independently of full-collection order
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:154: NOTICE:  ok - content: featured capacity cannot be exceeded by direct RPC (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:155: NOTICE:  ok - content: duplicate featured positions refused (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:156: NOTICE:  ok - content: position beyond section capacity refused (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:157: NOTICE:  ok - content: fractional featured position refused (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:158: NOTICE:  ok - content: wrong media type for a video slot refused (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:159: NOTICE:  ok - content: unfeatured record cannot claim a position (refused)
+ fails 
+-------
+ 
+(1 row)
+
+                                                                                                                                                                                                                                                                                                                                                                                                set_config                                                                                                                                                                                                                                                                                                                                                                                                
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ [{"id": "cb000000-0000-4000-8000-000000000071", "data": {"media": [{"alt": "One", "src": "/assets/one.mp4", "type": "video", "poster": "/assets/one.webp", "caption": ""}], "title": "One"}, "slug": "feature-one", "deleted": false, "featured": false}, {"id": "cb000000-0000-4000-8000-000000000072", "data": {"media": [{"alt": "Two", "src": "/assets/two.mp4", "type": "video", "poster": "/assets/two.webp", "caption": ""}], "title": "Two"}, "slug": "feature-two", "deleted": false, "featured": true, "featuredOrder": 1}, {"id": "cb000000-0000-4000-8000-000000000073", "data": {"media": [{"alt": "Three", "src": "/assets/three.mp4", "type": "video", "poster": "/assets/three.webp", "caption": ""}], "title": "Three"}, "slug": "feature-three", "deleted": false, "featured": false}]
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:161: NOTICE:  ok - content: incomplete fixed-slot publication refused (refused)
+ fails 
+-------
+ 
+(1 row)
+
+ save_website_content 
+----------------------
+                    3
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:163: NOTICE:  ok - content: incomplete draft remains private and previous positions stay published
+ ok 
+----
+ 
+(1 row)
+
+ save_website_content 
+----------------------
+                    4
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:165: NOTICE:  ok - content: unpublish still preserves incomplete draft without public slots
+ ok 
+----
+ 
+(1 row)
+
+       set_config        
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+ save_website_content 
+----------------------
+                    5
+(1 row)
+
+                                                                                                                                                                                                                                                                                                                                                                                                set_config                                                                                                                                                                                                                                                                                                                                                                                                
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ [{"id": "cb000000-0000-4000-8000-000000000071", "data": {"media": [{"alt": "One", "src": "/assets/one.mp4", "type": "video", "poster": "/assets/one.webp", "caption": ""}], "title": "One"}, "slug": "feature-one", "deleted": false, "featured": false}, {"id": "cb000000-0000-4000-8000-000000000072", "data": {"media": [{"alt": "Two", "src": "/assets/two.mp4", "type": "video", "poster": "/assets/two.webp", "caption": ""}], "title": "Two"}, "slug": "feature-two", "deleted": false, "featured": true, "featuredOrder": 1}, {"id": "cb000000-0000-4000-8000-000000000073", "data": {"media": [{"alt": "Three", "src": "/assets/three.mp4", "type": "video", "poster": "/assets/three.webp", "caption": ""}], "title": "Three"}, "slug": "feature-three", "deleted": false, "featured": false}]
+(1 row)
+
+ save_content_design_workspace 
+-------------------------------
+                             3
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:174: NOTICE:  ok - content: Lab saves draft capacity without rewriting published positions
+ ok 
+----
+ 
+(1 row)
+
+ save_website_content 
+----------------------
+                    7
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:176: NOTICE:  ok - content: Publish commits policy and selected rows atomically
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:180: NOTICE:  ok - content: archived website denied
+ ok 
+----
+ 
+(1 row)
+
+   set_config    
+-----------------
+ {"role":"anon"}
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:182: NOTICE:  ok - content: anonymous cannot read drafts or publication table directly (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/content-hub.test.sql:183: NOTICE:  ok - content: private media never has public bucket reads
+ ok 
+----
+ 
+(1 row)
+
+▸ domain handoff assertions
+       set_config        
+-------------------------
+ {"role":"service_role"}
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:14: NOTICE:  ok - domain handoff: initial handoff persisted
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:15: NOTICE:  ok - domain handoff: lost response / repeated Continue is idempotent
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:16: NOTICE:  ok - domain handoff: stale concurrent replacement rejected (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:17: NOTICE:  ok - domain handoff: replace unverified selection with CAS
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:18: NOTICE:  ok - domain handoff: stale operation rejected (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:19: NOTICE:  ok - domain handoff: member cannot mutate (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:20: NOTICE:  ok - domain handoff: wrong org actor rejected (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:21: NOTICE:  ok - domain handoff: wrong website rejected (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:22: NOTICE:  ok - domain handoff: stale quote rejected (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:23: NOTICE:  ok - domain handoff: unsupported automation honestly records action required
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:24: NOTICE:  ok - domain handoff: abandonment is durable
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:25: NOTICE:  ok - domain handoff: one intent per website
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:26: NOTICE:  ok - domain handoff: handoff never asserts ownership
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:27: NOTICE:  ok - domain handoff: handoff never enqueues connection or launch
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:32: NOTICE:  ok - domain handoff: revoked membership rechecked by service-role mutation (refused)
+ fails 
+-------
+ 
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"dc000000-0000-4000-8000-000000000002","role":"authenticated"}
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:35: NOTICE:  ok - domain handoff: cross-tenant RLS hides selections
+ ok 
+----
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:36: NOTICE:  ok - domain handoff: authenticated cannot invoke privileged mutation (refused)
+ fails 
+-------
+ 
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:37: NOTICE:  ok - domain handoff: customer cannot forge state (refused)
+ fails 
+-------
+ 
+(1 row)
+
+   set_config    
+-----------------
+ {"role":"anon"}
+(1 row)
+
+psql:/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/supabase/test/domain-handoff.test.sql:40: NOTICE:  ok - domain handoff: anonymous has no access (refused)
+ fails 
+-------
+ 
+(1 row)
+
+✓ migrations and RLS assertions passed

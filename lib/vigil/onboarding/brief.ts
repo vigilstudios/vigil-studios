@@ -122,6 +122,7 @@ export const brandSchema = z.object({
 });
 
 export const REGISTRARS = [
+  "vercel",
   "godaddy",
   "namecheap",
   "squarespace",

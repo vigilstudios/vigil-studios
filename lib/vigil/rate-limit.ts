@@ -3,7 +3,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { headers } from "next/headers";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
-import { RateLimitedError } from "@/lib/vigil/auth/errors";
+import { ProviderError, ProviderNotConfiguredError, RateLimitedError } from "@/lib/vigil/auth/errors";
 
 /**
  * Fixed-window rate limits kept in the database (vigil.rate_limits), so they
@@ -35,6 +35,8 @@ export const RATE_LIMITS = {
   /** Registrar lookups (a DNS query each). */
   dnsLookupUser: { limit: 30, windowSeconds: 10 * MINUTE },
   /** Domain connections started per organization. */
+  domainSearchOrg: { limit: 30, windowSeconds: 10 * MINUTE },
+  domainHandoffOrg: { limit: 30, windowSeconds: 10 * MINUTE },
   domainStartOrg: { limit: 10, windowSeconds: HOUR },
   /** Onboarding autosave per person; the client debounces, this is the ceiling. */
   autosaveUser: { limit: 300, windowSeconds: 10 * MINUTE },
@@ -62,9 +64,11 @@ let warnedOnce = false;
  * Count one hit and throw RateLimitedError past the limit. Without a service
  * key (local development) the limiter is off; a database error is logged and
  * lets the request through rather than failing every sign-in on an outage.
+ * Public domain discovery/handoff opt into required limiting and fail closed.
  */
-export async function enforceRateLimit(key: string, rule: RateLimitRule): Promise<void> {
+export async function enforceRateLimit(key: string, rule: RateLimitRule, required = false): Promise<void> {
   if (!hasAdminClient()) {
+    if (required) throw new ProviderNotConfiguredError("Rate limiting");
     if (!warnedOnce) {
       warnedOnce = true;
       console.warn("[rate-limit] SUPABASE_SECRET_KEY is not set; rate limits are off.");
@@ -73,6 +77,7 @@ export async function enforceRateLimit(key: string, rule: RateLimitRule): Promis
   }
   const { data, error } = await createAdminClient().rpc("rate_limit", { p_key: key, p_limit: rule.limit, p_window_seconds: rule.windowSeconds });
   if (error) {
+    if (required) throw new ProviderError("vigil", "Rate limiting unavailable", { retryable: true });
     console.error("[rate-limit] rate_limit failed:", error.message);
     return;
   }

@@ -1,0 +1,142 @@
+
+> vigil-studios@0.1.0 prebuild
+> node scripts/verify-image-runtime.mjs && npm run design:runtime && npm run contact:runtime
+
+[image-runtime] {"platform":"darwin","arch":"arm64","node":"v24.19.0","sharp":"0.35.5","librsvg":"2.63.2","libvips":"8.18.7","benignSvgDecode":"passed"}
+
+> vigil-studios@0.1.0 design:runtime
+> node scripts/build-design-runtime.mjs
+
+Pinned Design Engine distribution v1-438085bde2bb9aae0900 (27 files)
+
+> vigil-studios@0.1.0 contact:runtime
+> node scripts/build-contact-runtime.mjs
+
+Built shared Vigil contact browser adapter v1
+
+> vigil-studios@0.1.0 build
+> next build --webpack
+
+▲ Next.js 16.3.8 (webpack)
+- Environments: .env.local
+✓ Running next.config.ts took 71ms
+- Experiments (use with caution):
+  ✓ inlineCss
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 12.4s
+  Running TypeScript ...
+  Finished TypeScript in 38.7s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/61) ...
+  Generating static pages using 7 workers (15/61) 
+  Generating static pages using 7 workers (30/61) 
+  Generating static pages using 7 workers (45/61) 
+[public-pricing] permission denied for table plans
+[public-pricing] permission denied for table plan_prices
+[public-pricing] permission denied for table plan_features
+[public-pricing] permission denied for table build_prices
+[public-pricing] permission denied for table plans
+[public-pricing] permission denied for table plan_prices
+[public-pricing] permission denied for table plan_features
+[public-pricing] permission denied for table build_prices
+✓ Generating static pages using 7 workers (61/61) in 715ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)                                                Revalidate  Expire
+┌ ○ /                                                              5m      1y
+├ ○ /_not-found
+├ ƒ /admin
+├ ƒ /admin/audit
+├ ƒ /admin/composition-lab
+├ ƒ /admin/design-lab
+├ ƒ /admin/domains
+├ ƒ /admin/jobs
+├ ƒ /admin/lab
+├ ƒ /admin/lab/express
+├ ƒ /admin/lab/express/[variantId]
+├ ƒ /admin/lab/project/[projectId]
+├ ƒ /admin/lab/projects
+├ ƒ /admin/orders
+├ ƒ /admin/organizations
+├ ƒ /admin/organizations/[orgId]
+├ ƒ /admin/organizations/[orgId]/files
+├ ƒ /admin/plans
+├ ƒ /admin/requests
+├ ƒ /admin/reviews
+├ ƒ /admin/reviews/[projectId]
+├ ƒ /admin/subscriptions
+├ ƒ /admin/websites
+├ ƒ /admin/websites/[websiteId]
+├ ƒ /admin/websites/[websiteId]/contact
+├ ƒ /api/admin/organizations/[orgId]/files.zip
+├ ƒ /api/admin/projects/[projectId]/assets/[assetId]
+├ ƒ /api/blog/[websiteId]
+├ ƒ /api/blog/[websiteId]/images
+├ ƒ /api/blog/[websiteId]/media/[imageId]
+├ ƒ /api/contact/[websiteId]
+├ ƒ /api/content/[websiteId]
+├ ƒ /api/content/[websiteId]/export
+├ ƒ /api/content/[websiteId]/library
+├ ƒ /api/content/[websiteId]/media/[mediaId]
+├ ƒ /api/content/[websiteId]/runtime/[runtimeId]/[pageId]
+├ ƒ /api/content/[websiteId]/uploads
+├ ƒ /api/csp-report
+├ ƒ /api/health
+├ ƒ /api/jobs/run
+├ ƒ /api/webhooks/stripe
+├ ƒ /api/websites/[websiteId]/export
+├ ○ /apple-icon.png
+├ ƒ /auth/callback
+├ ƒ /auth/confirm
+├ ƒ /auth/signout
+├ ƒ /checkout
+├ ƒ /checkout/[token]
+├ ƒ /checkout/success
+├ ƒ /creators
+├ ○ /creators/opengraph-image-6942ng
+├ ○ /creators/twitter-image-6942ng
+├ ƒ /dashboard
+├ ƒ /dashboard/billing
+├ ƒ /dashboard/blog
+├ ƒ /dashboard/blog/[postId]
+├ ƒ /dashboard/content
+├ ƒ /dashboard/domain
+├ ƒ /dashboard/files
+├ ƒ /dashboard/insights
+├ ƒ /dashboard/leads
+├ ƒ /dashboard/leads/[leadId]
+├ ƒ /dashboard/onboarding
+├ ƒ /dashboard/onboarding/later
+├ ƒ /dashboard/onboarding/welcome
+├ ƒ /dashboard/requests
+├ ƒ /dashboard/review
+├ ƒ /dashboard/settings
+├ ƒ /dashboard/virtue
+├ ƒ /dashboard/website
+├ ƒ /dashboard/welcome
+├ ƒ /express
+├ ƒ /express-preview/[slug]
+├ ƒ /find-your-fit
+├ ○ /icon.svg
+├ ƒ /login
+├ ○ /manifest.webmanifest
+├ ƒ /pricing
+├ ○ /process
+├ ƒ /products
+├ ○ /products/vigil                                                5m      1y
+├ ○ /products/virtue
+├ ƒ /products/websites
+├ ƒ /professional
+├ ○ /robots.txt
+├ ○ /sitemap.xml
+└ ○ /terms
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

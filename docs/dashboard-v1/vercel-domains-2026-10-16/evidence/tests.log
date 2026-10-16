@@ -1,0 +1,22 @@
+
+> vigil-studios@0.1.0 pretest
+> npm run design:runtime
+
+
+> vigil-studios@0.1.0 design:runtime
+> node scripts/build-design-runtime.mjs
+
+Pinned Design Engine distribution v1-438085bde2bb9aae0900 (27 files)
+
+> vigil-studios@0.1.0 test
+> vitest run --maxWorkers=2
+
+
+ RUN  v4.1.11 /Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey
+
+
+ Test Files  117 passed (117)
+      Tests  2375 passed (2375)
+   Start at  03:24:38
+   Duration  46.40s (transform 5.10s, setup 0ms, import 23.98s, tests 59.04s, environment 7ms)
+

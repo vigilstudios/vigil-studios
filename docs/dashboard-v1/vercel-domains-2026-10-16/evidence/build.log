@@ -1,0 +1,43 @@
+
+> vigil-studios@0.1.0 prebuild
+> node scripts/verify-image-runtime.mjs && npm run design:runtime && npm run contact:runtime
+
+[image-runtime] {"platform":"darwin","arch":"arm64","node":"v24.19.0","sharp":"0.35.5","librsvg":"2.63.2","libvips":"8.18.7","benignSvgDecode":"passed"}
+
+> vigil-studios@0.1.0 design:runtime
+> node scripts/build-design-runtime.mjs
+
+Pinned Design Engine distribution v1-438085bde2bb9aae0900 (27 files)
+
+> vigil-studios@0.1.0 contact:runtime
+> node scripts/build-contact-runtime.mjs
+
+Built shared Vigil contact browser adapter v1
+
+> vigil-studios@0.1.0 build
+> next build --webpack
+
+▲ Next.js 16.3.8 (webpack)
+- Environments: .env.local
+✓ Running next.config.ts took 102ms
+- Experiments (use with caution):
+  ✓ inlineCss
+  · serverActions
+
+  Creating an optimized production build ...
+Failed to compile.
+
+app/(site)/layout.tsx
+An error occurred in `next/font`.
+
+TypeError: Cannot read properties of null (reading '1')
+    at /Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/node_modules/next/dist/compiled/@next/font/dist/google/loader.js:122:78
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Promise.all (index 1)
+    at async nextFontGoogleFontLoader (/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/node_modules/next/dist/compiled/@next/font/dist/google/loader.js:104:33)
+    at async Span.traceAsyncFn (/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/node_modules/next/dist/trace/trace.js:164:20)
+    at async /Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/node_modules/next/dist/build/webpack/loaders/next-font-loader/index.js:90:87
+    at async Span.traceAsyncFn (/Users/belierjavier/.codex/worktrees/vigil-vercel-domain-journey/node_modules/next/dist/trace/trace.js:164:20)
+
+
+> Build failed because of webpack errors

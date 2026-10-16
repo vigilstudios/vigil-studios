@@ -561,6 +561,89 @@ export type Database = {
           },
         ]
       }
+      domain_purchase_intents: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          domain_id: string | null
+          handoff_at: string
+          hostname: string
+          id: string
+          organization_id: string
+          phase: string
+          provider: string
+          quote: Json
+          quoted_at: string
+          safe_error: string | null
+          updated_at: string
+          version: number
+          website_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          domain_id?: string | null
+          handoff_at?: string
+          hostname: string
+          id?: string
+          organization_id: string
+          phase?: string
+          provider?: string
+          quote: Json
+          quoted_at: string
+          safe_error?: string | null
+          updated_at?: string
+          version?: number
+          website_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          domain_id?: string | null
+          handoff_at?: string
+          hostname?: string
+          id?: string
+          organization_id?: string
+          phase?: string
+          provider?: string
+          quote?: Json
+          quoted_at?: string
+          safe_error?: string | null
+          updated_at?: string
+          version?: number
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_purchase_intents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_purchase_intents_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "domains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_purchase_intents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_purchase_intents_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: true
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       domains: {
         Row: {
           auto_renew: boolean | null
@@ -3431,6 +3514,41 @@ export type Database = {
           p_site: Json
         }
         Returns: number
+      }
+      save_domain_handoff: {
+        Args: {
+          p_action: string
+          p_actor: string
+          p_expected_version: number
+          p_hostname: string
+          p_organization: string
+          p_quote: Json
+          p_quoted_at: string
+          p_website: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          domain_id: string | null
+          handoff_at: string
+          hostname: string
+          id: string
+          organization_id: string
+          phase: string
+          provider: string
+          quote: Json
+          quoted_at: string
+          safe_error: string | null
+          updated_at: string
+          version: number
+          website_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "domain_purchase_intents"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       save_website_blog_post: {
         Args: {

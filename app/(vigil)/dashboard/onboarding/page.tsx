@@ -1,3 +1,6 @@
+import { domainHandoffEnabled } from "@/lib/vigil/domain-commerce-config";
+import { createClient } from "@/lib/supabase/server";
+import { loadDomainIntent } from "@/lib/vigil/services/domain-handoff";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
@@ -40,9 +43,15 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
       }
     : null;
 
+  const client = await createClient();
+  const { data: website } = await client.from("websites").select("id").eq("organization_id", ctx.organization.id).eq("project_id", project.id).maybeSingle();
+  const intent = website ? await loadDomainIntent(client, ctx.organization.id, website.id) : null;
+
   return (
     <OnboardingWizard
       projectId={project.id}
+      websiteId={domainHandoffEnabled() ? website?.id ?? null : null}
+      initialIntent={intent}
       projectKind={project.kind}
       organizationId={ctx.organization.id}
       businessName={brief.basics?.businessName || ctx.organization.name}
@@ -52,7 +61,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
       initialAssets={assets}
       initialDomain={domainSetup}
       completedAt={project.intake_completed_at}
-      canManageDomain={ctx.role === "owner" || ctx.role === "manager" || ctx.isImpersonating}
+      canManageDomain={!ctx.isImpersonating && (ctx.role === "owner" || ctx.role === "manager")}
     />
   );
 }

@@ -1,3 +1,7 @@
+import { domainHandoffEnabled } from "@/lib/vigil/domain-commerce-config";
+import { DomainJourney } from "@/components/vigil/DomainJourney";
+import { loadDomainIntent } from "@/lib/vigil/services/domain-handoff";
+import { createClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 import { Card, DefinitionList, EmptyState, PageHeader, StatusPill } from "@/components/vigil/ui";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
@@ -18,14 +22,18 @@ export default async function DomainPage() {
   const briefDomain = onboarding?.brief.domain ?? null;
   const hasConnectedDomain = domains.some((domain) => domain.status === "connected");
 
+  const intents = await Promise.all(websites.map(async website => ({ website, intent: await loadDomainIntent(await createClient(), ctx.organization.id, website.id) })));
+
   return (
     <div>
       <PageHeader title="Domain" description="Your domain stays yours. Vigil manages the technical connection while you are subscribed." />
 
+      {domainHandoffEnabled() && intents.map(({ website, intent }) => <Card key={website.id} className="mb-6">{websites.length > 1 ? <p className="mb-3 text-sm font-medium">{website.name}</p> : null}<DomainJourney websiteId={website.id} initial={intent} canManage={canManage && !ctx.isImpersonating} /></Card>)}
+
       {domains.length === 0 ? (
         <EmptyState
           title="No domain connected"
-          description="Already own a domain? Start the guided connection below. Need one? Vigil Studios can register it for you during onboarding."
+          description="Use a domain I own: start the guided connection below. Need one? Search above and buy directly from Vercel."
         />
       ) : (
         <div className="space-y-4">
