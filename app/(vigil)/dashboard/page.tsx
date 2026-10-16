@@ -55,7 +55,9 @@ export default async function OverviewPage() {
   const liveDeployments = await Promise.all(liveSites.map(site => getRecentDeployments(site.id, 12)));
   const canExport = ctx.role === "owner" || ctx.role === "manager" || ctx.isImpersonating;
   const website = websites[0] ?? null;
-  const domainIntent = website ? await loadDomainIntent(await createClient(), orgId, website.id) : null;
+  const handoffClient = await createClient();
+  const domainIntents = (await Promise.all(websites.map(site => loadDomainIntent(handoffClient, orgId, site.id))))
+    .flatMap(intent => intent && intent.phase !== "cancelled" ? [intent] : []);
   const deployments = website ? await getRecentDeployments(website.id, 12) : [];
   const latestDeployment = deployments[0] ?? null;
   const lastPublish = deployments.find(d => d.environment === "production" && d.status === "ready") ?? null;
@@ -172,7 +174,10 @@ export default async function OverviewPage() {
 
         {/* Domain */}
         <Panel className="lg:col-span-4" title="Domain" action={<Link href="/dashboard/domain" className="text-xs text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">Manage</Link>}>
-          {domainIntent && domainIntent.phase !== "cancelled" && domain ? <Link href="/dashboard/domain" className="mb-3 block break-all text-sm underline">Connect {domainIntent.hostname} · saved choice</Link> : null}
+          {domainIntents.length ? <div className="mb-3 space-y-2">{domainIntents.map(intent => <div key={intent.id}>
+            {websites.length > 1 ? <p className="text-xs text-[color:var(--text-secondary)]">{websites.find(site => site.id === intent.websiteId)?.name}</p> : null}
+            <Link href="/dashboard/domain" className="block break-all text-sm underline">Connect {intent.hostname}</Link>
+          </div>)}<p className="text-xs text-[color:var(--text-secondary)]">Saved choices. Connection needs Vigil assistance; purchase is not confirmed.</p></div> : null}
           {domain && domainStatus ? (
             <>
               <div className="flex items-start justify-between gap-3">
@@ -203,8 +208,7 @@ export default async function OverviewPage() {
           ) : (
             <div className="flex h-full flex-col justify-between gap-3">
               <StatusLine tone="neutral" label="No domain connected" hint="Use a domain you own, or search and buy directly from Vercel." />
-              {domainIntent && domainIntent.phase !== "cancelled" ? <><p className="break-all text-sm">Saved choice: {domainIntent.hostname}</p><p className="text-xs text-[color:var(--text-secondary)]">Connection needs Vigil assistance. Purchase is not confirmed.</p></> : null}
-              <ButtonLink href="/dashboard/domain" variant="secondary" className="!px-3 !py-1.5 self-start text-xs">{domainIntent && domainIntent.phase !== "cancelled" ? `Connect ${domainIntent.hostname}` : "Find or connect a domain"}</ButtonLink>
+              <ButtonLink href="/dashboard/domain" variant="secondary" className="!px-3 !py-1.5 self-start text-xs">{domainIntents.length ? "Manage domain choices" : "Find or connect a domain"}</ButtonLink>
             </div>
           )}
         </Panel>

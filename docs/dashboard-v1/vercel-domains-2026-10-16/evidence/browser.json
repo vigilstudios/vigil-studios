@@ -35,6 +35,7 @@
     "onboardingAutosaveAndContinueWithoutPurchase": true,
     "overviewSavedNameResume": true,
     "correctedPreviewAuthOriginVerified": true,
-    "ownedDomainReservedFixtureStagedPending": true
+    "ownedDomainReservedFixtureStagedPending": true,
+    "multiWebsiteOverview": "Verified locally against the same isolated hosted DB, with separate realistic projects and independent .com/.net intents."
   }
 }
