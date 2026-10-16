@@ -1100,3 +1100,15 @@ Implemented the independent search/handoff slice on freshly fetched shared main 
 **Full connection objective remains incomplete.** Current Vercel resource permissions remain private beta; no authorized cross-account fixture/consent and revocation path was proven. Connect stays disabled, with honest assistance guidance; no DNS/provider connection jobs, registrar billing/purchase calls or connected notifications are created by the new journey. Scar was verified read-only as Building, live URL null, zero domains, both review rounds approved; those approvals are not launch authorization.
 
 Fresh initial validation: 116 files / 2,372 tests, typecheck, full lint and disposable PostgreSQL migrations/RLS pass. Build/release/browser/migration final receipts and limitations are maintained in `docs/dashboard-v1/vercel-domains-2026-10-16/REPORT.md`; the feasibility decision and unsent provider inquiry are in `FEASIBILITY.md`.
+
+## 2026-10-16 — Staff domain discovery and Connect feasibility follow-up
+
+Staff view now displays the exact-name search field and permits credential-free
+discovery with tenant validation and fail-closed rate limiting. Saving, replacing
+or cancelling a choice remains restricted to a real customer owner/manager.
+Refreshed Phase 0 research adds classic Integration OAuth as a candidate and
+documents its broad DNS/registrar permission overlap; no configured customer app
+or authorized separate-account fixture was established, so automatic Connect
+remains disabled. Fresh 2,381 tests / 118 files, typecheck, lint, build and
+disposable migrations/RLS pass. No migration, DNS or customer launch change.
+See `vercel-domains-2026-10-16/CONNECT_FOLLOWUP.md` for release evidence and limits.

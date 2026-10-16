@@ -24,7 +24,8 @@ export async function findVercelDomain(websiteId: string, hostname: string): Pro
   try {
     const ctx = await requireOrgContextOrThrow();
     if (!domainHandoffEnabled()) throw new ProviderNotConfiguredError("Domain handoff");
-    assertHandoffActor(ctx);
+    // Discovery is read-only and uses no customer/provider credential. Staff
+    // viewing a tenant may search; saving a choice still requires its owner.
     await assertHandoffWebsite(await createClient(), ctx.organization.id, z.string().uuid().parse(websiteId));
     await enforceRateLimit(`domain-search:org:${ctx.organization.id}`, RATE_LIMITS.domainSearchOrg, true);
     return { ok: true, data: await searchVercelDomain(hostname) };
