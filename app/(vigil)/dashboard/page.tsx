@@ -1,3 +1,5 @@
+import { loadDomainIntent } from "@/lib/vigil/services/domain-handoff";
+import { createClient } from "@/lib/supabase/server";
 import { WebsiteOperations } from "@/components/vigil/WebsiteOperations";
 import { isWebsiteLive, showWebsitePreview } from "@/lib/vigil/presenters";
 import { PLAN_FEATURE_LABELS } from "@/lib/vigil/plan-presentation";
@@ -53,6 +55,7 @@ export default async function OverviewPage() {
   const liveDeployments = await Promise.all(liveSites.map(site => getRecentDeployments(site.id, 12)));
   const canExport = ctx.role === "owner" || ctx.role === "manager" || ctx.isImpersonating;
   const website = websites[0] ?? null;
+  const domainIntent = website ? await loadDomainIntent(await createClient(), orgId, website.id) : null;
   const deployments = website ? await getRecentDeployments(website.id, 12) : [];
   const latestDeployment = deployments[0] ?? null;
   const lastPublish = deployments.find(d => d.environment === "production" && d.status === "ready") ?? null;
@@ -169,6 +172,7 @@ export default async function OverviewPage() {
 
         {/* Domain */}
         <Panel className="lg:col-span-4" title="Domain" action={<Link href="/dashboard/domain" className="text-xs text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">Manage</Link>}>
+          {domainIntent && domainIntent.phase !== "cancelled" && domain ? <Link href="/dashboard/domain" className="mb-3 block break-all text-sm underline">Connect {domainIntent.hostname} · saved choice</Link> : null}
           {domain && domainStatus ? (
             <>
               <div className="flex items-start justify-between gap-3">
@@ -198,8 +202,9 @@ export default async function OverviewPage() {
             </>
           ) : (
             <div className="flex h-full flex-col justify-between gap-3">
-              <StatusLine tone="neutral" label="No domain connected" hint="Own a domain? Connect it in a few minutes. Need one? Vigil can register it for you." />
-              <ButtonLink href="/dashboard/domain" variant="secondary" className="!px-3 !py-1.5 self-start text-xs">Connect a domain</ButtonLink>
+              <StatusLine tone="neutral" label="No domain connected" hint="Use a domain you own, or search and buy directly from Vercel." />
+              {domainIntent && domainIntent.phase !== "cancelled" ? <><p className="break-all text-sm">Saved choice: {domainIntent.hostname}</p><p className="text-xs text-[color:var(--text-secondary)]">Connection needs Vigil assistance. Purchase is not confirmed.</p></> : null}
+              <ButtonLink href="/dashboard/domain" variant="secondary" className="!px-3 !py-1.5 self-start text-xs">{domainIntent && domainIntent.phase !== "cancelled" ? `Connect ${domainIntent.hostname}` : "Find or connect a domain"}</ButtonLink>
             </div>
           )}
         </Panel>

@@ -52,4 +52,7 @@ target -f "$ROOT/supabase/test/blog-images.test.sql"
 echo "▸ content hub assertions"
 target -f "$ROOT/supabase/test/content-hub.test.sql"
 
+echo "▸ domain handoff assertions"
+target -f "$ROOT/supabase/test/domain-handoff.test.sql"
+
 echo "✓ migrations and RLS assertions passed"

@@ -33,6 +33,13 @@ export type RegistrarGuide = {
 };
 
 export const REGISTRAR_GUIDES: Record<RegistrarKey, RegistrarGuide> = {
+  vercel: {
+    key: "vercel", name: "Vercel", loginUrl: "https://vercel.com/dashboard",
+    dnsPath: ["Domains", "your domain", "DNS Records"], fields: { name: "Name", value: "Value", ttl: "TTL" },
+    apexName: "@", before: ["For an existing domain, contact Vigil before changing DNS for a live website."],
+    conflicts: "Preserve email and unrelated records. Ask Vigil to review any conflicting website records before changing them.",
+    after: "DNS and secure certificates can take time to update.", nameservers: ["vercel-dns.com"],
+  },
   godaddy: {
     key: "godaddy",
     name: "GoDaddy",

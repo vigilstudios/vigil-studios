@@ -561,6 +561,89 @@ export type Database = {
           },
         ]
       }
+      domain_purchase_intents: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          domain_id: string | null
+          handoff_at: string
+          hostname: string
+          id: string
+          organization_id: string
+          phase: string
+          provider: string
+          quote: Json
+          quoted_at: string
+          safe_error: string | null
+          updated_at: string
+          version: number
+          website_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          domain_id?: string | null
+          handoff_at?: string
+          hostname: string
+          id?: string
+          organization_id: string
+          phase?: string
+          provider?: string
+          quote: Json
+          quoted_at: string
+          safe_error?: string | null
+          updated_at?: string
+          version?: number
+          website_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          domain_id?: string | null
+          handoff_at?: string
+          hostname?: string
+          id?: string
+          organization_id?: string
+          phase?: string
+          provider?: string
+          quote?: Json
+          quoted_at?: string
+          safe_error?: string | null
+          updated_at?: string
+          version?: number
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_purchase_intents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_purchase_intents_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "domains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_purchase_intents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_purchase_intents_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: true
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       domains: {
         Row: {
           auto_renew: boolean | null
@@ -966,66 +1049,46 @@ export type Database = {
       }
       legacy_clients: {
         Row: {
-          company_name: string
-          contact_email: string
-          contact_name: string
-          created_at: string
+          company_name: string | null
+          contact_email: string | null
+          contact_name: string | null
+          created_at: string | null
           id: string
           profile_id: string | null
         }
         Insert: {
-          company_name: string
-          contact_email: string
-          contact_name: string
-          created_at?: string
+          company_name?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string | null
           id?: string
           profile_id?: string | null
         }
         Update: {
-          company_name?: string
-          contact_email?: string
-          contact_name?: string
-          created_at?: string
+          company_name?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string | null
           id?: string
           profile_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "clients_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "legacy_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       legacy_onboarding_steps: {
         Row: {
-          completed_at: string | null
-          description: string
           id: string
-          project_id: string
-          status: Database["public"]["Enums"]["task_status"]
-          step_order: number
-          title: string
+          project_id: string | null
+          title: string | null
         }
         Insert: {
-          completed_at?: string | null
-          description: string
           id?: string
-          project_id: string
-          status?: Database["public"]["Enums"]["task_status"]
-          step_order: number
-          title: string
+          project_id?: string | null
+          title?: string | null
         }
         Update: {
-          completed_at?: string | null
-          description?: string
           id?: string
-          project_id?: string
-          status?: Database["public"]["Enums"]["task_status"]
-          step_order?: number
-          title?: string
+          project_id?: string | null
+          title?: string | null
         }
         Relationships: [
           {
@@ -1039,55 +1102,37 @@ export type Database = {
       }
       legacy_profiles: {
         Row: {
-          created_at: string
-          email: string
-          full_name: string
+          created_at: string | null
+          email: string | null
           id: string
-          role: Database["public"]["Enums"]["user_role"]
         }
         Insert: {
-          created_at?: string
-          email: string
-          full_name: string
+          created_at?: string | null
+          email?: string | null
           id: string
-          role?: Database["public"]["Enums"]["user_role"]
         }
         Update: {
-          created_at?: string
-          email?: string
-          full_name?: string
+          created_at?: string | null
+          email?: string | null
           id?: string
-          role?: Database["public"]["Enums"]["user_role"]
         }
         Relationships: []
       }
       legacy_project_files: {
         Row: {
-          category: Database["public"]["Enums"]["file_category"]
-          created_at: string
-          file_name: string
-          file_path: string
+          file_name: string | null
           id: string
-          project_id: string
-          uploaded_by: string | null
+          project_id: string | null
         }
         Insert: {
-          category: Database["public"]["Enums"]["file_category"]
-          created_at?: string
-          file_name: string
-          file_path: string
+          file_name?: string | null
           id?: string
-          project_id: string
-          uploaded_by?: string | null
+          project_id?: string | null
         }
         Update: {
-          category?: Database["public"]["Enums"]["file_category"]
-          created_at?: string
-          file_name?: string
-          file_path?: string
+          file_name?: string | null
           id?: string
-          project_id?: string
-          uploaded_by?: string | null
+          project_id?: string | null
         }
         Relationships: [
           {
@@ -1097,33 +1142,26 @@ export type Database = {
             referencedRelation: "legacy_projects"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "project_files_uploaded_by_fkey"
-            columns: ["uploaded_by"]
-            isOneToOne: false
-            referencedRelation: "legacy_profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       legacy_project_phase_progress: {
         Row: {
           id: string
-          phase: Database["public"]["Enums"]["project_phase"]
-          progress: number
-          project_id: string
+          phase: string | null
+          progress: number | null
+          project_id: string | null
         }
         Insert: {
           id?: string
-          phase: Database["public"]["Enums"]["project_phase"]
-          progress?: number
-          project_id: string
+          phase?: string | null
+          progress?: number | null
+          project_id?: string | null
         }
         Update: {
           id?: string
-          phase?: Database["public"]["Enums"]["project_phase"]
-          progress?: number
-          project_id?: string
+          phase?: string | null
+          progress?: number | null
+          project_id?: string | null
         }
         Relationships: [
           {
@@ -1137,49 +1175,28 @@ export type Database = {
       }
       legacy_projects: {
         Row: {
-          client_id: string
-          created_at: string
-          current_phase: Database["public"]["Enums"]["project_phase"]
-          domain: string | null
-          hosting_provider: string | null
+          client_id: string | null
+          created_at: string | null
+          current_phase: string | null
           id: string
-          launch_window: string | null
-          live_url: string | null
-          next_step_description: string
-          next_step_title: string
-          package_name: string
-          project_name: string
-          updated_at: string
+          package_name: string | null
+          project_name: string | null
         }
         Insert: {
-          client_id: string
-          created_at?: string
-          current_phase?: Database["public"]["Enums"]["project_phase"]
-          domain?: string | null
-          hosting_provider?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          current_phase?: string | null
           id?: string
-          launch_window?: string | null
-          live_url?: string | null
-          next_step_description?: string
-          next_step_title?: string
-          package_name: string
-          project_name: string
-          updated_at?: string
+          package_name?: string | null
+          project_name?: string | null
         }
         Update: {
-          client_id?: string
-          created_at?: string
-          current_phase?: Database["public"]["Enums"]["project_phase"]
-          domain?: string | null
-          hosting_provider?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          current_phase?: string | null
           id?: string
-          launch_window?: string | null
-          live_url?: string | null
-          next_step_description?: string
-          next_step_title?: string
-          package_name?: string
-          project_name?: string
-          updated_at?: string
+          package_name?: string | null
+          project_name?: string | null
         }
         Relationships: [
           {
@@ -3432,6 +3449,41 @@ export type Database = {
         }
         Returns: number
       }
+      save_domain_handoff: {
+        Args: {
+          p_action: string
+          p_actor: string
+          p_expected_version: number
+          p_hostname: string
+          p_organization: string
+          p_quote: Json
+          p_quoted_at: string
+          p_website: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          domain_id: string | null
+          handoff_at: string
+          hostname: string
+          id: string
+          organization_id: string
+          phase: string
+          provider: string
+          quote: Json
+          quoted_at: string
+          safe_error: string | null
+          updated_at: string
+          version: number
+          website_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "domain_purchase_intents"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       save_website_blog_post: {
         Args: {
           p_body: string
@@ -3510,42 +3562,18 @@ export type Database = {
       domain_kind: "apex" | "subdomain"
       domain_source: "purchased_via_vigil" | "customer_owned" | "vigil_managed"
       domain_status:
-        | "pending"
-        | "verifying"
-        | "connected"
-        | "error"
-        | "expired"
-        | "released"
+        "pending" | "verifying" | "connected" | "error" | "expired" | "released"
       feature_value_kind: "boolean" | "limit" | "text"
-      file_category: "brand_asset" | "document" | "content" | "deliverable"
       job_status: "queued" | "running" | "succeeded" | "failed" | "canceled"
       lead_status:
-        | "new"
-        | "contacted"
-        | "qualified"
-        | "won"
-        | "lost"
-        | "spam"
-        | "booked"
+        "new" | "contacted" | "qualified" | "won" | "lost" | "spam" | "booked"
       membership_status: "active" | "suspended"
       order_status:
-        | "pending"
-        | "paid"
-        | "provisioned"
-        | "failed"
-        | "refunded"
-        | "expired"
+        "pending" | "paid" | "provisioned" | "failed" | "refunded" | "expired"
       org_role: "owner" | "manager" | "member"
       organization_status: "active" | "suspended" | "offboarding" | "closed"
       project_asset_kind: "logo" | "photo" | "document" | "other" | "video"
       project_kind: "express" | "professional" | "custom"
-      project_phase:
-        | "onboarding"
-        | "design"
-        | "development"
-        | "review"
-        | "launch"
-        | "maintenance"
       project_status:
         | "draft"
         | "intake"
@@ -3573,8 +3601,6 @@ export type Database = {
         | "unpaid"
         | "paused"
         | "canceled"
-      task_status: "not_started" | "in_progress" | "completed"
-      user_role: "admin" | "client"
       webhook_status: "received" | "processed" | "failed" | "ignored"
       website_status:
         | "provisioning"
@@ -3815,8 +3841,7 @@ export type Tables<
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -3840,8 +3865,7 @@ export type TablesInsert<
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -3865,8 +3889,7 @@ export type TablesUpdate<
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
   EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -3926,7 +3949,6 @@ export const Constants = {
         "released",
       ],
       feature_value_kind: ["boolean", "limit", "text"],
-      file_category: ["brand_asset", "document", "content", "deliverable"],
       job_status: ["queued", "running", "succeeded", "failed", "canceled"],
       lead_status: [
         "new",
@@ -3950,14 +3972,6 @@ export const Constants = {
       organization_status: ["active", "suspended", "offboarding", "closed"],
       project_asset_kind: ["logo", "photo", "document", "other", "video"],
       project_kind: ["express", "professional", "custom"],
-      project_phase: [
-        "onboarding",
-        "design",
-        "development",
-        "review",
-        "launch",
-        "maintenance",
-      ],
       project_status: [
         "draft",
         "intake",
@@ -3988,8 +4002,6 @@ export const Constants = {
         "paused",
         "canceled",
       ],
-      task_status: ["not_started", "in_progress", "completed"],
-      user_role: ["admin", "client"],
       webhook_status: ["received", "processed", "failed", "ignored"],
       website_status: [
         "provisioning",

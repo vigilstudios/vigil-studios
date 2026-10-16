@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CalendlyPopup } from "@/components/CalendlyModal";
+import { DomainJourney } from "@/components/vigil/DomainJourney";
+import type { DomainIntent } from "@/lib/vigil/domain-commerce";
 import { DomainGuide } from "@/components/vigil/DomainGuide";
 import { confirmDnsAdded, getDomainSetup, guessRegistrar, startOnboardingDomain, type DomainSetup } from "@/lib/vigil/actions/onboarding";
 import { REGISTRAR_GUIDES } from "@/lib/vigil/domain-guides";
@@ -11,6 +12,8 @@ import { ChoiceCards, Field, StepFooter, TextInput, Toggle, useAutosave, VirtueA
 type Props = {
   initial: DomainAnswers | undefined;
   projectId: string;
+  websiteId: string | null;
+  initialIntent: DomainIntent | null;
   businessName: string;
   domain: DomainSetup | null;
   onDomain: (d: DomainSetup | null) => void;
@@ -30,7 +33,7 @@ type Phase = "ask" | "hostname" | "guide";
  *   unsure → one paragraph, then the same two paths
  * Nothing here is a dead end; "Do this later" keeps the same guide on the Domain page.
  */
-export function DomainStep({ initial, projectId, businessName, domain, onDomain, canManage, save, onSaveState, onBack, onNext }: Props) {
+export function DomainStep({ initial, projectId, websiteId, initialIntent, businessName, domain, onDomain, canManage, save, onSaveState, onBack, onNext }: Props) {
   const [data, setData] = useState<DomainAnswers>(() => initial ?? domainSchema.parse({}));
   const [phase, setPhase] = useState<Phase>(() => (initial?.answer === "own" && domain ? "guide" : initial?.answer === "own" ? "hostname" : "ask"));
   const [hostname, setHostname] = useState(initial?.hostname ?? "");
@@ -101,6 +104,7 @@ export function DomainStep({ initial, projectId, businessName, domain, onDomain,
 
   return (
     <div className="space-y-5">
+      {initialIntent && initialIntent.phase !== "cancelled" && answered !== "need" && websiteId ? <DomainJourney websiteId={websiteId} initial={initialIntent} canManage={canManage} /> : null}
       {/* 1. The question */}
       {phase === "ask" || !answered ? (
         <div>
@@ -139,26 +143,8 @@ export function DomainStep({ initial, projectId, businessName, domain, onDomain,
       {/* need */}
       {answered === "need" && phase === "ask" ? (
         <div className="space-y-4">
-          <VirtueAside>
-            No problem, buying one yourself is quick, and it means the domain is registered in <b>your</b> name from day one.
-          </VirtueAside>
-          <div className="rounded-lg border border-[color:var(--border)] p-4 text-[13px] leading-6">
-            <p className="font-semibold">How to buy a domain</p>
-            <ol className="mt-2 list-decimal space-y-1.5 pl-4 text-[color:var(--text-secondary)]">
-              <li>Pick a registrar, Namecheap or GoDaddy both work well.</li>
-              <li>Search for the name you want, like {businessName.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 16) || "yourbusiness"}.com, and buy it. Expect roughly $12&ndash;20 a year; skip the extra add-ons they try to sell you.</li>
-              <li>Come back here and enter it, we&apos;ll walk you through connecting it to your site.</li>
-            </ol>
-          </div>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-2 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-3 text-[12px] leading-5 text-[color:var(--text-secondary)]">
-            <span>Confused, or would rather we just handle it?</span>
-            <CalendlyPopup className="btn-secondary min-h-9 !px-3 !py-1.5 text-xs">Book a call</CalendlyPopup>
-            <a href="mailto:hello@vigilstudios.co" className="underline">Email hello@vigilstudios.co</a>
-          </div>
-          <button type="button" onClick={() => { set("answer", "own"); setPhase("hostname"); }} className="btn-primary min-h-11 !px-4 !py-2 text-sm">
-            I bought it, connect it now
-          </button>
-          <StepFooter onBack={() => { set("answer", null); setPhase("ask"); }} onNext={() => continueNext()} nextLabel="I'll buy it later" busy={busy} />
+          {websiteId ? <DomainJourney websiteId={websiteId} initial={initialIntent} canManage={canManage} /> : <VirtueAside>Domain search is not available yet. You can decide later or use a domain you own.</VirtueAside>}
+          <StepFooter onBack={() => { set("answer", null); setPhase("ask"); }} onNext={() => continueNext({ later: true })} nextLabel="Continue · decide later" busy={busy} />
         </div>
       ) : null}
 

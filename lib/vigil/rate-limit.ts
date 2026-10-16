@@ -35,6 +35,8 @@ export const RATE_LIMITS = {
   /** Registrar lookups (a DNS query each). */
   dnsLookupUser: { limit: 30, windowSeconds: 10 * MINUTE },
   /** Domain connections started per organization. */
+  domainSearchOrg: { limit: 30, windowSeconds: 10 * MINUTE },
+  domainHandoffOrg: { limit: 30, windowSeconds: 10 * MINUTE },
   domainStartOrg: { limit: 10, windowSeconds: HOUR },
   /** Onboarding autosave per person; the client debounces, this is the ceiling. */
   autosaveUser: { limit: 300, windowSeconds: 10 * MINUTE },

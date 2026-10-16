@@ -1092,3 +1092,11 @@ migration-history mismatch; this marketing release changes no database files.
 ## 2026-10-14 — Content Hub dashboard UI continuation
 
 Aligned Content Hub with shared dashboard theme tokens and full width; centered the crown upgrade wall and added navigation crown indicators. Renamed Website Preview, hid completed launch previews and moved each live website's operations/export tools to Overview. SiteFrame now transitions its actual phone container width and height with reduced-motion support. Recorded availability/DNS/SSL and production releases drive accessible charts; unconnected traffic/performance/SEO sources remain explicit empty states. See `docs/launch/dashboard-ui/REPORT.md` for validation, release boundaries and screenshots.
+
+## 2026-10-16 — Vercel domain discovery and saved external handoff
+
+Implemented the independent search/handoff slice on freshly fetched shared main in `codex/vercel-domain-journey`. Public credential-free Vercel exact-name discovery returns real advisory USD prices; Continue saves a website-bound, versioned intent before external navigation. Domain/onboarding share the UI and Overview resumes the saved next step. Migration 0047 enforces tenant reads, service-only serialized writes and actual customer owner/manager authorization. Staff impersonation cannot authorize customer DNS. Existing own/need/unsure/later and registrar answers remain compatible. `DOMAIN_HANDOFF_ENABLED` defaults off for controlled rollout/rollback.
+
+**Full connection objective remains incomplete.** Current Vercel resource permissions remain private beta; no authorized cross-account fixture/consent and revocation path was proven. Connect stays disabled, with honest assistance guidance; no DNS/provider connection jobs, registrar billing/purchase calls or connected notifications are created by the new journey. Scar was verified read-only as Building, live URL null, zero domains, both review rounds approved; those approvals are not launch authorization.
+
+Fresh initial validation: 116 files / 2,372 tests, typecheck, full lint and disposable PostgreSQL migrations/RLS pass. Build/release/browser/migration final receipts and limitations are maintained in `docs/dashboard-v1/vercel-domains-2026-10-16/REPORT.md`; the feasibility decision and unsent provider inquiry are in `FEASIBILITY.md`.

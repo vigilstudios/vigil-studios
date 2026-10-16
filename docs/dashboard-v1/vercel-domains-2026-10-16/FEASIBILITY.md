@@ -1,0 +1,23 @@
+# Vercel connection feasibility receipt — 16 October 2026
+
+Decision: **NO GO for automatic customer DNS connection.** Search and persisted external handoff are an independent partial release. Connect is disabled and makes no provider/job calls. No credential collection, beta access, completed customer authorization, DNS mutation, ownership claim, transfer, registrar purchase, billing operation or successful connection is claimed.
+
+## Refreshed evidence
+
+Context7 resolved Vercel to `/websites/vercel`, then queried resource permissions and the registrar search endpoint. Current primary [permissions documentation](https://vercel.com/docs/sign-in-with-vercel/scopes-and-permissions) still identifies resource API permissions as private beta. Identity scopes do not authorize DNS. Team Domains has read/write access, while project Domain Registrar concerns registration purchasing/transfer; neither a login nor Vigil's hosting token establishes the customer's consent. Registration purchase/billing permissions are unnecessary for the external checkout design.
+
+The [search API](https://vercel.com/docs/rest-api/domains-registrar/get-domain-availability-and-pricing) and [registrar overview](https://vercel.com/docs/domains/registrar-api) document public exact-name discovery, 1–200 candidates, with USD registration/renewal prices. Actual unauthenticated POST with `{"domains":["vigil-evaluation-7f416c29.com","vercel.com","vigil-evaluation-7f416c29.invalid","cars.com"]}` returned the first available for one year, price 11.25, renewalPrice 11.25, premium false; remaining names returned available false and no prices. The endpoint does not distinguish unsupported from unavailable in this response. Vigil searches one registrable exact name per call and labels that distinction honestly. Provider error statuses documented include 400/401/403/429/500; no numerical provider rate ceiling was verified. App-level throttling is separate.
+
+The [working-with-domains guide](https://vercel.com/docs/domains/working-with-domains) and [registration terms](https://vercel.com/legal/domain-name-registration-and-services-terms) were refreshed. A project association alone is not customer DNS authority. No ownership claim or account move is used to circumvent separate customer registration and Vigil hosting scopes.
+
+The actual signed-in Chrome Vercel search page retained the synthetic exact name and displayed $11.25 registration / $11.25 yearly renewal. No cart action, registration or payment occurred. Signed-out and authentication-completion evidence is recorded separately in the browser receipt; earlier planning observations are not promoted to new verification.
+
+## Missing proof and next dependency
+
+Available platform Vercel credentials concern Vigil hosting. No configured customer OAuth app with proven private-beta resource eligibility, explicit customer-like domain fixture authorization, separate customer DNS credential, consent callback, encrypted credential storage integration, revocation fixture or domain-specific grant was established. No customer password or broad token is requested. No DNS mutation was attempted with the platform token. Public DNS observation cannot fill this gap.
+
+Before enabling Connect: establish provider-approved eligibility and exact supported consent/scopes, token lifecycle and revocation; test an expressly authorized customer-owned fixture against a separate Vigil project. Verify team/account identities, narrow DNS changes, cross-team verification without registration ownership transfer, unrelated/email record preservation, current approved-production deployment/expected-site checks, SSL waiting states, cancellation/stale-worker protection and cleanup. Completion event/outbox and deduplicated staff app/email delivery belong to that proven connection slice; this partial release creates neither success events nor connected notifications.
+
+## Provider inquiry — prepared, not sent
+
+Can a third-party Vigil application obtain customer-consented, least-privilege DNS read/write access for a domain registered in the customer's Vercel team, while assigning that hostname to a project in a separate Vigil team and retaining registration, renewals, billing and transfer control in the original customer team? Please confirm eligibility for resource-permission beta, exact Domains permission/API coverage, domain-specific scope options, required team/project permissions, cross-team TXT/project verification procedure that does not claim/transfer registrar ownership, token expiry/refresh/revocation behavior and supported test fixtures. No registrar buying, transfer or Billing permission is wanted. Ordinary identity-only Sign in with Vercel is insufficient.
