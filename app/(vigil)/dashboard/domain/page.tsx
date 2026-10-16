@@ -41,7 +41,8 @@ export default async function DomainPage({ searchParams }: { searchParams: Promi
   const status = domain ? describeDomainStatus(domain.status, { dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable, launchReady }) : null;
   const linkedWebsite = websites.find(website => website.id === domain?.website_id);
 
-  return <div className={`mx-auto w-full ${flow === "choose" ? "max-w-4xl" : "max-w-3xl"}`}>
+  return <div className="flex min-h-[calc(100dvh-5rem)] items-center justify-center sm:min-h-[calc(100dvh-5.5rem)] lg:min-h-[calc(100dvh-6.5rem)]">
+    <div className={`w-full ${flow === "choose" ? "max-w-4xl" : "max-w-3xl"}`}>
     <PageHeader title="Domain" description={flow === "choose" ? "How would you like to set up your web address?" : "Follow the steps to set up your web address."} />
     {flow === "choose" ? <DomainOptions canFind={canFind} canSetUp={websites.length > 0} savedName={saved?.intent?.hostname} /> : <>
       <Link href="/dashboard/domain?flow=choose" className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]"><ArrowLeft className="h-4 w-4" aria-hidden="true" />All domain options</Link>
@@ -83,5 +84,6 @@ export default async function DomainPage({ searchParams }: { searchParams: Promi
         </> : null}
       </Card>}
     </>}
+    </div>
   </div>;
 }
