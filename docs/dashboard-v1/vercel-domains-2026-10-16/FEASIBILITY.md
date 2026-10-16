@@ -2,6 +2,32 @@
 
 Decision: **NO GO for automatic customer DNS connection.** Search and persisted external handoff are an independent partial release. Connect is disabled and makes no provider/job calls. No credential collection, beta access, completed customer authorization, DNS mutation, ownership claim, transfer, registrar purchase, billing operation or successful connection is claimed.
 
+## App registration and account-specific check — 16 October
+
+Registered **Vigil Domain Connect**, slug `vigil-domain-connect`, in the existing
+`vigilstudio-projects` team. Public client ID:
+`cl_GiSu5jiCuN4CIQlbRkMFDRYmpYc2c3CW`. This is an app definition only, with no
+customer installation, resource grant, generated client secret or working
+callback. Its unfiltered Permissions page exposes only `openid`, `profile`,
+`email` and `offline_access`; Domains and other resource categories are absent.
+Only the default required `openid` scope is enabled. Screenshot:
+`evidence/domain-center/vercel-app-permissions.jpg`.
+
+This replaces the earlier missing-app assumption with an observed account-level
+blocker. The current primary permissions reference still calls resource access
+private beta. Context7 returned an `oauth-apps register` example, but the actual
+latest Vercel CLI 64.3.1 rejects `oauth-apps` as an unknown command, and the
+referenced `/docs/cli/oauth-apps` redirects to the Sign in overview. Registration
+was completed through the supported dashboard instead. No CLI example is treated
+as proof of resource eligibility.
+
+The original Phase 0 gate still prevents proceeding to a production connection
+worker on assumed permissions. [Account-owner next steps and the exact unsent
+provider request](./AUTOMATIC_CONNECTION_SETUP.md) identify this app, the minimum
+capability needed, the separate authorized fixture, and the implementation that
+must follow successful proof. This cannot be resolved by setting a feature flag
+or by asking Scar to paste a token.
+
 ## Follow-up gate review — 16 October, 14:30 UTC
 
 The initial review was incomplete: private-beta Sign in with Vercel is **not the only documented authorization candidate**. Context7 (library resolution followed by two focused documentation queries) and the current primary [integration API guide](https://vercel.com/docs/integrations/create-integration/vercel-api-integrations) document classic Integration OAuth. An installation returns a one-use code, exchanged server-side at `/v2/oauth/access_token` with the integration client ID/secret and exact redirect URI. Its response identifies the customer team; subsequent customer API requests must include that team ID. Disabled installations reject access, and removal retires the installation ID.

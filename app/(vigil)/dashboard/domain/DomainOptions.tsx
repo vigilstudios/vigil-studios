@@ -7,7 +7,7 @@ export function DomainOptions({ canFind, canSetUp, savedName }: { canFind: boole
     { title: "Find your domain", description: savedName ? `Continue setting up ${savedName}, or search for a new name.` : "Search for a name and buy it through your own Vercel account.", href: "/dashboard/domain?flow=find", icon: Globe2, enabled: canFind },
     { title: "Already own one", description: "Use your existing web address. We’ll guide you through the setup.", href: "/dashboard/domain?flow=own", icon: Link2, enabled: canSetUp },
   ];
-  return <nav aria-label="Domain setup options" className="grid max-w-4xl gap-4 sm:grid-cols-2">
+  return <nav aria-label="Domain setup options" className="grid w-full gap-4 sm:grid-cols-2">
     {options.map(({ title, description, href, icon: Icon, enabled }) => {
       const content = <>
         <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[color:var(--bg-surface-soft)] text-[color:var(--accent)]"><Icon className="h-5 w-5" aria-hidden="true" /></span>
