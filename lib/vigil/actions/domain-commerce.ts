@@ -26,7 +26,7 @@ export async function findVercelDomain(websiteId: string, hostname: string): Pro
     if (!domainHandoffEnabled()) throw new ProviderNotConfiguredError("Domain handoff");
     assertHandoffActor(ctx);
     await assertHandoffWebsite(await createClient(), ctx.organization.id, z.string().uuid().parse(websiteId));
-    await enforceRateLimit(`domain-search:org:${ctx.organization.id}`, RATE_LIMITS.domainSearchOrg);
+    await enforceRateLimit(`domain-search:org:${ctx.organization.id}`, RATE_LIMITS.domainSearchOrg, true);
     return { ok: true, data: await searchVercelDomain(hostname) };
   } catch (error) { return toActionError(error); }
 }
@@ -36,7 +36,7 @@ export async function updateDomainHandoff(input: { websiteId: string; version: n
     if (!domainHandoffEnabled()) throw new ProviderNotConfiguredError("Domain handoff");
     assertHandoffActor(ctx);
     z.string().uuid().parse(input.websiteId);
-    await enforceRateLimit(`domain-handoff:org:${ctx.organization.id}`, RATE_LIMITS.domainHandoffOrg);
+    await enforceRateLimit(`domain-handoff:org:${ctx.organization.id}`, RATE_LIMITS.domainHandoffOrg, true);
     if (!hasAdminClient()) throw new ProviderNotConfiguredError("Domain handoff");
     const intent = await saveHandoff(createAdminClient(), ctx, input);
     for (const path of ["/dashboard", "/dashboard/domain", "/dashboard/onboarding"]) revalidatePath(path);

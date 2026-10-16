@@ -1049,46 +1049,66 @@ export type Database = {
       }
       legacy_clients: {
         Row: {
-          company_name: string | null
-          contact_email: string | null
-          contact_name: string | null
-          created_at: string | null
+          company_name: string
+          contact_email: string
+          contact_name: string
+          created_at: string
           id: string
           profile_id: string | null
         }
         Insert: {
-          company_name?: string | null
-          contact_email?: string | null
-          contact_name?: string | null
-          created_at?: string | null
+          company_name: string
+          contact_email: string
+          contact_name: string
+          created_at?: string
           id?: string
           profile_id?: string | null
         }
         Update: {
-          company_name?: string | null
-          contact_email?: string | null
-          contact_name?: string | null
-          created_at?: string | null
+          company_name?: string
+          contact_email?: string
+          contact_name?: string
+          created_at?: string
           id?: string
           profile_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "clients_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "legacy_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       legacy_onboarding_steps: {
         Row: {
+          completed_at: string | null
+          description: string
           id: string
-          project_id: string | null
-          title: string | null
+          project_id: string
+          status: Database["public"]["Enums"]["task_status"]
+          step_order: number
+          title: string
         }
         Insert: {
+          completed_at?: string | null
+          description: string
           id?: string
-          project_id?: string | null
-          title?: string | null
+          project_id: string
+          status?: Database["public"]["Enums"]["task_status"]
+          step_order: number
+          title: string
         }
         Update: {
+          completed_at?: string | null
+          description?: string
           id?: string
-          project_id?: string | null
-          title?: string | null
+          project_id?: string
+          status?: Database["public"]["Enums"]["task_status"]
+          step_order?: number
+          title?: string
         }
         Relationships: [
           {
@@ -1102,37 +1122,55 @@ export type Database = {
       }
       legacy_profiles: {
         Row: {
-          created_at: string | null
-          email: string | null
+          created_at: string
+          email: string
+          full_name: string
           id: string
+          role: Database["public"]["Enums"]["user_role"]
         }
         Insert: {
-          created_at?: string | null
-          email?: string | null
+          created_at?: string
+          email: string
+          full_name: string
           id: string
+          role?: Database["public"]["Enums"]["user_role"]
         }
         Update: {
-          created_at?: string | null
-          email?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
           id?: string
+          role?: Database["public"]["Enums"]["user_role"]
         }
         Relationships: []
       }
       legacy_project_files: {
         Row: {
-          file_name: string | null
+          category: Database["public"]["Enums"]["file_category"]
+          created_at: string
+          file_name: string
+          file_path: string
           id: string
-          project_id: string | null
+          project_id: string
+          uploaded_by: string | null
         }
         Insert: {
-          file_name?: string | null
+          category: Database["public"]["Enums"]["file_category"]
+          created_at?: string
+          file_name: string
+          file_path: string
           id?: string
-          project_id?: string | null
+          project_id: string
+          uploaded_by?: string | null
         }
         Update: {
-          file_name?: string | null
+          category?: Database["public"]["Enums"]["file_category"]
+          created_at?: string
+          file_name?: string
+          file_path?: string
           id?: string
-          project_id?: string | null
+          project_id?: string
+          uploaded_by?: string | null
         }
         Relationships: [
           {
@@ -1142,26 +1180,33 @@ export type Database = {
             referencedRelation: "legacy_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "project_files_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "legacy_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       legacy_project_phase_progress: {
         Row: {
           id: string
-          phase: string | null
-          progress: number | null
-          project_id: string | null
+          phase: Database["public"]["Enums"]["project_phase"]
+          progress: number
+          project_id: string
         }
         Insert: {
           id?: string
-          phase?: string | null
-          progress?: number | null
-          project_id?: string | null
+          phase: Database["public"]["Enums"]["project_phase"]
+          progress?: number
+          project_id: string
         }
         Update: {
           id?: string
-          phase?: string | null
-          progress?: number | null
-          project_id?: string | null
+          phase?: Database["public"]["Enums"]["project_phase"]
+          progress?: number
+          project_id?: string
         }
         Relationships: [
           {
@@ -1175,28 +1220,49 @@ export type Database = {
       }
       legacy_projects: {
         Row: {
-          client_id: string | null
-          created_at: string | null
-          current_phase: string | null
+          client_id: string
+          created_at: string
+          current_phase: Database["public"]["Enums"]["project_phase"]
+          domain: string | null
+          hosting_provider: string | null
           id: string
-          package_name: string | null
-          project_name: string | null
+          launch_window: string | null
+          live_url: string | null
+          next_step_description: string
+          next_step_title: string
+          package_name: string
+          project_name: string
+          updated_at: string
         }
         Insert: {
-          client_id?: string | null
-          created_at?: string | null
-          current_phase?: string | null
+          client_id: string
+          created_at?: string
+          current_phase?: Database["public"]["Enums"]["project_phase"]
+          domain?: string | null
+          hosting_provider?: string | null
           id?: string
-          package_name?: string | null
-          project_name?: string | null
+          launch_window?: string | null
+          live_url?: string | null
+          next_step_description?: string
+          next_step_title?: string
+          package_name: string
+          project_name: string
+          updated_at?: string
         }
         Update: {
-          client_id?: string | null
-          created_at?: string | null
-          current_phase?: string | null
+          client_id?: string
+          created_at?: string
+          current_phase?: Database["public"]["Enums"]["project_phase"]
+          domain?: string | null
+          hosting_provider?: string | null
           id?: string
-          package_name?: string | null
-          project_name?: string | null
+          launch_window?: string | null
+          live_url?: string | null
+          next_step_description?: string
+          next_step_title?: string
+          package_name?: string
+          project_name?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -3562,18 +3628,42 @@ export type Database = {
       domain_kind: "apex" | "subdomain"
       domain_source: "purchased_via_vigil" | "customer_owned" | "vigil_managed"
       domain_status:
-        "pending" | "verifying" | "connected" | "error" | "expired" | "released"
+        | "pending"
+        | "verifying"
+        | "connected"
+        | "error"
+        | "expired"
+        | "released"
       feature_value_kind: "boolean" | "limit" | "text"
+      file_category: "brand_asset" | "document" | "content" | "deliverable"
       job_status: "queued" | "running" | "succeeded" | "failed" | "canceled"
       lead_status:
-        "new" | "contacted" | "qualified" | "won" | "lost" | "spam" | "booked"
+        | "new"
+        | "contacted"
+        | "qualified"
+        | "won"
+        | "lost"
+        | "spam"
+        | "booked"
       membership_status: "active" | "suspended"
       order_status:
-        "pending" | "paid" | "provisioned" | "failed" | "refunded" | "expired"
+        | "pending"
+        | "paid"
+        | "provisioned"
+        | "failed"
+        | "refunded"
+        | "expired"
       org_role: "owner" | "manager" | "member"
       organization_status: "active" | "suspended" | "offboarding" | "closed"
       project_asset_kind: "logo" | "photo" | "document" | "other" | "video"
       project_kind: "express" | "professional" | "custom"
+      project_phase:
+        | "onboarding"
+        | "design"
+        | "development"
+        | "review"
+        | "launch"
+        | "maintenance"
       project_status:
         | "draft"
         | "intake"
@@ -3601,6 +3691,8 @@ export type Database = {
         | "unpaid"
         | "paused"
         | "canceled"
+      task_status: "not_started" | "in_progress" | "completed"
+      user_role: "admin" | "client"
       webhook_status: "received" | "processed" | "failed" | "ignored"
       website_status:
         | "provisioning"
@@ -3841,7 +3933,8 @@ export type Tables<
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -3865,7 +3958,8 @@ export type TablesInsert<
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -3889,7 +3983,8 @@ export type TablesUpdate<
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -3949,6 +4044,7 @@ export const Constants = {
         "released",
       ],
       feature_value_kind: ["boolean", "limit", "text"],
+      file_category: ["brand_asset", "document", "content", "deliverable"],
       job_status: ["queued", "running", "succeeded", "failed", "canceled"],
       lead_status: [
         "new",
@@ -3972,6 +4068,14 @@ export const Constants = {
       organization_status: ["active", "suspended", "offboarding", "closed"],
       project_asset_kind: ["logo", "photo", "document", "other", "video"],
       project_kind: ["express", "professional", "custom"],
+      project_phase: [
+        "onboarding",
+        "design",
+        "development",
+        "review",
+        "launch",
+        "maintenance",
+      ],
       project_status: [
         "draft",
         "intake",
@@ -4002,6 +4106,8 @@ export const Constants = {
         "paused",
         "canceled",
       ],
+      task_status: ["not_started", "in_progress", "completed"],
+      user_role: ["admin", "client"],
       webhook_status: ["received", "processed", "failed", "ignored"],
       website_status: [
         "provisioning",
