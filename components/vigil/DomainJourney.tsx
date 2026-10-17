@@ -56,7 +56,7 @@ export function DomainJourney({ websiteId, initial = null, canManage }: { websit
     <section aria-labelledby={`${id}-title`} className="min-w-0 space-y-4">
       <h2 id={`${id}-title`} className="flex items-center gap-2 text-lg font-semibold"><Globe2 className="h-4 w-4 shrink-0 text-[color:var(--accent)]" aria-hidden="true" />{["Find your domain", "Buy your domain", "Continue your purchase"][step]}</h2>
       {step === 0 ? <p className="text-sm text-[color:var(--text-secondary)]">Your domain and renewals stay in your own Vercel account.</p> : null}
-      {!canManage ? <p className="text-sm text-[color:var(--text-secondary)]">You’re viewing this customer’s dashboard as staff. You can open the domain on Vercel to view it. The customer must buy it using their own Vercel account.</p> : null}
+      {!canManage ? <p className="text-sm text-[color:var(--text-secondary)]">You can view this domain on Vercel. The customer’s account owner or manager needs to sign in to save the choice and continue setup.</p> : null}
       {saved && !choosing ? (
         <div className="space-y-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-4">
           <p className="break-all text-xl font-semibold sm:text-2xl">{intent.hostname}</p>

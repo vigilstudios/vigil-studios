@@ -30,7 +30,7 @@ describe("read-only discovery in staff view", () => {
     expect(html).toContain("Exact domain name");
     expect(html).toContain('placeholder="yourbusiness.com"');
     expect(html).toContain(">Search</button>");
-    expect(html).toContain("customer must buy it using their own Vercel account");
+    expect(html).toContain("account owner or manager needs to sign in");
     expect(html).not.toContain("Continue on Vercel");
     expect(html).not.toContain("Decide later");
   });
