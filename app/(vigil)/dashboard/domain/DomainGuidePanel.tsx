@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DomainGuide, type GuideDomain } from "@/components/vigil/DomainGuide";
-import { confirmDnsAdded, getDomainSetup } from "@/lib/vigil/actions/onboarding";
+import { confirmDnsAdded, getDomainSetup, saveDomainRegistrar } from "@/lib/vigil/actions/onboarding";
 import type { RegistrarKey } from "@/lib/vigil/onboarding/brief";
 
 /** The same walkthrough as the wizard, for a domain the customer chose to finish later. */
@@ -37,7 +37,11 @@ export function DomainGuidePanel({ domain, initialRegistrar, canManage }: { doma
       <DomainGuide
         domain={state}
         registrar={registrar}
-        onRegistrarChange={setRegistrar}
+        onRegistrarChange={canManage ? async next => {
+          setConfirming(true); setError(null);
+          try { const res = await saveDomainRegistrar(state.domainId, next); if (res.ok) { setRegistrar(next); setState(res.data); } else setError(res.error); }
+          catch { setError("The provider choice could not be saved. Please retry."); } finally { setConfirming(false); }
+        } : undefined}
         onRefresh={async () => {
           setConfirming(true); setError(null);
           try { const res = await getDomainSetup(state.domainId, registrar); if (res.ok) setState(res.data); else setError(res.error); }

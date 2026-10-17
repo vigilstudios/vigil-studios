@@ -1,5 +1,7 @@
 # Automatic connection: remaining setup
 
+**Current decision:** the customer chose the supported manual guided flow. See [GUIDED_SETUP.md](./GUIDED_SETUP.md). The beta-access steps below are historical prerequisites for the deferred OAuth approach, not actions required for guided connection.
+
 The search, prices, saved Vercel handoff and separate centered setup guides are
 implemented. **Automatic connection is not complete or enabled.** The original
 implementation prompt requires proof using authorized real provider fixtures

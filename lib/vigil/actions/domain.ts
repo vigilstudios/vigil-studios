@@ -35,6 +35,9 @@ export async function startDomainConnection(_prev: DomainState, formData: FormDa
     const { data: website, error: websiteError } = await supabase.from("websites").select("id").eq("id", websiteId).eq("organization_id", ctx.organization.id).neq("status", "archived").neq("status", "suspended").maybeSingle();
     if (websiteError) throw websiteError;
     if (!website) throw new ValidationError("Choose a website in your account.");
+    const { data: connected, error: connectedError } = await supabase.from("domains").select("id").eq("organization_id", ctx.organization.id).eq("website_id", websiteId).eq("status", "connected").neq("hostname", hostname).limit(1).maybeSingle();
+    if (connectedError) throw connectedError;
+    if (connected) throw new ValidationError("This website already has a connected domain. Contact Vigil to change it.");
     const registrar = formData.get("registrar") === "vercel" ? "vercel" : "other";
     const { data, error } = await supabase
       .from("domains")

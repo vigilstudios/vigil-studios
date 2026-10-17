@@ -5,6 +5,7 @@ import type { DeploymentProvider } from "@/lib/vigil/providers/types";
 import { NotFoundError } from "@/lib/vigil/auth/errors";
 import { checkDnsRecords, checkHttpsReachable, ownershipRecord, withOwnershipRecord, type DnsCheck, type DnsRecord } from "./dns";
 import { findExternalId, providerEnum } from "./provider-links";
+import { domainProductionContext } from "./domain-production";
 
 export type ManagedDomainConfig = {
   hostname: string;
@@ -81,11 +82,9 @@ function verificationState(
   };
 }
 
-async function restoreProviderAddress(admin: DbClient, websiteId: string | null) {
+async function restoreProviderAddress(admin: DbClient, websiteId: string | null, productionUrl: string | null) {
   if (!websiteId) return;
-  const { data: website } = await admin.from("websites").select("preview_url").eq("id", websiteId).maybeSingle();
-  if (!website) return;
-  await admin.from("websites").update({ primary_domain_id: null, live_url: website.preview_url ?? null }).eq("id", websiteId);
+  await admin.from("websites").update({ primary_domain_id: null, live_url: productionUrl }).eq("id", websiteId);
 }
 
 /**
@@ -134,6 +133,9 @@ export async function beginDomainVerification(
   // provider source and can safely try the removal again.
   const priorSource = (domain.verification as { source?: string } | null)?.source;
   if (domain.website_id && priorSource === "provider") {
+    // A later Preview must not detach a domain awaiting DNS for an already
+    // approved production build. Only heal legacy premature associations.
+    if (await domainProductionContext(admin, domain.website_id, domain.organization_id, provider)) return;
     const siteExternalId = await findExternalId(admin, {
       provider: providerEnum(provider.name), resourceKind: "site", entityType: "website", entityId: domain.website_id,
     });
@@ -182,6 +184,8 @@ export async function activateDomainVerification(
   if (!domain) throw new NotFoundError(`Domain ${domainId} not found.`);
   if (domain.status === "released") return { connected: false };
   if (!domain.website_id) throw new NotFoundError("No website is attached to this domain.");
+  const production = await domainProductionContext(admin, domain.website_id, domain.organization_id, provider);
+  if (!production) return { connected: false };
   const siteExternalId = await findExternalId(admin, {
     provider: providerEnum(provider.name), resourceKind: "site", entityType: "website", entityId: domain.website_id,
   });
@@ -195,7 +199,8 @@ export async function activateDomainVerification(
   const dnsOk = publicChecks.length > 0 && publicChecks.every((check) => check.ok);
   const sslOk = dnsOk && configs.every((config) => config.verified && config.sslReady && !config.misconfigured && config.requiredRecords.some(record => ["A", "AAAA", "CNAME"].includes(record.type)));
   const reachable = sslOk ? await checkHttps(plan[0].canonicalHostname) : false;
-  const connected = dnsOk && sslOk && reachable;
+  const expectedSite = configs[0]?.servingSiteId === siteExternalId && configs[0]?.servingDeploymentId === production.externalId;
+  const connected = dnsOk && sslOk && reachable && expectedSite;
   let nextStatus = domain.status;
   if (connected && domain.status !== "connected") {
     if (domain.status !== "verifying") {
@@ -211,14 +216,15 @@ export async function activateDomainVerification(
   const now = new Date().toISOString();
   const { error: updateError } = await admin.from("domains").update({
     status: nextStatus,
-    verification: { ...verificationState(records, publicChecks, plan.map((item) => item.hostname), plan[0].canonicalHostname, reachable), launch_ready: false },
+    verification: { ...verificationState(records, publicChecks, plan.map((item) => item.hostname), plan[0].canonicalHostname, reachable && expectedSite), launch_ready: false, production_deployment_id: production.id },
     dns_ok: dnsOk,
     ssl_ok: sslOk,
     ...(connected ? { verified_at: now, connected_at: now } : {}),
     last_checked_at: now,
-    status_reason: connected ? null : pendingReason(nextStatus, dnsOk, sslOk, reachable),
+    status_reason: connected ? null : pendingReason(nextStatus, dnsOk, sslOk, reachable && expectedSite),
   }).eq("id", domainId);
   if (updateError) throw updateError;
+  if (connected) await admin.from("websites").update({ primary_domain_id: domain.id, live_url: `https://${plan[0].canonicalHostname}` }).eq("id", domain.website_id).eq("organization_id", domain.organization_id).eq("status", "live");
   return { connected };
 }
 
@@ -267,6 +273,11 @@ export async function verifyDomain(
         checks: checks.map((check) => ({ type: check.record.type, name: check.record.name, ok: check.ok, found: check.found })),
       },
     }).eq("id", domainId);
+    // A later purchase can connect to an already approved production build.
+    // This creates project associations only; the customer still edits DNS.
+    if (dnsOk && domain.website_id && await domainProductionContext(admin, domain.website_id, domain.organization_id, provider)) {
+      return activateDomainVerification(admin, domainId, provider, connectionChecks);
+    }
     return { connected: false, readyForLaunch: dnsOk, dnsOk };
   }
 
@@ -300,16 +311,19 @@ export async function verifyDomain(
   }
 
   const plan = managedDomainConfigs(domain.hostname, domain.kind);
+  const production = domain.website_id ? await domainProductionContext(admin, domain.website_id, domain.organization_id, provider) : null;
+  if (!production) return { connected: false, reason: "no_site" };
   const configs = await Promise.all(plan.map((item) => provider.getDomainConfig(siteExternalId, item.hostname)));
   const records = withOwnershipRecord(uniqueRecords(configs), domain.hostname, domain.verification_token);
   const publicChecks = records.length > 0 ? await checkDns(domain.hostname, records) : [];
   const dnsOk = publicChecks.length > 0 && publicChecks.every((check) => check.ok);
   const sslOk = dnsOk && configs.every((config) => config.verified && config.sslReady && !config.misconfigured && config.requiredRecords.some(record => ["A", "AAAA", "CNAME"].includes(record.type)));
   const reachable = sslOk ? await checkHttps(plan[0].canonicalHostname) : false;
-  const connected = dnsOk && sslOk && reachable;
+  const expectedSite = configs[0]?.servingSiteId === siteExternalId && configs[0]?.servingDeploymentId === production.externalId;
+  const connected = dnsOk && sslOk && reachable && expectedSite;
   const wasConnected = domain.status === "connected";
   const now = new Date().toISOString();
-  const verification = verificationState(records, publicChecks, plan.map((item) => item.hostname), plan[0].canonicalHostname, reachable);
+  const verification = { ...verificationState(records, publicChecks, plan.map((item) => item.hostname), plan[0].canonicalHostname, reachable && expectedSite), production_deployment_id: production.id };
 
   if (connected && domain.status !== "connected") {
     if (domain.status !== "verifying") {
@@ -340,12 +354,13 @@ export async function verifyDomain(
         dns_ok: dnsOk,
         ssl_ok: sslOk,
         last_checked_at: now,
-        status_reason: pendingReason(nextStatus, dnsOk, sslOk, reachable),
+        status_reason: pendingReason(nextStatus, dnsOk, sslOk, reachable && expectedSite),
         verification,
       })
       .eq("id", domainId);
-    if (wasConnected) await restoreProviderAddress(admin, domain.website_id);
+    if (wasConnected) await restoreProviderAddress(admin, domain.website_id, production.url);
   }
 
+  if (connected && domain.website_id) await admin.from("websites").update({ primary_domain_id: domain.id, live_url: `https://${plan[0].canonicalHostname}` }).eq("id", domain.website_id).eq("organization_id", domain.organization_id).eq("status", "live");
   return { connected };
 }

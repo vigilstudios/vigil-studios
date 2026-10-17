@@ -30,6 +30,8 @@ customer would have to redirect an existing website before an approved build.
 After production activation, the guide shows the current provider TXT/routing
 requirements. Vercel DNS targets come from its current project-scoped config
 response; no hardcoded target is substituted if recommendations are missing.
+The activation service verifies current reviews, the saved production artifact and the provider’s actual Production status. Completion checks the canonical hostname’s alias against the exact expected Vercel project and deployment. A later purchase can use an existing eligible production build after ownership proof without triggering another deploy. A later Preview cannot detach a pending approved-production association; a lost connection falls back only to an approved Production URL.
+
 Full record names are converted to the zone-relative names used by DNS forms.
 An already observed ownership proof is not presented for re-entry. Connection
 success requires the existing server verification (project verification, public

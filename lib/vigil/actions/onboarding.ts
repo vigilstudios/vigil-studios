@@ -274,6 +274,10 @@ export async function startOnboardingDomain(projectId: string, input: { hostname
       await logAuditEvent(supabase, { action: "domain.connect_started", entityType: "domain", entityId: domainId, organizationId: ctx.organization.id, after: { hostname, website_id: website?.id ?? null, via: "onboarding" } });
     }
 
+    if (existing && hasAdminClient()) {
+      const { error: preferenceError } = await createAdminClient().from("domains").update({ registrar }).eq("id", domainId).eq("organization_id", ctx.organization.id).eq("website_id", website?.id ?? "");
+      if (preferenceError) throw preferenceError;
+    }
     // Work out the records now so the guide is complete on the next screen.
     if (!existing && hasAdminClient()) {
       const admin = createAdminClient();
@@ -305,6 +309,23 @@ async function domainSetup(supabase: Awaited<ReturnType<typeof createClient>>, d
   return { domainId: domain.id, hostname: domain.hostname, status: domain.status, registrar, records, dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable, launchReady, statusReason: domain.status_reason, cutoverReady: source === "provider" || domain.status === "connected" };
 }
 
+/** A guide preference only: no provider account access or DNS mutation. */
+export async function saveDomainRegistrar(domainId: string, registrar: RegistrarKey): Promise<ActionResult<DomainSetup>> {
+  try {
+    const ctx = await requireOrgContextOrThrow();
+    await assertOrgRole(ctx, ["owner", "manager"]);
+    if (!Object.hasOwn(REGISTRAR_GUIDES, registrar)) throw new ValidationError("Choose a domain provider from the list.");
+    const client = await createClient();
+    const { data: domain, error } = await client.from("domains").select("id").eq("id", domainId).eq("organization_id", ctx.organization.id).neq("status", "released").maybeSingle();
+    if (error) throw error;
+    if (!domain) throw new NotFoundError("Domain not found.");
+    if (!hasAdminClient()) throw new ValidationError("The provider choice could not be saved. Please try again later.");
+    const { error: saveError } = await createAdminClient().from("domains").update({ registrar }).eq("id", domainId).eq("organization_id", ctx.organization.id);
+    if (saveError) throw saveError;
+    return { ok: true, data: await domainSetup(client, domainId, registrar) };
+  } catch (error) { return toActionError(error); }
+}
+
 /** Re-read the domain's state (the wizard polls this while "Checking…"). */
 export async function getDomainSetup(domainId: string, registrar: RegistrarKey): Promise<ActionResult<DomainSetup>> {
   try {
@@ -334,7 +355,7 @@ export async function confirmDnsAdded(domainId: string, registrar: RegistrarKey 
         const { error } = await admin.from("domains").update({ status: "verifying", status_reason: null }).eq("id", domainId).eq("status", "pending");
         if (error) throw error;
       }
-      await enqueueJob(admin, { kind: JOB_KINDS.domainVerify, idempotencyKey: `domain.verify:${domainId}`, organizationId: ctx.organization.id, websiteId: domain.website_id, domainId, createdBy: ctx.user.id, maxAttempts: 50 });
+      await enqueueJob(admin, { kind: JOB_KINDS.domainVerify, idempotencyKey: `domain.verify:${domainId}`, organizationId: ctx.organization.id, websiteId: domain.website_id, domainId, createdBy: ctx.user.id, maxAttempts: 50, requeueFailed: true });
       await verifyDomain(admin, domainId).catch((err) => console.error("verifyDomain inline failed:", err));
       await logAuditEvent(supabase, { action: "domain.records_confirmed", entityType: "domain", entityId: domainId, organizationId: ctx.organization.id });
     }

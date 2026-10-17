@@ -142,6 +142,7 @@ export type ProvisionSiteInput = {
 };
 
 export type DeploymentSnapshot = {
+  environment?: "production" | "preview";
   externalId: string;
   status: NormalizedDeploymentStatus;
   url: string | null;
@@ -157,6 +158,8 @@ export type DomainConfigSnapshot = {
   verified: boolean;
   misconfigured: boolean;
   sslReady: boolean;
+  servingDeploymentId?: string | null;
+  servingSiteId?: string | null;
 };
 
 export interface DeploymentProvider {

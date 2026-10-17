@@ -62,7 +62,7 @@ export function DomainGuide({ domain, registrar, onRegistrarChange, onConfirm, o
       {(final === "waiting_launch" || final === "waiting_connection") ? <div><button type="button" className="min-h-11 text-sm underline" onClick={() => { setReviewing(true); navigate(screens[0].id); }}>Review my record</button></div> : null}
     </> : <>
       <p className="text-sm leading-6 text-[color:var(--text-secondary)]">{screen.instruction}</p>
-      {screen.kind === "provider" && onRegistrarChange ? <label className="block space-y-2 text-sm"><span>Domain provider</span><select className={inputClass} value={registrar} onChange={event => onRegistrarChange(event.target.value as RegistrarKey)}>{REGISTRAR_OPTIONS.map(option => <option key={option.key} value={option.key}>{option.name}</option>)}</select></label> : null}
+      {screen.kind === "provider" && onRegistrarChange ? <label className="block space-y-2 text-sm"><span>Domain provider</span><select className={inputClass} value={registrar} disabled={confirming || checking} onChange={event => onRegistrarChange(event.target.value as RegistrarKey)}>{REGISTRAR_OPTIONS.map(option => <option key={option.key} value={option.key}>{option.name}</option>)}</select></label> : null}
       {screen.kind === "login" && guide.loginUrl ? <a href={guide.loginUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 text-sm text-[color:var(--accent)] underline">Open {guide.name}<ExternalLink className="h-3.5 w-3.5" aria-hidden="true" /><span className="sr-only"> (opens in a new tab)</span></a> : null}
       {screen.kind === "field" ? <SingleValue key={screen.id} label={screen.field!} value={screen.value!} /> : null}
       {screen.kind === "check" ? <>
