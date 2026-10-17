@@ -17,7 +17,7 @@ import { domainSchema, parseBrief, SECTION_SCHEMAS, STEP_KEYS, type Brief, type 
 import { PROJECT_ASSETS_BUCKET, validateAssets, type AssetKind } from "@/lib/vigil/onboarding/assets";
 import { resolveEntitlements } from "@/lib/vigil/entitlements";
 import { fileLimitsFor, recordUploadedFiles } from "@/lib/vigil/services/project-files";
-import { detectRegistrar, requiredRecords, type DnsRecord } from "@/lib/vigil/services/dns";
+import { detectRegistrar, guidedDomainRecords, type DnsRecord } from "@/lib/vigil/services/dns";
 import { beginDomainVerification, normalizeHostname, verifyDomain } from "@/lib/vigil/services/domain";
 import type { Json } from "@/types/database.types";
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/vigil/rate-limit";
@@ -250,7 +250,7 @@ export async function startOnboardingDomain(projectId: string, input: { hostname
     const { data: website } = await supabase.from("websites").select("id").eq("project_id", projectId).maybeSingle();
 
     // Reuse an existing row for the same hostname in this organization.
-    const { data: existing } = await supabase.from("domains").select("id").eq("organization_id", ctx.organization.id).eq("hostname", hostname).maybeSingle();
+    const { data: existing } = await supabase.from("domains").select("id").eq("organization_id", ctx.organization.id).eq("website_id", website?.id ?? "").eq("hostname", hostname).neq("status", "released").maybeSingle();
     let domainId = existing?.id ?? null;
     if (!domainId) {
       const { data, error } = await supabase
@@ -274,12 +274,13 @@ export async function startOnboardingDomain(projectId: string, input: { hostname
       await logAuditEvent(supabase, { action: "domain.connect_started", entityType: "domain", entityId: domainId, organizationId: ctx.organization.id, after: { hostname, website_id: website?.id ?? null, via: "onboarding" } });
     }
 
+    if (existing && hasAdminClient()) {
+      const { error: preferenceError } = await createAdminClient().from("domains").update({ registrar }).eq("id", domainId).eq("organization_id", ctx.organization.id).eq("website_id", website?.id ?? "");
+      if (preferenceError) throw preferenceError;
+    }
     // Work out the records now so the guide is complete on the next screen.
-    if (hasAdminClient()) {
+    if (!existing && hasAdminClient()) {
       const admin = createAdminClient();
-      if (existing) {
-        await admin.from("domains").update({ registrar, website_id: website?.id ?? null }).eq("id", domainId);
-      }
       try {
         await beginDomainVerification(admin, domainId);
       } catch (err) {
@@ -301,11 +302,28 @@ export async function startOnboardingDomain(projectId: string, input: { hostname
 async function domainSetup(supabase: Awaited<ReturnType<typeof createClient>>, domainId: string, registrar: RegistrarKey): Promise<DomainSetup> {
   const { data: domain, error } = await supabase.from("domains").select("id, hostname, status, verification, verification_token, dns_ok, ssl_ok, status_reason").eq("id", domainId).single();
   if (error) throw error;
-  const records = requiredRecords(domain.hostname, domain.verification, domain.verification_token);
+  const records = guidedDomainRecords(domain.hostname, domain.verification, domain.verification_token);
   const source = (domain.verification as { source?: string } | null)?.source;
   const reachable = (domain.verification as { connection_reachable?: boolean } | null)?.connection_reachable ?? null;
   const launchReady = (domain.verification as { launch_ready?: boolean } | null)?.launch_ready === true;
   return { domainId: domain.id, hostname: domain.hostname, status: domain.status, registrar, records, dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable, launchReady, statusReason: domain.status_reason, cutoverReady: source === "provider" || domain.status === "connected" };
+}
+
+/** A guide preference only: no provider account access or DNS mutation. */
+export async function saveDomainRegistrar(domainId: string, registrar: RegistrarKey): Promise<ActionResult<DomainSetup>> {
+  try {
+    const ctx = await requireOrgContextOrThrow();
+    await assertOrgRole(ctx, ["owner", "manager"]);
+    if (!Object.hasOwn(REGISTRAR_GUIDES, registrar)) throw new ValidationError("Choose a domain provider from the list.");
+    const client = await createClient();
+    const { data: domain, error } = await client.from("domains").select("id").eq("id", domainId).eq("organization_id", ctx.organization.id).neq("status", "released").maybeSingle();
+    if (error) throw error;
+    if (!domain) throw new NotFoundError("Domain not found.");
+    if (!hasAdminClient()) throw new ValidationError("The provider choice could not be saved. Please try again later.");
+    const { error: saveError } = await createAdminClient().from("domains").update({ registrar }).eq("id", domainId).eq("organization_id", ctx.organization.id);
+    if (saveError) throw saveError;
+    return { ok: true, data: await domainSetup(client, domainId, registrar) };
+  } catch (error) { return toActionError(error); }
 }
 
 /** Re-read the domain's state (the wizard polls this while "Checking…"). */
@@ -337,7 +355,7 @@ export async function confirmDnsAdded(domainId: string, registrar: RegistrarKey 
         const { error } = await admin.from("domains").update({ status: "verifying", status_reason: null }).eq("id", domainId).eq("status", "pending");
         if (error) throw error;
       }
-      await enqueueJob(admin, { kind: JOB_KINDS.domainVerify, idempotencyKey: `domain.verify:${domainId}`, organizationId: ctx.organization.id, websiteId: domain.website_id, domainId, createdBy: ctx.user.id, maxAttempts: 50 });
+      await enqueueJob(admin, { kind: JOB_KINDS.domainVerify, idempotencyKey: `domain.verify:${domainId}`, organizationId: ctx.organization.id, websiteId: domain.website_id, domainId, createdBy: ctx.user.id, maxAttempts: 50, requeueFailed: true });
       await verifyDomain(admin, domainId).catch((err) => console.error("verifyDomain inline failed:", err));
       await logAuditEvent(supabase, { action: "domain.records_confirmed", entityType: "domain", entityId: domainId, organizationId: ctx.organization.id });
     }

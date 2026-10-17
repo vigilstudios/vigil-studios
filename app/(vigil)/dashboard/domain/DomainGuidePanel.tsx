@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DomainGuide, type GuideDomain } from "@/components/vigil/DomainGuide";
-import { confirmDnsAdded, getDomainSetup } from "@/lib/vigil/actions/onboarding";
+import { confirmDnsAdded, getDomainSetup, saveDomainRegistrar } from "@/lib/vigil/actions/onboarding";
 import type { RegistrarKey } from "@/lib/vigil/onboarding/brief";
 
 /** The same walkthrough as the wizard, for a domain the customer chose to finish later. */
@@ -15,16 +15,21 @@ export function DomainGuidePanel({ domain, initialRegistrar, canManage }: { doma
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (state.status !== "verifying" || state.launchReady) return;
+    if (state.status === "connected" || state.status === "released") return;
+    let active = true;
+    let inFlight = false;
     const id = window.setInterval(async () => {
-      if (document.visibilityState !== "visible" || !navigator.onLine) return;
+      if (inFlight || document.visibilityState !== "visible" || !navigator.onLine) return;
+      inFlight = true;
+      try {
       const res = await getDomainSetup(state.domainId, registrar);
-      if (res.ok) {
+      if (active && res.ok) {
         setState(res.data);
         if (res.data.status === "connected") router.refresh();
       }
+      } catch { /* Keep the current step on a temporary network failure. */ } finally { inFlight = false; }
     }, 20_000);
-    return () => window.clearInterval(id);
+    return () => { active = false; window.clearInterval(id); };
   }, [state.status, state.launchReady, state.domainId, registrar, router]);
 
   return (
@@ -32,16 +37,26 @@ export function DomainGuidePanel({ domain, initialRegistrar, canManage }: { doma
       <DomainGuide
         domain={state}
         registrar={registrar}
-        onRegistrarChange={setRegistrar}
+        onRegistrarChange={canManage ? async next => {
+          setConfirming(true); setError(null);
+          try { const res = await saveDomainRegistrar(state.domainId, next); if (res.ok) { setRegistrar(next); setState(res.data); } else setError(res.error); }
+          catch { setError("The provider choice could not be saved. Please retry."); } finally { setConfirming(false); }
+        } : undefined}
+        onRefresh={async () => {
+          setConfirming(true); setError(null);
+          try { const res = await getDomainSetup(state.domainId, registrar); if (res.ok) setState(res.data); else setError(res.error); }
+          catch { setError("The status could not be refreshed. Please retry."); } finally { setConfirming(false); }
+        }}
         onConfirm={
           canManage
             ? async () => {
                 setError(null);
                 setConfirming(true);
+                try {
                 const res = await confirmDnsAdded(state.domainId, registrar);
-                setConfirming(false);
                 if (res.ok) setState(res.data);
                 else setError(res.error);
+                } catch { setError("The check could not finish. Please try again."); } finally { setConfirming(false); }
               }
             : undefined
         }

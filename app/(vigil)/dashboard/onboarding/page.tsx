@@ -7,7 +7,7 @@ import { requireOrgContext } from "@/lib/vigil/auth/session";
 import { resumeStep, stepsForProjectKind, type StepKey } from "@/lib/vigil/onboarding/brief";
 import { getOnboardingProject, getProjectAssets } from "@/lib/vigil/queries/onboarding";
 import { getOrgDomains } from "@/lib/vigil/queries/dashboard";
-import { requiredRecords } from "@/lib/vigil/services/dns";
+import { guidedDomainRecords } from "@/lib/vigil/services/dns";
 import { OnboardingWizard } from "./OnboardingWizard";
 
 export const metadata: Metadata = { title: "Getting set up" };
@@ -26,14 +26,17 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
   const initialStep: StepKey = requested && (projectSteps as readonly string[]).includes(requested) ? (requested as StepKey) : resumeStep(brief, project.kind);
 
   const [assets, domains] = await Promise.all([getProjectAssets(project.id), getOrgDomains(ctx.organization.id)]);
-  const domainRow = brief.domain?.domainId ? domains.find((d) => d.id === brief.domain?.domainId) ?? null : null;
+  const client = await createClient();
+  const { data: website } = await client.from("websites").select("id").eq("organization_id", ctx.organization.id).eq("project_id", project.id).maybeSingle();
+  const intent = website ? await loadDomainIntent(client, ctx.organization.id, website.id) : null;
+  const domainRow = domains.find(d => d.id === brief.domain?.domainId && d.website_id === website?.id) ?? (intent && intent.phase !== "cancelled" ? domains.find(d => d.website_id === website?.id && d.hostname === intent.hostname && d.status !== "released") : null) ?? null;
   const domainSetup = domainRow
     ? {
         domainId: domainRow.id,
         hostname: domainRow.hostname,
         status: domainRow.status,
-        registrar: brief.domain?.registrar ?? ("other" as const),
-        records: requiredRecords(domainRow.hostname, domainRow.verification, domainRow.verification_token),
+        registrar: brief.domain?.registrar ?? (domainRow.registrar === "vercel" ? "vercel" as const : "other" as const),
+        records: guidedDomainRecords(domainRow.hostname, domainRow.verification, domainRow.verification_token),
         dnsOk: domainRow.dns_ok,
         sslOk: domainRow.ssl_ok,
         reachable: (domainRow.verification as { connection_reachable?: boolean } | null)?.connection_reachable ?? null,
@@ -42,10 +45,6 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
         cutoverReady: (domainRow.verification as { source?: string } | null)?.source === "provider" || domainRow.status === "connected",
       }
     : null;
-
-  const client = await createClient();
-  const { data: website } = await client.from("websites").select("id").eq("organization_id", ctx.organization.id).eq("project_id", project.id).maybeSingle();
-  const intent = website ? await loadDomainIntent(client, ctx.organization.id, website.id) : null;
 
   return (
     <OnboardingWizard

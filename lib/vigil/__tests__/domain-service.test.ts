@@ -12,7 +12,7 @@ function provider(config: (hostname: string) => DomainConfigSnapshot): Deploymen
     name: "vercel",
     provisionSite: vi.fn(),
     triggerDeployment: vi.fn(),
-    getDeployment: vi.fn(),
+    getDeployment: vi.fn(async () => ({externalId:"dpl_1",status:"ready",environment:"production",url:"https://production.vercel.app",createdAt:null,readyAt:null,error:null})),
     addDomain: vi.fn(async (_site, hostname) => config(hostname)),
     removeDomain: vi.fn(),
     getDomainConfig: vi.fn(async (_site, hostname) => config(hostname)),
@@ -28,6 +28,7 @@ const snapshot = (hostname: string, ready: boolean): DomainConfigSnapshot => ({
   verified: ready,
   misconfigured: !ready,
   sslReady: ready,
+  servingDeploymentId: "dpl_1", servingSiteId: "prj_1",
 });
 
 const dnsChecks = (ok: boolean) => ({
@@ -35,33 +36,42 @@ const dnsChecks = (ok: boolean) => ({
   checkHttps: vi.fn(async () => ok),
 });
 
+function readyProduction(fake: FakeAdmin) {
+  for (const site of fake.rows("websites")) site.organization_id ??= "org_1";
+  for (const row of fake.rows("domains")) row.organization_id ??= "org_1";
+  fake.rows("deployments").push({id:"prod_1",website_id:"web_1",organization_id:"org_1",environment:"production",status:"ready",created_at:"2026-10-16T10:00:00Z"});
+  fake.rows("provider_links").push({provider:"vercel",resource_kind:"deployment",entity_type:"deployment",entity_id:"prod_1",external_id:"dpl_1"});
+}
+
 describe("customer domain service", () => {
   it("holds DNS cutover until a provider site exists", async () => {
     process.env.VIGIL_DNS_APEX_A = "76.76.21.21";
-    const fake = new FakeAdmin({ domains: [{ id: "dom_1", hostname: "example.com", kind: "apex", website_id: "web_1", status: "pending" }] });
+    const fake = new FakeAdmin({ domains: [{ id: "dom_1", hostname: "example.com", kind: "apex", website_id: "web_1", status: "pending", verification_token: "fixture-token" }] });
 
     await beginDomainVerification(fake.asClient(), "dom_1", provider((hostname) => snapshot(hostname, false)));
 
     const domain = fake.rows("domains")[0];
     expect((domain.verification as { source: string }).source).toBe("platform");
     expect(domain.status).toBe("pending");
-    expect(domain.status_reason).toMatch(/Add the DNS record/);
+    expect(domain.status_reason).toMatch(/ownership record/);
   });
 
   it("attaches www plus apex only at launch, redirects the apex, and publishes the canonical URL after verification", async () => {
     const fake = new FakeAdmin({
-      domains: [{ id: "dom_1", hostname: "example.com", kind: "apex", website_id: "web_1", status: "pending" }],
+      domains: [{ id: "dom_1", hostname: "example.com", kind: "apex", website_id: "web_1", status: "pending", verification_token: "fixture-token" }],
       websites: [{ id: "web_1", live_url: "https://preview.vercel.app" }],
       provider_links: [{ provider: "vercel", resource_kind: "site", entity_type: "website", entity_id: "web_1", external_id: "prj_1" }],
     });
     const deployment = provider((hostname) => snapshot(hostname, true));
 
+    readyProduction(fake);
     await activateDomainVerification(fake.asClient(), "dom_1", deployment, dnsChecks(false));
     expect(deployment.addDomain).toHaveBeenNthCalledWith(1, "prj_1", "www.example.com", undefined);
     expect(deployment.addDomain).toHaveBeenNthCalledWith(2, "prj_1", "example.com", { redirect: "www.example.com", redirectStatusCode: 308 });
     expect(fake.rows("domains")[0].status).toBe("pending");
     expect(fake.rows("domains")[0].dns_ok).toBe(false);
 
+    readyProduction(fake);
     const result = await verifyDomain(fake.asClient(), "dom_1", deployment, dnsChecks(true));
     expect(result.connected).toBe(true);
     expect(fake.rows("domains")[0].status).toBe("connected");
@@ -71,7 +81,7 @@ describe("customer domain service", () => {
   it("does not trust provider verification when the public DNS record is absent", async () => {
     process.env.VIGIL_DNS_CNAME_TARGET = "cname.vercel-dns.com";
     const fake = new FakeAdmin({
-      domains: [{ id: "dom_1", hostname: "drytest.vigilstudios.co", kind: "subdomain", website_id: "web_1", status: "pending" }],
+      domains: [{ id: "dom_1", hostname: "drytest.vigilstudios.co", kind: "subdomain", website_id: "web_1", status: "pending", verification_token: "fixture-token" }],
       websites: [{ id: "web_1", live_url: "https://preview.vercel.app", preview_url: "https://preview.vercel.app" }],
       provider_links: [{ provider: "vercel", resource_kind: "site", entity_type: "website", entity_id: "web_1", external_id: "prj_1" }],
     });
@@ -80,7 +90,7 @@ describe("customer domain service", () => {
     await beginDomainVerification(fake.asClient(), "dom_1", deployment, dnsChecks(false));
 
     expect(fake.rows("domains")[0]).toMatchObject({ status: "pending", dns_ok: false });
-    expect(fake.rows("domains")[0].status_reason).toMatch(/Add the DNS record/);
+    expect(fake.rows("domains")[0].status_reason).toMatch(/ownership record/);
     expect(deployment.addDomain).not.toHaveBeenCalled();
   });
 
@@ -107,6 +117,7 @@ describe("customer domain service", () => {
       provider_links: [{ provider: "vercel", resource_kind: "site", entity_type: "website", entity_id: "web_1", external_id: "prj_1" }],
     });
     const deployment = provider((hostname) => snapshot(hostname, true));
+    readyProduction(fake);
     const result = await verifyDomain(fake.asClient(), "dom_1", deployment, {
       ...dnsChecks(true),
       checkHttps: vi.fn(async () => false),
@@ -126,13 +137,14 @@ describe("customer domain service", () => {
     });
     const deployment = provider((hostname) => snapshot(hostname, true));
 
+    readyProduction(fake);
     await verifyDomain(fake.asClient(), "dom_1", deployment, {
       ...dnsChecks(true),
       checkHttps: vi.fn(async () => false),
     });
 
     expect(fake.rows("domains")[0].status).toBe("verifying");
-    expect(fake.rows("websites")[0]).toMatchObject({ live_url: "https://preview.vercel.app", primary_domain_id: null });
+    expect(fake.rows("websites")[0]).toMatchObject({ live_url: "https://production.vercel.app", primary_domain_id: null });
   });
 });
 
@@ -164,4 +176,27 @@ describe("domain ownership", () => {
     const squatRecords = (rows.find((r) => r.id === "dom_squat")?.verification as { required_records: DnsRecord[] }).required_records;
     expect(squatRecords).toContainEqual({ type: "TXT", name: "_vigil", value: "vigil-verify=squat-token" });
   });
+});
+
+describe("manual guide production boundaries",()=>{
+  const fixture=()=>new FakeAdmin({websites:[{id:"web_1",organization_id:"org_1",status:"live",live_url:"https://production.vercel.app"}],domains:[{id:"dom_1",organization_id:"org_1",website_id:"web_1",hostname:"example.com",kind:"apex",status:"pending",verification_token:"proof"}],provider_links:[{provider:"vercel",resource_kind:"site",entity_type:"website",entity_id:"web_1",external_id:"prj_1"}]});
+  it("refuses directly called activation when no ready production exists",async()=>{
+    const db=fixture(),p=provider(name=>snapshot(name,true));expect(await activateDomainVerification(db.asClient(),"dom_1",p,dnsChecks(true))).toEqual({connected:false});expect(p.addDomain).not.toHaveBeenCalled();
+  });
+  it("connects a later purchase to an existing approved production build without deploying again",async()=>{
+    const db=fixture();readyProduction(db);const p=provider(name=>snapshot(name,true));expect((await verifyDomain(db.asClient(),"dom_1",p,dnsChecks(true))).connected).toBe(true);expect(p.addDomain).toHaveBeenCalled();expect(p.triggerDeployment).not.toHaveBeenCalled();
+  });
+  it("refuses a Preview returned for the alleged production deployment",async()=>{
+    const db=fixture();readyProduction(db);const p=provider(name=>snapshot(name,true));vi.mocked(p.getDeployment).mockResolvedValueOnce({externalId:"dpl_1",environment:"preview",status:"ready",url:"https://preview.test",createdAt:null,readyAt:null,error:null});expect((await activateDomainVerification(db.asClient(),"dom_1",p,dnsChecks(true))).connected).toBe(false);expect(p.addDomain).not.toHaveBeenCalled();
+  });
+  it("blocks a production artifact that does not match the current saved design",async()=>{
+    const db=fixture();readyProduction(db);db.rows("design_workspaces").push({website_id:"web_1",revision:2,repository_revision:1,repository_commit:"old"});const p=provider(name=>snapshot(name,true));expect((await activateDomainVerification(db.asClient(),"dom_1",p,dnsChecks(true))).connected).toBe(false);expect(p.addDomain).not.toHaveBeenCalled();
+  });
+  it("does not mark a different deployment or project as connected despite working DNS and HTTPS",async()=>{
+    const db=fixture();readyProduction(db);const p=provider(name=>({...snapshot(name,true),servingDeploymentId:"unapproved-build",servingSiteId:"wrong-project"}));expect((await activateDomainVerification(db.asClient(),"dom_1",p,dnsChecks(true))).connected).toBe(false);expect(db.rows("domains")[0].status).not.toBe("connected");expect(db.rows("domains")[0].status_reason).not.toBe("The domain is connected.");
+  });
+});
+
+it("keeps a pending production association when another Preview is prepared",async()=>{
+  const db=new FakeAdmin({websites:[{id:"web_1",organization_id:"org_1",status:"building"}],domains:[{id:"dom_1",organization_id:"org_1",website_id:"web_1",hostname:"example.com",kind:"apex",status:"pending",verification:{source:"provider"},verification_token:"proof"}]});readyProduction(db);const p=provider(name=>snapshot(name,false));await beginDomainVerification(db.asClient(),"dom_1",p,dnsChecks(false));expect(p.removeDomain).not.toHaveBeenCalled();expect(db.rows("domains")[0].verification).toEqual({source:"provider"});
 });

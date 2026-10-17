@@ -55,18 +55,14 @@ export function DomainJourney({ websiteId, initial = null, canManage }: { websit
   return (
     <section aria-labelledby={`${id}-title`} className="min-w-0 space-y-4">
       <h2 id={`${id}-title`} className="flex items-center gap-2 text-base font-semibold"><Globe2 className="h-4 w-4 shrink-0 text-[color:var(--accent)]" aria-hidden="true" />Find your domain</h2>
-      <ol aria-label="Domain steps" className="grid grid-cols-3 gap-2 text-xs text-[color:var(--text-secondary)]">
-        {["Find a domain", "Buy on Vercel", "Connect"].map((label, i) => <li key={label} aria-current={i === step ? "step" : undefined} className="border-t-2 border-[color:var(--border)] pt-2 aria-[current=step]:border-[color:var(--accent)] aria-[current=step]:text-[color:var(--text-primary)]">{i + 1}. {label}</li>)}
-      </ol>
       <p className="text-sm text-[color:var(--text-secondary)]">Your domain and renewals stay in your own Vercel account.</p>
-      {!canManage ? <p className="text-sm text-[color:var(--text-secondary)]">You can search availability and prices here. A customer owner or manager must save the choice and authorize the connection from their own account.</p> : null}
-      <h3 className="text-sm font-medium">{["Search for a name", "Review and buy", "Connect your domain"][step]}</h3>
+      {!canManage ? <p className="text-sm text-[color:var(--text-secondary)]">You can search availability and prices here. A customer owner or manager must save the choice and continue setup from their own account.</p> : null}
+      <h3 className="text-sm font-medium">{["Search for a name", "Review this domain", "Set up your domain"][step]}</h3>
       {saved && !choosing ? (
         <div className="space-y-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-4">
           <p className="break-all font-semibold">{intent.hostname}</p>
-          <p className="text-sm text-[color:var(--text-secondary)]">Finish your purchase on Vercel, then return here. A saved choice does not confirm a purchase.</p>
-          <button type="button" className="btn-primary min-h-11 max-w-full whitespace-normal break-words !px-4 text-xs sm:text-sm disabled:cursor-not-allowed disabled:opacity-50" disabled aria-describedby={`${id}-connection`}>Connect {intent.hostname}</button>
-          <p id={`${id}-connection`} className="text-sm text-[color:var(--text-secondary)]">Action required: automatic connection is not available yet. Contact Vigil for help with your Vercel domain. No DNS changes have started.</p>
+          <p className="text-sm text-[color:var(--text-secondary)]">After buying this name in your own Vercel account, continue to the guided setup. We’ll show one instruction at a time. Your saved choice does not confirm a purchase.</p>
+          {canManage ? <a href={`/dashboard/domain?flow=own&website=${encodeURIComponent(websiteId)}&hostname=${encodeURIComponent(intent.hostname)}&registrar=vercel`} className="btn-primary inline-flex min-h-11 max-w-full items-center whitespace-normal break-words !px-4 text-sm">Set up {intent.hostname}</a> : null}
           <div className="flex flex-wrap gap-x-4 gap-y-3 text-sm">
             <a className="inline-flex min-h-11 items-center gap-1 underline" href={vercelDomainUrl(intent.hostname)} target="_blank" rel="noopener noreferrer">Return to Vercel <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" /><span className="sr-only"> (opens in a new tab)</span></a>
             <a className="inline-flex min-h-11 items-center underline" href={`mailto:hello@vigilstudios.co?subject=${encodeURIComponent(`Connect ${intent.hostname}`)}`}>Contact Vigil</a>
@@ -87,7 +83,7 @@ export function DomainJourney({ websiteId, initial = null, canManage }: { websit
               <p className="text-sm">Available{quote.premium ? " · Premium domain" : " · Standard domain"}</p>
               <dl className="grid gap-2 text-sm sm:grid-cols-2"><div><dt className="text-[color:var(--text-secondary)]">Registration · {quote.years} {quote.years === 1 ? "year" : "years"}</dt><dd>{money(quote.registration)} USD</dd></div><div><dt className="text-[color:var(--text-secondary)]">Renewal estimate</dt><dd>{money(quote.renewal)} USD</dd></div></dl>
               <p className="text-xs text-[color:var(--text-secondary)]">Vercel confirms final availability, price and tax. Names are not reserved. We check the quote again before saving.</p>
-              <p className="text-sm text-[color:var(--text-secondary)]">Continue to Vercel to sign in and buy this domain. Connection currently needs Vigil’s help.</p>
+              <p className="text-sm text-[color:var(--text-secondary)]">Continue to Vercel to sign in and buy this domain. After buying, return to follow the guided DNS setup.</p>
               {canManage ? <button type="button" onClick={() => void handoff()} disabled={pending || !loaded} className="btn-primary min-h-11 text-sm">{pending ? "Saving…" : "Continue on Vercel"}<span className="sr-only"> (opens in a new tab)</span></button> : null}
               <div><button type="button" className="min-h-11 text-sm underline" disabled={pending} onClick={() => setQuote(null)}>Back to search</button></div>
             </> : <p className="text-sm">Unavailable or unsupported by Vercel. Try another name.</p>}

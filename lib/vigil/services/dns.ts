@@ -66,6 +66,18 @@ export function requiredRecords(hostname: string, verification: unknown, ownersh
   return stored.length > 0 ? withOwnershipRecord(stored, hostname, ownershipToken) : platformDnsRecords(hostname, ownershipToken);
 }
 
+/** The guided flow proves control first; routing records appear only after production activation. */
+export function guidedDomainRecords(hostname: string, verification: unknown, ownershipToken?: string | null): DnsRecord[] {
+  if ((verification as { source?: string } | null)?.source === "provider") {
+    const stored = (verification as { required_records?: DnsRecord[]; checks?: { type: string; name: string; ok: boolean; found?: string[] }[] });
+    const records = withOwnershipRecord(stored.required_records ?? [], hostname, ownershipToken);
+    // The initial ownership proof stays required by the verifier, but does not
+    // need to be entered again when it is already visible in the public zone.
+    return records.filter(record => !record.value.startsWith(OWNERSHIP_PREFIX) || !stored.checks?.some(check => check.ok && check.type === record.type && check.name === record.name && check.found?.includes(record.value)));
+  }
+  return ownershipToken ? [ownershipRecord(hostname, ownershipToken)] : [];
+}
+
 function fqdn(hostname: string, name: string): string {
   if (!name || name === "@" || name === hostname) return hostname;
   const zone = registrableDomain(hostname);
@@ -111,7 +123,7 @@ export async function checkDnsRecords(hostname: string, records: DnsRecord[], re
       found = [];
     }
     const want = record.value.toLowerCase().replace(/\.$/, "");
-    const ok = found.some((v) => v.toLowerCase().replace(/\.$/, "") === want);
+    const ok = record.type.toUpperCase() === "TXT" ? found.some(value => value === record.value) : found.some((v) => v.toLowerCase().replace(/\.$/, "") === want);
     out.push({ record, found, ok });
   }
   return out;

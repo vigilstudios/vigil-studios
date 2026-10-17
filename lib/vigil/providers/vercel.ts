@@ -1,3 +1,4 @@
+import { isIP } from "node:net";
 import "server-only";
 
 import { ProviderError } from "@/lib/vigil/auth/errors";
@@ -5,6 +6,7 @@ import { domainKind, relativeDnsName } from "@/lib/vigil/domains";
 import type { DeploymentProvider, DeploymentSnapshot, DomainConfigSnapshot, ProvisionSiteInput } from "./types";
 
 type VercelDeployment = {
+  target?: string | null;
   id: string;
   readyState: string;
   url?: string | null;
@@ -124,9 +126,15 @@ export class VercelDeploymentProvider implements DeploymentProvider {
         if (!(error instanceof ProviderError) || error.status !== 400) throw error;
       }
     }
-    const config = await this.api(`/v6/domains/${encodeURIComponent(hostname)}/config`, { allowNotFound: true }) as { misconfigured?: boolean } | null;
+    const config = await this.api(`/v6/domains/${encodeURIComponent(hostname)}/config`, { allowNotFound: true, query: { projectIdOrName: siteExternalId } }) as { misconfigured?: boolean; recommendedCNAME?: { rank: number; value: string }[]; recommendedIPv4?: { rank: number; value: string[] }[] } | null;
     const snapshot = this.domainSnapshot(domain);
-    return { ...snapshot, misconfigured: config?.misconfigured ?? !domain.verified, sslReady: domain.verified && !(config?.misconfigured ?? true) };
+    const cname = config?.recommendedCNAME?.slice().sort((a,b) => Number(a.rank)-Number(b.rank)).find(item => typeof item.value === "string" && /^[a-z0-9.-]+\.?$/i.test(item.value))?.value;
+    const ipv4 = config?.recommendedIPv4?.slice().sort((a,b) => Number(a.rank)-Number(b.rank)).flatMap(item => Array.isArray(item.value) ? item.value : []).find(value => typeof value === "string" && isIP(value) === 4);
+    const routing = domainKind(hostname) === "subdomain" ? cname ? [{type:"CNAME" as const,name:relativeDnsName(hostname),value:cname}] : [] : ipv4 ? [{type:"A" as const,name:"@",value:ipv4}] : [];
+    const alias = domain.verified && routing.length > 0 && config?.misconfigured === false
+      ? await this.api(`/v4/aliases/${encodeURIComponent(hostname)}`, { query: { projectId: siteExternalId }, allowNotFound: true }) as { deploymentId?: string; projectId?: string } | null : null;
+    return { ...snapshot, requiredRecords: [...snapshot.requiredRecords.filter(record => record.type === "TXT"), ...routing], misconfigured: config?.misconfigured ?? !domain.verified, sslReady: domain.verified && routing.length > 0 && config?.misconfigured === false,
+      servingDeploymentId: alias?.deploymentId ?? null, servingSiteId: alias?.projectId ?? null };
   }
 
   async deleteSite(siteExternalId: string) {
@@ -143,12 +151,6 @@ export class VercelDeploymentProvider implements DeploymentProvider {
       if (["A", "AAAA", "CNAME", "TXT"].includes(challenge.type)) {
         records.push({ type: challenge.type as "A" | "AAAA" | "CNAME" | "TXT", name: challenge.domain, value: challenge.value });
       }
-    }
-    if (records.length === 0) {
-      const subdomain = domainKind(domain.name) === "subdomain";
-      records.push(subdomain
-        ? { type: "CNAME", name: relativeDnsName(domain.name), value: process.env.VIGIL_DNS_CNAME_TARGET || "cname.vercel-dns-0.com" }
-        : { type: "A", name: "@", value: process.env.VIGIL_DNS_APEX_A || "76.76.21.21" });
     }
     return { hostname: domain.name, requiredRecords: records, verified: domain.verified, misconfigured: !domain.verified, sslReady: false };
   }
@@ -186,6 +188,7 @@ function normalizeDeployment(deployment: VercelDeployment): DeploymentSnapshot {
   const createdAt = deployment.createdAt ? new Date(deployment.createdAt).toISOString() : null;
   const readyAtMs = deployment.readyAt ?? deployment.ready;
   return {
+    environment: deployment.target === "production" ? "production" : "preview",
     externalId: deployment.id,
     status,
     url: deployment.url ? `https://${deployment.url.replace(/^https?:\/\//, "")}` : null,

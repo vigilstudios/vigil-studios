@@ -14,7 +14,7 @@ describe("owned-domain save navigation", () => {
   beforeEach(() => vi.clearAllMocks());
   const form = (hostname = "owned-example.com") => { const data = new FormData(); data.set("hostname", hostname); data.set("website_id", "site-a"); return data; };
   it("redirects to the exact created domain after saving, without swallowing the redirect", async () => {
-    const db = new FakeAdmin({ domains: [{ id: "old", hostname: "other-example.com", organization_id: "org-a" }] });
+    const db = new FakeAdmin({ websites: [{ id: "site-a", organization_id: "org-a", status: "building" }], domains: [{ id: "old", hostname: "other-example.com", organization_id: "org-a" }] });
     mocks.client = db.asClient();
     await expect(startDomainConnection(null, form())).rejects.toThrow("NEXT_REDIRECT:/dashboard/domain?flow=own&domain=id_1");
     expect(db.rows("domains")[1]).toMatchObject({ organization_id: "org-a", website_id: "site-a", hostname: "owned-example.com", source: "customer_owned", status: "pending" });
@@ -25,10 +25,18 @@ describe("owned-domain save navigation", () => {
     expect(mocks.redirect).not.toHaveBeenCalled();
     expect(db.rows("domains")).toHaveLength(0);
   });
-  it("does not navigate or create another row after a duplicate-domain error", async () => {
-    const db = new FakeAdmin({ domains: [{ id: "old", hostname: "owned-example.com", organization_id: "org-a" }] }); mocks.client = db.asClient();
+  it("does not reuse a domain attached to a different website", async () => {
+    const db = new FakeAdmin({ websites: [{ id: "site-a", organization_id: "org-a", status: "building" }], domains: [{ id: "old", hostname: "owned-example.com", organization_id: "org-a" }] }); mocks.client = db.asClient();
     expect(await startDomainConnection(null, form())).toMatchObject({ ok: false, code: "validation" });
     expect(mocks.redirect).not.toHaveBeenCalled();
     expect(db.rows("domains")).toHaveLength(1);
   });
+});
+
+it("resumes the same domain/site on a lost-response retry without duplicating or re-staging it",async()=>{
+  const db=new FakeAdmin({websites:[{id:"site-a",organization_id:"org-a",status:"building"}],domains:[{id:"existing",hostname:"owned-example.com",organization_id:"org-a",website_id:"site-a",status:"verifying",verification:{source:"provider"}}]});mocks.client=db.asClient();const data=new FormData();data.set("hostname","owned-example.com");data.set("website_id","site-a");
+  await expect(startDomainConnection(null,data)).rejects.toThrow("NEXT_REDIRECT:/dashboard/domain?flow=own&domain=existing");expect(db.rows("domains")).toHaveLength(1);expect(db.rows("domains")[0].verification).toEqual({source:"provider"});
+});
+it("rejects another tenant’s website before inserting the customer domain",async()=>{
+  const db=new FakeAdmin({websites:[{id:"site-a",organization_id:"org-b",status:"building"}]});mocks.client=db.asClient();const data=new FormData();data.set("hostname","owned-example.com");data.set("website_id","site-a");expect(await startDomainConnection(null,data)).toMatchObject({ok:false,code:"validation"});expect(db.rows("domains")).toHaveLength(0);
 });
