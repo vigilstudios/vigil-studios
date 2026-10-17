@@ -1132,3 +1132,14 @@ The Domain chooser now uses a centered 4xl column and either guide a centered 3x
 ### 2026-10-16 — One-task guided manual domain setup
 
 Replaced the simultaneous DNS checklist with a shared one-screen-at-a-time wizard, including separate type/name/value/save screens, local navigation resume, focus, copy feedback and help. Purchase handoff now continues to a prefilled manual setup; same-site retries resume rather than detach an existing association. Domain and onboarding use ownership-only TXT staging before launch, a distinct waiting state and provider requirements after authorized production activation. Vercel recommendations are read for the actual project and missing targets fail closed. No beta authorization, automated customer DNS, registrar operation, schema change or customer-site launch is included. See vercel-domains-2026-10-16/GUIDED_SETUP.md and its validation receipts.
+
+### 2026-10-16 — Clarify domain purchasing for customers and staff view
+
+Search results now highlight availability, domain identity, a large accent-colored
+registration price, a separate renewal estimate and an explicit Buy this domain
+on Vercel action. Plain instructions explain the new tab, customer account and
+return to guided setup. Staff can open the exact public domain page without
+saving a customer choice. Saved handoffs keep the Vercel purchase link prominent
+and label setup as the action after buying. Customer authorization, server-side
+requotes, allowlisted URLs, manual DNS and launch safeguards are unchanged.
+Validation/release receipts: vercel-domains-2026-10-16/evidence/purchase-clarity.
