@@ -87,8 +87,13 @@ describe("one domain path at a time", () => {
     const html = await render();
     expect(html).toContain("Now that you’ve bought saved-example.com"); expect(html).toContain("Open my Vercel domains");
     expect(html).not.toContain("Where do you manage"); expect(html).not.toContain("Sign in to Vercel"); expect(html).not.toContain("Confirm your domain");
+    // Overview selects the website, allowing the page to resume its saved domain.
+    mocks.sites.push({ id: "site-b", name: "Second website" });
+    mocks.intents["site-b"] = intent("site-b", "second-example.com");
+    const resumed = await render({ website: "site-a" });
+    expect(resumed).toContain("Now that you’ve bought saved-example.com"); expect(resumed).not.toContain("second-example.com");
     mocks.intents["site-a"] = { ...intent("site-a"), phase: "cancelled" };
-    expect(await render()).toContain("Where do you manage your domain?");
+    expect(await render({ flow: "own", domain: "domain-a" })).toContain("Where do you manage your domain?");
   });
   it("shows an explicitly read-only purchase preview without an owned-domain form", async () => {
     const html = await render({ flow: "purchase-preview", website: "site-a", hostname: "preview-example.com" });
