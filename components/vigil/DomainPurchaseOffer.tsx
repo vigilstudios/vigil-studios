@@ -26,10 +26,9 @@ export function DomainPurchaseOffer({ quote, canManage, pending, disabled, onBuy
       </div>
     </dl>
     <div className="space-y-3">
-      <p className="text-sm leading-relaxed">Buy this web address on Vercel. Sign in or create your own account there to complete your purchase.</p>
       {canManage ? <button type="button" onClick={onBuy} disabled={disabled} className={actionClass}>{pending ? "Saving your choice…" : "Buy this domain on Vercel"}<ArrowUpRight className="h-5 w-5 shrink-0" aria-hidden="true" /></button>
         : <a href={vercelDomainUrl(quote.hostname)} target="_blank" rel="noopener noreferrer" className={actionClass}>View this domain on Vercel<ArrowUpRight className="h-5 w-5 shrink-0" aria-hidden="true" /></a>}
-      <p className="text-center text-xs text-[color:var(--text-secondary)]">Opens Vercel’s page for <span className="break-all font-medium">{quote.hostname}</span> in a new tab.</p>
+      <p className="text-center text-xs text-[color:var(--text-secondary)]">Opens Vercel’s page for <span className="break-all font-medium">{quote.hostname}</span> in a new tab. Sign in or create your own Vercel account to buy it.</p>
       <p className="text-sm text-[color:var(--text-secondary)]">After buying, return here. We’ll guide you through connecting your domain, one step at a time.</p>
     </div>
     <p className="text-xs leading-relaxed text-[color:var(--text-secondary)]">Vercel confirms the final price, tax and availability before you pay. Searching does not reserve this name or charge you.</p>
