@@ -1143,3 +1143,7 @@ saving a customer choice. Saved handoffs keep the Vercel purchase link prominent
 and label setup as the action after buying. Customer authorization, server-side
 requotes, allowlisted URLs, manual DNS and launch safeguards are unchanged.
 Validation/release receipts: vercel-domains-2026-10-16/evidence/purchase-clarity.
+
+### 2026-10-17 — Explicit return from domain purchase
+
+After opening Vercel, the handoff screen now prioritizes I’ve bought it — continue setup, followed by the optional Return to Vercel link. Domain confirmation is prefilled and ownership is checked through the existing manual guide. A public-link click in Staff/read-only view now advances to a local preview of this next screen without saving a customer intent; the existing role-protected setup route can be inspected. Customer persistence and permissions are unchanged. A return or acknowledgement is not payment or ownership proof; there is no new callback, beta API, DNS mutation or customer launch. See vercel-domains-2026-10-16/evidence/purchase-return for validation and release receipts.

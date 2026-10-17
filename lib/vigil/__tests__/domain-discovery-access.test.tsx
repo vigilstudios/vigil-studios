@@ -14,6 +14,7 @@ vi.mock("@/lib/vigil/providers/vercel-discovery", () => ({ searchVercelDomain: m
 import { findVercelDomain, updateDomainHandoff } from "../actions/domain-commerce";
 import { DomainJourney } from "@/components/vigil/DomainJourney";
 import { DomainPurchaseOffer } from "@/components/vigil/DomainPurchaseOffer";
+import { DomainPurchaseReturn } from "@/components/vigil/DomainPurchaseReturn";
 import type { DomainQuote } from "../domain-commerce";
 
 const website = "11111111-1111-4111-8111-111111111111";
@@ -54,6 +55,22 @@ describe("read-only discovery in staff view", () => {
     expect(html).toContain("$15.10");
     expect(html).toContain("Premium domain");
     expect(html).toContain("before you pay");
+  });
+  it("prioritizes continuing setup with the exact saved name and website after the Vercel handoff", () => {
+    const html = renderToStaticMarkup(<DomainPurchaseReturn hostname="example.com" websiteId={website} canManage pending={false} onChoose={vi.fn()} />);
+    expect(html).toContain(`href="/dashboard/domain?flow=own&amp;website=${website}&amp;hostname=example.com&amp;registrar=vercel"`);
+    expect(html).toContain("I’ve bought it — continue setup");
+    expect(html.indexOf("I’ve bought it — continue setup")).toBeLessThan(html.indexOf("Return to Vercel"));
+    expect(html).toContain("checks ownership during setup");
+    expect(html).not.toContain("Purchased");
+    expect(html).not.toContain("Connected");
+  });
+  it("explains that a public-link preview is not a saved customer choice", () => {
+    const html = renderToStaticMarkup(<DomainPurchaseReturn hostname="example.com" websiteId={website} canManage={false} previewOnly pending={false} onChoose={vi.fn()} />);
+    expect(html).toContain("Preview the next step");
+    expect(html).toContain("has not saved a customer choice");
+    expect(html).not.toContain("Decide later");
+    expect(html).toContain("does not confirm payment");
   });
   it("allows staff discovery with tenant validation and a shared fail-closed rate limit", async () => {
     expect(await findVercelDomain(website, "example.com")).toMatchObject({ ok: true });

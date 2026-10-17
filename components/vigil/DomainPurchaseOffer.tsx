@@ -4,8 +4,8 @@ import { ArrowUpRight, Check } from "lucide-react";
 import { vercelDomainUrl, type DomainQuote } from "@/lib/vigil/domain-commerce";
 
 /** Public purchase link never grants authority to save customer choices or DNS. */
-export function DomainPurchaseOffer({ quote, canManage, pending, disabled, onBuy }: {
-  quote: DomainQuote; canManage: boolean; pending: boolean; disabled: boolean; onBuy: () => void;
+export function DomainPurchaseOffer({ quote, canManage, pending, disabled, onBuy, onView }: {
+  quote: DomainQuote; canManage: boolean; pending: boolean; disabled: boolean; onBuy: () => void; onView?: () => void;
 }) {
   const money = (value: number | null) => value === null ? "Unavailable" : new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
   const actionClass = "btn-primary flex min-h-12 w-full gap-2 whitespace-normal !px-4 text-center text-base";
@@ -27,7 +27,7 @@ export function DomainPurchaseOffer({ quote, canManage, pending, disabled, onBuy
     </dl>
     <div className="space-y-3">
       {canManage ? <button type="button" onClick={onBuy} disabled={disabled} className={actionClass}>{pending ? "Saving your choice…" : "Buy this domain on Vercel"}<ArrowUpRight className="h-5 w-5 shrink-0" aria-hidden="true" /></button>
-        : <a href={vercelDomainUrl(quote.hostname)} target="_blank" rel="noopener noreferrer" className={actionClass}>View this domain on Vercel<ArrowUpRight className="h-5 w-5 shrink-0" aria-hidden="true" /></a>}
+        : <a href={vercelDomainUrl(quote.hostname)} onClick={onView} target="_blank" rel="noopener noreferrer" className={actionClass}>View this domain on Vercel<ArrowUpRight className="h-5 w-5 shrink-0" aria-hidden="true" /></a>}
       <p className="text-center text-xs text-[color:var(--text-secondary)]">Opens Vercel’s page for <span className="break-all font-medium">{quote.hostname}</span> in a new tab. Sign in or create your own Vercel account to buy it.</p>
       <p className="text-sm text-[color:var(--text-secondary)]">After buying, return here. We’ll guide you through connecting your domain, one step at a time.</p>
     </div>
