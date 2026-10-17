@@ -61,7 +61,7 @@ export function DomainJourney({ websiteId, initial = null, canManage }: { websit
       <h2 id={`${id}-title`} className="flex items-center gap-2 text-lg font-semibold"><Globe2 className="h-4 w-4 shrink-0 text-[color:var(--accent)]" aria-hidden="true" />{["Find your domain", "Buy your domain", "After your purchase"][step]}</h2>
       {step === 0 ? <p className="text-sm text-[color:var(--text-secondary)]">Your domain and renewals stay in your own Vercel account.</p> : null}
       {!canManage ? <p className="text-sm text-[color:var(--text-secondary)]">You can view this domain on Vercel. The customer’s account owner or manager needs to sign in to save the choice and continue setup.</p> : null}
-      {handoffHostname ? <DomainPurchaseReturn hostname={handoffHostname} websiteId={websiteId} canManage={canManage} previewOnly={viewedHostname !== null} pending={pending} onChoose={() => { setChoosing(true); setViewedHostname(null); setQuote(null); }} onCancel={canManage && loaded && saved ? () => void cancel() : undefined} /> : null}
+      {handoffHostname ? <DomainPurchaseReturn hostname={handoffHostname} websiteId={websiteId} intentVersion={intent?.version} canManage={canManage} previewOnly={viewedHostname !== null} pending={pending || !loaded} onChoose={() => { setChoosing(true); setViewedHostname(null); setQuote(null); }} onCancel={canManage && loaded && saved ? () => void cancel() : undefined} /> : null}
       {searching ? (
         <div className="space-y-3">
           {!quote?.available ? <form onSubmit={event => { event.preventDefault(); void search(); }} className="flex flex-wrap items-end gap-2">

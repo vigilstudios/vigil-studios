@@ -16,7 +16,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn(), refres
 import DomainPage from "@/app/(vigil)/dashboard/domain/page";
 
 const intent = (websiteId: string, hostname = "saved-example.com"): DomainIntent => ({ id: `intent-${websiteId}`, websiteId, hostname, phase: "handoff_started", handoffAt: "2026-10-16T10:00:00Z", version: 1, quote: null });
-const render = async (params: { flow?: string; website?: string; domain?: string } = {}) => renderToStaticMarkup(await DomainPage({ searchParams: Promise.resolve(params) }));
+const render = async (params: { flow?: string; website?: string; domain?: string; hostname?: string } = {}) => renderToStaticMarkup(await DomainPage({ searchParams: Promise.resolve(params) }));
 
 describe("one domain path at a time", () => {
   beforeEach(() => {
@@ -80,5 +80,25 @@ describe("one domain path at a time", () => {
     vi.stubEnv("DOMAIN_HANDOFF_ENABLED", "false");
     expect(await render({ flow: "find" })).toContain("Domain search is unavailable");
     expect(await render({ flow: "own" })).toContain("Continue to setup");
+  });
+  it("resumes a purchased domain at Domains on reload without asking for its name or login", async () => {
+    mocks.intents["site-a"] = intent("site-a");
+    mocks.domains = [{ id: "domain-a", organization_id: "org-a", hostname: "saved-example.com", website_id: "site-a", registrar: "vercel", status: "pending", source: "customer_owned", verification: {}, verification_token: "proof" } as Tables<"domains">];
+    const html = await render();
+    expect(html).toContain("Now that you’ve bought saved-example.com"); expect(html).toContain("Open my Vercel domains");
+    expect(html).not.toContain("Where do you manage"); expect(html).not.toContain("Sign in to Vercel"); expect(html).not.toContain("Confirm your domain");
+    // Overview selects the website, allowing the page to resume its saved domain.
+    mocks.sites.push({ id: "site-b", name: "Second website" });
+    mocks.intents["site-b"] = intent("site-b", "second-example.com");
+    const resumed = await render({ website: "site-a" });
+    expect(resumed).toContain("Now that you’ve bought saved-example.com"); expect(resumed).not.toContain("second-example.com");
+    mocks.intents["site-a"] = { ...intent("site-a"), phase: "cancelled" };
+    expect(await render({ flow: "own", domain: "domain-a" })).toContain("Where do you manage your domain?");
+  });
+  it("shows an explicitly read-only purchase preview without an owned-domain form", async () => {
+    const html = await render({ flow: "purchase-preview", website: "site-a", hostname: "preview-example.com" });
+    expect(html).toContain("Post-purchase setup preview"); expect(html).toContain("Open Domains");
+    expect(html).not.toContain("<form"); expect(html).not.toContain("Check my setup"); expect(html).not.toContain("Confirm your domain");
+    expect(await render({ flow: "purchase-preview", website: "foreign-site", hostname: "preview-example.com" })).not.toContain("Post-purchase setup preview");
   });
 });

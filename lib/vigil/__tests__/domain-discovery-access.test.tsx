@@ -6,6 +6,7 @@ import type { OrgContext } from "../auth/session";
 
 const mocks = vi.hoisted(() => ({ context: {} as OrgContext, client: {}, search: vi.fn(), limit: vi.fn(), admin: vi.fn() }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("@/lib/vigil/actions/domain", () => ({ startDomainConnection: vi.fn() }));
 vi.mock("@/lib/vigil/auth/session", () => ({ requireOrgContextOrThrow: async () => mocks.context }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => mocks.client }));
 vi.mock("@/lib/supabase/admin", () => ({ hasAdminClient: () => true, createAdminClient: mocks.admin }));
@@ -58,7 +59,11 @@ describe("read-only discovery in staff view", () => {
   });
   it("prioritizes continuing setup with the exact saved name and website after the Vercel handoff", () => {
     const html = renderToStaticMarkup(<DomainPurchaseReturn hostname="example.com" websiteId={website} canManage pending={false} onChoose={vi.fn()} />);
-    expect(html).toContain(`href="/dashboard/domain?flow=own&amp;website=${website}&amp;hostname=example.com&amp;registrar=vercel"`);
+    expect(html).toContain('name="hostname" value="example.com"');
+    expect(html).toContain(`name="website_id" value="${website}"`);
+    expect(html).toContain('name="journey" value="vercel_purchase"');
+    expect(html).not.toContain('type="text"');
+    expect(html).not.toContain("Confirm your domain");
     expect(html).toContain("I’ve bought it — continue setup");
     expect(html.indexOf("I’ve bought it — continue setup")).toBeLessThan(html.indexOf("Return to Vercel"));
     expect(html).toContain("checks ownership during setup");
@@ -71,6 +76,8 @@ describe("read-only discovery in staff view", () => {
     expect(html).toContain("has not saved a customer choice");
     expect(html).not.toContain("Decide later");
     expect(html).toContain("does not confirm payment");
+    expect(html).toContain(`href="/dashboard/domain?flow=purchase-preview&amp;website=${website}&amp;hostname=example.com"`);
+    expect(html).not.toContain("<form");
   });
   it("allows staff discovery with tenant validation and a shared fail-closed rate limit", async () => {
     expect(await findVercelDomain(website, "example.com")).toMatchObject({ ok: true });

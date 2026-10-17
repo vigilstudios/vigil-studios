@@ -176,7 +176,7 @@ export default async function OverviewPage() {
         <Panel className="lg:col-span-4" title="Domain" action={<Link href="/dashboard/domain" className="text-xs text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">Manage</Link>}>
           {domainIntents.length ? <div className="mb-3 space-y-2">{domainIntents.map(intent => <div key={intent.id}>
             {websites.length > 1 ? <p className="text-xs text-[color:var(--text-secondary)]">{websites.find(site => site.id === intent.websiteId)?.name}</p> : null}
-            <Link href={`/dashboard/domain?flow=find&website=${intent.websiteId}`} className="block break-all text-sm underline">Connect {intent.hostname}</Link>
+            <Link href={`/dashboard/domain?website=${intent.websiteId}`} className="block break-all text-sm underline">Connect {intent.hostname}</Link>
           </div>)}<p className="text-xs text-[color:var(--text-secondary)]">Saved choices. Connection needs Vigil assistance; purchase is not confirmed.</p></div> : null}
           {domain && domainStatus ? (
             <>

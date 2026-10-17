@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { domainHandoffEnabled } from "@/lib/vigil/domain-commerce-config";
 import { DomainJourney } from "@/components/vigil/DomainJourney";
+import { DomainPurchasePreview } from "@/components/vigil/DomainPurchasePreview";
 import { loadDomainIntent } from "@/lib/vigil/services/domain-handoff";
 import { createClient } from "@/lib/supabase/server";
 import { Card, PageHeader, StatusPill, inputClass, labelClass } from "@/components/vigil/ui";
@@ -33,9 +34,9 @@ export default async function DomainPage({ searchParams }: { searchParams: Promi
   // Saved handoffs resume on return/Overview. Explicit navigation wins, and
   // query IDs can only select rows already loaded for this organization.
   const savedDomain = currentDomains.find(domain => intents.some(({ website, intent }) => intent && intent.phase !== "cancelled" && intent.hostname === domain.hostname && website.id === domain.website_id && (!params.website || params.website === website.id)));
-  const flow = params.flow === "choose" ? "choose" : params.flow === "find" || params.flow === "own" ? params.flow : savedDomain ? "own" : saved ? "find" : currentDomains.length ? "own" : "choose";
   const selectedWebsite = params.website === "choose" ? null : intents.find(({ website }) => website.id === params.website) ?? saved ?? (intents.length === 1 ? intents[0] : null);
   const requestedName = normalizeHostname(params.hostname ?? "") ?? "";
+  const flow = params.flow === "purchase-preview" && requestedName && websites.some(site => site.id === params.website) ? "purchase-preview" : params.flow === "choose" ? "choose" : params.flow === "find" || params.flow === "own" ? params.flow : savedDomain ? "own" : saved ? "find" : currentDomains.length ? "own" : "choose";
   const domain = currentDomains.find(domain => domain.id === params.domain) ?? currentDomains.find(domain => domain.hostname === requestedName && domain.website_id === selectedWebsite?.website.id) ?? savedDomain ?? currentDomains[0];
   const addNew = params.new === "1" || !domain || Boolean(requestedName && !currentDomains.some(item => item.hostname === requestedName));
   const canAdd = canManage && websites.length > 0 && !domains.some(domain => domain.status === "connected");
@@ -44,13 +45,14 @@ export default async function DomainPage({ searchParams }: { searchParams: Promi
   const launchReady = (domain?.verification as { launch_ready?: boolean } | null)?.launch_ready === true;
   const status = domain ? describeDomainStatus(domain.status, { dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable, launchReady }) : null;
   const initialRegistrar = (domain?.registrar && domain.registrar in REGISTRAR_GUIDES ? domain.registrar : briefDomain?.domainId === domain?.id && briefDomain?.registrar ? briefDomain.registrar : "other") as RegistrarKey;
+  const afterPurchase = initialRegistrar === "vercel" && intents.some(({ website, intent }) => intent && intent.phase !== "cancelled" && intent.hostname === domain?.hostname && website.id === domain?.website_id);
 
   return <div className="flex min-h-[calc(100dvh-5rem)] items-center justify-center sm:min-h-[calc(100dvh-5.5rem)] lg:min-h-[calc(100dvh-6.5rem)]">
     <div className={`w-full ${flow === "choose" ? "max-w-4xl" : "max-w-3xl"}`}>
     <PageHeader title="Domain" description={flow === "choose" ? "How would you like to set up your web address?" : "Follow the steps to set up your web address."} />
     {flow === "choose" ? <DomainOptions canFind={canFind} canSetUp={websites.length > 0} savedName={saved?.intent?.hostname} /> : <>
       <Link href="/dashboard/domain?flow=choose" className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]"><ArrowLeft className="h-4 w-4" aria-hidden="true" />All domain options</Link>
-      {flow === "find" ? <Card>
+      {flow === "purchase-preview" ? <Card><DomainPurchasePreview hostname={requestedName} /></Card> : flow === "find" ? <Card>
         {!canFind ? <p className="text-sm text-[color:var(--text-secondary)]">Domain search is unavailable right now. You can return to the options or contact Vigil for help.</p> : selectedWebsite ? <>
           {websites.length > 1 ? <p className="mb-4 text-sm text-[color:var(--text-secondary)]">{selectedWebsite.website.name} · <Link className="underline" href="/dashboard/domain?flow=find&website=choose">Change website</Link></p> : null}
           <DomainJourney key={selectedWebsite.website.id} websiteId={selectedWebsite.website.id} initial={selectedWebsite.intent} canManage={canManage && !ctx.isImpersonating} />
@@ -70,7 +72,7 @@ export default async function DomainPage({ searchParams }: { searchParams: Promi
           {canAdd ? <ConnectDomainForm websites={websites.map(site => ({ id: site.id, name: site.name }))} initialHostname={requestedName} initialWebsiteId={websites.find(site => site.id === params.website)?.id} registrar={params.registrar === "vercel" ? "vercel" : "other"} /> : <p className="mt-4 text-sm text-[color:var(--text-secondary)]">{domain ? "Your domain is already connected. Contact Vigil if you need to change it." : "A customer owner or manager can add a domain once the website is ready."}</p>}
         </> : domain && status ? <>
           {currentDomains.length > 1 ? <nav aria-label="Your domains" className="mb-5 flex flex-wrap gap-3 text-sm">{currentDomains.map(item => <Link key={item.id} className="break-all underline aria-[current=page]:text-[color:var(--accent)]" aria-current={item.id === domain.id ? "page" : undefined} href={`/dashboard/domain?flow=own&domain=${item.id}`}>{item.hostname}</Link>)}</nav> : null}
-          {domain.status !== "connected" && domain.source === "customer_owned" ? <DomainGuidePanel key={`${domain.id}:${domain.updated_at}`} domain={{ domainId: domain.id, hostname: domain.hostname, status: domain.status, records: guidedDomainRecords(domain.hostname, domain.verification, domain.verification_token), dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable, launchReady, statusReason: domain.status_reason, cutoverReady: (domain.verification as { source?: string } | null)?.source === "provider" }} initialRegistrar={initialRegistrar} canManage={canManage} /> : <>
+          {domain.status !== "connected" && domain.source === "customer_owned" ? <DomainGuidePanel key={`${domain.id}:${domain.updated_at}`} domain={{ domainId: domain.id, hostname: domain.hostname, status: domain.status, records: guidedDomainRecords(domain.hostname, domain.verification, domain.verification_token), dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable, launchReady, statusReason: domain.status_reason, cutoverReady: (domain.verification as { source?: string } | null)?.source === "provider" }} initialRegistrar={initialRegistrar} afterPurchase={afterPurchase} canManage={canManage} /> : <>
             <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="break-all text-lg font-semibold">{domain.hostname}</h2><StatusPill tone={status.tone}>{status.label}</StatusPill></div>
             {domain.status_reason || status.hint ? <p className="mt-2 text-sm text-[color:var(--text-secondary)]">{domain.status_reason || status.hint}</p> : null}
           </>}

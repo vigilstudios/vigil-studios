@@ -1,5 +1,8 @@
 import type { RegistrarKey } from "@/lib/vigil/onboarding/brief";
 
+/** Vercel's documented team picker, rather than a guessed customer team URL. */
+export const VERCEL_DOMAINS_URL = "https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fdomains&title=Go+to+Domains";
+
 /**
  * Registrar walkthroughs for connecting a domain the customer already owns
  * (master architecture §6, Flow B). Pure data so wording, menu paths and
@@ -39,6 +42,7 @@ export const REGISTRAR_GUIDES: Record<RegistrarKey, RegistrarGuide> = {
     apexName: "@", before: ["For an existing domain, contact Vigil before changing DNS for a live website."],
     conflicts: "Preserve email and unrelated records. Ask Vigil to review any conflicting website records before changing them.",
     after: "DNS and secure certificates can take time to update.", nameservers: ["vercel-dns.com"],
+    helpUrl: "https://vercel.com/docs/domains/managing-dns-records",
   },
   godaddy: {
     key: "godaddy",
