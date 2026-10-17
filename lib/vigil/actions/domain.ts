@@ -31,6 +31,11 @@ export async function startDomainConnection(_prev: DomainState, formData: FormDa
     const websiteId = String(formData.get("website_id") ?? "") || null;
 
     const supabase = await createClient();
+    if (!websiteId) throw new ValidationError("Choose the website for this domain.");
+    const { data: website, error: websiteError } = await supabase.from("websites").select("id").eq("id", websiteId).eq("organization_id", ctx.organization.id).neq("status", "archived").neq("status", "suspended").maybeSingle();
+    if (websiteError) throw websiteError;
+    if (!website) throw new ValidationError("Choose a website in your account.");
+    const registrar = formData.get("registrar") === "vercel" ? "vercel" : "other";
     const { data, error } = await supabase
       .from("domains")
       .insert({
@@ -39,45 +44,56 @@ export async function startDomainConnection(_prev: DomainState, formData: FormDa
         hostname,
         kind: domainKind(hostname),
         source: "customer_owned",
+        registrar,
         status: "pending",
       })
       .select("id")
       .single();
+    let created = true;
+    let savedId = data?.id;
     if (error) {
-      if (error.code === "23505") throw new ValidationError("You have already added that domain.", { hostname: ["Already added"] });
-      throw error;
+      if (error.code !== "23505") throw error;
+      // A retry must resume the same tenant/site row and never detach a domain
+      // already activated for production. Another site's domain is not reused.
+      const { data: existing, error: existingError } = await supabase.from("domains").select("id").eq("organization_id", ctx.organization.id).eq("website_id", websiteId).eq("hostname", hostname).neq("status", "released").maybeSingle();
+      if (existingError) throw existingError;
+      if (!existing) throw new ValidationError("This domain is already being set up elsewhere. Contact Vigil for help.");
+      savedId = existing.id;
+      created = false;
     }
+    if (!savedId) throw new ValidationError("Your domain could not be saved. Please retry.");
+    if (created) {
+      await logAuditEvent(supabase, {
+        action: "domain.connect_started",
+        entityType: "domain",
+        entityId: savedId,
+        organizationId: ctx.organization.id,
+        after: { hostname, website_id: websiteId },
+      });
 
-    await logAuditEvent(supabase, {
-      action: "domain.connect_started",
-      entityType: "domain",
-      entityId: data.id,
-      organizationId: ctx.organization.id,
-      after: { hostname, website_id: websiteId },
-    });
-
-    // Queue the provider hand-off. Without a service key the row still
-    // exists and staff can pick it up from the admin console.
-    if (hasAdminClient()) {
-      const admin = createAdminClient();
-      try {
-        // Inline so the records are on screen when the page re-renders.
-        await beginDomainVerification(admin, data.id);
-      } catch (err) {
-        console.error("beginDomainVerification failed inline; queueing:", err);
-        await enqueueJob(admin, {
-          kind: JOB_KINDS.domainConnect,
-          idempotencyKey: `domain.connect:${data.id}`,
-          organizationId: ctx.organization.id,
-          websiteId,
-          domainId: data.id,
-          createdBy: ctx.user.id,
-        });
+      // Queue the provider hand-off. Without a service key the row still
+      // exists and staff can pick it up from the admin console.
+      if (hasAdminClient()) {
+        const admin = createAdminClient();
+        try {
+          // Inline so the records are on screen when the page re-renders.
+          await beginDomainVerification(admin, savedId);
+        } catch (err) {
+          console.error("beginDomainVerification failed inline; queueing:", err);
+          await enqueueJob(admin, {
+            kind: JOB_KINDS.domainConnect,
+            idempotencyKey: `domain.connect:${savedId}`,
+            organizationId: ctx.organization.id,
+            websiteId,
+            domainId: savedId,
+            createdBy: ctx.user.id,
+          });
+        }
       }
     }
-
     revalidatePath("/dashboard/domain");
-    domainId = data.id;
+    revalidatePath("/dashboard/onboarding");
+    domainId = savedId;
   } catch (error) {
     return toActionError(error);
   }

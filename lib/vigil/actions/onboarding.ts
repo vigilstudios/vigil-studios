@@ -17,7 +17,7 @@ import { domainSchema, parseBrief, SECTION_SCHEMAS, STEP_KEYS, type Brief, type 
 import { PROJECT_ASSETS_BUCKET, validateAssets, type AssetKind } from "@/lib/vigil/onboarding/assets";
 import { resolveEntitlements } from "@/lib/vigil/entitlements";
 import { fileLimitsFor, recordUploadedFiles } from "@/lib/vigil/services/project-files";
-import { detectRegistrar, requiredRecords, type DnsRecord } from "@/lib/vigil/services/dns";
+import { detectRegistrar, guidedDomainRecords, type DnsRecord } from "@/lib/vigil/services/dns";
 import { beginDomainVerification, normalizeHostname, verifyDomain } from "@/lib/vigil/services/domain";
 import type { Json } from "@/types/database.types";
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/vigil/rate-limit";
@@ -250,7 +250,7 @@ export async function startOnboardingDomain(projectId: string, input: { hostname
     const { data: website } = await supabase.from("websites").select("id").eq("project_id", projectId).maybeSingle();
 
     // Reuse an existing row for the same hostname in this organization.
-    const { data: existing } = await supabase.from("domains").select("id").eq("organization_id", ctx.organization.id).eq("hostname", hostname).maybeSingle();
+    const { data: existing } = await supabase.from("domains").select("id").eq("organization_id", ctx.organization.id).eq("website_id", website?.id ?? "").eq("hostname", hostname).neq("status", "released").maybeSingle();
     let domainId = existing?.id ?? null;
     if (!domainId) {
       const { data, error } = await supabase
@@ -275,11 +275,8 @@ export async function startOnboardingDomain(projectId: string, input: { hostname
     }
 
     // Work out the records now so the guide is complete on the next screen.
-    if (hasAdminClient()) {
+    if (!existing && hasAdminClient()) {
       const admin = createAdminClient();
-      if (existing) {
-        await admin.from("domains").update({ registrar, website_id: website?.id ?? null }).eq("id", domainId);
-      }
       try {
         await beginDomainVerification(admin, domainId);
       } catch (err) {
@@ -301,7 +298,7 @@ export async function startOnboardingDomain(projectId: string, input: { hostname
 async function domainSetup(supabase: Awaited<ReturnType<typeof createClient>>, domainId: string, registrar: RegistrarKey): Promise<DomainSetup> {
   const { data: domain, error } = await supabase.from("domains").select("id, hostname, status, verification, verification_token, dns_ok, ssl_ok, status_reason").eq("id", domainId).single();
   if (error) throw error;
-  const records = requiredRecords(domain.hostname, domain.verification, domain.verification_token);
+  const records = guidedDomainRecords(domain.hostname, domain.verification, domain.verification_token);
   const source = (domain.verification as { source?: string } | null)?.source;
   const reachable = (domain.verification as { connection_reachable?: boolean } | null)?.connection_reachable ?? null;
   const launchReady = (domain.verification as { launch_ready?: boolean } | null)?.launch_ready === true;

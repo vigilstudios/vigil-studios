@@ -15,16 +15,21 @@ export function DomainGuidePanel({ domain, initialRegistrar, canManage }: { doma
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (state.status !== "verifying" || state.launchReady) return;
+    if (state.status === "connected" || state.status === "released") return;
+    let active = true;
+    let inFlight = false;
     const id = window.setInterval(async () => {
-      if (document.visibilityState !== "visible" || !navigator.onLine) return;
+      if (inFlight || document.visibilityState !== "visible" || !navigator.onLine) return;
+      inFlight = true;
+      try {
       const res = await getDomainSetup(state.domainId, registrar);
-      if (res.ok) {
+      if (active && res.ok) {
         setState(res.data);
         if (res.data.status === "connected") router.refresh();
       }
+      } catch { /* Keep the current step on a temporary network failure. */ } finally { inFlight = false; }
     }, 20_000);
-    return () => window.clearInterval(id);
+    return () => { active = false; window.clearInterval(id); };
   }, [state.status, state.launchReady, state.domainId, registrar, router]);
 
   return (
@@ -33,15 +38,21 @@ export function DomainGuidePanel({ domain, initialRegistrar, canManage }: { doma
         domain={state}
         registrar={registrar}
         onRegistrarChange={setRegistrar}
+        onRefresh={async () => {
+          setConfirming(true); setError(null);
+          try { const res = await getDomainSetup(state.domainId, registrar); if (res.ok) setState(res.data); else setError(res.error); }
+          catch { setError("The status could not be refreshed. Please retry."); } finally { setConfirming(false); }
+        }}
         onConfirm={
           canManage
             ? async () => {
                 setError(null);
                 setConfirming(true);
+                try {
                 const res = await confirmDnsAdded(state.domainId, registrar);
-                setConfirming(false);
                 if (res.ok) setState(res.data);
                 else setError(res.error);
+                } catch { setError("The check could not finish. Please try again."); } finally { setConfirming(false); }
               }
             : undefined
         }

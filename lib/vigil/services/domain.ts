@@ -3,7 +3,7 @@ import { assertTransition, domainTransitions } from "@/lib/vigil/lifecycle";
 import { getDeploymentProvider } from "@/lib/vigil/providers/registry";
 import type { DeploymentProvider } from "@/lib/vigil/providers/types";
 import { NotFoundError } from "@/lib/vigil/auth/errors";
-import { checkDnsRecords, checkHttpsReachable, platformDnsRecords, withOwnershipRecord, type DnsCheck, type DnsRecord } from "./dns";
+import { checkDnsRecords, checkHttpsReachable, ownershipRecord, withOwnershipRecord, type DnsCheck, type DnsRecord } from "./dns";
 import { findExternalId, providerEnum } from "./provider-links";
 
 export type ManagedDomainConfig = {
@@ -45,9 +45,10 @@ async function addManagedDomains(provider: DeploymentProvider, siteExternalId: s
   const plan = managedDomainConfigs(hostname, kind);
   const configs = [];
   for (const item of plan) {
-    configs.push(await provider.addDomain(siteExternalId, item.hostname, item.redirectTo
+    await provider.addDomain(siteExternalId, item.hostname, item.redirectTo
       ? { redirect: item.redirectTo, redirectStatusCode: 308 }
-      : undefined));
+      : undefined);
+    configs.push(await provider.getDomainConfig(siteExternalId, item.hostname));
   }
   return { plan, configs };
 }
@@ -93,15 +94,18 @@ async function restoreProviderAddress(admin: DbClient, websiteId: string | null)
  * interface exists in providers/types.ts.
  */
 export function normalizeHostname(input: string): string | null {
-  const host = input.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
-  if (!/^([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(host)) return null;
+  const raw = input.trim().replace(/^https?:\/\//i, "").replace(/\/.*$/, "").replace(/\.$/, "");
+  if (/[\s:@?#\\%]/u.test(raw)) return null;
+  let host: string;
+  try { host = new URL(`https://${raw}`).hostname.toLowerCase(); } catch { return null; }
+  if (host.length > 253 || !/^([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9-]{2,63}$/.test(host) || !/[a-z]/.test(host.split(".").at(-1)!)) return null;
   return host;
 }
 
 /**
  * Prepare DNS without attaching the custom hostname to the provider project.
- * This lets the customer configure DNS during preview without allowing the
- * hostname to route to a preview or an automatic Git deployment.
+ * Only the ownership TXT is staged. Routing records must wait until the
+ * approved production deployment is ready, preserving an existing website.
  */
 export async function beginDomainVerification(
   admin: DbClient,
@@ -115,7 +119,7 @@ export async function beginDomainVerification(
   if (domain.status === "released") return;
   // A later preview deployment must never detach an already-live hostname.
   if (domain.status === "connected") return;
-  const records = platformDnsRecords(domain.hostname, domain.verification_token);
+  const records = domain.verification_token ? [ownershipRecord(domain.hostname, domain.verification_token)] : [];
   const checkDns = connectionChecks.checkDns ?? checkDnsRecords;
   const publicChecks = records.length > 0 ? await checkDns(domain.hostname, records) : [];
   const dnsOk = publicChecks.length > 0 && publicChecks.every((check) => check.ok);
@@ -159,8 +163,8 @@ export async function beginDomainVerification(
       status_reason: records.length === 0
         ? "The website is still being set up."
         : dnsOk
-          ? "Your DNS is configured and ready. Vigil will activate the secure domain when your website is published."
-          : "The connection details are ready. Add the DNS record below, then select I've added the records.",
+          ? "Your ownership record is verified. Website routing will be configured after the approved production build is ready."
+          : "Add the ownership record in the guide, then check your setup. This does not redirect your website.",
     })
     .eq("id", domainId);
   if (updateError) throw updateError;
@@ -189,7 +193,7 @@ export async function activateDomainVerification(
   const checkHttps = connectionChecks.checkHttps ?? checkHttpsReachable;
   const publicChecks = records.length > 0 ? await checkDns(domain.hostname, records) : [];
   const dnsOk = publicChecks.length > 0 && publicChecks.every((check) => check.ok);
-  const sslOk = dnsOk && configs.every((config) => config.sslReady && !config.misconfigured);
+  const sslOk = dnsOk && configs.every((config) => config.verified && config.sslReady && !config.misconfigured && config.requiredRecords.some(record => ["A", "AAAA", "CNAME"].includes(record.type)));
   const reachable = sslOk ? await checkHttps(plan[0].canonicalHostname) : false;
   const connected = dnsOk && sslOk && reachable;
   let nextStatus = domain.status;
@@ -234,8 +238,7 @@ export async function verifyDomain(
 
   const currentVerification = (domain.verification as Record<string, unknown> | null) ?? {};
   if (currentVerification.source !== "provider") {
-    const stored = currentVerification.required_records as DnsRecord[] | undefined;
-    const base = stored && stored.length > 0 ? stored : platformDnsRecords(domain.hostname);
+    const base = domain.verification_token ? [ownershipRecord(domain.hostname, domain.verification_token)] : [];
     if (base.length === 0) return { connected: false, reason: "no_site" };
     // Rows recorded before the ownership token existed carry stored records
     // without it; the check always includes it.
@@ -253,7 +256,7 @@ export async function verifyDomain(
       ssl_ok: false,
       last_checked_at: new Date().toISOString(),
       status_reason: dnsOk
-        ? "Your DNS is configured and ready. Vigil will activate the secure domain when your website is published."
+        ? "Your ownership record is verified. Website routing will be configured after the approved production build is ready."
         : "The DNS record is not visible yet. We will keep checking automatically.",
       verification: {
         ...currentVerification,
@@ -301,7 +304,7 @@ export async function verifyDomain(
   const records = withOwnershipRecord(uniqueRecords(configs), domain.hostname, domain.verification_token);
   const publicChecks = records.length > 0 ? await checkDns(domain.hostname, records) : [];
   const dnsOk = publicChecks.length > 0 && publicChecks.every((check) => check.ok);
-  const sslOk = dnsOk && configs.every((config) => config.sslReady && !config.misconfigured);
+  const sslOk = dnsOk && configs.every((config) => config.verified && config.sslReady && !config.misconfigured && config.requiredRecords.some(record => ["A", "AAAA", "CNAME"].includes(record.type)));
   const reachable = sslOk ? await checkHttps(plan[0].canonicalHostname) : false;
   const connected = dnsOk && sslOk && reachable;
   const wasConnected = domain.status === "connected";

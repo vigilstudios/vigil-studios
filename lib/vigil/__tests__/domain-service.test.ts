@@ -38,19 +38,19 @@ const dnsChecks = (ok: boolean) => ({
 describe("customer domain service", () => {
   it("holds DNS cutover until a provider site exists", async () => {
     process.env.VIGIL_DNS_APEX_A = "76.76.21.21";
-    const fake = new FakeAdmin({ domains: [{ id: "dom_1", hostname: "example.com", kind: "apex", website_id: "web_1", status: "pending" }] });
+    const fake = new FakeAdmin({ domains: [{ id: "dom_1", hostname: "example.com", kind: "apex", website_id: "web_1", status: "pending", verification_token: "fixture-token" }] });
 
     await beginDomainVerification(fake.asClient(), "dom_1", provider((hostname) => snapshot(hostname, false)));
 
     const domain = fake.rows("domains")[0];
     expect((domain.verification as { source: string }).source).toBe("platform");
     expect(domain.status).toBe("pending");
-    expect(domain.status_reason).toMatch(/Add the DNS record/);
+    expect(domain.status_reason).toMatch(/ownership record/);
   });
 
   it("attaches www plus apex only at launch, redirects the apex, and publishes the canonical URL after verification", async () => {
     const fake = new FakeAdmin({
-      domains: [{ id: "dom_1", hostname: "example.com", kind: "apex", website_id: "web_1", status: "pending" }],
+      domains: [{ id: "dom_1", hostname: "example.com", kind: "apex", website_id: "web_1", status: "pending", verification_token: "fixture-token" }],
       websites: [{ id: "web_1", live_url: "https://preview.vercel.app" }],
       provider_links: [{ provider: "vercel", resource_kind: "site", entity_type: "website", entity_id: "web_1", external_id: "prj_1" }],
     });
@@ -71,7 +71,7 @@ describe("customer domain service", () => {
   it("does not trust provider verification when the public DNS record is absent", async () => {
     process.env.VIGIL_DNS_CNAME_TARGET = "cname.vercel-dns.com";
     const fake = new FakeAdmin({
-      domains: [{ id: "dom_1", hostname: "drytest.vigilstudios.co", kind: "subdomain", website_id: "web_1", status: "pending" }],
+      domains: [{ id: "dom_1", hostname: "drytest.vigilstudios.co", kind: "subdomain", website_id: "web_1", status: "pending", verification_token: "fixture-token" }],
       websites: [{ id: "web_1", live_url: "https://preview.vercel.app", preview_url: "https://preview.vercel.app" }],
       provider_links: [{ provider: "vercel", resource_kind: "site", entity_type: "website", entity_id: "web_1", external_id: "prj_1" }],
     });
@@ -80,7 +80,7 @@ describe("customer domain service", () => {
     await beginDomainVerification(fake.asClient(), "dom_1", deployment, dnsChecks(false));
 
     expect(fake.rows("domains")[0]).toMatchObject({ status: "pending", dns_ok: false });
-    expect(fake.rows("domains")[0].status_reason).toMatch(/Add the DNS record/);
+    expect(fake.rows("domains")[0].status_reason).toMatch(/ownership record/);
     expect(deployment.addDomain).not.toHaveBeenCalled();
   });
 

@@ -45,7 +45,7 @@ describe("one domain path at a time", () => {
   });
   it("resumes a saved handoff immediately, but lets Back explicitly choose another path", async () => {
     mocks.intents["site-a"] = intent("site-a");
-    expect(await render()).toContain("Connect saved-example.com");
+    expect(await render()).toContain("Set up saved-example.com");
     const choices = await render({ flow: "choose" });
     expect(choices).toContain('aria-label="Already own one"');
     expect(choices).not.toContain("<form");
@@ -63,7 +63,7 @@ describe("one domain path at a time", () => {
     mocks.intents["site-a"] = intent("site-a", "first-example.com");
     mocks.intents["site-b"] = intent("site-b", "second-example.com");
     const html = await render({ flow: "find", website: "site-b" });
-    expect(html).toContain("Connect second-example.com");
+    expect(html).toContain("Set up second-example.com");
     expect(html).not.toContain("first-example.com");
     expect(await render({ flow: "find", website: "choose" })).toContain("Which website is this domain for?");
   });
@@ -71,7 +71,7 @@ describe("one domain path at a time", () => {
     mocks.domains = ["first-example.com", "second-example.com"].map((hostname, i) => ({ id: `domain-${i}`, organization_id: "org-a", hostname, status: "pending", source: "customer_owned", website_id: "site-a", verification: {}, verification_token: "token", dns_ok: null, ssl_ok: null, expires_at: null, last_checked_at: null, status_reason: "The connection details are ready. Add the DNS record below." } as Tables<"domains">));
     const html = await render({ flow: "own", domain: "domain-1" });
     expect(html).toContain("second-example.com");
-    expect(html).toContain("Where is the domain managed?");
+    expect(html).toContain("Where do you manage your domain?");
     expect(html).not.toContain("Continue to setup");
     expect(html).not.toContain("Exact domain name");
     expect(html).not.toContain("The connection details are ready. Add the DNS record below.");

@@ -79,3 +79,9 @@ describe("VercelDeploymentProvider", () => {
     expect(request.mock.calls[0][1].method).toBe("DELETE");
   });
 });
+
+it("uses project-specific recommended DNS values and does not fabricate missing targets",async()=>{
+  const request=vi.fn().mockResolvedValueOnce(json({name:"www.example.com",verified:true})).mockResolvedValueOnce(json({misconfigured:true,recommendedCNAME:[{rank:2,value:"other.vercel-dns.com"},{rank:1,value:"project-specific.vercel-dns-017.com"}],recommendedIPv4:[]}));
+  const provider=new VercelDeploymentProvider("fixture","team",request);const config=await provider.getDomainConfig("prj_1","www.example.com");expect(config.requiredRecords).toEqual([{type:"CNAME",name:"www",value:"project-specific.vercel-dns-017.com"}]);expect((request.mock.calls[1][0] as URL).searchParams.get("projectIdOrName")).toBe("prj_1");
+  const missing=new VercelDeploymentProvider("fixture","team",vi.fn().mockResolvedValueOnce(json({name:"example.com",verified:true})).mockResolvedValueOnce(json({misconfigured:false})));const absent=await missing.getDomainConfig("prj_1","example.com");expect(absent.requiredRecords).toEqual([]);expect(absent.sslReady).toBe(false);
+});

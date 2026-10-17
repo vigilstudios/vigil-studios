@@ -1,225 +1,96 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { DomainJourney } from "@/components/vigil/DomainJourney";
 import type { DomainIntent } from "@/lib/vigil/domain-commerce";
 import { DomainGuide } from "@/components/vigil/DomainGuide";
+import { guideOutcome } from "@/lib/vigil/domain-guide-flow";
 import { confirmDnsAdded, getDomainSetup, guessRegistrar, startOnboardingDomain, type DomainSetup } from "@/lib/vigil/actions/onboarding";
-import { REGISTRAR_GUIDES } from "@/lib/vigil/domain-guides";
+import { REGISTRAR_OPTIONS } from "@/lib/vigil/domain-guides";
 import { domainSchema, type DomainAnswers, type RegistrarKey } from "@/lib/vigil/onboarding/brief";
-import { ChoiceCards, Field, StepFooter, TextInput, Toggle, useAutosave, VirtueAside, type SaveState } from "../wizard-ui";
+import { ChoiceCards, Field, TextInput, useAutosave, type SaveState } from "../wizard-ui";
+import { inputClass } from "@/components/vigil/ui";
 
 type Props = {
-  initial: DomainAnswers | undefined;
-  projectId: string;
-  websiteId: string | null;
-  initialIntent: DomainIntent | null;
-  businessName: string;
-  domain: DomainSetup | null;
-  onDomain: (d: DomainSetup | null) => void;
-  canManage: boolean;
+  initial: DomainAnswers | undefined; projectId: string; websiteId: string | null;
+  initialIntent: DomainIntent | null; businessName: string; domain: DomainSetup | null;
+  onDomain: (d: DomainSetup | null) => void; canManage: boolean;
   save: (data: DomainAnswers, completed?: boolean) => Promise<boolean>;
-  onSaveState: (s: SaveState) => void;
-  onBack: () => void;
-  onNext: () => void;
+  onSaveState: (s: SaveState) => void; onBack: () => void; onNext: () => void;
 };
+type Phase = "ask" | "unsure" | "search" | "hostname" | "provider" | "guide";
 
-type Phase = "ask" | "hostname" | "guide";
-
-/**
- * The domain step. Three answers, each ending somewhere useful:
- *   own    → hostname → registrar (guessed from nameservers) → walkthrough → "I've added the records"
- *   need   → buy-it-yourself guide; "I bought it" hands straight into the own path above
- *   unsure → one paragraph, then the same two paths
- * Nothing here is a dead end; "Do this later" keeps the same guide on the Domain page.
- */
+/** Each branch occupies one screen; the shared DNS guide handles its own individual tasks. */
 export function DomainStep({ initial, projectId, websiteId, initialIntent, businessName, domain, onDomain, canManage, save, onSaveState, onBack, onNext }: Props) {
-  const [data, setData] = useState<DomainAnswers>(() => initial ?? domainSchema.parse({}));
-  const [phase, setPhase] = useState<Phase>(() => (initial?.answer === "own" && domain ? "guide" : initial?.answer === "own" ? "hostname" : "ask"));
+  const [data, setData] = useState<DomainAnswers>(() => domain && canManage ? { ...(initial ?? domainSchema.parse({})), answer: "own", hostname: domain.hostname, domainId: domain.domainId, registrar: domain.registrar } : initial ?? domainSchema.parse({}));
+  const [phase, setPhase] = useState<Phase>(() => domain ? "guide" : initial?.answer === "own" ? "hostname" : initial?.answer === "need" || (initialIntent && initialIntent.phase !== "cancelled") ? "search" : "ask");
   const [hostname, setHostname] = useState(initial?.hostname ?? "");
-  const [registrar, setRegistrar] = useState<RegistrarKey | null>(initial?.registrar ?? null);
-  const [guessed, setGuessed] = useState<RegistrarKey | null>(null);
-  const [working, setWorking] = useState<null | "guess" | "start" | "confirm">(null);
+  const [registrar, setRegistrar] = useState<RegistrarKey>(initial?.registrar ?? domain?.registrar ?? "other");
+  const [working, setWorking] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const { state, flush } = useAutosave(data, (v) => save(v));
+  const { state, flush } = useAutosave(data, value => save(value));
   useEffect(() => onSaveState(state), [state, onSaveState]);
-  const set = <K extends keyof DomainAnswers>(k: K, v: DomainAnswers[K]) => setData((d) => ({ ...d, [k]: v }));
-
-  // While the domain is verifying, refresh its state every 20 s.
-  const pollRef = useRef<number | null>(null);
+  const pollingDomainId = domain?.domainId;
+  const pollingStatus = domain?.status;
   useEffect(() => {
-    if (!domain || domain.status !== "verifying") return;
-    pollRef.current = window.setInterval(async () => {
-      if (document.visibilityState !== "visible" || !navigator.onLine) return;
-      const res = await getDomainSetup(domain.domainId, registrar ?? "other");
-      if (res.ok) onDomain(res.data);
+    if (!pollingDomainId || pollingStatus === "connected") return;
+    let active = true;
+    let inFlight = false;
+    const timer = window.setInterval(async () => {
+      if (inFlight || document.visibilityState !== "visible" || !navigator.onLine) return;
+      inFlight = true;
+      try { const result = await getDomainSetup(pollingDomainId, registrar); if (active && result.ok) onDomain(result.data); } catch { /* Retry on the next visible poll. */ } finally { inFlight = false; }
     }, 20_000);
-    return () => { if (pollRef.current) window.clearInterval(pollRef.current); };
-  }, [domain, registrar, onDomain]);
-
-  const lookUp = async () => {
-    setError(null);
-    if (!hostname.trim()) { setError("Enter your domain, like yourbusiness.com."); return; }
-    setWorking("guess");
-    const res = await guessRegistrar(hostname);
-    setWorking(null);
-    if (!res.ok) { setError(res.error); return; }
-    setGuessed(res.data.registrar);
-    setRegistrar(res.data.registrar ?? "other");
+    return () => { active = false; window.clearInterval(timer); };
+  }, [pollingDomainId, pollingStatus, registrar, onDomain]);
+  const run = async (work: () => Promise<void>) => {
+    setWorking(true); setError(null);
+    try { await work(); } catch { setError("This step could not finish. Please try again."); } finally { setWorking(false); }
   };
-
-  const showSteps = async () => {
-    setError(null);
-    setWorking("start");
-    const res = await startOnboardingDomain(projectId, { hostname, registrar });
-    setWorking(null);
-    if (!res.ok) { setError(res.error); return; }
-    onDomain(res.data);
-    setData((d) => ({ ...d, answer: "own", hostname: res.data.hostname, registrar: res.data.registrar, domainId: res.data.domainId, later: false }));
-    setPhase("guide");
+  const finish = (later: boolean) => run(async () => {
+    const next = { ...data, later };
+    setData(next);
+    if (await flush() && await save(next, true)) onNext();
+  });
+  const choose = (answer: "own" | "need" | "unsure") => {
+    setData(current => ({ ...current, answer }));
+    setPhase(answer === "own" ? "hostname" : answer === "need" ? "search" : "unsure");
   };
-
-  const confirm = async () => {
-    if (!domain) return;
-    setError(null);
-    setWorking("confirm");
-    const res = await confirmDnsAdded(domain.domainId, registrar ?? domain.registrar);
-    setWorking(null);
-    if (!res.ok) { setError(res.error); return; }
-    onDomain(res.data);
-  };
-
-  const continueNext = async (patch: Partial<DomainAnswers> = {}) => {
-    setBusy(true);
-    const merged = { ...data, ...patch };
-    setData(merged);
-    const ok = await flush();
-    const done = ok && (await save(merged, true));
-    setBusy(false);
-    if (done) onNext();
-  };
-
-  const answered = data.answer;
-
-  return (
-    <div className="space-y-5">
-      {initialIntent && initialIntent.phase !== "cancelled" && answered !== "need" && websiteId ? <DomainJourney websiteId={websiteId} initial={initialIntent} canManage={canManage} /> : null}
-      {/* 1. The question */}
-      {phase === "ask" || !answered ? (
-        <div>
-          <p className="mb-2 text-[13px] font-medium">Do you already have a domain, like {businessName.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 16) || "yourbusiness"}.com?</p>
-          <ChoiceCards
-            name="Domain"
-            value={answered}
-            onChange={(v) => {
-              set("answer", v);
-              if (v === "own") setPhase("hostname");
-              else setPhase("ask");
-            }}
-            options={[
-              { value: "own", label: "Yes, I own one", hint: "Save it now. DNS setup starts after your preview is ready." },
-              { value: "need", label: "No, I need one", hint: "Takes a few minutes; we'll show you how." },
-              { value: "unsure", label: "Not sure", hint: "Takes ten seconds to work out." },
-            ]}
-          />
-        </div>
-      ) : null}
-
-      {/* unsure */}
-      {answered === "unsure" && phase === "ask" ? (
-        <div className="space-y-3">
-          <VirtueAside>
-            A domain is your web address, the thing people type in, like <b>{businessName.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 16) || "yourbusiness"}.com</b>. If you have ever paid a yearly fee for one, often to GoDaddy, Namecheap, Wix, Squarespace or whoever built your old site, you own one. Search your email for &ldquo;domain&rdquo; or &ldquo;renewal&rdquo; and you will find it.
-          </VirtueAside>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => { set("answer", "own"); setPhase("hostname"); }} className="btn-secondary min-h-11 !px-4 !py-2 text-sm">Found it, I own one</button>
-            <button type="button" onClick={() => set("answer", "need")} className="btn-secondary min-h-11 !px-4 !py-2 text-sm">I don&apos;t have one</button>
-          </div>
-          <StepFooter onBack={onBack} onNext={() => continueNext()} nextLabel="Decide later" busy={busy} />
-        </div>
-      ) : null}
-
-      {/* need */}
-      {answered === "need" && phase === "ask" ? (
-        <div className="space-y-4">
-          {websiteId ? <DomainJourney websiteId={websiteId} initial={initialIntent} canManage={canManage} /> : <VirtueAside>Domain search is not available yet. You can decide later or use a domain you own.</VirtueAside>}
-          <StepFooter onBack={() => { set("answer", null); setPhase("ask"); }} onNext={() => continueNext({ later: true })} nextLabel="Continue onboarding" busy={busy} />
-        </div>
-      ) : null}
-
-      {/* own: hostname + registrar */}
-      {answered === "own" && phase === "hostname" ? (
-        <div className="space-y-4">
-          <Field id="hostname" label="Your domain" hint="Just the name, without www or https://" error={error}>
-            <div className="flex gap-2">
-              <TextInput id="hostname" inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="yourbusiness.com" value={hostname} onChange={(e) => { setHostname(e.target.value); setGuessed(null); }} onKeyDown={(e) => { if (e.key === "Enter") void lookUp(); }} />
-              <button type="button" onClick={lookUp} disabled={working === "guess" || !hostname.trim()} className="btn-secondary min-h-11 shrink-0 !px-4 !py-2 text-sm disabled:opacity-60">
-                {working === "guess" ? "Looking…" : "Look it up"}
-              </button>
-            </div>
-          </Field>
-          {working === "guess" ? <VirtueAside state="working">Checking where {hostname.trim()} is managed…</VirtueAside> : null}
-          {registrar && working !== "guess" ? (
-            <div className="space-y-3">
-              <VirtueAside state="done">
-                {guessed ? (
-                  <>Looks like it is managed at <b>{REGISTRAR_GUIDES[guessed].name}</b>. If that is wrong, change it below.</>
-                ) : (
-                  <>I could not tell where it is managed from here. Pick the company you pay for the domain, or &ldquo;Somewhere else&rdquo; and I will give general steps.</>
-                )}
-              </VirtueAside>
-              <label className="block text-xs">
-                <span className="mb-1 block font-medium text-[color:var(--text-secondary)]">Managed at</span>
-                <select value={registrar} onChange={(e) => setRegistrar(e.target.value as RegistrarKey)} className="min-h-11 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--bg-primary)] px-3 text-[13px]">
-                  {Object.values(REGISTRAR_GUIDES).map((g) => (
-                    <option key={g.key} value={g.key}>{g.name}</option>
-                  ))}
-                </select>
-              </label>
-              {canManage ? (
-                <button type="button" onClick={showSteps} disabled={working === "start"} className="btn-primary min-h-11 !px-5 !py-2.5 text-sm disabled:opacity-60">
-                  {working === "start" ? "Saving…" : "Save my domain"}
-                </button>
-              ) : (
-                <p className="text-xs text-[color:var(--text-secondary)]">Only the account owner or a manager can connect a domain. Ask them to sign in, or choose &ldquo;Do this later&rdquo;.</p>
-              )}
-            </div>
-          ) : null}
-          <StepFooter onBack={() => { set("answer", null); setPhase("ask"); }} laterHref={null} />
-        </div>
-      ) : null}
-
-      {/* own: the guide */}
-      {answered === "own" && phase === "guide" && domain ? (
-        <div className="space-y-4">
-          <DomainGuide
-            domain={domain}
-            registrar={registrar ?? domain.registrar}
-            onRegistrarChange={(r) => { setRegistrar(r); set("registrar", r); }}
-            onConfirm={canManage ? confirm : undefined}
-            confirming={working === "confirm"}
-          />
-          {error ? <p role="alert" className="text-xs text-[color:var(--status-bad)]">{error}</p> : null}
-          <div className="rounded-lg border border-[color:var(--border)] p-3">
-            <Toggle id="delegate" checked={data.delegate} onChange={(v) => set("delegate", v)} label="Prefer we do it? Ask Vigil to make these changes for you" />
-            {data.delegate ? (
-              <p className="mt-1 text-[11px] leading-5 text-[color:var(--text-secondary)]">
-                Noted. After you send the brief, the team will reply with instructions for temporary delegated access at {REGISTRAR_GUIDES[registrar ?? "other"].name}. Never send us your password or a domain transfer code. We will preserve your email records, make the website cutover only when the new site is ready, then remove our access.
-              </p>
-            ) : null}
-          </div>
-          <StepFooter
-            onBack={() => setPhase("hostname")}
-            onNext={() => continueNext({ later: domain.status === "pending" && !data.delegate })}
-            nextLabel="Continue onboarding"
-            busy={busy}
-            laterHref={null}
-          />
-        </div>
-      ) : null}
-
-      {phase === "ask" && !answered ? <StepFooter onBack={onBack} /> : null}
+  return <div className="space-y-5">
+    {phase === "ask" ? <>
+      <p className="text-sm font-medium">Do you already own a web address for {businessName}?</p>
+      <ChoiceCards name="Domain" value={data.answer} onChange={choose} options={[
+        { value: "own", label: "I already own one", hint: "Use your existing domain." },
+        { value: "need", label: "Find a domain", hint: "Search and buy through your own Vercel account." },
+        { value: "unsure", label: "I’m not sure", hint: "Help me work it out." },
+      ]} />
+    </> : phase === "unsure" ? <>
+      <h2 className="text-base font-semibold">Have you bought a web address before?</h2>
+      <p className="text-sm text-[color:var(--text-secondary)]">A domain is an address like yourbusiness.com. Search your email for a domain purchase or renewal receipt.</p>
+      <div className="flex flex-wrap gap-3"><button type="button" className="btn-secondary min-h-11 text-sm" onClick={() => choose("own")}>Yes, I found mine</button><button type="button" className="btn-secondary min-h-11 text-sm" onClick={() => choose("need")}>I need a new one</button></div>
+    </> : phase === "search" ? websiteId ? <DomainJourney websiteId={websiteId} initial={initialIntent} canManage={canManage} /> : <p>Domain search is being prepared. You can continue onboarding and return later.</p> : phase === "hostname" ? <form className="space-y-4" onSubmit={event => { event.preventDefault(); void run(async () => {
+      const result = await guessRegistrar(hostname);
+      if (!result.ok) { setError(result.error); return; }
+      setRegistrar(result.data.registrar ?? "other"); setPhase("provider");
+    }); }}>
+      <Field id="onboarding-domain" label="Your domain" hint="Enter the web address you control."><TextInput id="onboarding-domain" inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="yourbusiness.com" value={hostname} onChange={event => setHostname(event.target.value)} disabled={working} /></Field>
+      <button type="submit" className="btn-primary min-h-11 text-sm" disabled={working || !hostname.trim()}>{working ? "Checking…" : "Continue"}</button>
+    </form> : phase === "provider" ? <div className="space-y-4">
+      <h2 className="text-base font-semibold">Where do you manage {hostname}?</h2>
+      <label className="block space-y-2 text-sm"><span>Domain provider</span><select className={inputClass} value={registrar} onChange={event => setRegistrar(event.target.value as RegistrarKey)}>{REGISTRAR_OPTIONS.map(option => <option key={option.key} value={option.key}>{option.name}</option>)}</select></label>
+      {canManage ? <button type="button" className="btn-primary min-h-11 text-sm" disabled={working} onClick={() => void run(async () => {
+        const result = await startOnboardingDomain(projectId, { hostname, registrar });
+        if (!result.ok) { setError(result.error); return; }
+        onDomain(result.data); setData(current => ({ ...current, answer: "own", hostname: result.data.hostname, registrar, domainId: result.data.domainId, later: false })); setPhase("guide");
+      })}>{working ? "Saving…" : "Continue to guide"}</button> : <p className="text-sm">A customer owner or manager can save the domain.</p>}
+    </div> : domain ? <>
+      <DomainGuide domain={domain} registrar={registrar} onConfirm={canManage ? () => void run(async () => { const result = await confirmDnsAdded(domain.domainId, registrar); if (result.ok) onDomain(result.data); else setError(result.error); }) : undefined} onRefresh={() => void run(async () => { const result = await getDomainSetup(domain.domainId, registrar); if (result.ok) onDomain(result.data); else setError(result.error); })} confirming={working} />
+      {guideOutcome(domain) ? <button type="button" className="btn-primary min-h-11 text-sm" disabled={working} onClick={() => void finish(domain.status !== "connected")}>Continue onboarding</button> : null}
+    </> : null}
+    {error ? <p role="alert" className="text-sm text-[color:var(--status-bad)]">{error}</p> : null}
+    <div className="flex flex-wrap gap-5 border-t border-[color:var(--border)] pt-3 text-sm text-[color:var(--text-secondary)]">
+      <button type="button" className="min-h-11" disabled={working} onClick={() => phase === "ask" ? onBack() : setPhase(phase === "provider" ? "hostname" : "ask")}>{phase === "guide" ? "All domain options" : "Back"}</button>
+      {phase !== "guide" || !domain || !guideOutcome(domain) ? <button type="button" className="min-h-11 underline" disabled={working} onClick={() => void finish(true)}>Do this later</button> : null}
     </div>
-  );
+  </div>;
 }

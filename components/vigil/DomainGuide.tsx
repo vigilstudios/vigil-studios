@@ -1,266 +1,86 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { CheckCircle2, Circle, ExternalLink, LoaderCircle } from "lucide-react";
-import { clsx } from "clsx";
-import { REGISTRAR_GUIDES, REGISTRAR_OPTIONS, RECORD_TYPE_HELP } from "@/lib/vigil/domain-guides";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, CheckCircle2, ExternalLink } from "lucide-react";
+import { REGISTRAR_GUIDES, REGISTRAR_OPTIONS } from "@/lib/vigil/domain-guides";
 import type { RegistrarKey } from "@/lib/vigil/onboarding/brief";
-import { describeDomainStatus } from "@/lib/vigil/lifecycle";
-import type { DomainStatus } from "@/lib/vigil/types";
+import { domainGuideScreens, guideOutcome, guideStorageKey, restoreGuideScreen, visibleGuideRecords, type GuideDomain } from "@/lib/vigil/domain-guide-flow";
 import { inputClass } from "./ui";
-import { StatusLine } from "./widgets";
-import { VirtueOrb } from "./VirtueOrb";
 
-export type GuideDomain = {
-  domainId: string;
-  hostname: string;
-  status: string;
-  records: { type: string; name: string; value: string }[];
-  dnsOk: boolean | null;
-  sslOk: boolean | null;
-  reachable: boolean | null;
-  launchReady?: boolean;
-  statusReason: string | null;
-  cutoverReady: boolean;
-};
+export type { GuideDomain } from "@/lib/vigil/domain-guide-flow";
 
-/**
- * The registrar-specific walkthrough for a customer-owned domain. Shared by
- * the onboarding wizard and the dashboard's Domain page so a customer who
- * chose "later" finds exactly the same steps. Pure presentation: the caller
- * owns the actions ("I've added the records", registrar changes, polling).
- */
-export function DomainGuide({
-  domain,
-  registrar,
-  onRegistrarChange,
-  onConfirm,
-  confirming,
-  checking,
-  compact,
-}: {
-  domain: GuideDomain;
-  registrar: RegistrarKey;
-  onRegistrarChange?: (r: RegistrarKey) => void;
-  onConfirm?: () => void;
-  confirming?: boolean;
-  /** True while a verify is in flight or the domain is in `verifying`. */
-  checking?: boolean;
-  compact?: boolean;
+/** Shared manual DNS guide. Navigation never claims a successful connection. */
+export function DomainGuide({ domain, registrar, onRegistrarChange, onConfirm, onRefresh, confirming, checking }: {
+  domain: GuideDomain; registrar: RegistrarKey; onRegistrarChange?: (r: RegistrarKey) => void;
+  onConfirm?: () => void; onRefresh?: () => void; confirming?: boolean; checking?: boolean; compact?: boolean;
 }) {
+  const screens = domainGuideScreens(domain, registrar, Boolean(onRegistrarChange));
+  const key = guideStorageKey(domain, registrar);
+  const [cursor, setCursor] = useState(screens[0].id);
+  const [reviewing, setReviewing] = useState(false);
+  const [help, setHelp] = useState(false);
+  const hydrated = useRef(false);
+  const heading = useRef<HTMLHeadingElement>(null);
   const guide = REGISTRAR_GUIDES[registrar];
-  const status = describeDomainStatus(domain.status as DomainStatus, { dnsOk: domain.dnsOk, sslOk: domain.sslOk, reachable: domain.reachable, launchReady: domain.launchReady });
-  const connected = domain.status === "connected";
-  const verifying = domain.status === "verifying" && !domain.launchReady;
-  const apex = domain.records.some((record) => record.name === "@" || record.name === domain.hostname);
-  const records = domain.records.map((r) => ({ ...r, displayName: r.name === "@" || r.name === domain.hostname ? guide.apexName : r.name }));
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-base font-semibold">{domain.hostname}</p>
-        <StatusLine tone={status.tone} label={status.label} size="sm" />
-      </div>
-
-      {connected ? (
-        <p className="text-[13px] text-[color:var(--text-secondary)]">Your domain points at Vigil. Nothing more to do here.</p>
-      ) : (
-        <>
-          {onRegistrarChange ? (
-            <label className="block text-xs">
-              <span className="mb-1 block font-medium text-[color:var(--text-secondary)]">Where is the domain managed?</span>
-              <select value={registrar} onChange={(e) => onRegistrarChange(e.target.value as RegistrarKey)} className={clsx(inputClass, "min-h-11")}>
-                {REGISTRAR_OPTIONS.map((o) => (
-                  <option key={o.key} value={o.key}>{o.name}</option>
-                ))}
-              </select>
-              <span className="mt-1 block text-[11px] text-[color:var(--text-secondary)]">Usually the company you pay each year for the domain.</span>
-            </label>
-          ) : null}
-
-          {!domain.cutoverReady ? (
-            <div className="flex items-start gap-2 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] px-3 py-2.5 text-[13px]">
-              <VirtueOrb size="sm" state="working" label="" className="mt-0.5" />
-              <p>
-                Your domain is saved. <b>You do not need to change anything yet.</b> As soon as your preview is deployed, the exact DNS record will appear here and we will guide you through the connection.
-              </p>
-            </div>
-          ) : records.length === 0 ? (
-            <div className="flex items-start gap-2 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] px-3 py-2.5 text-[13px]">
-              <VirtueOrb size="sm" state="working" label="" className="mt-0.5" />
-              <p>I&apos;m preparing the exact records for {domain.hostname}. Nothing to change yet.</p>
-            </div>
-          ) : (
-            <ol className="space-y-3 text-[13px]">
-              <Step n={1} title={`Sign in at ${guide.name}`}>
-                {guide.loginUrl ? (
-                  <a href={guide.loginUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-9 items-center gap-1 text-[color:var(--accent)] underline-offset-2 hover:underline">
-                    Open {guide.name} in a new tab <ExternalLink className="h-3 w-3" />
-                  </a>
-                ) : (
-                  <span className="text-[color:var(--text-secondary)]">Sign in with the company you bought the domain from. Not sure who that is? Search your email for &ldquo;domain renewal&rdquo; or &ldquo;{domain.hostname}&rdquo;.</span>
-                )}
-              </Step>
-              <Step n={2} title="Open the DNS settings">
-                <p className="text-[color:var(--text-secondary)]">
-                  Go to <Breadcrumb parts={guide.dnsPath} />.
-                </p>
-                {guide.before?.map((b, i) => (
-                  <p key={i} className="mt-1 text-[color:var(--text-secondary)]">{b}</p>
-                ))}
-              </Step>
-              <Step n={3} title={`Add ${records.length === 1 ? "this record" : `these ${records.length} records`}`}>
-                <p className="mb-2 text-[color:var(--text-secondary)]">
-                  Look for &ldquo;Add record&rdquo;. Copy each value exactly; {guide.fields.ttl ? `leave ${guide.fields.ttl} at its default.` : "leave everything else at its default."}
-                </p>
-                <ul className="space-y-2">
-                  {records.map((r, i) => (
-                    <li key={i} className="min-w-0 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[11px] font-semibold uppercase tracking-wide">{r.type} record</span>
-                        {domain.dnsOk === true ? <span className="text-[11px] text-[color:var(--status-good)]">Found</span> : null}
-                      </div>
-                      <dl className="mt-2 grid gap-2">
-                        <RecordField label={`Type`} value={r.type} />
-                        <RecordField label={guide.fields.name} value={r.displayName} copy={r.displayName} />
-                        <RecordField label={guide.fields.valueByType?.[r.type.toUpperCase()] ?? guide.fields.value} value={r.value} copy={r.value} />
-                      </dl>
-                      {!compact && RECORD_TYPE_HELP[r.type.toUpperCase()] ? <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">{RECORD_TYPE_HELP[r.type.toUpperCase()]}</p> : null}
-                    </li>
-                  ))}
-                </ul>
-                {guide.apexNote && apex ? <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">{guide.apexNote}</p> : null}
-                {!apex ? <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">Because {domain.hostname} is a subdomain, only the part before the first dot goes in the name field.</p> : null}
-              </Step>
-              <Step n={4} title="Remove anything that clashes">
-                <p className="text-[color:var(--text-secondary)]">{guide.conflicts}</p>
-                <p className="mt-1 font-medium text-[color:var(--status-warn)]">
-                  Only replace conflicting A, AAAA, or CNAME records for the website host shown above. Keep all MX, TXT, CAA, and email records, and do not change nameservers or transfer the domain.
-                </p>
-              </Step>
-              <Step n={5} title="Save, then tell me">
-                <p className="text-[color:var(--text-secondary)]">{guide.after ?? "Changes can take up to 48 hours to spread across the internet."} Vigil checks the connection after you save the records.</p>
-                {guide.helpUrl ? (
-                  <a href={guide.helpUrl} target="_blank" rel="noreferrer" className="mt-1 inline-flex min-h-9 items-center gap-1 text-[11px] text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">
-                    {guide.name}&apos;s own help article <ExternalLink className="h-3 w-3" />
-                  </a>
-                ) : null}
-              </Step>
-            </ol>
-          )}
-
-          {domain.cutoverReady && records.length > 0 ? <ConnectionProgress domain={domain} /> : null}
-
-          {domain.cutoverReady && records.length > 0 && onConfirm && !domain.launchReady ? (
-            <div className="flex flex-wrap items-center gap-3">
-              <button type="button" onClick={onConfirm} disabled={confirming || checking || verifying} className="btn-primary min-h-11 !px-5 !py-2.5 text-sm disabled:opacity-60">
-                {confirming ? "Checking…" : verifying ? "Checking…" : "I've added the records"}
-              </button>
-              {verifying || checking ? (
-                <span className="flex items-center gap-2 text-xs text-[color:var(--text-secondary)]">
-                  <VirtueOrb size="sm" state="working" label="" />
-                  {domain.launchReady
-                    ? "Your DNS is ready. The secure connection activates when Vigil publishes your website."
-                    : domain.dnsOk
-                    ? domain.sslOk
-                      ? "The secure connection is ready. Waiting for the site to answer before we open it."
-                      : "Your DNS record is correct. We are creating the secure connection."
-                    : "Checking public DNS. Changes can take up to 48 hours to appear."}
-                </span>
-              ) : null}
-            </div>
-          ) : null}
-          {domain.statusReason && domain.cutoverReady && records.length > 0 && (!verifying || domain.launchReady) ? <p className="text-[11px] text-[color:var(--text-secondary)]">{domain.statusReason}</p> : null}
-        </>
-      )}
-    </div>
-  );
-}
-
-function ConnectionProgress({ domain }: { domain: GuideDomain }) {
-  const steps = [
-    { label: "DNS record", done: domain.dnsOk === true, active: domain.status === "verifying" && domain.dnsOk !== true },
-    { label: domain.launchReady ? "Secure connection at launch" : "Secure connection", done: domain.sslOk === true, active: domain.dnsOk === true && domain.sslOk !== true && !domain.launchReady },
-    { label: "Site reachable", done: domain.status === "connected" && domain.reachable === true, active: domain.sslOk === true && domain.status !== "connected" },
-  ];
-  return (
-    <div className="rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] px-3 py-3" aria-label="Domain connection progress">
-      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--text-secondary)]">Connection progress</p>
-      <ol className="grid gap-2 sm:grid-cols-3">
-        {steps.map((step) => (
-          <li key={step.label} className="flex items-center gap-2 text-xs">
-            {step.done ? (
-              <CheckCircle2 className="h-4 w-4 shrink-0 text-[color:var(--status-good)]" aria-hidden />
-            ) : step.active ? (
-              <LoaderCircle className="h-4 w-4 shrink-0 animate-spin text-[color:var(--status-info)]" aria-hidden />
-            ) : (
-              <Circle className="h-4 w-4 shrink-0 text-[color:var(--status-neutral)]" aria-hidden />
-            )}
-            <span className={step.done ? "text-[color:var(--text-primary)]" : "text-[color:var(--text-secondary)]"}>{step.label}</span>
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
-}
-
-function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
-  return (
-    <li className="flex gap-3">
-      <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--accent)_16%,transparent)] text-[11px] font-semibold text-[color:var(--accent)]">{n}</span>
-      <div className="min-w-0 flex-1">
-        <p className="font-semibold">{title}</p>
-        <div className="mt-0.5">{children}</div>
-      </div>
-    </li>
-  );
-}
-
-function Breadcrumb({ parts }: { parts: string[] }) {
-  return (
-    <span>
-      {parts.map((p, i) => (
-        <span key={i}>
-          {i > 0 ? <span className="mx-1 opacity-60">→</span> : null}
-          <b className="font-medium text-[color:var(--text-primary)]">{p}</b>
-        </span>
-      ))}
-    </span>
-  );
-}
-
-function RecordField({ label, value, copy }: { label: string; value: string; copy?: string }) {
-  return (
-    <div className="grid min-w-0 grid-cols-[5.5rem_minmax(0,1fr)_auto] items-center gap-2">
-      <dt className="text-[11px] leading-4 text-[color:var(--text-secondary)]">{label}</dt>
-      <dd className="min-w-0 break-all font-mono text-xs">{value}</dd>
-      {copy ? <InlineCopy value={copy} label={label} /> : <span />}
-    </div>
-  );
-}
-
-function InlineCopy({ value, label }: { value: string; label: string }) {
-  const [copied, setCopied] = useState(false);
+  const index = Math.max(0, screens.findIndex(screen => screen.id === cursor));
+  const screen = screens[index];
+  const outcome = guideOutcome(domain);
+  const final = !reviewing ? outcome : null;
+  const navigate = (id: string) => {
+    setCursor(id);
+    try { window.localStorage.setItem(key, id); } catch { /* Navigation still works without browser storage. */ }
+    requestAnimationFrame(() => heading.current?.focus());
+  };
   useEffect(() => {
-    if (!copied) return;
-    const t = window.setTimeout(() => setCopied(false), 1500);
-    return () => window.clearTimeout(t);
-  }, [copied]);
-  return (
-    <button
-      type="button"
-      aria-label={`Copy ${label}`}
-      onClick={async () => {
-        try {
-          await navigator.clipboard.writeText(value);
-          setCopied(true);
-        } catch {
-          window.prompt(`Copy this ${label}:`, value);
-        }
-      }}
-      className={clsx("min-h-8 shrink-0 rounded-md border px-2 text-[11px] font-medium", copied ? "border-[color:var(--accent)] text-[color:var(--accent)]" : "border-[color:var(--border)] text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]")}
-    >
-      {copied ? "Copied" : "Copy"}
-    </button>
-  );
+    let active = true;
+    // Defer restoration until hydration; the server always renders one screen.
+    void Promise.resolve().then(() => {
+      if (!active) return;
+      let stored: string | null = null;
+      try { stored = hydrated.current ? null : window.localStorage.getItem(key); } catch { /* Optional local progress. */ }
+      hydrated.current = true;
+      setCursor(restoreGuideScreen(domainGuideScreens(domain, registrar, Boolean(onRegistrarChange)), stored));
+      setReviewing(false);
+    });
+    return () => { active = false; };
+    // Only the record/provider fingerprint changes the navigation sequence.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  const title = help ? "Need a hand?" : final === "connected" ? "Your domain is connected" : final === "waiting_launch" ? "Your domain is ready for launch" : final === "waiting_connection" ? "Finishing your secure connection" : final === "preparing" ? "We’re preparing your guide" : screen.title;
+  return <section aria-label="Guided domain setup" className="min-w-0 space-y-5">
+    <p className="break-all text-sm text-[color:var(--text-secondary)]">{domain.hostname}</p>
+    {!final && !help ? <p className="text-xs text-[color:var(--text-secondary)]">Step {index + 1}{screen.record !== undefined ? ` · Record ${screen.record + 1} of ${visibleGuideRecords(domain).length}` : ""}</p> : null}
+    <h2 ref={heading} tabIndex={-1} className="text-lg font-semibold outline-none">{title}</h2>
+    {help ? <>
+      <p className="text-sm leading-6 text-[color:var(--text-secondary)]">Vigil can walk you through this setup. Keep this page open so you can return to the same step.</p>
+      <a href={`mailto:hello@vigilstudios.co?subject=${encodeURIComponent(`Domain setup help: ${domain.hostname}`)}`} className="btn-primary inline-flex min-h-11 items-center text-sm">Contact Vigil</a>
+      <div><button type="button" className="min-h-11 text-sm underline" onClick={() => setHelp(false)}>Back to my step</button></div>
+    </> : final ? <>
+      {final === "connected" ? <CheckCircle2 className="h-7 w-7 text-[color:var(--accent)]" aria-hidden="true" /> : null}
+      <p className="text-sm leading-6 text-[color:var(--text-secondary)]">{final === "connected" ? "Your website is available at your domain. Setup is complete." : final === "waiting_launch" ? "Your ownership record is verified. Keep it in place. We’ll show the next instruction here when Vigil prepares your approved website for launch. Your current website and email have not been redirected." : final === "waiting_connection" ? "Your DNS records are visible. We’re waiting for the secure certificate and website checks to finish. You can return here to check the status." : "Your domain is saved. There is nothing to change in your domain account yet. Return here to continue when the guide is ready."}</p>
+      {final !== "connected" && (onRefresh || onConfirm) ? <button type="button" className="btn-secondary min-h-11 text-sm" disabled={confirming || checking} onClick={onRefresh ?? onConfirm}>{confirming || checking ? "Checking…" : "Refresh status"}</button> : null}
+      {(final === "waiting_launch" || final === "waiting_connection") ? <div><button type="button" className="min-h-11 text-sm underline" onClick={() => { setReviewing(true); navigate(screens[0].id); }}>Review my record</button></div> : null}
+    </> : <>
+      <p className="text-sm leading-6 text-[color:var(--text-secondary)]">{screen.instruction}</p>
+      {screen.kind === "provider" && onRegistrarChange ? <label className="block space-y-2 text-sm"><span>Domain provider</span><select className={inputClass} value={registrar} onChange={event => onRegistrarChange(event.target.value as RegistrarKey)}>{REGISTRAR_OPTIONS.map(option => <option key={option.key} value={option.key}>{option.name}</option>)}</select></label> : null}
+      {screen.kind === "login" && guide.loginUrl ? <a href={guide.loginUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 text-sm text-[color:var(--accent)] underline">Open {guide.name}<ExternalLink className="h-3.5 w-3.5" aria-hidden="true" /><span className="sr-only"> (opens in a new tab)</span></a> : null}
+      {screen.kind === "field" ? <SingleValue key={screen.id} label={screen.field!} value={screen.value!} /> : null}
+      {screen.kind === "check" ? <>
+        {onConfirm ? <button type="button" className="btn-primary min-h-11 text-sm" disabled={confirming || checking} onClick={() => { setReviewing(false); onConfirm(); }}>{confirming || checking ? "Checking…" : domain.status === "verifying" ? "Check again" : "Check my setup"}</button> : <p className="text-sm text-[color:var(--text-secondary)]">A customer owner or manager can check this setup.</p>}
+        <p role="status" className="text-sm text-[color:var(--text-secondary)]">{confirming || checking ? "Checking your saved records…" : domain.dnsOk ? domain.sslOk ? "Waiting for your website to answer securely." : "The DNS records are visible. The secure connection is still being prepared." : "If the records were just saved, they may take a while to appear. You can leave and return to this step."}</p>
+      </> : <button type="button" className="btn-primary min-h-11 text-sm" disabled={confirming || checking} onClick={() => navigate(screens[index + 1].id)}>{screen.kind === "login" ? "I’m signed in" : screen.kind === "save" ? "I saved this record" : "Continue"}</button>}
+      {index > 0 ? <div><button type="button" className="inline-flex min-h-11 items-center gap-2 text-sm text-[color:var(--text-secondary)]" disabled={confirming || checking} onClick={() => navigate(screens[index - 1].id)}><ArrowLeft className="h-4 w-4" aria-hidden="true" />Back</button></div> : null}
+    </>}
+    {!help && final !== "connected" ? <div className="border-t border-[color:var(--border)] pt-3"><button type="button" className="min-h-11 text-sm text-[color:var(--text-secondary)] underline" onClick={() => setHelp(true)}>Need help?</button></div> : null}
+  </section>;
+}
+
+function SingleValue({ label, value }: { label: string; value: string }) {
+  const [message, setMessage] = useState("");
+  return <div className="min-w-0 space-y-3 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-4">
+    <p className="text-xs text-[color:var(--text-secondary)]">{label}</p>
+    <p className="break-all font-mono text-sm">{value || "Leave blank"}</p>
+    {value ? <button type="button" className="btn-secondary min-h-11 text-sm" onClick={async () => { try { await navigator.clipboard.writeText(value); setMessage("Copied"); } catch { setMessage("Select the value above and copy it manually."); } }}>Copy {label}</button> : null}
+    <p role="status" className="text-xs text-[color:var(--text-secondary)]">{message}</p>
+  </div>;
 }
