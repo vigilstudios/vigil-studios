@@ -25,7 +25,7 @@ export function DomainStep({ initial, projectId, websiteId, initialIntent, busin
   const [data, setData] = useState<DomainAnswers>(() => domain && canManage ? { ...(initial ?? domainSchema.parse({})), answer: "own", hostname: domain.hostname, domainId: domain.domainId, registrar: domain.registrar } : initial ?? domainSchema.parse({}));
   const [phase, setPhase] = useState<Phase>(() => domain ? "guide" : initial?.answer === "own" ? "hostname" : initial?.answer === "need" || (initialIntent && initialIntent.phase !== "cancelled") ? "search" : "ask");
   const [hostname, setHostname] = useState(initial?.hostname ?? "");
-  const [registrar, setRegistrar] = useState<RegistrarKey>(initial?.registrar ?? domain?.registrar ?? "other");
+  const [registrar, setRegistrar] = useState<RegistrarKey>(domain?.registrar ?? initial?.registrar ?? "other");
   const [working, setWorking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { state, flush } = useAutosave(data, value => save(value));
@@ -84,7 +84,7 @@ export function DomainStep({ initial, projectId, websiteId, initialIntent, busin
         onDomain(result.data); setData(current => ({ ...current, answer: "own", hostname: result.data.hostname, registrar, domainId: result.data.domainId, later: false })); setPhase("guide");
       })}>{working ? "Saving…" : "Continue to guide"}</button> : <p className="text-sm">A customer owner or manager can save the domain.</p>}
     </div> : domain ? <>
-      <DomainGuide domain={domain} registrar={registrar} onConfirm={canManage ? () => void run(async () => { const result = await confirmDnsAdded(domain.domainId, registrar); if (result.ok) onDomain(result.data); else setError(result.error); }) : undefined} onRefresh={() => void run(async () => { const result = await getDomainSetup(domain.domainId, registrar); if (result.ok) onDomain(result.data); else setError(result.error); })} confirming={working} />
+      <DomainGuide domain={domain} registrar={registrar} afterPurchase={Boolean(initialIntent && initialIntent.phase !== "cancelled" && initialIntent.websiteId === websiteId && initialIntent.hostname === domain.hostname && registrar === "vercel")} onConfirm={canManage ? () => void run(async () => { const result = await confirmDnsAdded(domain.domainId, registrar); if (result.ok) onDomain(result.data); else setError(result.error); }) : undefined} onRefresh={() => void run(async () => { const result = await getDomainSetup(domain.domainId, registrar); if (result.ok) onDomain(result.data); else setError(result.error); })} confirming={working} />
       {guideOutcome(domain) ? <button type="button" className="btn-primary min-h-11 text-sm" disabled={working} onClick={() => void finish(domain.status !== "connected")}>Continue onboarding</button> : null}
     </> : null}
     {error ? <p role="alert" className="text-sm text-[color:var(--status-bad)]">{error}</p> : null}

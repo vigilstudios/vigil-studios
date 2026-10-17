@@ -7,7 +7,7 @@ import { confirmDnsAdded, getDomainSetup, saveDomainRegistrar } from "@/lib/vigi
 import type { RegistrarKey } from "@/lib/vigil/onboarding/brief";
 
 /** The same walkthrough as the wizard, for a domain the customer chose to finish later. */
-export function DomainGuidePanel({ domain, initialRegistrar, canManage }: { domain: GuideDomain; initialRegistrar: RegistrarKey; canManage: boolean }) {
+export function DomainGuidePanel({ domain, initialRegistrar, canManage, afterPurchase = false }: { domain: GuideDomain; initialRegistrar: RegistrarKey; canManage: boolean; afterPurchase?: boolean }) {
   const router = useRouter();
   const [state, setState] = useState<GuideDomain>(domain);
   const [registrar, setRegistrar] = useState<RegistrarKey>(initialRegistrar);
@@ -37,6 +37,7 @@ export function DomainGuidePanel({ domain, initialRegistrar, canManage }: { doma
       <DomainGuide
         domain={state}
         registrar={registrar}
+        afterPurchase={afterPurchase}
         onRegistrarChange={canManage ? async next => {
           setConfirming(true); setError(null);
           try { const res = await saveDomainRegistrar(state.domainId, next); if (res.ok) { setRegistrar(next); setState(res.data); } else setError(res.error); }

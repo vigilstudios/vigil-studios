@@ -11,6 +11,7 @@ import { enqueueJob, JOB_KINDS } from "@/lib/vigil/jobs";
 import { domainKind } from "@/lib/vigil/domains";
 import { beginDomainVerification, normalizeHostname } from "@/lib/vigil/services/domain";
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/vigil/rate-limit";
+import { assertHandoffActor, loadDomainIntent } from "@/lib/vigil/services/domain-handoff";
 
 export type DomainState = ActionResult<{ domainId: string }> | null;
 
@@ -24,6 +25,8 @@ export async function startDomainConnection(_prev: DomainState, formData: FormDa
   try {
     const ctx = await requireOrgContextOrThrow();
     await assertOrgRole(ctx, ["owner", "manager"]);
+    const afterPurchase = formData.get("journey") === "vercel_purchase";
+    if (afterPurchase) assertHandoffActor(ctx);
 
     const hostname = normalizeHostname(String(formData.get("hostname") ?? ""));
     if (!hostname) throw new ValidationError("Enter a domain like yourbusiness.com.", { hostname: ["Invalid domain"] });
@@ -35,6 +38,15 @@ export async function startDomainConnection(_prev: DomainState, formData: FormDa
     const { data: website, error: websiteError } = await supabase.from("websites").select("id").eq("id", websiteId).eq("organization_id", ctx.organization.id).neq("status", "archived").neq("status", "suspended").maybeSingle();
     if (websiteError) throw websiteError;
     if (!website) throw new ValidationError("Choose a website in your account.");
+    if (afterPurchase) {
+      // The form is a continuation of a saved choice, never evidence of payment.
+      // Reject stale tabs and cancelled/replaced choices before creating a row.
+      const intent = await loadDomainIntent(supabase, ctx.organization.id, websiteId);
+      const version = Number(formData.get("intent_version"));
+      if (!intent || intent.phase === "cancelled" || intent.hostname !== hostname || !Number.isSafeInteger(version) || version < 1 || intent.version !== version || formData.get("registrar") !== "vercel") {
+        throw new ValidationError("Your domain choice changed. Return to Find your domain and continue from your saved choice.");
+      }
+    }
     const { data: connected, error: connectedError } = await supabase.from("domains").select("id").eq("organization_id", ctx.organization.id).eq("website_id", websiteId).eq("status", "connected").neq("hostname", hostname).limit(1).maybeSingle();
     if (connectedError) throw connectedError;
     if (connected) throw new ValidationError("This website already has a connected domain. Contact Vigil to change it.");
