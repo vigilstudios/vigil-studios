@@ -12,7 +12,7 @@ export function VercelDomainIllustration({ hostname, stage }: { hostname: string
         <p className={stage === "domains" ? active : "px-3 py-2"}>Domains</p>
       </div>
       <div className="min-w-0 flex-1 space-y-4 border-l border-[color:var(--border)] pl-3 sm:pl-5">
-        <p className="font-semibold">{stage === "domains" || stage === "domain" ? "Domains" : hostname}</p>
+        <p className="break-all font-semibold">{stage === "domains" || stage === "domain" ? "Domains" : hostname}</p>
         {stage === "dns" ? <div className={active}>DNS Records</div> : <div className={`${stage === "domain" ? active : "rounded-md border border-[color:var(--border)] p-3"} flex min-w-0 items-center gap-2`}><Globe2 className="h-4 w-4 shrink-0" /><span className="min-w-0 flex-1 break-all">{hostname}</span><ArrowRight className="h-4 w-4 shrink-0" /></div>}
       </div>
     </div>
