@@ -81,6 +81,11 @@ describe("one domain path at a time", () => {
     expect(await render({ flow: "find" })).toContain("Domain search is unavailable");
     expect(await render({ flow: "own" })).toContain("Continue to setup");
   });
+  it("keeps the verified connection success screen after a refresh", async () => {
+    mocks.domains = [{ id: "connected-domain", organization_id: "org-a", website_id: "site-a", hostname: "connected-example.com", source: "customer_owned", registrar: "vercel", status: "connected", dns_ok: true, ssl_ok: true, verification: { source: "provider", connection_reachable: true }, verification_token: "proof" } as Tables<"domains">];
+    const html = await render({ flow: "own" });
+    expect(html).toContain("Your domain is connected"); expect(html).toContain("Visit my website"); expect(html).not.toContain("Where do you manage your domain?");
+  });
   it("resumes a purchased domain at Domains on reload without asking for its name or login", async () => {
     mocks.intents["site-a"] = intent("site-a");
     mocks.domains = [{ id: "domain-a", organization_id: "org-a", hostname: "saved-example.com", website_id: "site-a", registrar: "vercel", status: "pending", source: "customer_owned", verification: {}, verification_token: "proof" } as Tables<"domains">];
