@@ -55,4 +55,7 @@ target -f "$ROOT/supabase/test/content-hub.test.sql"
 echo "▸ domain handoff assertions"
 target -f "$ROOT/supabase/test/domain-handoff.test.sql"
 
+echo "▸ domain readiness notification assertions"
+target -f "$ROOT/supabase/test/domain-readiness.test.sql"
+
 echo "✓ migrations and RLS assertions passed"

@@ -149,6 +149,17 @@ describe("customer domain service", () => {
 });
 
 describe("domain ownership", () => {
+  it("does not report readiness when its transactional notification/outbox update fails", async () => {
+    const fake = new FakeAdmin({ domains: [{ id: "dom-a", organization_id: "org-a", website_id: "web-a", hostname: "example.com", kind: "apex", status: "verifying", verification_token: "proof", dns_ok: false, verification: { source: "platform" } }] });
+    const from = fake.from.bind(fake);
+    vi.spyOn(fake, "from").mockImplementation(table => {
+      const builder = from(table); const run = builder.run.bind(builder);
+      builder.run = () => table === "domains" && (builder._payload?.verification as { launch_ready?: boolean } | undefined)?.launch_ready ? { data: null, error: { message: "Outbox unavailable" } } : run();
+      return builder;
+    });
+    await expect(verifyDomain(fake.asClient(), "dom-a", provider(host => snapshot(host, false)), dnsChecks(true))).rejects.toMatchObject({ message: "Outbox unavailable" });
+    expect(fake.rows("domains")[0].dns_ok).toBe(false);
+  });
   it("verifies only the organization whose token is in the zone", async () => {
     process.env.VIGIL_DNS_APEX_A = "76.76.21.21";
     const fake = new FakeAdmin({

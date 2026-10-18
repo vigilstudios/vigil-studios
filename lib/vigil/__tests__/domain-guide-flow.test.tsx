@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { DomainGuide } from "@/components/vigil/DomainGuide";
-import { domainGuideScreens, guideOutcome, guideStorageKey, restoreGuideScreen, visibleGuideRecords, type GuideDomain } from "../domain-guide-flow";
+import { domainGuideScreens, guideEncouragement, guideOutcome, guideStorageKey, restoreGuideScreen, visibleGuideRecords, type GuideDomain } from "../domain-guide-flow";
 import { guidedDomainRecords } from "../services/dns";
 import { normalizeHostname } from "../services/domain";
 const domain: GuideDomain = { domainId: "domain-a", hostname: "example.com", status: "pending", records: [{type:"TXT",name:"_vigil",value:"vigil-verify=proof"},{type:"CNAME",name:"www",value:"unique.vercel-dns-017.com"}], dnsOk:false,sslOk:false,reachable:false,cutoverReady:false,statusReason:null };
@@ -38,12 +38,26 @@ describe("one task per guided screen", () => {
   });
   it("cannot turn Next clicks, launch readiness or partial checks into connection success", () => {
     expect(guideOutcome({...domain,status:"connected",dnsOk:true,sslOk:false,reachable:true})).not.toBe("connected");
-    expect(guideOutcome({...domain,launchReady:true,dnsOk:true})).toBe("waiting_launch");
+    expect(guideOutcome({...domain,status:"verifying",launchReady:true,dnsOk:true})).toBe("waiting_launch");
+    expect(guideOutcome({...domain,launchReady:true,dnsOk:true})).toBeNull();
     expect(guideOutcome({...domain,cutoverReady:true,status:"connected",dnsOk:true,sslOk:true,reachable:true})).toBe("connected");
   });
   it("shows only the waiting message after proof, with no cutover instructions", () => {
-    const html=renderToStaticMarkup(<DomainGuide domain={{...domain,launchReady:true,dnsOk:true}} registrar="vercel" />);
+    const html=renderToStaticMarkup(<DomainGuide domain={{...domain,status:"verifying",launchReady:true,dnsOk:true}} registrar="vercel" />);
     expect(html).toContain("Your domain is ready for launch");expect(html).not.toContain("Select this type");expect(html).not.toContain("unique.vercel");
+    expect(html).toContain("Your part is done!"); expect(html).toContain("Ownership verified"); expect(html).toContain("Your site is not live yet"); expect(html).not.toContain("Visit my website");
+  });
+  it("celebrates a connected domain only after DNS, SSL and the expected site all pass", () => {
+    const html = renderToStaticMarkup(<DomainGuide domain={{...domain,status:"connected",dnsOk:true,sslOk:true,reachable:true,cutoverReady:true}} registrar="vercel" />);
+    expect(html).toContain("Your domain is connected"); expect(html).toContain("Visit my website"); expect(html).toContain('href="https://example.com"');
+    const partial = renderToStaticMarkup(<DomainGuide domain={{...domain,status:"connected",dnsOk:true,sslOk:false,reachable:true,cutoverReady:true}} registrar="vercel" />);
+    expect(partial).not.toContain("Visit my website"); expect(partial).not.toContain("You did it");
+  });
+  it("encourages progress without treating navigation as proof", () => {
+    const screens = domainGuideScreens(domain,"vercel",true,true);
+    expect(guideEncouragement(screens.find(screen=>screen.kind==="record")!)).toBe("Almost there!");
+    const html = renderToStaticMarkup(<DomainGuide domain={domain} registrar="vercel" afterPurchase />);
+    expect(html).toContain("Great start!"); expect(html).toContain('role="progressbar"'); expect(html).not.toContain("Ownership verified"); expect(html).not.toContain("Your part is done!");
   });
   it("restores only valid cursors and invalidates progress when domain, provider or records change", () => {
     const screens=domainGuideScreens(domain,"vercel");expect(restoreGuideScreen(screens,"record-0")).toBe("record-0");expect(restoreGuideScreen(screens,"record-0-value")).toBe("provider");
