@@ -15,6 +15,13 @@ export function DomainGuidePanel({ domain, initialRegistrar, canManage, afterPur
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (state.status !== "connected" || domain.status === "connected") return;
+    // Let the verified milestone finish before a server refresh remounts it.
+    const id = window.setTimeout(() => router.refresh(), 3_000);
+    return () => window.clearTimeout(id);
+  }, [state.status, domain.status, router]);
+
+  useEffect(() => {
     if (state.status === "connected" || state.status === "released") return;
     let active = true;
     let inFlight = false;
@@ -25,7 +32,6 @@ export function DomainGuidePanel({ domain, initialRegistrar, canManage, afterPur
       const res = await getDomainSetup(state.domainId, registrar);
       if (active && res.ok) {
         setState(res.data);
-        if (res.data.status === "connected") router.refresh();
       }
       } catch { /* Keep the current step on a temporary network failure. */ } finally { inFlight = false; }
     }, 20_000);
