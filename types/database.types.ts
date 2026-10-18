@@ -3851,6 +3851,10 @@ export type Database = {
         Returns: undefined
       }
       queue_contact_setup: { Args: { p_website: string }; Returns: undefined }
+      queue_domain_readiness_alert: {
+        Args: { p_domain: string }
+        Returns: undefined
+      }
       rate_limit: {
         Args: { p_key: string; p_limit: number; p_window_seconds: number }
         Returns: boolean
