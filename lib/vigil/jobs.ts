@@ -5,6 +5,7 @@ import type { Json } from "@/types/database.types";
 import { deployWebsite, finalizeWebsiteLaunch, provisionWebsite, syncDeployment } from "./services/deployment";
 import { notifyCustomerDeployment } from "./services/deployment-notifications";
 import { beginDomainVerification, verifyDomain } from "./services/domain";
+import { notifyDomainReadiness } from "./services/domain-readiness-notifications";
 import { provisionOrder } from "./services/orders";
 import { provisionWebsiteRepository } from "./services/repository";
 import { provisionWebsiteContact } from "./contact/provision";
@@ -31,6 +32,7 @@ export const JOB_KINDS = {
   deploymentNotify: "website.deployment.notify",
   domainConnect: "domain.connect",
   domainVerify: "domain.verify",
+  domainReadinessNotify: "domain.readiness.notify",
   orderProvision: "order.provision",
 } as const;
 
@@ -51,6 +53,11 @@ export function registerJobHandler(kind: string, handler: JobHandler): void {
 }
 
 const builtInHandlers: Record<JobKind, JobHandler> = {
+  [JOB_KINDS.domainReadinessNotify]: async ({ admin, job }) => {
+    const result = await notifyDomainReadiness(admin, job);
+    if (result.status === "waiting") throw new RetryLater("Waiting for verified domain ownership before notifying staff.", 15 * 60);
+    return result;
+  },
   [JOB_KINDS.websiteContactConfigure]: async ({admin,job}) => provisionWebsiteContact(admin,job),
   [JOB_KINDS.leadNotify]: async ({admin,job}) => notifyWebsiteLead(admin,job),
   [JOB_KINDS.websiteProvision]: async ({ admin, job }) => {

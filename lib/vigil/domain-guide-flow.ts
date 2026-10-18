@@ -51,9 +51,17 @@ export function restoreGuideScreen(screens: GuideScreen[], stored: string | null
   return screens.some(screen => screen.id === stored) ? stored! : screens[0].id;
 }
 
+/** Encouragement describes the guide, never infers successful DNS from clicks. */
+export function guideEncouragement(screen: GuideScreen): string {
+  if (screen.kind === "record") return "Almost there!";
+  if (screen.kind === "check") return "So close — let’s check your setup!";
+  if (screen.kind === "provider" || screen.kind === "login") return "You’ve got this. We’ll take it one step at a time.";
+  return screen.id === "menu-0" ? "Great start!" : "You’re getting closer!";
+}
+
 export function guideOutcome(domain: GuideDomain): "connected" | "waiting_launch" | "waiting_connection" | "preparing" | null {
   if (domain.status === "connected" && domain.dnsOk && domain.sslOk && domain.reachable) return "connected";
-  if (!domain.cutoverReady && domain.launchReady && domain.dnsOk) return "waiting_launch";
+  if (domain.status === "verifying" && !domain.cutoverReady && domain.launchReady && domain.dnsOk) return "waiting_launch";
   if (domain.cutoverReady && domain.dnsOk) return "waiting_connection";
   if (visibleGuideRecords(domain).length === 0) return "preparing";
   return null;

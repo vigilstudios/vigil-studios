@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, CheckCircle2, ExternalLink } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ExternalLink, Loader2 } from "lucide-react";
 import { REGISTRAR_GUIDES, REGISTRAR_OPTIONS, VERCEL_DOMAINS_URL } from "@/lib/vigil/domain-guides";
 import type { RegistrarKey } from "@/lib/vigil/onboarding/brief";
-import { domainGuideScreens, guideOutcome, guideStorageKey, restoreGuideScreen, visibleGuideRecords, type GuideDomain } from "@/lib/vigil/domain-guide-flow";
+import { domainGuideScreens, guideEncouragement, guideOutcome, guideStorageKey, restoreGuideScreen, visibleGuideRecords, type GuideDomain } from "@/lib/vigil/domain-guide-flow";
 import { inputClass } from "./ui";
 import { VercelDomainIllustration } from "./VercelDomainIllustration";
+import { DomainCelebration } from "./DomainCelebration";
 
 export type { GuideDomain } from "@/lib/vigil/domain-guide-flow";
 
@@ -48,8 +49,14 @@ export function DomainGuide({ domain, registrar, afterPurchase = false, onRegist
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
   const title = help ? "Need a hand?" : final === "connected" ? "Your domain is connected" : final === "waiting_launch" ? "Your domain is ready for launch" : final === "waiting_connection" ? "Finishing your secure connection" : final === "preparing" ? "We’re preparing your guide" : screen.title;
-  return <section aria-label="Guided domain setup" className="min-w-0 space-y-5">
+  const success = final === "connected" || final === "waiting_launch";
+  const progress = success ? 100 : final === "waiting_connection" ? 90 : final === "preparing" ? 0 : Math.round((index + 1) / (screens.length + 1) * 100);
+  return <section aria-label="Guided domain setup" className="relative min-w-0 space-y-5">
     <p className="break-all text-sm text-[color:var(--text-secondary)]">{domain.hostname}</p>
+    {!help ? <div className="space-y-2">
+      <p className="text-sm font-semibold text-[color:var(--accent)]">{final === "connected" ? "You did it — your website is live!" : final === "waiting_launch" ? "Your part is done!" : final === "waiting_connection" ? "You’re so close! We’re finishing the secure connection." : final === "preparing" ? "We’re getting everything ready for you." : guideEncouragement(screen)}</p>
+      <div role="progressbar" aria-label="Domain setup progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} aria-valuetext={success ? final === "connected" ? "Domain connected" : "Ownership verified; waiting for Vigil’s launch review" : final === "waiting_connection" ? "DNS verified; waiting for the secure connection" : final === "preparing" ? "Preparing your guide" : screen.kind === "check" ? "Waiting for DNS verification" : `Guide step ${index + 1} of ${screens.length}`} className="h-1.5 overflow-hidden rounded-full bg-[color:var(--border)]"><div className="h-full rounded-full bg-[color:var(--accent)]" style={{ width: `${progress}%` }} /></div>
+    </div> : null}
     {!final && !help ? <p className="text-xs text-[color:var(--text-secondary)]">Step {index + 1}{screen.record !== undefined ? ` · Record ${screen.record + 1} of ${visibleGuideRecords(domain).length}` : ""}</p> : null}
     <h2 ref={heading} tabIndex={-1} className="text-lg font-semibold outline-none">{title}</h2>
     {help ? <>
@@ -57,8 +64,12 @@ export function DomainGuide({ domain, registrar, afterPurchase = false, onRegist
       <a href={`mailto:hello@vigilstudios.co?subject=${encodeURIComponent(`Domain setup help: ${domain.hostname}`)}`} className="btn-primary inline-flex min-h-11 items-center text-sm">Contact Vigil</a>
       <div><button type="button" className="min-h-11 text-sm underline" onClick={() => setHelp(false)}>Back to my step</button></div>
     </> : final ? <>
-      {final === "connected" ? <CheckCircle2 className="h-7 w-7 text-[color:var(--accent)]" aria-hidden="true" /> : null}
-      <p className="text-sm leading-6 text-[color:var(--text-secondary)]">{final === "connected" ? "Your website is available at your domain. Setup is complete." : final === "waiting_launch" ? "Your ownership record is verified. Keep it in place. We’ll show the next instruction here when Vigil prepares your approved website for launch. Your current website and email have not been redirected." : final === "waiting_connection" ? "Your DNS records are visible. We’re waiting for the secure certificate and website checks to finish. You can return here to check the status." : "Your domain is saved. There is nothing to change in your domain account yet. Return here to continue when the guide is ready."}</p>
+      {success ? <>
+        <DomainCelebration key={`${domain.domainId}:${final}`} domainId={domain.domainId} milestone={final === "connected" ? "connected" : "ownership"} />
+        <div role="status" className="flex items-center gap-3 rounded-xl border border-[color:var(--accent)] bg-[color:var(--bg-surface-soft)] p-4 text-[color:var(--accent)]"><CheckCircle2 className="h-8 w-8 shrink-0" aria-hidden="true" /><span className="font-semibold">{final === "connected" ? "Domain connected · secure connection ready" : "Ownership verified · ready for Vigil’s launch review"}</span></div>
+      </> : final === "waiting_connection" ? <Loader2 className="h-7 w-7 animate-spin text-[color:var(--accent)] motion-reduce:animate-none" aria-hidden="true" /> : null}
+      <p className="text-sm leading-6 text-[color:var(--text-secondary)]">{final === "connected" ? "Your domain is connected to your website and the secure connection is ready. It’s time to share your new address!" : final === "waiting_launch" ? "Your ownership record is verified. You’ve finished this step! Keep the record in place. The Vigil team can now review your website for launch. Your site is not live yet; we’ll guide you if another record is needed to put it online." : final === "waiting_connection" ? "Your DNS records are visible. We’re waiting for the secure certificate and website checks to finish. You can return here to check the status." : "Your domain is saved. There is nothing to change in your domain account yet. Return here to continue when the guide is ready."}</p>
+      {final === "connected" ? <a href={`https://${domain.hostname}`} target="_blank" rel="noopener noreferrer" className="btn-primary inline-flex min-h-11 items-center gap-2 text-sm">Visit my website<ExternalLink className="h-4 w-4" aria-hidden="true" /><span className="sr-only"> (opens in a new tab)</span></a> : null}
       {final !== "connected" && (onRefresh || onConfirm) ? <button type="button" className="btn-secondary min-h-11 text-sm" disabled={confirming || checking} onClick={onRefresh ?? onConfirm}>{confirming || checking ? "Checking…" : "Refresh status"}</button> : null}
       {(final === "waiting_launch" || final === "waiting_connection") ? <div><button type="button" className="min-h-11 text-sm underline" onClick={() => { setReviewing(true); navigate(screens[0].id); }}>Review my record</button></div> : null}
     </> : <>

@@ -1,0 +1,6 @@
+.burst { position: absolute; inset: 0; overflow: hidden; pointer-events: none; border-radius: inherit; }
+.piece { position: absolute; left: var(--x); top: -12px; width: 7px; height: 12px; background: var(--accent); opacity: 0; animation: fall 2.3s ease-out var(--delay) both; }
+.piece:nth-child(3n) { background: #a7efbf; border-radius: 50%; }
+.piece:nth-child(3n + 1) { background: #e6c66b; }
+@keyframes fall { 0% { opacity: 0; transform: translateY(0) rotate(0deg); } 12% { opacity: .9; } 100% { opacity: 0; transform: translate(var(--drift), 260px) rotate(var(--turn)); } }
+@media (prefers-reduced-motion: reduce) { .burst, .piece { display: none; animation: none; } }

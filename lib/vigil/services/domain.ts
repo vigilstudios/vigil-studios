@@ -256,7 +256,7 @@ export async function verifyDomain(
       assertTransition(domainTransitions, domain.status, "verifying", "domain");
       nextStatus = "verifying";
     }
-    await admin.from("domains").update({
+    const { error: updateError } = await admin.from("domains").update({
       status: nextStatus,
       dns_ok: dnsOk,
       ssl_ok: false,
@@ -273,6 +273,7 @@ export async function verifyDomain(
         checks: checks.map((check) => ({ type: check.record.type, name: check.record.name, ok: check.ok, found: check.found })),
       },
     }).eq("id", domainId);
+    if (updateError) throw updateError;
     // A later purchase can connect to an already approved production build.
     // This creates project associations only; the customer still edits DNS.
     if (dnsOk && domain.website_id && await domainProductionContext(admin, domain.website_id, domain.organization_id, provider)) {
