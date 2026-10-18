@@ -82,7 +82,7 @@ describe("one domain path at a time", () => {
     expect(await render({ flow: "own" })).toContain("Continue to setup");
   });
   it("keeps the verified connection success screen after a refresh", async () => {
-    mocks.domains = [{ id: "connected-domain", organization_id: "org-a", website_id: "site-a", hostname: "connected-example.com", source: "customer_owned", registrar: "vercel", status: "connected", dns_ok: true, ssl_ok: true, verification: { source: "provider", connection_reachable: true }, verification_token: "proof" } as Tables<"domains">];
+    mocks.domains = [{ id: "connected-domain", organization_id: "org-a", website_id: "site-a", hostname: "connected-example.com", kind: "apex", source: "customer_owned", registrar: "vercel", status: "connected", dns_ok: true, ssl_ok: true, verification: { source: "provider", connection_reachable: true }, verification_token: "proof", auto_renew: null, connected_at: null, created_at: "2026-10-18T00:00:00Z", expires_at: null, last_checked_at: null, metadata: {}, registrant: {}, status_reason: null, updated_at: "2026-10-18T00:00:00Z", verified_at: null }];
     const html = await render({ flow: "own" });
     expect(html).toContain("Your domain is connected"); expect(html).toContain("Visit my website"); expect(html).not.toContain("Where do you manage your domain?");
   });
