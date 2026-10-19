@@ -85,7 +85,7 @@ export function DomainStep({ initial, projectId, websiteId, initialIntent, busin
       })}>{working ? "Saving…" : "Continue to guide"}</button> : <p className="text-sm">A customer owner or manager can save the domain.</p>}
     </div> : domain ? <>
       <DomainGuide domain={domain} registrar={registrar} afterPurchase={Boolean(initialIntent && initialIntent.phase !== "cancelled" && initialIntent.websiteId === websiteId && initialIntent.hostname === domain.hostname && registrar === "vercel")} onConfirm={canManage ? () => void run(async () => { const result = await confirmDnsAdded(domain.domainId, registrar); if (result.ok) onDomain(result.data); else setError(result.error); }) : undefined} onRefresh={() => void run(async () => { const result = await getDomainSetup(domain.domainId, registrar); if (result.ok) onDomain(result.data); else setError(result.error); })} confirming={working} />
-      {guideOutcome(domain) ? <button type="button" className="btn-primary min-h-11 text-sm" disabled={working} onClick={() => void finish(domain.status !== "connected")}>Continue onboarding</button> : null}
+      {guideOutcome(domain) ? <button type="button" className="btn-primary min-h-11 text-sm" disabled={working} onClick={() => void finish(guideOutcome(domain) !== "connected")}>{guideOutcome(domain) === "connected" ? "Continue onboarding" : "Continue onboarding — finish domain setup later"}</button> : null}
     </> : null}
     {error ? <p role="alert" className="text-sm text-[color:var(--status-bad)]">{error}</p> : null}
     <div className="flex flex-wrap gap-5 border-t border-[color:var(--border)] pt-3 text-sm text-[color:var(--text-secondary)]">
