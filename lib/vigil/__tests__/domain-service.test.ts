@@ -44,6 +44,20 @@ function readyProduction(fake: FakeAdmin) {
 }
 
 describe("customer domain service", () => {
+  it.each(["prepare", "verify"])("does not revive a reset setup when an older %s DNS check finishes", async operation => {
+    const fake = new FakeAdmin({ domains: [{ id: "dom_1", hostname: "example.com", kind: "apex", website_id: "web_1", status: "pending", verification_token: "old-proof", verification: { source: "platform" } }] });
+    const checkDns = async (_hostname: string, records: DnsRecord[]) => {
+      // An administrator resets while the earlier public DNS request is in flight.
+      // Replace the persisted row: the request keeps its earlier DB snapshot.
+      fake.rows("domains")[0] = { ...fake.rows("domains")[0], status: "released", verification_token: "new-proof", dns_ok: false, verification: {} };
+      return records.map(record => ({ record, found: [record.value], ok: true }));
+    };
+    const deployment = provider(hostname => snapshot(hostname, false));
+    if (operation === "prepare") await beginDomainVerification(fake.asClient(), "dom_1", deployment, { checkDns });
+    else expect(await verifyDomain(fake.asClient(), "dom_1", deployment, { checkDns })).toMatchObject({ connected: false, readyForLaunch: false });
+    expect(fake.rows("domains")[0]).toMatchObject({ status: "released", dns_ok: false, verification: {} });
+    expect(deployment.addDomain).not.toHaveBeenCalled();
+  });
   it("holds DNS cutover until a provider site exists", async () => {
     process.env.VIGIL_DNS_APEX_A = "76.76.21.21";
     const fake = new FakeAdmin({ domains: [{ id: "dom_1", hostname: "example.com", kind: "apex", website_id: "web_1", status: "pending", verification_token: "fixture-token" }] });

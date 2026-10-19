@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { DomainIntent } from "../domain-commerce";
 import type { Tables } from "../types";
 
-const mocks = vi.hoisted(() => ({ sites: [{ id: "site-a", name: "First website" }], domains: [] as Tables<"domains">[], intents: {} as Record<string, DomainIntent | null> }));
-vi.mock("@/lib/vigil/auth/session", () => ({ requireOrgContext: async () => ({ organization: { id: "org-a" }, role: "owner", isImpersonating: false }) }));
+const mocks = vi.hoisted(() => ({ isImpersonating: false, staffRole: undefined as "admin" | "staff" | undefined, sites: [{ id: "site-a", name: "First website" }], domains: [] as Tables<"domains">[], intents: {} as Record<string, DomainIntent | null> }));
+vi.mock("@/lib/vigil/auth/session", () => ({ requireOrgContext: async () => ({ organization: { id: "org-a", name: "Customer A" }, role: "owner", isImpersonating: mocks.isImpersonating, staffRole: mocks.staffRole }) }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({}) }));
 vi.mock("@/lib/vigil/queries/dashboard", () => ({ getOrgDomains: async () => mocks.domains, getOrgWebsites: async () => mocks.sites }));
 vi.mock("@/lib/vigil/queries/onboarding", () => ({ getOnboardingProject: async () => null }));
@@ -22,6 +22,7 @@ describe("one domain path at a time", () => {
   beforeEach(() => {
     vi.stubEnv("DOMAIN_HANDOFF_ENABLED", "true");
     mocks.sites = [{ id: "site-a", name: "First website" }]; mocks.domains = []; mocks.intents = {};
+    mocks.isImpersonating = false; mocks.staffRole = undefined;
   });
   it("starts with two described choices and no setup forms", async () => {
     const html = await render();
@@ -101,9 +102,18 @@ describe("one domain path at a time", () => {
     expect(await render({ flow: "own", domain: "domain-a" })).toContain("Where do you manage your domain?");
   });
   it("shows an explicitly read-only purchase preview without an owned-domain form", async () => {
+    mocks.isImpersonating = true; mocks.staffRole = "staff";
     const html = await render({ flow: "purchase-preview", website: "site-a", hostname: "preview-example.com" });
     expect(html).toContain("Post-purchase setup preview"); expect(html).toContain("Open Domains");
     expect(html).not.toContain("<form"); expect(html).not.toContain("Check my setup"); expect(html).not.toContain("Confirm your domain");
     expect(await render({ flow: "purchase-preview", website: "foreign-site", hostname: "preview-example.com" })).not.toContain("Post-purchase setup preview");
+  });
+  it("gives an administrator the actual saved purchase form and converts old preview links to the real flow", async () => {
+    mocks.isImpersonating = true; mocks.staffRole = "admin"; mocks.intents["site-a"] = intent("site-a");
+    const html = await render({ flow: "find" });
+    expect(html).toContain("Admin access"); expect(html).toContain("real domain setup");
+    expect(html).toContain("I’ve bought it — continue setup"); expect(html).not.toContain("Preview the next step");
+    const oldLink = await render({ flow: "purchase-preview", website: "site-a", hostname: "saved-example.com" });
+    expect(oldLink).not.toContain("Read-only preview"); expect(oldLink).toContain("I’ve bought it — continue setup");
   });
 });

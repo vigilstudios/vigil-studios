@@ -1,5 +1,7 @@
 "use server";
 
+import { assertDomainSetupActor } from "@/lib/vigil/services/domain-handoff";
+
 import { revalidatePath } from "next/cache";
 import type { z } from "zod";
 import { BLOG_IMAGE_BUCKET } from "@/lib/vigil/blog/media-contract";
@@ -238,7 +240,7 @@ export type DomainSetup = {
 export async function startOnboardingDomain(projectId: string, input: { hostname: string; registrar: RegistrarKey | null }): Promise<ActionResult<DomainSetup>> {
   try {
     const ctx = await requireOrgContextOrThrow();
-    await assertOrgRole(ctx, ["owner", "manager"]);
+    assertDomainSetupActor(ctx);
     const { supabase, brief } = await loadProject(ctx, projectId);
     const hostname = normalizeHostname(input.hostname);
     if (!hostname) throw new ValidationError("Enter a domain like yourbusiness.com.", { hostname: ["Invalid domain"] });
@@ -300,7 +302,7 @@ export async function startOnboardingDomain(projectId: string, input: { hostname
 }
 
 async function domainSetup(supabase: Awaited<ReturnType<typeof createClient>>, domainId: string, registrar: RegistrarKey): Promise<DomainSetup> {
-  const { data: domain, error } = await supabase.from("domains").select("id, hostname, status, verification, verification_token, dns_ok, ssl_ok, status_reason").eq("id", domainId).single();
+  const { data: domain, error } = await supabase.from("domains").select("id, hostname, status, verification, verification_token, dns_ok, ssl_ok, status_reason").eq("id", domainId).neq("status", "released").single();
   if (error) throw error;
   const records = guidedDomainRecords(domain.hostname, domain.verification, domain.verification_token);
   const source = (domain.verification as { source?: string } | null)?.source;
@@ -313,7 +315,7 @@ async function domainSetup(supabase: Awaited<ReturnType<typeof createClient>>, d
 export async function saveDomainRegistrar(domainId: string, registrar: RegistrarKey): Promise<ActionResult<DomainSetup>> {
   try {
     const ctx = await requireOrgContextOrThrow();
-    await assertOrgRole(ctx, ["owner", "manager"]);
+    assertDomainSetupActor(ctx);
     if (!Object.hasOwn(REGISTRAR_GUIDES, registrar)) throw new ValidationError("Choose a domain provider from the list.");
     const client = await createClient();
     const { data: domain, error } = await client.from("domains").select("id").eq("id", domainId).eq("organization_id", ctx.organization.id).neq("status", "released").maybeSingle();
@@ -343,10 +345,12 @@ export async function getDomainSetup(domainId: string, registrar: RegistrarKey):
 export async function confirmDnsAdded(domainId: string, registrar: RegistrarKey = "other"): Promise<ActionResult<DomainSetup>> {
   try {
     const ctx = await requireOrgContextOrThrow();
-    await assertOrgRole(ctx, ["owner", "manager"]);
+    assertDomainSetupActor(ctx);
     const supabase = await createClient();
     const { data: domain } = await supabase.from("domains").select("id, organization_id, status, website_id").eq("id", domainId).maybeSingle();
     if (!domain || domain.organization_id !== ctx.organization.id) throw new NotFoundError("Domain not found.");
+
+    if (domain.status === "released") throw new ValidationError("This setup was cleared. Return to Domain to choose your next step.");
 
     if (hasAdminClient()) {
       const admin = createAdminClient();

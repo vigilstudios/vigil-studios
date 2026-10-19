@@ -9,10 +9,10 @@ import { DomainPurchaseReturn } from "@/components/vigil/DomainPurchaseReturn";
 import { FormError, inputClass, labelClass } from "@/components/vigil/ui";
 
 /** Shared Domain/onboarding journey. Purchase intent is never domain ownership. */
-export function DomainJourney({ websiteId, initial = null, canManage }: { websiteId: string; initial?: DomainIntent | null; canManage: boolean }) {
+export function DomainJourney({ websiteId, initial = null, initialHostname = "", canManage }: { websiteId: string; initial?: DomainIntent | null; initialHostname?: string; canManage: boolean }) {
   const id = useId();
   const [intent, setIntent] = useState(initial);
-  const [name, setName] = useState("");
+  const [name, setName] = useState(initialHostname);
   const [quote, setQuote] = useState<DomainQuote | null>(null);
   const [pending, setPending] = useState(false);
   const [loaded, setLoaded] = useState(false);
