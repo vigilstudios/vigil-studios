@@ -79,7 +79,10 @@ describe("customer-facing descriptions", () => {
     expect(describeWebsiteStatus("live").label).toBe("Website Live");
     expect(describeDomainStatus("connected").label).toBe("Domain Connected");
     expect(describeDomainStatus("verifying", { dnsOk: true, sslOk: false, reachable: false }).label).toBe("Securing domain");
-    expect(describeDomainStatus("verifying", { dnsOk: true, sslOk: false, reachable: false, launchReady: true }).label).toBe("Ready for launch");
+    const ownership = describeDomainStatus("verifying", { dnsOk: true, sslOk: false, reachable: false, launchReady: true });
+    expect(ownership.label).toBe("Ownership verified");
+    expect(ownership.hint).toContain("remaining connection records");
+    expect(ownership.tone).toBe("info");
     expect(describeDomainStatus("verifying", { dnsOk: true, sslOk: true, reachable: false }).label).toBe("Establishing connection");
     expect(describeSubscriptionStatus("active").label).toBe("Subscription Active");
   });

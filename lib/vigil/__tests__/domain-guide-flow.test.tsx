@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+vi.mock("@/components/vigil/DomainCelebration", () => ({ DomainCelebration: () => <span data-testid="connected-celebration" /> }));
 import { DomainGuide } from "@/components/vigil/DomainGuide";
 import { domainGuideScreens, guideEncouragement, guideOutcome, guideStorageKey, restoreGuideScreen, visibleGuideRecords, type GuideDomain } from "../domain-guide-flow";
 import { guidedDomainRecords } from "../services/dns";
@@ -42,16 +43,41 @@ describe("one task per guided screen", () => {
     expect(guideOutcome({...domain,launchReady:true,dnsOk:true})).toBeNull();
     expect(guideOutcome({...domain,cutoverReady:true,status:"connected",dnsOk:true,sslOk:true,reachable:true})).toBe("connected");
   });
-  it("shows only the waiting message after proof, with no cutover instructions", () => {
+  it("keeps ownership as an unfinished waiting step, without confetti or final records", () => {
     const html=renderToStaticMarkup(<DomainGuide domain={{...domain,status:"verifying",launchReady:true,dnsOk:true}} registrar="vercel" />);
-    expect(html).toContain("Your domain is ready for launch");expect(html).not.toContain("Select this type");expect(html).not.toContain("unique.vercel");
-    expect(html).toContain("Your part is done!"); expect(html).toContain("Ownership verified"); expect(html).toContain("Your site is not live yet"); expect(html).not.toContain("Visit my website");
+    expect(html).toContain("Ownership verified — more steps to come");expect(html).not.toContain("unique.vercel");
+    expect(html).toContain("remaining connection records"); expect(html).toContain("checks automatically"); expect(html).toContain("Your website is not live yet"); expect(html).not.toContain("Visit my website");
+    expect(html).not.toContain("Your part is done"); expect(html).not.toContain("connected-celebration"); expect(html).not.toContain('aria-valuenow="100"');
   });
   it("celebrates a connected domain only after DNS, SSL and the expected site all pass", () => {
     const html = renderToStaticMarkup(<DomainGuide domain={{...domain,status:"connected",dnsOk:true,sslOk:true,reachable:true,cutoverReady:true}} registrar="vercel" />);
     expect(html).toContain("Your domain is connected"); expect(html).toContain("Visit my website"); expect(html).toContain('href="https://example.com"');
+    expect(html).toContain("connected-celebration"); expect(html).toContain('aria-valuenow="100"');
     const partial = renderToStaticMarkup(<DomainGuide domain={{...domain,status:"connected",dnsOk:true,sslOk:false,reachable:true,cutoverReady:true}} registrar="vercel" />);
     expect(partial).not.toContain("Visit my website"); expect(partial).not.toContain("You did it");
+    expect(partial).not.toContain("connected-celebration"); expect(partial).not.toContain('aria-valuenow="100"');
+  });
+  it("continues directly with additional records when production requirements arrive", () => {
+    const next = {...domain, status:"verifying", cutoverReady:true, records:[{type:"TXT",name:"_vercel.example.com",value:"apex-proof"},{type:"TXT",name:"_vercel.example.com",value:"www-proof"},{type:"A",name:"@",value:"192.0.2.1"},{type:"CNAME",name:"www",value:"unique.vercel-dns-017.com"}]};
+    const screens = domainGuideScreens(next,"vercel",true,true);
+    expect(screens[0].kind).toBe("record"); expect(screens.filter(screen=>screen.kind==="record")).toHaveLength(4);
+    expect(screens.some(screen=>["provider","login","menu"].includes(screen.kind))).toBe(false);
+    expect(screens[0].instruction).toContain("separate TXT record for each value");
+    expect(screens.at(-1)?.title).toBe("Check your final connection");
+    const html=renderToStaticMarkup(<DomainGuide domain={next} registrar="vercel" afterPurchase />);
+    expect(html).toContain("apex-proof"); expect(html).not.toContain("www-proof"); expect(html).not.toContain("192.0.2.1"); expect(html).not.toContain("unique.vercel-dns-017.com");
+    expect(html).toContain("Open my Vercel domains"); expect(html).toContain("Keep your ownership TXT record"); expect(html).not.toContain("connected-celebration");
+    expect(guideStorageKey(next,"vercel",true)).not.toBe(guideStorageKey(domain,"vercel",true));
+  });
+  it.each([
+    {cutoverReady:false,status:"connected",dnsOk:true,sslOk:true,reachable:true},
+    {cutoverReady:true,status:"verifying",dnsOk:true,sslOk:true,reachable:true},
+    {cutoverReady:true,status:"connected",dnsOk:false,sslOk:true,reachable:true},
+    {cutoverReady:true,status:"connected",dnsOk:true,sslOk:false,reachable:true},
+    {cutoverReady:true,status:"connected",dnsOk:true,sslOk:true,reachable:false},
+  ])("does not celebrate incomplete connection signals: %o", state => {
+    const html = renderToStaticMarkup(<DomainGuide domain={{...domain,...state}} registrar="vercel" />);
+    expect(html).not.toContain("connected-celebration"); expect(html).not.toContain("Visit my website"); expect(html).not.toContain('aria-valuenow="100"');
   });
   it("encourages progress without treating navigation as proof", () => {
     const screens = domainGuideScreens(domain,"vercel",true,true);
@@ -90,6 +116,8 @@ describe("record names and verified state", () => {
   });
   it("shows a single waiting phase while SSL/site verification is unfinished", () => {
     expect(guideOutcome({...domain,cutoverReady:true,dnsOk:true,sslOk:false})).toBe("waiting_connection");
+    const html=renderToStaticMarkup(<DomainGuide domain={{...domain,cutoverReady:true,dnsOk:true,sslOk:false}} registrar="vercel" />);
+    expect(html).toContain("Finishing your secure connection");expect(html).not.toContain("connected-celebration");expect(html).not.toContain('aria-valuenow="100"');
   });
 });
 
