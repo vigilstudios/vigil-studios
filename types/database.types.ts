@@ -3482,6 +3482,16 @@ export type Database = {
         }
         Returns: string
       }
+      reset_domain_setup: {
+        Args: {
+          p_actor: string
+          p_domains: Json
+          p_expected_version: number
+          p_organization: string
+          p_website: string
+        }
+        Returns: undefined
+      }
       resolve_entitlements: {
         Args: { p_org: string }
         Returns: {

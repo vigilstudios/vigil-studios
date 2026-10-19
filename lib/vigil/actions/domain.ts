@@ -6,12 +6,12 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/vigil/audit";
 import { ValidationError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
-import { assertOrgRole, requireOrgContextOrThrow } from "@/lib/vigil/auth/session";
+import { requireOrgContextOrThrow } from "@/lib/vigil/auth/session";
 import { enqueueJob, JOB_KINDS } from "@/lib/vigil/jobs";
 import { domainKind } from "@/lib/vigil/domains";
 import { beginDomainVerification, normalizeHostname } from "@/lib/vigil/services/domain";
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/vigil/rate-limit";
-import { assertHandoffActor, loadDomainIntent } from "@/lib/vigil/services/domain-handoff";
+import { assertDomainSetupActor, loadDomainIntent } from "@/lib/vigil/services/domain-handoff";
 
 export type DomainState = ActionResult<{ domainId: string }> | null;
 
@@ -24,9 +24,8 @@ export async function startDomainConnection(_prev: DomainState, formData: FormDa
   let domainId: string;
   try {
     const ctx = await requireOrgContextOrThrow();
-    await assertOrgRole(ctx, ["owner", "manager"]);
+    assertDomainSetupActor(ctx);
     const afterPurchase = formData.get("journey") === "vercel_purchase";
-    if (afterPurchase) assertHandoffActor(ctx);
 
     const hostname = normalizeHostname(String(formData.get("hostname") ?? ""));
     if (!hostname) throw new ValidationError("Enter a domain like yourbusiness.com.", { hostname: ["Invalid domain"] });

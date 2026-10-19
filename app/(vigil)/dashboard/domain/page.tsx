@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import { domainHandoffEnabled } from "@/lib/vigil/domain-commerce-config";
 import { DomainJourney } from "@/components/vigil/DomainJourney";
 import { DomainPurchasePreview } from "@/components/vigil/DomainPurchasePreview";
+import { AdminDomainControls } from "@/components/vigil/AdminDomainControls";
+import { canManageDomainSetup } from "@/lib/vigil/domain-access";
 import { loadDomainIntent } from "@/lib/vigil/services/domain-handoff";
 import { createClient } from "@/lib/supabase/server";
 import { Card, PageHeader, StatusPill, inputClass, labelClass } from "@/components/vigil/ui";
@@ -25,7 +27,8 @@ type Params = { flow?: string; website?: string; domain?: string; new?: string; 
 export default async function DomainPage({ searchParams }: { searchParams: Promise<Params> }) {
   const ctx = await requireOrgContext("/dashboard/domain");
   const [params, domains, websites, onboarding] = await Promise.all([searchParams, getOrgDomains(ctx.organization.id), getOrgWebsites(ctx.organization.id), getOnboardingProject(ctx.organization.id)]);
-  const canManage = ctx.role === "owner" || ctx.role === "manager" || ctx.isImpersonating;
+  const canManage = canManageDomainSetup(ctx);
+  const adminManaging = ctx.staffRole === "admin";
   const canFind = domainHandoffEnabled() && websites.length > 0;
   const client = await createClient();
   const intents = await Promise.all(websites.map(async website => ({ website, intent: await loadDomainIntent(client, ctx.organization.id, website.id) })));
@@ -36,7 +39,8 @@ export default async function DomainPage({ searchParams }: { searchParams: Promi
   const savedDomain = currentDomains.find(domain => intents.some(({ website, intent }) => intent && intent.phase !== "cancelled" && intent.hostname === domain.hostname && website.id === domain.website_id && (!params.website || params.website === website.id)));
   const selectedWebsite = params.website === "choose" ? null : intents.find(({ website }) => website.id === params.website) ?? saved ?? (intents.length === 1 ? intents[0] : null);
   const requestedName = normalizeHostname(params.hostname ?? "") ?? "";
-  const flow = params.flow === "purchase-preview" && requestedName && websites.some(site => site.id === params.website) ? "purchase-preview" : params.flow === "choose" ? "choose" : params.flow === "find" || params.flow === "own" ? params.flow : savedDomain ? "own" : saved ? "find" : currentDomains.length ? "own" : "choose";
+  const validPreview = params.flow === "purchase-preview" && requestedName && websites.some(site => site.id === params.website);
+  const flow = validPreview ? canManage ? currentDomains.some(item => item.hostname === requestedName && item.website_id === params.website) ? "own" : "find" : "purchase-preview" : params.flow === "choose" ? "choose" : params.flow === "find" || params.flow === "own" ? params.flow : savedDomain ? "own" : saved ? "find" : currentDomains.length ? "own" : "choose";
   const domain = currentDomains.find(domain => domain.id === params.domain) ?? currentDomains.find(domain => domain.hostname === requestedName && domain.website_id === selectedWebsite?.website.id) ?? savedDomain ?? currentDomains[0];
   const addNew = params.new === "1" || !domain || Boolean(requestedName && !currentDomains.some(item => item.hostname === requestedName));
   const canAdd = canManage && websites.length > 0 && !domains.some(domain => domain.status === "connected");
@@ -46,16 +50,23 @@ export default async function DomainPage({ searchParams }: { searchParams: Promi
   const status = domain ? describeDomainStatus(domain.status, { dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable, launchReady }) : null;
   const initialRegistrar = (domain?.registrar && domain.registrar in REGISTRAR_GUIDES ? domain.registrar : briefDomain?.domainId === domain?.id && briefDomain?.registrar ? briefDomain.registrar : "other") as RegistrarKey;
   const afterPurchase = initialRegistrar === "vercel" && intents.some(({ website, intent }) => intent && intent.phase !== "cancelled" && intent.hostname === domain?.hostname && website.id === domain?.website_id);
+  const adminWebsiteId = flow === "own" && !addNew && domain?.website_id ? domain.website_id : selectedWebsite?.website.id;
 
   return <div className="flex min-h-[calc(100dvh-5rem)] items-center justify-center sm:min-h-[calc(100dvh-5.5rem)] lg:min-h-[calc(100dvh-6.5rem)]">
     <div className={`w-full ${flow === "choose" ? "max-w-4xl" : "max-w-3xl"}`}>
     <PageHeader title="Domain" description={flow === "choose" ? "How would you like to set up your web address?" : "Follow the steps to set up your web address."} />
+    {adminManaging ? <AdminDomainControls key={adminWebsiteId} customer={ctx.organization.name} selectedWebsite={adminWebsiteId} websites={intents.map(({ website, intent }) => {
+      const setupDomains = currentDomains.filter(item => item.website_id === website.id);
+      return { id: website.id, name: website.name, intentVersion: intent?.version ?? 0,
+        canReset: ["provisioning", "building", "error"].includes(website.status) && !website.live_url && !website.primary_domain_id && setupDomains.every(item => item.source === "customer_owned" && item.status !== "connected" && (item.verification as { source?: string } | null)?.source !== "provider"),
+        domains: setupDomains.map(item => ({ id: item.id, hostname: item.hostname, updated_at: item.updated_at })) };
+    })} /> : null}
     {flow === "choose" ? <DomainOptions canFind={canFind} canSetUp={websites.length > 0} savedName={saved?.intent?.hostname} /> : <>
       <Link href="/dashboard/domain?flow=choose" className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]"><ArrowLeft className="h-4 w-4" aria-hidden="true" />All domain options</Link>
       {flow === "purchase-preview" ? <Card><DomainPurchasePreview hostname={requestedName} /></Card> : flow === "find" ? <Card>
         {!canFind ? <p className="text-sm text-[color:var(--text-secondary)]">Domain search is unavailable right now. You can return to the options or contact Vigil for help.</p> : selectedWebsite ? <>
           {websites.length > 1 ? <p className="mb-4 text-sm text-[color:var(--text-secondary)]">{selectedWebsite.website.name} · <Link className="underline" href="/dashboard/domain?flow=find&website=choose">Change website</Link></p> : null}
-          <DomainJourney key={selectedWebsite.website.id} websiteId={selectedWebsite.website.id} initial={selectedWebsite.intent} canManage={canManage && !ctx.isImpersonating} />
+          <DomainJourney key={`${selectedWebsite.website.id}:${requestedName}`} websiteId={selectedWebsite.website.id} initial={selectedWebsite.intent} initialHostname={requestedName} canManage={canManage} />
         </> : <>
           <h2 className="text-base font-semibold">Which website is this domain for?</h2>
           <form action="/dashboard/domain" className="mt-4 space-y-4">

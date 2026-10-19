@@ -9,7 +9,7 @@ import { requireOrgContextOrThrow } from "@/lib/vigil/auth/session";
 import { ProviderNotConfiguredError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
 import { enforceRateLimit, RATE_LIMITS } from "@/lib/vigil/rate-limit";
 import { searchVercelDomain } from "@/lib/vigil/providers/vercel-discovery";
-import { assertHandoffActor, assertHandoffWebsite, loadDomainIntent, saveHandoff } from "@/lib/vigil/services/domain-handoff";
+import { assertDomainSetupActor, assertHandoffWebsite, loadDomainIntent, saveHandoff } from "@/lib/vigil/services/domain-handoff";
 import type { DomainIntent, DomainQuote } from "@/lib/vigil/domain-commerce";
 
 export async function getDomainHandoff(websiteId: string): Promise<ActionResult<DomainIntent | null>> {
@@ -35,7 +35,7 @@ export async function updateDomainHandoff(input: { websiteId: string; version: n
   try {
     const ctx = await requireOrgContextOrThrow();
     if (!domainHandoffEnabled()) throw new ProviderNotConfiguredError("Domain handoff");
-    assertHandoffActor(ctx);
+    assertDomainSetupActor(ctx);
     z.string().uuid().parse(input.websiteId);
     await enforceRateLimit(`domain-handoff:org:${ctx.organization.id}`, RATE_LIMITS.domainHandoffOrg, true);
     if (!hasAdminClient()) throw new ProviderNotConfiguredError("Domain handoff");

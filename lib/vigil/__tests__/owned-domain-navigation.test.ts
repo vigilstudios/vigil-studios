@@ -1,17 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeAdmin } from "./fake-admin";
-const mocks = vi.hoisted(() => ({ client: {}, role: "owner", isImpersonating: false, redirect: vi.fn((url: string) => { throw new Error(`NEXT_REDIRECT:${url}`); }) }));
+const mocks = vi.hoisted(() => ({ client: {}, role: "owner", isImpersonating: false, staffRole: null as "admin" | "staff" | null, redirect: vi.fn((url: string) => { throw new Error(`NEXT_REDIRECT:${url}`); }) }));
 vi.mock("next/navigation", () => ({ redirect: mocks.redirect }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => mocks.client }));
 vi.mock("@/lib/supabase/admin", () => ({ hasAdminClient: () => false, createAdminClient: vi.fn() }));
-vi.mock("@/lib/vigil/auth/session", () => ({ requireOrgContextOrThrow: async () => ({ organization: { id: "org-a" }, user: { id: "owner-a" }, role: mocks.role, isImpersonating: mocks.isImpersonating }), assertOrgRole: vi.fn() }));
+vi.mock("@/lib/vigil/auth/session", () => ({ requireOrgContextOrThrow: async () => ({ organization: { id: "org-a" }, user: { id: "owner-a" }, role: mocks.role, isImpersonating: mocks.isImpersonating, staffRole: mocks.staffRole }), assertOrgRole: vi.fn() }));
 vi.mock("@/lib/vigil/rate-limit", () => ({ enforceRateLimit: vi.fn(), RATE_LIMITS: { domainStartOrg: {} } }));
 vi.mock("@/lib/vigil/audit", () => ({ logAuditEvent: vi.fn() }));
 import { startDomainConnection } from "../actions/domain";
 
 describe("owned-domain save navigation", () => {
-  beforeEach(() => { vi.clearAllMocks(); mocks.role = "owner"; mocks.isImpersonating = false; });
+  beforeEach(() => { vi.clearAllMocks(); mocks.role = "owner"; mocks.isImpersonating = false; mocks.staffRole = null; });
   const form = (hostname = "owned-example.com") => { const data = new FormData(); data.set("hostname", hostname); data.set("website_id", "site-a"); return data; };
   it("redirects to the exact created domain after saving, without swallowing the redirect", async () => {
     const db = new FakeAdmin({ websites: [{ id: "site-a", organization_id: "org-a", status: "building" }], domains: [{ id: "old", hostname: "other-example.com", organization_id: "org-a" }] });
@@ -34,7 +34,7 @@ describe("owned-domain save navigation", () => {
 });
 
 describe("continuing a saved Vercel purchase choice", () => {
-  beforeEach(() => { vi.clearAllMocks(); vi.stubEnv("DOMAIN_HANDOFF_ENABLED", "true"); mocks.role = "owner"; mocks.isImpersonating = false; });
+  beforeEach(() => { vi.clearAllMocks(); vi.stubEnv("DOMAIN_HANDOFF_ENABLED", "true"); mocks.role = "owner"; mocks.isImpersonating = false; mocks.staffRole = null; });
   const form = () => { const data = new FormData(); for (const [key, value] of Object.entries({ hostname: "saved-example.com", website_id: "site-a", registrar: "vercel", journey: "vercel_purchase", intent_version: "2" })) data.set(key, value); return data; };
   const fixture = (intent = {}) => new FakeAdmin({ websites: [{ id: "site-a", organization_id: "org-a", status: "building" }], domain_purchase_intents: [{ id: "intent-a", organization_id: "org-a", website_id: "site-a", hostname: "saved-example.com", phase: "handoff_started", version: 2, ...intent }] });
   it("saves the exact selected domain and redirects directly to its guide", async () => {
@@ -42,6 +42,12 @@ describe("continuing a saved Vercel purchase choice", () => {
     await expect(startDomainConnection(null, form())).rejects.toThrow("NEXT_REDIRECT:/dashboard/domain?flow=own&domain=id_1");
     expect(db.rows("domains")[0]).toMatchObject({ hostname: "saved-example.com", registrar: "vercel", status: "pending", website_id: "site-a", organization_id: "org-a" });
     expect(db.rows("domain_purchase_intents")[0].phase).toBe("handoff_started");
+  });
+  it.each([{ isImpersonating: true, role: "owner" }, { isImpersonating: false, role: "member" }])("lets a verified administrator continue the actual saved setup: %j", async actor => {
+    mocks.staffRole = "admin"; mocks.isImpersonating = actor.isImpersonating; mocks.role = actor.role;
+    const db = fixture(); mocks.client = db.asClient();
+    await expect(startDomainConnection(null, form())).rejects.toThrow("NEXT_REDIRECT:/dashboard/domain?flow=own&domain=id_1");
+    expect(db.rows("domains")[0]).toMatchObject({ status: "pending", hostname: "saved-example.com" });
   });
   it.each([{ phase: "cancelled" }, { hostname: "replacement.com" }, { version: 3 }, { organization_id: "org-b" }, { website_id: "site-b" }])("rejects a stale or unrelated saved choice before starting setup: %j", async intent => {
     const db = fixture(intent); mocks.client = db.asClient();

@@ -6,6 +6,11 @@ import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/vigil/auth
 import type { OrgContext } from "@/lib/vigil/auth/session";
 import { normalizeRegistrationName, type DomainIntent, type DomainQuote } from "@/lib/vigil/domain-commerce";
 import { searchVercelDomain } from "@/lib/vigil/providers/vercel-discovery";
+import { canManageDomainSetup } from "@/lib/vigil/domain-access";
+
+export function assertDomainSetupActor(ctx: OrgContext): void {
+  if (!canManageDomainSetup(ctx)) throw new ForbiddenError("A customer owner, manager or Vigil administrator is required to manage domain setup.");
+}
 
 export function assertHandoffActor(ctx: OrgContext): void {
   if (ctx.isImpersonating || !["owner", "manager"].includes(ctx.role)) throw new ForbiddenError("Only a customer owner or manager can save a domain choice. Staff viewing this account cannot provide customer authorization.");
@@ -26,7 +31,7 @@ export async function assertHandoffWebsite(client: DbClient, orgId: string, webs
   if (!data) throw new NotFoundError("Website not found.");
 }
 export async function saveHandoff(admin: DbClient, ctx: OrgContext, input: { websiteId: string; version: number; action: "handoff" | "help" | "cancel"; hostname?: string }, search = searchVercelDomain): Promise<DomainIntent> {
-  assertHandoffActor(ctx);
+  assertDomainSetupActor(ctx);
   await assertHandoffWebsite(admin, ctx.organization.id, input.websiteId);
   if (!Number.isSafeInteger(input.version) || input.version < 0 || !["handoff", "help", "cancel"].includes(input.action)) throw new ValidationError("Refresh the domain selection and try again.");
   // Requote server-side. Browser prices/timestamps are never accepted as authority.

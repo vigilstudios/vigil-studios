@@ -4,6 +4,7 @@ import { loadDomainIntent } from "@/lib/vigil/services/domain-handoff";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
+import { canManageDomainSetup } from "@/lib/vigil/domain-access";
 import { resumeStep, stepsForProjectKind, type StepKey } from "@/lib/vigil/onboarding/brief";
 import { getOnboardingProject, getProjectAssets } from "@/lib/vigil/queries/onboarding";
 import { getOrgDomains } from "@/lib/vigil/queries/dashboard";
@@ -60,7 +61,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
       initialAssets={assets}
       initialDomain={domainSetup}
       completedAt={project.intake_completed_at}
-      canManageDomain={!ctx.isImpersonating && (ctx.role === "owner" || ctx.role === "manager")}
+      canManageDomain={canManageDomainSetup(ctx)}
     />
   );
 }

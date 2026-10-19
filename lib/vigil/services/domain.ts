@@ -168,7 +168,7 @@ export async function beginDomainVerification(
           ? "Your ownership record is verified. Website routing will be configured after the approved production build is ready."
           : "Add the ownership record in the guide, then check your setup. This does not redirect your website.",
     })
-    .eq("id", domainId);
+    .eq("id", domainId).eq("verification_token", domain.verification_token).neq("status", "released");
   if (updateError) throw updateError;
 }
 
@@ -256,7 +256,7 @@ export async function verifyDomain(
       assertTransition(domainTransitions, domain.status, "verifying", "domain");
       nextStatus = "verifying";
     }
-    const { error: updateError } = await admin.from("domains").update({
+    const { data: updated, error: updateError } = await admin.from("domains").update({
       status: nextStatus,
       dns_ok: dnsOk,
       ssl_ok: false,
@@ -272,8 +272,9 @@ export async function verifyDomain(
         connection_reachable: false,
         checks: checks.map((check) => ({ type: check.record.type, name: check.record.name, ok: check.ok, found: check.found })),
       },
-    }).eq("id", domainId);
+    }).eq("id", domainId).eq("verification_token", domain.verification_token).neq("status", "released").select("id").maybeSingle();
     if (updateError) throw updateError;
+    if (!updated) return { connected: false, readyForLaunch: false, dnsOk: false };
     // A later purchase can connect to an already approved production build.
     // This creates project associations only; the customer still edits DNS.
     if (dnsOk && domain.website_id && await domainProductionContext(admin, domain.website_id, domain.organization_id, provider)) {
