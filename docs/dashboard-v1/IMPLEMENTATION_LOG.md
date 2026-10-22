@@ -1163,3 +1163,12 @@ Administrators now use the actual customer domain journey in the selected accoun
 ### 2026-10-18 — Keep domain setup open through the final connection
 
 Ownership verification now remains an unfinished waiting step with explicit additional-record instructions. When provider requirements arrive after approved production preparation, the shared Domain/onboarding guide continues directly to one additional record at a time. Duplicate-name TXT challenges have separate-record instructions, and old local navigation cannot skip the new phase. Only a fully connected domain with DNS, SSL and expected-site checks can show completion, 100% progress and confetti. Onboarding labels unfinished setup explicitly. No schema, DNS, approval or customer-site publication change is included. See vercel-domains-2026-10-16/FINAL_CONNECTION_GUIDE.md and its validation/release receipts.
+
+---
+
+## 2026-10-22 — Lead Hub design alignment with Content Hub
+
+- Rebuilt the authenticated inbox, unread view, contact preferences and inquiry-detail presentation using existing Content Hub proportions, tokens, navigation and table styling; added compact phone/tablet layouts and keyboard focus treatment.
+- Preserved existing contact/notification actions and launch gates, added tenant-scoped unread filtering, normalized search inputs and context-preserving pagination/back navigation. Distinct empty/search/out-of-range states avoid misleading inbox messages.
+- Scar’s capture remains disabled pending website/domain launch. The UI reflects that state rather than suggesting a live connection. No production leads or outgoing notifications were created.
+- Validation: 85 focused tests, TypeScript, focused lint, optimized production build, and 24 Chrome layout checks in both themes. Local-only sample lab: `node scripts/preview-lead-hub.mjs`, port 4187. Details in `docs/launch/lead-hub-design/REPORT.md`.

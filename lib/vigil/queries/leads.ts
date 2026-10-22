@@ -1,13 +1,16 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
-import { leadStatuses } from "@/lib/vigil/contact/contract";
-export async function getLeadHub(filters: {q?:string;status?:string;source?:string;page?:string}) {
+import { readLeadFilters } from "@/lib/vigil/leads/presentation";
+import type { leadStatuses } from "@/lib/vigil/contact/contract";
+export async function getLeadHub(input: Record<string, unknown>) {
+  const filters = readLeadFilters({ ...input, page: typeof input.page === 'number' ? String(input.page) : input.page });
   const ctx = await requireOrgContext("/dashboard/leads"), client = await createClient();
-  const page = Math.min(10_000,Math.max(1,Number.parseInt(filters.page??"1",10)||1));
+  const page = filters.page;
   let query = client.from("leads").select("*",{count:"exact"}).eq("organization_id",ctx.organization.id);
-  if (leadStatuses.includes(filters.status as typeof leadStatuses[number])) query = query.eq("status",filters.status as typeof leadStatuses[number]);
-  if (filters.source && /^[a-z][a-z0-9-]{0,79}$/.test(filters.source)) query = query.eq("source",filters.source);
+  if (filters.status) query = query.eq("status",filters.status as typeof leadStatuses[number]);
+  if (filters.source) query = query.eq("source",filters.source);
+  if (filters.view === 'unread') query = query.is("read_at",null);
   if (filters.q?.trim()) query = query.textSearch("search_document",filters.q.trim().slice(0,200),{type:"websearch",config:"simple"});
   const [rows, unread,settings,sites] = await Promise.all([
     query.order("received_at",{ascending:false}).order("id",{ascending:false}).range((page-1)*25,page*25-1),
