@@ -8,6 +8,7 @@ import { addLeadNote, updateLead } from '@/lib/vigil/actions/leads';
 import { leadStatuses } from '@/lib/vigil/contact/contract';
 import { titleCase } from '@/lib/vigil/format';
 import { leadBackHref } from '@/lib/vigil/leads/presentation';
+import { readLeadReplyPlatform } from '@/lib/vigil/leads/reply';
 
 export default async function LeadPage({ params, searchParams }: { params: Promise<{ leadId: string }>; searchParams: Promise<{ back?: string | string[] }> }) {
   const { leadId } = await params;
@@ -20,5 +21,5 @@ export default async function LeadPage({ params, searchParams }: { params: Promi
     <label className="lead-field" htmlFor="lead-read">Read state<select id="lead-read" name="read" defaultValue={lead.read_at ? 'read' : 'unread'}><option value="read">Read</option><option value="unread">Unread</option></select></label></div>
   </ActionForm>;
   const noteForm = <ActionForm action={addLeadNote.bind(null, lead.id)} submitLabel="Add note" className="lead-form mt-6"><label className="lead-field" htmlFor="lead-note">Internal follow-up note<textarea id="lead-note" name="note" required maxLength={4000} rows={4} placeholder="What’s the next step? Add context for your follow-up…" /><small>Only your team can see these notes.</small></label></ActionForm>;
-  return <LeadDetailView detail={detail} Link={Link} backHref={leadBackHref((await searchParams).back)} updateForm={updateForm} noteForm={noteForm} />;
+  return <LeadDetailView detail={detail} Link={Link} backHref={leadBackHref((await searchParams).back)} updateForm={updateForm} noteForm={noteForm} replyPlatform={readLeadReplyPlatform(detail.ctx.user.user_metadata)} />;
 }

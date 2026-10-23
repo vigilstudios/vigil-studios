@@ -141,11 +141,13 @@ export function ActionForm({
   children,
   submitLabel,
   className,
+  resetOnSuccess = true,
 }: {
   action: (formData: FormData) => Promise<ActionResult<unknown>>;
   children: React.ReactNode;
   submitLabel: string;
   className?: string;
+  resetOnSuccess?: boolean;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -165,7 +167,7 @@ export function ActionForm({
           if (!res.ok) setError(res.error);
           else {
             setOk(true);
-            form.reset();
+            if (resetOnSuccess) form.reset();
             router.refresh();
           }
         });

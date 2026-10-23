@@ -1180,3 +1180,12 @@ Ownership verification now remains an unfinished waiting step with explicit addi
 - Added a read-only published-content delivery gate for approved Building sites whose exact production build, provider association, ownership, routing DNS and SSL already pass. This lets the real homepage render for its final HTTPS check without setting Live early or exposing drafts. Ordinary live/review delivery and database eligibility remain intact; no schema change.
 - Domain verification returns the production deployment it actually checked, so manual jobs with no deployment payload and stale deployment-bound jobs can finish the existing launch service. Expected DNS waiting no longer consumes the domain job’s failure budget; real errors remain bounded.
 - Scar’s customer DNS and review approvals are unchanged. Production rollout will use the existing verifier and launch/contact automation. Diagnosis and validation scope: `docs/launch/domain-launch-cycle/REPORT.md`.
+
+---
+
+## 2026-10-22 — Personal Lead Hub reply platform
+
+- Added a personal reply preference in Lead Hub Settings: Gmail, Outlook.com, Microsoft 365 Outlook, or the device’s default email app. The signed-in user’s non-sensitive Auth metadata stores one allowlisted value across devices; staff viewing a customer still changes only their own preference. Website notification and booking preferences keep their existing role restrictions.
+- Inquiry details open an addressed draft with a short subject in the selected platform. Fixed provider origins, encoded recipients, single-mailbox validation, new-tab isolation, and safe fallback handle unsupported metadata and malformed contact addresses. Opening a draft does not send email, change lead status, or synchronize external conversations.
+- Reused the existing settings styling and form behavior, with an opt-out from successful form reset so the new selection remains visible. The local sample lab supports saving the preference across its native page navigations via sessionStorage; production persistence uses Auth, not browser storage.
+- Validation: all 2,559 tests passed (129 files), TypeScript, focused ESLint, and the optimized production build. Release/browser verification is recorded in docs/launch/lead-reply-platform/REPORT.md.

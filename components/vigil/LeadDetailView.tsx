@@ -4,18 +4,19 @@ import type { getLeadDetail } from '@/lib/vigil/queries/leads';
 import { formatDateTime, titleCase } from '@/lib/vigil/format';
 import { contactInitials, sourceLabel } from '@/lib/vigil/leads/presentation';
 import { LeadStatus, type HubLink } from './LeadHubView';
+import { leadReplyLink, type LeadReplyPlatform } from '@/lib/vigil/leads/reply';
 
 export type LeadDetailData = Omit<NonNullable<Awaited<ReturnType<typeof getLeadDetail>>>, 'ctx'>;
-export function LeadDetailView({ detail, Link, backHref, updateForm, noteForm }: { detail: LeadDetailData; Link: HubLink; backHref: string; updateForm: ReactNode; noteForm: ReactNode }) {
+export function LeadDetailView({ detail, Link, backHref, updateForm, noteForm, replyPlatform }: { detail: LeadDetailData; Link: HubLink; backHref: string; updateForm: ReactNode; noteForm: ReactNode; replyPlatform: LeadReplyPlatform }) {
   const { lead, events, notification } = detail;
   const contact = lead.contact as { name?: string; email?: string; phone?: string; details?: Record<string, string> };
   const name = contact.name || 'Website inquiry';
-  const email = contact.email && /^[^\s<>?]+@[^\s<>?]+\.[^\s<>?]+$/.test(contact.email) ? contact.email : null;
+  const reply = leadReplyLink(replyPlatform, contact.email);
   const delivered = notification?.status === 'sent';
   return <div className="lead-hub">
     <Link href={backHref} className="lead-back"><ArrowLeft size={14} aria-hidden="true" />Back to inbox</Link>
     <header className="lead-page-heading lead-detail-heading"><div className="lead-detail-person"><span className="lead-avatar" aria-hidden="true">{contactInitials(name)}</span><div><h1>{name}</h1><p>Received {formatDateTime(lead.received_at)}</p></div></div>
-      {email && <a className="lead-button" data-primary="true" href={`mailto:${encodeURIComponent(email)}`}><Mail size={15} aria-hidden="true" />Reply by email<ArrowUpRight size={14} aria-hidden="true" /></a>}
+      {reply && <a className="lead-button" data-primary="true" href={reply.href} target={reply.external ? '_blank' : undefined} rel={reply.external ? 'noopener noreferrer' : undefined}><Mail size={15} aria-hidden="true" />{reply.label}<ArrowUpRight size={14} aria-hidden="true" />{reply.external && <span className="lead-sr-only"> (opens a new tab)</span>}</a>}
     </header>
     <div className="lead-detail-grid"><div className="lead-detail-main">
       <section className="lead-detail-panel" aria-labelledby="lead-message-title"><h2 className="lead-panel-heading" id="lead-message-title"><FileText size={16} aria-hidden="true" />The inquiry</h2><div className="lead-panel-body">

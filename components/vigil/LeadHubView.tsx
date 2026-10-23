@@ -12,7 +12,7 @@ export function LeadStatus({ status }: { status: string }) {
   const tone = ['booked', 'won'].includes(status) ? 'good' : status === 'new' ? 'accent' : ['qualified', 'contacted'].includes(status) ? 'info' : 'neutral';
   return <span className="lead-status" data-tone={tone}><span aria-hidden="true" />{titleCase(status)}</span>;
 }
-export function LeadHubView({ data, filters, Link, preferenceForms }: { data: LeadHubData; filters: LeadFilters; Link: HubLink; preferenceForms: Record<string, ReactNode> }) {
+export function LeadHubView({ data, filters, Link, preferenceForms, replyPreferencesForm }: { data: LeadHubData; filters: LeadFilters; Link: HubLink; preferenceForms: Record<string, ReactNode>; replyPreferencesForm: ReactNode }) {
   const filtered = hasLeadFilters(filters), settingsView = filters.view === 'settings';
   const connected = data.settings.filter(setting => setting.enabled && data.sites.find(site => site.id === setting.website_id)?.status === 'live');
   const waitingLaunch = data.sites.some(site => ['building', 'provisioning'].includes(site.status));
@@ -34,7 +34,12 @@ export function LeadHubView({ data, filters, Link, preferenceForms }: { data: Le
       {!connected.length && <Link href={waitingLaunch ? '/dashboard/domain' : '/dashboard/website'}>{waitingLaunch ? 'View launch progress' : 'View website'}<ArrowUpRight size={13} aria-hidden="true" /></Link>}
     </div>
     {settingsView ? <section className="lead-settings" aria-labelledby="lead-settings-title">
-      <div className="lead-section-heading"><div><h2 id="lead-settings-title">Contact settings</h2><p>Choose where inquiry notifications go, and add a booking link if you use one.</p></div></div>
+      <div className="lead-section-heading"><div><h2 id="lead-settings-title">Contact settings</h2><p>Choose how you reply, where notifications go, and where visitors can book.</p></div></div>
+      <section className="lead-settings-panel" aria-labelledby="lead-reply-title">
+        <div className="lead-settings-summary"><span className="lead-setting-icon"><ArrowUpRight size={19} aria-hidden="true" /></span><div><h3 id="lead-reply-title">Your reply preference</h3><p>Open inquiry replies in the email platform you prefer. Saved to your account across devices.</p></div><span className="lead-status" data-tone="neutral"><span aria-hidden="true" />Personal</span></div>
+        {replyPreferencesForm}
+        <p className="lead-settings-note">The Reply button opens a new draft addressed to the visitor. Check the sending account before you send. Email conversations and sent status are managed in your email platform.</p>
+      </section>
       {data.settings.length ? data.settings.map(setting => {
         const site = data.sites.find(site => site.id === setting.website_id);
         const active = connected.some(row => row.website_id === setting.website_id);
@@ -44,7 +49,7 @@ export function LeadHubView({ data, filters, Link, preferenceForms }: { data: Le
           <p className="lead-settings-note">A booking link opens your scheduler. Appointments are not synchronized with Lead Hub.</p>
         </section>;
       }) : <div className="lead-empty"><Settings2 size={25} aria-hidden="true" /><h3>Contact setup is on its way</h3><p>Vigil will connect your website’s inquiry form. Its notification preferences will appear here.</p><Link className="lead-button" href="/dashboard/website">View your website<ArrowRight size={14} aria-hidden="true" /></Link></div>}
-      <p className="lead-footnote">These settings control website inquiry notifications. No automatic replies are sent to visitors.</p>
+      <p className="lead-footnote">Reply preferences are personal. Website settings control inquiry notifications. No automatic replies are sent to visitors.</p>
     </section> : <>
       <form className="lead-toolbar" action="/dashboard/leads" role="search" aria-label="Search website inquiries">
         {filters.view === 'unread' && <input type="hidden" name="view" value="unread" />}

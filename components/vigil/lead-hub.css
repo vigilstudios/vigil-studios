@@ -72,6 +72,7 @@
 .lead-settings-summary>div{flex:1;min-width:0}.lead-settings-summary h3{font-size:14px;font-weight:500}.lead-settings-summary p{font-size:12px;line-height:1.65;color:var(--text-secondary);margin-top:5px;max-width:580px}
 .lead-settings-summary>.lead-status{margin-top:2px}
 .lead-form-fields{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.lead-reply-form{max-width:430px}
 .lead-hub label.lead-field,.lead-field{display:flex;flex-direction:column;align-items:stretch;gap:8px;min-width:0;font-size:12px;color:var(--text-secondary)}
 .lead-field small{font-size:11px;line-height:1.7;color:var(--text-secondary)}
 .lead-form>div:last-child{flex-wrap:wrap}.lead-hub .btn-primary:disabled{opacity:.6;cursor:wait}
