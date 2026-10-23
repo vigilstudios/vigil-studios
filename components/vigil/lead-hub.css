@@ -73,6 +73,10 @@
 .lead-settings-summary>.lead-status{margin-top:2px}
 .lead-form-fields{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .lead-reply-form{max-width:430px}
+.lead-reply-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.lead-gmail-notice{margin:0 0 18px;padding:12px 14px;border:1px solid var(--border);border-radius:9px;font-size:12px;line-height:1.7;color:var(--text-secondary)}
+.lead-gmail-notice a{color:var(--accent);text-decoration:underline}
+@media(max-width:1040px){.lead-detail-heading>.lead-reply-actions{margin-left:62px}}
 .lead-hub label.lead-field,.lead-field{display:flex;flex-direction:column;align-items:stretch;gap:8px;min-width:0;font-size:12px;color:var(--text-secondary)}
 .lead-field small{font-size:11px;line-height:1.7;color:var(--text-secondary)}
 .lead-form>div:last-child{flex-wrap:wrap}.lead-hub .btn-primary:disabled{opacity:.6;cursor:wait}

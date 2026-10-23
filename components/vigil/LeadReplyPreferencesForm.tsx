@@ -11,7 +11,7 @@ export function LeadReplyPreferencesForm({ platform, action }: {
       <select id="lead-reply-platform" name="reply_platform" defaultValue={platform} required aria-describedby="lead-reply-help">
         {leadReplyPlatforms.map(value => <option value={value} key={value}>{leadReplyPlatformLabels[value]}</option>)}
       </select>
-      <small id="lead-reply-help">Gmail and Outlook open in a new tab. Choose Default email app to use the mail app set up on your device.</small>
+      <small id="lead-reply-help">Gmail and Outlook open in a new tab. Connect Gmail below to prepare replies in your full inbox. Default email app uses the mail app set up on your device.</small>
     </label>
   </ActionForm>;
 }

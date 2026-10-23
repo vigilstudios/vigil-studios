@@ -18,7 +18,7 @@ export function readLeadReplyPlatform(metadata: unknown): LeadReplyPlatform {
   return isLeadReplyPlatform(value) ? value : 'default';
 }
 
-/** Opens a new draft only. Provider URLs are fixed, and recipient data is encoded. */
+/** Fixed draft links for mail apps; Gmail uses the authenticated server handoff. */
 export function leadReplyLink(platform: LeadReplyPlatform, recipient: unknown) {
   if (typeof recipient !== 'string') return null;
   const email = recipient.trim();
@@ -27,7 +27,8 @@ export function leadReplyLink(platform: LeadReplyPlatform, recipient: unknown) {
   const to = encodeURIComponent(email);
   const subject = encodeURIComponent('Re: Your website inquiry');
   switch (platform) {
-    case 'gmail': return { href: `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}`, label: 'Reply in Gmail', external: true };
+    // Gmail needs the authenticated draft handoff; compose URLs lose the inbox.
+    case 'gmail': return null;
     case 'outlook': return { href: `https://outlook.live.com/mail/0/deeplink/compose?to=${to}&subject=${subject}`, label: 'Reply in Outlook.com', external: true };
     case 'microsoft365': return { href: `https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${subject}`, label: 'Reply in Outlook', external: true };
     default: return { href: `mailto:${to}?subject=${subject}`, label: 'Reply by email', external: false };

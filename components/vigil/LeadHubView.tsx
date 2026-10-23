@@ -12,7 +12,7 @@ export function LeadStatus({ status }: { status: string }) {
   const tone = ['booked', 'won'].includes(status) ? 'good' : status === 'new' ? 'accent' : ['qualified', 'contacted'].includes(status) ? 'info' : 'neutral';
   return <span className="lead-status" data-tone={tone}><span aria-hidden="true" />{titleCase(status)}</span>;
 }
-export function LeadHubView({ data, filters, Link, preferenceForms, replyPreferencesForm }: { data: LeadHubData; filters: LeadFilters; Link: HubLink; preferenceForms: Record<string, ReactNode>; replyPreferencesForm: ReactNode }) {
+export function LeadHubView({ data, filters, Link, preferenceForms, replyPreferencesForm, gmailConnectionPanel }: { data: LeadHubData; filters: LeadFilters; Link: HubLink; preferenceForms: Record<string, ReactNode>; replyPreferencesForm: ReactNode; gmailConnectionPanel?: ReactNode }) {
   const filtered = hasLeadFilters(filters), settingsView = filters.view === 'settings';
   const connected = data.settings.filter(setting => setting.enabled && data.sites.find(site => site.id === setting.website_id)?.status === 'live');
   const waitingLaunch = data.sites.some(site => ['building', 'provisioning'].includes(site.status));
@@ -40,6 +40,7 @@ export function LeadHubView({ data, filters, Link, preferenceForms, replyPrefere
         {replyPreferencesForm}
         <p className="lead-settings-note">The Reply button opens a new draft addressed to the visitor. Check the sending account before you send. Email conversations and sent status are managed in your email platform.</p>
       </section>
+      {gmailConnectionPanel}
       {data.settings.length ? data.settings.map(setting => {
         const site = data.sites.find(site => site.id === setting.website_id);
         const active = connected.some(row => row.website_id === setting.website_id);

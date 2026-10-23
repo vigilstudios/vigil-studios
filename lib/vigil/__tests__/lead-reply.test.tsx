@@ -66,7 +66,6 @@ describe('Personal reply preference', () => {
 
 describe('Draft links', () => {
   it.each([
-    ['gmail', 'mail.google.com', 'su'],
     ['outlook', 'outlook.live.com', 'subject'],
     ['microsoft365', 'outlook.office.com', 'subject'],
   ] as const)('opens %s with exactly the intended recipient and subject', (platform, host, subjectKey) => {
@@ -87,10 +86,8 @@ describe('Draft links', () => {
   });
   it('uses the saved platform on the detail page and keeps the inbox context', () => {
     const html = renderToStaticMarkup(<LeadDetailView detail={detail} replyPlatform="gmail" Link={Link} backHref="/dashboard/leads?view=unread" updateForm={<p>Update</p>} noteForm={<p>Notes</p>} />);
-    expect(html).toContain('Reply in Gmail');
-    expect(html).toContain('https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=maya%2Bcampaign%40example.com');
-    expect(html).toContain('target="_blank"');
-    expect(html).toContain('rel="noopener noreferrer"');
+    expect(html).toContain('Connect Gmail to reply');
+    expect(html).not.toContain('mail.google.com');
     expect(html).toContain('/dashboard/leads?view=unread');
     expect(html).toContain('Update');
     expect(html).toContain('Notes');

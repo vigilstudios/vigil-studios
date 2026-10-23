@@ -3420,6 +3420,30 @@ export type Database = {
         }
         Returns: boolean
       }
+      finish_gmail_draft: {
+        Args: {
+          p_connected_at: string
+          p_draft: string
+          p_lead: string
+          p_thread: string
+          p_token: string
+          p_user: string
+        }
+        Returns: boolean
+      }
+      gmail_connection: {
+        Args: { p_credentials?: boolean; p_user: string }
+        Returns: Json
+      }
+      gmail_draft_lock: {
+        Args: {
+          p_lead: string
+          p_release?: boolean
+          p_token: string
+          p_user: string
+        }
+        Returns: boolean
+      }
       list_my_invitations: {
         Args: never
         Returns: {
@@ -3472,6 +3496,7 @@ export type Database = {
         Returns: boolean
       }
       reconcile_contact_setup: { Args: { p_limit?: number }; Returns: number }
+      remove_gmail_connection: { Args: { p_user: string }; Returns: undefined }
       reserve_content_media: {
         Args: {
           p_collection: string
@@ -3559,6 +3584,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      save_gmail_connection: {
+        Args: { p_email: string; p_refresh_token: string; p_user: string }
+        Returns: undefined
       }
       save_website_blog_post: {
         Args: {
@@ -3743,6 +3772,48 @@ export type Database = {
         }
         Relationships: []
       }
+      gmail_connections: {
+        Row: {
+          account_email: string
+          connected_at: string
+          user_id: string
+          vault_secret_id: string
+        }
+        Insert: {
+          account_email: string
+          connected_at?: string
+          user_id: string
+          vault_secret_id: string
+        }
+        Update: {
+          account_email?: string
+          connected_at?: string
+          user_id?: string
+          vault_secret_id?: string
+        }
+        Relationships: []
+      }
+      gmail_draft_leases: {
+        Row: {
+          lead_id: string
+          lease_token: string
+          lease_until: string
+          user_id: string
+        }
+        Insert: {
+          lead_id: string
+          lease_token: string
+          lease_until: string
+          user_id: string
+        }
+        Update: {
+          lead_id?: string
+          lease_token?: string
+          lease_until?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       rate_limits: {
         Row: {
           hits: number
@@ -3801,6 +3872,7 @@ export type Database = {
         Args: { p_website: string }
         Returns: boolean
       }
+      gmail_service_only: { Args: never; Returns: undefined }
       has_org_role: {
         Args: {
           p_org: string

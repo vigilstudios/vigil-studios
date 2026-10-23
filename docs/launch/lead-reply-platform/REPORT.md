@@ -1,5 +1,7 @@
 # Lead Hub reply platform — 2026-10-22
 
+Follow-up: Gmail now uses the connected draft flow described in [GMAIL_CONNECTION.md](GMAIL_CONNECTION.md). The sections below record the original 22 October release.
+
 A personal setting selects Default email app, Gmail, Outlook.com, or Microsoft 365 Outlook. The default preserves the existing mailto behavior until the user chooses another platform. A separate panel in Lead Hub Settings is available to every signed-in user, independent of the owner/manager restriction on website notification preferences. Staff viewing a customer saves only the signed-in staff account’s preference.
 
 The authenticated server action validates the platform and calls the session-scoped Supabase Auth updateUser with only data.lead_reply_platform. Existing Auth metadata is merged by Auth; no service-role mutation, arbitrary user id, table/schema migration, mailbox credential, or OAuth grant is involved. Server pages read the verified session user’s metadata and allowlist it before rendering.

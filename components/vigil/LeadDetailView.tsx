@@ -7,17 +7,19 @@ import { LeadStatus, type HubLink } from './LeadHubView';
 import { leadReplyLink, type LeadReplyPlatform } from '@/lib/vigil/leads/reply';
 
 export type LeadDetailData = Omit<NonNullable<Awaited<ReturnType<typeof getLeadDetail>>>, 'ctx'>;
-export function LeadDetailView({ detail, Link, backHref, updateForm, noteForm, replyPlatform }: { detail: LeadDetailData; Link: HubLink; backHref: string; updateForm: ReactNode; noteForm: ReactNode; replyPlatform: LeadReplyPlatform }) {
+export function LeadDetailView({ detail, Link, backHref, updateForm, noteForm, replyPlatform, gmailReplyAction, gmailError }: { detail: LeadDetailData; Link: HubLink; backHref: string; updateForm: ReactNode; noteForm: ReactNode; replyPlatform: LeadReplyPlatform; gmailReplyAction?: ReactNode; gmailError?: boolean }) {
   const { lead, events, notification } = detail;
   const contact = lead.contact as { name?: string; email?: string; phone?: string; details?: Record<string, string> };
   const name = contact.name || 'Website inquiry';
-  const reply = leadReplyLink(replyPlatform, contact.email);
+  const reply = replyPlatform === 'gmail' ? null : leadReplyLink(replyPlatform, contact.email);
+  const fallbackReply = leadReplyLink('default',contact.email);
   const delivered = notification?.status === 'sent';
   return <div className="lead-hub">
     <Link href={backHref} className="lead-back"><ArrowLeft size={14} aria-hidden="true" />Back to inbox</Link>
     <header className="lead-page-heading lead-detail-heading"><div className="lead-detail-person"><span className="lead-avatar" aria-hidden="true">{contactInitials(name)}</span><div><h1>{name}</h1><p>Received {formatDateTime(lead.received_at)}</p></div></div>
-      {reply && <a className="lead-button" data-primary="true" href={reply.href} target={reply.external ? '_blank' : undefined} rel={reply.external ? 'noopener noreferrer' : undefined}><Mail size={15} aria-hidden="true" />{reply.label}<ArrowUpRight size={14} aria-hidden="true" />{reply.external && <span className="lead-sr-only"> (opens a new tab)</span>}</a>}
+      {replyPlatform === 'gmail' && fallbackReply ? <div className="lead-reply-actions">{gmailReplyAction || <><Link className="lead-button" href="/dashboard/leads?view=settings"><Mail size={15} aria-hidden="true" />Connect Gmail to reply</Link><a className="lead-button" href={fallbackReply.href}>Reply by email app</a></>}</div> : reply && <a className="lead-button" data-primary="true" href={reply.href} target={reply.external ? '_blank' : undefined} rel={reply.external ? 'noopener noreferrer' : undefined}><Mail size={15} aria-hidden="true" />{reply.label}<ArrowUpRight size={14} aria-hidden="true" />{reply.external && <span className="lead-sr-only"> (opens a new tab)</span>}</a>}
     </header>
+    {gmailError && <p className="lead-gmail-notice" role="alert">We couldn’t open your Gmail draft. Check Gmail’s Drafts folder before trying again, then <Link href="/dashboard/leads?view=settings">review your Gmail connection</Link>. Your inquiry is still saved here.</p>}
     <div className="lead-detail-grid"><div className="lead-detail-main">
       <section className="lead-detail-panel" aria-labelledby="lead-message-title"><h2 className="lead-panel-heading" id="lead-message-title"><FileText size={16} aria-hidden="true" />The inquiry</h2><div className="lead-panel-body">
         <dl className="lead-contact-facts"><div><dt>Email address</dt><dd>{contact.email || 'Not provided'}</dd></div><div><dt>Phone number</dt><dd>{contact.phone || 'Not provided'}</dd></div></dl>

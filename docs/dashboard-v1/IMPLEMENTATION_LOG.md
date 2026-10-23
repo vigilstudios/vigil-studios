@@ -1189,3 +1189,12 @@ Ownership verification now remains an unfinished waiting step with explicit addi
 - Inquiry details open an addressed draft with a short subject in the selected platform. Fixed provider origins, encoded recipients, single-mailbox validation, new-tab isolation, and safe fallback handle unsupported metadata and malformed contact addresses. Opening a draft does not send email, change lead status, or synchronize external conversations.
 - Reused the existing settings styling and form behavior, with an opt-out from successful form reset so the new selection remains visible. The local sample lab supports saving the preference across its native page navigations via sessionStorage; production persistence uses Auth, not browser storage.
 - Validation: all 2,559 tests passed (129 files), TypeScript, focused ESLint, and the optimized production build. Release/browser verification is recorded in docs/launch/lead-reply-platform/REPORT.md.
+
+---
+
+## 2026-10-23 — Connected Gmail drafts inside the full inbox
+
+- Replaced the standalone Gmail compose handoff with a personal Google OAuth connection and server-created draft flow. Replies quote the original inquiry and open the saved draft in the connected account’s full Gmail interface. Existing drafts are reused without overwriting user edits; no reply sending or mailbox ingestion is added.
+- Added state/PKCE/cookie/CSRF protections, tenant and user checks, lease-based draft preparation, reconnect/disconnect, private Vault credential storage, credential cleanup, setup gating, email-app fallback and a focused Google-data privacy disclosure. Migration 0050 is applied and remote database types regenerated.
+- Validation: 2,601 tests passed; TypeScript, focused lint, production build, full database suite and 21 Gmail SQL assertions passed. A synthetic draft verified the full-Gmail URL and quoted-context presentation in Chrome. No email sent.
+- Google client setup remains an activation dependency: current Cloud account cannot create OAuth clients in vigil-studios. No real customer Google authorization/token exchange has been completed. Setup and exact validation limits: docs/launch/lead-reply-platform/GMAIL_CONNECTION.md.
