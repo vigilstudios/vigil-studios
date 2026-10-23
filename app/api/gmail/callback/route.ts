@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getViewer } from '@/lib/vigil/auth/session';
+import { requestOrigin } from '@/lib/vigil/auth/origin';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { GMAIL_COOKIE, GMAIL_SETTINGS, exchangeGmailCode, gmailConfig, readGmailOAuthCookie } from '@/lib/vigil/gmail/provider';
 
@@ -8,7 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     const viewer = await getViewer(), cfg = gmailConfig();
     const state = viewer && readGmailOAuthCookie(request.cookies.get(GMAIL_COOKIE)?.value,request.nextUrl.searchParams.get('state'),viewer.user.id);
-    if (state && cfg && new URL(cfg.redirectUri).host === request.headers.get('host')) {
+    if (state && cfg && new URL(cfg.redirectUri).host === (request.headers.get('x-forwarded-host')??request.headers.get('host'))) {
       const code = request.nextUrl.searchParams.get('code');
       if (request.nextUrl.searchParams.get('error')) outcome = 'cancelled';
       else if (code && code.length <= 4096) {
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
       }
     }
   } catch { /* No authorization codes, tokens, or provider payloads in logs or redirects. */ }
-  const response = NextResponse.redirect(new URL(`${GMAIL_SETTINGS}&gmail=${outcome}`,request.url),303);
+  const response = NextResponse.redirect(new URL(`${GMAIL_SETTINGS}&gmail=${outcome}`,requestOrigin(request)),303);
   response.cookies.set(GMAIL_COOKIE,'',{httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'lax',path:'/',maxAge:0});
   response.headers.set('Cache-Control','no-store');
   response.headers.set('Referrer-Policy','no-referrer');

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireOrgContextOrThrow } from '@/lib/vigil/auth/session';
-import { isSameOriginRequest } from '@/lib/vigil/auth/origin';
+import { isSameOriginRequest, requestOrigin } from '@/lib/vigil/auth/origin';
 import { prepareGmailReply } from '@/lib/vigil/gmail/reply';
 
 export async function POST(request: NextRequest, {params}: {params:Promise<{leadId:string}>}) {
@@ -10,7 +10,7 @@ export async function POST(request: NextRequest, {params}: {params:Promise<{lead
   if (!z.string().uuid().safeParse(leadId).success) return new Response('Inquiry not found.',{status:404});
   let destination: string;
   try { destination = await prepareGmailReply(await requireOrgContextOrThrow(),leadId); }
-  catch { destination = new URL(`/dashboard/leads/${leadId}?gmail=error`,request.url).href; }
+  catch { destination = new URL(`/dashboard/leads/${leadId}?gmail=error`,requestOrigin(request)).href; }
   const response = NextResponse.redirect(destination,303);
   response.headers.set('Cache-Control','no-store');
   response.headers.set('Referrer-Policy','no-referrer');
