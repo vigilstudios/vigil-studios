@@ -1,3 +1,4 @@
+import {publishedWebsiteDelivery} from '@/lib/vigil/content/delivery';
 import 'server-only';
 import {z} from 'zod';
 import {readBlogMedia,signedBlogImages} from './images';
@@ -15,11 +16,11 @@ export async function publicWebsiteBlog(request:Request,websiteId:string,adminFa
   if(error)throw new Error('Registry unavailable');if(!website)return respond({error:'Blog unavailable.'},404);
   const {data:org,error:orgError}=await admin.from('organizations').select('archived_at').eq('id',website.organization_id).maybeSingle();
   if(orgError)throw new Error('Registry unavailable');
-  const {data:available,error:accessError}=await admin.rpc('website_blog_delivery',{p_website:websiteId,p_review:review});
-  if(accessError)throw new Error('Scope unavailable');if(!available)return respond({error:'Blog unavailable.'},404);
+  const available=await publishedWebsiteDelivery(admin,websiteId,review,'blog');
+  if(!available)return respond({error:'Blog unavailable.'},404);
   // Building previews show normal published articles only. Drafts and trash remain private.
-  // The preview selector never overrides live/paused site lifecycle gating.
-  if((review?!['building','live'].includes(website.status):website.status!=='live')||!org||org.archived_at)return slug?respond({error:'Post unavailable.'},404):respond({posts:[],page,total:0});
+  // Normal building-site delivery also requires the full approved-launch check.
+  if((review||available==='launch'?!['building','live'].includes(website.status):website.status!=='live')||!org||org.archived_at)return slug?respond({error:'Post unavailable.'},404):respond({posts:[],page,total:0});
   let query=admin.from('website_blog_posts').select(slug?'slug,title,excerpt,body,published_at,updated_at,media,published_snapshot':'slug,title,excerpt,published_at,updated_at,media,published_snapshot',{count:'exact'}).eq('website_id',websiteId).eq('organization_id',website.organization_id).eq('review_sample',false).not('published_snapshot','is',null).is('deleted_at',null);
   if(slug)query=query.eq('slug',slug);
   const rows=await query.order('published_at',{ascending:false}).order('id',{ascending:false}).range(slug?0:(page-1)*12,slug?0:page*12-1);

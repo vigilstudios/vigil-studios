@@ -1172,3 +1172,11 @@ Ownership verification now remains an unfinished waiting step with explicit addi
 - Preserved existing contact/notification actions and launch gates, added tenant-scoped unread filtering, normalized search inputs and context-preserving pagination/back navigation. Distinct empty/search/out-of-range states avoid misleading inbox messages.
 - Scar’s capture remains disabled pending website/domain launch. The UI reflects that state rather than suggesting a live connection. No production leads or outgoing notifications were created.
 - Validation: 85 focused tests, TypeScript, focused lint, optimized production build, and 24 Chrome layout checks in both themes. Local-only sample lab: `node scripts/preview-lead-hub.mjs`, port 4187. Details in `docs/launch/lead-hub-design/REPORT.md`.
+
+---
+
+## 2026-10-22 — Break the first-launch domain/content dependency
+
+- Added a read-only published-content delivery gate for approved Building sites whose exact production build, provider association, ownership, routing DNS and SSL already pass. This lets the real homepage render for its final HTTPS check without setting Live early or exposing drafts. Ordinary live/review delivery and database eligibility remain intact; no schema change.
+- Domain verification returns the production deployment it actually checked, so manual jobs with no deployment payload and stale deployment-bound jobs can finish the existing launch service. Expected DNS waiting no longer consumes the domain job’s failure budget; real errors remain bounded.
+- Scar’s customer DNS and review approvals are unchanged. Production rollout will use the existing verifier and launch/contact automation. Diagnosis and validation scope: `docs/launch/domain-launch-cycle/REPORT.md`.

@@ -1,3 +1,4 @@
+import {canDeliverPublishedWebsite} from '@/lib/vigil/content/delivery';
 import {z} from 'zod';
 import {createAdminClient} from '@/lib/supabase/admin';
 import {contentCollections} from '@/lib/vigil/content/service';
@@ -11,7 +12,7 @@ const escape=(v:string)=>v.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 export async function GET(request:Request,{params}:{params:Promise<{websiteId:string;runtimeId:string;pageId:string}>}){
  const {websiteId,runtimeId,pageId}=await params,headers={'Cache-Control':'no-store','Content-Type':'text/html; charset=utf-8','X-Content-Type-Options':'nosniff'},unavailable=(status:number)=>new Response(status===404?'Page unavailable.':'Website temporarily unavailable.',{status,headers});
  if(!z.string().uuid().safeParse(websiteId).success||!z.string().uuid().safeParse(runtimeId).success)return unavailable(404);
- try{const admin=createAdminClient(),url=new URL(request.url),review=url.searchParams.get('review')==='published',[{data:allowed,error:gate},{data:snapshot,error}]=await Promise.all([admin.rpc('website_content_delivery',{p_website:websiteId,p_review:review}),admin.from('website_content_runtimes').select('*').eq('id',runtimeId).eq('website_id',websiteId).maybeSingle()]);if(gate||error)throw gate??error;if(!allowed||!snapshot)return unavailable(404);
+ try{const admin=createAdminClient(),url=new URL(request.url),review=url.searchParams.get('review')==='published',[allowed,{data:snapshot,error}]=await Promise.all([canDeliverPublishedWebsite(admin,websiteId,review),admin.from('website_content_runtimes').select('*').eq('id',runtimeId).eq('website_id',websiteId).maybeSingle()]);if(error)throw error;if(!allowed||!snapshot)return unavailable(404);
   const original=parseSiteDefinition(snapshot.site_definition),collections=await contentCollections(admin,websiteId,snapshot.organization_id,'published');
   const site=applyBindings(original,collections.filter(c=>c.binding.adapter==='professional'&&snapshot.binding_keys.includes(c.binding.key)&&c.publishedRevision!==null).map(c=>({...c,records:publicRecords(c.records,websiteId,c.id,review)})),true);
   const page=site.pages.find(p=>p.id===pageId);if(!page)return unavailable(404);

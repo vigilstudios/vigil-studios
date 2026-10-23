@@ -178,7 +178,7 @@ export async function activateDomainVerification(
   domainId: string,
   provider: DeploymentProvider = getDeploymentProvider(),
   connectionChecks: ConnectionChecks = {}
-): Promise<{ connected: boolean }> {
+): Promise<{ connected: boolean; deploymentId?: string }> {
   const { data: domain, error } = await admin.from("domains").select("*").eq("id", domainId).maybeSingle();
   if (error) throw error;
   if (!domain) throw new NotFoundError(`Domain ${domainId} not found.`);
@@ -225,7 +225,7 @@ export async function activateDomainVerification(
   }).eq("id", domainId);
   if (updateError) throw updateError;
   if (connected) await admin.from("websites").update({ primary_domain_id: domain.id, live_url: `https://${plan[0].canonicalHostname}` }).eq("id", domain.website_id).eq("organization_id", domain.organization_id).eq("status", "live");
-  return { connected };
+  return { connected, ...(connected ? { deploymentId: production.id } : {}) };
 }
 
 /** Re-check DNS and SSL; move to connected when both are good. */
@@ -234,7 +234,7 @@ export async function verifyDomain(
   domainId: string,
   provider: DeploymentProvider = getDeploymentProvider(),
   connectionChecks: ConnectionChecks = {}
-): Promise<{ connected: boolean; readyForLaunch?: boolean; reason?: "no_site"; dnsOk?: boolean }> {
+): Promise<{ connected: boolean; deploymentId?: string; readyForLaunch?: boolean; reason?: "no_site"; dnsOk?: boolean }> {
   const { data: domain, error } = await admin.from("domains").select("*").eq("id", domainId).maybeSingle();
   if (error) throw error;
   if (!domain) throw new NotFoundError(`Domain ${domainId} not found.`);
@@ -364,5 +364,5 @@ export async function verifyDomain(
   }
 
   if (connected && domain.website_id) await admin.from("websites").update({ primary_domain_id: domain.id, live_url: `https://${plan[0].canonicalHostname}` }).eq("id", domain.website_id).eq("organization_id", domain.organization_id).eq("status", "live");
-  return { connected };
+  return { connected, ...(connected ? { deploymentId: production.id } : {}) };
 }

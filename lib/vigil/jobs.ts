@@ -189,7 +189,10 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
       if (result.reason === "no_site") throw new RetryLater(result.dnsOk ? "DNS correct; waiting for the website" : "DNS not yet verified; no site yet", 6 * 60 * 60);
       throw new RetryLater("Domain connection is still propagating", 15 * 60);
     }
-    const deploymentId = (job.payload as { deployment_id?: string } | null)?.deployment_id;
+    // Customer/manual DNS checks have no deployment payload. Use the exact
+    // approved production build that verification just checked, including when
+    // an older queued job refers to a superseded deployment.
+    const deploymentId = result.deploymentId ?? (job.payload as { deployment_id?: string } | null)?.deployment_id;
     if (deploymentId && job.website_id) {
       const launched = await finalizeWebsiteLaunch(admin, job.website_id, deploymentId);
       if (launched) await enqueueDeploymentNotification(admin, job, deploymentId);
@@ -388,10 +391,13 @@ async function runOne(admin: DbClient, job: ProvisioningJob): Promise<JobOutcome
     const exhausted = job.attempts >= job.max_attempts;
     const errorJson = { code: failure.code, message: failure.message, attempt: job.attempts };
 
-    if (failure.retryable && !exhausted) {
+    // DNS waiting is expected external progress, not a failed execution.
+    // Keep the existing failure budget for real provider/application errors.
+    const waitingForDomain = job.kind === JOB_KINDS.domainVerify && err instanceof RetryLater;
+    if (failure.retryable && (!exhausted || waitingForDomain)) {
       const delay = failure.delaySeconds ?? backoffSeconds(job.attempts);
       const scheduledFor = new Date(Date.now() + delay * 1000).toISOString();
-      await persistJob(admin, job, { status: "queued", error: errorJson, scheduled_for: scheduledFor, locked_by: null, locked_at: null });
+      await persistJob(admin, job, { status: "queued", error: errorJson, scheduled_for: scheduledFor, locked_by: null, locked_at: null, ...(waitingForDomain ? { attempts: Math.max(0, job.attempts - 1) } : {}) });
       return { id: job.id, kind: job.kind, status: "queued", error: failure.message };
     }
 
