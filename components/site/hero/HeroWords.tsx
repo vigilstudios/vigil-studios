@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { InitialPaintScript } from "./InitialPaintScript";
 import { HERO_TYPING_BOOTSTRAP } from "./typing-bootstrap";
 import {
   PHASE,
@@ -124,7 +125,7 @@ export function HeroWords({
         id="hero-line"
         suppressHydrationWarning
         data-text={line}
-        className="story-typing-pending mt-4 min-h-[1.2em] font-mono text-[10.5px] uppercase tracking-[0.16em] text-[rgba(245,245,243,0.55)]"
+        className="story-typing-pending mt-4 min-h-[1.2em] font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:var(--text-secondary)]"
       >
         <span className="story-text" suppressHydrationWarning>
           {line}
@@ -143,10 +144,7 @@ export function HeroWords({
       >
         {children}
       </div>
-      <script
-        suppressHydrationWarning
-        dangerouslySetInnerHTML={{ __html: HERO_TYPING_BOOTSTRAP }}
-      />
+      <InitialPaintScript html={HERO_TYPING_BOOTSTRAP} />
     </>
   );
 }

@@ -8,7 +8,7 @@
 .question { border: 1px solid var(--border); border-radius: 16px; padding: 28px; background: var(--bg-surface); animation: arrive .4s ease both; }
 .progress { display: flex; gap: 6px; margin-top: 24px; margin-bottom: 8px; }
 .progress span { height: 3px; flex: 1; border-radius: 4px; background: var(--border); }
-.progress .progressActive { background: var(--accent); }
+.progress .progressActive { background: var(--accent-fill, var(--accent)); }
 .step { font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; }
 .question h2 { font-weight: 600; font-size: clamp(22px, 2vw, 28px); letter-spacing: -.035em; line-height: 1.2; }
 .question h2:focus, .resultTitle:focus { outline: none; }
@@ -18,10 +18,15 @@
 .option:hover, .option:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
 .option:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 3px; }
 .option input { width: 16px; height: 16px; margin-top: 3px; flex-shrink: 0; accent-color: var(--accent); }
+:global(html[data-theme="light"]) .option input[type="radio"] { appearance: none; border: 1px solid var(--border); border-radius: 50%; background: #fff; }
+:global(html[data-theme="light"]) .option input[type="radio"]:checked { border-color: var(--accent); box-shadow: inset 0 0 0 4px var(--accent); }
+@media (forced-colors: active) {
+  :global(html[data-theme="light"]) .option input[type="radio"] { appearance: auto; background: revert; border: revert; box-shadow: none; }
+}
 .option strong { display: block; font-size: 14px; font-weight: 550; }
 .option small { display: block; color: var(--text-secondary); font-size: 12px; line-height: 1.6; margin-top: 3px; }
 .controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 24px; }
-.primary { display: inline-flex; justify-content: center; align-items: center; gap: 9px; min-height: 48px; border-radius: 10px; padding: 12px 22px; background: var(--accent); color: #062b13; font-size: 14px; font-weight: 650; transition: filter .2s, transform .2s; }
+.primary { display: inline-flex; justify-content: center; align-items: center; gap: 9px; min-height: 48px; border-radius: 10px; padding: 12px 22px; background: var(--accent-fill, var(--accent)); color: var(--on-accent); font-size: 14px; font-weight: 650; transition: filter .2s, transform .2s; }
 .primary:hover { filter: brightness(1.1); transform: translateY(-2px); }
 .primary:disabled { opacity: .4; cursor: not-allowed; transform: none; }
 .primary:focus-visible, .back:focus-visible, .resultActions button:focus-visible, .call:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }

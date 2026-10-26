@@ -1,0 +1,230 @@
+{
+  "checks": [
+    {
+      "name": "Home renders successfully",
+      "pass": true
+    },
+    {
+      "name": "Fresh light device defaults to light",
+      "pass": true
+    },
+    {
+      "name": "Home hero uses neutral light surface",
+      "pass": true
+    },
+    {
+      "name": "Light mode main accent is the approved spring green",
+      "pass": true
+    },
+    {
+      "name": "Home outline CTA uses the approved green text and border",
+      "pass": true
+    },
+    {
+      "name": "Navbar toggle selects dark",
+      "pass": true
+    },
+    {
+      "name": "Explicit dark survives reload on a light device",
+      "pass": true
+    },
+    {
+      "name": "Marketing preference survives product root navigation",
+      "pass": true
+    },
+    {
+      "name": "Navbar toggle restores light",
+      "pass": true
+    },
+    {
+      "name": "Explicit light survives reload",
+      "pass": true
+    },
+    {
+      "name": "Desktop Get started points to the current website finder",
+      "pass": true
+    },
+    {
+      "name": "Get started opens the real website-fit questionnaire",
+      "pass": true
+    },
+    {
+      "name": "Website-fit questionnaire advances after an answer",
+      "pass": true
+    },
+    {
+      "name": "Light primary buttons use the brighter spring green",
+      "pass": true
+    },
+    {
+      "name": "Dashboard components inherit light preference",
+      "pass": true
+    },
+    {
+      "name": "Dashboard canvas is soft gray",
+      "pass": true
+    },
+    {
+      "name": "Dashboard sidebar is white",
+      "pass": true
+    },
+    {
+      "name": "Dashboard panels are white",
+      "pass": true
+    },
+    {
+      "name": "Dashboard primary buttons share the bright home green",
+      "pass": true
+    },
+    {
+      "name": "Dashboard meters share the bright home green",
+      "pass": true
+    },
+    {
+      "name": "Dashboard status text uses the canonical spring green",
+      "pass": true
+    },
+    {
+      "name": "Content Hub primary buttons use matching green and readable text",
+      "pass": true
+    },
+    {
+      "name": "Lead Hub primary buttons use matching green and readable text",
+      "pass": true
+    },
+    {
+      "name": "Premium preview primary buttons use matching green and readable text",
+      "pass": true
+    },
+    {
+      "name": "Dashboard selected navigation uses the canonical green",
+      "pass": true
+    },
+    {
+      "name": "Dashboard success pills use the canonical green",
+      "pass": true
+    },
+    {
+      "name": "Admin frame uses the approved main accent",
+      "pass": true
+    },
+    {
+      "name": "Admin navigation uses the approved green",
+      "pass": true
+    },
+    {
+      "name": "Admin status text uses the approved green",
+      "pass": true
+    },
+    {
+      "name": "Admin workspace contains its admin navigation",
+      "pass": true
+    },
+    {
+      "name": "Sidebar collapses in light theme",
+      "pass": true
+    },
+    {
+      "name": "Dashboard toggle selects dark",
+      "pass": true
+    },
+    {
+      "name": "Product preference survives return to marketing",
+      "pass": true
+    },
+    {
+      "name": "Cleared preference returns to system light",
+      "pass": true
+    },
+    {
+      "name": "Unselected theme follows live device change",
+      "pass": true
+    },
+    {
+      "name": "Unselected theme follows device back to light",
+      "pass": true
+    },
+    {
+      "name": "Home 768px has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "Home 768px has one visible theme control",
+      "pass": true
+    },
+    {
+      "name": "Dashboard 768px has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "Home 390px has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "Home 390px has one visible theme control",
+      "pass": true
+    },
+    {
+      "name": "Dashboard 390px has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "Dashboard 390px drawer opens",
+      "pass": true
+    },
+    {
+      "name": "Dashboard 390px drawer toggle works",
+      "pass": true
+    },
+    {
+      "name": "Home 320px has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "Home 320px has one visible theme control",
+      "pass": true
+    },
+    {
+      "name": "Mobile navigation opens alongside theme control",
+      "pass": true
+    },
+    {
+      "name": "Mobile theme toggle works with menu open",
+      "pass": true
+    },
+    {
+      "name": "Dashboard 320px has no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "Dashboard 320px drawer opens",
+      "pass": true
+    },
+    {
+      "name": "Dashboard 320px drawer toggle works",
+      "pass": true
+    },
+    {
+      "name": "Invalid saved theme falls back to device preference",
+      "pass": true
+    },
+    {
+      "name": "Storage blocked still initializes from device",
+      "pass": true
+    },
+    {
+      "name": "Storage blocked still permits theme switching",
+      "pass": true
+    },
+    {
+      "name": "No browser runtime errors",
+      "pass": true
+    },
+    {
+      "name": "No React rendering or hydration warnings",
+      "pass": true
+    }
+  ],
+  "errors": [],
+  "reactWarnings": []
+}

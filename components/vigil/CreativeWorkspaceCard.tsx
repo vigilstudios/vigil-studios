@@ -36,7 +36,7 @@ export function CreativeWorkspaceCard({ websiteId, workspace, repositoryUrl, pro
       </div>
 
       {failure ? (
-        <div className="mt-3 rounded-lg border border-[#ef4444]/40 bg-[#ef4444]/10 p-3 text-sm">
+        <div className="mt-3 rounded-lg border border-[color-mix(in_srgb,var(--status-bad)_40%,transparent)] bg-[color-mix(in_srgb,var(--status-bad)_10%,transparent)] p-3 text-sm">
           <p className="font-semibold">Last run failed{failure.code ? ` (${failure.code})` : ""}</p>
           <p className="mt-1 whitespace-pre-wrap text-xs">{failure.message ?? "No message recorded."}</p>
           <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">The repository was not changed by the failed run. Fix the cause, then generate again; intelligence already produced for this brief is reused.</p>

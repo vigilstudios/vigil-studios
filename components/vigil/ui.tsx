@@ -73,7 +73,7 @@ export function StatusPill({ tone = "neutral", children }: { tone?: Tone; childr
   return (
     <span
       className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold"
-      style={{ color, background: `color-mix(in srgb, ${color} 14%, transparent)` }}
+      style={{ color, background: `color-mix(in srgb, ${tone === "good" ? "var(--status-good-fill, var(--status-good))" : color} 14%, transparent)` }}
     >
       <StatusGlyph tone={tone} />
       {children}
@@ -170,7 +170,7 @@ export const labelClass = "mb-1 block text-xs font-medium text-[color:var(--text
 export function FormError({ message }: { message?: string | null }) {
   if (!message) return null;
   return (
-    <p role="alert" className="mt-3 rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-3 py-2 text-sm text-[#ef4444]">
+    <p role="alert" className="mt-3 rounded-lg border border-[color-mix(in_srgb,var(--status-bad)_30%,transparent)] bg-[color-mix(in_srgb,var(--status-bad)_10%,transparent)] px-3 py-2 text-sm text-[color:var(--status-bad)]">
       {message}
     </p>
   );
@@ -179,7 +179,7 @@ export function FormError({ message }: { message?: string | null }) {
 export function FormSuccess({ message }: { message?: string | null }) {
   if (!message) return null;
   return (
-    <p role="status" className="mt-3 rounded-lg border border-[color:var(--accent)]/30 bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] px-3 py-2 text-sm text-[color:var(--accent)]">
+    <p role="status" className="mt-3 rounded-lg border border-[color:var(--accent)]/30 bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_10%,transparent)] px-3 py-2 text-sm text-[color:var(--accent)]">
       {message}
     </p>
   );

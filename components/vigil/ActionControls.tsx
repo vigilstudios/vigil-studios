@@ -39,7 +39,7 @@ export function ActionButton({
       : variant === "secondary"
         ? "btn-secondary text-sm !px-3 !py-1.5"
         : variant === "danger"
-          ? "text-xs text-[#ef4444] underline"
+          ? "text-xs text-[color:var(--status-bad)] underline"
           : "text-xs text-[color:var(--text-secondary)] underline hover:text-[color:var(--text-primary)]";
   return (
     <span className="inline-flex flex-col items-start gap-1" title={disabled ? disabledReason : undefined}>
@@ -62,7 +62,7 @@ export function ActionButton({
         {pending ? "…" : children}
       </button>
       {disabled && disabledReason ? <span className="max-w-52 text-[11px] leading-4 text-[color:var(--text-secondary)]">{disabledReason}</span> : null}
-      {error ? <span className="text-xs text-[#ef4444]">{error}</span> : null}
+      {error ? <span className="text-xs text-[color:var(--status-bad)]">{error}</span> : null}
     </span>
   );
 }
@@ -131,7 +131,7 @@ export function TransitionSelect({
       >
         Apply
       </button>
-      {error ? <span className="text-xs text-[#ef4444]">{error}</span> : null}
+      {error ? <span className="text-xs text-[color:var(--status-bad)]">{error}</span> : null}
     </div>
   );
 }
@@ -178,7 +178,7 @@ export function ActionForm({
         <button type="submit" className="btn-primary text-sm" disabled={pending}>
           {pending ? "Working…" : submitLabel}
         </button>
-        {error ? <span className="text-xs text-[#ef4444]">{error}</span> : null}
+        {error ? <span className="text-xs text-[color:var(--status-bad)]">{error}</span> : null}
         {ok ? <span className="text-xs text-[color:var(--accent)]">Done.</span> : null}
       </div>
     </form>
@@ -235,7 +235,7 @@ export function SelectApply({
           Apply
         </button>
       ) : null}
-      {error ? <span className="text-xs text-[#ef4444]">{error}</span> : null}
+      {error ? <span className="text-xs text-[color:var(--status-bad)]">{error}</span> : null}
     </div>
   );
 }

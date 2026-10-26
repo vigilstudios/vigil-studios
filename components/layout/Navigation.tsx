@@ -9,6 +9,7 @@ import {
   useMotionIntent,
 } from "@/components/site/motion-runtime";
 import { ProductsMenu } from "@/components/layout/ProductsMenu";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { PRODUCT_LINKS } from "@/lib/site-copy";
 
 /**
@@ -67,7 +68,7 @@ export function Navigation() {
   const getStarted = (
     <span className="inline-flex items-center gap-2">
       <span
-        className="h-1.5 w-1.5 rounded-full bg-[color:var(--accent)] shadow-[0_0_8px_var(--accent)]"
+        className="h-1.5 w-1.5 rounded-full bg-[color:var(--accent-fill,var(--accent))] shadow-[0_0_8px_var(--accent-fill,var(--accent))]"
         aria-hidden
       />
       Get started
@@ -90,7 +91,7 @@ export function Navigation() {
         <Link
           prefetch={false}
           href="/"
-          className={loud}
+          className={`${loud} whitespace-nowrap`}
           aria-label="Vigil Studios home"
         >
           Vigil Studios
@@ -117,14 +118,16 @@ export function Navigation() {
           <Link prefetch={false} href="/find-your-fit" className={loud}>
             {getStarted}
           </Link>
+          <ThemeToggle />
         </div>
 
         {/* Phone */}
-        <div className="flex items-center justify-end gap-4 md:hidden">
+        <div className="flex items-center justify-end gap-3 md:hidden">
+          <ThemeToggle />
           <Link
             prefetch={false}
             href="/find-your-fit"
-            className={loud}
+            className={`${loud} hidden min-[360px]:inline-flex`}
             onClick={() => setIsOpen(false)}
           >
             {getStarted}

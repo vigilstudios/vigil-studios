@@ -2,7 +2,7 @@ import { ArrowRight, Globe2 } from "lucide-react";
 
 /** Code-native orientation graphic. Never an interactive provider control. */
 export function VercelDomainIllustration({ hostname, stage }: { hostname: string; stage: "domains" | "domain" | "dns" }) {
-  const active = "rounded-md border border-[color:var(--accent)] bg-[color:var(--accent)]/10 px-3 py-2 font-medium text-[color:var(--text-primary)]";
+  const active = "rounded-md border border-[color:var(--accent)] bg-[color:var(--accent-fill,var(--accent))]/10 px-3 py-2 font-medium text-[color:var(--text-primary)]";
   return <figure className="overflow-hidden rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)]">
     <figcaption className="border-b border-[color:var(--border)] px-4 py-2 text-xs text-[color:var(--text-secondary)]">Vercel · simplified illustration</figcaption>
     <div aria-hidden="true" className="flex min-w-0 gap-3 p-4 text-xs sm:gap-5 sm:text-sm">

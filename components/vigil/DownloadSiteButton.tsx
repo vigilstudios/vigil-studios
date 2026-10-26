@@ -41,7 +41,7 @@ export function DownloadSiteButton({ websiteId, disabled }: { websiteId: string;
         <Download className="mr-1.5 h-3.5 w-3.5" />
         {busy ? "Preparing…" : "Download site (.zip)"}
       </button>
-      {error ? <p className="mt-1.5 text-xs text-[#ef4444]">{error}</p> : null}
+      {error ? <p className="mt-1.5 text-xs text-[color:var(--status-bad)]">{error}</p> : null}
     </div>
   );
 }

@@ -129,11 +129,11 @@ export function ChoiceCards<T extends string>({ value, onChange, options, name }
             onClick={() => onChange(o.value)}
             className={clsx(
               "min-h-14 rounded-xl border px-4 py-3 text-left transition-colors",
-              active ? "border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]" : "border-[color:var(--border)] hover:border-[color:var(--text-secondary)]"
+              active ? "border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_10%,transparent)]" : "border-[color:var(--border)] hover:border-[color:var(--text-secondary)]"
             )}
           >
             <span className="flex items-center gap-2 text-[13px] font-semibold">
-              <span className={clsx("inline-flex h-4 w-4 items-center justify-center rounded-full border", active ? "border-[color:var(--accent)] bg-[color:var(--accent)] text-[color:var(--bg-primary)]" : "border-[color:var(--border)]")}>{active ? <Check className="h-3 w-3" /> : null}</span>
+              <span className={clsx("inline-flex h-4 w-4 items-center justify-center rounded-full border", active ? "border-[color:var(--accent)] bg-[color:var(--accent-fill,var(--accent))] text-[color:var(--on-accent)]" : "border-[color:var(--border)]")}>{active ? <Check className="h-3 w-3" /> : null}</span>
               {o.label}
             </span>
             {o.hint ? <span className="mt-1 block text-xs text-[color:var(--text-secondary)]">{o.hint}</span> : null}

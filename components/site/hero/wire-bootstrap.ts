@@ -8,6 +8,7 @@ export const WIRE_BOOTSTRAP = `
   if (!canvas || canvas.dataset.wireOwner === 'react') return;
   const ctx = canvas.getContext('2d', {alpha:true});
   if (!ctx) return;
+  const ink = getComputedStyle(document.documentElement).getPropertyValue("--scene-ink-rgb").trim();
   const parts = ${JSON.stringify(WIRE_EDGES)};
   const rotation = ${wireRotation.toString()};
   const project = ${projectWireVertex.toString()};
@@ -28,7 +29,7 @@ export const WIRE_BOOTSTRAP = `
   };
   const onMove = (event) => { tx = event.clientX/innerWidth*2-1; ty = event.clientY/innerHeight*2-1; };
   const stop = () => {
-    cancelAnimationFrame(raf); io.disconnect(); ro.disconnect();
+    cancelAnimationFrame(raf); io.disconnect(); ro.disconnect(); ownerObserver.disconnect();
     window.removeEventListener('pointermove', onMove); document.removeEventListener('visibilitychange', kick);
   };
   const frame = (now) => {
@@ -41,7 +42,7 @@ export const WIRE_BOOTSTRAP = `
     const t=(now-start)/1000;
     const m=rotation((reduced ? 0.1 : 0.1+Math.sin(t*.35)*.08)+y*.14,(reduced?-.4:t*.22)+x*.22,0);
     const focal=h/(2*Math.tan(Math.PI/12));
-    ctx.clearRect(0,0,w,h); ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=1/dpr;
+    ctx.clearRect(0,0,w,h); ctx.strokeStyle='rgba('+ink+',.9)'; ctx.lineWidth=1/dpr;
     for (const part of parts) for (let i=0;i<part.length;i+=6) {
       const a=project(part,i,m,scale,x*.18,lift-y*.12,w,h,focal);
       const b=project(part,i+3,m,scale,x*.18,lift-y*.12,w,h,focal);
@@ -52,6 +53,8 @@ export const WIRE_BOOTSTRAP = `
   function kick() { if (!raf && visible && !document.hidden) raf=requestAnimationFrame(frame); }
   const io=new IntersectionObserver(([entry])=>{ visible=entry.isIntersecting; if(visible)kick(); });
   const ro=new ResizeObserver(()=>{fit();kick();});
+  const ownerObserver=new MutationObserver(()=>{if(canvas.dataset.wireOwner==='react')stop();});
+  ownerObserver.observe(canvas,{attributes:true,attributeFilter:['data-wire-owner']});
   fit(); io.observe(canvas); ro.observe(canvas);
   if (matchMedia('(pointer: fine)').matches) window.addEventListener('pointermove',onMove,{passive:true});
   document.addEventListener('visibilitychange',kick); kick();

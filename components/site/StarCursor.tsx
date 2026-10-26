@@ -29,6 +29,7 @@ export function StarCursor() {
       // a white pointer, while its green primary button still needs black.
       const surface = node.closest("[data-cursor], .btn-primary, .section-accent");
       if (surface?.getAttribute("data-cursor") === "light") return "is-light";
+      if (surface?.matches(".section-accent") && root.dataset.theme === "light") return "is-light";
       if (surface?.matches(".btn-primary, .section-accent, [data-cursor='dark']")) return "is-dark";
       if (node.closest("a, button, [role='button'], summary, label")) return "is-light";
       return "";

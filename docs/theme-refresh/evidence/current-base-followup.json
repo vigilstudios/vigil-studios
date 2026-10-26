@@ -1,0 +1,12 @@
+{
+  "scene": {
+    "color": "rgb(24, 24, 27)",
+    "markup": true
+  },
+  "mobileGetStarted": "http://127.0.0.1:3190/find-your-fit",
+  "finderButton": {
+    "background": "rgb(18, 191, 96)",
+    "color": "rgb(4, 53, 27)"
+  },
+  "errors": []
+}

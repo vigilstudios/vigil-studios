@@ -6,6 +6,7 @@ import { inter } from "@/lib/site-fonts";
 import "@/app/globals.css";
 import { CREATOR_CAMPAIGN } from "@/lib/creator-campaign";
 import { PromoBanner } from "@/components/creators/PromoBanner";
+import { themeBootstrapScript } from "@/lib/site-theme";
 import { Navigation } from "@/components/layout/Navigation";
 import { StarCursor } from "@/components/site/StarCursor";
 import {
@@ -69,9 +70,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable} scroll-smooth`}
     >
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

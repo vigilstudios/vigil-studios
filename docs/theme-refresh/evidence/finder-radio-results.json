@@ -1,0 +1,37 @@
+{
+  "checks": [
+    {
+      "name": "light radio appearance",
+      "pass": true,
+      "styles": {
+        "appearance": "none",
+        "background": "rgb(255, 255, 255)",
+        "shadow": "rgba(18, 191, 96, 0.77) 0px 0px 0px 3.06931px inset",
+        "scheme": "light"
+      }
+    },
+    {
+      "name": "light keyboard changes selection",
+      "pass": true
+    },
+    {
+      "name": "Forced colors retain native radio rendering",
+      "pass": true
+    },
+    {
+      "name": "dark radio appearance",
+      "pass": true,
+      "styles": {
+        "appearance": "auto",
+        "background": "rgba(0, 0, 0, 0)",
+        "shadow": "none",
+        "scheme": "dark"
+      }
+    },
+    {
+      "name": "dark keyboard changes selection",
+      "pass": true
+    }
+  ],
+  "errors": []
+}

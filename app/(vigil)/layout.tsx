@@ -4,7 +4,7 @@ import { Space_Grotesk } from "next/font/google";
 import { inter } from "@/lib/site-fonts";
 import "@/app/globals.css";
 import "@/components/vigil/vigil.css";
-import { themeBootstrapScript } from "@/components/vigil/ThemeSwitch";
+import { themeBootstrapScript } from "@/lib/site-theme";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -30,9 +30,10 @@ export default function VigilRootLayout({ children }: { children: React.ReactNod
     // suppressHydrationWarning: the bootstrap script below sets data-theme on
     // <html> before React hydrates, on purpose.
     <html lang="en" className={`${spaceGrotesk.variable} ${inter.variable}`} suppressHydrationWarning>
-      <body className="min-h-screen font-sans antialiased">
-        {/* Applies the saved theme before first paint; the marketing toggle uses the same key. */}
+      <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
+      </head>
+      <body className="min-h-screen font-sans antialiased">
         <PromoBanner publicOnly />
         {children}
       </body>

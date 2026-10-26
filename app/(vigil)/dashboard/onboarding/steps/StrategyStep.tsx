@@ -177,7 +177,7 @@ export function StrategyStep({ initial, projectKind="professional", save, onSave
 
 function CheckOption({ checked, label, onChange }: { checked: boolean; label: string; onChange: () => void }) {
   return (
-    <button type="button" aria-pressed={checked} onClick={onChange} className={clsx("min-h-11 rounded-lg border px-3 py-2 text-left text-[13px] transition-colors", checked ? "border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]" : "border-[color:var(--border)] hover:border-[color:var(--text-secondary)]")}>
+    <button type="button" aria-pressed={checked} onClick={onChange} className={clsx("min-h-11 rounded-lg border px-3 py-2 text-left text-[13px] transition-colors", checked ? "border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_10%,transparent)]" : "border-[color:var(--border)] hover:border-[color:var(--text-secondary)]")}>
       <span className="mr-2 inline-block h-3.5 w-3.5 rounded border align-[-2px]" style={checked ? { background: "var(--accent)", borderColor: "var(--accent)" } : undefined} />
       {label}
     </button>

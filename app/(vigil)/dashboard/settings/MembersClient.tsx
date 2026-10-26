@@ -15,7 +15,7 @@ export function InviteForm({ canInviteOwner }: { canInviteOwner: boolean }) {
           Email
         </label>
         <input id="invite-email" name="email" type="email" className={inputClass} placeholder="teammate@yourbusiness.com" required disabled={pending} />
-        {issues.email ? <p className="mt-1 text-xs text-[#ef4444]">{issues.email[0]}</p> : null}
+        {issues.email ? <p className="mt-1 text-xs text-[color:var(--status-bad)]">{issues.email[0]}</p> : null}
       </div>
       <div>
         <label htmlFor="invite-role" className={labelClass}>
@@ -48,7 +48,7 @@ export function MemberActions({ userId, isSelf, canRemove }: { userId: string; i
       <button
         type="button"
         disabled={pending}
-        className="text-xs text-[color:var(--text-secondary)] underline hover:text-[#ef4444]"
+        className="text-xs text-[color:var(--text-secondary)] underline hover:text-[color:var(--status-bad)]"
         onClick={() => {
           if (!confirm(isSelf ? "Leave this organization?" : "Remove this person from the organization?")) return;
           startTransition(async () => {
@@ -60,7 +60,7 @@ export function MemberActions({ userId, isSelf, canRemove }: { userId: string; i
       >
         {isSelf ? "Leave" : "Remove"}
       </button>
-      {error ? <p className="mt-1 text-xs text-[#ef4444]">{error}</p> : null}
+      {error ? <p className="mt-1 text-xs text-[color:var(--status-bad)]">{error}</p> : null}
     </div>
   );
 }
@@ -72,7 +72,7 @@ export function InviteActions({ inviteId }: { inviteId: string }) {
     <button
       type="button"
       disabled={pending}
-      className="text-xs text-[color:var(--text-secondary)] underline hover:text-[#ef4444]"
+      className="text-xs text-[color:var(--text-secondary)] underline hover:text-[color:var(--status-bad)]"
       onClick={() =>
         startTransition(async () => {
           await revokeInvite(inviteId);

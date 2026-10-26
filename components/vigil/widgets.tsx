@@ -16,6 +16,12 @@ export const toneVar: Record<Tone, string> = {
   neutral: "var(--status-neutral)",
 };
 
+/** Decorative fills share the bright brand green; status text keeps its contrast. */
+const fillVar: Record<Tone, string> = {
+  ...toneVar,
+  good: "var(--status-good-fill, var(--status-good))",
+};
+
 export function ToneIcon({ tone, className }: { tone: Tone; className?: string }) {
   const cls = clsx("h-4 w-4 shrink-0", className);
   const style = { color: toneVar[tone] };
@@ -112,9 +118,9 @@ export function Meter({ value, max, tone = "good", label, srLabel }: { value: nu
         aria-valuenow={value}
         aria-label={srLabel}
         className="h-1.5 w-full overflow-hidden rounded-full"
-        style={{ background: `color-mix(in srgb, ${toneVar[tone]} 22%, transparent)` }}
+        style={{ background: `color-mix(in srgb, ${fillVar[tone]} 22%, transparent)` }}
       >
-        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: toneVar[tone] }} />
+        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: fillVar[tone] }} />
       </div>
       {label ? <div className="mt-1.5 flex items-center justify-between text-xs text-[color:var(--text-secondary)]">{label}</div> : null}
     </div>
@@ -129,13 +135,13 @@ export function DistributionBar({ segments, total }: { segments: { label: string
     <div>
       <div className="flex h-2 w-full gap-[2px] overflow-hidden rounded-full bg-[color:var(--track)]">
         {shown.map((s) => (
-          <div key={s.label} title={`${s.label}: ${s.value}`} className="h-full" style={{ width: `${(s.value / Math.max(sum, 1)) * 100}%`, background: toneVar[s.tone] }} />
+          <div key={s.label} title={`${s.label}: ${s.value}`} className="h-full" style={{ width: `${(s.value / Math.max(sum, 1)) * 100}%`, background: fillVar[s.tone] }} />
         ))}
       </div>
       <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
         {segments.map((s) => (
           <li key={s.label} className="flex items-center gap-1.5 text-[color:var(--text-secondary)]">
-            <span className="h-2 w-2 rounded-sm" style={{ background: toneVar[s.tone] }} aria-hidden />
+            <span className="h-2 w-2 rounded-sm" style={{ background: fillVar[s.tone] }} aria-hidden />
             <span>{s.label}</span>
             <span className="font-medium tabular-nums text-[color:var(--text-primary)]">{s.value}</span>
           </li>
@@ -188,7 +194,7 @@ export function DonutChart({
                       cy="21"
                       r="15.9155"
                       fill="none"
-                      stroke={segment.color}
+                      stroke={segment.tone ? fillVar[segment.tone] : segment.color}
                       strokeWidth="5.5"
                       strokeDasharray={`${portion} ${100 - portion}`}
                       strokeDashoffset={dashOffset}
@@ -209,7 +215,7 @@ export function DonutChart({
               {segment.tone ? (
                 <ToneIcon tone={segment.tone} className="h-3 w-3" />
               ) : (
-                <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: segment.color }} aria-hidden />
+                <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: segment.tone ? fillVar[segment.tone] : segment.color }} aria-hidden />
               )}
               <span className="min-w-0 flex-1 truncate text-[color:var(--text-secondary)]">{segment.label}</span>
               <span className="font-semibold tabular-nums text-[color:var(--text-primary)]">{segment.value}</span>
@@ -240,7 +246,7 @@ export function HorizontalBarChart({ title, items }: { title: string; items: { l
             <div className="h-2 overflow-hidden rounded-full bg-[color:var(--track)]">
               <div
                 className="h-full min-w-0 rounded-full"
-                style={{ width: `${item.value > 0 ? Math.max((item.value / max) * 100, 4) : 0}%`, background: toneVar[item.tone] }}
+                style={{ width: `${item.value > 0 ? Math.max((item.value / max) * 100, 4) : 0}%`, background: fillVar[item.tone] }}
               />
             </div>
           </li>
@@ -266,14 +272,14 @@ export function Stepper({
     <ol className="flex items-start gap-0" aria-label="Progress">
       {steps.map((step, i) => {
         const state: "done" | "current" | "todo" = done || i < current ? "done" : i === current ? "current" : "todo";
-        const color = state === "todo" ? "var(--track)" : state === "current" ? toneVar[tone] : toneVar.good;
+        const color = state === "todo" ? "var(--track)" : state === "current" ? fillVar[tone] : fillVar.good;
         return (
           <li key={step.key} className="relative flex min-w-0 flex-1 flex-col items-center">
             {i > 0 ? (
-              <span className="absolute left-0 right-1/2 top-[7px] h-[2px]" style={{ background: state === "todo" ? "var(--track)" : toneVar.good }} aria-hidden />
+              <span className="absolute left-0 right-1/2 top-[7px] h-[2px]" style={{ background: state === "todo" ? "var(--track)" : fillVar.good }} aria-hidden />
             ) : null}
             {i < steps.length - 1 ? (
-              <span className="absolute left-1/2 right-0 top-[7px] h-[2px]" style={{ background: state === "done" ? toneVar.good : "var(--track)" }} aria-hidden />
+              <span className="absolute left-1/2 right-0 top-[7px] h-[2px]" style={{ background: state === "done" ? fillVar.good : "var(--track)" }} aria-hidden />
             ) : null}
             <span
               className={clsx("relative z-10 flex h-4 w-4 items-center justify-center rounded-full border-2 bg-[color:var(--bg-primary)]", state === "current" && "ring-4")}

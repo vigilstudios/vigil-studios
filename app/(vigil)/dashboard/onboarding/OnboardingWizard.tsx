@@ -112,10 +112,10 @@ export function OnboardingWizard(props: WizardProps) {
               className={clsx(
                 "flex min-h-10 items-center gap-2.5 rounded-lg px-2.5 text-left text-[13px] transition-colors",
                 orientation === "column" && "w-full",
-                current ? "bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] font-semibold text-[color:var(--text-primary)]" : reachable ? "text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]" : "text-[color:var(--text-secondary)] opacity-50"
+                current ? "bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_12%,transparent)] font-semibold text-[color:var(--text-primary)]" : reachable ? "text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]" : "text-[color:var(--text-secondary)] opacity-50"
               )}
             >
-              <span className={clsx("inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-semibold", current ? "border-[color:var(--accent)] text-[color:var(--accent)]" : done ? "border-[color:var(--accent)] bg-[color:var(--accent)] text-[color:var(--bg-primary)]" : "border-[color:var(--border)]")}>
+              <span className={clsx("inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-semibold", current ? "border-[color:var(--accent)] text-[color:var(--accent)]" : done ? "border-[color:var(--accent)] bg-[color:var(--accent-fill,var(--accent))] text-[color:var(--on-accent)]" : "border-[color:var(--border)]")}>
                 {done && !current ? <Check className="h-3 w-3" /> : i + 1}
               </span>
               <span className="whitespace-nowrap">{STEP_TITLES[k]}</span>

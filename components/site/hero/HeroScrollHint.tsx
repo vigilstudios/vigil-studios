@@ -14,7 +14,7 @@ export function HeroScrollHint() {
     });
   }, []);
   return (
-    <p ref={ref} className="hero-bob absolute bottom-[22px] left-1/2 z-[5] font-mono text-[10px] uppercase tracking-[0.2em] text-[rgba(245,245,243,0.55)]" aria-hidden>
+    <p ref={ref} className="hero-bob absolute bottom-[22px] left-1/2 z-[5] font-mono text-[10px] uppercase tracking-[0.2em] text-[color:var(--text-secondary)]" aria-hidden>
       Scroll ↓
     </p>
   );

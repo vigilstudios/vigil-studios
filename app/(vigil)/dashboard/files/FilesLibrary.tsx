@@ -128,7 +128,7 @@ export function FilesLibrary({ projectId, projectName, organizationId, initialAs
           onDragOver={(e) => { e.preventDefault(); if (!busy) setDragging(true); }}
           onDragLeave={() => setDragging(false)}
           onDrop={(e) => { e.preventDefault(); setDragging(false); void upload(Array.from(e.dataTransfer.files)); }}
-          className={`files-drop-zone flex flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-8 text-center transition-colors ${dragging ? "border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent)_8%,transparent)]" : "border-[color:var(--border)]"}`}
+          className={`files-drop-zone flex flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-8 text-center transition-colors ${dragging ? "border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_8%,transparent)]" : "border-[color:var(--border)]"}`}
         >
           <UploadCloud className="h-6 w-6 text-[color:var(--text-secondary)]" aria-hidden />
           <p className="mt-2 text-sm font-semibold">Drop photos, videos or PDFs here</p>
@@ -148,13 +148,13 @@ export function FilesLibrary({ projectId, projectName, organizationId, initialAs
               <span className="shrink-0">{Math.min(progress.done + 1, progress.total)} of {progress.total}</span>
             </div>
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[color:var(--bg-surface-soft)]">
-              <div className="h-full bg-[color:var(--accent)] transition-[width]" style={{ width: `${Math.round(((progress.done + progress.fraction) / progress.total) * 100)}%` }} />
+              <div className="h-full bg-[color:var(--accent-fill,var(--accent))] transition-[width]" style={{ width: `${Math.round(((progress.done + progress.fraction) / progress.total) * 100)}%` }} />
             </div>
             <p className="mt-1 text-[11px] text-[color:var(--text-secondary)]">Large videos upload in pieces and resume if your connection drops. Keep this page open.</p>
           </div>
         ) : null}
-        {error ? <p role="alert" className="mt-3 rounded-lg border border-[#ef4444]/40 bg-[#ef4444]/10 px-3 py-2 text-xs text-[#ef4444]">{error}</p> : null}
-        {notice ? <p role="status" className="mt-3 rounded-lg border border-[color:var(--accent)]/40 bg-[color-mix(in_srgb,var(--accent)_8%,transparent)] px-3 py-2 text-xs">{notice}</p> : null}
+        {error ? <p role="alert" className="mt-3 rounded-lg border border-[color-mix(in_srgb,var(--status-bad)_40%,transparent)] bg-[color-mix(in_srgb,var(--status-bad)_10%,transparent)] px-3 py-2 text-xs text-[color:var(--status-bad)]">{error}</p> : null}
+        {notice ? <p role="status" className="mt-3 rounded-lg border border-[color:var(--accent)]/40 bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_8%,transparent)] px-3 py-2 text-xs">{notice}</p> : null}
         <p className="mt-3 text-[11px] leading-4 text-[color:var(--text-secondary)]">These go to the team building {projectName}. Changes to a live site still go through Requests.</p>
       </Panel>
       </aside>

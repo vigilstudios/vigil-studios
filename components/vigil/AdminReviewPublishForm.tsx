@@ -41,7 +41,7 @@ export function AdminReviewPublishForm({ projectId, roundNumber, submitLabel }: 
       </label>
       <div className="flex items-center gap-3">
         <button type="submit" className="btn-primary text-sm" disabled={pending}>{pending ? "Publishing…" : submitLabel}</button>
-        {error ? <span className="text-xs text-[#ef4444]">{error}</span> : null}
+        {error ? <span className="text-xs text-[color:var(--status-bad)]">{error}</span> : null}
       </div>
     </form>
   );

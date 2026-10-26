@@ -90,7 +90,7 @@ export function NewRequestForm({ websites, organizationId }: { websites: { id: s
           What should change?
         </label>
         <input id="title" name="title" className={inputClass} placeholder="Update our opening hours" maxLength={200} required disabled={busy} />
-        {issues.title ? <p className="mt-1 text-xs text-[#ef4444]">{issues.title[0]}</p> : null}
+        {issues.title ? <p className="mt-1 text-xs text-[color:var(--status-bad)]">{issues.title[0]}</p> : null}
       </div>
       <div>
         <label htmlFor="description" className={labelClass}>
@@ -157,7 +157,7 @@ export function NewRequestForm({ websites, organizationId }: { websites: { id: s
                   )}
                   <span className="min-w-0 flex-1 truncate">{f.name}</span>
                   <span className="shrink-0 text-[color:var(--text-secondary)]">{formatBytes(f.size)}</span>
-                  {problem ? <span className="shrink-0 text-[#ef4444]">{problem.reason}</span> : null}
+                  {problem ? <span className="shrink-0 text-[color:var(--status-bad)]">{problem.reason}</span> : null}
                   <button type="button" aria-label={`Remove ${f.name}`} disabled={busy} onClick={() => setFiles(files.filter((_, j) => j !== i))} className="shrink-0 text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -166,7 +166,7 @@ export function NewRequestForm({ websites, organizationId }: { websites: { id: s
             })}
           </ul>
         ) : null}
-        {problems.find((p) => p.name === "*") ? <p className="mt-1 text-xs text-[#ef4444]">{problems.find((p) => p.name === "*")!.reason}</p> : null}
+        {problems.find((p) => p.name === "*") ? <p className="mt-1 text-xs text-[color:var(--status-bad)]">{problems.find((p) => p.name === "*")!.reason}</p> : null}
       </div>
 
       <FormError message={error} />

@@ -1,0 +1,102 @@
+{
+  "checks": [
+    {
+      "name": "Wire bootstrap runs before framework scripts load",
+      "pass": true
+    },
+    {
+      "name": "Typing bootstrap runs before hydration",
+      "pass": true
+    },
+    {
+      "name": "Server bootstraps are executable scripts",
+      "pass": true
+    },
+    {
+      "name": "Early canvas is drawn",
+      "pass": true
+    },
+    {
+      "name": "Early wire pointer listener is registered before hydration",
+      "pass": true
+    },
+    {
+      "name": "React handoff removes early listeners in reduced motion",
+      "pass": true
+    },
+    {
+      "name": "Initial load renders the hero (no-preference)",
+      "pass": true
+    },
+    {
+      "name": "Return 1 uses client navigation (no-preference)",
+      "pass": true
+    },
+    {
+      "name": "Return 1 has inert bootstrap tags (no-preference)",
+      "pass": true
+    },
+    {
+      "name": "Return 1 draws the wire mark (no-preference)",
+      "pass": true
+    },
+    {
+      "name": "Return 2 uses client navigation (no-preference)",
+      "pass": true
+    },
+    {
+      "name": "Return 2 has inert bootstrap tags (no-preference)",
+      "pass": true
+    },
+    {
+      "name": "Return 2 draws the wire mark (no-preference)",
+      "pass": true
+    },
+    {
+      "name": "Theme switching still works (no-preference)",
+      "pass": true
+    },
+    {
+      "name": "Initial load renders the hero (reduce)",
+      "pass": true
+    },
+    {
+      "name": "Return 1 uses client navigation (reduce)",
+      "pass": true
+    },
+    {
+      "name": "Return 1 has inert bootstrap tags (reduce)",
+      "pass": true
+    },
+    {
+      "name": "Return 1 draws the wire mark (reduce)",
+      "pass": true
+    },
+    {
+      "name": "Return 2 uses client navigation (reduce)",
+      "pass": true
+    },
+    {
+      "name": "Return 2 has inert bootstrap tags (reduce)",
+      "pass": true
+    },
+    {
+      "name": "Return 2 draws the wire mark (reduce)",
+      "pass": true
+    },
+    {
+      "name": "Theme switching still works (reduce)",
+      "pass": true
+    },
+    {
+      "name": "No thrown browser errors",
+      "pass": true
+    },
+    {
+      "name": "No React script or hydration warnings",
+      "pass": true
+    }
+  ],
+  "errors": [],
+  "reactWarnings": []
+}

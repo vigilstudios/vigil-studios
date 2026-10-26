@@ -31,7 +31,7 @@ export function OnboardingCard({ brief, completedAt, businessName, projectKind }
   const done = items.filter((i) => i.done).length;
   const started = brief.progress.lastStep !== "welcome" || done > 0;
   return (
-    <section className="rounded-xl border border-[color:var(--accent)]/40 bg-[color-mix(in_srgb,var(--accent)_6%,var(--bg-surface))] p-4">
+    <section className="rounded-xl border border-[color:var(--accent)]/40 bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_6%,var(--bg-surface))] p-4">
       <div className="flex items-center gap-3">
         <VirtueOrb size="md" state="idle" className="shrink-0" />
         <div className="min-w-0 flex-1">

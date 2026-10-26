@@ -23,8 +23,8 @@ import { HOW_IT_WORKS, HOW_IT_WORKS_HEAD } from "@/lib/site-copy";
 const WIN = (ox: number, oy: number, cls = "w", bright = false) => `<g transform="translate(${ox} ${oy})">
   <rect class="hiw-tile ${cls}" pathLength="1" x="0" y="0" width="300" height="150" rx="8"/><line class="hiw-tile ${cls}" pathLength="1" x1="0" y1="22" x2="300" y2="22"/>
   <g><line class="hiw-tile ${cls}" pathLength="1" x1="18" y1="40" x2="80" y2="40"/><rect class="hiw-tile ${cls}" pathLength="1" x="18" y="58" width="110" height="9" rx="2"/><rect class="hiw-tile ${cls}" pathLength="1" x="18" y="73" width="80" height="9" rx="2"/><rect class="hiw-tile ${cls}" pathLength="1" x="160" y="40" width="122" height="66" rx="4"/><rect class="hiw-tile ${cls}" pathLength="1" x="18" y="112" width="80" height="26" rx="4"/><rect class="hiw-tile ${cls}" pathLength="1" x="110" y="112" width="80" height="26" rx="4"/><rect class="hiw-tile ${cls}" pathLength="1" x="202" y="112" width="80" height="26" rx="4"/></g>
-  <g class="wf" opacity="0"><rect x="18" y="58" width="110" height="9" rx="2" fill="rgba(245,245,243,${bright ? 0.5 : 0.18})"/><rect x="18" y="73" width="80" height="9" rx="2" fill="rgba(245,245,243,${bright ? 0.35 : 0.12})"/><rect x="160" y="40" width="122" height="66" rx="4" fill="rgba(16,212,90,${bright ? 0.34 : 0.14})"/><rect x="18" y="112" width="80" height="26" rx="4" fill="rgba(245,245,243,${bright ? 0.22 : 0.08})"/><rect x="110" y="112" width="80" height="26" rx="4" fill="rgba(245,245,243,${bright ? 0.22 : 0.08})"/><rect x="202" y="112" width="80" height="26" rx="4" fill="rgba(245,245,243,${bright ? 0.22 : 0.08})"/>${bright ? '<rect x="18" y="112" width="80" height="26" rx="4" fill="none" stroke="rgba(16,212,90,.6)"/>' : ""}</g></g>`;
-const CURSOR = '<svg viewBox="0 0 14 18"><path d="M1 1 L1 14 L4.4 10.8 L6.8 16.6 L9.2 15.6 L6.8 9.9 L11.6 9.9 Z" fill="#10d45a" stroke="#0a0a0a" stroke-width=".8"/></svg><span class="cr"></span>';
+  <g class="wf" opacity="0"><rect x="18" y="58" width="110" height="9" rx="2" fill="rgba(var(--scene-ink-rgb),${bright ? 0.5 : 0.18})"/><rect x="18" y="73" width="80" height="9" rx="2" fill="rgba(var(--scene-ink-rgb),${bright ? 0.35 : 0.12})"/><rect x="160" y="40" width="122" height="66" rx="4" fill="rgba(var(--accent-rgb),${bright ? 0.34 : 0.14})"/><rect x="18" y="112" width="80" height="26" rx="4" fill="rgba(var(--scene-ink-rgb),${bright ? 0.22 : 0.08})"/><rect x="110" y="112" width="80" height="26" rx="4" fill="rgba(var(--scene-ink-rgb),${bright ? 0.22 : 0.08})"/><rect x="202" y="112" width="80" height="26" rx="4" fill="rgba(var(--scene-ink-rgb),${bright ? 0.22 : 0.08})"/>${bright ? '<rect x="18" y="112" width="80" height="26" rx="4" fill="none" stroke="rgba(var(--accent-rgb),.6)"/>' : ""}</g></g>`;
+const CURSOR = '<svg viewBox="0 0 14 18"><path d="M1 1 L1 14 L4.4 10.8 L6.8 16.6 L9.2 15.6 L6.8 9.9 L11.6 9.9 Z" fill="var(--accent)" stroke="var(--bg-primary)" stroke-width=".8"/></svg><span class="cr"></span>';
 
 /** The five scenes, in the order of the steps. Step 2's orb is a React child, not markup. */
 const SCENES: string[] = [
@@ -38,11 +38,11 @@ const SCENES: string[] = [
     <rect class="hiw-tile pl" pathLength="1" x="110" y="136" width="88" height="60" rx="8"/><text x="122" y="158">Care</text><text class="sm" x="122" y="176">Changes handled</text>
     <rect class="hiw-tile pl" pathLength="1" x="206" y="136" width="88" height="60" rx="8"/><text x="218" y="158">Growth</text><text class="sm" x="218" y="176">Tools coming</text>
     <rect class="hiw-tile pl" pathLength="1" x="302" y="136" width="88" height="60" rx="8"/><text x="314" y="158">Priority</text><text class="sm" x="314" y="176">Tools coming</text>
-    <circle class="clickring" cx="68" cy="68" r="6" fill="none" stroke="#10d45a" opacity="0"/><circle class="cur" cx="392" cy="204" r="5"/></g></svg>
+    <circle class="clickring" cx="68" cy="68" r="6" fill="none" stroke="var(--accent)" opacity="0"/><circle class="cur" cx="392" cy="204" r="5"/></g></svg>
     <span class="hiw-pill p1" style="left:2%;top:6%">Selected</span><span class="hiw-pill p2" style="left:26%;top:58%">Selected</span>`,
   `<svg viewBox="0 0 400 210"><g>
     <rect class="hiw-tile" pathLength="1" x="14" y="26" width="176" height="160" rx="8"/><text x="30" y="50">Kickoff call</text>
-    <rect class="hiw-tile" pathLength="1" x="66" y="82" width="72" height="58" rx="4"/><line class="hiw-tile" pathLength="1" x1="66" y1="98" x2="138" y2="98"/><line class="hiw-tile" pathLength="1" x1="82" y1="74" x2="82" y2="88"/><line class="hiw-tile" pathLength="1" x1="122" y1="74" x2="122" y2="88"/><circle cx="102" cy="120" r="5" fill="rgba(245,245,243,.32)"/>
+    <rect class="hiw-tile" pathLength="1" x="66" y="82" width="72" height="58" rx="4"/><line class="hiw-tile" pathLength="1" x1="66" y1="98" x2="138" y2="98"/><line class="hiw-tile" pathLength="1" x1="82" y1="74" x2="82" y2="88"/><line class="hiw-tile" pathLength="1" x1="122" y1="74" x2="122" y2="88"/><circle cx="102" cy="120" r="5" fill="rgba(var(--scene-ink-rgb),.32)"/>
     <text x="30" y="172">15 min · a person</text>
     <rect class="hiw-tile sel2" pathLength="1" x="210" y="26" width="176" height="160" rx="8"/><text x="226" y="50">Guided brief</text><text x="226" y="172">Virtue · saves as you go</text></g></svg>
     <div class="hiw-bubble" style="left:53%"><span class="who">Virtue</span><span class="t"></span></div>`,
@@ -56,8 +56,8 @@ const SCENES: string[] = [
     <text class="sm" x="130" y="66">Requested</text><text class="sm" x="212" y="66">In progress</text><text class="sm" x="294" y="66">Done</text></g></svg>
     <span class="hiw-chip bad sm req" style="left:40.5%;top:46%"><i></i><b>Make the hours bigger</b></span>`,
   `<div class="hiw-glow"></div><svg viewBox="0 0 400 210">${WIN(50, 30, "lv bright", true)}
-    <g class="up" opacity="0"><rect x="64" y="124" width="118" height="42" rx="6" fill="rgba(10,10,10,.9)" stroke="rgba(16,212,90,.55)"/><text class="sm" x="72" y="138">Hosting · managed</text><path class="hiw-tile spark" pathLength="1" d="M72 158 L86 156 100 158 114 155 128 158 142 157 156 158 170 156 176 158" style="stroke:#10d45a;stroke-width:1.5"/></g>
-    <g class="lock" opacity="0"><rect x="333" y="37" width="9" height="8" rx="2" fill="none" stroke="#10d45a" stroke-width="1.2"/><path d="M335 37 v-3 a2.5 2.5 0 0 1 5 0 v3" fill="none" stroke="#10d45a" stroke-width="1.2"/></g></svg>
+    <g class="up" opacity="0"><rect x="64" y="124" width="118" height="42" rx="6" fill="rgba(var(--scene-bg-rgb),.9)" stroke="rgba(var(--accent-rgb),.55)"/><text class="sm" x="72" y="138">Hosting · managed</text><path class="hiw-tile spark" pathLength="1" d="M72 158 L86 156 100 158 114 155 128 158 142 157 156 158 170 156 176 158" style="stroke:var(--accent);stroke-width:1.5"/></g>
+    <g class="lock" opacity="0"><rect x="333" y="37" width="9" height="8" rx="2" fill="none" stroke="var(--accent)" stroke-width="1.2"/><path d="M335 37 v-3 a2.5 2.5 0 0 1 5 0 v3" fill="none" stroke="var(--accent)" stroke-width="1.2"/></g></svg>
     <span class="hiw-pill lp">Live</span>
     <span class="hiw-cur2 c1">${CURSOR}</span><span class="hiw-cur2 c2">${CURSOR}</span><span class="hiw-cur2 c3">${CURSOR}</span>
     <span class="hiw-chip sm n" style="left:8%;top:14%"><i></i>Website · Live</span>
@@ -245,7 +245,7 @@ export function HowItWorksScene() {
   }, []);
 
   return (
-    <div ref={root} className="hiw absolute inset-0 z-[1] text-[#f5f5f3] opacity-0" style={{ pointerEvents: "none" }}>
+    <div ref={root} className="hiw absolute inset-0 z-[1] text-[color:var(--text-primary)] opacity-0" style={{ pointerEvents: "none" }}>
       <div className="hiw-head">
         <p className="hiw-eyebrow story-typing-pending" data-text={HOW_IT_WORKS_HEAD.eyebrow}>{HOW_IT_WORKS_HEAD.eyebrow}</p>
         <h2 className="story-typing-pending" data-text={HOW_IT_WORKS_HEAD.title}>{HOW_IT_WORKS_HEAD.title}</h2>

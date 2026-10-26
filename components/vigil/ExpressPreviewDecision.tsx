@@ -29,7 +29,7 @@ export function ExpressPreviewDecision({ websiteId, review }: { websiteId: strin
 
   if (review.status === "approved") {
     return (
-      <section className="rounded-xl border border-[color:var(--accent)]/40 bg-[color-mix(in_srgb,var(--accent)_7%,var(--bg-surface))] p-4">
+      <section className="rounded-xl border border-[color:var(--accent)]/40 bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_7%,var(--bg-surface))] p-4">
         <div className="flex items-start gap-3">
           <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[color:var(--accent)]" />
           <div>
@@ -54,7 +54,7 @@ export function ExpressPreviewDecision({ websiteId, review }: { websiteId: strin
 
   if (review.status !== "awaiting_feedback") return null;
   return (
-    <section className="rounded-xl border border-[color:var(--accent)]/45 bg-[color-mix(in_srgb,var(--accent)_6%,var(--bg-surface))] p-4">
+    <section className="rounded-xl border border-[color:var(--accent)]/45 bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_6%,var(--bg-surface))] p-4">
       <div className="flex items-start gap-3">
         <MessageSquareText className="mt-0.5 h-5 w-5 shrink-0 text-[color:var(--accent)]" />
         <div className="min-w-0 flex-1">
@@ -94,7 +94,7 @@ export function ExpressPreviewDecision({ websiteId, review }: { websiteId: strin
               </div>
             </div>
           ) : null}
-          {error ? <p className="mt-2 text-xs text-[#ef4444]">{error}</p> : null}
+          {error ? <p className="mt-2 text-xs text-[color:var(--status-bad)]">{error}</p> : null}
         </div>
       </div>
     </section>

@@ -267,10 +267,10 @@ function RoundProgress({ review }: { review: CustomerReview | null }) {
           const round = roundFor(review, definition.key);
           const state = review?.currentRound === definition.key ? "current" : round.status === "approved" || round.status === "complete" ? "done" : "todo";
           return (
-            <li key={definition.key} className={`relative rounded-lg border p-3 ${state === "current" ? "border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent)_7%,transparent)]" : "border-[color:var(--border)]"}`}>
+            <li key={definition.key} className={`relative rounded-lg border p-3 ${state === "current" ? "border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_7%,transparent)]" : "border-[color:var(--border)]"}`}>
               {index === 0 ? <span className="sr-only">Round 1 of 2. </span> : null}
               <div className="flex items-start gap-3">
-                <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${state === "done" ? "bg-[color:var(--accent)] text-[color:var(--bg-primary)]" : state === "current" ? "border border-[color:var(--accent)] text-[color:var(--accent)]" : "border border-[color:var(--border)] text-[color:var(--text-secondary)]"}`}>
+                <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${state === "done" ? "bg-[color:var(--accent-fill,var(--accent))] text-[color:var(--on-accent)]" : state === "current" ? "border border-[color:var(--accent)] text-[color:var(--accent)]" : "border border-[color:var(--border)] text-[color:var(--text-secondary)]"}`}>
                   {state === "done" ? <Check className="h-4 w-4" aria-hidden /> : index + 1}
                 </span>
                 <div className="min-w-0 flex-1">
@@ -444,8 +444,8 @@ function DecisionPanel({ formRef, review, currentRound, decision, feedback, file
     <Panel title="Your decision">
       <form ref={formRef} onSubmit={onSubmit} className="space-y-4" noValidate>
         {canDecide ? (
-          <div className="flex items-start gap-2.5 rounded-lg border border-[color:var(--accent)]/35 bg-[color-mix(in_srgb,var(--accent)_7%,transparent)] px-3 py-2.5">
-            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--accent)] text-[color:var(--bg-primary)]">
+          <div className="flex items-start gap-2.5 rounded-lg border border-[color:var(--accent)]/35 bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_7%,transparent)] px-3 py-2.5">
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--accent-fill,var(--accent))] text-[color:var(--on-accent)]">
               <CheckCircle2 className="h-3 w-3" aria-hidden />
             </span>
             <div>
@@ -459,8 +459,8 @@ function DecisionPanel({ formRef, review, currentRound, decision, feedback, file
           <p className="mt-1 text-xs leading-5 text-[color:var(--text-secondary)]">Choose one clear outcome. If you request changes, keep every note in one list so nothing gets lost between messages.</p>
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
-          <button type="button" disabled={!canDecide || busy} onClick={() => onDecision("approve")} className={`flex min-h-20 items-start gap-2 rounded-lg border-2 p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none ${decision === "approve" ? "border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent)_16%,transparent)] shadow-[0_0_0_3px_color-mix(in_srgb,var(--accent)_12%,transparent)]" : "border-[color-mix(in_srgb,var(--accent)_45%,var(--border))] bg-[color-mix(in_srgb,var(--accent)_7%,transparent)] hover:border-[color:var(--accent)] hover:bg-[color-mix(in_srgb,var(--accent)_12%,transparent)]"}`}>
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--accent)_18%,transparent)]"><CheckCircle2 className="h-4 w-4 text-[color:var(--accent)]" aria-hidden /></span>
+          <button type="button" disabled={!canDecide || busy} onClick={() => onDecision("approve")} className={`flex min-h-20 items-start gap-2 rounded-lg border-2 p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none ${decision === "approve" ? "border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_16%,transparent)] shadow-[0_0_0_3px_color-mix(in_srgb,var(--accent)_12%,transparent)]" : "border-[color-mix(in_srgb,var(--accent)_45%,var(--border))] bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_7%,transparent)] hover:border-[color:var(--accent)] hover:bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_12%,transparent)]"}`}>
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_18%,transparent)]"><CheckCircle2 className="h-4 w-4 text-[color:var(--accent)]" aria-hidden /></span>
             <span><span className="block text-[13px] font-semibold">Approve</span><span className="mt-0.5 block text-[11px] text-[color:var(--text-secondary)]">This round is ready to move forward.</span></span>
           </button>
           <button type="button" disabled={!canDecide || busy} onClick={() => onDecision("request_revisions")} className={`flex min-h-20 items-start gap-2 rounded-lg border-2 p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none ${decision === "request_revisions" ? "border-[color:var(--status-info)] bg-[color-mix(in_srgb,var(--status-info)_16%,transparent)] shadow-[0_0_0_3px_color-mix(in_srgb,var(--status-info)_12%,transparent)]" : "border-[color-mix(in_srgb,var(--status-info)_45%,var(--border))] bg-[color-mix(in_srgb,var(--status-info)_7%,transparent)] hover:border-[color:var(--status-info)] hover:bg-[color-mix(in_srgb,var(--status-info)_12%,transparent)]"}`}>
@@ -521,11 +521,11 @@ function ReviewAttachments({ files, problems, busy, onFiles, onRemove }: { files
         return <li key={`${file.name}-${index}`} className="flex min-w-0 max-w-full items-center gap-2 px-3 py-1.5 text-xs sm:gap-3">
           {file.type.startsWith("image/") ? <ImageIcon className="h-4 w-4 shrink-0 text-[color:var(--text-secondary)]" aria-hidden /> : <FileText className="h-4 w-4 shrink-0 text-[color:var(--text-secondary)]" aria-hidden />}
           <span className="min-w-0 flex-1 truncate">{file.name}</span><span className="shrink-0 text-[color:var(--text-secondary)]">{formatBytes(file.size)}</span>
-          {issue ? <span className="shrink-0 text-[#ef4444]">{issue.reason}</span> : null}
+          {issue ? <span className="shrink-0 text-[color:var(--status-bad)]">{issue.reason}</span> : null}
           <button type="button" aria-label={`Remove ${file.name}`} disabled={busy} onClick={() => onRemove(index)} className="shrink-0 text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]"><X className="h-3.5 w-3.5" aria-hidden /></button>
         </li>;
       })}</ul> : null}
-      {problems.find((problem) => problem.name === "*") ? <p className="mt-1 text-xs text-[#ef4444]">{problems.find((problem) => problem.name === "*")!.reason}</p> : null}
+      {problems.find((problem) => problem.name === "*") ? <p className="mt-1 text-xs text-[color:var(--status-bad)]">{problems.find((problem) => problem.name === "*")!.reason}</p> : null}
       <p className="mt-1 text-[10px] text-[color:var(--text-secondary)]">Images and PDFs upload directly to Vigil after you send your notes. Maximum file size is {formatBytes(MAX_ATTACHMENT_BYTES)}.</p>
     </div>
   );

@@ -24,8 +24,8 @@ export async function StartSection() {
       <Container>
         <Reveal>
           <div className="mx-auto max-w-2xl text-center">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#062b13]">{START.eyebrow}</p>
-            <h2 className="text-3xl font-semibold tracking-tight text-[#062b13] sm:text-4xl">{START.title}</h2>
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-on-accent-section)]">{START.eyebrow}</p>
+            <h2 className="text-3xl font-semibold tracking-tight text-[color:var(--text-on-accent-section)] sm:text-4xl">{START.title}</h2>
           </div>
         </Reveal>
         <CardRow className="mt-6 md:grid-cols-3">
@@ -33,7 +33,7 @@ export async function StartSection() {
             const stage = START.stages[b.kind];
             return (
               <Card key={b.kind}>
-                <div data-cursor="light" className="flex h-full flex-col rounded-2xl border border-[rgba(255,255,255,0.1)] bg-[color:var(--bg-primary)] p-5 text-[color:var(--text-primary)] lg:p-6 transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-[rgba(255,255,255,0.3)]">
+                <div data-cursor="light" className="flex h-full flex-col rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-primary)] p-5 text-[color:var(--text-primary)] lg:p-6 transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-[color:var(--accent)]">
                   <Eyebrow tone={stage.tone}>{stage.stage}</Eyebrow>
                   <h3 className="text-xl font-semibold tracking-tight">{b.name}</h3>
                   <p className="mt-1.5 text-[14px] leading-6 text-[color:var(--text-secondary)]">{stage.body}</p>

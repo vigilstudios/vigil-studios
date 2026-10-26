@@ -1,81 +1,22 @@
 "use client";
 
-import { useEffect } from "react";
 import { Moon, Sun } from "lucide-react";
-import { useSiteTheme } from "./useSiteTheme";
+import { setSiteTheme, useSiteTheme } from "./useSiteTheme";
 
-const themes = {
-    dark: {
-      "--bg-primary": "#0a0a0a",
-      "--bg-secondary": "#1a1a1a",
-      "--bg-surface": "rgba(255, 255, 255, 0.04)",
-      "--bg-surface-soft": "rgba(255, 255, 255, 0.06)",
-      "--text-primary": "#f5f5f3",
-      "--text-secondary": "#a1a1aa",
-      //"--accent": "#166534",
-      //"--accent-hover": "#15803d",
-      "--accent": "#10D45A",
-      "--accent-hover": "#0ab247",
-      "--border": "rgba(255, 255, 255, 0.08)",
-    },
-    light: {
-      "--bg-primary": "#E4F9EC",
-      "--bg-secondary": "#CEE1D6",
-      "--bg-surface": "rgba(17, 24, 39, 0.04)",
-      "--bg-surface-soft": "rgba(17, 24, 39, 0.08)",
-      "--text-primary": "#111827",
-      "--text-secondary": "#4b5563",
-      //"--accent": "#10D45A",
-      //"--accent-hover": "#0ab247",
-      "--accent": "#1E8846",
-      "--accent-hover": "#15803d",
-      "--border": "rgba(17, 24, 39, 0.08)",
-    },
-  };
+/** A small outlined control in the navbar's quiet, monochrome HUD style. */
 export function ThemeToggle() {
-  // Mirrors data-theme on <html>; applyTheme writes it, the store reads it back.
   const theme = useSiteTheme();
-
-  const applyTheme = (selectedTheme: "dark" | "light") => {
-    const root = document.documentElement;
-    const themeValues = themes[selectedTheme];
-    Object.entries(themeValues).forEach(([key, value]) => {
-      root.style.setProperty(key, value);
-    });
-    root.dataset.theme = selectedTheme;
-    window.dispatchEvent(
-      new CustomEvent("site-theme-change", { detail: selectedTheme })
-    );
-  };
-
-  useEffect(() => {
-    const savedTheme = window.localStorage.getItem("site-theme") as
-      | "dark"
-      | "light"
-      | null;
-
-    if (savedTheme) {
-      applyTheme(savedTheme);
-    } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
-      applyTheme("light");
-    } else {
-      applyTheme("dark");
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const nextTheme = theme === "dark" ? "light" : "dark";
-    applyTheme(nextTheme);
-    window.localStorage.setItem("site-theme", nextTheme);
-  };
+  const label = theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
 
   return (
     <button
-      onClick={toggleTheme}
-      aria-label="Toggle theme"
-      className="h-14 w-14 inline-flex items-center justify-center rounded-[1.25rem] text-[color:var(--text-primary)] hover:bg-[color:var(--bg-secondary)] transition-colors"
+      type="button"
+      onClick={() => setSiteTheme(theme === "dark" ? "light" : "dark")}
+      aria-label={label}
+      title={label}
+      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[color:var(--border)] text-[color:var(--text-secondary)] transition-colors hover:bg-[color:var(--bg-surface-soft)] hover:text-[color:var(--text-primary)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[color:var(--accent)]"
     >
-      {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+      {theme === "dark" ? <Sun size={14} aria-hidden /> : <Moon size={14} aria-hidden />}
     </button>
   );
 }

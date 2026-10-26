@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { WIRE_EDGES, wireRotation, projectWireVertex } from "./wire-geometry";
+import { InitialPaintScript } from "./InitialPaintScript";
 import { WIRE_BOOTSTRAP } from "./wire-bootstrap";
 import { cursor, startCursor, tickCursor } from "./cursor";
 import { watchCovered } from "./covered";
@@ -119,6 +120,7 @@ export function WireMark({
     };
     fit();
 
+    let ink = getComputedStyle(document.documentElement).getPropertyValue("--scene-ink-rgb").trim();
     let raf = 0,
       visible = false,
       hidden = document.hidden,
@@ -136,7 +138,7 @@ export function WireMark({
       );
       applyExit();
       ctx.clearRect(0, 0, w, h);
-      ctx.strokeStyle = `rgba(255,255,255,${0.9 * (1 - exitU)})`;
+      ctx.strokeStyle = `rgba(${ink},${0.9 * (1 - exitU)})`;
       // WebGL LineBasicMaterial used one physical pixel, including on Retina.
       ctx.lineWidth = 1 / dpr;
       const focal = h / (2 * Math.tan((FOV * Math.PI) / 360));
@@ -204,9 +206,15 @@ export function WireMark({
           }
         })
       : () => {};
+    const themeObserver = new MutationObserver(() => {
+      ink = getComputedStyle(document.documentElement).getPropertyValue("--scene-ink-rgb").trim();
+      loop();
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     loop();
 
     return () => {
+      themeObserver.disconnect();
       cancelAnimationFrame(raf);
       io.disconnect();
       ro.disconnect();
@@ -237,20 +245,15 @@ export function WireMark({
         className="pointer-events-none absolute left-1/2 top-[40%] w-[70vw] -translate-x-1/2 -translate-y-1/2 md:w-[34vw]"
         aria-hidden
       >
-        <path d={V_PATH} fill="none" stroke="#f5f5f3" strokeWidth="3" />
+        <path d={V_PATH} fill="none" stroke="var(--text-primary)" strokeWidth="3" />
         <polygon
           points={STAR_POINTS}
           fill="none"
-          stroke="#f5f5f3"
+          stroke="var(--text-primary)"
           strokeWidth="3"
         />
       </svg>
-      {story ? (
-        <script
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: WIRE_BOOTSTRAP }}
-        />
-      ) : null}
+      {story ? <InitialPaintScript html={WIRE_BOOTSTRAP} /> : null}
     </>
   );
 }

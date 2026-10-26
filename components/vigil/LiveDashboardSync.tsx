@@ -109,7 +109,7 @@ export function LiveDashboardSync({ scope }: { scope: Scope }) {
     <TopbarActions>
       <div className="flex items-center gap-1.5" aria-live="polite">
         <span className="hidden items-center gap-1.5 text-[11px] text-[color:var(--text-secondary)] sm:inline-flex">
-          <span className={`h-1.5 w-1.5 rounded-full ${!automatic ? "bg-[color:var(--text-secondary)]" : state === "live" ? "bg-[color:var(--accent)]" : state === "offline" ? "bg-[#ef4444]" : "bg-[#f59e0b]"}`} />
+          <span className={`h-1.5 w-1.5 rounded-full ${!automatic ? "bg-[color:var(--text-secondary)]" : state === "live" ? "bg-[color:var(--accent-fill,var(--accent))]" : state === "offline" ? "bg-[#ef4444]" : "bg-[#f59e0b]"}`} />
           {label}
         </span>
         <button

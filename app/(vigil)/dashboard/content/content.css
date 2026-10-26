@@ -57,13 +57,13 @@
   cursor:default;
 }
 .content-hub .hub-primary {
-  background:var(--accent);
-  color:var(--bg-primary);
+  background:var(--accent-fill,var(--accent));
+  color:var(--on-accent);
   border-color:transparent;
   text-decoration:none;
 }
 .content-hub .hub-primary:hover {
-  background:var(--accent-hover);
+  background:var(--accent-fill-hover,var(--accent-hover));
 }
 .hub-tabs {
   display:flex;
@@ -80,7 +80,7 @@
   color:var(--text-secondary);
 }
 .hub-tabs [aria-selected=true] {
-  background:color-mix(in srgb,var(--accent) 12%,transparent);
+  background:color-mix(in srgb,var(--accent-fill,var(--accent)) 12%,transparent);
   color:var(--accent);
   border-color:color-mix(in srgb,var(--accent) 22%,transparent);
 }

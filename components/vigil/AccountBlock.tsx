@@ -21,7 +21,7 @@ export function AccountBlock({
       <div className="flex items-center gap-2 px-1 py-1 [aside[data-collapsed=true]_&]:justify-center">
         <span
           aria-hidden
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--accent)_18%,transparent)] text-[11px] font-semibold uppercase text-[color:var(--accent)]"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_18%,transparent)] text-[11px] font-semibold uppercase text-[color:var(--accent)]"
         >
           {(name ?? email).slice(0, 1)}
         </span>

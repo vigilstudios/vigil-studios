@@ -1,11 +1,8 @@
-/*
- * Product-frame tokens. Status colours were checked with the dataviz
- * validator against both surfaces (>= 3:1); the amber/green and amber/red
- * pairs are weak under colour-vision simulation, so status is always shown
- * with an icon and a label, never colour alone.
- */
+/* The client and admin frames share the canonical site accent for all
+ * positive status colors, fills, glyphs and highlights. */
 .vigil-frame {
-  --status-good: #10d45a;
+  --status-good: var(--accent);
+  --status-good-fill: var(--status-good);
   --status-warn: #fab219;
   --status-bad: #ef4444;
   --status-info: #60a5fa;
@@ -13,17 +10,42 @@
   --track: rgba(255, 255, 255, 0.08);
 }
 
-html[data-theme="light"] .vigil-frame {
-  --status-good: #1e8846;
-  --status-warn: #b45309;
-  --status-bad: #dc2626;
-  --status-info: #1d4ed8;
-  --status-neutral: #6b7280;
-  --track: rgba(17, 24, 39, 0.1);
+.vigil-frame ::selection {
+  background: color-mix(in srgb, var(--accent-fill,var(--accent)) 30%, transparent);
 }
 
-.vigil-frame ::selection {
-  background: color-mix(in srgb, var(--accent) 30%, transparent);
+/* White work surfaces on a quiet gray canvas give the dashboard hierarchy. */
+html[data-theme="light"] .vigil-frame {
+  --bg-primary: #f6f7f9;
+  --bg-secondary: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-surface-soft: #f0f2f5;
+  --text-primary: #1c2026;
+  --text-secondary: #606773;
+  --border: #e0e4e9;
+  --status-good: var(--accent);
+  --status-good-fill: var(--accent);
+  --status-warn: #8a510a;
+  --status-bad: #b72c2c;
+  --status-info: #285dc1;
+  --status-neutral: #566170;
+  --track: #e4e7ec;
+  --button-secondary-bg: #ffffff;
+  --button-secondary-hover: #f0f2f5;
+}
+
+html[data-theme="light"] .vigil-frame > aside,
+html[data-theme="light"] .vigil-frame > div > header {
+  background-color: #ffffff;
+}
+
+html[data-theme="light"] .vigil-frame :is(input, textarea, select) {
+  background-color: #ffffff;
+}
+
+html[data-theme="light"] .vigil-frame :is(button, a, input, textarea, select):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 /* Animate the actual browser width; ResizeObserver keeps its iframe at true scale. */

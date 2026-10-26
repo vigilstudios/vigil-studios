@@ -62,7 +62,7 @@ export function FloatingAttentionCenter({ portal, items }: { portal: "customer" 
           <div className="max-h-[min(55vh,460px)] overflow-y-auto p-2">
             {visibleItems.length ? visibleItems.map((item) => (
               <Link key={item.key} href={item.href} onClick={() => markRead(item)} className="group flex gap-3 rounded-xl p-3 hover:bg-[color:var(--bg-surface-soft)]">
-                <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[color:var(--accent)]" />
+                <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[color:var(--accent-fill,var(--accent))]" />
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold">{item.title}</span>
                   <span className="mt-0.5 block text-xs leading-5 text-[color:var(--text-secondary)]">{item.body}</span>
@@ -92,7 +92,7 @@ export function FloatingAttentionCenter({ portal, items }: { portal: "customer" 
         {!hidden ? (
           <button type="button" onClick={() => setOpen((value) => !value)} className="relative rounded-full bg-[color:var(--bg-primary)] p-1 shadow-xl" aria-label="Open Virtue notifications" aria-expanded={open} data-virtue-dock={portal}>
             <VirtueOrb size="md" state={visibleItems.length ? "working" : "idle"} label="" />
-            {visibleItems.length ? <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[color:var(--accent)] px-1 text-[10px] font-bold text-black">{visibleItems.length}</span> : null}
+            {visibleItems.length ? <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[color:var(--accent-fill,var(--accent))] px-1 text-[10px] font-bold text-black">{visibleItems.length}</span> : null}
           </button>
         ) : null}
       </div>

@@ -4,7 +4,7 @@
   --bg-primary: #fff; --bg-secondary: #f8f2f5; --bg-section-alt: #f8f2f5;
   --bg-surface: #fff; --bg-surface-soft: #f2e7eb; --text-primary: #30262c;
   --text-secondary: #69616a; --accent: #96516c; --creator-pink: #f2c7d7;
-  --accent-hover: #80405b; --border: #e4d7dc;
+  --on-accent: #fff; --accent-fill: #96516c; --accent-fill-hover: #80405b; --accent-hover: #80405b; --border: #e4d7dc;
   background: var(--bg-primary); color: var(--text-primary); color-scheme: light;
 }
 :global(body):has(.page) > :global(nav) { background: #fff; border-color: #eee; backdrop-filter: none; }

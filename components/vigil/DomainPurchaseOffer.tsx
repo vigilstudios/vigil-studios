@@ -16,7 +16,7 @@ export function DomainPurchaseOffer({ quote, canManage, pending, disabled, onBuy
       {quote.premium ? <p className="text-sm font-medium text-[color:var(--accent-3)]">Premium domain</p> : null}
     </div>
     <dl className="grid gap-4 sm:grid-cols-2">
-      <div className="rounded-lg border border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent)_8%,transparent)] p-4">
+      <div className="rounded-lg border border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_8%,transparent)] p-4">
         <dt className="text-sm font-medium">{quote.years === 1 ? "First year" : `First ${quote.years} years`}</dt>
         <dd className="mt-2 text-4xl font-semibold tracking-tight text-[color:var(--accent)]">{money(quote.registration)} <span className="text-sm font-medium">USD</span><span className="mt-2 block text-xs font-normal tracking-normal text-[color:var(--text-secondary)]">Paid to Vercel to register this web address.</span></dd>
       </div>

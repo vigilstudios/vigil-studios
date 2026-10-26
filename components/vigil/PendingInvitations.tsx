@@ -58,7 +58,7 @@ export function PendingInvitations({ invitations }: { invitations: PendingInvita
           </li>
         ))}
       </ul>
-      {error ? <p className="mt-2 text-xs text-[#ef4444]">{error}</p> : null}
+      {error ? <p className="mt-2 text-xs text-[color:var(--status-bad)]">{error}</p> : null}
     </Card>
   );
 }

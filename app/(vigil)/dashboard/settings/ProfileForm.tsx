@@ -34,7 +34,7 @@ export function ProfileForm({ organization, readOnly }: { organization: Organiza
             className={inputClass}
             disabled={pending || readOnly}
           />
-          {issues[f.name] ? <p className="mt-1 text-xs text-[#ef4444]">{issues[f.name][0]}</p> : null}
+          {issues[f.name] ? <p className="mt-1 text-xs text-[color:var(--status-bad)]">{issues[f.name][0]}</p> : null}
         </div>
       ))}
       <div className="sm:col-span-2">

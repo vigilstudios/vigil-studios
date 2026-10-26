@@ -6,7 +6,7 @@ import { HOW_IT_WORKS, HOW_IT_WORKS_HEAD } from "@/lib/site-copy";
 export function HowItWorksSection() {
   return (
     <StoryScene>
-      <div className="hiw absolute inset-0 z-[1] text-[#f5f5f3] opacity-0" style={{ pointerEvents: "none" }}>
+      <div className="hiw absolute inset-0 z-[1] text-[color:var(--text-primary)] opacity-0" style={{ pointerEvents: "none" }}>
         <div className="hiw-head">
           <p className="hiw-eyebrow">{HOW_IT_WORKS_HEAD.eyebrow}</p>
           <h2>{HOW_IT_WORKS_HEAD.title}</h2>
