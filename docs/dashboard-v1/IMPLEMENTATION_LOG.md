@@ -1198,3 +1198,11 @@ Ownership verification now remains an unfinished waiting step with explicit addi
 - Added state/PKCE/cookie/CSRF protections, tenant and user checks, lease-based draft preparation, reconnect/disconnect, private Vault credential storage, credential cleanup, setup gating, email-app fallback and a focused Google-data privacy disclosure. Migration 0050 is applied and remote database types regenerated.
 - Validation: 2,601 tests passed; TypeScript, focused lint, production build, full database suite and 21 Gmail SQL assertions passed. A synthetic draft verified the full-Gmail URL and quoted-context presentation in Chrome. No email sent.
 - Google client setup remains an activation dependency: current Cloud account cannot create OAuth clients in vigil-studios. No real customer Google authorization/token exchange has been completed. Setup and exact validation limits: docs/launch/lead-reply-platform/GMAIL_CONNECTION.md.
+
+---
+
+## 2026-10-26 — Open the admin console immediately after sign-in
+
+- Password sign-in, PKCE callbacks and confirmed email links now resolve the authenticated user's `staff_members` role under RLS before choosing a destination. Admin/staff accounts land at `/admin` instead of client Overview or onboarding, including when an older sign-in link carries a customer dashboard destination. Explicit admin deep links and non-dashboard destinations remain usable.
+- Existing sessions visiting `/login` use the same role-based destination policy in the login page. Removed the proxy's unconditional `/dashboard` redirect, preserving its refreshed session response. Customer sign-in/onboarding behavior and intentional Client view access from the admin console are unchanged; no authorization, tenancy or schema changes.
+- Local validation: all 2,632 tests (133 files), full lint, typecheck and optimized production build passed. Added 29 regressions for every sign-in entry point, stale destinations, role isolation, failed login/role lookup, legacy token retry and refreshed-cookie preservation. Local browser verification reached the sign-in form successfully; this browser had no authenticated admin session, so a real-account sign-in was not performed. Available at `http://127.0.0.1:3190/login`; not deployed.

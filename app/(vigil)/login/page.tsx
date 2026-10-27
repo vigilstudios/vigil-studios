@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { LoginForm } from "./LoginForm";
 import { Logo } from "@/components/vigil/Logo";
-import { safeNextPath } from "@/lib/vigil/auth/redirects";
+import { loginDestination, safeNextPath } from "@/lib/vigil/auth/redirects";
+import { getViewer } from "@/lib/vigil/auth/session";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -18,6 +20,8 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string; error?: string; email?: string }>;
 }) {
   const params = await searchParams;
+  const viewer = await getViewer();
+  if (viewer) redirect(loginDestination(params.next, viewer.staffRole));
   const next = safeNextPath(params.next);
   const error = params.error ? errorMessages[params.error] ?? "Something went wrong. Please try again." : null;
 
