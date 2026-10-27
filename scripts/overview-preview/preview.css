@@ -1,0 +1,15 @@
+@font-face {
+  font-family: Inter;
+  src: url("/fonts/inter/InterVariable-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+body {
+  margin: 0;
+  font-family: Inter, Arial, sans-serif;
+  --font-inter: Inter;
+}
+.vigil-frame {
+  font-family: Inter, Arial, sans-serif;
+}

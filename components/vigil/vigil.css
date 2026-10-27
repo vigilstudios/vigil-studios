@@ -11,7 +11,11 @@
 }
 
 .vigil-frame ::selection {
-  background: color-mix(in srgb, var(--accent-fill,var(--accent)) 30%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--accent-fill, var(--accent)) 30%,
+    transparent
+  );
 }
 
 /* White work surfaces on a quiet gray canvas give the dashboard hierarchy. */
@@ -43,13 +47,127 @@ html[data-theme="light"] .vigil-frame :is(input, textarea, select) {
   background-color: #ffffff;
 }
 
-html[data-theme="light"] .vigil-frame :is(button, a, input, textarea, select):focus-visible {
+html[data-theme="light"]
+  .vigil-frame
+  :is(button, a, input, textarea, select):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
-/* Animate the actual browser width; ResizeObserver keeps its iframe at true scale. */
-.site-preview-frame { transition: max-width 360ms cubic-bezier(.22,1,.36,1), border-radius 360ms; }
-.site-preview-viewport { transition: height 360ms cubic-bezier(.22,1,.36,1); }
-.site-preview-frame[data-viewport="mobile"] { border-radius: 16px; }
-@media (prefers-reduced-motion: reduce) { .site-preview-frame, .site-preview-viewport { transition: none; } }
+/* Keep authenticated work inside its single viewport-height frame. */
+html:has(.vigil-frame),
+body:has(.vigil-frame) {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+.vigil-frame > div {
+  min-height: 0;
+}
+.vigil-frame {
+  position: fixed;
+  inset: 0;
+  overflow: clip;
+}
+.vigil-frame main {
+  min-height: 0;
+  overscroll-behavior-y: contain;
+}
+.vigil-frame nav {
+  overscroll-behavior-y: contain;
+}
+
+/* The browser and native iframe viewport animate together. SiteFrame observes
+   their current dimensions to keep the page uniformly scaled throughout. */
+.site-preview-frame {
+  transition:
+    max-width 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 420ms;
+}
+.site-preview-page {
+  transition:
+    width 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    height 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.site-preview-frame[data-viewport="mobile"] {
+  border-radius: 16px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-preview-frame,
+  .site-preview-page {
+    transition: none;
+  }
+}
+
+.vigil-workspace-icon {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--bg-surface-soft);
+  flex-shrink: 0;
+}
+.vigil-workspace-icon img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+.vigil-nav-group-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 26px;
+  margin-bottom: 3px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.vigil-nav-group-toggle:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface-soft);
+}
+.vigil-nav-group-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.vigil-nav-group-toggle[data-rail] {
+  justify-content: center;
+}
+.vigil-nav-group-toggle > svg {
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  flex-shrink: 0;
+}
+.vigil-nav-group-toggle[aria-expanded="false"] > svg {
+  transform: rotate(-90deg);
+}
+.vigil-nav-group-items {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition:
+    grid-template-rows 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 180ms ease;
+}
+.vigil-nav-group-items[data-open="false"] {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+.vigil-nav-group-clip {
+  min-height: 0;
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vigil-nav-group-items,
+  .vigil-nav-group-toggle > svg {
+    transition: none;
+  }
+}

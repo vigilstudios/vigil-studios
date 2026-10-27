@@ -1,3 +1,5 @@
+import type { StaffRole } from "@/lib/vigil/types";
+
 /**
  * Only same-origin, path-style targets are honoured for post-login redirects.
  * Anything else (absolute URLs, protocol-relative, backslashes) falls back to
@@ -11,6 +13,14 @@ export function safeNextPath(candidate: string | null | undefined, fallback = "/
   // Never send someone back into the auth routes.
   if (candidate.startsWith("/auth") || candidate.startsWith("/login")) return fallback;
   return candidate;
+}
+
+/** Login opens the staff console, even when an old link points at client view. */
+export function loginDestination(candidate: string | null | undefined, staffRole: StaffRole | null): string {
+  const next = safeNextPath(candidate, staffRole ? "/admin" : "/dashboard");
+  const pathname = next.split(/[?#]/)[0];
+  if (staffRole && (pathname === "/dashboard" || pathname.startsWith("/dashboard/"))) return "/admin";
+  return next;
 }
 
 export function normalizeEmail(input: string): string {

@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import { createPortal } from "react-dom";
 import { clsx } from "clsx";
 import {
@@ -19,6 +26,7 @@ import {
   LayoutDashboard,
   ListChecks,
   Crown,
+  ChevronDown,
   Lock,
   Menu,
   MonitorSmartphone,
@@ -30,8 +38,15 @@ import {
   X,
 } from "lucide-react";
 import { Logo } from "./Logo";
+import { WorkspaceSiteIcon } from "./WorkspaceSiteIcon";
 import { VirtueOrb } from "./VirtueOrb";
-import { SIDEBAR_COOKIE, type NavGroup, type NavIcon, type NavItem } from "./nav";
+import {
+  SIDEBAR_COOKIE,
+  type NavGroup,
+  type NavIcon,
+  type NavItem,
+  type WorkspaceBrand,
+} from "./nav";
 
 /** Virtue's nav icon is the orb itself, sized like the other glyphs. */
 function VirtueNavIcon({ className }: { className?: string }) {
@@ -74,6 +89,7 @@ export function AppFrame({
   homeHref,
   workspace,
   account,
+  workspaceBrand,
   initialCollapsed,
   children,
 }: {
@@ -83,16 +99,22 @@ export function AppFrame({
   workspace: ReactNode;
   /** Bottom-of-sidebar block: who is signed in, theme, sign-out, cross-links. */
   account: ReactNode;
+  workspaceBrand?: WorkspaceBrand;
   initialCollapsed: boolean;
   children: ReactNode;
 }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(initialCollapsed);
+  const [closedGroups, setClosedGroups] = useState<Record<string, boolean>>({});
+  const navId = useId();
   // The drawer remembers the path it was opened on, so navigating closes it
   // without an effect.
   const [drawerPath, setDrawerPath] = useState<string | null>(null);
   const drawerOpen = drawerPath === pathname;
-  const setDrawerOpen = useCallback((open: boolean) => setDrawerPath(open ? pathname : null), [pathname]);
+  const setDrawerOpen = useCallback(
+    (open: boolean) => setDrawerPath(open ? pathname : null),
+    [pathname],
+  );
 
   const toggleCollapsed = useCallback(() => {
     setCollapsed((c) => {
@@ -115,33 +137,104 @@ export function AppFrame({
   const active = findActive(groups, pathname);
 
   // The drawer is always the full sidebar; only the desktop aside collapses.
-  const sidebar = (rail: boolean) => (
+  const sidebar = (rail: boolean, surface: "desktop" | "drawer") => (
     <div className="flex h-full flex-col">
-      <div className={clsx("flex h-14 shrink-0 items-center border-b border-[color:var(--border)] py-3", rail ? "justify-center px-0" : "gap-2.5 px-4")}>
+      <div
+        className={clsx(
+          "flex h-14 shrink-0 items-center border-b border-[color:var(--border)] py-3",
+          rail ? "justify-center px-0" : "gap-2.5 px-4",
+        )}
+      >
         <Link href={homeHref} aria-label="Home" className="shrink-0">
-          <Logo size="sm" />
+          {workspaceBrand ? (
+            <WorkspaceSiteIcon {...workspaceBrand} />
+          ) : (
+            <Logo size="sm" />
+          )}
         </Link>
         {!rail ? <div className="min-w-0 flex-1">{workspace}</div> : null}
       </div>
 
       <nav aria-label="Sections" className="flex-1 overflow-y-auto px-2 py-2">
-        {groups.map((group, gi) => (
-          <div key={gi} className={clsx(gi > 0 && "mt-3 border-t border-[color:var(--border)] pt-3")}>
-            {group.label && !rail ? (
-              <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--text-secondary)]">{group.label}</p>
-            ) : null}
-            <ul className="space-y-0.5">
-              {group.items.map((item) => (
-                <li key={item.href} className={item.desktopOnly ? "hidden lg:block" : undefined}>
-                  <NavLink item={item} active={isActive(item, pathname)} collapsed={rail} />
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        {groups.map((group, gi) => {
+          const key = group.id ?? group.label ?? String(gi);
+          const collapsible = Boolean(group.collapsible && group.label);
+          const open = !closedGroups[key];
+          const itemsId = `${navId}-${surface}-${gi}`;
+          return (
+            <div
+              key={key}
+              className={clsx(
+                gi > 0 && "mt-3 border-t border-[color:var(--border)] pt-3",
+              )}
+            >
+              {collapsible ? (
+                <button
+                  type="button"
+                  className="vigil-nav-group-toggle"
+                  data-rail={rail || undefined}
+                  aria-label={`${open ? "Collapse" : "Expand"} ${group.label}`}
+                  aria-expanded={open}
+                  aria-controls={itemsId}
+                  title={rail ? group.label : undefined}
+                  onClick={() =>
+                    setClosedGroups((current) => ({
+                      ...current,
+                      [key]: !current[key],
+                    }))
+                  }
+                >
+                  <span className={rail ? "sr-only" : undefined}>
+                    {group.label}
+                  </span>
+                  <ChevronDown size={13} aria-hidden="true" />
+                </button>
+              ) : group.label && !rail ? (
+                <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--text-secondary)]">
+                  {group.label}
+                </p>
+              ) : null}
+              <div
+                id={itemsId}
+                className={collapsible ? "vigil-nav-group-items" : undefined}
+                data-open={open}
+                inert={collapsible && !open}
+                aria-hidden={collapsible && !open ? true : undefined}
+              >
+                <div
+                  className={collapsible ? "vigil-nav-group-clip" : undefined}
+                >
+                  <ul className="space-y-0.5">
+                    {group.items.map((item) => (
+                      <li
+                        key={item.href}
+                        className={
+                          item.desktopOnly ? "hidden lg:block" : undefined
+                        }
+                      >
+                        <NavLink
+                          item={item}
+                          active={isActive(item, pathname)}
+                          collapsed={rail}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </nav>
 
-      <div className={clsx("shrink-0 border-t border-[color:var(--border)]", rail ? "p-1.5" : "p-2")}>{account}</div>
+      <div
+        className={clsx(
+          "shrink-0 border-t border-[color:var(--border)]",
+          rail ? "p-1.5" : "p-2",
+        )}
+      >
+        {account}
+      </div>
     </div>
   );
 
@@ -153,13 +246,23 @@ export function AppFrame({
         style={{ width: collapsed ? RAIL_WIDTH : EXPANDED_WIDTH }}
         data-collapsed={collapsed ? "true" : "false"}
       >
-        {sidebar(collapsed)}
+        {sidebar(collapsed, "desktop")}
       </aside>
 
       {/* Mobile drawer */}
       {drawerOpen ? (
-        <div className="fixed inset-0 z-40 md:hidden" role="dialog" aria-modal="true" aria-label="Navigation">
-          <button type="button" aria-label="Close navigation" onClick={() => setDrawerOpen(false)} className="absolute inset-0 bg-black/50" />
+        <div
+          className="fixed inset-0 z-40 md:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation"
+        >
+          <button
+            type="button"
+            aria-label="Close navigation"
+            onClick={() => setDrawerOpen(false)}
+            className="absolute inset-0 bg-black/50"
+          />
           <div className="absolute inset-y-0 left-0 w-[280px] max-w-[85vw] bg-[color:var(--bg-primary)] shadow-2xl">
             <button
               type="button"
@@ -169,7 +272,7 @@ export function AppFrame({
             >
               <X className="h-5 w-5" />
             </button>
-            {sidebar(false)}
+            {sidebar(false, "drawer")}
           </div>
         </div>
       ) : null}
@@ -191,9 +294,15 @@ export function AppFrame({
             onClick={toggleCollapsed}
             className="hidden h-8 w-8 items-center justify-center rounded-md text-[color:var(--text-secondary)] hover:bg-[color:var(--bg-surface-soft)] hover:text-[color:var(--text-primary)] md:inline-flex"
           >
-            {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+            {collapsed ? (
+              <PanelLeftOpen className="h-4 w-4" />
+            ) : (
+              <PanelLeftClose className="h-4 w-4" />
+            )}
           </button>
-          <div className="min-w-0 flex-1 truncate text-sm font-medium">{active?.label ?? titleFromPath(pathname)}</div>
+          <div className="min-w-0 flex-1 truncate text-sm font-medium">
+            {active?.label ?? titleFromPath(pathname)}
+          </div>
           <div id="vigil-topbar-actions" className="flex items-center gap-2" />
         </header>
 
@@ -213,7 +322,9 @@ function titleFromPath(pathname: string): string {
 }
 
 function isActive(item: NavItem, pathname: string): boolean {
-  return item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
+  return item.exact
+    ? pathname === item.href
+    : pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
 
 function findActive(groups: NavGroup[], pathname: string): NavItem | undefined {

@@ -5,7 +5,7 @@ import { AccountBlock } from "@/components/vigil/AccountBlock";
 import { AppShell } from "@/components/vigil/AppShell";
 import { LiveDashboardSync } from "@/components/vigil/LiveDashboardSync";
 import { OrgSwitcher } from "@/components/vigil/OrgSwitcher";
-import type { NavGroup } from "@/components/vigil/nav";
+import type { NavGroup, WorkspaceBrand } from "@/components/vigil/nav";
 import { getOrgContext, requireViewer } from "@/lib/vigil/auth/session";
 import { FEATURES, resolveEntitlements } from "@/lib/vigil/entitlements";
 import { getOnboardingProject, needsOnboarding } from "@/lib/vigil/queries/onboarding";
@@ -16,6 +16,7 @@ import { FloatingAttentionCenter, type AttentionItem } from "@/components/vigil/
 import { getCustomerExpressPreviewReview } from "@/lib/vigil/queries/dashboard";
 import { getUnreadNotifications } from "@/lib/vigil/queries/dashboard";
 import { customerDomainNeedsAttention } from "@/lib/vigil/attention";
+import { getWebsiteIcon } from "@/lib/vigil/queries/website-icon";
 import { reviewRoundDefinition } from "@/lib/vigil/project-reviews";
 
 /**
@@ -27,6 +28,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const [ctx, invitations] = await Promise.all([getOrgContext(), listMyInvitations()]);
 
   let groups: NavGroup[] = [];
+  let workspaceBrand: WorkspaceBrand | undefined;
   let floatingItems: AttentionItem[] = [];
   if (ctx) {
     const [ent, onboarding, projects, websites, domains, subscription] = await Promise.all([
@@ -37,7 +39,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
       getOrgDomains(ctx.organization.id),
       getOrgSubscription(ctx.organization.id),
     ]);
-    const contentWebsites=await contentSites(await createClient(),ctx.organization.id);
+    const client = await createClient();
+    const liveSite = websites.find(isWebsiteLive);
+    const [contentWebsites, iconUrl] = await Promise.all([
+      contentSites(client, ctx.organization.id),
+      liveSite ? getWebsiteIcon(client, ctx.organization.id, liveSite) : Promise.resolve(null),
+    ]);
+    workspaceBrand = { name: liveSite?.name ?? ctx.organization.name, iconUrl };
     const contentAccess=contentWebsites.some(site=>site.access),contentLaunchLocked=!contentAccess&&contentWebsites.some(site=>site.eligible);
     // Build reviews belong to the Professional project, independently of the
     // ongoing Requests entitlement. Keep the nav quiet until the project is
@@ -83,6 +91,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
         items: [
           ...(onboardingNeedsAttention ? [{ href: "/dashboard/onboarding", label: "Getting set up", icon: "virtue" as const, attention: true }] : []),
           { href: "/dashboard", label: "Overview", icon: "overview", exact: true, attention: anythingNeedsAttention },
+        ],
+      },
+      {
+        id: "website",
+        label: "Website",
+        collapsible: true,
+        items: [
           ...(showWebsitePreview(websites) ? [{ href: "/dashboard/website", label: "Website Preview", icon: "website" as const, attention: websiteNeedsAttention }] : []),
           { href: "/dashboard/content", label: "Content Hub", icon: "blog", premium: true, locked: !contentAccess, launchLocked:contentLaunchLocked },
           { href: "/dashboard/files", label: "Files", icon: "files" },
@@ -93,7 +108,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
         ],
       },
       {
+        id: "grow",
         label: "Grow",
+        collapsible: true,
         items: [
           { href: "/dashboard/leads", label: "Lead Hub", icon: "leads" },
           { href: "/dashboard/insights", label: "Insights", icon: "insights", locked: true, disabled: true, badge: "Soon" },
@@ -112,6 +129,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <AppShell
       groups={groups}
+      workspaceBrand={workspaceBrand}
       homeHref="/dashboard"
       workspace={ctx ? <OrgSwitcher organizations={organizations} activeId={ctx.organization.id} staffView={ctx.isImpersonating} /> : <span className="text-[13px] font-semibold">Vigil</span>}
       account={

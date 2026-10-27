@@ -1198,3 +1198,110 @@ Ownership verification now remains an unfinished waiting step with explicit addi
 - Added state/PKCE/cookie/CSRF protections, tenant and user checks, lease-based draft preparation, reconnect/disconnect, private Vault credential storage, credential cleanup, setup gating, email-app fallback and a focused Google-data privacy disclosure. Migration 0050 is applied and remote database types regenerated.
 - Validation: 2,601 tests passed; TypeScript, focused lint, production build, full database suite and 21 Gmail SQL assertions passed. A synthetic draft verified the full-Gmail URL and quoted-context presentation in Chrome. No email sent.
 - Google client setup remains an activation dependency: current Cloud account cannot create OAuth clients in vigil-studios. No real customer Google authorization/token exchange has been completed. Setup and exact validation limits: docs/launch/lead-reply-platform/GMAIL_CONNECTION.md.
+
+---
+
+## 2026-10-26 — Open the admin console immediately after sign-in
+
+- Password sign-in, PKCE callbacks and confirmed email links now resolve the authenticated user's `staff_members` role under RLS before choosing a destination. Admin/staff accounts land at `/admin` instead of client Overview or onboarding, including when an older sign-in link carries a customer dashboard destination. Explicit admin deep links and non-dashboard destinations remain usable.
+- Existing sessions visiting `/login` use the same role-based destination policy in the login page. Removed the proxy's unconditional `/dashboard` redirect, preserving its refreshed session response. Customer sign-in/onboarding behavior and intentional Client view access from the admin console are unchanged; no authorization, tenancy or schema changes.
+- Local validation: all 2,632 tests (133 files), full lint, typecheck and optimized production build passed. Added 29 regressions for every sign-in entry point, stale destinations, role isolation, failed login/role lookup, legacy token retry and refreshed-cookie preservation. Local browser verification reached the sign-in form successfully; this browser had no authenticated admin session, so a real-account sign-in was not performed. Available at `http://127.0.0.1:3190/login`; not deployed.
+
+---
+
+## 2026-10-26 — Website-first live client overview
+
+- Introduced a dedicated postlaunch overview with the actual website preview and recorded health checks first, inquiry trend/status charts, an actionable New-inquiry queue, traffic connection states, coming-soon Insights, recent activity/releases and a compact plan/service section. Prelaunch accounts retain their existing onboarding overview. Multi-site selection remains tenant-scoped.
+- Added interchangeable chart views, 7/30/90-day reporting, keyboard exploration and personal panel ordering, widths, visibility and reset/save controls. Preferences update only the signed-in user's allowlisted Auth metadata, including for staff in Client view; failed saves preserve the draft. Small screens stack panels.
+- Read models use RLS and both organization/website filters, paginate historical rows, aggregate on the server and explicitly flag bounded history. No traffic, uptime, conversion, security or revenue statistics are invented. Customer analytics is unconnected; Insights is not activated. No schema, provider, customer-site or admin-layout change.
+- Validation: all 2,654 tests / 137 files, full lint, typecheck and optimized build pass; actual authenticated overview and a loopback-only sample lab cover layouts, chart controls, drag/keyboard interaction, persistence, errors and responsive states. Local only. Design/data boundaries and repeatable previews: `docs/launch/client-overview/REPORT.md`.
+
+
+---
+
+## 2026-10-27 — Readable, structured live overview with direct swaps
+
+- Increased dashboard text and chart labels, retained only the page eyebrow, added header icons and replaced the layout editor with direct drag/grip, keyboard and touch/pen swaps. The website and integrated Vigil plan occupy two thirds of row one, with compact recorded health checks alongside. Row two contains green-gradient Insights, traffic, inquiry trends and narrower lead status at a shared height; swaps preserve panel widths. Inbox/activity exchange fixed three-quarter/one-quarter positions and render expanded or simplified content accordingly.
+- Simplified card gradients to vertical borders/fills, fixed translucent dark-surface bleed, removed chart dots and the preview's inner green wrapper, made donut ends flat with a near-background track, and gave the desktop preview a physical 340px viewport without stretching. Mobile preview dimensions remain unchanged.
+- Added a validated deployed-brand color projection and a bounded public Vercel-build fallback for older custom websites. RLS checks precede access to immutable palettes; every source is scoped by organization and website. Public fallback forbids arbitrary hosts, redirects, credentials and third-party styles. Scar's real preview uses its published pink token. No customer site, provider, schema or access setting changes.
+- Personal preferences now use an allowlisted v2 shape and serialized automatic saves; failures retain the draft with retry. Full validation: 2,668 tests / 139 files, full lint, typecheck and optimized build passed. Browser checks cover actual customer data, both themes, fixed-width report swaps, adaptive inbox/activity swaps, persistence/errors and 320/390/768px overflow checks. Local only; application 3190 and fictional lab 4188 remain available. See `docs/launch/client-overview/REPORT.md`.
+
+
+---
+
+## 2026-10-27 — Preserve desktop preview proportions and stack lead status
+
+- Replaced the overview's fixed 340px preview height with a stable 1200×1000 virtual desktop viewport. The displayed height now scales with width, preserving the website layout and giving the preview more height; the phone remains 390×780 and other SiteFrame consumers retain their default viewport.
+- Moved lead status beneath health and security in the first row's right column. Insights, website traffic and inquiry trends now occupy three equal, wider columns in the next row. Their swaps and the adaptive inbox/activity row remain available. Existing v2 preferences normalize status into its new fixed position while retaining valid report order, chart choices and working slots.
+- Validation: 37 focused overview tests / 6 files, typecheck, focused lint and optimized build passed. Browser checks verified 1200×1000 desktop and 390×780 phone frames, proportional display dimensions, three equal report widths, native/keyboard swaps and 320/390px layouts without horizontal overflow. Local only; server remains on 3190.
+
+
+---
+
+## 2026-10-27 — Fit the website preview to the status stack
+
+- The health/security and lead-status stack now determines the first row's height. CSS size containment lets the website card stretch to the same height while its preview fits proportionally into the remaining space above the plan controls. The browser frame supplies its viewport ratio as a CSS token; named dashboard container queries keep responsive layout rules separate from the preview's height container. No extra measurement loop or fixed card height is needed.
+- Reduced the desktop viewport slightly to 1200×900 (4:3); phone stays 390×780. Both modes scale to fit in the desktop card. Narrow layouts retain natural card heights and full-width previews.
+- Validation: 37 focused overview tests / 6 files, typecheck, focused lint and optimized build passed. Browser checks confirmed matching 616px cards, dynamic matching at 670px in Bars view, fitting desktop/phone frames without overlapping the plan, a collapsed-sidebar layout and 320/390px layouts without horizontal overflow. Local only; server remains on 3190.
+
+
+---
+
+## 2026-10-27 — Website context, Vigil Security and compact site quality
+
+- Kept the approved 616px desktop row height. The website preview is slightly larger and left aligned, with the Live website eyebrow, linked domain and recorded availability/SSL/DNS checks to its right; the Vigil plan stays below. Vigil Security takes the upper right, with Lead status and the new Site quality card splitting its lower row at unchanged height. Mobile layouts retain natural website sizing and paired compact cards.
+- Added a custom vigilante-eye header, secured/warning shields and blue/orange vertical gradient states, Overview/Alerts switching, per-category monitoring status and scrollable alert details. Secured requires current, complete, clear checks; unresolved alerts remain visible after expiry, without claiming stale firewall protection. Real monitoring and audit feeds are absent, so the authenticated read model explicitly supplies null and the UI displays unconnected/unmeasured states. No scanner, firewall change, provider setup or background service is created.
+- Site quality supports measured SEO and Performance scores, raw LCP seconds, device and audit time. Compact CRM groups retain all non-spam cohort statuses in Donut/Bars views; existing report/work swaps and saved chart preferences remain. Older v2 layouts gain the quality card without losing their report order.
+- Validation: full suite 2,684 tests / 140 files, then 37 focused tests / 3 files after tightening stale status rendering; typecheck, focused lint and optimized build passed. Browser checks covered the real customer site, both themes, blue/orange/unconnected states, alert details, fixed 616/341/263px geometry, larger proportional phone preview and 320/390/768px layouts without horizontal overflow. Local only; application 3190 and sample lab 4188 remain available. See `docs/launch/client-overview/REPORT.md` for data boundaries.
+
+
+---
+
+## 2026-10-27 — Preview transitions, chart polish and dashboard scroll containment
+
+- Preserved the approved preview/card dimensions while making website metadata fill the space beside the actual desktop frame with an 8px gap, including when the sidebar is collapsed. Mobile mode centers within that desktop area. Frame width/position and native iframe viewport dimensions animate together over 420ms; a stable dimensional read hook maintains uniform scaling without remounting the iframe. Reduced motion skips transitions.
+- Swapped Site quality and Lead status. The status view control now hugs its buttons on the right; the donut has more interior space and a singular caption for one inquiry. Trend SVGs use their measured width and full plot endpoints, retaining keyboard exploration and readable labels. Recent activity has colored timeline dots and release rows/empty states use box icons.
+- Reproduced a second vertical scroll region that moved the complete dashboard offscreen after reaching the footer, plus focus scrolling inside the hidden frame. The authenticated frame is now pinned and clipped, with scoped root overflow locking, zero minimum flex heights and contained main/navigation scrolling. Login/public pages without a frame retain ordinary document flow. Verified repeated footer scrolling and control focus leave document/frame scroll at zero and the header at y=0.
+- Validation: 46 focused tests / 5 files, typecheck, focused lint and optimized production build passed. Browser checks covered real customer desktop/phone previews, the preserved 616px row, expanded/rail spacing, the reordered 263px status cards, chart endpoints and keyboard selection, timeline/release details, both themes, and 320/390px document/card overflow. Local only; servers remain on 3190 and 4188. Details in `docs/launch/client-overview/REPORT.md`.
+
+
+---
+
+## 2026-10-27 — Customer sidebar branding and grouped website navigation
+
+- Added roomier website-card padding, a larger domain link with readable label breaks, and more space between the live-site identity and its connection checks. The first row retains its 616px height.
+- Customer workspaces resolve their default live site's icon from the RLS-scoped published production deployment, with tenant/site filters and a publication-time bound. Public HTML reads reuse the existing Vercel-origin, size, timeout, cache and redirect restrictions. Icons are dynamic across customers; missing/unavailable/failed images show the theme-aware Vigil logo. No customer-specific URL is hardcoded in production and no website/provider data is changed.
+- Grouped Content Hub through Subscription (and applicable preview/review links) under Website. Website and Grow start expanded and collapse independently with animated height/opacity and chevrons. Collapsed links are inert; state labels/control IDs work in expanded and rail navigation and the mobile drawer. Existing entitlement and coming-soon behavior remains. Reduced motion skips animations.
+- Validation: 38 focused tests / 5 files, typecheck, focused lint and optimized build passed. Browser checks verified the actual customer's sparkle icon, independent/keyboard group toggles, default open state, absent/broken image fallbacks, light/dark branding, drawer accessibility, unique IDs and 390px overflow. Local only; servers remain on 3190 and 4188. See `docs/launch/client-overview/REPORT.md`.
+
+
+### 2026-10-27 — Inset the website details column
+
+- Added 12px of padding on each side of the website details at desktop widths and 8px in compact desktop layouts. The narrow layout reserves a little more column width for readable content. Stacked mobile details retain their existing spacing.
+- Browser verification confirmed both 12px insets, no details overflow, the unchanged 461px desktop preview and 616px first row. CSS-only follow-up; no application tests rerun. Local server remains on 3190.
+
+### 2026-10-27 — Reliable overview drag handles and rounded drag tabs
+
+- Replaced the split native mouse/touch behavior with pointer capture shared by movable headers and explicit dot-handle handlers. The grip SVG no longer intercepts input, small clicks do not reorder panels, and mouse/touch/pen follow the same movement threshold. Existing row restrictions, exact swaps, adaptive working slots and serialized personal saves remain.
+- Added a rounded 12px floating title tab outside the scrolling/container-query surface, with opaque light/dark surfaces. Valid targets highlight; edge scrolling supports stacked layouts. Escape, cancelled gestures, lost capture and window blur clear the drag; unmount cancels the animation frame. Keyboard arrows remain available.
+- Validation: 24 focused tests / 3 files, typecheck, focused lint and optimized build passed. Browser checks verified dot-origin report swaps in both directions, working-panel adaptation, keyboard swaps, Escape cancellation, invalid cross-row drops, reload persistence, live rounded previews in both themes and 390px swaps/edge scrolling without horizontal overflow. No new console errors. Real customer data remained unchanged; local servers stay on 3190 and 4188.
+
+### 2026-10-27 — Place the inquiry caption beside its total
+
+- Changed the Inquiry trends caption to inline flow, retaining the existing 6px gap and singular/plural wording. The comparison remains below the total and caption.
+- Browser verified the authenticated dashboard displays “1 inquiry received” on the same line. CSS-only change; no application tests rerun. Local server remains on 3190.
+
+### 2026-10-27 — Top-align live website identity and enlarge the URL
+
+- Top-aligned the preview and website details in their shared workspace. The Live website eyebrow starts at the preview's top edge. Increased the URL to 20px, with 18px at compact desktop widths; existing horizontal padding and spacing before checks remain.
+- Browser verified matching preview/identity top coordinates for desktop and phone modes, the unchanged 461px desktop preview width and 616px row, and a 390px layout without details/URL overflow. CSS-only change; no application tests rerun. Local server remains on 3190.
+
+### 2026-10-27 — Align website check statuses beside their labels
+
+- Website checks now use icon, label and right-aligned status columns. Passed, Pending and Attention occupy the same right-hand position. Reserved slightly more desktop details width and tightened narrow-screen gaps so labels and statuses fit beside one another.
+- Browser verified the real Pending/Passed states and fictional all-Passed checks, including 768px and 320px layouts. At 320px, all statuses align with the row's right edge and labels fit without overflow. CSS-only change; no application tests rerun. Local server remains on 3190.
+
+### 2026-10-27 — Client overview production release preparation
+
+- User authorized production deployment of the approved client overview and preceding admin sign-in routing fix. The release branch is a direct descendant of current `origin/main`; no unrelated upstream changes or schema migrations are included. Production deploys through the existing main-branch Vercel integration.
+- Release validation: full suite 2,692 tests / 141 files, full lint, typecheck, four dependency-security checks and local migration/RLS assertions passed. Optimized build and hosted push/PR/main checks are tracked in the release handoff. Local application and fictional preview servers remain available.

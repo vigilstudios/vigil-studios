@@ -1,6 +1,6 @@
 import { loadDomainIntent } from "@/lib/vigil/services/domain-handoff";
 import { createClient } from "@/lib/supabase/server";
-import { WebsiteOperations } from "@/components/vigil/WebsiteOperations";
+import { LiveOverview } from "@/components/vigil/overview/LiveOverview";
 import { isWebsiteLive, showWebsitePreview } from "@/lib/vigil/presenters";
 import { PLAN_FEATURE_LABELS } from "@/lib/vigil/plan-presentation";
 import { WEBSITE_TIERS } from "@/lib/vigil/site-tiers";
@@ -29,19 +29,10 @@ import { getCustomerProjectReviews, type ProjectReviews } from "@/lib/vigil/quer
 
 export const metadata: Metadata = { title: "Overview" };
 
-export default async function OverviewPage() {
+export default async function OverviewPage({ searchParams }: { searchParams: Promise<{ website?: string }> }) {
   const ctx = await requireOrgContext("/dashboard");
   const orgId = ctx.organization.id;
 
-  // First arrival after a purchase: Virtue welcomes them over the dimmed
-  // dashboard until they begin or choose to look around first.
-  const onboarding = await getOnboardingProject(orgId);
-  let welcome = false;
-  if (needsOnboarding(onboarding?.project) && onboarding?.brief.progress.lastStep === "welcome") {
-    const deferredProject = (await cookies()).get(ONBOARDING_SKIP_COOKIE)?.value;
-    const skipped = welcomeWasDeferred(deferredProject, onboarding.project.id);
-    welcome = !skipped;
-  }
   const [websites, domains, subscription, projects, activity, ent] = await Promise.all([
     getOrgWebsites(orgId),
     getOrgDomains(orgId),
@@ -52,8 +43,19 @@ export default async function OverviewPage() {
   ]);
 
   const liveSites = websites.filter(isWebsiteLive);
-  const liveDeployments = await Promise.all(liveSites.map(site => getRecentDeployments(site.id, 12)));
-  const canExport = ctx.role === "owner" || ctx.role === "manager" || ctx.isImpersonating;
+  if (liveSites.length) {
+    const selected = (await searchParams).website;
+    return <LiveOverview ctx={ctx} websites={websites} domains={domains} projects={projects} subscription={subscription} activity={activity} canRequest={ent.enabled(FEATURES.requests)} selectedWebsite={typeof selected === "string" ? selected : undefined} />;
+  }
+  // First arrival after a purchase: Virtue welcomes them over the dimmed
+  // dashboard until they begin or choose to look around first.
+  const onboarding = await getOnboardingProject(orgId);
+  let welcome = false;
+  if (needsOnboarding(onboarding?.project) && onboarding?.brief.progress.lastStep === "welcome") {
+    const deferredProject = (await cookies()).get(ONBOARDING_SKIP_COOKIE)?.value;
+    const skipped = welcomeWasDeferred(deferredProject, onboarding.project.id);
+    welcome = !skipped;
+  }
   const website = websites[0] ?? null;
   const handoffClient = await createClient();
   const domainIntents = (await Promise.all(websites.map(site => loadDomainIntent(handoffClient, orgId, site.id))))
@@ -133,7 +135,6 @@ export default async function OverviewPage() {
         <OnboardingCard brief={onboarding.brief} completedAt={onboarding.project.intake_completed_at} businessName={onboarding.brief.basics?.businessName || ctx.organization.name} projectKind={onboarding.project.kind} />
       ) : null}
 
-      {liveSites.map((site, index) => <WebsiteOperations key={site.id} site={site} domain={domains.find(d => d.id === site.primary_domain_id) ?? domains.find(d => d.website_id === site.id) ?? null} deployments={liveDeployments[index]} canExport={canExport} canRequest={ent.enabled(FEATURES.requests)} />)}
 
       <div className="grid gap-4 lg:grid-cols-12">
         {/* Website */}

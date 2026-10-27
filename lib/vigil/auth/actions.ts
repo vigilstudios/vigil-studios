@@ -7,6 +7,7 @@ import type { ActionResult } from "./errors";
 import { NEXT_COOKIE, nextCookieOptions } from "./next-cookie";
 import { MIN_PASSWORD_LENGTH } from "./password";
 import { isPlausibleEmail, normalizeEmail, safeNextPath } from "./redirects";
+import { resolveLoginDestination } from "./login-destination";
 import { RateLimitedError } from "./errors";
 import { clientIp, enforceRateLimit, limitKey, RATE_LIMITS } from "@/lib/vigil/rate-limit";
 import { ONBOARDING_WELCOME_HREF } from "@/lib/vigil/onboarding/constants";
@@ -98,12 +99,12 @@ export async function signInWithPassword(_prev: PasswordSignInState, formData: F
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error || !data.user) {
     return { ok: false, error: "That email and password do not match. If you have not set a password yet, email yourself a sign-in link and set one in Settings.", code: "auth" };
   }
   await supabase.rpc("accept_pending_invites").then(({ error: e }) => e && console.error("accept_pending_invites failed:", e.message));
-  redirect(next);
+  redirect(await resolveLoginDestination(supabase, data.user.id, next));
 }
 
 export type PasswordState = ActionResult<undefined> | null;

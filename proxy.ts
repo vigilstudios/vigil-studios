@@ -31,10 +31,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(login);
   }
 
-  if (pathname === "/login" && session.userId) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
+  // /login resolves an existing viewer's destination using their verified
+  // staff role. A session alone cannot choose between admin and client view.
   return session.response;
 }
 

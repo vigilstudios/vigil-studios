@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { clearNextCookie, resolveNext } from "@/lib/vigil/auth/next-cookie";
 import { isSameOriginRequest, requestOrigin } from "@/lib/vigil/auth/origin";
 import { safeNextPath } from "@/lib/vigil/auth/redirects";
+import { resolveLoginDestination } from "@/lib/vigil/auth/login-destination";
 
 const allowedTypes: EmailOtpType[] = ["magiclink", "email", "signup", "invite", "recovery", "email_change"];
 
@@ -80,14 +81,15 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = await createClient();
-  let { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+  let result = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
   // Welcome emails created before the generated-link fix labelled new-user
   // `signup` tokens as `magiclink`. Keep those already-sent links usable.
-  if (error && type === "magiclink") {
-    ({ error } = await supabase.auth.verifyOtp({ type: "signup", token_hash: tokenHash }));
+  if (result.error && type === "magiclink") {
+    result = await supabase.auth.verifyOtp({ type: "signup", token_hash: tokenHash });
   }
-  if (error) {
-    console.error("verifyOtp failed:", error.message);
+  const { data, error } = result;
+  if (error || !data.user) {
+    console.error("verifyOtp failed:", error?.message ?? "No authenticated user returned");
     const login = new URL("/login", origin);
     login.searchParams.set("error", "link_expired");
     login.searchParams.set("next", next);
@@ -97,7 +99,8 @@ export async function POST(request: NextRequest) {
   const { error: inviteError } = await supabase.rpc("accept_pending_invites");
   if (inviteError) console.error("accept_pending_invites failed:", inviteError.message);
 
-  const response = NextResponse.redirect(`${origin}${next}`, { status: 303 });
+  const destination = await resolveLoginDestination(supabase, data.user.id, next);
+  const response = NextResponse.redirect(`${origin}${destination}`, { status: 303 });
   clearNextCookie(response);
   return response;
 }
