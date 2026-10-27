@@ -1,9 +1,10 @@
 # Live client overview
 
-Local implementation on `codex/client-overview-redesign`. The authenticated preview is
+Implementation on `codex/client-overview-redesign`. The authenticated local preview is
 http://127.0.0.1:3190/dashboard. The separate fictional-data design lab is
-http://127.0.0.1:4188/ (`node scripts/preview-overview.mjs`). Nothing is deployed.
-The preceding admin sign-in fix is preserved in local commit `a58b767`.
+http://127.0.0.1:4188/ (`node scripts/preview-overview.mjs`). Production destination:
+https://vigilstudios.co/dashboard. Hosted CI and deployment receipts are tracked in
+the release pull request and handoff. The admin sign-in fix is included.
 
 ## Information hierarchy
 
@@ -231,4 +232,6 @@ views preserve the cohort total and link into the existing Lead Hub.
 
 Local data verification was read-only. Preference mutations used only fictional
 lab storage; no real lead or customer data was changed. Local servers remain on
-3190 (application) and 4188 (sample lab). Nothing is pushed or deployed.
+3190 (application) and 4188 (sample lab). The production release includes the
+approved dashboard changes and admin sign-in routing, with no schema migrations
+or customer-data changes.

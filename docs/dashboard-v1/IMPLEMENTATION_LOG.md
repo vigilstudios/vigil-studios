@@ -1300,3 +1300,8 @@ Ownership verification now remains an unfinished waiting step with explicit addi
 
 - Website checks now use icon, label and right-aligned status columns. Passed, Pending and Attention occupy the same right-hand position. Reserved slightly more desktop details width and tightened narrow-screen gaps so labels and statuses fit beside one another.
 - Browser verified the real Pending/Passed states and fictional all-Passed checks, including 768px and 320px layouts. At 320px, all statuses align with the row's right edge and labels fit without overflow. CSS-only change; no application tests rerun. Local server remains on 3190.
+
+### 2026-10-27 — Client overview production release preparation
+
+- User authorized production deployment of the approved client overview and preceding admin sign-in routing fix. The release branch is a direct descendant of current `origin/main`; no unrelated upstream changes or schema migrations are included. Production deploys through the existing main-branch Vercel integration.
+- Release validation: full suite 2,692 tests / 141 files, full lint, typecheck, four dependency-security checks and local migration/RLS assertions passed. Optimized build and hosted push/PR/main checks are tracked in the release handoff. Local application and fictional preview servers remain available.
