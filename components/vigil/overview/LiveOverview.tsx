@@ -6,6 +6,7 @@ import type {
   getRecentActivity,
 } from "@/lib/vigil/queries/dashboard";
 import { getRecentDeployments } from "@/lib/vigil/queries/dashboard";
+import { getOverviewPalette } from "@/lib/vigil/queries/overview-palette";
 import { getOverviewLeads } from "@/lib/vigil/queries/overview";
 import { saveOverviewLayout } from "@/lib/vigil/actions/overview";
 import {
@@ -46,7 +47,7 @@ export async function LiveOverview({
     null;
   const client = await createClient();
   const asOf = new Date().toISOString();
-  const [leads, releases, requests] = await Promise.all([
+  const [leads, releases, requests, previewAccent] = await Promise.all([
     getOverviewLeads(client, ctx.organization.id, site.id, asOf),
     getRecentDeployments(site.id, 12),
     client
@@ -54,10 +55,12 @@ export async function LiveOverview({
       .select("id", { head: true, count: "exact" })
       .eq("organization_id", ctx.organization.id)
       .in("status", ["submitted", "triaged", "in_progress", "delivered"]),
+    getOverviewPalette(client, ctx.organization.id, site.id),
   ]);
   if (requests.error) throw requests.error;
   const data: OverviewData = {
     ...leads,
+    previewAccent,
     asOf,
     organizationName: ctx.organization.name,
     userName: ctx.profile.full_name,

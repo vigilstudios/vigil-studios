@@ -72,6 +72,7 @@ export function sampleOverview(
       }));
   return {
     asOf,
+    previewAccent: "#344a37",
     organizationName: "Marlow & Fen",
     userName: "Alex Morgan",
     site: {

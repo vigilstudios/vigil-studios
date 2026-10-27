@@ -80,9 +80,9 @@ export function TrendChart({
         </table>
       </div>
     );
-  const width = 720,
-    height = 210,
-    left = 38,
+  const width = 300,
+    height = 170,
+    left = 30,
     right = 12,
     top = 16,
     bottom = 26;
@@ -152,7 +152,7 @@ export function TrendChart({
               y={y((maximum * tick) / 4) + 4}
               textAnchor="end"
               fill="var(--text-secondary)"
-              fontSize="11"
+              fontSize="14"
             >
               {(maximum * tick) / 4}
             </text>
@@ -194,14 +194,6 @@ export function TrendChart({
                 strokeDasharray="3 3"
               />
             )}
-            <circle
-              cx={x(i)}
-              cy={y(p.value)}
-              r={active === i ? 5 : 3}
-              fill={color}
-              stroke="var(--bg-surface)"
-              strokeWidth="2"
-            />
             <rect
               x={x(i) - plotWidth / Math.max(1, points.length) / 2}
               y={top}
@@ -242,9 +234,11 @@ export function TrendChart({
             key={i}
             x={x(i)}
             y={height - 4}
-            textAnchor="middle"
+            textAnchor={
+              i === 0 ? "start" : i === points.length - 1 ? "end" : "middle"
+            }
             fill="var(--text-secondary)"
-            fontSize="11"
+            fontSize="14"
           >
             {points[i].label}
           </text>
@@ -265,24 +259,17 @@ export function RingChart({
   caption: string;
   label: string;
 }) {
-  const gradient = useId().replace(/:/g, "");
   const total = parts.reduce((sum, item) => sum + item.value, 0);
   const circumference = 301.59;
   return (
     <div className="ov-ring">
       <svg viewBox="0 0 120 120" role="img" aria-label={label}>
-        <defs>
-          <linearGradient id={gradient} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="var(--accent)" />
-            <stop offset="100%" stopColor="var(--ov-cyan)" />
-          </linearGradient>
-        </defs>
         <circle
           cx="60"
           cy="60"
           r="48"
           fill="none"
-          stroke="var(--track)"
+          stroke="var(--ov-ring-track)"
           strokeWidth="9"
         />
         {parts.map((part, i) => {
@@ -300,11 +287,11 @@ export function RingChart({
                 r="48"
                 fill="none"
                 transform="rotate(-90 60 60)"
-                stroke={parts.length === 1 ? `url(#${gradient})` : part.color}
+                stroke={part.color}
                 strokeWidth="9"
                 strokeDasharray={`${Math.max(0, length - 2)} ${circumference - Math.max(0, length - 2)}`}
                 strokeDashoffset={-offset}
-                strokeLinecap="round"
+                strokeLinecap="butt"
               />
             )
           );
@@ -350,7 +337,7 @@ export function RankedBars({
             <i
               style={{
                 width: `${(item.value / max) * 100}%`,
-                background: `linear-gradient(90deg, color-mix(in srgb, ${item.color || color} 45%, transparent), ${item.color || color})`,
+                background: `linear-gradient(180deg, color-mix(in srgb, ${item.color || color} 45%, transparent), ${item.color || color})`,
               }}
             />
           </span>

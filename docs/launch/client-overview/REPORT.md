@@ -7,9 +7,11 @@ The preceding admin sign-in fix is preserved in local commit `a58b767`.
 
 ## Information hierarchy
 
-1. **Website + trust:** the customer's actual website leads, with desktop/phone
-   preview and content access. Alongside it, availability, domain and SSL checks
-   show their recorded outcomes and timestamps. An unmeasured check stays pending;
+1. **Website + trust:** the website occupies two thirds of the first row, with
+   the Vigil plan, renewal, requests and service actions inside the same card.
+   Its actual desktop/phone preview leads, with a 340px desktop viewport that
+   preserves the page's true scale. Health occupies the final third; availability,
+   domain and SSL checks show their recorded outcomes and timestamps. An unmeasured check stays pending;
    there is no invented uptime percentage, security score, speed score or SEO score.
 2. **Conversations + action:** inquiry trends, current lead status and the oldest
    New inquiries form the working CRM summary. Incoming volume, the all-time New
@@ -20,10 +22,11 @@ The preceding admin sign-in fix is preserved in local commit `a58b767`.
    explicit connection state, not a fictional graph or zero visitors. The lab
    demonstrates the ready-to-use chart interface with clearly labeled sample data.
    Insights remains Coming soon.
-4. **Work + service:** a timestamped activity timeline switches to recent release
-   history and recorded durations. Plan/renewal, open requests across the business,
-   change options and role-gated source export sit below the business information.
-   A mixed live/build account retains its onboarding navigation and a project link.
+4. **Work:** the final row has a three-quarter-width inbox and quarter-width
+   recent activity panel. Swapping them expands activity to more events/full dates
+   and simplifies the inbox to a three-contact list. Release history remains
+   switchable. A mixed live/build account retains its onboarding navigation and a
+   project link. Source export stays role-gated inside the website's plan section.
 
 Time trends use area / bar / table views; lead status uses donut / ranked bars.
 All share the same source values. Seven-, 30- and 90-day ranges apply to inquiry
@@ -38,20 +41,45 @@ and shares in [Datawrapper's chart guide](https://www.datawrapper.de/blog/chart-
 The focus on lead progress and actionable follow-up is informed by
 [HubSpot's activities and lead reporting](https://knowledge.hubspot.com/reports/create-sales-reports-in-the-sales-analytics-suite).
 
-## Personal layouts
+## Layout and styling
 
-Customize exposes native drag grips, keyboard/touch-friendly up/down buttons,
-compact/wide/full desktop widths, panel visibility, reset, cancel and save.
-Website and health remain visible. Small screens stack panels and adapt widths.
-Chart choices can be saved with Save view. Failed saves keep the draft and show
-an error. A live status message confirms movement and persistence.
+The default second row is Insights / Website traffic / Inquiry trends / Lead
+status. The first three have equal widths; status uses a smaller width. All
+four share the same row height and keep their individual widths during swaps.
+The final row's wide/narrow positions remain fixed while the swapped content
+adapts. Reports swap only with reports; inbox and activity swap only with each
+other. The first row stays fixed. Tablet/phone widths adapt into fewer columns.
 
-Preferences are a versioned, allowlisted value in the signed-in user's Auth
-metadata (`vigil_overview_layout_v1`), saved through a verified server action.
-They merge only this non-sensitive key. Staff in Client view update their own
-preferences, never the customer's. Unknown panels, invalid sizes, injected fields
-and unsupported versions normalize safely. No role or access decision reads these
-preferences; no schema migration is required.
+Headers have icons and direct drag grips, without an editing mode, Customize
+button, visibility controls or resizing controls. Header/grip drag, keyboard
+arrows and touch/pen grips swap positions. Swaps and chart choices save
+automatically through a serialized queue. Failures preserve the local draft
+and offer Retry save. A live status confirms persistence.
+
+Readability uses larger 13–14px primary text, 11–12px supporting text, larger
+chart labels and controls. Only the eyebrow remains above the cards. Trend
+charts have no point markers; keyboard/hover values remain available. Donut
+segments have flat ends and a near-background track. Card borders and fills
+fade vertically, with opaque inner surfaces preventing dark-theme border bleed.
+Insights uses the canonical Vigil green in this same gradient treatment.
+
+The website's gradient uses the deployed site's brand accent. Modern sites
+project one validated color from the immutable Design Engine snapshot preceding
+the production deployment, after an RLS website access check. Older custom sites
+fall back to public style tokens from their RLS-scoped, ready production Vercel
+build: HTTPS on a single *.vercel.app hostname, no redirects or credentials,
+2.5-second request deadlines, 256KB responses and at most two same-origin styles.
+Only the resulting hex color reaches the client. No arbitrary customer URL,
+external stylesheet host or script is fetched. Missing palettes remain neutral.
+The actual Scar site resolves to its published pink token, #a52d60.
+
+Preferences are versioned and allowlisted in the signed-in user's Auth metadata
+(`vigil_overview_layout_v2`). Version 2 replaces the earlier widths/visibility
+editor and normalizes ordering within the permitted rows. Verified server saves
+merge only this non-sensitive key. Staff in Client view update their own
+preferences, never the customer's. Unknown panels, injected fields and unsupported
+versions normalize safely. No role or access decision reads these preferences;
+no schema migration is required.
 
 ## Data and access
 
@@ -74,22 +102,22 @@ provider settings, subscription entitlements, or admin screen layouts.
 
 ## Validation
 
-- Full suite: **2,654 tests / 137 files passed** with `npm test -- --maxWorkers=2`.
-  The first unrestricted run hit two existing CPU-heavy Design Engine timeouts;
-  the complete run with two workers passed without changing those tests.
-- New coverage: UTC/cohort boundaries, spam exclusion, exact bucket totals,
+- Full suite: **2,668 tests / 139 files passed** with `npm test -- --maxWorkers=2`.
+- Coverage includes UTC/cohort boundaries, spam exclusion, exact bucket totals,
   pagination, tenant/website isolation, capped history, empty/unconnected states,
-  pending checks, preference normalization, personal saves and errors.
+  pending checks, grouped preference normalization, exact swaps, adaptive working
+  panels, personal saves/errors and bounded public palette reads.
 - Typecheck, full lint and optimized production build passed.
-- Browser: authenticated customer overview rendered real site/lead data without
-  console errors. The local sample verified area/bar/table switches, range totals,
-  keyboard point navigation, donut/bars, actual drag reordering, arrow movement,
-  resizing, hiding, save/reload persistence and recoverable save failures.
-- Responsive checks used real app components inside 320/390/768px iframe viewports
-  in the local lab because the in-app browser's viewport override had no effect.
-  No document overflow was observed. Desktop and both themes were inspected.
-  `?viewport=390&disconnected`, `?theme=dark&empty&disconnected` and `?fail`
-  reproduce the key lab states. These fixtures are outside application routes.
+- Browser: authenticated overview rendered the real site/lead data and published
+  pink palette. The desktop viewport measures 340px; phone iframe remains 390×780.
+  Sample lab verified native header/grip swaps, keyboard swaps, unchanged report
+  widths/heights, expanded activity/compact inbox, reload persistence, failed
+  saves and retry. Both themes were inspected; no new console errors were found.
+- Responsive checks used real components inside 320/390/768px iframe viewports.
+  No document overflow was observed. `?viewport=390&disconnected`,
+  `?viewport=320&theme=dark&empty&disconnected` and `?fail` reproduce the key lab
+  states. Fixtures remain outside application routes.
 
-Local data verification was read-only. Browser preference mutations used only
-fictional lab storage; no real lead or customer data was changed.
+Local data verification was read-only. Preference mutations used only fictional
+lab storage; no real lead or customer data was changed. Local servers remain on
+3190 (application) and 4188 (sample lab). Nothing is pushed or deployed.

@@ -4,7 +4,8 @@ import {
   PANEL_IDS,
   comparison,
   leadReport,
-  movePanel,
+  canSwapPanels,
+  swapPanels,
   rangeStart,
   readLayout,
 } from "../overview/model";
@@ -74,7 +75,7 @@ describe("live overview reporting", () => {
   });
 });
 describe("personal dashboard layouts", () => {
-  it.each([null, {}, "bad", { version: 2 }])(
+  it.each([null, {}, "bad", { version: 1 }, { version: 3 }])(
     "falls back safely for unsupported preferences: %j",
     (input) => {
       expect(readLayout(input)).toEqual(DEFAULT_LAYOUT);
@@ -82,7 +83,7 @@ describe("personal dashboard layouts", () => {
   );
   it("deduplicates panel ids, drops unknown fields and restores missing panels", () => {
     const layout = readLayout({
-      version: 1,
+      version: 2,
       order: ["leads", "leads", "evil"],
       hidden: ["website", "health", "traffic", "traffic", "evil"],
       spans: { leads: 12, health: "999;background:red" },
@@ -92,31 +93,52 @@ describe("personal dashboard layouts", () => {
       role: "admin",
     });
     expect(layout.order).toHaveLength(PANEL_IDS.length);
-    expect(layout.order[0]).toBe("leads");
-    expect(layout.hidden).toEqual(["traffic"]);
-    expect(layout.spans.leads).toBe(12);
-    expect(layout.spans.health).toBe(4);
+    expect(layout.order).toEqual([
+      "website",
+      "health",
+      "leads",
+      "insights",
+      "traffic",
+      "pipeline",
+      "followup",
+      "activity",
+    ]);
+    expect(layout).not.toHaveProperty("hidden");
+    expect(layout).not.toHaveProperty("spans");
     expect(layout.leadView).toBe("table");
     expect(layout.trafficView).toBe("area");
     expect(layout.statusView).toBe("bars");
     expect(layout).not.toHaveProperty("role");
   });
-  it("moves in both directions without duplicating or losing panels", () => {
-    expect(
-      movePanel(["website", "health", "leads"], "website", "health"),
-    ).toEqual(["health", "website", "leads"]);
-    expect(
-      movePanel(["website", "health", "leads"], "leads", "website"),
-    ).toEqual(["leads", "website", "health"]);
-    expect(movePanel(["website", "health"], "health", "health")).toEqual([
+  it("keeps swaps inside their intended rows", () => {
+    expect(canSwapPanels("leads", "pipeline")).toBe(true);
+    expect(canSwapPanels("insights", "traffic")).toBe(true);
+    expect(canSwapPanels("followup", "activity")).toBe(true);
+    expect(canSwapPanels("website", "health")).toBe(false);
+    expect(canSwapPanels("pipeline", "activity")).toBe(false);
+    expect(canSwapPanels("traffic", "traffic")).toBe(false);
+  });
+  it("swaps two positions without shifting other panels or mutating the saved order", () => {
+    const order = ["website", "health", "leads", "pipeline"] as const;
+    expect(swapPanels([...order], "website", "pipeline")).toEqual([
+      "pipeline",
+      "health",
+      "leads",
       "website",
+    ]);
+    expect(swapPanels([...order], "pipeline", "health")).toEqual([
+      "website",
+      "pipeline",
+      "leads",
       "health",
     ]);
+    expect(order).toEqual(["website", "health", "leads", "pipeline"]);
+    expect(swapPanels([...order], "website", "website")).toEqual(order);
+    expect(swapPanels([...order], "traffic", "health")).toEqual(order);
   });
   it("returns independent defaults so one account cannot mutate another layout", () => {
     const a = readLayout(null);
     a.order.reverse();
-    a.spans.website = 4;
     expect(readLayout(null)).toEqual(DEFAULT_LAYOUT);
   });
 });

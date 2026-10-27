@@ -10,13 +10,14 @@ import {
   Check,
   ChevronRight,
   Clock3,
+  CreditCard,
+  Sparkles,
   ExternalLink,
   Globe2,
   Inbox,
   LockKeyhole,
   MousePointer2,
   ShieldCheck,
-  Sparkles,
   Users,
 } from "lucide-react";
 import { SiteFrame } from "@/components/vigil/SiteFrame";
@@ -68,10 +69,12 @@ export function WebsitePanel({ data }: { data: OverviewData }) {
       </div>
       <div className="ov-preview">
         <SiteFrame
+          key={`${data.site.id}:${data.site.last_deployed_at}`}
           src={data.site.live_url!}
           title={`${data.site.name} live preview`}
           address={host}
-          desktopHeight={540}
+          desktopHeight={1000}
+          desktopPreviewHeight={340}
         />
       </div>
       <div className="ov-website-footer">
@@ -86,6 +89,12 @@ export function WebsitePanel({ data }: { data: OverviewData }) {
           Manage content
           <ArrowUpRight size={14} />
         </Link>
+      </div>
+      <div className="ov-website-plan">
+        <div className="ov-plan-label">
+          <CreditCard size={14} /> Your Vigil plan
+        </div>
+        <ServicePanel data={data} />
       </div>
     </div>
   );
@@ -127,7 +136,7 @@ export function HealthPanel({ data }: { data: OverviewData }) {
             },
             {
               value: checks.filter((c) => c.value === null).length,
-              color: "var(--ov-muted)",
+              color: "var(--ov-ring-track)",
               label: "Not checked",
             },
           ]}
@@ -137,17 +146,23 @@ export function HealthPanel({ data }: { data: OverviewData }) {
         />
         <p className={attention ? "ov-health-attention" : ""}>
           {attention
-            ? "Something needs a look"
+            ? "Needs attention"
             : passed === 3
-              ? "Your latest checks look good"
-              : "Waiting for a complete picture"}
+              ? "Checks passed"
+              : "Checks pending"}
         </p>
       </div>
       <ul className="ov-checks">
         {checks.map((check) => (
           <li key={check.name}>
             <check.icon size={16} aria-hidden="true" />
-            <div>
+            <div
+              title={
+                check.at
+                  ? `Checked ${formatRelative(check.at)}`
+                  : "Check date not recorded"
+              }
+            >
               <strong>{check.name}</strong>
               <small>
                 {check.at
@@ -177,11 +192,9 @@ export function HealthPanel({ data }: { data: OverviewData }) {
           </li>
         ))}
       </ul>
-      <p className="ov-footnote">
-        Recorded checks, not continuous uptime or a security audit.
-      </p>
+      <p className="ov-footnote">Latest recorded checks.</p>
       <Link className="ov-text-link" href="/dashboard/domain">
-        Domain & certificate details
+        View details
         <ChevronRight size={14} />
       </Link>
     </div>
@@ -293,7 +306,9 @@ export function PipelinePanel({
               <li key={stage.key}>
                 <Link href={`/dashboard/leads?status=${stage.key}`}>
                   <i style={{ background: STAGE_COLORS[stage.key] }} />
-                  <span>{stage.label}</span>
+                  <span title={stage.label}>
+                    {stage.key === "lost" ? "Lost" : stage.label}
+                  </span>
                   <strong>{stage.value}</strong>
                 </Link>
               </li>
@@ -311,8 +326,7 @@ export function PipelinePanel({
         />
       )}
       <p className="ov-footnote">
-        Current status of inquiries received in the last {range} days. These are
-        counts, not conversion rates.
+        Current status · inquiries received in the last {range} days.
       </p>
     </div>
   );
@@ -346,7 +360,7 @@ export function TrafficPanel({
                 ? "Audience"
                 : key === "sources"
                   ? "Sources"
-                  : "Top pages"}
+                  : "Pages"}
             </button>
           ))}
         </div>
@@ -432,40 +446,38 @@ export function TrafficPanel({
 export function InsightsPanel() {
   return (
     <div className="ov-insights">
-      <div className="ov-insight-orb" aria-hidden="true">
-        <Sparkles size={24} />
-      </div>
       <span className="ov-neutral-pill">Coming soon</span>
-      <h3>
-        A clearer picture.
-        <br />A smarter next move.
-      </h3>
-      <p>
-        Understand what’s working and where to focus next, with insights built
-        around your business.
-      </p>
-      <ul>
-        <li>
-          <Check size={13} />
-          Performance highlights
-        </li>
-        <li>
-          <Check size={13} />
-          Trends worth watching
-        </li>
-        <li>
-          <Check size={13} />
-          Suggested next steps
-        </li>
-      </ul>
+      <Sparkles size={26} aria-hidden="true" />
+      <p>Performance highlights, emerging trends and suggested next steps.</p>
       <small>Insights and automated recommendations are not active yet.</small>
     </div>
   );
 }
 
-export function InboxPanel({ data }: { data: OverviewData }) {
+export function InboxPanel({
+  data,
+  compact = false,
+}: {
+  data: OverviewData;
+  compact?: boolean;
+}) {
   const [view, setView] = useState<"followup" | "recent">("followup");
-  const rows = view === "followup" ? data.queue : data.recent;
+  const rows = (view === "followup" ? data.queue : data.recent).slice(
+    0,
+    compact ? 3 : 5,
+  );
+  const contact = (lead: (typeof rows)[number]) => {
+    const details =
+      lead.contact &&
+      typeof lead.contact === "object" &&
+      !Array.isArray(lead.contact)
+        ? lead.contact
+        : {};
+    return {
+      name: typeof details.name === "string" ? details.name : "Website visitor",
+      email: typeof details.email === "string" ? details.email : "",
+    };
+  };
   return (
     <>
       <div className="ov-inbox-top">
@@ -475,101 +487,124 @@ export function InboxPanel({ data }: { data: OverviewData }) {
             aria-pressed={view === "followup"}
             onClick={() => setView("followup")}
           >
-            Needs a first reply <span>{data.awaiting}</span>
+            {compact ? "First reply" : "Needs a first reply"}{" "}
+            <span>{data.awaiting}</span>
           </button>
           <button
             type="button"
             aria-pressed={view === "recent"}
             onClick={() => setView("recent")}
           >
-            Recent inquiries
+            {compact ? "Recent" : "Recent inquiries"}
           </button>
         </div>
-        <span className="ov-inbox-unread">{data.unread} unread</span>
+        {!compact && (
+          <span className="ov-inbox-unread">{data.unread} unread</span>
+        )}
       </div>
       {rows.length ? (
-        <div className="ov-inbox-table">
-          <table>
-            <caption className="ov-sr-only">
-              {view === "followup"
-                ? "Oldest new inquiries awaiting a first reply"
-                : "Latest website inquiries"}
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">Contact</th>
-                <th scope="col">Status</th>
-                <th scope="col">Received</th>
-                <th scope="col">
-                  <span className="ov-sr-only">Open</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((lead) => {
-                const contact =
-                  lead.contact &&
-                  typeof lead.contact === "object" &&
-                  !Array.isArray(lead.contact)
-                    ? lead.contact
-                    : {};
-                const name =
-                  typeof contact.name === "string"
-                    ? contact.name
-                    : "Website visitor";
-                return (
-                  <tr key={lead.id}>
-                    <td>
-                      <div className="ov-contact">
-                        <span className="ov-avatar">
-                          {contactInitials(name)}
-                        </span>
-                        <div>
-                          <Link href={`/dashboard/leads/${lead.id}`}>
-                            {!lead.read_at && <i className="ov-unread-dot" />}
-                            {name}
-                          </Link>
-                          <small>{sourceLabel(lead.source)}</small>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span
-                        className="ov-stage-pill"
-                        style={
-                          {
-                            "--stage-color":
-                              lead.status === "spam"
-                                ? "var(--ov-muted)"
-                                : STAGE_COLORS[lead.status],
-                          } as React.CSSProperties
-                        }
-                      >
-                        {lead.status === "spam"
-                          ? "Spam"
-                          : STAGE_LABELS[lead.status]}
-                      </span>
-                    </td>
-                    <td>
-                      <time dateTime={lead.received_at}>
+        compact ? (
+          <ul className="ov-inbox-compact">
+            {rows.map((lead) => {
+              const { name } = contact(lead);
+              return (
+                <li key={lead.id}>
+                  <Link href={`/dashboard/leads/${lead.id}`}>
+                    <span className="ov-avatar">{contactInitials(name)}</span>
+                    <span>
+                      <strong>{name}</strong>
+                      <small>
+                        {sourceLabel(lead.source)} ·{" "}
                         {formatRelative(lead.received_at)}
-                      </time>
-                    </td>
-                    <td>
-                      <Link
-                        className="ov-icon-button"
-                        href={`/dashboard/leads/${lead.id}`}
-                        aria-label={`Open inquiry from ${name}`}
-                      >
-                        <ArrowUpRight size={15} />
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      </small>
+                    </span>
+                    <ArrowUpRight size={13} />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <div className="ov-inbox-table">
+            <table>
+              <caption className="ov-sr-only">
+                {view === "followup"
+                  ? "Oldest new inquiries awaiting a first reply"
+                  : "Latest website inquiries"}
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Contact</th>
+                  <th scope="col" className="ov-source-cell">
+                    Source
+                  </th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Received</th>
+                  <th scope="col">
+                    <span className="ov-sr-only">Open</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((lead) => {
+                  const { name, email } = contact(lead);
+                  return (
+                    <tr key={lead.id}>
+                      <td>
+                        <div className="ov-contact">
+                          <span className="ov-avatar">
+                            {contactInitials(name)}
+                          </span>
+                          <div>
+                            <Link href={`/dashboard/leads/${lead.id}`}>
+                              {!lead.read_at && <i className="ov-unread-dot" />}
+                              {name}
+                            </Link>
+                            {email && <small>{email}</small>}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="ov-source-cell">
+                        {sourceLabel(lead.source)}
+                      </td>
+                      <td>
+                        <span
+                          className="ov-stage-pill"
+                          style={
+                            {
+                              "--stage-color":
+                                lead.status === "spam"
+                                  ? "var(--ov-muted)"
+                                  : STAGE_COLORS[lead.status],
+                            } as React.CSSProperties
+                          }
+                        >
+                          {lead.status === "spam"
+                            ? "Spam"
+                            : STAGE_LABELS[lead.status]}
+                        </span>
+                      </td>
+                      <td>
+                        <time dateTime={lead.received_at}>
+                          {formatRelative(lead.received_at)}
+                        </time>
+                      </td>
+                      <td>
+                        <Link
+                          className="ov-icon-button"
+                          href={`/dashboard/leads/${lead.id}`}
+                          aria-label={`Open inquiry from ${name}`}
+                        >
+                          <ArrowUpRight size={15} />
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )
       ) : (
         <div className="ov-quiet-empty">
           <Inbox size={25} />
@@ -588,8 +623,8 @@ export function InboxPanel({ data }: { data: OverviewData }) {
       <div className="ov-panel-bottom">
         <span>
           {view === "followup"
-            ? "All-time · oldest first · based on New status"
-            : "All-time · latest five inquiries"}
+            ? "Oldest first · New status"
+            : "Latest inquiries · all time"}
         </span>
         <Link
           href={
@@ -606,7 +641,13 @@ export function InboxPanel({ data }: { data: OverviewData }) {
   );
 }
 
-export function ActivityPanel({ data }: { data: OverviewData }) {
+export function ActivityPanel({
+  data,
+  compact = false,
+}: {
+  data: OverviewData;
+  compact?: boolean;
+}) {
   const [view, setView] = useState<"activity" | "releases">("activity");
   const releases = data.releases.filter(
     (row) => row.environment === "production",
@@ -635,13 +676,17 @@ export function ActivityPanel({ data }: { data: OverviewData }) {
       </div>
       {view === "activity" ? (
         data.activity.length ? (
-          <ol className="ov-timeline">
-            {data.activity.slice(0, 5).map((event) => (
+          <ol className={`ov-timeline ${compact ? "" : "ov-timeline-wide"}`}>
+            {data.activity.slice(0, compact ? 3 : 8).map((event) => (
               <li key={event.id}>
                 <i data-tone={event.tone} />
                 <div>
                   <strong>{event.title}</strong>
-                  <time dateTime={event.at}>{formatRelative(event.at)}</time>
+                  <time dateTime={event.at}>
+                    {compact
+                      ? formatRelative(event.at)
+                      : `${formatDate(event.at)} · ${formatRelative(event.at)}`}
+                  </time>
                 </div>
               </li>
             ))}
@@ -653,8 +698,8 @@ export function ActivityPanel({ data }: { data: OverviewData }) {
           </div>
         )
       ) : releases.length ? (
-        <ol className="ov-release-list">
-          {releases.slice(0, 5).map((row) => {
+        <ol className={`ov-release-list ${compact ? "" : "ov-releases-wide"}`}>
+          {releases.slice(0, compact ? 3 : 8).map((row) => {
             const duration = row.finished_at
               ? Math.max(
                   0,

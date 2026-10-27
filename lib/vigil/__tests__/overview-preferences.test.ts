@@ -37,7 +37,6 @@ describe("overview preferences", () => {
       data: {
         [LAYOUT_METADATA_KEY]: {
           ...DEFAULT_LAYOUT,
-          spans: { ...DEFAULT_LAYOUT.spans, website: 12 },
         },
       },
     });

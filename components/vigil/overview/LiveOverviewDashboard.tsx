@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useRef,
   useState,
   useTransition,
   type CSSProperties,
@@ -8,27 +9,27 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowDown,
-  ArrowUp,
+  Activity,
   ArrowUpRight,
-  Check,
+  BarChart3,
   ChevronDown,
-  Grip,
+  Globe2,
+  GripVertical,
+  Inbox,
   LayoutGrid,
-  Maximize2,
+  PieChart,
   RefreshCw,
-  RotateCcw,
-  Save,
-  SlidersHorizontal,
-  X,
+  ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 import {
-  DEFAULT_LAYOUT,
-  PANEL_IDS,
   PANEL_LABELS,
   RANGES,
-  movePanel,
+  REPORT_PANELS,
+  WORK_PANELS,
+  canSwapPanels,
   readLayout,
+  swapPanels,
   type LayoutPreference,
   type OverviewData,
   type PanelId,
@@ -42,12 +43,21 @@ import {
   InsightsPanel,
   LeadTrendsPanel,
   PipelinePanel,
-  ServicePanel,
-  SnapshotStrip,
   TrafficPanel,
   WebsitePanel,
 } from "./OverviewPanels";
 import "./overview.css";
+
+const icons = {
+  website: Globe2,
+  health: ShieldCheck,
+  leads: BarChart3,
+  pipeline: PieChart,
+  traffic: Activity,
+  insights: Sparkles,
+  followup: Inbox,
+  activity: Activity,
+};
 
 export function LiveOverviewDashboard({
   data,
@@ -62,51 +72,54 @@ export function LiveOverviewDashboard({
 }) {
   const router = useRouter();
   const [layout, setLayout] = useState(() => readLayout(initialLayout));
-  const [saved, setSaved] = useState(() => readLayout(initialLayout));
-  const [customizing, setCustomizing] = useState(false);
+  const latest = useRef(layout);
+  const queued = useRef<LayoutPreference | null>(null);
+  const inFlight = useRef(false);
   const [range, setRange] = useState<ReportRange>(30);
   const [dragging, setDragging] = useState<PanelId | null>(null);
   const [dropTarget, setDropTarget] = useState<PanelId | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
-  const [saving, startSave] = useTransition();
   const [refreshing, startRefresh] = useTransition();
-  const dirty = JSON.stringify(layout) !== JSON.stringify(saved);
-  const visible = layout.order.filter((id) => !layout.hidden.includes(id));
-  const update = (patch: Partial<LayoutPreference>) => {
-    setLayout((current) => ({ ...current, ...patch }));
-    setNotice("");
+  const touch = useRef<{
+    id: PanelId;
+    x: number;
+    y: number;
+    active: boolean;
+    target: PanelId | null;
+  } | null>(null);
+
+  // Serialize saves: a slower response can never overwrite a later swap/chart choice.
+  const persist = async (next: LayoutPreference) => {
+    queued.current = next;
+    if (inFlight.current) return;
+    inFlight.current = true;
     setError("");
-  };
-  const move = (id: PanelId, target: PanelId) => {
-    setLayout((current) => ({
-      ...current,
-      order: movePanel(current.order, id, target),
-    }));
-    setNotice(`${PANEL_LABELS[id]} moved.`);
-  };
-  const save = () => {
-    setError("");
-    startSave(async () => {
+    setNotice("Saving…");
+    while (queued.current) {
+      const pending = queued.current;
+      queued.current = null;
       try {
-        const result = await saveLayout(layout);
-        if (!result.ok) {
-          setError(result.error);
-          return;
-        }
-        setSaved(layout);
-        setCustomizing(false);
-        setNotice(
-          sample
-            ? "Layout saved in this sample browser."
-            : "Your view is saved to your account.",
-        );
+        const result = await saveLayout(pending);
+        if (!result.ok) throw new Error(result.error);
+        setNotice(sample ? "Saved in sample browser" : "Layout saved");
+        setError("");
       } catch {
-        setError(
-          "Your layout could not be saved. Your changes are still here; please try again.",
-        );
+        setNotice("");
+        setError("Layout couldn’t be saved. Your changes are still here.");
       }
-    });
+    }
+    inFlight.current = false;
+  };
+  const update = (patch: Partial<LayoutPreference>) => {
+    const next = { ...latest.current, ...patch };
+    latest.current = next;
+    setLayout(next);
+    void persist(next);
+  };
+  const swap = (id: PanelId, target: PanelId) => {
+    if (!canSwapPanels(id, target)) return;
+    update({ order: swapPanels(latest.current.order, id, target) });
   };
   const panels: Record<PanelId, ReactNode> = {
     website: <WebsitePanel data={data} />,
@@ -136,41 +149,44 @@ export function LiveOverviewDashboard({
       />
     ),
     insights: <InsightsPanel />,
-    followup: <InboxPanel data={data} />,
-    activity: <ActivityPanel data={data} />,
-    service: <ServicePanel data={data} />,
-  };
-  const labels: Record<PanelId, string> = {
-    website: "01 / YOUR DIGITAL HOME",
-    health: "THE ESSENTIALS",
-    leads: "THE CONVERSATIONS START HERE",
-    pipeline: "FROM HELLO TO CUSTOMER",
-    traffic: "YOUR AUDIENCE",
-    insights: "A LOOK AHEAD",
-    followup: "TURN INTEREST INTO CONVERSATION",
-    activity: "BEHIND THE SCENES",
-    service: "WE’RE IN YOUR CORNER",
+    followup: (
+      <InboxPanel
+        data={data}
+        compact={
+          layout.order.filter((id) =>
+            (WORK_PANELS as readonly PanelId[]).includes(id),
+          )[1] === "followup"
+        }
+      />
+    ),
+    activity: (
+      <ActivityPanel
+        data={data}
+        compact={
+          layout.order.filter((id) =>
+            (WORK_PANELS as readonly PanelId[]).includes(id),
+          )[1] === "activity"
+        }
+      />
+    ),
   };
   return (
     <div className="ov-dashboard">
       {sample && (
         <div className="ov-sample-banner">
-          <LayoutGrid size={14} />
-          Design preview · fictional business & sample data. No customer records
-          are changed.
+          <LayoutGrid size={12} />
+          Sample business & data · changes stay in this preview
         </div>
       )}
       <header className="ov-page-header">
-        <div>
-          <p className="ov-eyebrow">
-            {data.organizationName} <span>/</span> OVERVIEW
-          </p>
-          <h1>
-            Your business, in view<span>.</span>
-          </h1>
-          <p>Your website, your conversations, and what comes next.</p>
-        </div>
+        <h1 className="ov-eyebrow">
+          {data.organizationName}
+          <span>/</span>OVERVIEW
+        </h1>
         <div className="ov-header-actions">
+          <span className="ov-save-status" aria-live="polite">
+            {notice}
+          </span>
           {data.sites.length > 1 && (
             <label className="ov-site-select">
               <span className="ov-sr-only">Website</span>
@@ -188,54 +204,9 @@ export function LiveOverviewDashboard({
                   </option>
                 ))}
               </select>
-              <ChevronDown size={13} />
+              <ChevronDown size={12} />
             </label>
           )}
-          <button
-            className="ov-icon-button"
-            type="button"
-            disabled={refreshing}
-            onClick={() => startRefresh(() => router.refresh())}
-            aria-label="Refresh dashboard"
-            title="Refresh dashboard"
-          >
-            <RefreshCw size={16} className={refreshing ? "ov-spinning" : ""} />
-          </button>
-          <button
-            className={`ov-button ${customizing ? "ov-button-active" : ""}`}
-            type="button"
-            aria-expanded={customizing}
-            aria-controls="overview-customize"
-            onClick={() => {
-              setCustomizing(!customizing);
-              setError("");
-            }}
-          >
-            <SlidersHorizontal size={15} />
-            Customize
-          </button>
-          {dirty && !customizing && (
-            <button
-              className="ov-button ov-button-primary"
-              type="button"
-              onClick={save}
-              disabled={saving}
-            >
-              <Save size={14} />
-              {saving ? "Saving…" : "Save view"}
-            </button>
-          )}
-        </div>
-      </header>
-      <div className="ov-report-bar">
-        <div>
-          <span className="ov-tiny-dot" />
-          {data.site.name}
-          <span className="ov-report-divider" />
-          Live overview
-        </div>
-        <div className="ov-range-control">
-          <span>Inquiries & traffic</span>
           <div
             className="ov-segments"
             role="group"
@@ -248,159 +219,123 @@ export function LiveOverviewDashboard({
                 aria-pressed={range === days}
                 onClick={() => setRange(days)}
               >
-                {days} days
+                {days}d
               </button>
             ))}
           </div>
+          <button
+            className="ov-icon-button"
+            type="button"
+            disabled={refreshing}
+            onClick={() => startRefresh(() => router.refresh())}
+            aria-label="Refresh dashboard"
+            title="Refresh dashboard"
+          >
+            <RefreshCw size={14} className={refreshing ? "ov-spinning" : ""} />
+          </button>
         </div>
-      </div>
+      </header>
       {!data.completeHistory && (
         <p className="ov-warning" role="status">
-          Trend and status charts include only the latest 10,000 records from
-          the last 180 days ({data.historyCount.toLocaleString()} available).
-          Period totals may be incomplete. Inbox counts are complete.
+          Trend and status charts include the latest 10,000 records (
+          {data.historyCount.toLocaleString()} available). Period totals may be
+          incomplete. Inbox counts are complete.
         </p>
       )}
       {data.otherProjects > 0 && (
         <div className="ov-project-note">
-          You also have {data.otherProjects}{" "}
+          {data.otherProjects}{" "}
           {data.otherProjects === 1 ? "project" : "projects"} in progress.{" "}
           <a href="/dashboard/website">
-            View website projects
+            View projects
             <ArrowUpRight size={12} />
           </a>
         </div>
       )}
-      {customizing && (
-        <section
-          className="ov-customize"
-          id="overview-customize"
-          aria-label="Customize dashboard layout"
-        >
-          <div className="ov-customize-heading">
-            <div>
-              <h2>Make room for what matters.</h2>
-              <p>
-                Drag a panel by its grip, or use the arrows. Choose what to
-                show. Panel widths adapt on smaller screens.
-              </p>
-            </div>
-            <button
-              className="ov-icon-button"
-              type="button"
-              aria-label="Close layout editor"
-              onClick={() => {
-                setLayout(saved);
-                setCustomizing(false);
-              }}
-            >
-              <X size={16} />
-            </button>
-          </div>
-          <div className="ov-widget-choices">
-            {PANEL_IDS.map((id) => (
-              <label key={id}>
-                <input
-                  type="checkbox"
-                  checked={!layout.hidden.includes(id)}
-                  disabled={id === "website" || id === "health" || saving}
-                  onChange={(event) =>
-                    update({
-                      hidden: event.target.checked
-                        ? layout.hidden.filter((item) => item !== id)
-                        : [...layout.hidden, id],
-                    })
-                  }
-                />
-                {PANEL_LABELS[id]}
-              </label>
-            ))}
-          </div>
-          <div className="ov-customize-bottom">
-            <span>
-              Website and health stay visible. Your layout is personal,
-              including in Client view.
-            </span>
-            <div>
-              <button
-                type="button"
-                className="ov-text-link"
-                disabled={saving}
-                onClick={() => {
-                  setLayout(structuredClone(DEFAULT_LAYOUT));
-                  setNotice("Default layout restored. Save to keep it.");
-                }}
-              >
-                <RotateCcw size={13} />
-                Reset layout
-              </button>
-              <button
-                type="button"
-                className="ov-button"
-                disabled={saving}
-                onClick={() => {
-                  setLayout(saved);
-                  setCustomizing(false);
-                  setError("");
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="ov-button ov-button-primary"
-                disabled={saving}
-                onClick={save}
-              >
-                <Check size={14} />
-                {saving ? "Saving…" : "Save layout"}
-              </button>
-            </div>
-          </div>
-        </section>
-      )}
-      <div className="ov-save-status" aria-live="polite">
-        {notice}
-      </div>
       {error && (
-        <p className="ov-warning" role="alert">
+        <div className="ov-warning" role="alert">
           {error}
-        </p>
+          <button type="button" onClick={() => void persist(latest.current)}>
+            Retry save
+          </button>
+        </div>
       )}
-      <div className={`ov-grid ${customizing ? "ov-grid-editing" : ""}`}>
-        {visible.map((id, index) => (
-          <section
-            key={id}
-            className={`ov-card ov-card-${id} ${dropTarget === id ? "ov-drop-target" : ""}`}
-            data-panel={id}
-            data-span={layout.spans[id]}
-            style={{ "--panel-span": layout.spans[id] } as CSSProperties}
-            aria-labelledby={`ov-heading-${id}`}
-            onDragOver={(event) => {
-              if (customizing && dragging) {
-                event.preventDefault();
-                event.dataTransfer.dropEffect = "move";
-                setDropTarget(id);
-              }
-            }}
-            onDrop={(event) => {
-              if (customizing && dragging) {
-                event.preventDefault();
-                move(dragging, id);
-                setDragging(null);
-                setDropTarget(null);
-              }
-            }}
-          >
-            {customizing && (
-              <div className="ov-panel-tools">
-                <button
-                  className="ov-icon-button ov-grip"
-                  type="button"
-                  draggable={!saving}
-                  aria-label={`Drag ${PANEL_LABELS[id]}`}
-                  title="Drag to move"
+      {(
+        [
+          { kind: "site", ids: ["website", "health"] as PanelId[] },
+          {
+            kind: "reports",
+            ids: layout.order.filter((id) =>
+              (REPORT_PANELS as readonly PanelId[]).includes(id),
+            ),
+          },
+          {
+            kind: "work",
+            ids: layout.order.filter((id) =>
+              (WORK_PANELS as readonly PanelId[]).includes(id),
+            ),
+          },
+        ] as const
+      ).map(({ kind, ids }) => (
+        <div
+          key={kind}
+          className={`ov-row ov-row-${kind}`}
+          style={
+            kind === "reports"
+              ? {
+                  gridTemplateColumns: ids
+                    .map((id) =>
+                      id === "pipeline"
+                        ? "minmax(180px, .82fr)"
+                        : "minmax(0, 1fr)",
+                    )
+                    .join(" "),
+                }
+              : undefined
+          }
+        >
+          {ids.map((id, index) => {
+            const Icon = icons[id];
+            return (
+              <section
+                key={id}
+                className={`ov-card ov-card-${id} ${dropTarget === id ? "ov-drop-target" : ""} ${dragging === id ? "ov-dragging" : ""}`}
+                data-panel={id}
+                data-slot={index}
+                data-compact={(kind === "work" && index === 1) || undefined}
+                style={
+                  id === "website"
+                    ? ({
+                        "--website-accent":
+                          data.previewAccent ?? "var(--ov-neutral-tint)",
+                      } as CSSProperties)
+                    : undefined
+                }
+                aria-labelledby={`ov-heading-${id}`}
+                onDragOver={(event) => {
+                  if (dragging && canSwapPanels(dragging, id)) {
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = "move";
+                    setDropTarget(id);
+                  }
+                }}
+                onDrop={(event) => {
+                  if (dragging && canSwapPanels(dragging, id)) {
+                    event.preventDefault();
+                    swap(dragging, id);
+                    setDragging(null);
+                    setDropTarget(null);
+                  }
+                }}
+              >
+                <div
+                  className="ov-card-heading"
+                  draggable={kind !== "site"}
                   onDragStart={(event) => {
+                    if ((event.target as HTMLElement).closest("a,select")) {
+                      event.preventDefault();
+                      return;
+                    }
                     setDragging(id);
                     event.dataTransfer.setData("text/plain", id);
                     event.dataTransfer.effectAllowed = "move";
@@ -410,80 +345,99 @@ export function LiveOverviewDashboard({
                     setDropTarget(null);
                   }}
                 >
-                  <Grip size={15} />
-                </button>
-                <span>
-                  {layout.spans[id] === 4
-                    ? "Compact"
-                    : layout.spans[id] === 8
-                      ? "Wide"
-                      : "Full width"}
-                </span>
-                <button
-                  type="button"
-                  className="ov-icon-button"
-                  disabled={index === 0 || saving}
-                  onClick={() => move(id, visible[index - 1])}
-                  aria-label={`Move ${PANEL_LABELS[id]} up`}
-                >
-                  <ArrowUp size={14} />
-                </button>
-                <button
-                  type="button"
-                  className="ov-icon-button"
-                  disabled={index === visible.length - 1 || saving}
-                  onClick={() => move(id, visible[index + 1])}
-                  aria-label={`Move ${PANEL_LABELS[id]} down`}
-                >
-                  <ArrowDown size={14} />
-                </button>
-                <button
-                  type="button"
-                  className="ov-icon-button"
-                  disabled={saving}
-                  onClick={() =>
-                    update({
-                      spans: {
-                        ...layout.spans,
-                        [id]:
-                          layout.spans[id] === 4
-                            ? 8
-                            : layout.spans[id] === 8
-                              ? 12
-                              : 4,
-                      },
-                    })
-                  }
-                  aria-label={`Resize ${PANEL_LABELS[id]}`}
-                  title="Change panel width"
-                >
-                  <Maximize2 size={14} />
-                </button>
-              </div>
-            )}
-            <div className="ov-card-heading">
-              <div>
-                <p>{labels[id]}</p>
-                <h2 id={`ov-heading-${id}`}>{PANEL_LABELS[id]}</h2>
-              </div>
-              {id === "health" && <ShieldMark />}
-              {id === "leads" && (
-                <span className="ov-small-period">Last {range} days</span>
-              )}
-              {id === "pipeline" && (
-                <span className="ov-small-period">Last {range} days</span>
-              )}
-            </div>
-            <div className="ov-card-body">{panels[id]}</div>
-            {id === "leads" && <SnapshotStrip data={data} range={range} />}
-          </section>
-        ))}
-      </div>
+                  <h2 id={`ov-heading-${id}`}>
+                    <Icon size={14} aria-hidden="true" />
+                    {PANEL_LABELS[id]}
+                  </h2>
+                  {kind !== "site" && (
+                    <button
+                      className="ov-grip"
+                      draggable
+                      type="button"
+                      aria-label={`Swap ${PANEL_LABELS[id]}`}
+                      title="Drag to swap panels. Arrow keys also swap panels."
+                      aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight"
+                      onKeyDown={(event) => {
+                        const step =
+                          event.key === "ArrowUp" || event.key === "ArrowLeft"
+                            ? -1
+                            : event.key === "ArrowDown" ||
+                                event.key === "ArrowRight"
+                              ? 1
+                              : 0;
+                        if (step) {
+                          event.preventDefault();
+                          const target = ids[index + step];
+                          if (target) swap(id, target);
+                        }
+                      }}
+                      onPointerDown={(event) => {
+                        if (
+                          event.pointerType === "touch" ||
+                          event.pointerType === "pen"
+                        ) {
+                          event.currentTarget.setPointerCapture(
+                            event.pointerId,
+                          );
+                          touch.current = {
+                            id,
+                            x: event.clientX,
+                            y: event.clientY,
+                            active: false,
+                            target: null,
+                          };
+                        }
+                      }}
+                      onPointerMove={(event) => {
+                        const current = touch.current;
+                        if (!current) return;
+                        if (
+                          Math.hypot(
+                            event.clientX - current.x,
+                            event.clientY - current.y,
+                          ) < 7 &&
+                          !current.active
+                        )
+                          return;
+                        current.active = true;
+                        setDragging(current.id);
+                        const target = document
+                          .elementFromPoint(event.clientX, event.clientY)
+                          ?.closest<HTMLElement>("[data-panel]")?.dataset
+                          .panel as PanelId | undefined;
+                        current.target = target ?? null;
+                        setDropTarget(
+                          target && canSwapPanels(current.id, target)
+                            ? target
+                            : null,
+                        );
+                      }}
+                      onPointerUp={() => {
+                        const current = touch.current;
+                        if (current?.active && current.target)
+                          swap(current.id, current.target);
+                        touch.current = null;
+                        setDragging(null);
+                        setDropTarget(null);
+                      }}
+                      onPointerCancel={() => {
+                        touch.current = null;
+                        setDragging(null);
+                        setDropTarget(null);
+                      }}
+                    >
+                      <GripVertical size={16} />
+                    </button>
+                  )}
+                </div>
+                <div className="ov-card-body">{panels[id]}</div>
+              </section>
+            );
+          })}
+        </div>
+      ))}
       <footer className="ov-page-footer">
-        <span>
-          <span className="ov-tiny-dot" />
-          Kept running by Vigil.
-        </span>
+        <span>Kept running by Vigil</span>
         <span>
           Snapshot{" "}
           {new Date(data.asOf).toLocaleString("en-US", {
@@ -497,12 +451,5 @@ export function LiveOverviewDashboard({
         </span>
       </footer>
     </div>
-  );
-}
-function ShieldMark() {
-  return (
-    <span className="ov-shield-mark">
-      <Check size={14} />
-    </span>
   );
 }

@@ -1,12 +1,36 @@
 import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { LiveOverviewDashboard } from "@/components/vigil/overview/LiveOverviewDashboard";
+import {
+  ActivityPanel,
+  InboxPanel,
+} from "@/components/vigil/overview/OverviewPanels";
 import { readLayout } from "@/lib/vigil/overview/model";
 import { sampleOverview } from "../../../scripts/overview-preview/fixture";
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
 const save = async () => ({ ok: true as const, data: undefined });
+describe("adaptive working panels", () => {
+  it("expands the inbox to five contacts and simplifies it to three in the narrow position", () => {
+    const data = sampleOverview();
+    const wide = renderToStaticMarkup(<InboxPanel data={data} />);
+    const narrow = renderToStaticMarkup(<InboxPanel data={data} compact />);
+    expect(wide).toContain("Maya Chen");
+    expect(wide).toContain("<table>");
+    expect(narrow).toContain("Olivia Bennett");
+    expect(narrow).not.toContain("Maya Chen");
+    expect(narrow).not.toContain("<table>");
+  });
+  it("shows more activity and full dates in the wide position", () => {
+    const data = sampleOverview();
+    const wide = renderToStaticMarkup(<ActivityPanel data={data} />);
+    const narrow = renderToStaticMarkup(<ActivityPanel data={data} compact />);
+    expect(wide).toContain("Domain verification completed");
+    expect(wide).toContain("Oct 23, 2026");
+    expect(narrow).not.toContain("Domain verification completed");
+  });
+});
 describe("overview data truth in the rendered interface", () => {
   it("does not show invented traffic metrics when analytics is unconnected", () => {
     const html = renderToStaticMarkup(
@@ -36,9 +60,8 @@ describe("overview data truth in the rendered interface", () => {
       />,
     );
     expect(html).toContain("0/3");
-    expect(html).toContain("Waiting for a complete picture");
     expect(html).toContain("Pending");
-    expect(html).not.toContain("Your latest checks look good");
+    expect(html).not.toContain("Checks passed");
   });
   it("warns when history is capped and suppresses a growth comparison", () => {
     const data = sampleOverview();

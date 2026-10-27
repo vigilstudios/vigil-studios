@@ -4,16 +4,18 @@ export const DAY = 86_400_000;
 export const RANGES = [7, 30, 90] as const;
 export type ReportRange = (typeof RANGES)[number];
 export type ChartView = "area" | "bars" | "table";
+export const REPORT_PANELS = [
+  "insights",
+  "traffic",
+  "leads",
+  "pipeline",
+] as const;
+export const WORK_PANELS = ["followup", "activity"] as const;
 export const PANEL_IDS = [
   "website",
   "health",
-  "leads",
-  "pipeline",
-  "traffic",
-  "insights",
-  "followup",
-  "activity",
-  "service",
+  ...REPORT_PANELS,
+  ...WORK_PANELS,
 ] as const;
 export type PanelId = (typeof PANEL_IDS)[number];
 export const PANEL_LABELS: Record<PanelId, string> = {
@@ -25,78 +27,72 @@ export const PANEL_LABELS: Record<PanelId, string> = {
   insights: "Insights",
   followup: "Your inbox",
   activity: "Recent activity",
-  service: "Your Vigil plan",
 };
 export type LayoutPreference = {
-  version: 1;
+  version: 2;
   order: PanelId[];
-  hidden: PanelId[];
-  spans: Record<PanelId, 4 | 8 | 12>;
   leadView: ChartView;
   trafficView: ChartView;
   statusView: "donut" | "bars";
 };
 export const DEFAULT_LAYOUT: LayoutPreference = {
-  version: 1,
+  version: 2,
   order: [...PANEL_IDS],
-  hidden: [],
-  spans: {
-    website: 8,
-    health: 4,
-    leads: 8,
-    pipeline: 4,
-    traffic: 8,
-    insights: 4,
-    followup: 8,
-    activity: 4,
-    service: 12,
-  },
   leadView: "area",
   trafficView: "area",
   statusView: "donut",
 };
-export const LAYOUT_METADATA_KEY = "vigil_overview_layout_v1";
+export const LAYOUT_METADATA_KEY = "vigil_overview_layout_v2";
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 const panel = (v: unknown): v is PanelId =>
   typeof v === "string" && PANEL_IDS.includes(v as PanelId);
 export function readLayout(input: unknown): LayoutPreference {
-  if (!isObject(input) || input.version !== 1)
+  if (!isObject(input) || input.version !== 2)
     return structuredClone(DEFAULT_LAYOUT);
   const order = Array.isArray(input.order)
     ? [...new Set(input.order.filter(panel))]
     : [];
-  const spans = { ...DEFAULT_LAYOUT.spans };
-  if (isObject(input.spans))
-    for (const id of PANEL_IDS) {
-      const value = input.spans[id];
-      if (value === 4 || value === 8 || value === 12) spans[id] = value;
-    }
+  const group = (ids: readonly PanelId[]) => [
+    ...order.filter((id) => ids.includes(id)),
+    ...ids.filter((id) => !order.includes(id)),
+  ];
   const view = (v: unknown): ChartView =>
     v === "bars" || v === "table" ? v : "area";
   return {
-    version: 1,
-    order: [...order, ...PANEL_IDS.filter((id) => !order.includes(id))],
-    hidden: Array.isArray(input.hidden)
-      ? [...new Set(input.hidden.filter(panel))].filter(
-          (id) => id !== "website" && id !== "health",
-        )
-      : [],
-    spans,
+    version: 2,
+    order: [
+      "website",
+      "health",
+      ...group(REPORT_PANELS),
+      ...group(WORK_PANELS),
+    ],
     leadView: view(input.leadView),
     trafficView: view(input.trafficView),
     statusView: input.statusView === "bars" ? "bars" : "donut",
   };
 }
-export function movePanel(
+export function canSwapPanels(id: PanelId, target: PanelId): boolean {
+  return (
+    id !== target &&
+    [REPORT_PANELS, WORK_PANELS].some(
+      (group) =>
+        (group as readonly PanelId[]).includes(id) &&
+        (group as readonly PanelId[]).includes(target),
+    )
+  );
+}
+/** Exchange the contents of two dashboard positions without shifting other panels. */
+export function swapPanels(
   order: PanelId[],
   id: PanelId,
   target: PanelId,
 ): PanelId[] {
-  if (id === target || !order.includes(id) || !order.includes(target))
-    return [...order];
-  const next = order.filter((item) => item !== id);
-  next.splice(order.indexOf(target), 0, id);
+  const a = order.indexOf(id),
+    b = order.indexOf(target);
+  if (a < 0 || b < 0 || a === b) return [...order];
+  const next = [...order];
+  [next[a], next[b]] = [next[b], next[a]];
   return next;
 }
 export type SeriesPoint = { date: string; label: string; value: number };
@@ -220,6 +216,7 @@ export type TrafficReport = {
 };
 export type OverviewData = {
   asOf: string;
+  previewAccent?: string | null;
   organizationName: string;
   userName: string | null;
   site: Pick<
