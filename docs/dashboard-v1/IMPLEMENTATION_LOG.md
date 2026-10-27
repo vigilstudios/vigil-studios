@@ -1295,3 +1295,8 @@ Ownership verification now remains an unfinished waiting step with explicit addi
 
 - Top-aligned the preview and website details in their shared workspace. The Live website eyebrow starts at the preview's top edge. Increased the URL to 20px, with 18px at compact desktop widths; existing horizontal padding and spacing before checks remain.
 - Browser verified matching preview/identity top coordinates for desktop and phone modes, the unchanged 461px desktop preview width and 616px row, and a 390px layout without details/URL overflow. CSS-only change; no application tests rerun. Local server remains on 3190.
+
+### 2026-10-27 — Align website check statuses beside their labels
+
+- Website checks now use icon, label and right-aligned status columns. Passed, Pending and Attention occupy the same right-hand position. Reserved slightly more desktop details width and tightened narrow-screen gaps so labels and statuses fit beside one another.
+- Browser verified the real Pending/Passed states and fictional all-Passed checks, including 768px and 320px layouts. At 320px, all statuses align with the row's right edge and labels fit without overflow. CSS-only change; no application tests rerun. Local server remains on 3190.
