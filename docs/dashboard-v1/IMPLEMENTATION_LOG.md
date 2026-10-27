@@ -1273,3 +1273,9 @@ Ownership verification now remains an unfinished waiting step with explicit addi
 - Customer workspaces resolve their default live site's icon from the RLS-scoped published production deployment, with tenant/site filters and a publication-time bound. Public HTML reads reuse the existing Vercel-origin, size, timeout, cache and redirect restrictions. Icons are dynamic across customers; missing/unavailable/failed images show the theme-aware Vigil logo. No customer-specific URL is hardcoded in production and no website/provider data is changed.
 - Grouped Content Hub through Subscription (and applicable preview/review links) under Website. Website and Grow start expanded and collapse independently with animated height/opacity and chevrons. Collapsed links are inert; state labels/control IDs work in expanded and rail navigation and the mobile drawer. Existing entitlement and coming-soon behavior remains. Reduced motion skips animations.
 - Validation: 38 focused tests / 5 files, typecheck, focused lint and optimized build passed. Browser checks verified the actual customer's sparkle icon, independent/keyboard group toggles, default open state, absent/broken image fallbacks, light/dark branding, drawer accessibility, unique IDs and 390px overflow. Local only; servers remain on 3190 and 4188. See `docs/launch/client-overview/REPORT.md`.
+
+
+### 2026-10-27 — Inset the website details column
+
+- Added 12px of padding on each side of the website details at desktop widths and 8px in compact desktop layouts. The narrow layout reserves a little more column width for readable content. Stacked mobile details retain their existing spacing.
+- Browser verification confirmed both 12px insets, no details overflow, the unchanged 461px desktop preview and 616px first row. CSS-only follow-up; no application tests rerun. Local server remains on 3190.

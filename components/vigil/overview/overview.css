@@ -1575,6 +1575,7 @@ html[data-theme="light"] .ov-dashboard {
   }
   .ov-website-meta {
     flex: 1;
+    padding-inline: 12px;
   }
 }
 @container overview (max-width:960px) {
@@ -2093,7 +2094,10 @@ html[data-theme="light"] .ov-card-health {
     grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
   }
   .ov-website-workspace {
-    --ov-site-meta-min: 116px;
+    --ov-site-meta-min: 124px;
+  }
+  .ov-website-meta {
+    padding-inline: 8px;
   }
   .ov-website-url {
     font-size: 15px;

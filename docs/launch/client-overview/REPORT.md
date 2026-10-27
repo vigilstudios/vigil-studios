@@ -68,7 +68,9 @@ into the fixed status stack.
 
 The website card now uses slightly roomier internal padding, a 16px domain
 link (15px at compact desktop widths), deliberate breaks at domain labels and
-additional space between its live-site identity and the recorded checks.
+additional space between its live-site identity and the recorded checks. The
+side column adds 12px padding on each side, reduced to 8px at compact desktop
+widths, with the approved preview size preserved in the standard layout.
 
 The customer sidebar resolves its icon from that organization's default live
 site's published production deployment. Both tenant and website filters run
