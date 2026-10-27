@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+vi.mock("next/cache", () => ({ unstable_cache: (read: unknown) => read }));
 import type { DbClient } from "../types";
 import { deploymentIcon, getWebsiteIcon } from "../queries/website-icon";
 import { createElement } from "react";

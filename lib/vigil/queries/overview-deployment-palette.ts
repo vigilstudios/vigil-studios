@@ -1,4 +1,6 @@
 import "server-only";
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import {
   previewAccentFromCss,
   safePreviewAccent,
@@ -20,16 +22,16 @@ export function publicDeploymentOrigin(value: string): string | null {
   }
 }
 
-export async function publicDeploymentText(
+async function fetchPublicDeploymentText(
   url: string,
   type: "html" | "css",
-): Promise<string | null> {
+): Promise<string> {
   const response = await fetch(url, {
     redirect: "error", // Never follow customer-controlled redirects to another network destination.
     credentials: "omit",
-    signal: AbortSignal.timeout(2500),
-    cache: "force-cache",
-    next: { revalidate: 3600 },
+    signal: AbortSignal.timeout(6000),
+    // Cache the validated document below, never a transient HTTP error response.
+    cache: "no-store",
   });
   if (
     !response.ok ||
@@ -38,24 +40,49 @@ export async function publicDeploymentText(
       ?.includes(type === "html" ? "text/html" : "text/css")
   ) {
     await response.body?.cancel();
-    return null;
+    throw new Error("Public branding document unavailable");
   }
   const reader = response.body?.getReader();
-  if (!reader) return null;
+  if (!reader) throw new Error("Public branding document has no body");
   const decoder = new TextDecoder();
   let text = "",
     bytes = 0;
   while (true) {
     const chunk = await reader.read();
-    if (chunk.done) return text + decoder.decode();
+    if (chunk.done) {
+      const document = text + decoder.decode();
+      if (!document.trim())
+        throw new Error("Public branding document is empty");
+      return document;
+    }
     bytes += chunk.value.byteLength;
     if (bytes > 262144) {
       await reader.cancel();
-      return null;
+      throw new Error("Public branding document exceeds the size limit");
     }
     text += decoder.decode(chunk.value, { stream: true });
   }
 }
+
+// Only fulfilled, bounded documents enter the cross-request cache. Exceptions
+// leave it empty so the next request can recover instead of retaining a fallback.
+const cachedPublicDeploymentText = unstable_cache(
+  fetchPublicDeploymentText,
+  ["published-website-branding-v2"],
+  { revalidate: 3600 },
+);
+
+/** Icon and palette reads share one document within a server render. */
+export const publicDeploymentText = cache(
+  async (url: string, type: "html" | "css"): Promise<string | null> => {
+    if (!publicDeploymentOrigin(url)) return null;
+    try {
+      return await cachedPublicDeploymentText(url, type);
+    } catch {
+      return null;
+    }
+  },
+);
 
 /** Read public style tokens only; no cookies, provider credentials, arbitrary hosts, scripts or page content leave the server. */
 export async function readPublicDeploymentAccent(

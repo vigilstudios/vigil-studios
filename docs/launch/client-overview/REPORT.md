@@ -120,7 +120,12 @@ project one validated color from the immutable Design Engine snapshot preceding
 the production deployment, after an RLS website access check. Older custom sites
 fall back to public style tokens from their RLS-scoped, ready production Vercel
 build: HTTPS on a single *.vercel.app hostname, no redirects or credentials,
-2.5-second request deadlines, 256KB responses and at most two same-origin styles.
+6-second request deadlines, 256KB responses and at most two same-origin styles.
+Only successfully read, nonempty documents enter the one-hour branding cache;
+raw HTTP responses use `no-store`, so 404s, timeouts and invalid/oversized bodies
+do not persist as missing branding. Icon and palette reads share the document
+within a render. This versioned document cache replaces the HTTP-response cache,
+whose lookup previously consumed part of the short fetch deadline in production.
 Only the resulting hex color reaches the client. No arbitrary customer URL,
 external stylesheet host or script is fetched. Missing palettes remain neutral.
 The actual Scar site resolves to its published pink token, #a52d60.

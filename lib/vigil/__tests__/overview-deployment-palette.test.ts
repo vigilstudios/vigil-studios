@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+vi.mock("next/cache", () => ({ unstable_cache: (read: unknown) => read }));
 import {
   publicDeploymentOrigin,
   readPublicDeploymentAccent,
