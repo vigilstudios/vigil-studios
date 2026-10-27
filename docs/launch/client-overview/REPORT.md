@@ -66,8 +66,8 @@ adapt into fewer columns. Existing v2 preferences retain report order, chart
 choices and working slots while lead status and the new quality panel normalize
 into the fixed status stack.
 
-The website card now uses slightly roomier internal padding, a 16px domain
-link (15px at compact desktop widths), deliberate breaks at domain labels and
+The website card now uses slightly roomier internal padding, a 20px domain
+link (18px at compact desktop widths), deliberate breaks at domain labels and
 additional space between its live-site identity and the recorded checks. The
 side column adds 12px padding on each side, reduced to 8px at compact desktop
 widths, with the approved preview size preserved in the standard layout.

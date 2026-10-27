@@ -1591,7 +1591,7 @@ html[data-theme="light"] .ov-dashboard {
     min-height: 0;
     container-type: size;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: flex-start;
   }
   .ov-card-website .ov-preview > div {
@@ -1754,7 +1754,7 @@ html[data-theme="light"] .ov-dashboard {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
   gap: 12px;
 }
@@ -1763,7 +1763,7 @@ html[data-theme="light"] .ov-dashboard {
   letter-spacing: 0.08em;
 }
 .ov-website-url {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 550;
   line-height: 1.5;
   overflow-wrap: anywhere;
@@ -2136,7 +2136,7 @@ html[data-theme="light"] .ov-card-health {
     padding-inline: 8px;
   }
   .ov-website-url {
-    font-size: 15px;
+    font-size: 18px;
   }
 }
 @container overview (max-width:680px) {
