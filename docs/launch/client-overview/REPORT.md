@@ -9,8 +9,9 @@ The preceding admin sign-in fix is preserved in local commit `a58b767`.
 
 1. **Website + trust:** the website occupies two thirds of the first row, with
    the Vigil plan, renewal, requests and service actions inside the same card.
-   Its actual desktop/phone preview leads, with a 340px desktop viewport that
-   preserves the page's true scale. Health occupies the final third; availability,
+   Its actual desktop/phone preview leads, with a fixed 1200×1000 desktop
+   viewport scaled proportionally to its width. Health and lead status stack
+   in the final third; availability,
    domain and SSL checks show their recorded outcomes and timestamps. An unmeasured check stays pending;
    there is no invented uptime percentage, security score, speed score or SEO score.
 2. **Conversations + action:** inquiry trends, current lead status and the oldest
@@ -43,12 +44,14 @@ The focus on lead progress and actionable follow-up is informed by
 
 ## Layout and styling
 
-The default second row is Insights / Website traffic / Inquiry trends / Lead
-status. The first three have equal widths; status uses a smaller width. All
-four share the same row height and keep their individual widths during swaps.
+Lead status sits directly below health in the first row's right column.
+The default second row is Insights / Website traffic / Inquiry trends. All
+three have equal widths and share the same row height during swaps.
 The final row's wide/narrow positions remain fixed while the swapped content
 adapts. Reports swap only with reports; inbox and activity swap only with each
-other. The first row stays fixed. Tablet/phone widths adapt into fewer columns.
+other. The first row, including the status stack, stays fixed. Tablet/phone widths
+adapt into fewer columns. Existing v2 preferences retain report order, chart
+choices and working slots while lead status normalizes into the status stack.
 
 Headers have icons and direct drag grips, without an editing mode, Customize
 button, visibility controls or resizing controls. Header/grip drag, keyboard
@@ -102,16 +105,20 @@ provider settings, subscription entitlements, or admin screen layouts.
 
 ## Validation
 
-- Full suite: **2,668 tests / 139 files passed** with `npm test -- --maxWorkers=2`.
+- Baseline full suite: **2,668 tests / 139 files passed** with `npm test -- --maxWorkers=2`.
+- Latest preview-ratio/status-stack follow-up: **37 focused tests / 6 files passed**,
+  plus typecheck, focused lint and optimized production build. Saved-layout
+  normalization pins lead status without losing report order or chart choices.
 - Coverage includes UTC/cohort boundaries, spam exclusion, exact bucket totals,
   pagination, tenant/website isolation, capped history, empty/unconnected states,
   pending checks, grouped preference normalization, exact swaps, adaptive working
   panels, personal saves/errors and bounded public palette reads.
 - Typecheck, full lint and optimized production build passed.
 - Browser: authenticated overview rendered the real site/lead data and published
-  pink palette. The desktop viewport measures 340px; phone iframe remains 390×780.
+  pink palette. The desktop iframe stays 1200×1000 and its displayed ratio follows its width
+  (617×514 at the verified desktop size); phone iframe remains 390×780.
   Sample lab verified native header/grip swaps, keyboard swaps, unchanged report
-  widths/heights, expanded activity/compact inbox, reload persistence, failed
+  widths/heights, the new three-report row, expanded activity/compact inbox, reload persistence, failed
   saves and retry. Both themes were inspected; no new console errors were found.
 - Responsive checks used real components inside 320/390/768px iframe viewports.
   No document overflow was observed. `?viewport=390&disconnected`,

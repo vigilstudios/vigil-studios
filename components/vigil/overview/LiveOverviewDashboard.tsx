@@ -121,6 +121,12 @@ export function LiveOverviewDashboard({
     if (!canSwapPanels(id, target)) return;
     update({ order: swapPanels(latest.current.order, id, target) });
   };
+  const reportOrder = layout.order.filter((id) =>
+    (REPORT_PANELS as readonly PanelId[]).includes(id),
+  );
+  const workOrder = layout.order.filter((id) =>
+    (WORK_PANELS as readonly PanelId[]).includes(id),
+  );
   const panels: Record<PanelId, ReactNode> = {
     website: <WebsitePanel data={data} />,
     health: <HealthPanel data={data} />,
@@ -149,26 +155,151 @@ export function LiveOverviewDashboard({
       />
     ),
     insights: <InsightsPanel />,
-    followup: (
-      <InboxPanel
-        data={data}
-        compact={
-          layout.order.filter((id) =>
-            (WORK_PANELS as readonly PanelId[]).includes(id),
-          )[1] === "followup"
-        }
-      />
-    ),
+    followup: <InboxPanel data={data} compact={workOrder[1] === "followup"} />,
     activity: (
-      <ActivityPanel
-        data={data}
-        compact={
-          layout.order.filter((id) =>
-            (WORK_PANELS as readonly PanelId[]).includes(id),
-          )[1] === "activity"
-        }
-      />
+      <ActivityPanel data={data} compact={workOrder[1] === "activity"} />
     ),
+  };
+  const renderPanel = (
+    id: PanelId,
+    index: number,
+    kind: "site" | "reports" | "work",
+    ids: readonly PanelId[],
+  ) => {
+    const Icon = icons[id];
+    return (
+      <section
+        key={id}
+        className={`ov-card ov-card-${id} ${dropTarget === id ? "ov-drop-target" : ""} ${dragging === id ? "ov-dragging" : ""}`}
+        data-panel={id}
+        data-slot={index}
+        data-compact={(kind === "work" && index === 1) || undefined}
+        style={
+          id === "website"
+            ? ({
+                "--website-accent":
+                  data.previewAccent ?? "var(--ov-neutral-tint)",
+              } as CSSProperties)
+            : undefined
+        }
+        aria-labelledby={`ov-heading-${id}`}
+        onDragOver={(event) => {
+          if (dragging && canSwapPanels(dragging, id)) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+            setDropTarget(id);
+          }
+        }}
+        onDrop={(event) => {
+          if (dragging && canSwapPanels(dragging, id)) {
+            event.preventDefault();
+            swap(dragging, id);
+            setDragging(null);
+            setDropTarget(null);
+          }
+        }}
+      >
+        <div
+          className="ov-card-heading"
+          draggable={kind !== "site"}
+          onDragStart={(event) => {
+            if ((event.target as HTMLElement).closest("a,select")) {
+              event.preventDefault();
+              return;
+            }
+            setDragging(id);
+            event.dataTransfer.setData("text/plain", id);
+            event.dataTransfer.effectAllowed = "move";
+          }}
+          onDragEnd={() => {
+            setDragging(null);
+            setDropTarget(null);
+          }}
+        >
+          <h2 id={`ov-heading-${id}`}>
+            <Icon size={14} aria-hidden="true" />
+            {PANEL_LABELS[id]}
+          </h2>
+          {kind !== "site" && (
+            <button
+              className="ov-grip"
+              draggable
+              type="button"
+              aria-label={`Swap ${PANEL_LABELS[id]}`}
+              title="Drag to swap panels. Arrow keys also swap panels."
+              aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight"
+              onKeyDown={(event) => {
+                const step =
+                  event.key === "ArrowUp" || event.key === "ArrowLeft"
+                    ? -1
+                    : event.key === "ArrowDown" || event.key === "ArrowRight"
+                      ? 1
+                      : 0;
+                if (step) {
+                  event.preventDefault();
+                  const target = ids[index + step];
+                  if (target) swap(id, target);
+                }
+              }}
+              onPointerDown={(event) => {
+                if (
+                  event.pointerType === "touch" ||
+                  event.pointerType === "pen"
+                ) {
+                  event.currentTarget.setPointerCapture(event.pointerId);
+                  touch.current = {
+                    id,
+                    x: event.clientX,
+                    y: event.clientY,
+                    active: false,
+                    target: null,
+                  };
+                }
+              }}
+              onPointerMove={(event) => {
+                const current = touch.current;
+                if (!current) return;
+                if (
+                  Math.hypot(
+                    event.clientX - current.x,
+                    event.clientY - current.y,
+                  ) < 7 &&
+                  !current.active
+                )
+                  return;
+                current.active = true;
+                setDragging(current.id);
+                const target = document
+                  .elementFromPoint(event.clientX, event.clientY)
+                  ?.closest<HTMLElement>("[data-panel]")?.dataset.panel as
+                  | PanelId
+                  | undefined;
+                current.target = target ?? null;
+                setDropTarget(
+                  target && canSwapPanels(current.id, target) ? target : null,
+                );
+              }}
+              onPointerUp={() => {
+                const current = touch.current;
+                if (current?.active && current.target)
+                  swap(current.id, current.target);
+                touch.current = null;
+                setDragging(null);
+                setDropTarget(null);
+              }}
+              onPointerCancel={() => {
+                touch.current = null;
+                setDragging(null);
+                setDropTarget(null);
+              }}
+            >
+              <GripVertical size={16} />
+            </button>
+          )}
+        </div>
+        <div className="ov-card-body">{panels[id]}</div>
+      </section>
+    );
   };
   return (
     <div className="ov-dashboard">
@@ -260,182 +391,23 @@ export function LiveOverviewDashboard({
           </button>
         </div>
       )}
-      {(
-        [
-          { kind: "site", ids: ["website", "health"] as PanelId[] },
-          {
-            kind: "reports",
-            ids: layout.order.filter((id) =>
-              (REPORT_PANELS as readonly PanelId[]).includes(id),
-            ),
-          },
-          {
-            kind: "work",
-            ids: layout.order.filter((id) =>
-              (WORK_PANELS as readonly PanelId[]).includes(id),
-            ),
-          },
-        ] as const
-      ).map(({ kind, ids }) => (
-        <div
-          key={kind}
-          className={`ov-row ov-row-${kind}`}
-          style={
-            kind === "reports"
-              ? {
-                  gridTemplateColumns: ids
-                    .map((id) =>
-                      id === "pipeline"
-                        ? "minmax(180px, .82fr)"
-                        : "minmax(0, 1fr)",
-                    )
-                    .join(" "),
-                }
-              : undefined
-          }
-        >
-          {ids.map((id, index) => {
-            const Icon = icons[id];
-            return (
-              <section
-                key={id}
-                className={`ov-card ov-card-${id} ${dropTarget === id ? "ov-drop-target" : ""} ${dragging === id ? "ov-dragging" : ""}`}
-                data-panel={id}
-                data-slot={index}
-                data-compact={(kind === "work" && index === 1) || undefined}
-                style={
-                  id === "website"
-                    ? ({
-                        "--website-accent":
-                          data.previewAccent ?? "var(--ov-neutral-tint)",
-                      } as CSSProperties)
-                    : undefined
-                }
-                aria-labelledby={`ov-heading-${id}`}
-                onDragOver={(event) => {
-                  if (dragging && canSwapPanels(dragging, id)) {
-                    event.preventDefault();
-                    event.dataTransfer.dropEffect = "move";
-                    setDropTarget(id);
-                  }
-                }}
-                onDrop={(event) => {
-                  if (dragging && canSwapPanels(dragging, id)) {
-                    event.preventDefault();
-                    swap(dragging, id);
-                    setDragging(null);
-                    setDropTarget(null);
-                  }
-                }}
-              >
-                <div
-                  className="ov-card-heading"
-                  draggable={kind !== "site"}
-                  onDragStart={(event) => {
-                    if ((event.target as HTMLElement).closest("a,select")) {
-                      event.preventDefault();
-                      return;
-                    }
-                    setDragging(id);
-                    event.dataTransfer.setData("text/plain", id);
-                    event.dataTransfer.effectAllowed = "move";
-                  }}
-                  onDragEnd={() => {
-                    setDragging(null);
-                    setDropTarget(null);
-                  }}
-                >
-                  <h2 id={`ov-heading-${id}`}>
-                    <Icon size={14} aria-hidden="true" />
-                    {PANEL_LABELS[id]}
-                  </h2>
-                  {kind !== "site" && (
-                    <button
-                      className="ov-grip"
-                      draggable
-                      type="button"
-                      aria-label={`Swap ${PANEL_LABELS[id]}`}
-                      title="Drag to swap panels. Arrow keys also swap panels."
-                      aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight"
-                      onKeyDown={(event) => {
-                        const step =
-                          event.key === "ArrowUp" || event.key === "ArrowLeft"
-                            ? -1
-                            : event.key === "ArrowDown" ||
-                                event.key === "ArrowRight"
-                              ? 1
-                              : 0;
-                        if (step) {
-                          event.preventDefault();
-                          const target = ids[index + step];
-                          if (target) swap(id, target);
-                        }
-                      }}
-                      onPointerDown={(event) => {
-                        if (
-                          event.pointerType === "touch" ||
-                          event.pointerType === "pen"
-                        ) {
-                          event.currentTarget.setPointerCapture(
-                            event.pointerId,
-                          );
-                          touch.current = {
-                            id,
-                            x: event.clientX,
-                            y: event.clientY,
-                            active: false,
-                            target: null,
-                          };
-                        }
-                      }}
-                      onPointerMove={(event) => {
-                        const current = touch.current;
-                        if (!current) return;
-                        if (
-                          Math.hypot(
-                            event.clientX - current.x,
-                            event.clientY - current.y,
-                          ) < 7 &&
-                          !current.active
-                        )
-                          return;
-                        current.active = true;
-                        setDragging(current.id);
-                        const target = document
-                          .elementFromPoint(event.clientX, event.clientY)
-                          ?.closest<HTMLElement>("[data-panel]")?.dataset
-                          .panel as PanelId | undefined;
-                        current.target = target ?? null;
-                        setDropTarget(
-                          target && canSwapPanels(current.id, target)
-                            ? target
-                            : null,
-                        );
-                      }}
-                      onPointerUp={() => {
-                        const current = touch.current;
-                        if (current?.active && current.target)
-                          swap(current.id, current.target);
-                        touch.current = null;
-                        setDragging(null);
-                        setDropTarget(null);
-                      }}
-                      onPointerCancel={() => {
-                        touch.current = null;
-                        setDragging(null);
-                        setDropTarget(null);
-                      }}
-                    >
-                      <GripVertical size={16} />
-                    </button>
-                  )}
-                </div>
-                <div className="ov-card-body">{panels[id]}</div>
-              </section>
-            );
-          })}
+      <div className="ov-row ov-row-site">
+        {renderPanel("website", 0, "site", [])}
+        <div className="ov-site-status">
+          {renderPanel("health", 0, "site", [])}
+          {renderPanel("pipeline", 1, "site", [])}
         </div>
-      ))}
+      </div>
+      <div className="ov-row ov-row-reports">
+        {reportOrder.map((id, index) =>
+          renderPanel(id, index, "reports", reportOrder),
+        )}
+      </div>
+      <div className="ov-row ov-row-work">
+        {workOrder.map((id, index) =>
+          renderPanel(id, index, "work", workOrder),
+        )}
+      </div>
       <footer className="ov-page-footer">
         <span>Kept running by Vigil</span>
         <span>

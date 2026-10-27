@@ -96,10 +96,10 @@ describe("personal dashboard layouts", () => {
     expect(layout.order).toEqual([
       "website",
       "health",
+      "pipeline",
       "leads",
       "insights",
       "traffic",
-      "pipeline",
       "followup",
       "activity",
     ]);
@@ -110,8 +110,37 @@ describe("personal dashboard layouts", () => {
     expect(layout.statusView).toBe("bars");
     expect(layout).not.toHaveProperty("role");
   });
+  it("moves saved lead status into the fixed status stack while preserving report choices and working slots", () => {
+    const layout = readLayout({
+      version: 2,
+      order: [
+        "website",
+        "health",
+        "traffic",
+        "pipeline",
+        "leads",
+        "insights",
+        "activity",
+        "followup",
+      ],
+      statusView: "bars",
+      leadView: "table",
+    });
+    expect(layout.order).toEqual([
+      "website",
+      "health",
+      "pipeline",
+      "traffic",
+      "leads",
+      "insights",
+      "activity",
+      "followup",
+    ]);
+    expect(layout.statusView).toBe("bars");
+    expect(layout.leadView).toBe("table");
+  });
   it("keeps swaps inside their intended rows", () => {
-    expect(canSwapPanels("leads", "pipeline")).toBe(true);
+    expect(canSwapPanels("leads", "pipeline")).toBe(false);
     expect(canSwapPanels("insights", "traffic")).toBe(true);
     expect(canSwapPanels("followup", "activity")).toBe(true);
     expect(canSwapPanels("website", "health")).toBe(false);

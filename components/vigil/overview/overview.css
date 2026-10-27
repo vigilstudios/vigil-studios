@@ -1034,7 +1034,14 @@ html[data-theme="light"] .ov-dashboard {
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   align-items: start;
 }
+.ov-site-status {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
 .ov-row-reports {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
 }
 .ov-row-work {
@@ -1493,9 +1500,6 @@ html[data-theme="light"] .ov-dashboard {
   font-size: 11px;
 }
 @container (max-width:960px) {
-  .ov-row-reports {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
   .ov-row-work {
     grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr);
   }
@@ -1513,6 +1517,11 @@ html[data-theme="light"] .ov-dashboard {
   .ov-card[data-compact] .ov-card-body {
     padding-left: 12px;
     padding-right: 12px;
+  }
+}
+@container (max-width:800px) {
+  .ov-row-reports {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @container (max-width:680px) {
@@ -1623,4 +1632,24 @@ html[data-theme="light"] .ov-dashboard {
   .ov-website-title h3 {
     font-size: 15px;
   }
+}
+
+.ov-site-status .ov-pipeline {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+.ov-site-status .ov-status-switch {
+  grid-column: 1 / -1;
+  justify-self: end;
+}
+.ov-site-status .ov-legend {
+  grid-template-columns: 1fr;
+  gap: 8px;
+  max-width: none;
+}
+.ov-site-status .ov-pipeline > .ov-footnote,
+.ov-site-status .ov-pipeline > .ov-ranked {
+  grid-column: 1 / -1;
 }

@@ -4,16 +4,12 @@ export const DAY = 86_400_000;
 export const RANGES = [7, 30, 90] as const;
 export type ReportRange = (typeof RANGES)[number];
 export type ChartView = "area" | "bars" | "table";
-export const REPORT_PANELS = [
-  "insights",
-  "traffic",
-  "leads",
-  "pipeline",
-] as const;
+export const REPORT_PANELS = ["insights", "traffic", "leads"] as const;
 export const WORK_PANELS = ["followup", "activity"] as const;
 export const PANEL_IDS = [
   "website",
   "health",
+  "pipeline",
   ...REPORT_PANELS,
   ...WORK_PANELS,
 ] as const;
@@ -64,6 +60,7 @@ export function readLayout(input: unknown): LayoutPreference {
     order: [
       "website",
       "health",
+      "pipeline",
       ...group(REPORT_PANELS),
       ...group(WORK_PANELS),
     ],

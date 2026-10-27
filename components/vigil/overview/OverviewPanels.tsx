@@ -74,7 +74,6 @@ export function WebsitePanel({ data }: { data: OverviewData }) {
           title={`${data.site.name} live preview`}
           address={host}
           desktopHeight={1000}
-          desktopPreviewHeight={340}
         />
       </div>
       <div className="ov-website-footer">

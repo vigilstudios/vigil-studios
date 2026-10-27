@@ -22,7 +22,6 @@ export function SiteFrame({
   initialMode = "desktop",
   className,
   desktopHeight = DESKTOP.height,
-  desktopPreviewHeight,
 }: {
   src: string;
   title: string;
@@ -32,8 +31,6 @@ export function SiteFrame({
   className?: string;
   /** Virtual desktop viewport height; other previews retain the full default height. */
   desktopHeight?: number;
-  /** Optional physical desktop viewport height; keeps the rendered page at its true scale. */
-  desktopPreviewHeight?: number;
 }) {
   const [mode, setMode] = useState<ViewMode>(initialMode);
   const [host, setHost] = useState<HTMLDivElement | null>(null);
@@ -44,21 +41,8 @@ export function SiteFrame({
   const shownWidth = Math.max(0, Math.min(width, frameWidth) - 2);
   const scale = shownWidth > 0 ? shownWidth / frameWidth : 0;
   const frame =
-    mode === "desktop"
-      ? {
-          ...DESKTOP,
-          height:
-            desktopPreviewHeight && scale > 0
-              ? desktopPreviewHeight / scale
-              : desktopHeight,
-        }
-      : MOBILE;
-  const boxHeight =
-    mode === "desktop" && desktopPreviewHeight
-      ? desktopPreviewHeight
-      : width > 0
-        ? Math.round(frame.height * scale)
-        : 0;
+    mode === "desktop" ? { ...DESKTOP, height: desktopHeight } : MOBILE;
+  const boxHeight = width > 0 ? Math.round(frame.height * scale) : 0;
 
   let hostname = address ?? "";
   if (!address) {

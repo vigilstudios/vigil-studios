@@ -1225,3 +1225,12 @@ Ownership verification now remains an unfinished waiting step with explicit addi
 - Simplified card gradients to vertical borders/fills, fixed translucent dark-surface bleed, removed chart dots and the preview's inner green wrapper, made donut ends flat with a near-background track, and gave the desktop preview a physical 340px viewport without stretching. Mobile preview dimensions remain unchanged.
 - Added a validated deployed-brand color projection and a bounded public Vercel-build fallback for older custom websites. RLS checks precede access to immutable palettes; every source is scoped by organization and website. Public fallback forbids arbitrary hosts, redirects, credentials and third-party styles. Scar's real preview uses its published pink token. No customer site, provider, schema or access setting changes.
 - Personal preferences now use an allowlisted v2 shape and serialized automatic saves; failures retain the draft with retry. Full validation: 2,668 tests / 139 files, full lint, typecheck and optimized build passed. Browser checks cover actual customer data, both themes, fixed-width report swaps, adaptive inbox/activity swaps, persistence/errors and 320/390/768px overflow checks. Local only; application 3190 and fictional lab 4188 remain available. See `docs/launch/client-overview/REPORT.md`.
+
+
+---
+
+## 2026-10-27 — Preserve desktop preview proportions and stack lead status
+
+- Replaced the overview's fixed 340px preview height with a stable 1200×1000 virtual desktop viewport. The displayed height now scales with width, preserving the website layout and giving the preview more height; the phone remains 390×780 and other SiteFrame consumers retain their default viewport.
+- Moved lead status beneath health and security in the first row's right column. Insights, website traffic and inquiry trends now occupy three equal, wider columns in the next row. Their swaps and the adaptive inbox/activity row remain available. Existing v2 preferences normalize status into its new fixed position while retaining valid report order, chart choices and working slots.
+- Validation: 37 focused overview tests / 6 files, typecheck, focused lint and optimized build passed. Browser checks verified 1200×1000 desktop and 390×780 phone frames, proportional display dimensions, three equal report widths, native/keyboard swaps and 320/390px layouts without horizontal overflow. Local only; server remains on 3190.
