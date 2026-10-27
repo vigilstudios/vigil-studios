@@ -86,7 +86,11 @@ function Preview() {
       ]}
     >
       <LiveOverviewDashboard
-        data={sampleOverview(params.has("empty"), params.has("disconnected"))}
+        data={sampleOverview(
+          params.has("empty"),
+          params.has("disconnected"),
+          params.has("alert"),
+        )}
         initialLayout={initial}
         sample
         saveLayout={async (layout) => {

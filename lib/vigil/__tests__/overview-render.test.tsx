@@ -59,9 +59,9 @@ describe("overview data truth in the rendered interface", () => {
         saveLayout={save}
       />,
     );
-    expect(html).toContain("0/3");
+    expect(html).toContain("Availability");
     expect(html).toContain("Pending");
-    expect(html).not.toContain("Checks passed");
+    expect(html).not.toContain("Passed");
   });
   it("warns when history is capped and suppresses a growth comparison", () => {
     const data = sampleOverview();

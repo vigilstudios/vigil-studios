@@ -9,11 +9,12 @@ The preceding admin sign-in fix is preserved in local commit `a58b767`.
 
 1. **Website + trust:** the website occupies two thirds of the first row, with
    the Vigil plan, renewal, requests and service actions inside the same card.
-   Its actual desktop/phone preview leads, with a fixed 1200×900 desktop
-   viewport scaled proportionally to the available width and height. Health and lead status stack
-   in the final third; availability,
-   domain and SSL checks show their recorded outcomes and timestamps. An unmeasured check stays pending;
-   there is no invented uptime percentage, security score, speed score or SEO score.
+   Its proportionally scaled 1200×900 desktop preview is slightly larger and left
+   aligned. The Live website eyebrow, linked domain and recorded availability,
+   SSL and DNS checks sit to its right. Unmeasured checks stay pending.
+   The right column has Vigil Security above a shared Lead status / Site quality
+   row. Security monitoring and audit measurements have distinct connection states;
+   passing SSL or DNS never implies a vulnerability scan or active firewall.
 2. **Conversations + action:** inquiry trends, current lead status and the oldest
    New inquiries form the working CRM summary. Incoming volume, the all-time New
    backlog and inquiries marked Won answer different questions. The inbox links
@@ -44,21 +45,22 @@ The focus on lead progress and actionable follow-up is informed by
 
 ## Layout and styling
 
-Lead status sits directly below health in the first row's right column.
-On desktop, this status stack determines the row height. The website card matches
-it exactly; its browser preview scales into the space remaining above the plan
-without clipping or changing the website's viewport. The slightly wider 4:3
-preview is centered inside the card. Phone remains 390×780. Below the desktop
-breakpoint, cards use their natural height and stack normally. Named `overview`
-container queries keep dashboard breakpoints independent of the preview's size
-container, which supplies the fitting height.
+The approved desktop first-row height remains **616px**. Vigil Security takes
+341px of the right column; Lead status and Site quality share the 263px lower
+row, separated by a 12px gap. Website and status stack match exactly in both
+Donut and Bars modes. The website preview fits proportionally beside its details
+and above its plan, with a left-aligned frame. Phone remains 390×780. Below the
+desktop breakpoint, the website uses its natural height; the two small status
+cards remain side by side. Named `overview` container queries keep dashboard
+breakpoints independent of the preview's size container.
 The default second row is Insights / Website traffic / Inquiry trends. All
 three have equal widths and share the same row height during swaps.
 The final row's wide/narrow positions remain fixed while the swapped content
 adapts. Reports swap only with reports; inbox and activity swap only with each
 other. The first row, including the status stack, stays fixed. Tablet/phone widths
 adapt into fewer columns. Existing v2 preferences retain report order, chart
-choices and working slots while lead status normalizes into the status stack.
+choices and working slots while lead status and the new quality panel normalize
+into the fixed status stack.
 
 Headers have icons and direct drag grips, without an editing mode, Customize
 button, visibility controls or resizing controls. Header/grip drag, keyboard
@@ -110,28 +112,48 @@ Prelaunch-only accounts retain the existing onboarding/project overview. The
 redesign does not change lead actions, review/launch gates, customer websites,
 provider settings, subscription entitlements, or admin screen layouts.
 
+## Monitoring and audit integration
+
+Vigil Security uses an angular vigilante-eye header and a separate status shield.
+A complete, current set of clear vulnerability, exploit, suspicious-activity and
+firewall checks produces a blue vertical gradient and secured shield. Any flagged
+check or unresolved alert produces an orange gradient and warning shield, with
+Overview / Alerts controls and a bounded, scrollable alert list. Unconnected or
+incomplete/expired monitoring stays neutral. Source-supplied observation/expiry
+timestamps determine freshness. Unresolved alerts survive expiry; stale passing
+firewall results never appear as Protected.
+
+The real application currently passes **null security and audit reports**: there
+is no connected threat/WAF monitor or website audit source in this repository.
+No scan, firewall configuration, provider integration or scheduled background job
+is added. The interface does not claim that continuous monitoring is active.
+The fictional loopback lab demonstrates secured (`/`), orange alert (`/?alert`),
+and unavailable (`/?disconnected`) states. Fixtures stay outside app routes.
+
+Site quality shows recorded SEO and Performance scores out of 100 plus Speed as
+Largest Contentful Paint in seconds, with device and audit timestamp. Missing or
+invalid scores remain unmeasured; zero is a valid measured value. No speed score,
+quality threshold or security metric is fabricated. Compact Lead status groups
+are New / In progress (Contacted + Qualified + Booked) / Won / Lost. Both chart
+views preserve the cohort total and link into the existing Lead Hub.
+
 ## Validation
 
-- Baseline full suite: **2,668 tests / 139 files passed** with `npm test -- --maxWorkers=2`.
-- Latest preview-ratio/status-stack follow-up: **37 focused tests / 6 files passed**,
-  plus typecheck, focused lint and optimized production build. Saved-layout
-  normalization pins lead status without losing report order or chart choices.
-- Coverage includes UTC/cohort boundaries, spam exclusion, exact bucket totals,
-  pagination, tenant/website isolation, capped history, empty/unconnected states,
-  pending checks, grouped preference normalization, exact swaps, adaptive working
-  panels, personal saves/errors and bounded public palette reads.
-- Typecheck, full lint and optimized production build passed.
-- Browser: authenticated overview rendered the real site/lead data and published
-  pink palette. The desktop iframe stays 1200×900 and fits the remaining card space;
-  phone iframe remains 390×780. The verified website card and status stack both
-  measure 616px, and stay equal when Bars changes the status stack to 670px.
-  Sample lab verified native header/grip swaps, keyboard swaps, unchanged report
-  widths/heights, the new three-report row, expanded activity/compact inbox, reload persistence, failed
-  saves and retry. Both themes were inspected; no new console errors were found.
-- Responsive checks used real components inside 320/390/768px iframe viewports.
-  No document overflow was observed. `?viewport=390&disconnected`,
-  `?viewport=320&theme=dark&empty&disconnected` and `?fail` reproduce the key lab
-  states. Fixtures remain outside application routes.
+- Full suite: **2,684 tests / 140 files passed** with `npm test -- --maxWorkers=2`.
+  After the stale-check follow-up, **37 focused tests / 3 files passed**.
+- Typecheck, focused lint and optimized production build passed.
+- New regressions cover current/expired/incomplete security states, retained
+  alerts, absent monitoring despite passing SSL/DNS, unknown and zero audit
+  scores, LCP units and compact CRM group totals. Existing tests preserve tenant
+  scope, preferences, reporting, data truth and adaptive work panels.
+- Browser: actual authenticated overview shows the larger left-aligned real
+  preview with URL/checks to its right. Website and right stack both measure
+  616px; security is 341px and both lower cards 263px. Phone preview is larger
+  while preserving 390×780 proportions and staying above the plan.
+- Fictional lab: blue secured state, orange alert state and alert details,
+  both lead chart views at unchanged height, light/dark themes and
+  320/390/768px viewport checks without horizontal overflow. Report/work panel
+  swapping remains unchanged.
 
 Local data verification was read-only. Preference mutations used only fictional
 lab storage; no real lead or customer data was changed. Local servers remain on

@@ -1,4 +1,5 @@
 import type { Deployment, Domain, Lead, Website } from "@/lib/vigil/types";
+import type { SecurityReport, SiteQualityReport } from "./monitoring";
 
 export const DAY = 86_400_000;
 export const RANGES = [7, 30, 90] as const;
@@ -10,13 +11,15 @@ export const PANEL_IDS = [
   "website",
   "health",
   "pipeline",
+  "quality",
   ...REPORT_PANELS,
   ...WORK_PANELS,
 ] as const;
 export type PanelId = (typeof PANEL_IDS)[number];
 export const PANEL_LABELS: Record<PanelId, string> = {
   website: "Your website",
-  health: "Health & security",
+  health: "Vigil Security",
+  quality: "Site quality",
   leads: "Inquiry trends",
   pipeline: "Lead status",
   traffic: "Website traffic",
@@ -61,6 +64,7 @@ export function readLayout(input: unknown): LayoutPreference {
       "website",
       "health",
       "pipeline",
+      "quality",
       ...group(REPORT_PANELS),
       ...group(WORK_PANELS),
     ],
@@ -131,6 +135,24 @@ export type LeadReport = {
   stages: { key: (typeof STAGES)[number]; label: string; value: number }[];
   sources: { label: string; value: number }[];
 };
+/** Compact CRM groups retain every non-spam status in the selected cohort. */
+export function leadStatusGroups(report: LeadReport) {
+  const count = (...keys: (typeof STAGES)[number][]) =>
+    report.stages.reduce(
+      (sum, stage) => sum + (keys.includes(stage.key) ? stage.value : 0),
+      0,
+    );
+  return [
+    { label: "New", value: count("new"), color: STAGE_COLORS.new },
+    {
+      label: "In progress",
+      value: count("contacted", "qualified", "booked"),
+      color: STAGE_COLORS.contacted,
+    },
+    { label: "Won", value: count("won"), color: STAGE_COLORS.won },
+    { label: "Lost", value: count("lost"), color: STAGE_COLORS.lost },
+  ];
+}
 export function rangeStart(asOf: string, days: number) {
   const date = new Date(asOf);
   date.setUTCHours(0, 0, 0, 0);
@@ -214,6 +236,8 @@ export type TrafficReport = {
 export type OverviewData = {
   asOf: string;
   previewAccent?: string | null;
+  security: SecurityReport | null;
+  quality: SiteQualityReport | null;
   organizationName: string;
   userName: string | null;
   site: Pick<

@@ -1500,12 +1500,19 @@ html[data-theme="light"] .ov-dashboard {
 .ov-page-footer {
   font-size: 11px;
 }
-/* The status stack determines the first row's height. Fit the entire browser
-   preview into the remaining space while preserving its viewport proportions. */
+/* Keep the approved desktop row height while fitting the complete browser frame. */
 @container overview (min-width:681px) {
+  .ov-row-site {
+    height: 616px;
+    align-items: stretch;
+  }
+  .ov-site-status {
+    display: grid;
+    grid-template-rows: minmax(0, 341fr) minmax(0, 263fr);
+    min-height: 0;
+  }
   .ov-row-site > .ov-card-website {
-    align-self: stretch;
-    contain: size;
+    min-height: 0;
   }
   .ov-card-website .ov-website {
     display: flex;
@@ -1513,13 +1520,19 @@ html[data-theme="light"] .ov-dashboard {
     flex: 1;
     min-height: 0;
   }
-  .ov-card-website .ov-preview {
+  .ov-website-workspace {
     flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 128px;
+    gap: 14px;
+  }
+  .ov-card-website .ov-preview {
     min-height: 0;
     container-type: size;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
   }
   .ov-card-website .ov-preview > div {
     /* 30px browser toolbar, two borders and a 2px rounding allowance. */
@@ -1661,22 +1674,422 @@ html[data-theme="light"] .ov-dashboard {
   }
 }
 
-.ov-site-status .ov-pipeline {
-  display: grid;
-  grid-template-columns: 90px minmax(0, 1fr);
-  align-items: center;
+/* Site context lives next to the preview, with the service plan below both. */
+.ov-website-meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
   gap: 12px;
 }
+.ov-website-meta .ov-live {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+.ov-website-url {
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.ov-website-url svg {
+  display: inline;
+  margin-left: 3px;
+}
+.ov-site-checks {
+  width: 100%;
+}
+.ov-site-checks .ov-checks li {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  gap: 3px 6px;
+  padding: 9px 0;
+}
+.ov-site-checks .ov-checks li > svg {
+  width: 13px;
+  height: 13px;
+}
+.ov-site-checks .ov-checks strong {
+  font-size: 11px;
+  line-height: 1.4;
+}
+.ov-site-checks .ov-check-state {
+  grid-column: 2;
+  font-size: 10px;
+}
+.ov-site-checks > .ov-text-link {
+  font-size: 10px;
+  margin-top: 9px;
+  gap: 2px;
+}
+.ov-website-published {
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.ov-website-meta > .ov-text-link {
+  font-size: 11px;
+}
+.ov-status-detail-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  min-height: 0;
+  min-width: 0;
+}
+.ov-status-detail-row > .ov-card {
+  min-width: 0;
+}
+.ov-status-detail-row .ov-card-heading {
+  padding: 12px 12px 0;
+}
+.ov-status-detail-row .ov-card-heading h2 {
+  font-size: 12px;
+  gap: 5px;
+}
+.ov-status-detail-row .ov-card-heading h2 > svg {
+  height: 14px;
+  width: 14px;
+}
+.ov-status-detail-row .ov-card-body {
+  padding: 10px 12px 12px;
+}
+.ov-site-status .ov-pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  align-items: center;
+}
 .ov-site-status .ov-status-switch {
-  grid-column: 1 / -1;
-  justify-self: end;
+  align-self: stretch;
+  justify-content: center;
+}
+.ov-site-status .ov-status-switch button {
+  font-size: 10px;
+  padding: 2px 6px;
+  min-height: 21px;
+}
+.ov-site-status .ov-pipeline > .ov-ring {
+  width: 66px;
+}
+.ov-site-status .ov-pipeline .ov-ring strong {
+  font-size: 22px;
+}
+.ov-site-status .ov-pipeline .ov-ring span {
+  font-size: 9px;
 }
 .ov-site-status .ov-legend {
   grid-template-columns: 1fr;
-  gap: 8px;
+  gap: 5px;
   max-width: none;
 }
-.ov-site-status .ov-pipeline > .ov-footnote,
-.ov-site-status .ov-pipeline > .ov-ranked {
-  grid-column: 1 / -1;
+.ov-site-status .ov-legend li {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.ov-site-status .ov-legend li > i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.ov-site-status .ov-legend strong {
+  margin-left: auto;
+}
+.ov-pipeline-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  align-self: stretch;
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-top: auto;
+}
+.ov-site-status .ov-ranked {
+  gap: 11px;
+  margin: 4px 0;
+}
+.ov-site-status .ov-ranked li > div {
+  gap: 2px;
+  font-size: 11px;
+}
+.ov-site-status .ov-ranked small {
+  display: none;
+}
+/* Monitoring states use the same vertical fill and fading border as the site. */
+.ov-card-health {
+  --security-color: var(--ov-neutral-tint);
+  --security-clear-text: #8abdff;
+  --security-alert-text: #ffb564;
+}
+html[data-theme="light"] .ov-card-health {
+  --security-clear-text: #2164b3;
+  --security-alert-text: #9e500c;
+}
+.ov-card-health[data-security-state="secured"] {
+  --security-color: #4d9dfa;
+}
+.ov-card-health[data-security-state="alert"] {
+  --security-color: #f29b43;
+}
+.ov-card-health {
+  background:
+    linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--security-color) 13%, var(--ov-card-base)),
+        var(--ov-card-base) 85%
+      )
+      padding-box,
+    linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--security-color) 60%, var(--border)),
+        color-mix(in srgb, var(--border) 20%, transparent)
+      )
+      border-box;
+}
+.ov-security {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  flex: 1;
+  min-height: 0;
+}
+.ov-security-summary {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.ov-security-shield {
+  width: 52px;
+  height: 58px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--security-color) 28%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--security-color) 16%, transparent),
+    transparent
+  );
+  border-radius: 16px;
+  color: var(--security-color);
+}
+.ov-security-summary h3 {
+  font-size: 17px;
+  font-weight: 550;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+}
+.ov-security-summary p {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: 3px;
+}
+.ov-security-tabs {
+  flex-shrink: 0;
+}
+.ov-security-tabs button {
+  font-size: 11px;
+  padding-bottom: 6px;
+}
+.ov-security-checks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.ov-security-checks li {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  align-items: center;
+  gap: 3px 6px;
+  min-width: 0;
+}
+.ov-security-checks li > svg {
+  color: var(--text-secondary);
+}
+.ov-security-checks li > span {
+  font-size: 11px;
+  line-height: 1.4;
+}
+.ov-security-checks li > strong {
+  grid-column: 2;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.ov-security-checks li[data-state="secured"] > strong {
+  color: var(--security-clear-text);
+}
+.ov-security-checks li[data-state="alert"] > strong {
+  color: var(--security-alert-text);
+}
+.ov-security-alerts {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.ov-security-alerts > p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  padding-top: 8px;
+}
+.ov-security-alerts ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.ov-security-alerts li {
+  display: flex;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.ov-security-alerts li > svg {
+  color: var(--security-alert-text);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.ov-security-alerts strong {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.ov-security-alerts small {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 10px;
+  margin-top: 3px;
+}
+.ov-security-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  color: var(--text-secondary);
+  font-size: 10px;
+  line-height: 1.5;
+}
+.ov-security-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--security-color);
+  flex-shrink: 0;
+}
+.ov-quality {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+}
+.ov-quality-metric > div:first-child,
+.ov-quality-speed {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+.ov-quality-metric span,
+.ov-quality-speed > span {
+  font-size: 11px;
+}
+.ov-quality strong {
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+.ov-quality strong small {
+  font-size: 10px;
+  color: var(--text-secondary);
+  letter-spacing: 0;
+  margin-left: 2px;
+}
+.ov-quality-track {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--ov-ring-track);
+  overflow: hidden;
+  margin-top: 5px;
+}
+.ov-quality-track i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent) 45%, transparent),
+    var(--accent)
+  );
+}
+.ov-quality-speed > span small {
+  display: block;
+  font-size: 9px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.ov-quality-note {
+  display: flex;
+  flex-direction: column;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin-top: auto;
+}
+@container overview (max-width:960px) and (min-width:681px) {
+  .ov-row-site {
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+  }
+  .ov-website-workspace {
+    grid-template-columns: minmax(0, 1fr) 110px;
+    gap: 10px;
+  }
+  .ov-website-url {
+    font-size: 12px;
+  }
+}
+@container overview (max-width:680px) {
+  .ov-site-status {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .ov-card-health {
+    min-height: 310px;
+  }
+  .ov-status-detail-row {
+    min-height: 263px;
+  }
+  .ov-website-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .ov-website-meta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 10px 16px;
+  }
+  .ov-website-meta > .ov-live {
+    grid-column: 1;
+  }
+  .ov-website-url {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .ov-site-checks {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+  }
+  .ov-site-checks .ov-checks li:first-child {
+    padding-top: 0;
+  }
 }

@@ -19,7 +19,7 @@ import {
   LayoutGrid,
   PieChart,
   RefreshCw,
-  ShieldCheck,
+  Gauge,
   Sparkles,
 } from "lucide-react";
 import {
@@ -38,7 +38,6 @@ import {
 import type { ActionResult } from "@/lib/vigil/auth/errors";
 import {
   ActivityPanel,
-  HealthPanel,
   InboxPanel,
   InsightsPanel,
   LeadTrendsPanel,
@@ -46,11 +45,18 @@ import {
   TrafficPanel,
   WebsitePanel,
 } from "./OverviewPanels";
+import {
+  SecurityPanel,
+  SiteQualityPanel,
+  VigilEyeIcon,
+} from "./OverviewMonitoring";
+import { securityState } from "@/lib/vigil/overview/monitoring";
 import "./overview.css";
 
 const icons = {
   website: Globe2,
-  health: ShieldCheck,
+  health: VigilEyeIcon,
+  quality: Gauge,
   leads: BarChart3,
   pipeline: PieChart,
   traffic: Activity,
@@ -129,7 +135,8 @@ export function LiveOverviewDashboard({
   );
   const panels: Record<PanelId, ReactNode> = {
     website: <WebsitePanel data={data} />,
-    health: <HealthPanel data={data} />,
+    health: <SecurityPanel data={data} />,
+    quality: <SiteQualityPanel data={data} />,
     leads: (
       <LeadTrendsPanel
         data={data}
@@ -172,6 +179,9 @@ export function LiveOverviewDashboard({
         key={id}
         className={`ov-card ov-card-${id} ${dropTarget === id ? "ov-drop-target" : ""} ${dragging === id ? "ov-dragging" : ""}`}
         data-panel={id}
+        data-security-state={
+          id === "health" ? securityState(data.security, data.asOf) : undefined
+        }
         data-slot={index}
         data-compact={(kind === "work" && index === 1) || undefined}
         style={
@@ -395,7 +405,10 @@ export function LiveOverviewDashboard({
         {renderPanel("website", 0, "site", [])}
         <div className="ov-site-status">
           {renderPanel("health", 0, "site", [])}
-          {renderPanel("pipeline", 1, "site", [])}
+          <div className="ov-status-detail-row">
+            {renderPanel("pipeline", 1, "site", [])}
+            {renderPanel("quality", 2, "site", [])}
+          </div>
         </div>
       </div>
       <div className="ov-row ov-row-reports">

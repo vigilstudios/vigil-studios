@@ -12,7 +12,6 @@ import {
   Clock3,
   CreditCard,
   Sparkles,
-  ExternalLink,
   Globe2,
   Inbox,
   LockKeyhole,
@@ -27,6 +26,7 @@ import { contactInitials, sourceLabel } from "@/lib/vigil/leads/presentation";
 import {
   STAGE_COLORS,
   STAGE_LABELS,
+  leadStatusGroups,
   comparison,
   type ChartView,
   type OverviewData,
@@ -48,46 +48,42 @@ export function WebsitePanel({ data }: { data: OverviewData }) {
   }
   return (
     <div className="ov-website">
-      <div className="ov-website-title">
-        <div>
+      <div className="ov-website-workspace">
+        <div className="ov-preview">
+          <SiteFrame
+            key={`${data.site.id}:${data.site.last_deployed_at}`}
+            src={data.site.live_url!}
+            title={`${data.site.name} live preview`}
+            address={host}
+            desktopHeight={900}
+          />
+        </div>
+        <aside className="ov-website-meta" aria-label="Website details">
           <span className="ov-live">
             <i />
             Live website
           </span>
-          <h3>{host}</h3>
-        </div>
-        <a
-          href={data.site.live_url!}
-          target="_blank"
-          rel="noreferrer"
-          className="ov-icon-button"
-          title="Open live website"
-          aria-label="Open live website"
-        >
-          <ExternalLink size={17} />
-        </a>
-      </div>
-      <div className="ov-preview">
-        <SiteFrame
-          key={`${data.site.id}:${data.site.last_deployed_at}`}
-          src={data.site.live_url!}
-          title={`${data.site.name} live preview`}
-          address={host}
-          desktopHeight={900}
-        />
-      </div>
-      <div className="ov-website-footer">
-        <span>
-          <span className="ov-tiny-dot" />
-          Published{" "}
-          {data.site.last_deployed_at
-            ? formatRelative(data.site.last_deployed_at)
-            : "· date not recorded"}
-        </span>
-        <Link href="/dashboard/content">
-          Manage content
-          <ArrowUpRight size={14} />
-        </Link>
+          <a
+            className="ov-website-url"
+            href={data.site.live_url!}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {host.replace(/^www\./, "")}
+            <ArrowUpRight size={13} aria-hidden="true" />
+          </a>
+          <SiteChecks data={data} />
+          <div className="ov-website-published">
+            Published{" "}
+            {data.site.last_deployed_at
+              ? formatRelative(data.site.last_deployed_at)
+              : "· date not recorded"}
+          </div>
+          <Link className="ov-text-link" href="/dashboard/content">
+            Manage content
+            <ArrowUpRight size={13} />
+          </Link>
+        </aside>
       </div>
       <div className="ov-website-plan">
         <div className="ov-plan-label">
@@ -99,58 +95,29 @@ export function WebsitePanel({ data }: { data: OverviewData }) {
   );
 }
 
-export function HealthPanel({ data }: { data: OverviewData }) {
+function SiteChecks({ data }: { data: OverviewData }) {
   const checks = [
     {
-      name: "Website availability",
+      name: "Availability",
       icon: Globe2,
       value: data.site.last_health_at ? data.site.health_ok : null,
       at: data.site.last_health_at,
     },
     {
-      name: "Secure connection (SSL)",
+      name: "HTTPS / SSL",
       icon: LockKeyhole,
       value: data.domain?.ssl_ok ?? null,
       at: data.domain?.last_checked_at,
     },
     {
-      name: "Domain connection",
+      name: "Domain / DNS",
       icon: ShieldCheck,
       value: data.domain?.dns_ok ?? null,
       at: data.domain?.last_checked_at,
     },
   ];
-  const passed = checks.filter((check) => check.value === true).length;
-  const attention = checks.some((check) => check.value === false);
   return (
-    <div className="ov-health">
-      <div className="ov-health-summary">
-        <RingChart
-          parts={[
-            { value: passed, color: "var(--accent)", label: "Passed" },
-            {
-              value: checks.filter((c) => c.value === false).length,
-              color: "var(--status-bad)",
-              label: "Needs attention",
-            },
-            {
-              value: checks.filter((c) => c.value === null).length,
-              color: "var(--ov-ring-track)",
-              label: "Not checked",
-            },
-          ]}
-          center={`${passed}/3`}
-          caption="checks passed"
-          label={`${passed} of 3 recorded checks passed`}
-        />
-        <p className={attention ? "ov-health-attention" : ""}>
-          {attention
-            ? "Needs attention"
-            : passed === 3
-              ? "Checks passed"
-              : "Checks pending"}
-        </p>
-      </div>
+    <div className="ov-site-checks">
       <ul className="ov-checks">
         {checks.map((check) => (
           <li key={check.name}>
@@ -163,13 +130,6 @@ export function HealthPanel({ data }: { data: OverviewData }) {
               }
             >
               <strong>{check.name}</strong>
-              <small>
-                {check.at
-                  ? `Checked ${formatRelative(check.at)}`
-                  : check.value === null
-                    ? "Not checked yet"
-                    : "Check date not recorded"}
-              </small>
             </div>
             <span
               className="ov-check-state"
@@ -191,9 +151,8 @@ export function HealthPanel({ data }: { data: OverviewData }) {
           </li>
         ))}
       </ul>
-      <p className="ov-footnote">Latest recorded checks.</p>
       <Link className="ov-text-link" href="/dashboard/domain">
-        View details
+        Connection details
         <ChevronRight size={14} />
       </Link>
     </div>
@@ -267,6 +226,7 @@ export function PipelinePanel({
   onView: (v: "donut" | "bars") => void;
 }) {
   const report = data.reports[range];
+  const groups = leadStatusGroups(report);
   return (
     <div className="ov-pipeline">
       <div
@@ -292,41 +252,36 @@ export function PipelinePanel({
       {view === "donut" ? (
         <>
           <RingChart
-            parts={report.stages.map((item) => ({
-              ...item,
-              color: STAGE_COLORS[item.key],
-            }))}
+            parts={groups}
             center={report.total.toLocaleString()}
             caption="inquiries"
             label={`Current statuses of ${report.total} inquiries received in the selected period`}
           />
           <ul className="ov-legend">
-            {report.stages.map((stage) => (
-              <li key={stage.key}>
-                <Link href={`/dashboard/leads?status=${stage.key}`}>
-                  <i style={{ background: STAGE_COLORS[stage.key] }} />
-                  <span title={stage.label}>
-                    {stage.key === "lost" ? "Lost" : stage.label}
-                  </span>
-                  <strong>{stage.value}</strong>
-                </Link>
+            {groups.map((stage) => (
+              <li key={stage.label}>
+                <i style={{ background: stage.color }} />
+                <span title={stage.label}>{stage.label}</span>
+                <strong>{stage.value}</strong>
               </li>
             ))}
           </ul>
         </>
       ) : (
         <RankedBars
-          items={report.stages.map((stage) => ({
-            ...stage,
-            color: STAGE_COLORS[stage.key],
-          }))}
+          items={groups}
           label="Current lead statuses"
           total={report.total}
         />
       )}
-      <p className="ov-footnote">
-        Current status · inquiries received in the last {range} days.
-      </p>
+      <Link
+        className="ov-pipeline-link"
+        href="/dashboard/leads"
+        title={`Current status of inquiries received in the last ${range} days. In progress includes contacted, qualified and booked.`}
+      >
+        View Lead Hub
+        <ChevronRight size={12} />
+      </Link>
     </div>
   );
 }

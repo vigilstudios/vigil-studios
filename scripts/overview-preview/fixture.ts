@@ -8,6 +8,7 @@ import {
 export function sampleOverview(
   empty = false,
   disconnected = false,
+  alert = false,
 ): OverviewData {
   const asOf = "2026-10-26T18:30:00Z";
   const rows: LeadDatum[] = [];
@@ -73,6 +74,38 @@ export function sampleOverview(
   return {
     asOf,
     previewAccent: "#344a37",
+    security: disconnected
+      ? null
+      : {
+          observedAt: "2026-10-26T18:28:00Z",
+          expiresAt: "2026-10-26T18:45:00Z",
+          checks: {
+            vulnerabilities: "clear",
+            exploits: "clear",
+            activity: alert ? "alert" : "clear",
+            firewall: "clear",
+          },
+          alerts: alert
+            ? [
+                {
+                  id: "sample-alert",
+                  title: "Unusual sign-in activity detected",
+                  category: "activity",
+                  severity: "warning",
+                  detectedAt: "2026-10-26T18:27:00Z",
+                },
+              ]
+            : [],
+        },
+    quality: disconnected
+      ? null
+      : {
+          measuredAt: "2026-10-26T18:20:00Z",
+          device: "mobile",
+          seo: 98,
+          performance: 94,
+          lcpMs: 1800,
+        },
     organizationName: "Marlow & Fen",
     userName: "Alex Morgan",
     site: {

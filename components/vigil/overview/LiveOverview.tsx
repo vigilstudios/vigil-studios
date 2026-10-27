@@ -84,6 +84,8 @@ export async function LiveOverview({
         }
       : null,
     traffic: null, // No customer website analytics source is connected yet. Never invent visitor counts.
+    security: null, // Threat monitoring requires a connected source; SSL/DNS are not security scans.
+    quality: null, // No website audit source is connected yet. Never invent scores.
     activity: activity.map((row) => ({
       id: String(row.id),
       title: humanizeAction(row.action),
