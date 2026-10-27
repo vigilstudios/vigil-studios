@@ -1271,9 +1271,8 @@ html[data-theme="light"] .ov-dashboard {
   font-size: 28px;
 }
 .ov-main-number > span {
-  display: block;
+  display: inline;
   font-size: 11px;
-  margin-top: 4px;
 }
 .ov-main-number > small {
   font-size: 10px;

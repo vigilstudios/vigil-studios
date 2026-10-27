@@ -1285,3 +1285,8 @@ Ownership verification now remains an unfinished waiting step with explicit addi
 - Replaced the split native mouse/touch behavior with pointer capture shared by movable headers and explicit dot-handle handlers. The grip SVG no longer intercepts input, small clicks do not reorder panels, and mouse/touch/pen follow the same movement threshold. Existing row restrictions, exact swaps, adaptive working slots and serialized personal saves remain.
 - Added a rounded 12px floating title tab outside the scrolling/container-query surface, with opaque light/dark surfaces. Valid targets highlight; edge scrolling supports stacked layouts. Escape, cancelled gestures, lost capture and window blur clear the drag; unmount cancels the animation frame. Keyboard arrows remain available.
 - Validation: 24 focused tests / 3 files, typecheck, focused lint and optimized build passed. Browser checks verified dot-origin report swaps in both directions, working-panel adaptation, keyboard swaps, Escape cancellation, invalid cross-row drops, reload persistence, live rounded previews in both themes and 390px swaps/edge scrolling without horizontal overflow. No new console errors. Real customer data remained unchanged; local servers stay on 3190 and 4188.
+
+### 2026-10-27 — Place the inquiry caption beside its total
+
+- Changed the Inquiry trends caption to inline flow, retaining the existing 6px gap and singular/plural wording. The comparison remains below the total and caption.
+- Browser verified the authenticated dashboard displays “1 inquiry received” on the same line. CSS-only change; no application tests rerun. Local server remains on 3190.
