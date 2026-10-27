@@ -20,7 +20,7 @@ export function publicDeploymentOrigin(value: string): string | null {
   }
 }
 
-async function publicText(
+export async function publicDeploymentText(
   url: string,
   type: "html" | "css",
 ): Promise<string | null> {
@@ -64,7 +64,7 @@ export async function readPublicDeploymentAccent(
   const origin = publicDeploymentOrigin(deploymentUrl);
   if (!origin) return null;
   try {
-    const html = await publicText(`${origin}/`, "html");
+    const html = await publicDeploymentText(`${origin}/`, "html");
     if (!html) return null;
     const inline = [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)]
       .map((m) => m[1])
@@ -85,7 +85,7 @@ export async function readPublicDeploymentAccent(
       })
       .slice(0, 2);
     const css = await Promise.all(
-      sheets.map((url) => publicText(url, "css").catch(() => null)),
+      sheets.map((url) => publicDeploymentText(url, "css").catch(() => null)),
     );
     const linked = previewAccentFromCss(css.filter(Boolean).join("\n"));
     if (linked) return linked;

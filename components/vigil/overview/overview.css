@@ -1539,7 +1539,7 @@ html[data-theme="light"] .ov-dashboard {
     min-height: 0;
   }
   .ov-website-workspace {
-    --ov-site-meta-min: 134px;
+    --ov-site-meta-min: 142px;
     flex: 1;
     min-height: 0;
     display: flex;
@@ -1726,7 +1726,7 @@ html[data-theme="light"] .ov-dashboard {
   letter-spacing: 0.08em;
 }
 .ov-website-url {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 550;
   line-height: 1.5;
   overflow-wrap: anywhere;
@@ -2096,7 +2096,7 @@ html[data-theme="light"] .ov-card-health {
     --ov-site-meta-min: 116px;
   }
   .ov-website-url {
-    font-size: 12px;
+    font-size: 15px;
   }
 }
 @container overview (max-width:680px) {
@@ -2121,12 +2121,10 @@ html[data-theme="light"] .ov-card-health {
     align-items: start;
     gap: 10px 16px;
   }
-  .ov-website-meta > .ov-live {
+  .ov-website-identity {
     grid-column: 1;
-  }
-  .ov-website-url {
-    grid-column: 1;
-    grid-row: 2;
+    grid-row: 1;
+    margin-bottom: 8px;
   }
   .ov-site-checks {
     grid-column: 2;
@@ -2140,5 +2138,37 @@ html[data-theme="light"] .ov-card-health {
 @media (prefers-reduced-motion: reduce) {
   .ov-card-website .ov-preview > div {
     transition: none;
+  }
+}
+
+.ov-card-website .ov-card-heading {
+  padding: 18px 20px 0;
+}
+.ov-card-website .ov-card-body {
+  padding: 18px 20px 20px;
+}
+.ov-website-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.ov-website-identity .ov-live {
+  margin-bottom: 0;
+}
+.ov-website-plan {
+  margin-top: 16px;
+  padding-top: 16px;
+}
+@container overview (max-width:500px) {
+  .ov-card-website .ov-card-heading {
+    padding: 16px 16px 0;
+  }
+  .ov-card-website .ov-card-body {
+    padding: 16px;
+  }
+  .ov-website-identity {
+    margin-bottom: 8px;
   }
 }

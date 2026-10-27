@@ -24,6 +24,14 @@ function Preview() {
   return (
     <AppFrame
       homeHref="/"
+      workspaceBrand={{
+        name: "Marlow & Fen",
+        iconUrl: params.has("noicon")
+          ? null
+          : params.has("brokenicon")
+            ? "/unavailable-sample-icon.svg"
+            : "/sample-icon.svg",
+      }}
       initialCollapsed={params.has("rail")}
       workspace={
         <span style={{ fontSize: 13, fontWeight: 600 }}>Marlow & Fen</span>
@@ -33,6 +41,13 @@ function Preview() {
         {
           items: [
             { href: "/", label: "Overview", icon: "overview", exact: true },
+          ],
+        },
+        {
+          id: "website",
+          label: "Website",
+          collapsible: true,
+          items: [
             {
               href: "/dashboard/content",
               label: "Content Hub",
@@ -55,7 +70,9 @@ function Preview() {
           ],
         },
         {
-          label: "GROW",
+          id: "grow",
+          label: "Grow",
+          collapsible: true,
           items: [
             { href: "/dashboard/leads", label: "Lead Hub", icon: "leads" },
             {
@@ -124,7 +141,8 @@ createRoot(document.getElementById("root")!).render(
         src={`/?${testParams}`}
         style={{
           width: Number(testWidth),
-          height: 900,
+          height: "calc(100dvh - 100px)",
+          maxHeight: 900,
           border: 0,
           outline: "1px solid #ccd2da",
           display: "block",

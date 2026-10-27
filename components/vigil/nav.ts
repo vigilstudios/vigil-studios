@@ -34,7 +34,7 @@ export type NavItem = {
   desktopOnly?: boolean;
   /** Rendered dimmed with a premium crown; the page explains why. */
   locked?: boolean;
-  launchLocked?:boolean;
+  launchLocked?: boolean;
   /** Coming-soon destination: visible with a lock, without a navigation target. */
   disabled?: boolean;
   /** Paid feature indicator, independent of current access. */
@@ -46,8 +46,12 @@ export type NavItem = {
 };
 
 export type NavGroup = {
+  id?: string;
   label?: string;
+  collapsible?: boolean;
   items: NavItem[];
 };
+
+export type WorkspaceBrand = { name: string; iconUrl: string | null };
 
 export const SIDEBAR_COOKIE = "vigil-sidebar";

@@ -60,19 +60,33 @@ export function WebsitePanel({ data }: { data: OverviewData }) {
           />
         </div>
         <aside className="ov-website-meta" aria-label="Website details">
-          <span className="ov-live">
-            <i />
-            Live website
-          </span>
-          <a
-            className="ov-website-url"
-            href={data.site.live_url!}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {host.replace(/^www\./, "")}
-            <ArrowUpRight size={13} aria-hidden="true" />
-          </a>
+          <div className="ov-website-identity">
+            <span className="ov-live">
+              <i />
+              Live website
+            </span>
+            <a
+              className="ov-website-url"
+              href={data.site.live_url!}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {host
+                .replace(/^www\./, "")
+                .split(".")
+                .map((part, index) => (
+                  <span key={index}>
+                    {index > 0 && (
+                      <>
+                        <wbr />.
+                      </>
+                    )}
+                    {part}
+                  </span>
+                ))}
+              <ArrowUpRight size={13} aria-hidden="true" />
+            </a>
+          </div>
           <SiteChecks data={data} />
           <div className="ov-website-published">
             Published{" "}

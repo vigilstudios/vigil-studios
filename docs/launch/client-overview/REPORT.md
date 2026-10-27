@@ -66,6 +66,30 @@ adapt into fewer columns. Existing v2 preferences retain report order, chart
 choices and working slots while lead status and the new quality panel normalize
 into the fixed status stack.
 
+The website card now uses slightly roomier internal padding, a 16px domain
+link (15px at compact desktop widths), deliberate breaks at domain labels and
+additional space between its live-site identity and the recorded checks.
+
+The customer sidebar resolves its icon from that organization's default live
+site's published production deployment. Both tenant and website filters run
+under RLS; the selected publication timestamp bounds the build. Only the recorded
+public Vercel origin supplies bounded HTML, without credentials or redirects.
+The client receives the advertised same-origin icon URL, with canonical favicon
+fallback. Missing, unavailable or failed images render the theme-aware Vigil logo.
+No customer's icon is hardcoded or shared across organizations; the lab's artwork
+is a separate fictional fixture. Before a website is published, Vigil remains the
+fallback. No provider configuration or customer-site change is made.
+
+Content Hub through Subscription now sit in **Website**, alongside any relevant
+preview/review destinations. Overview stays above the groups; Grow contains its
+three existing destinations. Both groups start expanded and have independent,
+280ms grid/opacity and chevron transitions, including icon-rail controls and the
+mobile drawer. Collapsed links are inert and hidden from assistive technology;
+button labels, expanded state and controlled IDs remain accurate. Desktop/drawer
+IDs are unique and group choices persist only while the frame stays mounted.
+Reduced motion disables group transitions. Existing access/paid/coming-soon
+behavior is preserved.
+
 Headers have icons and direct drag grips, without an editing mode, Customize
 button, visibility controls or resizing controls. Header/grip drag, keyboard
 arrows and touch/pen grips swap positions. Swaps and chart choices save
@@ -153,6 +177,16 @@ are New / In progress (Contacted + Qualified + Booked) / Won / Lost. Both chart
 views preserve the cohort total and link into the existing Lead Hub.
 
 ## Validation
+
+- Latest branding/navigation follow-up: **38 focused tests / 5 files passed**,
+  typecheck, focused lint and optimized build passed. New coverage checks separate
+  customer icon resolution, RLS query filters/publication bounds, icon URL parsing,
+  unsafe destinations, unavailable sources and the Vigil fallback.
+- Browser verified the real customer's loaded sparkle icon, independent group
+  collapse, keyboard toggling and default expanded state. The lab verified both
+  absent and broken-image Vigil fallbacks, light/dark branding, mobile drawer
+  collapse/inert links, unique control IDs and a 390px viewport without document
+  overflow. `?noicon` and `?brokenicon&theme=dark` reproduce fallback cases.
 
 - Full suite: **2,684 tests / 140 files passed** with `npm test -- --maxWorkers=2`.
   After the stale-check follow-up, **37 focused tests / 3 files passed**.
