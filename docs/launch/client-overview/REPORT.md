@@ -9,8 +9,8 @@ The preceding admin sign-in fix is preserved in local commit `a58b767`.
 
 1. **Website + trust:** the website occupies two thirds of the first row, with
    the Vigil plan, renewal, requests and service actions inside the same card.
-   Its actual desktop/phone preview leads, with a fixed 1200×1000 desktop
-   viewport scaled proportionally to its width. Health and lead status stack
+   Its actual desktop/phone preview leads, with a fixed 1200×900 desktop
+   viewport scaled proportionally to the available width and height. Health and lead status stack
    in the final third; availability,
    domain and SSL checks show their recorded outcomes and timestamps. An unmeasured check stays pending;
    there is no invented uptime percentage, security score, speed score or SEO score.
@@ -45,6 +45,13 @@ The focus on lead progress and actionable follow-up is informed by
 ## Layout and styling
 
 Lead status sits directly below health in the first row's right column.
+On desktop, this status stack determines the row height. The website card matches
+it exactly; its browser preview scales into the space remaining above the plan
+without clipping or changing the website's viewport. The slightly wider 4:3
+preview is centered inside the card. Phone remains 390×780. Below the desktop
+breakpoint, cards use their natural height and stack normally. Named `overview`
+container queries keep dashboard breakpoints independent of the preview's size
+container, which supplies the fitting height.
 The default second row is Insights / Website traffic / Inquiry trends. All
 three have equal widths and share the same row height during swaps.
 The final row's wide/narrow positions remain fixed while the swapped content
@@ -115,8 +122,9 @@ provider settings, subscription entitlements, or admin screen layouts.
   panels, personal saves/errors and bounded public palette reads.
 - Typecheck, full lint and optimized production build passed.
 - Browser: authenticated overview rendered the real site/lead data and published
-  pink palette. The desktop iframe stays 1200×1000 and its displayed ratio follows its width
-  (617×514 at the verified desktop size); phone iframe remains 390×780.
+  pink palette. The desktop iframe stays 1200×900 and fits the remaining card space;
+  phone iframe remains 390×780. The verified website card and status stack both
+  measure 616px, and stay equal when Bars changes the status stack to 670px.
   Sample lab verified native header/grip swaps, keyboard swaps, unchanged report
   widths/heights, the new three-report row, expanded activity/compact inbox, reload persistence, failed
   saves and retry. Both themes were inspected; no new console errors were found.

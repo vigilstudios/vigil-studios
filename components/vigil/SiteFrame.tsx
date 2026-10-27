@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore, type CSSProperties } from "react";
 import { clsx } from "clsx";
 import { Monitor, Smartphone } from "lucide-react";
 
@@ -54,7 +54,13 @@ export function SiteFrame({
   }
 
   return (
-    <div ref={setHost} className="w-full min-w-0">
+    <div
+      ref={setHost}
+      className="w-full min-w-0"
+      style={
+        { "--site-preview-ratio": frame.width / frame.height } as CSSProperties
+      }
+    >
       <div
         className={clsx(
           "site-preview-frame mx-auto w-full overflow-hidden rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-secondary)]",

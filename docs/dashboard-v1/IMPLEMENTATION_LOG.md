@@ -1234,3 +1234,12 @@ Ownership verification now remains an unfinished waiting step with explicit addi
 - Replaced the overview's fixed 340px preview height with a stable 1200×1000 virtual desktop viewport. The displayed height now scales with width, preserving the website layout and giving the preview more height; the phone remains 390×780 and other SiteFrame consumers retain their default viewport.
 - Moved lead status beneath health and security in the first row's right column. Insights, website traffic and inquiry trends now occupy three equal, wider columns in the next row. Their swaps and the adaptive inbox/activity row remain available. Existing v2 preferences normalize status into its new fixed position while retaining valid report order, chart choices and working slots.
 - Validation: 37 focused overview tests / 6 files, typecheck, focused lint and optimized build passed. Browser checks verified 1200×1000 desktop and 390×780 phone frames, proportional display dimensions, three equal report widths, native/keyboard swaps and 320/390px layouts without horizontal overflow. Local only; server remains on 3190.
+
+
+---
+
+## 2026-10-27 — Fit the website preview to the status stack
+
+- The health/security and lead-status stack now determines the first row's height. CSS size containment lets the website card stretch to the same height while its preview fits proportionally into the remaining space above the plan controls. The browser frame supplies its viewport ratio as a CSS token; named dashboard container queries keep responsive layout rules separate from the preview's height container. No extra measurement loop or fixed card height is needed.
+- Reduced the desktop viewport slightly to 1200×900 (4:3); phone stays 390×780. Both modes scale to fit in the desktop card. Narrow layouts retain natural card heights and full-width previews.
+- Validation: 37 focused overview tests / 6 files, typecheck, focused lint and optimized build passed. Browser checks confirmed matching 616px cards, dynamic matching at 670px in Bars view, fitting desktop/phone frames without overlapping the plan, a collapsed-sidebar layout and 320/390px layouts without horizontal overflow. Local only; server remains on 3190.
