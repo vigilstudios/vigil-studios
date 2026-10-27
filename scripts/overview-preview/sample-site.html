@@ -1,0 +1,183 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #f1ece3;
+        color: #293829;
+        font:
+          14px Arial,
+          sans-serif;
+      }
+      nav {
+        display: flex;
+        justify-content: space-between;
+        padding: 27px 6%;
+        align-items: center;
+        border-bottom: 1px solid #29382925;
+      }
+      nav strong {
+        font:
+          24px Georgia,
+          serif;
+      }
+      nav span {
+        font-size: 10px;
+        letter-spacing: 2px;
+      }
+      main {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: 440px;
+        align-items: center;
+        gap: 5%;
+        padding: 25px 6%;
+      }
+      small {
+        font-size: 9px;
+        letter-spacing: 3px;
+      }
+      h1 {
+        font:
+          60px/1.07 Georgia,
+          serif;
+        margin: 24px 0;
+        letter-spacing: -2px;
+      }
+      p {
+        font-size: 12px;
+        line-height: 1.8;
+        max-width: 300px;
+        color: #677064;
+      }
+      a {
+        display: inline-block;
+        background: #344a37;
+        color: #f8f6ef;
+        padding: 13px 20px;
+        margin-top: 16px;
+        font-size: 10px;
+        text-decoration: none;
+      }
+      .room {
+        height: 340px;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(
+          130deg,
+          #d6c5ac 0%,
+          #e8dfcc 45%,
+          #b6b69d 100%
+        );
+        border-radius: 100px 100px 2px 2px;
+        box-shadow: inset -50px -10px 70px #a9947630;
+      }
+      .window {
+        position: absolute;
+        top: 0;
+        left: 20%;
+        height: 70%;
+        width: 40%;
+        background: linear-gradient(140deg, #ffffeb, #b5bfa1);
+        border: 14px solid #eee7d5;
+        border-radius: 0 0 3px 3px;
+        box-shadow: 20px 20px 30px #7e785125;
+      }
+      .window:after {
+        content: "";
+        position: absolute;
+        width: 6px;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        background: #eee7d5;
+      }
+      .couch {
+        position: absolute;
+        bottom: 0;
+        left: 4%;
+        height: 80px;
+        right: 5%;
+        border-radius: 20px 20px 4px 4px;
+        background: linear-gradient(#dfd2ba, #aa9a7d);
+        box-shadow: inset 0 15px 20px #f4e9d84d;
+      }
+      .pot {
+        position: absolute;
+        bottom: 15%;
+        right: 8%;
+        width: 36px;
+        height: 50px;
+        background: linear-gradient(90deg, #6a7456, #9a9f7c);
+        border-radius: 0 0 10px 10px;
+      }
+      .plant {
+        position: absolute;
+        bottom: 28%;
+        right: 4%;
+        width: 75px;
+        height: 135px;
+        border-radius: 70% 5% 70% 10%;
+        background: linear-gradient(120deg, #455b37, #82926c);
+        transform: rotate(-18deg);
+      }
+      footer {
+        display: flex;
+        justify-content: space-between;
+        padding: 20px 6%;
+        font-size: 9px;
+        border-top: 1px solid #29382925;
+        color: #69745f;
+      }
+      @media (max-width: 600px) {
+        main {
+          display: block;
+        }
+        h1 {
+          font-size: 45px;
+        }
+        .room {
+          height: 260px;
+          margin-top: 30px;
+        }
+        nav span {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <strong>Marlow & Fen</strong
+      ><span
+        >OUR STUDIO &nbsp;&nbsp; SELECTED WORK &nbsp;&nbsp; GET IN TOUCH</span
+      >
+    </nav>
+    <main>
+      <section>
+        <small>THOUGHTFULLY CONSIDERED INTERIORS</small>
+        <h1>Rooms that<br />feel like you.</h1>
+        <p>
+          Quietly beautiful spaces for living well. An independent interior
+          design studio in the heart of Brooklyn.
+        </p>
+        <a href="#">Discover our work ↗</a>
+      </section>
+      <div class="room">
+        <div class="window"></div>
+        <div class="plant"></div>
+        <div class="pot"></div>
+        <div class="couch"></div>
+      </div>
+    </main>
+    <footer>
+      <span>BASED IN BROOKLYN. DESIGNED FOR YOU.</span
+      ><span>RESIDENTIAL · COMMERCIAL · CONSULTATION</span>
+    </footer>
+  </body>
+</html>

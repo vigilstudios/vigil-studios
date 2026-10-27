@@ -21,6 +21,7 @@ export function SiteFrame({
   address,
   initialMode = "desktop",
   className,
+  desktopHeight = DESKTOP.height,
 }: {
   src: string;
   title: string;
@@ -28,12 +29,14 @@ export function SiteFrame({
   address?: string;
   initialMode?: ViewMode;
   className?: string;
+  /** Shorter overview viewport; other previews retain the full default height. */
+  desktopHeight?: number;
 }) {
   const [mode, setMode] = useState<ViewMode>(initialMode);
   const [host, setHost] = useState<HTMLDivElement | null>(null);
   const width = useElementWidth(host);
 
-  const frame = mode === "desktop" ? DESKTOP : MOBILE;
+  const frame = mode === "desktop" ? { ...DESKTOP, height: desktopHeight } : MOBILE;
   // The outer browser includes its two one-pixel borders.
   const shownWidth = Math.max(0, Math.min(width, frame.width) - 2);
   const scale = shownWidth > 0 ? shownWidth / frame.width : 0;
