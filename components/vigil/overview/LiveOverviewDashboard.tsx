@@ -1,12 +1,16 @@
 "use client";
 
 import {
+  useCallback,
+  useEffect,
   useRef,
   useState,
   useTransition,
   type CSSProperties,
+  type PointerEvent,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   Activity,
@@ -87,12 +91,22 @@ export function LiveOverviewDashboard({
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [refreshing, startRefresh] = useTransition();
-  const touch = useRef<{
+  const pointer = useRef<{
     id: PanelId;
+    pointerId: number;
+    handle: HTMLElement;
     x: number;
     y: number;
     active: boolean;
-    target: PanelId | null;
+    clientX: number;
+    clientY: number;
+    scrollFrame: number | null;
+  } | null>(null);
+  const [dragPreview, setDragPreview] = useState<{
+    id: PanelId;
+    x: number;
+    y: number;
+    host: HTMLElement;
   } | null>(null);
 
   // Serialize saves: a slower response can never overwrite a later swap/chart choice.
@@ -127,6 +141,119 @@ export function LiveOverviewDashboard({
     if (!canSwapPanels(id, target)) return;
     update({ order: swapPanels(latest.current.order, id, target) });
   };
+  const cancelDrag = useCallback(() => {
+    const current = pointer.current;
+    pointer.current = null;
+    if (current?.scrollFrame != null) cancelAnimationFrame(current.scrollFrame);
+    if (current?.handle.hasPointerCapture(current.pointerId))
+      current.handle.releasePointerCapture(current.pointerId);
+    setDragging(null);
+    setDropTarget(null);
+    setDragPreview(null);
+  }, []);
+  useEffect(() => {
+    window.addEventListener("blur", cancelDrag);
+    return () => {
+      window.removeEventListener("blur", cancelDrag);
+      const current = pointer.current;
+      if (current?.scrollFrame != null)
+        cancelAnimationFrame(current.scrollFrame);
+    };
+  }, [cancelDrag]);
+  const panelAt = (x: number, y: number) =>
+    document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-panel]")
+      ?.dataset.panel as PanelId | undefined;
+  const beginDrag = (event: PointerEvent<HTMLElement>, id: PanelId) => {
+    if (!event.isPrimary || event.button !== 0 || pointer.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    event.currentTarget
+      .closest(".ov-card-heading")
+      ?.querySelector<HTMLButtonElement>(".ov-grip")
+      ?.focus({ preventScroll: true });
+    pointer.current = {
+      id,
+      pointerId: event.pointerId,
+      handle: event.currentTarget,
+      x: event.clientX,
+      y: event.clientY,
+      active: false,
+      clientX: event.clientX,
+      clientY: event.clientY,
+      scrollFrame: null,
+    };
+  };
+  const scrollDrag = () => {
+    const current = pointer.current;
+    if (!current?.active) return;
+    const scroller = current.handle.closest("main");
+    if (scroller) {
+      const bounds = scroller.getBoundingClientRect();
+      const y = current.clientY;
+      const delta =
+        y < bounds.top + 48
+          ? -Math.min(12, (bounds.top + 48 - y) / 4)
+          : y > bounds.bottom - 48
+            ? Math.min(12, (y - bounds.bottom + 48) / 4)
+            : 0;
+      if (
+        delta &&
+        current.clientX >= bounds.left &&
+        current.clientX <= bounds.right
+      ) {
+        scroller.scrollTop += delta;
+        const target = panelAt(current.clientX, y);
+        setDropTarget(
+          target && canSwapPanels(current.id, target) ? target : null,
+        );
+      }
+    }
+    current.scrollFrame = requestAnimationFrame(scrollDrag);
+  };
+  const moveDrag = (event: PointerEvent<HTMLElement>) => {
+    const current = pointer.current;
+    if (!current || current.pointerId !== event.pointerId) return;
+    event.stopPropagation();
+    if (
+      !current.active &&
+      Math.hypot(event.clientX - current.x, event.clientY - current.y) < 7
+    )
+      return;
+    current.active = true;
+    current.clientX = event.clientX;
+    current.clientY = event.clientY;
+    if (current.scrollFrame === null)
+      current.scrollFrame = requestAnimationFrame(scrollDrag);
+    setDragging(current.id);
+    const target = panelAt(event.clientX, event.clientY);
+    setDropTarget(target && canSwapPanels(current.id, target) ? target : null);
+    setDragPreview({
+      id: current.id,
+      x: Math.max(8, Math.min(event.clientX + 14, window.innerWidth - 236)),
+      y: Math.max(8, Math.min(event.clientY + 14, window.innerHeight - 56)),
+      // Outside the scrolling/container-query surface, with the dashboard theme.
+      host:
+        current.handle.closest<HTMLElement>(".vigil-frame") ?? document.body,
+    });
+  };
+  const finishDrag = (event: PointerEvent<HTMLElement>) => {
+    const current = pointer.current;
+    if (!current || current.pointerId !== event.pointerId) return;
+    event.stopPropagation();
+    const target = current.active
+      ? panelAt(event.clientX, event.clientY)
+      : undefined;
+    cancelDrag();
+    if (target) swap(current.id, target);
+  };
+  const pointerHandlers = {
+    onPointerMove: moveDrag,
+    onPointerUp: finishDrag,
+    onPointerCancel: cancelDrag,
+    onLostPointerCapture: cancelDrag,
+  };
+  const DragIcon = dragPreview ? icons[dragPreview.id] : GripVertical;
   const reportOrder = layout.order.filter((id) =>
     (REPORT_PANELS as readonly PanelId[]).includes(id),
   );
@@ -193,38 +320,14 @@ export function LiveOverviewDashboard({
             : undefined
         }
         aria-labelledby={`ov-heading-${id}`}
-        onDragOver={(event) => {
-          if (dragging && canSwapPanels(dragging, id)) {
-            event.preventDefault();
-            event.dataTransfer.dropEffect = "move";
-            setDropTarget(id);
-          }
-        }}
-        onDrop={(event) => {
-          if (dragging && canSwapPanels(dragging, id)) {
-            event.preventDefault();
-            swap(dragging, id);
-            setDragging(null);
-            setDropTarget(null);
-          }
-        }}
       >
         <div
           className="ov-card-heading"
-          draggable={kind !== "site"}
-          onDragStart={(event) => {
-            if ((event.target as HTMLElement).closest("a,select")) {
-              event.preventDefault();
-              return;
-            }
-            setDragging(id);
-            event.dataTransfer.setData("text/plain", id);
-            event.dataTransfer.effectAllowed = "move";
-          }}
-          onDragEnd={() => {
-            setDragging(null);
-            setDropTarget(null);
-          }}
+          data-draggable={kind !== "site" || undefined}
+          onPointerDown={
+            kind !== "site" ? (event) => beginDrag(event, id) : undefined
+          }
+          {...(kind !== "site" ? pointerHandlers : {})}
         >
           <h2 id={`ov-heading-${id}`}>
             <Icon size={14} aria-hidden="true" />
@@ -233,12 +336,17 @@ export function LiveOverviewDashboard({
           {kind !== "site" && (
             <button
               className="ov-grip"
-              draggable
+              draggable={false}
               type="button"
               aria-label={`Swap ${PANEL_LABELS[id]}`}
-              title="Drag to swap panels. Arrow keys also swap panels."
-              aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight"
+              title="Drag to swap panels. Arrow keys also swap panels. Escape cancels dragging."
+              aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight Escape"
               onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  cancelDrag();
+                  return;
+                }
+                if (pointer.current) return;
                 const step =
                   event.key === "ArrowUp" || event.key === "ArrowLeft"
                     ? -1
@@ -251,57 +359,8 @@ export function LiveOverviewDashboard({
                   if (target) swap(id, target);
                 }
               }}
-              onPointerDown={(event) => {
-                if (
-                  event.pointerType === "touch" ||
-                  event.pointerType === "pen"
-                ) {
-                  event.currentTarget.setPointerCapture(event.pointerId);
-                  touch.current = {
-                    id,
-                    x: event.clientX,
-                    y: event.clientY,
-                    active: false,
-                    target: null,
-                  };
-                }
-              }}
-              onPointerMove={(event) => {
-                const current = touch.current;
-                if (!current) return;
-                if (
-                  Math.hypot(
-                    event.clientX - current.x,
-                    event.clientY - current.y,
-                  ) < 7 &&
-                  !current.active
-                )
-                  return;
-                current.active = true;
-                setDragging(current.id);
-                const target = document
-                  .elementFromPoint(event.clientX, event.clientY)
-                  ?.closest<HTMLElement>("[data-panel]")?.dataset.panel as
-                  | PanelId
-                  | undefined;
-                current.target = target ?? null;
-                setDropTarget(
-                  target && canSwapPanels(current.id, target) ? target : null,
-                );
-              }}
-              onPointerUp={() => {
-                const current = touch.current;
-                if (current?.active && current.target)
-                  swap(current.id, current.target);
-                touch.current = null;
-                setDragging(null);
-                setDropTarget(null);
-              }}
-              onPointerCancel={() => {
-                touch.current = null;
-                setDragging(null);
-                setDropTarget(null);
-              }}
+              onPointerDown={(event) => beginDrag(event, id)}
+              {...pointerHandlers}
             >
               <GripVertical size={16} />
             </button>
@@ -313,6 +372,19 @@ export function LiveOverviewDashboard({
   };
   return (
     <div className="ov-dashboard">
+      {dragPreview &&
+        createPortal(
+          <div
+            className="ov-drag-preview"
+            aria-hidden="true"
+            style={{ left: dragPreview.x, top: dragPreview.y }}
+          >
+            <DragIcon size={16} />
+            <span>{PANEL_LABELS[dragPreview.id]}</span>
+            <GripVertical size={16} />
+          </div>,
+          dragPreview.host,
+        )}
       {sample && (
         <div className="ov-sample-banner">
           <LayoutGrid size={12} />

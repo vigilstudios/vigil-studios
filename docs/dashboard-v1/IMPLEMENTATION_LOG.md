@@ -1279,3 +1279,9 @@ Ownership verification now remains an unfinished waiting step with explicit addi
 
 - Added 12px of padding on each side of the website details at desktop widths and 8px in compact desktop layouts. The narrow layout reserves a little more column width for readable content. Stacked mobile details retain their existing spacing.
 - Browser verification confirmed both 12px insets, no details overflow, the unchanged 461px desktop preview and 616px first row. CSS-only follow-up; no application tests rerun. Local server remains on 3190.
+
+### 2026-10-27 — Reliable overview drag handles and rounded drag tabs
+
+- Replaced the split native mouse/touch behavior with pointer capture shared by movable headers and explicit dot-handle handlers. The grip SVG no longer intercepts input, small clicks do not reorder panels, and mouse/touch/pen follow the same movement threshold. Existing row restrictions, exact swaps, adaptive working slots and serialized personal saves remain.
+- Added a rounded 12px floating title tab outside the scrolling/container-query surface, with opaque light/dark surfaces. Valid targets highlight; edge scrolling supports stacked layouts. Escape, cancelled gestures, lost capture and window blur clear the drag; unmount cancels the animation frame. Keyboard arrows remain available.
+- Validation: 24 focused tests / 3 files, typecheck, focused lint and optimized build passed. Browser checks verified dot-origin report swaps in both directions, working-panel adaptation, keyboard swaps, Escape cancellation, invalid cross-row drops, reload persistence, live rounded previews in both themes and 390px swaps/edge scrolling without horizontal overflow. No new console errors. Real customer data remained unchanged; local servers stay on 3190 and 4188.

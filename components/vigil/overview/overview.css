@@ -19,6 +19,43 @@
 .ov-dashboard * {
   box-sizing: border-box;
 }
+.ov-card-heading[data-draggable] {
+  user-select: none;
+  touch-action: none;
+}
+.ov-grip svg {
+  pointer-events: none;
+}
+.ov-grip:active {
+  cursor: grabbing !important;
+}
+.ov-drag-preview {
+  position: fixed;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  width: 228px;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background:
+    linear-gradient(var(--bg-surface), var(--bg-surface)), var(--bg-primary);
+  color: var(--text-primary);
+  box-shadow: 0 8px 28px #0003;
+  pointer-events: none;
+  user-select: none;
+  font-size: 13px;
+  font-weight: 550;
+}
+.ov-drag-preview span {
+  flex: 1;
+}
+.ov-drag-preview svg {
+  flex-shrink: 0;
+}
 .ov-dashboard button,
 .ov-dashboard a,
 .ov-dashboard select {

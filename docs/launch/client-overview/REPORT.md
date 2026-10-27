@@ -93,8 +93,13 @@ Reduced motion disables group transitions. Existing access/paid/coming-soon
 behavior is preserved.
 
 Headers have icons and direct drag grips, without an editing mode, Customize
-button, visibility controls or resizing controls. Header/grip drag, keyboard
-arrows and touch/pen grips swap positions. Swaps and chart choices save
+button, visibility controls or resizing controls. Header/grip drags share pointer
+capture for mouse, touch and pen, with a 7px movement threshold. The dots own
+their drag handlers and the SVG cannot intercept pointer input. A rounded,
+theme-aware floating tab follows the pointer outside the scrolling surface;
+valid targets are highlighted and edge scrolling supports stacked layouts.
+Escape, cancellation, lost capture and window blur clear the gesture. Keyboard
+arrows also swap positions. Swaps and chart choices save
 automatically through a serialized queue. Failures preserve the local draft
 and offer Retry save. A live status confirms persistence.
 
@@ -179,6 +184,15 @@ are New / In progress (Contacted + Qualified + Booked) / Won / Lost. Both chart
 views preserve the cohort total and link into the existing Lead Hub.
 
 ## Validation
+
+- Drag-handle follow-up: **24 focused tests / 3 files**, typecheck, focused lint
+  and optimized build passed. Browser checks verified dot-origin report swaps in
+  both directions, wide/narrow working-panel swaps, arrow-key swapping, Escape
+  cancellation, rejected cross-row drops, saved order after reload and no stale
+  drag UI. Observed the floating tab during live drags with 12px corners and
+  theme-aware surfaces. A 390px stacked layout supports direct grip swaps and
+  edge scrolling without horizontal overflow. No new browser console errors;
+  preference writes remained confined to fictional lab storage.
 
 - Latest branding/navigation follow-up: **38 focused tests / 5 files passed**,
   typecheck, focused lint and optimized build passed. New coverage checks separate
