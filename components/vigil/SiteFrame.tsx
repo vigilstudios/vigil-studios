@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useSyncExternalStore, type CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { clsx } from "clsx";
 import { Monitor, Smartphone } from "lucide-react";
+import { useElementBox } from "./useElementBox";
 
 /**
  * A live preview of a website, the same way the Express catalogue shows a
@@ -34,15 +35,24 @@ export function SiteFrame({
 }) {
   const [mode, setMode] = useState<ViewMode>(initialMode);
   const [host, setHost] = useState<HTMLDivElement | null>(null);
-  const width = useElementWidth(host);
+  const [browser, setBrowser] = useState<HTMLDivElement | null>(null);
+  const [page, setPage] = useState<HTMLIFrameElement | null>(null);
+  const { width } = useElementBox(host, "width");
+  const displayed = useElementBox(browser, "width");
+  const viewport = useElementBox(page);
 
   const frameWidth = mode === "desktop" ? DESKTOP.width : MOBILE.width;
   // The outer browser includes its two one-pixel borders.
-  const shownWidth = Math.max(0, Math.min(width, frameWidth) - 2);
-  const scale = shownWidth > 0 ? shownWidth / frameWidth : 0;
+  const shownWidth = browser
+    ? displayed.width
+    : Math.max(0, Math.min(width, frameWidth) - 2);
   const frame =
     mode === "desktop" ? { ...DESKTOP, height: desktopHeight } : MOBILE;
-  const boxHeight = width > 0 ? Math.round(frame.height * scale) : 0;
+  // During a mode transition both the browser and the real iframe viewport
+  // animate. Fit their current dimensions uniformly, without stretching or reloading.
+  const scale = shownWidth / (viewport.width || frame.width);
+  const boxHeight =
+    width > 0 ? Math.round((viewport.height || frame.height) * scale) : 0;
 
   let hostname = address ?? "";
   if (!address) {
@@ -57,11 +67,13 @@ export function SiteFrame({
     <div
       ref={setHost}
       className="w-full min-w-0"
+      data-viewport={mode}
       style={
         { "--site-preview-ratio": frame.width / frame.height } as CSSProperties
       }
     >
       <div
+        ref={setBrowser}
         className={clsx(
           "site-preview-frame mx-auto w-full overflow-hidden rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-secondary)]",
           className,
@@ -109,11 +121,12 @@ export function SiteFrame({
               : `${frame.width} / ${frame.height}`,
           }}
         >
-          {scale > 0 ? (
+          {width > 0 ? (
             <div className="absolute inset-0 overflow-hidden bg-white">
               {/* Clipping without a scroll container: the page scrolls inside its own iframe. */}
               <iframe
-                key={mode}
+                ref={setPage}
+                className="site-preview-page"
                 src={src}
                 title={title}
                 tabIndex={-1}
@@ -163,19 +176,5 @@ function ModeButton({
     >
       {children}
     </button>
-  );
-}
-
-/** Width of an element, tracked with ResizeObserver; 0 before mount. */
-function useElementWidth(el: HTMLElement | null): number {
-  return useSyncExternalStore(
-    (onChange) => {
-      if (!el) return () => {};
-      const ro = new ResizeObserver(onChange);
-      ro.observe(el);
-      return () => ro.disconnect();
-    },
-    () => (el ? Math.round(el.getBoundingClientRect().width) : 0),
-    () => 0,
   );
 }

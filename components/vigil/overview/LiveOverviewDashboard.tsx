@@ -406,8 +406,8 @@ export function LiveOverviewDashboard({
         <div className="ov-site-status">
           {renderPanel("health", 0, "site", [])}
           <div className="ov-status-detail-row">
-            {renderPanel("pipeline", 1, "site", [])}
-            {renderPanel("quality", 2, "site", [])}
+            {renderPanel("quality", 1, "site", [])}
+            {renderPanel("pipeline", 2, "site", [])}
           </div>
         </div>
       </div>

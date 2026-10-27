@@ -96,8 +96,8 @@ describe("personal dashboard layouts", () => {
     expect(layout.order).toEqual([
       "website",
       "health",
-      "pipeline",
       "quality",
+      "pipeline",
       "leads",
       "insights",
       "traffic",
@@ -130,8 +130,8 @@ describe("personal dashboard layouts", () => {
     expect(layout.order).toEqual([
       "website",
       "health",
-      "pipeline",
       "quality",
+      "pipeline",
       "traffic",
       "leads",
       "insights",

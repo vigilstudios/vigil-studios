@@ -12,7 +12,7 @@ The preceding admin sign-in fix is preserved in local commit `a58b767`.
    Its proportionally scaled 1200×900 desktop preview is slightly larger and left
    aligned. The Live website eyebrow, linked domain and recorded availability,
    SSL and DNS checks sit to its right. Unmeasured checks stay pending.
-   The right column has Vigil Security above a shared Lead status / Site quality
+   The right column has Vigil Security above a shared Site quality / Lead status
    row. Security monitoring and audit measurements have distinct connection states;
    passing SSL or DNS never implies a vulnerability scan or active firewall.
 2. **Conversations + action:** inquiry trends, current lead status and the oldest
@@ -46,10 +46,14 @@ The focus on lead progress and actionable follow-up is informed by
 ## Layout and styling
 
 The approved desktop first-row height remains **616px**. Vigil Security takes
-341px of the right column; Lead status and Site quality share the 263px lower
+341px of the right column; Site quality and Lead status share the 263px lower
 row, separated by a 12px gap. Website and status stack match exactly in both
 Donut and Bars modes. The website preview fits proportionally beside its details
-and above its plan, with a left-aligned frame. Phone remains 390×780. Below the
+and above its plan, with a left-aligned desktop frame. Metadata fills the
+remaining width with an 8px gap. Phone remains 390×780 and centers inside the
+desktop preview area. Both the frame width/position and native iframe viewport
+animate over 420ms; current dimensions keep scaling uniform without remounting
+or reloading the page. Reduced motion disables these transitions. Below the
 desktop breakpoint, the website uses its natural height; the two small status
 cards remain side by side. Named `overview` container queries keep dashboard
 breakpoints independent of the preview's size container.
@@ -71,7 +75,11 @@ and offer Retry save. A live status confirms persistence.
 Readability uses larger 13–14px primary text, 11–12px supporting text, larger
 chart labels and controls. Only the eyebrow remains above the cards. Trend
 charts have no point markers; keyboard/hover values remain available. Donut
-segments have flat ends and a near-background track. Card borders and fills
+segments have flat ends and a near-background track. Lead status has a compact,
+right-aligned view toggle and a larger ring with breathing room for its total
+and singular/plural caption. Trend SVGs measure their actual containers so their
+plots reach the right edge without letterboxing or stretched labels. Activity
+has status-colored timeline dots; release rows use box icons. Card borders and fills
 fade vertically, with opaque inner surfaces preventing dark-theme border bleed.
 Insights uses the canonical Vigil green in this same gradient treatment.
 
@@ -92,6 +100,13 @@ merge only this non-sensitive key. Staff in Client view update their own
 preferences, never the customer's. Unknown panels, injected fields and unsupported
 versions normalize safely. No role or access decision reads these preferences;
 no schema migration is required.
+
+The shared authenticated frame is pinned to the viewport, with document scrolling
+locked only while that frame exists. Its overflow is clipped rather than becoming
+a second, focus-scrollable hidden container. Main content and navigation keep
+their own scroll regions with scroll chaining contained. This fixes both scrolling
+past the footer and controls moving the header/sidebar while receiving focus.
+Public and frameless authentication pages retain their normal document flow.
 
 ## Data and access
 
@@ -141,7 +156,8 @@ views preserve the cohort total and link into the existing Lead Hub.
 
 - Full suite: **2,684 tests / 140 files passed** with `npm test -- --maxWorkers=2`.
   After the stale-check follow-up, **37 focused tests / 3 files passed**.
-- Typecheck, focused lint and optimized production build passed.
+- Latest spacing/animation/scroll follow-up: **46 focused tests / 5 files passed**,
+  plus typecheck, focused lint and optimized production build.
 - New regressions cover current/expired/incomplete security states, retained
   alerts, absent monitoring despite passing SSL/DNS, unknown and zero audit
   scores, LCP units and compact CRM group totals. Existing tests preserve tenant
@@ -150,6 +166,14 @@ views preserve the cohort total and link into the existing Lead Hub.
   preview with URL/checks to its right. Website and right stack both measure
   616px; security is 341px and both lower cards 263px. Phone preview is larger
   while preserving 390×780 proportions and staying above the plan.
+- Latest browser checks verified the unchanged 477px desktop preview at a 992px
+  dashboard width, an 8px metadata gap at expanded/rail widths, centered phone
+  mode, the fixed-height status cards in their new order, a compact right-aligned
+  toggle, padded donut text, activity dots and release boxes. Trend plot endpoints
+  reach within 3px of the SVG edge; keyboard End still selects the final point.
+  Repeated bottom scrolling and footer-control clicks keep root/frame scroll at
+  zero with a 720px document/viewport and the header at y=0. Exact 320/390px inner
+  viewport checks have no document or compact-card overflow. No new console errors.
 - Fictional lab: blue secured state, orange alert state and alert details,
   both lead chart views at unchanged height, light/dark themes and
   320/390/768px viewport checks without horizontal overflow. Report/work panel

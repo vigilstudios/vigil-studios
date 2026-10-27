@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 import { BarChart3, LineChart, Table2 } from "lucide-react";
 import type { ChartView, SeriesPoint } from "@/lib/vigil/overview/model";
+import { useElementBox } from "../useElementBox";
 
 export function ChartSwitcher({
   value,
@@ -55,6 +56,8 @@ export function TrendChart({
 }) {
   const gradient = useId().replace(/:/g, "");
   const [selected, setSelected] = useState<number | null>(null);
+  const [host, setHost] = useState<HTMLDivElement | null>(null);
+  const measured = useElementBox(host, "width");
   const active =
     selected !== null && selected < points.length ? selected : null;
   const point = active === null ? null : points[active];
@@ -80,10 +83,10 @@ export function TrendChart({
         </table>
       </div>
     );
-  const width = 300,
-    height = 170,
-    left = 30,
-    right = 12,
+  const width = measured.width || 300,
+    height = 180,
+    left = 28,
+    right = 3,
     top = 16,
     bottom = 26;
   const plotWidth = width - left - right,
@@ -92,8 +95,12 @@ export function TrendChart({
     4,
     Math.ceil(Math.max(...points.map((p) => p.value), 0) / 4) * 4,
   );
+  const bucketWidth = plotWidth / Math.max(1, points.length);
   const x = (i: number) =>
-    left + ((i + 0.5) / Math.max(1, points.length)) * plotWidth;
+    left +
+    (view === "bars" || points.length === 1
+      ? (i + 0.5) * bucketWidth
+      : (i / Math.max(1, points.length - 1)) * plotWidth);
   const y = (value: number) =>
     top + plotHeight - (value / maximum) * plotHeight;
   const line = points
@@ -111,7 +118,7 @@ export function TrendChart({
     ]),
   ].filter((i) => i >= 0 && i < points.length);
   return (
-    <div className="ov-trend">
+    <div className="ov-trend" ref={setHost}>
       <div className="ov-chart-readout" aria-live="polite">
         {point ? (
           <>
@@ -152,7 +159,7 @@ export function TrendChart({
               y={y((maximum * tick) / 4) + 4}
               textAnchor="end"
               fill="var(--text-secondary)"
-              fontSize="14"
+              fontSize="12"
             >
               {(maximum * tick) / 4}
             </text>
@@ -195,9 +202,12 @@ export function TrendChart({
               />
             )}
             <rect
-              x={x(i) - plotWidth / Math.max(1, points.length) / 2}
+              x={Math.max(left, x(i) - bucketWidth / 2)}
               y={top}
-              width={plotWidth / Math.max(1, points.length)}
+              width={Math.min(
+                bucketWidth,
+                width - right - Math.max(left, x(i) - bucketWidth / 2),
+              )}
               height={plotHeight}
               fill="transparent"
               data-point
@@ -238,7 +248,7 @@ export function TrendChart({
               i === 0 ? "start" : i === points.length - 1 ? "end" : "middle"
             }
             fill="var(--text-secondary)"
-            fontSize="14"
+            fontSize="12"
           >
             {points[i].label}
           </text>

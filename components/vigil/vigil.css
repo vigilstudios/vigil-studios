@@ -11,7 +11,11 @@
 }
 
 .vigil-frame ::selection {
-  background: color-mix(in srgb, var(--accent-fill,var(--accent)) 30%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--accent-fill, var(--accent)) 30%,
+    transparent
+  );
 }
 
 /* White work surfaces on a quiet gray canvas give the dashboard hierarchy. */
@@ -43,13 +47,54 @@ html[data-theme="light"] .vigil-frame :is(input, textarea, select) {
   background-color: #ffffff;
 }
 
-html[data-theme="light"] .vigil-frame :is(button, a, input, textarea, select):focus-visible {
+html[data-theme="light"]
+  .vigil-frame
+  :is(button, a, input, textarea, select):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
-/* Animate the actual browser width; ResizeObserver keeps its iframe at true scale. */
-.site-preview-frame { transition: max-width 360ms cubic-bezier(.22,1,.36,1), border-radius 360ms; }
-.site-preview-viewport { transition: height 360ms cubic-bezier(.22,1,.36,1); }
-.site-preview-frame[data-viewport="mobile"] { border-radius: 16px; }
-@media (prefers-reduced-motion: reduce) { .site-preview-frame, .site-preview-viewport { transition: none; } }
+/* Keep authenticated work inside its single viewport-height frame. */
+html:has(.vigil-frame),
+body:has(.vigil-frame) {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+.vigil-frame > div {
+  min-height: 0;
+}
+.vigil-frame {
+  position: fixed;
+  inset: 0;
+  overflow: clip;
+}
+.vigil-frame main {
+  min-height: 0;
+  overscroll-behavior-y: contain;
+}
+.vigil-frame nav {
+  overscroll-behavior-y: contain;
+}
+
+/* The browser and native iframe viewport animate together. SiteFrame observes
+   their current dimensions to keep the page uniformly scaled throughout. */
+.site-preview-frame {
+  transition:
+    max-width 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 420ms;
+}
+.site-preview-page {
+  transition:
+    width 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    height 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.site-preview-frame[data-viewport="mobile"] {
+  border-radius: 16px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-preview-frame,
+  .site-preview-page {
+    transition: none;
+  }
+}

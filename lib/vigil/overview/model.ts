@@ -10,8 +10,8 @@ export const WORK_PANELS = ["followup", "activity"] as const;
 export const PANEL_IDS = [
   "website",
   "health",
-  "pipeline",
   "quality",
+  "pipeline",
   ...REPORT_PANELS,
   ...WORK_PANELS,
 ] as const;
@@ -63,8 +63,8 @@ export function readLayout(input: unknown): LayoutPreference {
     order: [
       "website",
       "health",
-      "pipeline",
       "quality",
+      "pipeline",
       ...group(REPORT_PANELS),
       ...group(WORK_PANELS),
     ],

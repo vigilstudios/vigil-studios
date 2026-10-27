@@ -7,6 +7,7 @@ import {
   ArrowDownRight,
   ArrowRight,
   ArrowUpRight,
+  Box,
   Check,
   ChevronRight,
   Clock3,
@@ -176,7 +177,7 @@ export function LeadTrendsPanel({
       <div className="ov-trend-top">
         <div className="ov-main-number">
           <strong>{report.total.toLocaleString()}</strong>
-          <span>inquiries received</span>
+          <span>{report.total === 1 ? "inquiry" : "inquiries"} received</span>
           <small
             className={report.total >= report.previous ? "ov-positive" : ""}
           >
@@ -254,8 +255,8 @@ export function PipelinePanel({
           <RingChart
             parts={groups}
             center={report.total.toLocaleString()}
-            caption="inquiries"
-            label={`Current statuses of ${report.total} inquiries received in the selected period`}
+            caption={report.total === 1 ? "inquiry" : "inquiries"}
+            label={`Current statuses of ${report.total} ${report.total === 1 ? "inquiry" : "inquiries"} received in the selected period`}
           />
           <ul className="ov-legend">
             {groups.map((stage) => (
@@ -664,7 +665,7 @@ export function ActivityPanel({
             return (
               <li key={row.id}>
                 <span className="ov-release-icon" data-state={row.status}>
-                  <ArrowUpRight size={15} />
+                  <Box size={15} />
                 </span>
                 <div>
                   <strong>
@@ -693,7 +694,7 @@ export function ActivityPanel({
         </ol>
       ) : (
         <div className="ov-quiet-empty">
-          <Activity size={23} />
+          <Box size={23} />
           <p>No production releases recorded.</p>
         </div>
       )}
