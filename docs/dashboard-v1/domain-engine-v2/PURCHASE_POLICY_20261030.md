@@ -4,7 +4,7 @@
 
 The owner requested purchase-policy setup and completion of the remaining nonfinancial live-acceptance work. Earlier approvals establish the following initial scope:
 
-- USD, ordinary non-premium `.com`, one year per registration.
+- US customers only initially; USD, ordinary non-premium `.com`, one year per registration.
 - Name.com registrar cost at most $20.00; customer checkout total at most $30.00, including applicable tax.
 - One-time Vigil service fee of $5.00. This is gross service revenue before Stripe fees, taxes and support costs.
 - The customer's real approved details are the registrant; Vigil manages the registrar account as the customer's agent. No separate Vercel account is required.
@@ -30,11 +30,11 @@ Source: [Name.com account funding](https://docs.name.com/guides/funding-your-nam
 
 `$HOME/.local/share/vigil-domain-e2e/purchase-policy-draft-20261030.json` resolves the existing Onboarding Demo — Growth organization/website, live provider account bindings, approved caps, fee and manual-renewal setting. It is explicitly marked incomplete and is **not inserted into production**. A fake customer's address or tax details cannot establish a genuine customer's policy.
 
-The following facts remain required for the first real policy:
+The owner approved US-only launch, the domain terms and seven-year transaction/consent retention in this chat on 30 October 2026. Publication and enforcement are not yet complete. The following facts/actions remain required for the first real policy:
 
 1. Genuine customer/website, chosen supported `.com` and actual registrant jurisdiction (country, state/region, postal code).
 2. Reviewed customer tax treatment/rate and confirmation of the supported zero-additional-supplier-tax case. An active Stripe Tax registration alone is insufficient.
-3. Approved versioned domain terms, their HTTPS publication URL and evidence-retention duration. The current `/terms` page is dated 15 September 2026; the domain addendum draft in this directory has not been approved or published.
+3. Publish the owner-approved domain addendum at a versioned HTTPS URL, and implement the approved retention schedule with applicable recordkeeping-period/hold exceptions. The existing `/terms` page remains dated 15 September 2026 until publication. Approval is no longer missing.
 4. Exact policy expiry and approval reference. Recommended first admission is one website/domain for seven days; DNS approval stays false until separately scoped.
 
 No placeholder tax rate, address, legal approval, retention attestation or genuine-customer consent is installed. The actual row must satisfy `vigil.domain_live_policies` and the existing immutable policy/reservation guards. There is no wildcard policy or frontend flag that bypasses these requirements.
@@ -48,3 +48,7 @@ Contact-verification, expiration, lock-change, asynchronous rejection, inventory
 ## Remaining live acceptance
 
 Funding requires the owner's explicit amount approval or direct deposit. Vendor-signed delivery must be observed independently of locally signed receiver probes. The genuine client must complete their own registrant consent and email verification. One registration/receipt and exact Stripe capture, preserved mail DNS and the approved Vercel deployment serving publicly over HTTPS are the final customer journey acceptance. Do not self-charge or use fake registrant contacts to manufacture this evidence.
+
+## Tax and retention research follow-up
+
+See [US tax and retention review](US_TAX_AND_RETENTION_REVIEW_20261030.md). The active Stripe tax-code catalog was queried read-only: 682 codes, no explicitly named domain-registration category. Do not silently use the account-wide generic digital-services default or change existing website/hosting product classifications. Customer location, product mapping, real tax registrations and any other-state obligations need correct treatment; a zero automatic calculation outside configured registrations does not establish exemption.

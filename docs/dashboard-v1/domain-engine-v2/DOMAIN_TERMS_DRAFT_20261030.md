@@ -1,6 +1,6 @@
-# Vigil domain registration addendum — draft for owner review
+# Vigil domain registration addendum — approved text, publication pending
 
-Status: **not approved or published**. Proposed version `vigil-domain-v1`; manual renewal version `vigil-domain-manual-v1`. This draft supplements the existing Vigil service agreement. It does not authorize a payment or a DNS change.
+Status: **approved by the owner in this chat on 30 October 2026; not yet published**. Version `vigil-domain-v1`; manual renewal version `vigil-domain-manual-v1`. This addendum supplements the existing Vigil service agreement. The owner approved a US-customer-only initial launch and the proposed seven-year transaction/consent retention policy. Approval of this text does not authorize a payment or a DNS change. The historical filename is retained to preserve existing review links.
 
 ## Your domain and our role
 
@@ -10,7 +10,7 @@ You accept the applicable [Name.com registration agreement](https://www.name.com
 
 ## Price and payment
 
-Checkout shows the one-year registration cost, a one-time $5 Vigil automation fee, applicable tax, total and current renewal estimate. The initial offering is limited to ordinary non-premium `.com` domains within the published purchase limits. Hosting and website-plan charges are separate.
+Checkout shows the one-year registration cost, a one-time $5 Vigil automation fee, applicable tax, total and current renewal estimate. The initial offering is for US customers and is limited to ordinary non-premium `.com` domains within the published purchase limits. Hosting and website-plan charges are separate.
 
 Your card is authorized for the displayed amount. Vigil captures that amount after confirming the matching registrar registration and receipt. A confirmed failure before registration releases the authorization. If the provider's response is uncertain, Vigil investigates the original request before retrying, refunding or asking you to purchase again. A registration is not canceled merely because its payment needs assistance.
 
@@ -34,6 +34,6 @@ Canceling a Vigil hosting plan does not transfer domain ownership to Vigil. You 
 
 ## Records and privacy
 
-Vigil shares the necessary approved registrant information with Name.com to register and administer your domain, and uses Stripe for payment processing. Vigil does not store card numbers. Ownership, consent, financial and DNS evidence is access-controlled and retained under the approved retention policy. The exact retention schedule must be settled before this draft is published or used in a live policy.
+Vigil shares the necessary approved registrant information with Name.com to register and administer your domain, and uses Stripe for payment processing. Vigil does not store card numbers. Ownership, consent, financial and DNS evidence is access-controlled. Transaction and consent records are retained for seven years, and longer where an applicable recordkeeping obligation, active dispute, audit or legal hold requires it. Registrant contact information is maintained while Vigil manages the domain; afterward, operational information is minimized where possible while preserving necessary ownership, transaction and compliance evidence. The recordkeeping period cannot end before the applicable period measured from the relevant return due/filing date. This policy does not promise automatic deletion while that enforcement is still being implemented.
 
-Owner decisions still needed: approve this text/publication and the domain evidence-retention schedule; confirm the reviewed customer and supplier tax treatment. No draft sentence is evidence that those decisions have already been made.
+Approval record: the owner explicitly approved the terms and proposed retention policy and limited initial launch to US customers on 30 October 2026. Publication and retention enforcement remain implementation work. Domain/service-fee tax classification and supplier tax handling remain unresolved; this approval does not assert a tax exemption, tax registration or professional tax opinion.
