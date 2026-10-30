@@ -2,6 +2,7 @@
 
 The final audit and production release were authorized on 30 October 2026. **Automated purchasing and DNS admission remain disabled pending real-client activation.** The reviewed domain migrations are installed in production; see the release record for checks and activation requirements.
 
+- [Current purchase-policy and live-acceptance preparation](PURCHASE_POLICY_20261030.md): enabled signed receivers/lifecycle runtime, approved limits, recommended funding and the remaining business inputs. Domain terms are an unpublished draft.
 - [Final audit and release record](FINAL_AUDIT_AND_RELEASE_20261030.md).
 - [Earlier production preparation and release sequence](PRODUCTION_PREPARATION_20261029.md): verified provider setup, funding protection, migrations, validation, remaining activation steps and rollback.
 - [Client UI/UX handoff](CLIENT_UI_HANDOFF.md): current dashboard/onboarding integration points, API contracts, state/consent requirements and screenshot acceptance.

@@ -72,6 +72,19 @@ export async function handleNamecomWebhook(
       "record_managed_domain_signal",
       { p_account_scope: scope, p_payload_digest: digest },
     );
+    // A verified account can send a balance event before its first purchase
+    // policy exists. There are no managed assets to reconcile in that case.
+    // Keep the database's account guard intact; acknowledge only this exact
+    // pre-admission condition, never a failed inbox write for an admitted account.
+    if (
+      environment === "live" &&
+      error?.code === "42501" &&
+      error.message === "Unknown registrar account"
+    )
+      return NextResponse.json(
+        { received: true, ignored: true },
+        { headers: { "Cache-Control": "no-store" } },
+      );
     if (error)
       return NextResponse.json(
         { error: "Registrar notification could not be saved." },
