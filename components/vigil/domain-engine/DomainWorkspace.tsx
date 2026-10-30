@@ -636,7 +636,7 @@ export function DomainWorkspace({
               <>
                 <p>
                   {live && !discoveryOnly
-                    ? "Confirm the legal owner and approve the exact name, one-year term and final price. Enter accurate registrant details. A verification email will be sent by the registrar."
+                    ? "Confirm the legal owner and approve the exact name, one-year term and final price. Use the registrant’s billing address for this US launch. If the registrant and billing addresses differ, contact Vigil before purchasing. A verification email will be sent by the registrar."
                     : "Confirm the legal registrant and approve the exact name, term and test price. Use fictional contact details in this workspace."}
                 </p>
                 <p>
@@ -722,8 +722,7 @@ export function DomainWorkspace({
                     onChange={(event) => setTransmit(event.target.checked)}
                   />
                   <span>
-                    I confirm these registrant details and approve sending them
-                    to the registrar.
+                    {live ? "I confirm these registrant details, including this billing address, and approve sending the required contact details to the registrar." : "I confirm these registrant details and approve sending them to the registrar."}
                   </span>
                 </label>
                 <label className={styles.check}>

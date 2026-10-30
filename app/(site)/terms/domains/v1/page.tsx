@@ -22,7 +22,7 @@ const sections = [
   {
     "title": "Price and payment",
     "paragraphs": [
-      "Checkout shows the one-year registration cost, a one-time $5 Vigil automation fee, applicable tax, total and current renewal estimate. The initial offering is for US customers and is limited to ordinary non-premium .com domains within the published purchase limits. Hosting and website-plan charges are separate.",
+      "Checkout shows the one-year registration cost, a one-time $5 Vigil automation fee, applicable tax, total and current renewal estimate. The initial offering is for US customers and is limited to ordinary non-premium .com domains within the published purchase limits. For this initial service, the registrant address must also be the billing address used for the domain purchase; contact Vigil before buying if those addresses differ. Hosting and website-plan charges are separate.",
       "Your card is authorized for the displayed amount. Vigil captures that amount after confirming the matching registrar registration and receipt. A confirmed failure before registration releases the authorization. If the provider's response is uncertain, Vigil investigates the original request before retrying, refunding or asking you to purchase again. A registration is not canceled merely because its payment needs assistance.",
       "Contact Vigil for a refund or correction request. The registrar's cancellation/refund rules and applicable customer rights determine what can be reversed after registration; a refund request does not itself delete or transfer a registered domain."
     ]
