@@ -561,6 +561,347 @@ export type Database = {
           },
         ]
       }
+      dns_authorizations: {
+        Row: {
+          consented_at: string | null
+          created_at: string
+          dns_provider: string
+          domain_id: string
+          environment: string
+          expires_at: string
+          id: string
+          organization_id: string
+          requested_by: string
+          requested_records: Json
+          revoked_at: string | null
+          status: string
+          template_version: number
+        }
+        Insert: {
+          consented_at?: string | null
+          created_at?: string
+          dns_provider: string
+          domain_id: string
+          environment: string
+          expires_at: string
+          id?: string
+          organization_id: string
+          requested_by: string
+          requested_records: Json
+          revoked_at?: string | null
+          status?: string
+          template_version: number
+        }
+        Update: {
+          consented_at?: string | null
+          created_at?: string
+          dns_provider?: string
+          domain_id?: string
+          environment?: string
+          expires_at?: string
+          id?: string
+          organization_id?: string
+          requested_by?: string
+          requested_records?: Json
+          revoked_at?: string | null
+          status?: string
+          template_version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dns_authorizations_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "domains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dns_authorizations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      domain_acceptances: {
+        Row: {
+          accepted_at: string
+          accepted_by: string
+          auto_renew_consent: boolean
+          contact_id: string
+          environment: string
+          fqdn: string
+          id: string
+          organization_id: string
+          quote_id: string
+          renewal_policy_version: string
+          terms_version: string
+        }
+        Insert: {
+          accepted_at?: string
+          accepted_by: string
+          auto_renew_consent: boolean
+          contact_id: string
+          environment: string
+          fqdn: string
+          id?: string
+          organization_id: string
+          quote_id: string
+          renewal_policy_version: string
+          terms_version: string
+        }
+        Update: {
+          accepted_at?: string
+          accepted_by?: string
+          auto_renew_consent?: boolean
+          contact_id?: string
+          environment?: string
+          fqdn?: string
+          id?: string
+          organization_id?: string
+          quote_id?: string
+          renewal_policy_version?: string
+          terms_version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_acceptances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_acceptances_quote_id_organization_id_fqdn_environme_fkey"
+            columns: ["quote_id", "organization_id", "fqdn", "environment"]
+            isOneToOne: false
+            referencedRelation: "domain_quotes"
+            referencedColumns: ["id", "organization_id", "fqdn", "environment"]
+          },
+        ]
+      }
+      domain_events: {
+        Row: {
+          actor_id: string | null
+          correlation_id: string
+          created_at: string
+          event_type: string
+          id: number
+          order_id: string | null
+          organization_id: string
+          reason_code: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          correlation_id: string
+          created_at?: string
+          event_type: string
+          id?: never
+          order_id?: string | null
+          organization_id: string
+          reason_code?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          correlation_id?: string
+          created_at?: string
+          event_type?: string
+          id?: never
+          order_id?: string | null
+          organization_id?: string
+          reason_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_events_order_id_organization_id_fkey"
+            columns: ["order_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "domain_orders"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "domain_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      domain_lifecycle_notices: {
+        Row: {
+          created_at: string
+          delivered_at: string | null
+          id: string
+          kind: string
+          organization_id: string
+          period_key: string
+          registration_id: string
+        }
+        Insert: {
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          kind: string
+          organization_id: string
+          period_key: string
+          registration_id: string
+        }
+        Update: {
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          kind?: string
+          organization_id?: string
+          period_key?: string
+          registration_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_lifecycle_notices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_lifecycle_notices_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "domain_registrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_notice_registration_tenant_fk"
+            columns: ["registration_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "domain_registrations"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      domain_orders: {
+        Row: {
+          acceptance_id: string
+          connection_state: string
+          created_at: string
+          environment: string
+          fqdn: string
+          id: string
+          intent_key: string
+          next_check_at: string | null
+          operation: string
+          organization_id: string
+          payment_capture_before: string | null
+          payment_state: string
+          quote_id: string
+          reason_code: string | null
+          registrar: string
+          registration_id: string | null
+          registration_state: string
+          updated_at: string
+        }
+        Insert: {
+          acceptance_id: string
+          connection_state?: string
+          created_at?: string
+          environment: string
+          fqdn: string
+          id?: string
+          intent_key: string
+          next_check_at?: string | null
+          operation?: string
+          organization_id: string
+          payment_capture_before?: string | null
+          payment_state?: string
+          quote_id: string
+          reason_code?: string | null
+          registrar: string
+          registration_id?: string | null
+          registration_state?: string
+          updated_at?: string
+        }
+        Update: {
+          acceptance_id?: string
+          connection_state?: string
+          created_at?: string
+          environment?: string
+          fqdn?: string
+          id?: string
+          intent_key?: string
+          next_check_at?: string | null
+          operation?: string
+          organization_id?: string
+          payment_capture_before?: string | null
+          payment_state?: string
+          quote_id?: string
+          reason_code?: string | null
+          registrar?: string
+          registration_id?: string | null
+          registration_state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_orders_acceptance_id_quote_id_organization_id_fqdn__fkey"
+            columns: [
+              "acceptance_id",
+              "quote_id",
+              "organization_id",
+              "fqdn",
+              "environment",
+            ]
+            isOneToOne: false
+            referencedRelation: "domain_acceptances"
+            referencedColumns: [
+              "id",
+              "quote_id",
+              "organization_id",
+              "fqdn",
+              "environment",
+            ]
+          },
+          {
+            foreignKeyName: "domain_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_orders_quote_id_organization_id_fqdn_environment_re_fkey"
+            columns: [
+              "quote_id",
+              "organization_id",
+              "fqdn",
+              "environment",
+              "registrar",
+            ]
+            isOneToOne: false
+            referencedRelation: "domain_quotes"
+            referencedColumns: [
+              "id",
+              "organization_id",
+              "fqdn",
+              "environment",
+              "registrar",
+            ]
+          },
+          {
+            foreignKeyName: "domain_orders_registration_id_organization_id_fqdn_environ_fkey"
+            columns: [
+              "registration_id",
+              "organization_id",
+              "fqdn",
+              "environment",
+            ]
+            isOneToOne: false
+            referencedRelation: "domain_registrations"
+            referencedColumns: ["id", "organization_id", "fqdn", "environment"]
+          },
+        ]
+      }
       domain_purchase_intents: {
         Row: {
           created_at: string
@@ -644,6 +985,225 @@ export type Database = {
           },
         ]
       }
+      domain_quotes: {
+        Row: {
+          created_at: string
+          currency: string
+          environment: string
+          expires_at: string
+          fqdn: string
+          id: string
+          live_policy_id: string | null
+          organization_id: string
+          premium: boolean
+          registrar: string
+          renewal_estimate_minor: number | null
+          subtotal_minor: number
+          tax_minor: number
+          total_minor: number
+          version: number
+          website_id: string | null
+          years: number
+        }
+        Insert: {
+          created_at?: string
+          currency: string
+          environment: string
+          expires_at: string
+          fqdn: string
+          id?: string
+          live_policy_id?: string | null
+          organization_id: string
+          premium?: boolean
+          registrar: string
+          renewal_estimate_minor?: number | null
+          subtotal_minor: number
+          tax_minor: number
+          total_minor: number
+          version?: number
+          website_id?: string | null
+          years: number
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          environment?: string
+          expires_at?: string
+          fqdn?: string
+          id?: string
+          live_policy_id?: string | null
+          organization_id?: string
+          premium?: boolean
+          registrar?: string
+          renewal_estimate_minor?: number | null
+          subtotal_minor?: number
+          tax_minor?: number
+          total_minor?: number
+          version?: number
+          website_id?: string | null
+          years?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_quotes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_quotes_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      domain_registrations: {
+        Row: {
+          contact_verification: string
+          contact_verification_deadline: string | null
+          created_at: string
+          environment: string
+          expires_at: string | null
+          fqdn: string
+          id: string
+          next_check_at: string | null
+          organization_id: string
+          provider_checked_at: string | null
+          registrar: string
+          registration_status: string
+          renewal_mode: string
+          updated_at: string
+          website_id: string | null
+        }
+        Insert: {
+          contact_verification?: string
+          contact_verification_deadline?: string | null
+          created_at?: string
+          environment: string
+          expires_at?: string | null
+          fqdn: string
+          id?: string
+          next_check_at?: string | null
+          organization_id: string
+          provider_checked_at?: string | null
+          registrar: string
+          registration_status?: string
+          renewal_mode?: string
+          updated_at?: string
+          website_id?: string | null
+        }
+        Update: {
+          contact_verification?: string
+          contact_verification_deadline?: string | null
+          created_at?: string
+          environment?: string
+          expires_at?: string | null
+          fqdn?: string
+          id?: string
+          next_check_at?: string | null
+          organization_id?: string
+          provider_checked_at?: string | null
+          registrar?: string
+          registration_status?: string
+          renewal_mode?: string
+          updated_at?: string
+          website_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_registrations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_registrations_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      domain_support_requests: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          domain_id: string | null
+          id: string
+          kind: string
+          organization_id: string
+          registration_id: string | null
+          requested_by: string
+          resolved_at: string | null
+          status: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          domain_id?: string | null
+          id?: string
+          kind: string
+          organization_id: string
+          registration_id?: string | null
+          requested_by: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          domain_id?: string | null
+          id?: string
+          kind?: string
+          organization_id?: string
+          registration_id?: string | null
+          requested_by?: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_support_registration_tenant_fk"
+            columns: ["registration_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "domain_registrations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "domain_support_requests_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_support_requests_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "domains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_support_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_support_requests_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "domain_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       domains: {
         Row: {
           auto_renew: boolean | null
@@ -655,6 +1215,7 @@ export type Database = {
           id: string
           kind: Database["public"]["Enums"]["domain_kind"]
           last_checked_at: string | null
+          managed_registration_id: string | null
           metadata: Json
           organization_id: string
           registrant: Json
@@ -668,8 +1229,6 @@ export type Database = {
           verification_token: string
           verified_at: string | null
           website_id: string | null
-managed_registration_id: string | null
-
         }
         Insert: {
           auto_renew?: boolean | null
@@ -681,6 +1240,7 @@ managed_registration_id: string | null
           id?: string
           kind?: Database["public"]["Enums"]["domain_kind"]
           last_checked_at?: string | null
+          managed_registration_id?: string | null
           metadata?: Json
           organization_id: string
           registrant?: Json
@@ -694,8 +1254,6 @@ managed_registration_id: string | null
           verification_token?: string
           verified_at?: string | null
           website_id?: string | null
-managed_registration_id?: string | null
-
         }
         Update: {
           auto_renew?: boolean | null
@@ -707,6 +1265,7 @@ managed_registration_id?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["domain_kind"]
           last_checked_at?: string | null
+          managed_registration_id?: string | null
           metadata?: Json
           organization_id?: string
           registrant?: Json
@@ -720,10 +1279,15 @@ managed_registration_id?: string | null
           verification_token?: string
           verified_at?: string | null
           website_id?: string | null
-managed_registration_id?: string | null
-
         }
         Relationships: [
+          {
+            foreignKeyName: "domains_managed_registration_id_fkey"
+            columns: ["managed_registration_id"]
+            isOneToOne: true
+            referencedRelation: "domain_registrations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "domains_organization_id_fkey"
             columns: ["organization_id"]
@@ -3281,578 +3845,6 @@ managed_registration_id?: string | null
           },
         ]
       }
-dns_authorizations: {
-        Row: {
-          id: string
-          organization_id: string
-          domain_id: string
-          dns_provider: string
-          environment: string
-          template_version: number
-          status: string
-          requested_records: NonNullable<Json>
-          requested_by: string
-          consented_at: string | null
-          expires_at: string
-          revoked_at: string | null
-          created_at: string
-        }
-        ComputedFields: never
-        Insert: {
-          id?: string
-          organization_id: string
-          domain_id: string
-          dns_provider: string
-          environment: string
-          template_version: number
-          status?: string
-          requested_records: NonNullable<Json>
-          requested_by: string
-          consented_at?: string | null
-          expires_at: string
-          revoked_at?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          organization_id?: string
-          domain_id?: string
-          dns_provider?: string
-          environment?: string
-          template_version?: number
-          status?: string
-          requested_records?: NonNullable<Json>
-          requested_by?: string
-          consented_at?: string | null
-          expires_at?: string
-          revoked_at?: string | null
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "dns_authorizations_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "dns_authorizations_domain_id_fkey"
-            columns: ["domain_id"]
-            isOneToOne: false
-            referencedRelation: "domains"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-domain_acceptances: {
-        Row: {
-          id: string
-          organization_id: string
-          quote_id: string
-          fqdn: string
-          environment: string
-          contact_id: string
-          accepted_by: string
-          terms_version: string
-          renewal_policy_version: string
-          auto_renew_consent: boolean
-          accepted_at: string
-        }
-        ComputedFields: never
-        Insert: {
-          id?: string
-          organization_id: string
-          quote_id: string
-          fqdn: string
-          environment: string
-          contact_id: string
-          accepted_by: string
-          terms_version: string
-          renewal_policy_version: string
-          auto_renew_consent: boolean
-          accepted_at?: string
-        }
-        Update: {
-          id?: string
-          organization_id?: string
-          quote_id?: string
-          fqdn?: string
-          environment?: string
-          contact_id?: string
-          accepted_by?: string
-          terms_version?: string
-          renewal_policy_version?: string
-          auto_renew_consent?: boolean
-          accepted_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "domain_acceptances_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "domain_acceptances_quote_id_organization_id_fqdn_environme_fkey"
-            columns: ["quote_id", "organization_id", "fqdn", "environment"]
-            isOneToOne: false
-            referencedRelation: "domain_quotes"
-            referencedColumns: ["id", "organization_id", "fqdn", "environment"]
-          },
-        ]
-      }
-domain_events: {
-        Row: {
-          id: number
-          organization_id: string
-          order_id: string | null
-          event_type: string
-          reason_code: string | null
-          actor_id: string | null
-          correlation_id: string
-          created_at: string
-        }
-        ComputedFields: never
-        Insert: {
-          id?: never
-          organization_id: string
-          order_id?: string | null
-          event_type: string
-          reason_code?: string | null
-          actor_id?: string | null
-          correlation_id: string
-          created_at?: string
-        }
-        Update: {
-          id?: never
-          organization_id?: string
-          order_id?: string | null
-          event_type?: string
-          reason_code?: string | null
-          actor_id?: string | null
-          correlation_id?: string
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "domain_events_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "domain_events_order_id_organization_id_fkey"
-            columns: ["order_id", "organization_id"]
-            isOneToOne: false
-            referencedRelation: "domain_orders"
-            referencedColumns: ["id", "organization_id"]
-          },
-        ]
-      }
-domain_orders: {
-        Row: {
-          id: string
-          organization_id: string
-          quote_id: string
-          acceptance_id: string
-          fqdn: string
-          environment: string
-          registrar: string
-          operation: string
-          intent_key: string
-          registration_id: string | null
-          registration_state: string
-          payment_capture_before: string | null
-          payment_state: string
-          connection_state: string
-          reason_code: string | null
-          next_check_at: string | null
-          created_at: string
-          updated_at: string
-        }
-        ComputedFields: never
-        Insert: {
-          id?: string
-          organization_id: string
-          quote_id: string
-          acceptance_id: string
-          fqdn: string
-          environment: string
-          registrar: string
-          operation?: string
-          intent_key: string
-          registration_id?: string | null
-          registration_state?: string
-          payment_capture_before?: string | null
-          payment_state?: string
-          connection_state?: string
-          reason_code?: string | null
-          next_check_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          organization_id?: string
-          quote_id?: string
-          acceptance_id?: string
-          fqdn?: string
-          environment?: string
-          registrar?: string
-          operation?: string
-          intent_key?: string
-          registration_id?: string | null
-          registration_state?: string
-          payment_capture_before?: string | null
-          payment_state?: string
-          connection_state?: string
-          reason_code?: string | null
-          next_check_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "domain_orders_registration_id_organization_id_fqdn_environ_fkey"
-            columns: [
-              "registration_id",
-              "organization_id",
-              "fqdn",
-              "environment",
-            ]
-            isOneToOne: false
-            referencedRelation: "domain_registrations"
-            referencedColumns: ["id", "organization_id", "fqdn", "environment"]
-          },
-          {
-            foreignKeyName: "domain_orders_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "domain_orders_acceptance_id_quote_id_organization_id_fqdn__fkey"
-            columns: [
-              "acceptance_id",
-              "quote_id",
-              "organization_id",
-              "fqdn",
-              "environment",
-            ]
-            isOneToOne: false
-            referencedRelation: "domain_acceptances"
-            referencedColumns: [
-              "id",
-              "quote_id",
-              "organization_id",
-              "fqdn",
-              "environment",
-            ]
-          },
-          {
-            foreignKeyName: "domain_orders_quote_id_organization_id_fqdn_environment_re_fkey"
-            columns: [
-              "quote_id",
-              "organization_id",
-              "fqdn",
-              "environment",
-              "registrar",
-            ]
-            isOneToOne: false
-            referencedRelation: "domain_quotes"
-            referencedColumns: [
-              "id",
-              "organization_id",
-              "fqdn",
-              "environment",
-              "registrar",
-            ]
-          },
-        ]
-      }
-domain_quotes: {
-        Row: {
-          id: string
-          organization_id: string
-          website_id: string | null
-          fqdn: string
-          registrar: string
-          environment: string
-          years: number
-          currency: string
-          subtotal_minor: number
-          tax_minor: number
-          total_minor: number
-          renewal_estimate_minor: number | null
-          premium: boolean
-          version: number
-          expires_at: string
-          created_at: string
-live_policy_id: string | null
-
-        }
-        ComputedFields: never
-        Insert: {
-          id?: string
-          organization_id: string
-          website_id?: string | null
-          fqdn: string
-          registrar: string
-          environment: string
-          years: number
-          currency: string
-          subtotal_minor: number
-          tax_minor: number
-          total_minor: number
-          renewal_estimate_minor?: number | null
-          premium?: boolean
-          version?: number
-          expires_at: string
-          created_at?: string
-live_policy_id?: string | null
-
-        }
-        Update: {
-          id?: string
-          organization_id?: string
-          website_id?: string | null
-          fqdn?: string
-          registrar?: string
-          environment?: string
-          years?: number
-          currency?: string
-          subtotal_minor?: number
-          tax_minor?: number
-          total_minor?: number
-          renewal_estimate_minor?: number | null
-          premium?: boolean
-          version?: number
-          expires_at?: string
-          created_at?: string
-live_policy_id?: string | null
-
-        }
-        Relationships: [
-          {
-            foreignKeyName: "domain_quotes_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "domain_quotes_website_id_fkey"
-            columns: ["website_id"]
-            isOneToOne: false
-            referencedRelation: "websites"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-domain_registrations: {
-        Row: {
-          id: string
-          organization_id: string
-          website_id: string | null
-          fqdn: string
-          registrar: string
-          environment: string
-          registration_status: string
-          contact_verification: string
-          renewal_mode: string
-          expires_at: string | null
-          provider_checked_at: string | null
-          next_check_at: string | null
-          created_at: string
-          updated_at: string
-          contact_verification_deadline: string | null
-        }
-        ComputedFields: never
-        Insert: {
-          id?: string
-          organization_id: string
-          website_id?: string | null
-          fqdn: string
-          registrar: string
-          environment: string
-          registration_status?: string
-          contact_verification?: string
-          renewal_mode?: string
-          expires_at?: string | null
-          provider_checked_at?: string | null
-          next_check_at?: string | null
-          created_at?: string
-          updated_at?: string
-          contact_verification_deadline?: string | null
-        }
-        Update: {
-          id?: string
-          organization_id?: string
-          website_id?: string | null
-          fqdn?: string
-          registrar?: string
-          environment?: string
-          registration_status?: string
-          contact_verification?: string
-          renewal_mode?: string
-          expires_at?: string | null
-          provider_checked_at?: string | null
-          next_check_at?: string | null
-          created_at?: string
-          updated_at?: string
-          contact_verification_deadline?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "domain_registrations_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "domain_registrations_website_id_fkey"
-            columns: ["website_id"]
-            isOneToOne: false
-            referencedRelation: "websites"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-domain_lifecycle_notices: {
-        Row: {
-          id: string
-          organization_id: string
-          registration_id: string
-          kind: string
-          period_key: string
-          delivered_at: string | null
-          created_at: string
-        }
-        ComputedFields: never
-        Insert: {
-          id?: string
-          organization_id: string
-          registration_id: string
-          kind: string
-          period_key: string
-          delivered_at?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          organization_id?: string
-          registration_id?: string
-          kind?: string
-          period_key?: string
-          delivered_at?: string | null
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "domain_lifecycle_notices_registration_id_fkey"
-            columns: ["registration_id"]
-            isOneToOne: false
-            referencedRelation: "domain_registrations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "domain_lifecycle_notices_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "domain_notice_registration_tenant_fk"
-            columns: ["registration_id", "organization_id"]
-            isOneToOne: false
-            referencedRelation: "domain_registrations"
-            referencedColumns: ["id", "organization_id"]
-          },
-        ]
-      }
-domain_support_requests: {
-        Row: {
-          id: string
-          organization_id: string
-          domain_id: string | null
-          registration_id: string | null
-          kind: string
-          status: string
-          requested_by: string
-          assigned_to: string | null
-          created_at: string
-          resolved_at: string | null
-        }
-        ComputedFields: never
-        Insert: {
-          id?: string
-          organization_id: string
-          domain_id?: string | null
-          registration_id?: string | null
-          kind: string
-          status?: string
-          requested_by: string
-          assigned_to?: string | null
-          created_at?: string
-          resolved_at?: string | null
-        }
-        Update: {
-          id?: string
-          organization_id?: string
-          domain_id?: string | null
-          registration_id?: string | null
-          kind?: string
-          status?: string
-          requested_by?: string
-          assigned_to?: string | null
-          created_at?: string
-          resolved_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "domain_support_requests_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "domain_support_requests_domain_id_fkey"
-            columns: ["domain_id"]
-            isOneToOne: false
-            referencedRelation: "domains"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "domain_support_requests_registration_id_fkey"
-            columns: ["registration_id"]
-            isOneToOne: false
-            referencedRelation: "domain_registrations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "domain_support_requests_assigned_to_fkey"
-            columns: ["assigned_to"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "domain_support_registration_tenant_fk"
-            columns: ["registration_id", "organization_id"]
-            isOneToOne: false
-            referencedRelation: "domain_registrations"
-            referencedColumns: ["id", "organization_id"]
-          },
-        ]
-      }
-
     }
     Views: {
       published_express_variants: {
@@ -3908,9 +3900,54 @@ domain_support_requests: {
         Args: { p_actor_id: string; p_organization_id: string }
         Returns: undefined
       }
+      assert_domain_purge_allowed: {
+        Args: { p_organization_id: string }
+        Returns: undefined
+      }
+      assert_domain_retirement_allowed: {
+        Args: { p_organization_id: string }
+        Returns: undefined
+      }
       attach_content_library_media: {
         Args: { p_asset: string; p_collection: string }
         Returns: undefined
+      }
+      authorize_external_dns_write: {
+        Args: { p_claim: string; p_id: string; p_organization_id: string }
+        Returns: undefined
+      }
+      authorize_live_domain_action: {
+        Args: {
+          p_action: string
+          p_order_id: string
+          p_registrar_scope: string
+          p_stripe_account: string
+        }
+        Returns: Json
+      }
+      authorize_live_domain_dns: {
+        Args: {
+          p_account_scope: string
+          p_plan: Json
+          p_registration_id: string
+        }
+        Returns: undefined
+      }
+      bind_live_managed_domain: {
+        Args: {
+          p_actor_id: string
+          p_registration_id: string
+          p_website_id: string
+        }
+        Returns: string
+      }
+      bind_managed_domain: {
+        Args: {
+          p_actor_id: string
+          p_registration_id: string
+          p_website_id: string
+        }
+        Returns: string
       }
       capture_website_lead: {
         Args: {
@@ -3932,6 +3969,18 @@ domain_support_requests: {
       claim_design_sync: {
         Args: { p_project_id: string; p_token: string }
         Returns: boolean
+      }
+      claim_domain_registration: {
+        Args: { p_order_id: string }
+        Returns: boolean
+      }
+      claim_domain_sandbox_contact: {
+        Args: { p_acceptance_id: string; p_account_scope: string }
+        Returns: Json
+      }
+      claim_external_dns_plan: {
+        Args: { p_actor_id: string; p_id: string; p_organization_id: string }
+        Returns: Json
       }
       claim_jobs: {
         Args: { p_lease_seconds?: number; p_limit?: number; p_worker: string }
@@ -3964,6 +4013,23 @@ domain_support_requests: {
           isSetofReturn: true
         }
       }
+      claim_managed_dns_plan: {
+        Args: {
+          p_actor_id: string
+          p_organization_id: string
+          p_plan_id: string
+        }
+        Returns: Json
+      }
+      claim_managed_dns_plan_environment: {
+        Args: {
+          p_actor_id: string
+          p_environment: string
+          p_organization_id: string
+          p_plan_id: string
+        }
+        Returns: Json
+      }
       configure_website_contact: {
         Args: {
           p_booking?: string
@@ -3973,6 +4039,15 @@ domain_support_requests: {
           p_website: string
         }
         Returns: undefined
+      }
+      consume_domain_dns_callback: {
+        Args: {
+          p_approved: boolean
+          p_authorization_id: string
+          p_nonce_digest: string
+          p_organization_id: string
+        }
+        Returns: string
       }
       contact_setup_failed: {
         Args: {
@@ -3985,7 +4060,85 @@ domain_support_requests: {
         Returns: undefined
       }
       contact_widget_credentials: { Args: { p_website: string }; Returns: Json }
+      create_domain_purchase: {
+        Args: {
+          p_actor_id: string
+          p_auto_renew: boolean
+          p_contact_digest: string
+          p_contact_encrypted: string
+          p_contact_id: string
+          p_currency: string
+          p_intent_key: string
+          p_organization_id: string
+          p_quote_id: string
+          p_renewal_policy_version: string
+          p_terms_version: string
+          p_total_minor: number
+        }
+        Returns: string
+      }
+      create_domain_quote: {
+        Args: {
+          p_organization_id: string
+          p_quote?: Json
+          p_registrar_cost?: number
+          p_website_id?: string
+        }
+        Returns: string
+      }
+      create_external_dns_plan: {
+        Args: {
+          p_actor_id: string
+          p_domain_id: string
+          p_id: string
+          p_plan: Json
+          p_token: string
+        }
+        Returns: string
+      }
+      create_live_domain_quote: {
+        Args: {
+          p_cost_minor: number
+          p_expires_at: string
+          p_fqdn: string
+          p_organization_id: string
+          p_renewal_minor: number
+          p_website_id: string
+        }
+        Returns: string
+      }
+      create_live_managed_dns_plan: {
+        Args: { p_actor_id: string; p_plan: Json; p_registration_id: string }
+        Returns: Json
+      }
+      create_managed_dns_plan: {
+        Args: { p_actor_id: string; p_plan: Json; p_registration_id: string }
+        Returns: Json
+      }
       decline_invitation: { Args: { p_invite: string }; Returns: undefined }
+      domain_engine_order_context: {
+        Args: { p_order_id: string }
+        Returns: Json
+      }
+      domain_live_policy: {
+        Args: {
+          p_active?: boolean
+          p_fqdn?: string
+          p_organization_id: string
+          p_policy_id?: string
+          p_website_id?: string
+        }
+        Returns: Json
+      }
+      expire_external_dns_tokens: { Args: never; Returns: number }
+      external_dns_plan: {
+        Args: { p_actor_id: string; p_domain_id: string }
+        Returns: Json
+      }
+      external_dns_release: {
+        Args: { p_actor_id: string; p_domain_id: string }
+        Returns: Json
+      }
       finish_contact_setup: {
         Args: {
           p_account: string
@@ -3998,6 +4151,18 @@ domain_support_requests: {
         }
         Returns: boolean
       }
+      finish_domain_sandbox_contact: {
+        Args: {
+          p_acceptance_id: string
+          p_account_scope: string
+          p_handle: string
+        }
+        Returns: undefined
+      }
+      finish_external_dns_plan: {
+        Args: { p_applied: boolean; p_claim: string; p_id: string }
+        Returns: undefined
+      }
       finish_gmail_draft: {
         Args: {
           p_connected_at: string
@@ -4008,6 +4173,10 @@ domain_support_requests: {
           p_user: string
         }
         Returns: boolean
+      }
+      finish_managed_dns_plan: {
+        Args: { p_applied: boolean; p_claim_token: string; p_plan_id: string }
+        Returns: undefined
       }
       gmail_connection: {
         Args: { p_credentials?: boolean; p_user: string }
@@ -4021,6 +4190,10 @@ domain_support_requests: {
           p_user: string
         }
         Returns: boolean
+      }
+      invalidate_unsubmitted_managed_dns_plan: {
+        Args: { p_claim_token: string; p_plan_id: string }
+        Returns: undefined
       }
       list_my_invitations: {
         Args: never
@@ -4046,6 +4219,14 @@ domain_support_requests: {
           p_org?: string
         }
         Returns: number
+      }
+      managed_dns_plan_status: {
+        Args: {
+          p_actor_id: string
+          p_organization_id: string
+          p_registration_id: string
+        }
+        Returns: Json
       }
       mark_contact_widget_creation: {
         Args: { p_token: string; p_website: string }
@@ -4074,7 +4255,49 @@ domain_support_requests: {
         Returns: boolean
       }
       reconcile_contact_setup: { Args: { p_limit?: number }; Returns: number }
+      record_domain_lifecycle_notice: {
+        Args: {
+          p_kind: string
+          p_period_key: string
+          p_registration_id: string
+        }
+        Returns: boolean
+      }
+      record_domain_registration: {
+        Args: {
+          p_account_scope: string
+          p_domain: Json
+          p_external_id: string
+          p_order_id: string
+        }
+        Returns: string
+      }
+      record_live_domain_registration: {
+        Args: {
+          p_account_scope: string
+          p_domain: Json
+          p_external_id: string
+          p_order_id: string
+        }
+        Returns: string
+      }
+      record_managed_domain_signal: {
+        Args: { p_account_scope: string; p_payload_digest: string }
+        Returns: boolean
+      }
       remove_gmail_connection: { Args: { p_user: string }; Returns: undefined }
+      request_domain_assistance: {
+        Args: { p_domain_id: string }
+        Returns: string
+      }
+      request_domain_release: {
+        Args: { p_registration_id: string }
+        Returns: string
+      }
+      request_managed_domain_support: {
+        Args: { p_actor_id: string; p_kind: string; p_registration_id: string }
+        Returns: string
+      }
       reserve_content_media: {
         Args: {
           p_collection: string
@@ -4208,6 +4431,20 @@ domain_support_requests: {
         Args: { p_automatic: boolean; p_website: string }
         Returns: undefined
       }
+      sync_managed_domain_state: {
+        Args: {
+          p_account_scope: string
+          p_external_id: string
+          p_observed_at: string
+          p_registration_id: string
+          p_snapshot: Json
+        }
+        Returns: boolean
+      }
+      transition_domain_order: {
+        Args: { p_order_id: string; p_patch: Json }
+        Returns: undefined
+      }
       unpublish_website_blog_post: {
         Args: { p_expected: string; p_post: string; p_website: string }
         Returns: string
@@ -4226,126 +4463,6 @@ domain_support_requests: {
         Args: { p_website: string }
         Returns: boolean
       }
-managed_dns_plan_status: { Args: { p_registration_id: string; p_organization_id: string; p_actor_id: string }; Returns: Json }
-sync_managed_domain_state: { Args: { p_registration_id: string; p_snapshot: Json; p_external_id: string; p_account_scope: string; p_observed_at: string }; Returns: boolean }
-record_managed_domain_signal: { Args: { p_account_scope: string; p_payload_digest: string }; Returns: boolean }
-bind_managed_domain: { Args: { p_registration_id: string; p_website_id: string; p_actor_id: string }; Returns: string }
-create_managed_dns_plan: { Args: { p_registration_id: string; p_actor_id: string; p_plan: Json }; Returns: Json }
-claim_managed_dns_plan: { Args: { p_plan_id: string; p_organization_id: string; p_actor_id: string }; Returns: Json }
-finish_managed_dns_plan: { Args: { p_plan_id: string; p_claim_token: string; p_applied: boolean }; Returns: undefined }
-assert_domain_retirement_allowed: {
-        Args: { p_organization_id: string }
-        Returns: undefined
-      }
-claim_domain_registration: {
-        Args: { p_order_id: string }
-        Returns: boolean
-      }
-create_domain_purchase: {
-        Args: {
-          p_actor_id: string
-          p_auto_renew: boolean
-          p_contact_digest: string
-          p_contact_encrypted: string
-          p_contact_id: string
-          p_currency: string
-          p_intent_key: string
-          p_organization_id: string
-          p_quote_id: string
-          p_renewal_policy_version: string
-          p_terms_version: string
-          p_total_minor: number
-        }
-        Returns: string
-      }
-create_domain_quote: {
-        Args: {
-          p_organization_id: string
-          p_quote?: Json
-          p_registrar_cost?: number
-          p_website_id?: string
-        }
-        Returns: string
-      }
-domain_engine_order_context: {
-        Args: { p_order_id: string }
-        Returns: Json
-      }
-record_domain_registration: {
-        Args: {
-          p_account_scope: string
-          p_domain: Json
-          p_external_id: string
-          p_order_id: string
-        }
-        Returns: string
-      }
-transition_domain_order: {
-        Args: { p_order_id: string; p_patch: Json }
-        Returns: undefined
-      }
-request_domain_assistance: {
-        Args: { p_domain_id: string }
-        Returns: string
-      }
-request_domain_release: {
-        Args: { p_registration_id: string }
-        Returns: string
-      }
-consume_domain_dns_callback: {
-        Args: {
-          p_approved: boolean
-          p_authorization_id: string
-          p_nonce_digest: string
-          p_organization_id: string
-        }
-        Returns: string
-      }
-record_domain_lifecycle_notice: {
-        Args: {
-          p_kind: string
-          p_period_key: string
-          p_registration_id: string
-        }
-        Returns: boolean
-      }
-assert_domain_purge_allowed: {
-        Args: { p_organization_id: string }
-        Returns: undefined
-      }
-claim_domain_sandbox_contact: {
-        Args: { p_acceptance_id: string; p_account_scope: string }
-        Returns: Json
-      }
-finish_domain_sandbox_contact: {
-        Args: {
-          p_acceptance_id: string
-          p_account_scope: string
-          p_handle: string
-        }
-        Returns: undefined
-      }
-domain_live_policy: { Args: {p_organization_id: string; p_website_id?: string; p_fqdn?: string; p_policy_id?: string; p_active?: boolean}; Returns: Json }
-create_live_domain_quote: { Args: {p_organization_id: string; p_website_id: string; p_fqdn: string; p_cost_minor: number; p_renewal_minor: number; p_expires_at: string}; Returns: string }
-authorize_live_domain_action: { Args: {p_order_id: string; p_action: string; p_registrar_scope: string; p_stripe_account: string}; Returns: Json }
-record_live_domain_registration: { Args: {p_order_id: string; p_domain: Json; p_external_id: string; p_account_scope: string}; Returns: string }
-bind_live_managed_domain: { Args: {p_registration_id: string; p_website_id: string; p_actor_id: string}; Returns: string }
-create_live_managed_dns_plan: { Args: {p_registration_id: string; p_actor_id: string; p_plan: Json}; Returns: Json }
-authorize_live_domain_dns: { Args: {p_registration_id: string; p_plan: Json; p_account_scope: string}; Returns: undefined }
-invalidate_unsubmitted_managed_dns_plan: {Args:{p_plan_id:string;p_claim_token:string};Returns:undefined}
-claim_managed_dns_plan_environment: { Args: {p_plan_id:string;p_organization_id:string;p_actor_id:string;p_environment:string};Returns:Json }
-request_managed_domain_support: {Args:{p_registration_id:string;p_actor_id:string;p_kind:string};Returns:string}
-expire_external_dns_tokens:{Args:Record<PropertyKey,never>;Returns:number}
-external_dns_release:{Args:{p_domain_id:string;p_actor_id:string};Returns:Json}
-create_external_dns_plan:{Args:{p_id:string;p_domain_id:string;p_actor_id:string;p_token:string;p_plan:Json};Returns:string}
-external_dns_plan:{Args:{p_domain_id:string;p_actor_id:string};Returns:Json}
-claim_external_dns_plan:{Args:{p_id:string;p_actor_id:string;p_organization_id:string};Returns:Json}
-authorize_external_dns_write:{Args:{p_id:string;p_claim:string;p_organization_id:string};Returns:undefined}
-finish_external_dns_plan:{Args:{p_id:string;p_claim:string;p_applied:boolean};Returns:undefined}
-
-
-
-
     }
     Enums: {
       actor_kind: "user" | "staff" | "system" | "provider"
@@ -4470,6 +4587,304 @@ finish_external_dns_plan:{Args:{p_id:string;p_claim:string;p_applied:boolean};Re
         }
         Relationships: []
       }
+      domain_authorization_secrets: {
+        Row: {
+          authorization_id: string
+          callback_nonce_digest: string
+          consumed_at: string | null
+          encrypted_token: string | null
+          organization_id: string
+        }
+        Insert: {
+          authorization_id: string
+          callback_nonce_digest: string
+          consumed_at?: string | null
+          encrypted_token?: string | null
+          organization_id: string
+        }
+        Update: {
+          authorization_id?: string
+          callback_nonce_digest?: string
+          consumed_at?: string | null
+          encrypted_token?: string | null
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      domain_contact_submissions: {
+        Row: {
+          account_scope: string
+          contact_id: string
+          created_at: string
+          organization_id: string
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          account_scope: string
+          contact_id: string
+          created_at?: string
+          organization_id: string
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          account_scope?: string
+          contact_id?: string
+          created_at?: string
+          organization_id?: string
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_contact_submissions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: true
+            referencedRelation: "domain_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      domain_contacts: {
+        Row: {
+          contact_digest: string
+          created_at: string
+          encrypted_payload: string
+          id: string
+          organization_id: string
+        }
+        Insert: {
+          contact_digest: string
+          created_at?: string
+          encrypted_payload: string
+          id?: string
+          organization_id: string
+        }
+        Update: {
+          contact_digest?: string
+          created_at?: string
+          encrypted_payload?: string
+          id?: string
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      domain_dns_releases: {
+        Row: {
+          approval_reference: string
+          approved_by: string
+          created_at: string
+          domain_id: string
+          hostname: string
+          organization_id: string
+          revoked_at: string | null
+          valid_until: string
+          website_id: string
+        }
+        Insert: {
+          approval_reference: string
+          approved_by: string
+          created_at?: string
+          domain_id: string
+          hostname: string
+          organization_id: string
+          revoked_at?: string | null
+          valid_until: string
+          website_id: string
+        }
+        Update: {
+          approval_reference?: string
+          approved_by?: string
+          created_at?: string
+          domain_id?: string
+          hostname?: string
+          organization_id?: string
+          revoked_at?: string | null
+          valid_until?: string
+          website_id?: string
+        }
+        Relationships: []
+      }
+      domain_external_dns_plans: {
+        Row: {
+          claim_token: string | null
+          consented_at: string | null
+          created_at: string
+          domain_id: string
+          encrypted_token: string | null
+          expires_at: string
+          id: string
+          organization_id: string
+          plan: Json
+          requested_by: string
+          status: string
+          website_id: string
+        }
+        Insert: {
+          claim_token?: string | null
+          consented_at?: string | null
+          created_at?: string
+          domain_id: string
+          encrypted_token?: string | null
+          expires_at?: string
+          id: string
+          organization_id: string
+          plan: Json
+          requested_by: string
+          status?: string
+          website_id: string
+        }
+        Update: {
+          claim_token?: string | null
+          consented_at?: string | null
+          created_at?: string
+          domain_id?: string
+          encrypted_token?: string | null
+          expires_at?: string
+          id?: string
+          organization_id?: string
+          plan?: Json
+          requested_by?: string
+          status?: string
+          website_id?: string
+        }
+        Relationships: []
+      }
+      domain_live_policies: {
+        Row: {
+          approval_reference: string
+          approved_by: string
+          created_at: string
+          dns_approved: boolean
+          fqdn: string | null
+          id: string
+          max_client_minor: number
+          max_registrar_minor: number
+          organization_id: string
+          registrant_country: string
+          registrant_postal_code: string
+          registrant_region: string
+          registrar_scope: string
+          registrar_tax_confirmation: string
+          registration_agreement_url: string
+          renewal_model: string
+          renewal_policy_version: string
+          retention_days: number
+          revoked_at: string | null
+          service_fee_minor: number
+          stripe_account: string
+          tax_description: string
+          tax_rate_bps: number
+          terms_url: string
+          terms_version: string
+          valid_until: string
+          website_id: string
+        }
+        Insert: {
+          approval_reference: string
+          approved_by: string
+          created_at?: string
+          dns_approved?: boolean
+          fqdn?: string | null
+          id?: string
+          max_client_minor: number
+          max_registrar_minor: number
+          organization_id: string
+          registrant_country: string
+          registrant_postal_code: string
+          registrant_region: string
+          registrar_scope: string
+          registrar_tax_confirmation: string
+          registration_agreement_url: string
+          renewal_model: string
+          renewal_policy_version: string
+          retention_days: number
+          revoked_at?: string | null
+          service_fee_minor: number
+          stripe_account: string
+          tax_description: string
+          tax_rate_bps: number
+          terms_url: string
+          terms_version: string
+          valid_until: string
+          website_id: string
+        }
+        Update: {
+          approval_reference?: string
+          approved_by?: string
+          created_at?: string
+          dns_approved?: boolean
+          fqdn?: string | null
+          id?: string
+          max_client_minor?: number
+          max_registrar_minor?: number
+          organization_id?: string
+          registrant_country?: string
+          registrant_postal_code?: string
+          registrant_region?: string
+          registrar_scope?: string
+          registrar_tax_confirmation?: string
+          registration_agreement_url?: string
+          renewal_model?: string
+          renewal_policy_version?: string
+          retention_days?: number
+          revoked_at?: string | null
+          service_fee_minor?: number
+          stripe_account?: string
+          tax_description?: string
+          tax_rate_bps?: number
+          terms_url?: string
+          terms_version?: string
+          valid_until?: string
+          website_id?: string
+        }
+        Relationships: []
+      }
+      domain_live_reservations: {
+        Row: {
+          created_at: string
+          order_id: string
+          policy_id: string
+        }
+        Insert: {
+          created_at?: string
+          order_id: string
+          policy_id: string
+        }
+        Update: {
+          created_at?: string
+          order_id?: string
+          policy_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_live_reservations_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: true
+            referencedRelation: "domain_live_policies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      domain_quote_costs: {
+        Row: {
+          created_at: string
+          quote_id: string
+          registrar_amount_minor: number
+        }
+        Insert: {
+          created_at?: string
+          quote_id: string
+          registrar_amount_minor: number
+        }
+        Update: {
+          created_at?: string
+          quote_id?: string
+          registrar_amount_minor?: number
+        }
+        Relationships: []
+      }
       gmail_connections: {
         Row: {
           account_email: string
@@ -4512,6 +4927,72 @@ finish_external_dns_plan:{Args:{p_id:string;p_claim:string;p_applied:boolean};Re
         }
         Relationships: []
       }
+      managed_domain_dns_plans: {
+        Row: {
+          claim_token: string | null
+          consented_at: string | null
+          created_at: string
+          domain_id: string
+          expires_at: string
+          finished_at: string | null
+          id: string
+          organization_id: string
+          plan: Json
+          registration_id: string
+          requested_by: string
+          status: string
+          website_id: string
+        }
+        Insert: {
+          claim_token?: string | null
+          consented_at?: string | null
+          created_at?: string
+          domain_id: string
+          expires_at?: string
+          finished_at?: string | null
+          id?: string
+          organization_id: string
+          plan: Json
+          registration_id: string
+          requested_by: string
+          status?: string
+          website_id: string
+        }
+        Update: {
+          claim_token?: string | null
+          consented_at?: string | null
+          created_at?: string
+          domain_id?: string
+          expires_at?: string
+          finished_at?: string | null
+          id?: string
+          organization_id?: string
+          plan?: Json
+          registration_id?: string
+          requested_by?: string
+          status?: string
+          website_id?: string
+        }
+        Relationships: []
+      }
+      managed_domain_signals: {
+        Row: {
+          account_scope: string
+          payload_digest: string
+          received_at: string
+        }
+        Insert: {
+          account_scope: string
+          payload_digest: string
+          received_at?: string
+        }
+        Update: {
+          account_scope?: string
+          payload_digest?: string
+          received_at?: string
+        }
+        Relationships: []
+      }
       rate_limits: {
         Row: {
           hits: number
@@ -4530,112 +5011,6 @@ finish_external_dns_plan:{Args:{p_id:string;p_claim:string;p_applied:boolean};Re
         }
         Relationships: []
       }
-domain_authorization_secrets: {
-        Row: {
-          authorization_id: string
-          organization_id: string
-          callback_nonce_digest: string
-          encrypted_token: string | null
-          consumed_at: string | null
-        }
-        ComputedFields: never
-        Insert: {
-          authorization_id: string
-          organization_id: string
-          callback_nonce_digest: string
-          encrypted_token?: string | null
-          consumed_at?: string | null
-        }
-        Update: {
-          authorization_id?: string
-          organization_id?: string
-          callback_nonce_digest?: string
-          encrypted_token?: string | null
-          consumed_at?: string | null
-        }
-        Relationships: []
-      }
-domain_contacts: {
-        Row: {
-          id: string
-          organization_id: string
-          encrypted_payload: string
-          contact_digest: string
-          created_at: string
-        }
-        ComputedFields: never
-        Insert: {
-          id?: string
-          organization_id: string
-          encrypted_payload: string
-          contact_digest: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          organization_id?: string
-          encrypted_payload?: string
-          contact_digest?: string
-          created_at?: string
-        }
-        Relationships: []
-      }
-domain_quote_costs: {
-        Row: {
-          quote_id: string
-          registrar_amount_minor: number
-          created_at: string
-        }
-        ComputedFields: never
-        Insert: {
-          quote_id: string
-          registrar_amount_minor: number
-          created_at?: string
-        }
-        Update: {
-          quote_id?: string
-          registrar_amount_minor?: number
-          created_at?: string
-        }
-        Relationships: []
-      }
-domain_contact_submissions: {
-        Row: {
-          contact_id: string
-          organization_id: string
-          account_scope: string
-          state: string
-          created_at: string
-          updated_at: string
-        }
-        ComputedFields: never
-        Insert: {
-          contact_id: string
-          organization_id: string
-          account_scope: string
-          state?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          contact_id?: string
-          organization_id?: string
-          account_scope?: string
-          state?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "domain_contact_submissions_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: true
-            referencedRelation: "domain_contacts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-
     }
     Views: {
       [_ in never]: never
@@ -4758,6 +5133,7 @@ domain_contact_submissions: {
         Args: { p_actor_id: string; p_organization_id: string }
         Returns: undefined
       }
+      safe_external_dns_plan: { Args: { p: Json }; Returns: Json }
       shares_org_with: { Args: { p_user: string }; Returns: boolean }
       validate_content_records: {
         Args: {
@@ -4778,8 +5154,6 @@ domain_contact_submissions: {
           value: Json
         }[]
       }
-
-
     }
     Enums: {
       [_ in never]: never

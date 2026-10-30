@@ -96,6 +96,16 @@ describe("domain transaction orchestration", () => {
     expect(payments.cancellations.size).toBe(0);
     expect(store.orders.get("order")?.registrationState).toBe("registered");
   });
+  it("releases payment after failed discovery without submitting or abandoning an unknown purchase", async () => {
+    const { store, payments, registrar } = setup();
+    vi.spyOn(registrar, "searchAndPrice").mockRejectedValue(new Error("lookup timeout"));
+    const buy = vi.spyOn(registrar, "register");
+    await processDomainOrder(store, registrar, payments, "order");
+    await processDomainOrder(store, registrar, payments, "order");
+    expect(buy).not.toHaveBeenCalled();
+    expect(payments.cancellations.size).toBe(1);
+    expect(store.orders.get("order")).toMatchObject({ registrationState: "failed", paymentState: "canceled", reason: "provider_failed" });
+  });
   it("refuses a stale final registrar quote", async () => {
     const { store, payments, registrar } = setup();
     const quotes = await registrar.searchAndPrice(["vigil-fixture.com"]);

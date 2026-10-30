@@ -1,3 +1,4 @@
+import { boundedDomainBody } from "@/lib/vigil/domain-engine/request-body";
 import { z } from "zod";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
       limit: 30,
       windowSeconds: 3600,
     });
-    const text = await request.text();
+    const text = await boundedDomainBody(request, 16000);
     if (Buffer.byteLength(text) > 16000)
       throw new DomainEngineError(
         "request_too_large",

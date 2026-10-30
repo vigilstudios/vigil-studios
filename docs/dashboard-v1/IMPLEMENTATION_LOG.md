@@ -1355,3 +1355,12 @@ Verified actual production Name.com connectivity/funding/availability and Stripe
 Took private application schema/data backups and rehearsed the exact fourteen pending migrations against a fresh production schema copy without customer data; domain engine/RLS, existing handoff/readiness/admin and Gmail SQL assertions passed. Added prepaid funding preflight before checkout and registration, with authorization release only for proven non-submission. Added explicit organization ownership disclosure and corrected stale previous-order UI state; two new embedded Stripe test checkout mount checks used no card/payment and their unused sessions were expired.
 
 Final validation: 167 files / 2,949 tests, types, lint, production build, stable-source and private bundle checks. Current release preparation is `domain-engine-v2/PRODUCTION_PREPARATION_20261029.md`; `CLIENT_UI_HANDOFF.md` covers the later visual redesign. Owner requested deployment to main only after a later instruction.
+
+
+### 30 October — final Domain Engine security audit and gated release
+
+Owner authorized the final audit, repairs and production deployment. Patched dependency advisories (Next/ESLint 16.4.3, Zod 4.6.7, Resend 6.35.0, Vitest 4.1.12, Vite 7.3.7 and qs), preserving editor/navigation validation defaults, collections and email reply behavior. Added CI dependency-audit enforcement. Fixed pre-submission registrar discovery failure to release authorization safely; uncertain billable requests still preserve the original order. DNS credential cleanup now runs even with admission disabled, and the legacy existing-domain API bounds its request stream before parsing.
+
+Validation passed: 168 files / 2,952 tests, TypeScript, lint, four dependency compatibility/security assertions, clean lockfile install, zero known dependency vulnerabilities, production build and complete local migration/RLS checks. Took fresh private public/vigil schema and data backups, verified all fourteen migration hashes against the reviewed manifest and applied them to production; the subsequent dry run is clean. Regenerated types from the linked production database. Existing dashboard redesign and Preview/approved Deploy Live source are retained.
+
+Deploy with admission disabled: registrar credit is zero and no spending or DNS policies were installed. No payment, purchase, renewal, transfer, funding or production DNS operation was performed. Current audit/release scope and remaining genuine-client activation are in domain-engine-v2/FINAL_AUDIT_AND_RELEASE_20261030.md.

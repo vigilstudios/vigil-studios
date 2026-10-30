@@ -37,7 +37,7 @@ const domainSchema = z.object({
   autorenewEnabled: z.boolean().default(false),
   locks: z.array(z.string()).default([]),
   nameservers: z.array(z.string()).default([]),
-  contacts: z.object({ registrant: z.record(z.unknown()) }),
+  contacts: z.object({ registrant: z.record(z.string(), z.unknown()) }),
 });
 const orderSchema = z.object({
   id: z.number().int().positive(),

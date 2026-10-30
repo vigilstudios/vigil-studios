@@ -1,0 +1,18 @@
+{
+  "tests": 2952,
+  "testFiles": 168,
+  "dependencyAdvisories": 0,
+  "dbValidation": "passed",
+  "typecheck": "passed",
+  "lint": "passed",
+  "build": "passed",
+  "cleanInstall": "passed",
+  "reviewedMigrationsApplied": 14,
+  "migrationCount": 65,
+  "sourceFilesScanned": 190,
+  "browserBundlesScanned": 172,
+  "privateValuesScanned": 12,
+  "secretMatches": 0,
+  "financialOrDnsWrites": 0,
+  "admission": "disabled"
+}

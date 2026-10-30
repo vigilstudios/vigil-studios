@@ -6,6 +6,7 @@ import type {
   RegistrarOrder,
   RegistrantContact,
   RegistrarName,
+  RegistrarQuote,
 } from "./contracts";
 
 export type RegistrationState =
@@ -162,7 +163,14 @@ export async function processDomainOrder(
     await failBeforeRegistration(store, payments, order, "quote_expired");
     return;
   }
-  const [fresh] = await registrar.searchAndPrice([order.fqdn], order.years);
+  let fresh: RegistrarQuote | undefined;
+  try {
+    [fresh] = await registrar.searchAndPrice([order.fqdn], order.years);
+  } catch {
+    // Only discovery has run. A failed lookup cannot have registered the name.
+    await failBeforeRegistration(store, payments, order, "provider_failed");
+    return;
+  }
   if (
     !fresh ||
     fresh.fqdn !== order.fqdn ||

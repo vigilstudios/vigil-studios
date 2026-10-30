@@ -1,8 +1,9 @@
 # Vigil Domain Engine v2
 
-Production preparation is complete for a restricted release. **The feature remains disabled and has not been deployed to main.** The owner reserved deployment for a later instruction on 29 October 2026.
+The final audit and production release were authorized on 30 October 2026. **Automated purchasing and DNS admission remain disabled pending real-client activation.** The reviewed domain migrations are installed in production; see the release record for checks and activation requirements.
 
-- [Current production preparation and release sequence](PRODUCTION_PREPARATION_20261029.md): verified provider setup, funding protection, migrations, validation, remaining activation steps and rollback.
+- [Final audit and release record](FINAL_AUDIT_AND_RELEASE_20261030.md).
+- [Earlier production preparation and release sequence](PRODUCTION_PREPARATION_20261029.md): verified provider setup, funding protection, migrations, validation, remaining activation steps and rollback.
 - [Client UI/UX handoff](CLIENT_UI_HANDOFF.md): current dashboard/onboarding integration points, API contracts, state/consent requirements and screenshot acceptance.
 - [Actual sandbox purchase and DNS walkthrough](SANDBOX_WALKTHROUGH_20261029.md): fictional customer, actual Name.com sandbox and Stripe test-mode capture, preserved mail records and clearly labelled limitations.
 - [Reviewed release migration manifest](evidence/release-migrations-20261029.json).

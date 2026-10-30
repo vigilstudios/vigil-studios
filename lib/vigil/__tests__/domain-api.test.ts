@@ -20,7 +20,7 @@ vi.mock("../services/dns", () => ({
   detectRegistrar: async () => ({ registrar: "other" }),
 }));
 import { POST } from "@/app/api/domain-engine/route";
-const project = "10000000-0000-0000-0000-000000000001";
+const project = "10000000-0000-4000-8000-000000000001";
 let admin: FakeAdmin;
 function request(body: unknown, origin = "https://vigil.example.com") {
   return new NextRequest("https://vigil.example.com/api/domain-engine", {

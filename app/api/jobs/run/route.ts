@@ -49,7 +49,8 @@ async function handle(request: NextRequest) {
   try {
     const admin = createAdminClient();
     await reconcileContactSetup(admin).catch(() => console.error("Contact setup reconciliation could not run; queued jobs will continue."));
-    if(process.env.VIGIL_DOMAIN_CLOUDFLARE_ENABLED === "true")await admin.rpc("expire_external_dns_tokens").then(result=>{if(result.error)console.error("Expired DNS token cleanup needs retry.");});
+    // Disabling DNS admission must not extend the lifetime of saved credentials.
+    await admin.rpc("expire_external_dns_tokens").then(result=>{if(result.error)console.error("Expired DNS token cleanup needs retry.");});
     const outcomes = await runDueJobs(admin, { worker, limit });
     const reconcile =
       request.nextUrl.searchParams.get("reconcile") === "0"

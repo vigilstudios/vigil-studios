@@ -22,7 +22,7 @@ export const registrantSchema = z
         country: z.string().regex(/^[A-Z]{2}$/),
       })
       .strict(),
-    additional: z.record(z.string().max(200)).optional(),
+    additional: z.record(z.string(), z.string().max(200)).optional(),
   })
   .strict();
 

@@ -22,7 +22,7 @@ const contractSchema = z.object({
   contentConstraints: z.string().min(1).optional(), mediaRequirements: z.string().min(1).optional(),
   contentSchema: z.string().min(1), mediaSchema: z.string().min(1).nullable(), structuralDNA: z.string().min(1), variants: strings,
   typography: z.object({ profiles: z.array(z.enum(typographyIds)).min(1), roles: z.array(z.enum(typeRoles)).min(1), behavior: z.string().min(1) }).strict(),
-  artDirectionChoices: z.record(z.array(z.enum(artIds)).min(1)).optional(),
+  artDirectionChoices: z.record(z.string(), z.array(z.enum(artIds)).min(1)).optional(),
   artBehavior: z.string().min(1), motionIntensities: z.array(z.enum(motionLanguages)).min(1),
   artDirections: z.array(z.enum(artIds)).min(1), motion: z.array(z.enum(motionPresetNames)).min(1),
   overrides: z.array(z.enum(["typography", "artDirection", "motion"])), icons: z.array(z.enum(coreIconNames)),
