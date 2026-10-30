@@ -1000,6 +1000,7 @@ export type Database = {
           renewal_estimate_minor: number | null
           subtotal_minor: number
           tax_minor: number
+          tax_status: string
           total_minor: number
           version: number
           website_id: string | null
@@ -1019,6 +1020,7 @@ export type Database = {
           renewal_estimate_minor?: number | null
           subtotal_minor: number
           tax_minor: number
+          tax_status?: string
           total_minor: number
           version?: number
           website_id?: string | null
@@ -1038,6 +1040,7 @@ export type Database = {
           renewal_estimate_minor?: number | null
           subtotal_minor?: number
           tax_minor?: number
+          tax_status?: string
           total_minor?: number
           version?: number
           website_id?: string | null
@@ -3978,6 +3981,14 @@ export type Database = {
         Args: { p_acceptance_id: string; p_account_scope: string }
         Returns: Json
       }
+      claim_domain_tax_submission: {
+        Args: {
+          p_quote_id: string
+          p_reversal?: boolean
+          p_stripe_account: string
+        }
+        Returns: boolean
+      }
       claim_external_dns_plan: {
         Args: { p_actor_id: string; p_id: string; p_organization_id: string }
         Returns: Json
@@ -4115,11 +4126,27 @@ export type Database = {
         Args: { p_actor_id: string; p_plan: Json; p_registration_id: string }
         Returns: Json
       }
+      create_taxed_domain_quote: {
+        Args: {
+          p_actor_id: string
+          p_address_digest: string
+          p_breakdown: Json
+          p_calculation_id: string
+          p_organization_id: string
+          p_provider_expires_at: string
+          p_quote_id: string
+          p_stripe_account: string
+          p_tax_minor: number
+          p_total_minor: number
+        }
+        Returns: string
+      }
       decline_invitation: { Args: { p_invite: string }; Returns: undefined }
       domain_engine_order_context: {
         Args: { p_order_id: string }
         Returns: Json
       }
+      domain_launch_profile: { Args: never; Returns: Json }
       domain_live_policy: {
         Args: {
           p_active?: boolean
@@ -4127,6 +4154,22 @@ export type Database = {
           p_organization_id: string
           p_policy_id?: string
           p_website_id?: string
+        }
+        Returns: Json
+      }
+      domain_operations_health: { Args: never; Returns: Json }
+      domain_record_review_queue: { Args: { p_limit?: number }; Returns: Json }
+      domain_tax_quote: {
+        Args: { p_organization_id: string; p_quote_id: string }
+        Returns: Json
+      }
+      domain_tax_reconciliation: { Args: { p_limit?: number }; Returns: Json }
+      ensure_domain_website_policy: {
+        Args: {
+          p_actor_id: string
+          p_organization_id: string
+          p_profile_id: string
+          p_website_id: string
         }
         Returns: Json
       }
@@ -4271,6 +4314,16 @@ export type Database = {
           p_order_id: string
         }
         Returns: string
+      }
+      record_domain_tax_result: {
+        Args: {
+          p_failure_code?: string
+          p_quote_id: string
+          p_reversal_id?: string
+          p_stripe_account: string
+          p_transaction_id?: string
+        }
+        Returns: undefined
       }
       record_live_domain_registration: {
         Args: {
@@ -4751,20 +4804,97 @@ export type Database = {
         }
         Relationships: []
       }
+      domain_launch_profiles: {
+        Row: {
+          allowed_country: string
+          approval_reference: string
+          approved_by: string
+          created_at: string
+          fee_tax_code: string | null
+          id: string
+          max_client_minor: number
+          max_registrar_minor: number
+          purchasing_enabled: boolean
+          registrar_scope: string
+          registration_agreement_url: string
+          renewal_policy_version: string
+          retention_days: number
+          revoked_at: string | null
+          service_fee_minor: number
+          stripe_account: string
+          supplier_tax_reference: string | null
+          tax_code: string | null
+          tax_review_reference: string | null
+          terms_url: string
+          terms_version: string
+          valid_until: string
+        }
+        Insert: {
+          allowed_country: string
+          approval_reference: string
+          approved_by: string
+          created_at?: string
+          fee_tax_code?: string | null
+          id?: string
+          max_client_minor: number
+          max_registrar_minor: number
+          purchasing_enabled?: boolean
+          registrar_scope: string
+          registration_agreement_url: string
+          renewal_policy_version: string
+          retention_days: number
+          revoked_at?: string | null
+          service_fee_minor: number
+          stripe_account: string
+          supplier_tax_reference?: string | null
+          tax_code?: string | null
+          tax_review_reference?: string | null
+          terms_url: string
+          terms_version: string
+          valid_until: string
+        }
+        Update: {
+          allowed_country?: string
+          approval_reference?: string
+          approved_by?: string
+          created_at?: string
+          fee_tax_code?: string | null
+          id?: string
+          max_client_minor?: number
+          max_registrar_minor?: number
+          purchasing_enabled?: boolean
+          registrar_scope?: string
+          registration_agreement_url?: string
+          renewal_policy_version?: string
+          retention_days?: number
+          revoked_at?: string | null
+          service_fee_minor?: number
+          stripe_account?: string
+          supplier_tax_reference?: string | null
+          tax_code?: string | null
+          tax_review_reference?: string | null
+          terms_url?: string
+          terms_version?: string
+          valid_until?: string
+        }
+        Relationships: []
+      }
       domain_live_policies: {
         Row: {
           approval_reference: string
           approved_by: string
           created_at: string
           dns_approved: boolean
+          fee_tax_code: string | null
           fqdn: string | null
           id: string
+          launch_profile_id: string | null
           max_client_minor: number
           max_registrar_minor: number
           organization_id: string
           registrant_country: string
-          registrant_postal_code: string
-          registrant_region: string
+          registrant_postal_code: string | null
+          registrant_region: string | null
           registrar_scope: string
           registrar_tax_confirmation: string
           registration_agreement_url: string
@@ -4774,8 +4904,10 @@ export type Database = {
           revoked_at: string | null
           service_fee_minor: number
           stripe_account: string
+          tax_code: string | null
           tax_description: string
-          tax_rate_bps: number
+          tax_mode: string
+          tax_rate_bps: number | null
           terms_url: string
           terms_version: string
           valid_until: string
@@ -4786,14 +4918,16 @@ export type Database = {
           approved_by: string
           created_at?: string
           dns_approved?: boolean
+          fee_tax_code?: string | null
           fqdn?: string | null
           id?: string
+          launch_profile_id?: string | null
           max_client_minor: number
           max_registrar_minor: number
           organization_id: string
           registrant_country: string
-          registrant_postal_code: string
-          registrant_region: string
+          registrant_postal_code?: string | null
+          registrant_region?: string | null
           registrar_scope: string
           registrar_tax_confirmation: string
           registration_agreement_url: string
@@ -4803,8 +4937,10 @@ export type Database = {
           revoked_at?: string | null
           service_fee_minor: number
           stripe_account: string
+          tax_code?: string | null
           tax_description: string
-          tax_rate_bps: number
+          tax_mode?: string
+          tax_rate_bps?: number | null
           terms_url: string
           terms_version: string
           valid_until: string
@@ -4815,14 +4951,16 @@ export type Database = {
           approved_by?: string
           created_at?: string
           dns_approved?: boolean
+          fee_tax_code?: string | null
           fqdn?: string | null
           id?: string
+          launch_profile_id?: string | null
           max_client_minor?: number
           max_registrar_minor?: number
           organization_id?: string
           registrant_country?: string
-          registrant_postal_code?: string
-          registrant_region?: string
+          registrant_postal_code?: string | null
+          registrant_region?: string | null
           registrar_scope?: string
           registrar_tax_confirmation?: string
           registration_agreement_url?: string
@@ -4832,14 +4970,24 @@ export type Database = {
           revoked_at?: string | null
           service_fee_minor?: number
           stripe_account?: string
+          tax_code?: string | null
           tax_description?: string
-          tax_rate_bps?: number
+          tax_mode?: string
+          tax_rate_bps?: number | null
           terms_url?: string
           terms_version?: string
           valid_until?: string
           website_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "domain_live_policies_launch_profile_id_fkey"
+            columns: ["launch_profile_id"]
+            isOneToOne: false
+            referencedRelation: "domain_launch_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       domain_live_reservations: {
         Row: {
@@ -4882,6 +5030,142 @@ export type Database = {
           created_at?: string
           quote_id?: string
           registrar_amount_minor?: number
+        }
+        Relationships: []
+      }
+      domain_record_holds: {
+        Row: {
+          contact_id: string
+          id: string
+          placed_at: string
+          placed_by: string
+          reason: string
+          reference: string
+          released_at: string | null
+          released_by: string | null
+        }
+        Insert: {
+          contact_id: string
+          id?: string
+          placed_at?: string
+          placed_by: string
+          reason: string
+          reference: string
+          released_at?: string | null
+          released_by?: string | null
+        }
+        Update: {
+          contact_id?: string
+          id?: string
+          placed_at?: string
+          placed_by?: string
+          reason?: string
+          reference?: string
+          released_at?: string | null
+          released_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_record_holds_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "domain_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      domain_retention_reviews: {
+        Row: {
+          contact_id: string
+          created_at: string
+          filing_anchor_date: string
+          id: string
+          review_reference: string
+          reviewed_by: string
+          statutory_retain_until: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          filing_anchor_date: string
+          id?: string
+          review_reference: string
+          reviewed_by: string
+          statutory_retain_until: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          filing_anchor_date?: string
+          id?: string
+          review_reference?: string
+          reviewed_by?: string
+          statutory_retain_until?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_retention_reviews_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "domain_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      domain_tax_quotes: {
+        Row: {
+          address_digest: string
+          breakdown: Json
+          calculation_link_id: string
+          created_at: string
+          failure_code: string | null
+          first_submission_at: string | null
+          next_check_at: string
+          provider_expires_at: string
+          quote_id: string
+          reversal_link_id: string | null
+          reversal_submission_at: string | null
+          state: string
+          stripe_account: string
+          tax_minor: number
+          total_minor: number
+          transaction_link_id: string | null
+        }
+        Insert: {
+          address_digest: string
+          breakdown: Json
+          calculation_link_id: string
+          created_at?: string
+          failure_code?: string | null
+          first_submission_at?: string | null
+          next_check_at?: string
+          provider_expires_at: string
+          quote_id: string
+          reversal_link_id?: string | null
+          reversal_submission_at?: string | null
+          state?: string
+          stripe_account: string
+          tax_minor: number
+          total_minor: number
+          transaction_link_id?: string | null
+        }
+        Update: {
+          address_digest?: string
+          breakdown?: Json
+          calculation_link_id?: string
+          created_at?: string
+          failure_code?: string | null
+          first_submission_at?: string | null
+          next_check_at?: string
+          provider_expires_at?: string
+          quote_id?: string
+          reversal_link_id?: string | null
+          reversal_submission_at?: string | null
+          state?: string
+          stripe_account?: string
+          tax_minor?: number
+          total_minor?: number
+          transaction_link_id?: string | null
         }
         Relationships: []
       }

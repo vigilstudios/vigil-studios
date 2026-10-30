@@ -38,6 +38,7 @@ export type OrderContext = {
   environment: "test" | "live";
   registrarAmountMinor: number;
   totalMinor: number;
+  billingBreakdown?: { registrationMinor: number; serviceFeeMinor: number; taxMinor: number };
   currency: string;
   quoteExpiresAt: string;
   registrationState: RegistrationState;

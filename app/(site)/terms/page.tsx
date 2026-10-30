@@ -75,6 +75,7 @@ const SECTIONS: { title: string; body: ReactNode[] }[] = [
   {
     title: "8. Domains",
     body: [
+      <>Registrations purchased inside Vigil also follow our <Link href="/terms/domains/v1" className="underline">domain registration terms</Link>, including client ownership, the displayed service fee and manual renewal.</>,
       "If you bring a domain, Virtue shows you the records to add at your registrar and we check the connection. The domain, its registrar account and its renewals remain yours to manage and pay for. If we register a domain for you, it is registered in your name; while you are subscribed we handle the technical connection, and the renewal cost is passed through as agreed at the time.",
     ],
   },

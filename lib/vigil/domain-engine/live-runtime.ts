@@ -22,14 +22,26 @@ import { createDomainSecretCodec } from "./secrets";
 import { namecomContactPayload } from "./namecom-sandbox";
 import { domainCandidates } from "./search";
 import { checkoutOrderView } from "./client-order-view";
+import { ensureDomainWebsitePolicy } from "./launch-profile";
+import { calculateDomainTax, assertTaxQuoteContact, reconcileDomainTax, usTaxAddressSchema } from "./tax";
+
+async function websitePolicy(admin: DbClient, org: string, website: string, fqdn?: string, actor?: string) {
+  try { return await loadLivePolicy(admin, org, website, fqdn); }
+  catch (error) {
+    if (!actor) throw error;
+    await ensureDomainWebsitePolicy(admin, org, website, actor);
+    return loadLivePolicy(admin, org, website, fqdn);
+  }
+}
 
 export async function searchLiveDomains(
   admin: DbClient,
   org: string,
   website: string,
   input: string,
+  actor?: string,
 ) {
-  const p = await loadLivePolicy(admin, org, website);
+  const p = await websitePolicy(admin, org, website, undefined, actor);
   const results = await liveRegistrar(admin, p).searchAndPrice(
     domainCandidates(input),
   );
@@ -55,6 +67,7 @@ export async function searchLiveDomains(
     try {
       return {
         ...r,
+        taxPending: p.tax_mode === "stripe",
         registration: {
           ...r.registration,
           amountMinor: retailDomainAmount(r.registration.amountMinor, p)
@@ -76,8 +89,9 @@ export async function quoteLiveDomain(
   org: string,
   website: string,
   fqdn: string,
+  actor?: string,
 ) {
-  const p = await loadLivePolicy(admin, org, website, fqdn);
+  const p = await websitePolicy(admin, org, website, fqdn, actor);
   const registrar = liveRegistrar(admin, p);
   const [q] = await registrar.searchAndPrice([fqdn]);
   if (
@@ -106,8 +120,30 @@ export async function quoteLiveDomain(
     registration: { ...q.registration, amountMinor: amount.totalMinor },
     ...amount,
     serviceFeeMinor: p.service_fee_minor,
+    taxPending: p.tax_mode === "stripe",
     policy: publicDomainPolicy(p),
     contactSchema: await registrar.getContactSchema(q.fqdn),
+  };
+}
+export async function calculateLiveDomainQuote(admin: DbClient, org: string, website: string, actor: string, quoteId: string, address: unknown) {
+  const a = usTaxAddressSchema.parse(address);
+  const { data: q, error } = await admin.from("domain_quotes").select("*").eq("id", quoteId).eq("organization_id", org).eq("website_id", website).eq("environment", "live").single();
+  if (error || !q || Date.parse(q.expires_at) <= Date.now()) throw liveUnavailable("Search again for a current domain quote.");
+  const p = await loadLivePolicy(admin, org, website, q.fqdn, q.live_policy_id ?? undefined);
+  const calculation = await calculateDomainTax(p, a, q.subtotal_minor - p.service_fee_minor, q.id);
+  const { data: id, error: saveError } = await admin.rpc("create_taxed_domain_quote", {
+    p_quote_id: q.id, p_organization_id: org, p_actor_id: actor,
+    p_calculation_id: calculation.calculationId, p_address_digest: calculation.addressDigest,
+    p_tax_minor: calculation.taxMinor, p_total_minor: calculation.totalMinor,
+    p_provider_expires_at: calculation.providerExpiresAt, p_stripe_account: p.stripe_account,
+    p_breakdown: calculation.breakdown,
+  });
+  if (saveError || !id) throw liveUnavailable("The final price could not be saved. No payment was created.");
+  return { id, fqdn: q.fqdn, availability: "available", years: 1, premium: false, expiresAt: new Date(Math.min(Date.parse(q.expires_at), Date.parse(calculation.providerExpiresAt))).toISOString(),
+    registration: { amountMinor: calculation.totalMinor, currency: "usd" },
+    renewal: { amountMinor: q.renewal_estimate_minor, currency: "usd" },
+    subtotalMinor: q.subtotal_minor, taxMinor: calculation.taxMinor, totalMinor: calculation.totalMinor,
+    serviceFeeMinor: p.service_fee_minor, taxPending: false, policy: publicDomainPolicy(p),
   };
 }
 export async function prepareLiveCheckout(
@@ -118,6 +154,8 @@ export async function prepareLiveCheckout(
   returnUrl: string,
 ) {
   const approval = purchaseApprovalSchema.parse(raw);
+  if (approval.contact.address.country !== "US")
+    throw liveUnavailable("Domain purchasing is currently available to US customers only.");
   if (approval.autoRenew)
     throw liveUnavailable(
       "Automatic renewal is not enabled. Renewals require separate approval.",
@@ -138,19 +176,23 @@ export async function prepareLiveCheckout(
     q.fqdn,
     q.live_policy_id,
   );
+  if (p.tax_mode === "stripe") {
+    usTaxAddressSchema.parse(approval.contact.address);
+    await assertTaxQuoteContact(admin, q.id, org, approval.contact.address);
+  }
   if (
     !process.env.NEXT_PUBLIC_VIGIL_DOMAIN_STRIPE_LIVE_KEY?.startsWith(
       "pk_live_",
     )
   )
     throw liveUnavailable("Secure domain checkout is not configured.");
-  if (
+  if (p.tax_mode === "reviewed_rate" && (
     approval.contact.address.country !== p.registrant_country ||
     approval.contact.address.region.toLowerCase() !==
-      p.registrant_region.toLowerCase() ||
+      p.registrant_region?.toLowerCase() ||
     approval.contact.address.postalCode.replace(/\s/g, "").toUpperCase() !==
-      p.registrant_postal_code.replace(/\s/g, "").toUpperCase()
-  )
+      p.registrant_postal_code?.replace(/\s/g, "").toUpperCase()
+  ))
     throw liveUnavailable(
       "The registrant address needs a matching tax review before checkout.",
     );
@@ -255,6 +297,8 @@ export async function runLiveDomainPurchase(admin: DbClient, id: string) {
     await store.update(id, { paymentState: snapshot.state });
   }
   await processDomainOrder(store, registrar, payments, id);
+  if (policy.tax_mode === "stripe")
+    await reconcileDomainTax(admin).catch(() => console.error("Domain tax reporting needs retry; payment and ownership are preserved."));
   const current = await store.load(id);
   return {
     pending: current.registrationState === "pending",

@@ -8,6 +8,7 @@ export function checkoutOrderView(order: OrderContext) {
       id: order.id,
       fqdn: order.fqdn,
       totalMinor: order.totalMinor,
+      ...(order.billingBreakdown ? { priceBreakdown: order.billingBreakdown } : {}),
       currency: order.currency,
       registrationState: order.registrationState,
       paymentState: order.paymentState,

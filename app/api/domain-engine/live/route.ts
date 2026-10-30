@@ -20,10 +20,13 @@ import {
   quoteLiveDomain,
   prepareLiveCheckout,
   runLiveDomainPurchase,
+  calculateLiveDomainQuote,
 } from "@/lib/vigil/domain-engine/live-runtime";
 import { LiveDomainOrderStore } from "@/lib/vigil/domain-engine/store";
 import { livePayments } from "@/lib/vigil/domain-engine/live-providers";
 import { syncManagedRegistration } from "@/lib/vigil/domain-engine/registrar-sync";
+import { usTaxAddressSchema } from "@/lib/vigil/domain-engine/tax";
+import { isVigilError } from "@/lib/vigil/auth/errors";
 import { DomainEngineError } from "@/lib/vigil/domain-engine/errors";
 import { enqueueJob, JOB_KINDS } from "@/lib/vigil/jobs";
 const schema = z
@@ -31,6 +34,7 @@ const schema = z
     action: z.enum([
       "search",
       "quote",
+      "tax_quote",
       "purchase",
       "status",
       "reconcile",
@@ -42,6 +46,8 @@ const schema = z
     fqdn: z.string().max(253).optional(),
     approval: z.unknown().optional(),
     orderId: z.string().uuid().optional(),
+    quoteId: z.string().uuid().optional(),
+    address: usTaxAddressSchema.optional(),
     kind: z
       .enum([
         "renewal",
@@ -96,6 +102,7 @@ export async function POST(request: NextRequest) {
             ctx.organization.id,
             body.websiteId,
             body.input ?? "",
+            ctx.user.id,
           ),
         },
         { headers: { "Cache-Control": "no-store" } },
@@ -109,10 +116,15 @@ export async function POST(request: NextRequest) {
             ctx.organization.id,
             body.websiteId,
             body.fqdn ?? "",
+            ctx.user.id,
           ),
         },
         { headers: { "Cache-Control": "no-store" } },
       );
+    if (body.action === "tax_quote") {
+      if (!body.quoteId || !body.address) throw liveUnavailable("Confirm your US address before calculating the final price.");
+      return NextResponse.json({ ok: true, quote: await calculateLiveDomainQuote(admin, ctx.organization.id, body.websiteId, ctx.user.id, body.quoteId, body.address) }, { headers: { "Cache-Control": "no-store" } });
+    }
     if (body.action === "purchase") {
       const quoteId = z
         .object({ quoteId: z.string().uuid() })
@@ -213,7 +225,7 @@ export async function POST(request: NextRequest) {
     }
     const { data: current, error: currentError } = await client
       .from("domain_orders")
-      .select("*,domain_quotes(total_minor,currency,live_policy_id)")
+      .select("*,domain_quotes(total_minor,subtotal_minor,tax_minor,currency,live_policy_id)")
       .eq("id", order.id)
       .eq("organization_id", ctx.organization.id)
       .single();
@@ -256,6 +268,7 @@ export async function POST(request: NextRequest) {
           id: current.id,
           fqdn: current.fqdn,
           totalMinor: current.domain_quotes.total_minor,
+          priceBreakdown: { registrationMinor: current.domain_quotes.subtotal_minor - p.service_fee_minor, serviceFeeMinor: p.service_fee_minor, taxMinor: current.domain_quotes.tax_minor },
           currency: current.domain_quotes.currency,
           registrationState: current.registration_state,
           paymentState: current.payment_state,
@@ -277,12 +290,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          error instanceof DomainEngineError
+          error instanceof DomainEngineError || isVigilError(error)
             ? error.message
             : "The domain operation could not finish. Your existing order is preserved.",
       },
       {
-        status: error instanceof DomainEngineError ? error.status : 422,
+        status: error instanceof DomainEngineError || isVigilError(error) ? error.status : 422,
         headers: { "Cache-Control": "no-store" },
       },
     );

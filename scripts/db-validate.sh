@@ -37,6 +37,7 @@ done
 echo "▸ rls assertions"
 target -f "$ROOT/supabase/test/rls.test.sql"
 target -f "$ROOT/supabase/test/domain-engine.test.sql"
+target -f "$ROOT/supabase/test/domain-tax.test.sql"
 
 echo "▸ shared contact assertions"
 target -f "$ROOT/supabase/test/contact.test.sql"

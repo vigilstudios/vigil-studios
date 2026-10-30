@@ -45,7 +45,7 @@ if (stripeConfigured) {
   check("Stripe account identity and charging eligibility", account.status === 200 && account.data?.id === env.VIGIL_DOMAIN_STRIPE_ACCOUNT_ID && account.data?.charges_enabled === true && account.data?.details_submitted === true,
     { http: account.status, accountMatches: account.data?.id === env.VIGIL_DOMAIN_STRIPE_ACCOUNT_ID, chargesEnabled: account.data?.charges_enabled === true, detailsSubmitted: account.data?.details_submitted === true });
   const webhook = endpoints.data?.data?.find(item => item.url === "https://www.vigilstudios.co/api/webhooks/domain-stripe-live");
-  check("Separate domain webhook staged", Boolean(webhook), { http: endpoints.status, status: webhook?.status ?? "missing", apiVersion: webhook?.api_version ?? null, eventCount: webhook?.enabled_events?.length ?? 0 });
+  check("Separate domain webhook enabled", Boolean(webhook && webhook.status === "enabled"), { http: endpoints.status, status: webhook?.status ?? "missing", apiVersion: webhook?.api_version ?? null, eventCount: webhook?.enabled_events?.length ?? 0 });
   check("Stripe Tax configuration active", tax.status === 200 && tax.data?.status === "active", { http: tax.status, status: tax.data?.status ?? null });
   check("Stripe Tax has an active registration", registrations.status === 200 && registrations.data?.data?.some(item => item.status === "active"),
     { http: registrations.status, activeRegistrationCount: registrations.data?.data?.filter(item => item.status === "active").length ?? 0 });
