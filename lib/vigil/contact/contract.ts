@@ -11,7 +11,7 @@ export const contactSubmissionSchema = z.object({
   message: z.string().trim().min(1).max(5000).refine(value => !/\x00/.test(value)),
   source: z.string().regex(/^[a-z][a-z0-9-]{0,79}$/).default("inquiries"),
   sourcePage: z.string().max(2048),
-  details: z.record(z.string().regex(/^[a-z][a-z0-9-]{0,79}$/), singleLine(500)).default({})
+  details: z.record(z.string().regex(/^[a-z][a-z0-9-]{0,79}$/), singleLine(500)).prefault({})
     .refine(value => Object.keys(value).length <= 8),
 }).strict();
 export type ContactSubmission = z.infer<typeof contactSubmissionSchema>;

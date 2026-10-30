@@ -15,12 +15,17 @@ export const maxDuration = 300;
  */
 function authorized(request: NextRequest): boolean {
   // Vercel Cron sends CRON_SECRET; staff tooling sends VIGIL_JOBS_SECRET. Either opens the door.
-  const secrets = [process.env.VIGIL_JOBS_SECRET, process.env.CRON_SECRET].filter((s): s is string => Boolean(s));
+  const secrets = [
+    process.env.VIGIL_JOBS_SECRET,
+    process.env.CRON_SECRET,
+  ].filter((s): s is string => Boolean(s));
   if (secrets.length === 0) return false;
   const actual = Buffer.from(request.headers.get("authorization") ?? "");
   return secrets.some((secret) => {
     const expected = Buffer.from(`Bearer ${secret}`);
-    return expected.length === actual.length && timingSafeEqual(expected, actual);
+    return (
+      expected.length === actual.length && timingSafeEqual(expected, actual)
+    );
   });
 }
 
@@ -29,18 +34,60 @@ async function handle(request: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   if (!hasAdminClient()) {
-    return NextResponse.json({ error: "SUPABASE_SECRET_KEY is not configured" }, { status: 503 });
+    return NextResponse.json(
+      { error: "SUPABASE_SECRET_KEY is not configured" },
+      { status: 503 },
+    );
   }
 
-  const limit = Math.min(50, Math.max(1, Number(request.nextUrl.searchParams.get("limit") ?? 10) || 10));
+  const limit = Math.min(
+    50,
+    Math.max(1, Number(request.nextUrl.searchParams.get("limit") ?? 10) || 10),
+  );
   const worker = `runner:${process.env.VERCEL_REGION ?? "local"}:${Date.now().toString(36)}`;
 
   try {
     const admin = createAdminClient();
     await reconcileContactSetup(admin).catch(() => console.error("Contact setup reconciliation could not run; queued jobs will continue."));
+    // Disabling DNS admission must not extend the lifetime of saved credentials.
+    await admin.rpc("expire_external_dns_tokens").then(result=>{if(result.error)console.error("Expired DNS token cleanup needs retry.");});
     const outcomes = await runDueJobs(admin, { worker, limit });
-    const reconcile = request.nextUrl.searchParams.get("reconcile") === "0" ? null : await reconcileOrders(admin).catch((error) => ({ error: error instanceof Error ? error.message : String(error) }));
-    return NextResponse.json({ worker, ran: outcomes.length, outcomes, reconcile });
+    const reconcile =
+      request.nextUrl.searchParams.get("reconcile") === "0"
+        ? null
+        : await reconcileOrders(admin).catch((error) => ({
+            error: error instanceof Error ? error.message : String(error),
+          }));
+    let domainSync: unknown = null;
+    if (
+      process.env.VIGIL_DOMAIN_ENGINE_ENABLED === "true" &&
+      process.env.VIGIL_DOMAIN_LIFECYCLE_SYNC_ENABLED === "true"
+    ) {
+      const { syncManagedRegistrations } =
+        await import("@/lib/vigil/domain-engine/registrar-sync");
+      domainSync = await syncManagedRegistrations(admin, {environment:process.env.VIGIL_DOMAIN_LIVE_ENABLED === "true" ? "live" : "test"}).catch(() => ({
+        error: "domain_registrar_sync_failed",
+      }));
+    }
+    let domainLifecycle: unknown = null;
+    if (
+      process.env.VIGIL_DOMAIN_ENGINE_ENABLED === "true" &&
+      process.env.VIGIL_DOMAIN_LIFECYCLE_NOTIFICATIONS_ENABLED === "true"
+    ) {
+      const { reconcileDomainLifecycle } =
+        await import("@/lib/vigil/domain-engine/lifecycle");
+      domainLifecycle = await reconcileDomainLifecycle(admin).catch(() => ({
+        error: "domain_lifecycle_failed",
+      }));
+    }
+    return NextResponse.json({
+      worker,
+      ran: outcomes.length,
+      outcomes,
+      reconcile,
+      domainLifecycle,
+      domainSync,
+    });
   } catch (error) {
     console.error("job runner failed:", error);
     return NextResponse.json({ error: "runner_failed" }, { status: 500 });

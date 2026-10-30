@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DomainWorkspace } from "@/components/vigil/domain-engine/DomainWorkspace";
 import { DomainJourney } from "@/components/vigil/DomainJourney";
 import type { DomainIntent } from "@/lib/vigil/domain-commerce";
 import { DomainGuide } from "@/components/vigil/DomainGuide";
@@ -12,6 +13,7 @@ import { ChoiceCards, Field, TextInput, useAutosave, type SaveState } from "../w
 import { inputClass } from "@/components/vigil/ui";
 
 type Props = {
+  liveDomainEnabled?:boolean; domainLiveKey?:string; canPurchase?:boolean;
   initial: DomainAnswers | undefined; projectId: string; websiteId: string | null;
   initialIntent: DomainIntent | null; businessName: string; domain: DomainSetup | null;
   onDomain: (d: DomainSetup | null) => void; canManage: boolean;
@@ -21,7 +23,7 @@ type Props = {
 type Phase = "ask" | "unsure" | "search" | "hostname" | "provider" | "guide";
 
 /** Each branch occupies one screen; the shared DNS guide handles its own individual tasks. */
-export function DomainStep({ initial, projectId, websiteId, initialIntent, businessName, domain, onDomain, canManage, save, onSaveState, onBack, onNext }: Props) {
+export function DomainStep({ liveDomainEnabled=false,domainLiveKey="",canPurchase=false,initial, projectId, websiteId, initialIntent, businessName, domain, onDomain, canManage, save, onSaveState, onBack, onNext }: Props) {
   const [data, setData] = useState<DomainAnswers>(() => domain && canManage ? { ...(initial ?? domainSchema.parse({})), answer: "own", hostname: domain.hostname, domainId: domain.domainId, registrar: domain.registrar } : initial ?? domainSchema.parse({}));
   const [phase, setPhase] = useState<Phase>(() => domain ? "guide" : initial?.answer === "own" ? "hostname" : initial?.answer === "need" || (initialIntent && initialIntent.phase !== "cancelled") ? "search" : "ask");
   const [hostname, setHostname] = useState(initial?.hostname ?? "");
@@ -61,14 +63,14 @@ export function DomainStep({ initial, projectId, websiteId, initialIntent, busin
       <p className="text-sm font-medium">Do you already own a web address for {businessName}?</p>
       <ChoiceCards name="Domain" value={data.answer} onChange={choose} options={[
         { value: "own", label: "I already own one", hint: "Use your existing domain." },
-        { value: "need", label: "Find a domain", hint: "Search and buy through your own Vercel account." },
+        { value: "need", label: "Find a domain", hint: liveDomainEnabled ? "Register inside Vigil. Your domain stays yours." : "Search and buy through your own Vercel account." },
         { value: "unsure", label: "I’m not sure", hint: "Help me work it out." },
       ]} />
     </> : phase === "unsure" ? <>
       <h2 className="text-base font-semibold">Have you bought a web address before?</h2>
       <p className="text-sm text-[color:var(--text-secondary)]">A domain is an address like yourbusiness.com. Search your email for a domain purchase or renewal receipt.</p>
       <div className="flex flex-wrap gap-3"><button type="button" className="btn-secondary min-h-11 text-sm" onClick={() => choose("own")}>Yes, I found mine</button><button type="button" className="btn-secondary min-h-11 text-sm" onClick={() => choose("need")}>I need a new one</button></div>
-    </> : phase === "search" ? websiteId ? <DomainJourney websiteId={websiteId} initial={initialIntent} canManage={canManage} /> : <p>Domain search is being prepared. You can continue onboarding and return later.</p> : phase === "hostname" ? <form className="space-y-4" onSubmit={event => { event.preventDefault(); void run(async () => {
+    </> : phase === "search" ? websiteId ? liveDomainEnabled ? <DomainWorkspace live websiteId={websiteId} initialScreen="search" publishableTestKey={domainLiveKey} testWebsites={[{id:websiteId,label:businessName}]} canManage={canPurchase} /> : <DomainJourney websiteId={websiteId} initial={initialIntent} canManage={canManage} /> : <p>Domain search is being prepared. You can continue onboarding and return later.</p> : phase === "hostname" ? <form className="space-y-4" onSubmit={event => { event.preventDefault(); void run(async () => {
       const result = await guessRegistrar(hostname);
       if (!result.ok) { setError(result.error); return; }
       setRegistrar(result.data.registrar ?? "other"); setPhase("provider");

@@ -26,7 +26,7 @@ export async function sendEmail(message: EmailMessage): Promise<{ sent: boolean;
   }
   try {
     const resend = new Resend(key);
-    const { data, error } = await resend.emails.send({ from: FROM, to: message.to, reply_to: REPLY_TO, subject: message.subject, html: message.html, text: message.text });
+    const { data, error } = await resend.emails.send({ from: FROM, to: message.to, replyTo: REPLY_TO, subject: message.subject, html: message.html, text: message.text });
     if (error) {
       console.error(`[email] send failed to=${message.to} subject=${JSON.stringify(message.subject)}: ${error.message}`);
       return { sent: false, error: error.message };

@@ -46,6 +46,8 @@ export async function archiveCustomer(organizationId: string, actorId: string, d
   if (!org) throw new NotFoundError("Customer not found.");
   if (org.archived_at) return;
 
+  await assertManagedDomainsResolved(admin,organizationId);
+
   const subscriptions = org.subscriptions ?? [];
   const ids = subscriptions.map((subscription) => subscription.id);
   const { data: links, error: linksError } = ids.length
@@ -71,6 +73,8 @@ export async function permanentlyDeleteCustomer(organizationId: string, actorId:
   if (error) throw error;
   if (!org) throw new NotFoundError("Customer not found.");
   if (!org.archived_at) throw new ValidationError("Archive this customer before deleting it permanently.");
+
+  await assertManagedDomainsResolved(admin,organizationId,true);
 
   const websiteIds = org.websites.map((website) => website.id);
   const { data: links, error: linksError } = websiteIds.length
@@ -154,4 +158,10 @@ export async function permanentlyDeleteCustomer(organizationId: string, actorId:
   const { error: ledgerError } = await admin.from("customer_deletion_log").update({ cleanup: deleted }).eq("former_organization_id", organizationId);
   if (ledgerError) console.error("customer deletion ledger cleanup update failed:", ledgerError.message);
   return deleted;
+}
+
+async function assertManagedDomainsResolved(admin:AdminSupabaseClient,organizationId:string,purge=false){
+  const {error}=await admin.rpc(purge?"assert_domain_purge_allowed":"assert_domain_retirement_allowed",{p_organization_id:organizationId});
+  // During a disabled, pre-migration rollout no managed registrations can exist.
+  if(error && !(error.code==="PGRST202" && process.env.VIGIL_DOMAIN_ENGINE_ENABLED!=="true"))throw new ValidationError("Resolve or release managed domains before retiring this customer.");
 }

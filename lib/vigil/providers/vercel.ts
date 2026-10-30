@@ -23,6 +23,8 @@ type VercelProjectDomain = {
   verification?: { type: string; domain: string; value: string }[];
 };
 
+type VercelDnsRecommendations = { misconfigured?: boolean; recommendedCNAME?: {rank:number;value:string}[]; recommendedIPv4?:{rank:number;value:string[]}[] };
+
 export class VercelDeploymentProvider implements DeploymentProvider {
   readonly name = "vercel" as const;
 
@@ -137,6 +139,13 @@ export class VercelDeploymentProvider implements DeploymentProvider {
       servingDeploymentId: alias?.deploymentId ?? null, servingSiteId: alias?.projectId ?? null };
   }
 
+  async getRecommendedDnsRecords(siteExternalId:string,hostname:string){
+    const config=await this.api(`/v6/domains/${encodeURIComponent(hostname)}/config`,{query:{projectIdOrName:siteExternalId}}) as VercelDnsRecommendations;
+    const records=recommendedRoutingRecords(hostname,config);
+    if(records.length===0)throw new ProviderError("vercel","Project-specific DNS recommendations are not available yet.",{retryable:true});
+    return records;
+  }
+
   async deleteSite(siteExternalId: string) {
     await this.api(`/v9/projects/${encodeURIComponent(siteExternalId)}`, { method: "DELETE", allowNotFound: true });
   }
@@ -179,6 +188,15 @@ export class VercelDeploymentProvider implements DeploymentProvider {
     }
     return payload;
   }
+}
+
+function recommendedRoutingRecords(hostname:string,config:VercelDnsRecommendations):DomainConfigSnapshot["requiredRecords"]{
+  if(domainKind(hostname)==="subdomain"){
+    const cname=[...(config.recommendedCNAME??[])].sort((a,b)=>a.rank-b.rank)[0]?.value;
+    return cname?[{type:"CNAME",name:relativeDnsName(hostname),value:cname}]:[];
+  }
+  const values=[...(config.recommendedIPv4??[])].sort((a,b)=>a.rank-b.rank)[0]?.value??[];
+  return values.slice(0,1).map(value=>({type:"A" as const,name:"@",value}));
 }
 
 function normalizeDeployment(deployment: VercelDeployment): DeploymentSnapshot {

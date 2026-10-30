@@ -111,7 +111,7 @@ describe("customer permanent deletion orchestration", () => {
       change_request_attachments: [],
       project_review_attachments: [],
     };
-    const rpc = vi.fn(async () => { events.push("database"); return { data: null, error: null }; });
+    const rpc = vi.fn(async (name:string) => { events.push(name === "assert_domain_purge_allowed"?"domain-preflight":"database"); return { data: null, error: null }; });
     const remove = vi.fn(async () => { events.push("storage"); return { data: [], error: null }; });
     const deleteUser = vi.fn(async () => { events.push("auth"); return { data: {}, error: null }; });
     const admin = {
@@ -131,7 +131,7 @@ describe("customer permanent deletion orchestration", () => {
     expect(remove).toHaveBeenCalledWith(["org_1/project_1/logo.png"]);
     expect(deleteUser).toHaveBeenCalledWith("user_orphan");
     expect(rpc).toHaveBeenCalledWith("purge_customer", expect.objectContaining({ p_organization_id: "org_1", p_deleted_by: "staff_1" }));
-    expect(events).toEqual(["vercel", "github", "storage", "database", "auth"]);
+    expect(events).toEqual(["domain-preflight", "vercel", "github", "storage", "database", "auth"]);
   });
 
   it("never purges database rows when an external cleanup fails", async () => {
@@ -140,7 +140,7 @@ describe("customer permanent deletion orchestration", () => {
       projects: [], websites: [{ id: "website_1", name: "Site", repository_ref: null }], subscriptions: [], organization_members: [],
     };
     const links = [{ provider: "vercel", resource_kind: "site", external_id: "prj_1", entity_id: "website_1", metadata: {} }];
-    const rpc = vi.fn();
+    const rpc = vi.fn().mockResolvedValue({data:null,error:null});
     const admin = {
       from: vi.fn((table: string) => resultBuilder(table === "organizations" ? org : table === "provider_links" ? links : [])),
       storage: { from: () => ({ remove: vi.fn() }) },
@@ -149,6 +149,15 @@ describe("customer permanent deletion orchestration", () => {
     const deployment = { name: "vercel", deleteSite: vi.fn().mockRejectedValue(new Error("Vercel unavailable")) } as unknown as DeploymentProvider;
 
     await expect(permanentlyDeleteCustomer("org_1", "staff_1", { admin, deployment, github: { deleteRepository: vi.fn() } })).rejects.toThrow("Vercel unavailable");
-    expect(rpc).not.toHaveBeenCalled();
+    expect(rpc).toHaveBeenCalledExactlyOnceWith("assert_domain_purge_allowed",{p_organization_id:"org_1"});
   });
+  it("stops before external cleanup when managed-domain evidence blocks deletion",async()=>{
+    const rpc=vi.fn().mockResolvedValue({data:null,error:{code:"23503",message:"Domain evidence requires retention review"}});
+    const from=vi.fn(()=>resultBuilder({id:"org_1",archived_at:"2026-01-01",websites:[],projects:[],subscriptions:[],organization_members:[]}));
+    const deployment={name:"vercel",deleteSite:vi.fn()} as unknown as DeploymentProvider;
+    const github={deleteRepository:vi.fn()};
+    await expect(permanentlyDeleteCustomer("org_1","staff_1",{admin:{from,rpc} as unknown as AdminSupabaseClient,deployment,github})).rejects.toThrow();
+    expect(deployment.deleteSite).not.toHaveBeenCalled();expect(github.deleteRepository).not.toHaveBeenCalled();expect(from).toHaveBeenCalledTimes(1);
+  });
+
 });

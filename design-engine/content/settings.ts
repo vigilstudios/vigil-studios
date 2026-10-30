@@ -5,7 +5,7 @@ export const featuredSectionSchema=z.object({mode:z.literal('featured'),capacity
 export const contentHubSettingsSchema=z.record(z.string().max(100),featuredSectionSchema);
 export type ContentHubSettings=z.infer<typeof contentHubSettingsSchema>;
 export type CollectionCapability={field:string;module:CollectionModule;minimum:number;maximum:number;singleton:boolean;hasMedia:boolean};
-export function schemaBase(schema:z.ZodTypeAny):z.ZodTypeAny {for(let i=0;i<12;i++){if(schema instanceof z.ZodEffects)schema=schema.innerType();else if(schema instanceof z.ZodOptional||schema instanceof z.ZodNullable)schema=schema.unwrap();else if(schema instanceof z.ZodDefault)schema=schema.removeDefault();else return schema;}return schema;}
+export function schemaBase(schema:z.core.$ZodType):z.core.$ZodType {for(let i=0;i<12;i++){if(schema instanceof z.ZodOptional||schema instanceof z.ZodNullable||schema instanceof z.ZodPrefault)schema=schema.unwrap();else if(schema instanceof z.ZodDefault)schema=schema.removeDefault();else return schema;}return schema;}
 export function collectionCapabilities(component:string,schema:z.ZodTypeAny):CollectionCapability[]{
  const base=schemaBase(schema);if(!(base instanceof z.ZodObject))return [];
  const content=base.shape.content&&schemaBase(base.shape.content);if(!(content instanceof z.ZodObject))return [];
@@ -16,8 +16,8 @@ export function collectionCapabilities(component:string,schema:z.ZodTypeAny):Col
   const element=schemaBase(value instanceof z.ZodArray?value.element:value),item=element instanceof z.ZodDiscriminatedUnion?schemaBase(element.options[0]):element;if(!(item instanceof z.ZodObject))return [];
   const nested=item.shape.product&&schemaBase(item.shape.product),shape=nested instanceof z.ZodObject?nested.shape:item.shape;
   if(module==='testimonials'?!shape.quote:module==='faq'?!shape.answer:!shape.title&&!shape.name&&!shape.question)return [];
-  const limits=value instanceof z.ZodArray?value._def:null;
-  return [{field,module,singleton,minimum:limits?.exactLength?.value??limits?.minLength?.value??(singleton?1:0),maximum:limits?.exactLength?.value??limits?.maxLength?.value??(singleton?1:500),hasMedia:Boolean(shape.image||shape.scene||shape.video||shape.media||module==='testimonials')}];
+  const limits=value instanceof z.ZodArray?z.toJSONSchema(value,{unrepresentable:"any"}):null;
+  return [{field,module,singleton,minimum:limits?.minItems??(singleton?1:0),maximum:limits?.maxItems??(singleton?1:500),hasMedia:Boolean(shape.image||shape.scene||shape.video||shape.media||module==='testimonials')}];
  });
 }
 export function validateContentHubSettings(component:string,schema:z.ZodTypeAny,settings:ContentHubSettings|undefined){

@@ -163,7 +163,7 @@ export type DomainConfigSnapshot = {
 };
 
 export interface DeploymentProvider {
-  readonly name: ProviderName;
+  readonly name: ProviderName | "mock";
   provisionSite(input: ProvisionSiteInput): Promise<{ externalId: string; previewUrl: string | null }>;
   triggerDeployment(siteExternalId: string, input: { environment: "production" | "preview"; ref?: string; commitSha?:string; repositoryId?: number | null }): Promise<DeploymentSnapshot>;
   getDeployment(externalId: string): Promise<DeploymentSnapshot | null>;
@@ -174,6 +174,8 @@ export interface DeploymentProvider {
   ): Promise<DomainConfigSnapshot>;
   removeDomain(siteExternalId: string, hostname: string): Promise<void>;
   getDomainConfig(siteExternalId: string, hostname: string): Promise<DomainConfigSnapshot>;
+  /** Read project-specific routing targets without attaching a production hostname. */
+  getRecommendedDnsRecords?(siteExternalId: string, hostname: string): Promise<DomainConfigSnapshot["requiredRecords"]>;
   deleteSite(siteExternalId: string): Promise<void>;
 }
 

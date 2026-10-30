@@ -67,7 +67,7 @@ function schema(a: NavigationArchitecture) {
       settings: z
         .object(shape)
         .strict()
-        .default({})
+        .prefault({})
         .superRefine((c, ctx) => {
           if (c.scroll === "solidify" && c.position === "flow")
             ctx.addIssue({

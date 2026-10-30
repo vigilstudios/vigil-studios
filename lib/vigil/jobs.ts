@@ -33,6 +33,9 @@ export const JOB_KINDS = {
   domainConnect: "domain.connect",
   domainVerify: "domain.verify",
   domainReadinessNotify: "domain.readiness.notify",
+
+  domainPurchase: "domain.purchase",
+  domainLifecycleSync: "domain.lifecycle.sync",
   orderProvision: "order.provision",
 } as const;
 
@@ -60,6 +63,25 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
   },
   [JOB_KINDS.websiteContactConfigure]: async ({admin,job}) => provisionWebsiteContact(admin,job),
   [JOB_KINDS.leadNotify]: async ({admin,job}) => notifyWebsiteLead(admin,job),
+
+  [JOB_KINDS.domainLifecycleSync]: async ({ admin, job }) => {
+    const { syncManagedRegistrations } = await import("./domain-engine/registrar-sync");
+    const payload = (job.payload ?? {}) as { account_scope?: string; signal?: string; cursor?: string };
+    if (!payload.account_scope || !/^namecom:(test|live):[a-f0-9]{64}$/.test(payload.account_scope) || !/^[a-f0-9]{64}$/.test(payload.signal ?? "") || (payload.cursor && !/^[0-9a-f-]{36}$/.test(payload.cursor))) throw new ProviderNotConfiguredError("Registrar notification scope");
+    const result = await syncManagedRegistrations(admin, { accountScope: payload.account_scope, cursor: payload.cursor, force: true });
+    if (result.nextCursor) await enqueueJob(admin, { kind: JOB_KINDS.domainLifecycleSync, idempotencyKey: `domain.lifecycle:${payload.account_scope}:${payload.signal}:${result.nextCursor}`, payload: { ...payload, cursor: result.nextCursor }, maxAttempts: 10 });
+    if (result.failed > 0) throw new RetryLater("Registrar checks need another read; no purchase or DNS change was submitted.", 30 * 60);
+    return result;
+  },
+  [JOB_KINDS.domainPurchase]: async ({ admin, job }) => {
+    const orderId=(job.payload as {domain_order_id?:string}|null)?.domain_order_id;
+    if(!orderId)throw new ProviderNotConfiguredError("Domain order reference");
+    const {runDomainPurchase}=await import("./domain-engine/runtime");
+    const result=await runDomainPurchase(admin,orderId);
+    if(result.pending)throw new RetryLater("The registrar order is still processing; reconcile the existing reference.",15*60);
+    if(result.manualReview)throw new ProviderError("domain","The existing domain order needs manual reconciliation. Do not submit another purchase.",{retryable:false});
+    return {domain_order_id:orderId,state:result.state};
+  },
   [JOB_KINDS.websiteProvision]: async ({ admin, job }) => {
     if (!job.website_id) throw new Error("website.provision requires website_id");
     const result = await provisionWebsite(admin, job.website_id);

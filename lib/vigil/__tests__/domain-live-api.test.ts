@@ -1,0 +1,22 @@
+import { beforeEach,afterEach,describe,it,expect,vi } from 'vitest';
+import { NextRequest } from 'next/server';
+import { FakeAdmin } from './fake-admin';
+import { liveOrg,liveWebsite,liveOrder,liveQuote } from './domain-live-fixture';
+const state=vi.hoisted(()=>({db:null as unknown,role:'owner',impersonating:false,search:vi.fn(),quote:vi.fn(),purchase:vi.fn(),reconcile:vi.fn()}));
+vi.mock('@/lib/supabase/admin',()=>({createAdminClient:()=>state.db}));
+vi.mock('@/lib/supabase/server',()=>({createClient:async()=>state.db}));
+vi.mock('../auth/session',()=>({requireOrgContextOrThrow:async()=>({organization:{id:liveOrg},user:{id:liveOrder},isImpersonating:state.impersonating}),assertOrgRole:async()=>{if(state.role!=='owner')throw Error('owner');}}));
+vi.mock('../rate-limit',()=>({enforceRateLimit:async()=>{}}));
+vi.mock('../domain-engine/live-runtime',()=>({searchLiveDomains:state.search,quoteLiveDomain:state.quote,prepareLiveCheckout:state.purchase,runLiveDomainPurchase:state.reconcile}));
+import { POST } from '@/app/api/domain-engine/live/route';
+const request=(body:unknown,origin='https://vigil.example.com')=>new NextRequest('https://vigil.example.com/api/domain-engine/live',{method:'POST',headers:{host:'vigil.example.com',origin,'content-type':'application/json'},body:JSON.stringify(body)});
+beforeEach(()=>{vi.clearAllMocks();state.role='owner';state.impersonating=false;vi.stubEnv('VIGIL_DOMAIN_ENGINE_ENABLED','true');vi.stubEnv('VIGIL_DOMAIN_REGISTRAR','namecom');vi.stubEnv('VIGIL_DOMAIN_LIVE_ENABLED','true');state.db=new FakeAdmin({websites:[{id:liveWebsite,organization_id:liveOrg}],domain_quotes:[{id:liveQuote,organization_id:liveOrg,website_id:liveWebsite,environment:'live'}]}).asClient();state.search.mockResolvedValue([]);state.quote.mockResolvedValue({id:liveQuote});state.purchase.mockResolvedValue({orderId:liveOrder,clientSecret:'mock_only'});});
+afterEach(()=>vi.unstubAllEnvs());
+describe('live domain API',()=>{
+ it('is absent until the reviewed runtime is enabled',async()=>{vi.stubEnv('VIGIL_DOMAIN_LIVE_ENABLED','false');expect((await POST(request({action:'search',websiteId:liveWebsite,input:'fixture.com'}))).status).toBe(404);expect(state.search).not.toHaveBeenCalled();});
+ it('refuses cross-site requests, staff impersonation and non-owner financial consent',async()=>{expect((await POST(request({action:'search',websiteId:liveWebsite,input:'fixture.com'},'https://attacker.com'))).status).toBe(403);state.impersonating=true;expect((await POST(request({action:'search',websiteId:liveWebsite,input:'fixture.com'}))).status).toBe(403);state.impersonating=false;state.role='manager';expect((await POST(request({action:'purchase',websiteId:liveWebsite,approval:{quoteId:liveQuote}}))).status).not.toBe(200);expect(state.purchase).not.toHaveBeenCalled();});
+ it('rejects another website before pricing or payment preparation',async()=>{expect((await POST(request({action:'quote',websiteId:liveOrder,fqdn:'fixture.com'}))).status).toBe(403);expect(state.quote).not.toHaveBeenCalled();});
+ it('rejects browser-supplied pricing and account IDs',async()=>{expect((await POST(request({action:'quote',websiteId:liveWebsite,fqdn:'fixture.com',price:1,account:'acct_wrong'}))).status).toBe(422);expect(state.quote).not.toHaveBeenCalled();});
+ it('uses only server-bound org, website and contact approval when preparing checkout',async()=>{const body={action:'purchase',websiteId:liveWebsite,approval:{quoteId:liveQuote}};const r=await POST(request(body));expect(r.status).toBe(200);expect(state.purchase).toHaveBeenCalledWith(state.db,liveOrg,liveOrder,body.approval,`https://vigil.example.com/dashboard/domain?flow=find&website=${liveWebsite}`);expect(r.headers.get('cache-control')).toBe('no-store');});
+ it('cannot reuse a quote belonging to a different website',async()=>{state.db=new FakeAdmin({websites:[{id:liveWebsite,organization_id:liveOrg}],domain_quotes:[{id:liveQuote,organization_id:liveOrg,website_id:liveOrder,environment:'live'}]}).asClient();expect((await POST(request({action:'purchase',websiteId:liveWebsite,approval:{quoteId:liveQuote}}))).status).toBe(403);expect(state.purchase).not.toHaveBeenCalled();});
+});

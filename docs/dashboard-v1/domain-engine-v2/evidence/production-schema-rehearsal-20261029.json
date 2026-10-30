@@ -1,0 +1,30 @@
+{
+  "productionSchemaSnapshot": true,
+  "productionCustomerDataImported": false,
+  "database": "vigil_domain_release_rehearsal_20261029f",
+  "migrationsAppliedLocally": [
+    "20261024000030_domain_engine.sql",
+    "20261024000031_domain_orders.sql",
+    "20261024000032_domain_support.sql",
+    "20261024000033_domain_recovery.sql",
+    "20261024000034_domain_contact_provisioning.sql",
+    "20261024000035_domain_registration_scope.sql",
+    "20261024000036_domain_repeat_purchase_guard.sql",
+    "20261025000037_domain_namecom_sandbox.sql",
+    "20261026000038_managed_domain_connections.sql",
+    "20261026000039_managed_domain_lifecycle.sql",
+    "20261026000040_managed_domain_verification_status.sql",
+    "20261028000051_domain_live_policy.sql",
+    "20261028000052_domain_live_lifecycle.sql",
+    "20261028000053_domain_authorized_cloudflare.sql"
+  ],
+  "assertionFiles": [
+    "domain-engine.test.sql",
+    "domain-handoff.test.sql",
+    "domain-readiness.test.sql",
+    "admin-domain-setup.test.sql",
+    "gmail.test.sql"
+  ],
+  "passed": true,
+  "productionMigrationsApplied": 0
+}
