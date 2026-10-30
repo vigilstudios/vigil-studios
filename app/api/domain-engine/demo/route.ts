@@ -1,3 +1,4 @@
+import { boundedDomainBody } from "@/lib/vigil/domain-engine/request-body";
 import { NextResponse, type NextRequest } from "next/server";
 import { DomainEngineError } from "@/lib/vigil/domain-engine/errors";
 import {
@@ -14,6 +15,10 @@ import { isSameOriginRequest } from "@/lib/vigil/auth/origin";
 export async function POST(request: NextRequest) {
   try {
     assertMockAllowed(readDomainEngineConfig());
+  } catch {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  try {
     if (!isSameOriginRequest(request))
       return NextResponse.json(
         { error: "Open the test workspace directly." },
@@ -24,7 +29,7 @@ export async function POST(request: NextRequest) {
         { error: "Request too large." },
         { status: 413 },
       );
-    const raw = await request.text();
+    const raw = await boundedDomainBody(request, 16000);
     if (Buffer.byteLength(raw) > 16_000)
       throw new DomainEngineError(
         "request_too_large",
