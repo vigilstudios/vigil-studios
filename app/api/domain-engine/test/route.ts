@@ -1,3 +1,4 @@
+import { boundedDomainBody } from "@/lib/vigil/domain-engine/request-body";
 import { NextResponse, type NextRequest } from "next/server";
 import { domainTestPrice } from "@/lib/vigil/domain-engine/test-pricing";
 import { z } from "zod";
@@ -25,6 +26,10 @@ import { enforceRateLimit } from "@/lib/vigil/rate-limit";
 export async function POST(request: NextRequest) {
   try {
     assertDomainTestDatabase();
+  } catch {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  try {
     if (!isSameOriginRequest(request))
       throw new DomainEngineError(
         "invalid_origin",
@@ -43,7 +48,7 @@ export async function POST(request: NextRequest) {
       limit: 30,
       windowSeconds: 3600,
     });
-    const raw = await request.text();
+    const raw = await boundedDomainBody(request, 16000);
     if (Buffer.byteLength(raw) > 16000)
       throw new DomainEngineError(
         "request_too_large",

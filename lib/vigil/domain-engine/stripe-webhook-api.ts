@@ -15,6 +15,13 @@ export async function handleDomainStripeWebhook(
   request: NextRequest,
   environment: "test" | "live",
 ) {
+  if (environment === "test") {
+    try {
+      assertDomainTestDatabase();
+    } catch {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+  }
   let receiptId: string | undefined;
   let claimedAt: string | undefined;
   try {
