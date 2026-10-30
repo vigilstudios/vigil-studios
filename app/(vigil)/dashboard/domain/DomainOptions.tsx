@@ -2,9 +2,9 @@ import Link from "next/link";
 import { ArrowRight, Globe2, Link2 } from "lucide-react";
 
 /** Each entry opens its own guide, so the two setup forms never compete. */
-export function DomainOptions({ canFind, canSetUp, savedName }: { canFind: boolean; canSetUp: boolean; savedName?: string }) {
+export function DomainOptions({ canFind, canSetUp, savedName, managedPurchasing=false }: { managedPurchasing?:boolean; canFind: boolean; canSetUp: boolean; savedName?: string }) {
   const options = [
-    { title: "Find your domain", description: savedName ? `Continue setting up ${savedName}, or search for a new name.` : "Search for a name and buy it through your own Vercel account.", href: "/dashboard/domain?flow=find", icon: Globe2, enabled: canFind },
+    { title: "Find your domain", description: savedName ? `Continue setting up ${savedName}, or search for a new name.` : managedPurchasing ? "Choose your domain and register it inside Vigil. Your domain stays yours." : "Search for a name and buy it through your own Vercel account.", href: "/dashboard/domain?flow=find", icon: Globe2, enabled: canFind },
     { title: "Already own one", description: "Use your existing web address. We’ll guide you through the setup.", href: "/dashboard/domain?flow=own", icon: Link2, enabled: canSetUp },
   ];
   return <nav aria-label="Domain setup options" className="grid w-full gap-4 sm:grid-cols-2">

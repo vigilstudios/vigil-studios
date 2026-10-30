@@ -83,13 +83,13 @@ describe("one domain path at a time", () => {
     expect(await render({ flow: "own" })).toContain("Continue to setup");
   });
   it("keeps the verified connection success screen after a refresh", async () => {
-    mocks.domains = [{ id: "connected-domain", organization_id: "org-a", website_id: "site-a", hostname: "connected-example.com", kind: "apex", source: "customer_owned", registrar: "vercel", status: "connected", dns_ok: true, ssl_ok: true, verification: { source: "provider", connection_reachable: true }, verification_token: "proof", auto_renew: null, connected_at: null, created_at: "2026-10-18T00:00:00Z", expires_at: null, last_checked_at: null, metadata: {}, registrant: {}, status_reason: null, updated_at: "2026-10-18T00:00:00Z", verified_at: null }];
+    mocks.domains = [{ id: "connected-domain", organization_id: "org-a", website_id: "site-a", hostname: "connected-example.com", kind: "apex", source: "customer_owned", managed_registration_id: null, registrar: "vercel", status: "connected", dns_ok: true, ssl_ok: true, verification: { source: "provider", connection_reachable: true }, verification_token: "proof", auto_renew: null, connected_at: null, created_at: "2026-10-18T00:00:00Z", expires_at: null, last_checked_at: null, metadata: {}, registrant: {}, status_reason: null, updated_at: "2026-10-18T00:00:00Z", verified_at: null }];
     const html = await render({ flow: "own" });
     expect(html).toContain("Your domain is connected"); expect(html).toContain("Visit my website"); expect(html).not.toContain("Where do you manage your domain?");
   });
   it("resumes a purchased domain at Domains on reload without asking for its name or login", async () => {
     mocks.intents["site-a"] = intent("site-a");
-    mocks.domains = [{ id: "domain-a", organization_id: "org-a", hostname: "saved-example.com", website_id: "site-a", registrar: "vercel", status: "pending", source: "customer_owned", verification: {}, verification_token: "proof" } as Tables<"domains">];
+    mocks.domains = [{ id: "domain-a", managed_registration_id: null, organization_id: "org-a", hostname: "saved-example.com", website_id: "site-a", registrar: "vercel", status: "pending", source: "customer_owned", verification: {}, verification_token: "proof" } as Tables<"domains">];
     const html = await render();
     expect(html).toContain("Now that you’ve bought saved-example.com"); expect(html).toContain("Open my Vercel domains");
     expect(html).not.toContain("Where do you manage"); expect(html).not.toContain("Sign in to Vercel"); expect(html).not.toContain("Confirm your domain");

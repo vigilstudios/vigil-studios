@@ -115,9 +115,13 @@ export async function beginDomainVerification(
   const { data: domain, error } = await admin.from("domains").select("*").eq("id", domainId).maybeSingle();
   if (error) throw error;
   if (!domain) throw new NotFoundError(`Domain ${domainId} not found.`);
-  if (domain.status === "released") return;
-  // A later preview deployment must never detach an already-live hostname.
-  if (domain.status === "connected") return;
+  // Preview generation remains available when domain automation is disabled.
+  if(domain.managed_registration_id && process.env.VIGIL_DOMAIN_ENGINE_ENABLED !== "true")return;
+  if(domain.status === "released" || domain.status === "connected")return;
+  if (domain.managed_registration_id || process.env.VIGIL_DOMAIN_ENGINE_ENABLED === "true") {
+    const { assertManagedDomainDeployment } = await import("@/lib/vigil/domain-engine/managed-connection");
+    await assertManagedDomainDeployment(admin, domainId, provider, false);
+  }
   const records = domain.verification_token ? [ownershipRecord(domain.hostname, domain.verification_token)] : [];
   const checkDns = connectionChecks.checkDns ?? checkDnsRecords;
   const publicChecks = records.length > 0 ? await checkDns(domain.hostname, records) : [];
@@ -182,6 +186,10 @@ export async function activateDomainVerification(
   const { data: domain, error } = await admin.from("domains").select("*").eq("id", domainId).maybeSingle();
   if (error) throw error;
   if (!domain) throw new NotFoundError(`Domain ${domainId} not found.`);
+  if (domain.managed_registration_id || process.env.VIGIL_DOMAIN_ENGINE_ENABLED === "true") {
+    const { assertManagedDomainDeployment } = await import("@/lib/vigil/domain-engine/managed-connection");
+    await assertManagedDomainDeployment(admin, domainId, provider, true);
+  }
   if (domain.status === "released") return { connected: false };
   if (!domain.website_id) throw new NotFoundError("No website is attached to this domain.");
   const production = await domainProductionContext(admin, domain.website_id, domain.organization_id, provider);
@@ -238,6 +246,10 @@ export async function verifyDomain(
   const { data: domain, error } = await admin.from("domains").select("*").eq("id", domainId).maybeSingle();
   if (error) throw error;
   if (!domain) throw new NotFoundError(`Domain ${domainId} not found.`);
+  if (domain.managed_registration_id || process.env.VIGIL_DOMAIN_ENGINE_ENABLED === "true") {
+    const { assertManagedDomainDeployment } = await import("@/lib/vigil/domain-engine/managed-connection");
+    await assertManagedDomainDeployment(admin, domainId, provider, (domain.verification as { source?: string } | null)?.source === "provider");
+  }
   if (domain.status === "released") return { connected: false };
   const checkDns = connectionChecks.checkDns ?? checkDnsRecords;
   const checkHttps = connectionChecks.checkHttps ?? checkHttpsReachable;

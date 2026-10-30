@@ -1,0 +1,64 @@
+{
+  "productionAppliedVersions": 51,
+  "sourceMigrationCount": 65,
+  "pending": [
+    {
+      "file": "20261024000030_domain_engine.sql",
+      "sha256": "906761aef23fbb06666e0c0a496956845023ec45c08e465b0e2e141105f46651"
+    },
+    {
+      "file": "20261024000031_domain_orders.sql",
+      "sha256": "47e3f57607856309f4921cdecf2608de016f691d6b23f2e046d84fb9390a1224"
+    },
+    {
+      "file": "20261024000032_domain_support.sql",
+      "sha256": "8fbafe43acc94c8688f200ea1d5d46c8815451a931e33592ac93eaebc925d7e5"
+    },
+    {
+      "file": "20261024000033_domain_recovery.sql",
+      "sha256": "04270140426867d159be7c54c4d17778c46d427fa6e33a650e341efbf9792b3b"
+    },
+    {
+      "file": "20261024000034_domain_contact_provisioning.sql",
+      "sha256": "61ace5fd16966fa77099b5c40fe0ab6d1c2ccac438a21421ec2411d3bddcabaa"
+    },
+    {
+      "file": "20261024000035_domain_registration_scope.sql",
+      "sha256": "095e924e8c85351d2fa42945b1473f770c897400fd301bbd7c0412ec57837e5b"
+    },
+    {
+      "file": "20261024000036_domain_repeat_purchase_guard.sql",
+      "sha256": "e01c29f763c0c79a6a88204d44e98057b4cf0364e0795027bb08da3b3ba04dab"
+    },
+    {
+      "file": "20261025000037_domain_namecom_sandbox.sql",
+      "sha256": "50ea142f7c86738ef47fbb2a769b4e058d20f655eb7311998ef228e516a5ab14"
+    },
+    {
+      "file": "20261026000038_managed_domain_connections.sql",
+      "sha256": "251bf3e944f739376d9c182e50afa6c7a866e88183c1e4a5c900a6cba8b7f4ff"
+    },
+    {
+      "file": "20261026000039_managed_domain_lifecycle.sql",
+      "sha256": "28e010553a272ed567585c43a2f9608798b41edb25d7f6038c06b8aa201d8ce2"
+    },
+    {
+      "file": "20261026000040_managed_domain_verification_status.sql",
+      "sha256": "f1276f94d944861c3d64107f41cc1f7e327f453598a4228abe96787c05061f84"
+    },
+    {
+      "file": "20261028000051_domain_live_policy.sql",
+      "sha256": "5e25d7d731b458f02fdc22f4571101fdcaf924ffa8e9cc9278e7cfc54a21fc29"
+    },
+    {
+      "file": "20261028000052_domain_live_lifecycle.sql",
+      "sha256": "08bf785e61b757980efcf717121609dba217a67ff527cfb69ca00618ecf1e28c"
+    },
+    {
+      "file": "20261028000053_domain_authorized_cloudflare.sql",
+      "sha256": "0cc6b9f64f5bf860e7e07d5e2277f48fb88a9a37fd27de507c4d4c751e1fbb2e"
+    }
+  ],
+  "unknownProductionVersions": [],
+  "productionMigrationsAppliedByThisWork": 0
+}

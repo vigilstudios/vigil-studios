@@ -1,0 +1,18 @@
+{
+  "testFiles": 167,
+  "tests": 2949,
+  "testResult": "passed",
+  "typescript": "passed",
+  "lint": "passed",
+  "productionBuild": "passed-isolated-test-configuration",
+  "stableSourceFiles": 122,
+  "scannedBrowserBundles": 170,
+  "privateValuesScanned": 10,
+  "secretMatches": 0,
+  "productionMigrationsApplied": 0,
+  "productionDeployments": 0,
+  "productionPurchases": 0,
+  "productionDnsChanges": 0,
+  "productionEngineEnabled": false,
+  "productionStripeWebhook": "staged-disabled"
+}

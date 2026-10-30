@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-29",
+  "applicationTests": {
+    "files": 166,
+    "tests": 2936,
+    "passed": true
+  },
+  "typecheck": "passed",
+  "lint": "passed",
+  "productionWebpackBuild": "passed with isolated test configuration",
+  "sourceFilesChecked": 124,
+  "sourceChangedDuringBuild": [],
+  "browserBundlesScanned": 170,
+  "privateValuesChecked": 8,
+  "secretMatches": [],
+  "localMigrationsAppliedAfterBackup": [
+    "20261028000051_domain_live_policy.sql",
+    "20261028000052_domain_live_lifecycle.sql",
+    "20261028000053_domain_authorized_cloudflare.sql"
+  ],
+  "productionMigrationsApplied": 0,
+  "productionDeployments": 0,
+  "screenshotSteps": 13,
+  "mobile": {
+    "width": 390,
+    "height": 844,
+    "documentWidth": 390,
+    "bodyWidth": 390
+  },
+  "limitations": [
+    "Standalone actual domain sandbox surface, not deployed dashboard/onboarding",
+    "Fictional registrant email pending",
+    "Public DNS, HTTPS and actual Vercel attachment unverified",
+    "Initial checkout was interrupted and recovered using the same session; initial production transition remains to verify"
+  ]
+}

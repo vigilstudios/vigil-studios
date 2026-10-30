@@ -1,4 +1,9 @@
 import Link from "next/link";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { hasLiveWebsitePolicy } from "@/lib/vigil/domain-engine/live-policy";
+import { readDomainEngineConfig } from "@/lib/vigil/domain-engine/config";
+import { AuthorizedExistingDomain } from "@/components/vigil/domain-engine/CloudflareDomainConnection";
+import { DomainWorkspace } from "@/components/vigil/domain-engine/DomainWorkspace";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { domainHandoffEnabled } from "@/lib/vigil/domain-commerce-config";
@@ -29,7 +34,10 @@ export default async function DomainPage({ searchParams }: { searchParams: Promi
   const [params, domains, websites, onboarding] = await Promise.all([searchParams, getOrgDomains(ctx.organization.id), getOrgWebsites(ctx.organization.id), getOnboardingProject(ctx.organization.id)]);
   const canManage = canManageDomainSetup(ctx);
   const adminManaging = ctx.staffRole === "admin";
-  const canFind = domainHandoffEnabled() && websites.length > 0;
+  const liveConfigured=readDomainEngineConfig().enabled && process.env.VIGIL_DOMAIN_LIVE_ENABLED === "true";
+  const approvedLiveWebsites = liveConfigured ? await Promise.all(websites.map(async site => await hasLiveWebsitePolicy(createAdminClient(), ctx.organization.id, site.id) ? site.id : null)) : [];
+  const liveDomains = approvedLiveWebsites.some(Boolean);
+  const canFind = (liveDomains || domainHandoffEnabled()) && websites.length > 0;
   const client = await createClient();
   const intents = await Promise.all(websites.map(async website => ({ website, intent: await loadDomainIntent(client, ctx.organization.id, website.id) })));
   const saved = intents.find(({ intent }) => intent && intent.phase !== "cancelled");
@@ -61,12 +69,12 @@ export default async function DomainPage({ searchParams }: { searchParams: Promi
         canReset: ["provisioning", "building", "error"].includes(website.status) && !website.live_url && !website.primary_domain_id && setupDomains.every(item => item.source === "customer_owned" && item.status !== "connected" && (item.verification as { source?: string } | null)?.source !== "provider"),
         domains: setupDomains.map(item => ({ id: item.id, hostname: item.hostname, updated_at: item.updated_at })) };
     })} /> : null}
-    {flow === "choose" ? <DomainOptions canFind={canFind} canSetUp={websites.length > 0} savedName={saved?.intent?.hostname} /> : <>
+    {flow === "choose" ? <DomainOptions managedPurchasing={liveDomains} canFind={canFind} canSetUp={websites.length > 0} savedName={saved?.intent?.hostname} /> : <>
       <Link href="/dashboard/domain?flow=choose" className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]"><ArrowLeft className="h-4 w-4" aria-hidden="true" />All domain options</Link>
       {flow === "purchase-preview" ? <Card><DomainPurchasePreview hostname={requestedName} /></Card> : flow === "find" ? <Card>
         {!canFind ? <p className="text-sm text-[color:var(--text-secondary)]">Domain search is unavailable right now. You can return to the options or contact Vigil for help.</p> : selectedWebsite ? <>
           {websites.length > 1 ? <p className="mb-4 text-sm text-[color:var(--text-secondary)]">{selectedWebsite.website.name} · <Link className="underline" href="/dashboard/domain?flow=find&website=choose">Change website</Link></p> : null}
-          <DomainJourney key={`${selectedWebsite.website.id}:${requestedName}`} websiteId={selectedWebsite.website.id} initial={selectedWebsite.intent} initialHostname={requestedName} canManage={canManage} />
+          {approvedLiveWebsites.includes(selectedWebsite.website.id) ? <DomainWorkspace key={selectedWebsite.website.id} live websiteId={selectedWebsite.website.id} initialHostname={requestedName} initialScreen="search" testWebsites={[{id:selectedWebsite.website.id,label:selectedWebsite.website.name}]} publishableTestKey={process.env.NEXT_PUBLIC_VIGIL_DOMAIN_STRIPE_LIVE_KEY??""} canManage={ctx.role === "owner" && !ctx.isImpersonating} /> : <DomainJourney key={`${selectedWebsite.website.id}:${requestedName}`} websiteId={selectedWebsite.website.id} initial={selectedWebsite.intent} initialHostname={requestedName} canManage={canManage} />}
         </> : <>
           <h2 className="text-base font-semibold">Which website is this domain for?</h2>
           <form action="/dashboard/domain" className="mt-4 space-y-4">
@@ -83,7 +91,7 @@ export default async function DomainPage({ searchParams }: { searchParams: Promi
           {canAdd ? <ConnectDomainForm websites={websites.map(site => ({ id: site.id, name: site.name }))} initialHostname={requestedName} initialWebsiteId={websites.find(site => site.id === params.website)?.id} registrar={params.registrar === "vercel" ? "vercel" : "other"} /> : <p className="mt-4 text-sm text-[color:var(--text-secondary)]">{domain ? "Your domain is already connected. Contact Vigil if you need to change it." : "A customer owner or manager can add a domain once the website is ready."}</p>}
         </> : domain && status ? <>
           {currentDomains.length > 1 ? <nav aria-label="Your domains" className="mb-5 flex flex-wrap gap-3 text-sm">{currentDomains.map(item => <Link key={item.id} className="break-all underline aria-[current=page]:text-[color:var(--accent)]" aria-current={item.id === domain.id ? "page" : undefined} href={`/dashboard/domain?flow=own&domain=${item.id}`}>{item.hostname}</Link>)}</nav> : null}
-          {domain.source === "customer_owned" ? <DomainGuidePanel key={`${domain.id}:${domain.updated_at}`} domain={{ domainId: domain.id, hostname: domain.hostname, status: domain.status, records: guidedDomainRecords(domain.hostname, domain.verification, domain.verification_token), dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable, launchReady, statusReason: domain.status_reason, cutoverReady: (domain.verification as { source?: string } | null)?.source === "provider" }} initialRegistrar={initialRegistrar} afterPurchase={afterPurchase} canManage={canManage} /> : <>
+          {liveDomains && domain.managed_registration_id && domain.website_id ? <DomainWorkspace live websiteId={domain.website_id} initialScreen="progress" testWebsites={websites.map(site=>({id:site.id,label:site.name}))} publishableTestKey={process.env.NEXT_PUBLIC_VIGIL_DOMAIN_STRIPE_LIVE_KEY??""} canManage={ctx.role === "owner" && !ctx.isImpersonating} /> : domain.source === "customer_owned" ? (process.env.VIGIL_DOMAIN_CLOUDFLARE_ENABLED === "true" && ctx.role === "owner" && !ctx.isImpersonating ? <AuthorizedExistingDomain domainId={domain.id}><DomainGuidePanel key={`${domain.id}:${domain.updated_at}`} domain={{ domainId: domain.id, hostname: domain.hostname, status: domain.status, records: guidedDomainRecords(domain.hostname, domain.verification, domain.verification_token), dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable, launchReady, statusReason: domain.status_reason, cutoverReady: (domain.verification as { source?: string } | null)?.source === "provider" }} initialRegistrar={initialRegistrar} afterPurchase={afterPurchase} canManage={canManage} /></AuthorizedExistingDomain> : <DomainGuidePanel key={`${domain.id}:${domain.updated_at}`} domain={{ domainId: domain.id, hostname: domain.hostname, status: domain.status, records: guidedDomainRecords(domain.hostname, domain.verification, domain.verification_token), dnsOk: domain.dns_ok, sslOk: domain.ssl_ok, reachable, launchReady, statusReason: domain.status_reason, cutoverReady: (domain.verification as { source?: string } | null)?.source === "provider" }} initialRegistrar={initialRegistrar} afterPurchase={afterPurchase} canManage={canManage} />) : <>
             <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="break-all text-lg font-semibold">{domain.hostname}</h2><StatusPill tone={status.tone}>{status.label}</StatusPill></div>
             {domain.status_reason || status.hint ? <p className="mt-2 text-sm text-[color:var(--text-secondary)]">{domain.status_reason || status.hint}</p> : null}
           </>}

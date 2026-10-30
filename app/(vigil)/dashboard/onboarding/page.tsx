@@ -4,11 +4,14 @@ import { loadDomainIntent } from "@/lib/vigil/services/domain-handoff";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { hasLiveWebsitePolicy } from "@/lib/vigil/domain-engine/live-policy";
 import { canManageDomainSetup } from "@/lib/vigil/domain-access";
 import { resumeStep, stepsForProjectKind, type StepKey } from "@/lib/vigil/onboarding/brief";
 import { getOnboardingProject, getProjectAssets } from "@/lib/vigil/queries/onboarding";
 import { getOrgDomains } from "@/lib/vigil/queries/dashboard";
 import { guidedDomainRecords } from "@/lib/vigil/services/dns";
+import { readDomainEngineConfig } from "@/lib/vigil/domain-engine/config";
 import { OnboardingWizard } from "./OnboardingWizard";
 
 export const metadata: Metadata = { title: "Getting set up" };
@@ -47,10 +50,14 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
       }
     : null;
 
+  const liveDomainEnabled = Boolean(website && readDomainEngineConfig().enabled && process.env.VIGIL_DOMAIN_LIVE_ENABLED === "true" && await hasLiveWebsitePolicy(createAdminClient(), ctx.organization.id, website.id));
+
   return (
     <OnboardingWizard
       projectId={project.id}
-      websiteId={domainHandoffEnabled() ? website?.id ?? null : null}
+      websiteId={(domainHandoffEnabled() || liveDomainEnabled) ? website?.id ?? null : null}
+      liveDomainEnabled={liveDomainEnabled}
+      domainLiveKey={process.env.NEXT_PUBLIC_VIGIL_DOMAIN_STRIPE_LIVE_KEY??""}
       initialIntent={intent}
       projectKind={project.kind}
       organizationId={ctx.organization.id}
@@ -62,6 +69,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
       initialDomain={domainSetup}
       completedAt={project.intake_completed_at}
       canManageDomain={canManageDomainSetup(ctx)}
+      canPurchaseDomain={ctx.role === "owner" && !ctx.isImpersonating}
     />
   );
 }
