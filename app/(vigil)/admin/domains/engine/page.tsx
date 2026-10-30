@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getDomainLaunchProfile } from "@/lib/vigil/domain-engine/launch-profile";
 import { updateDomainSupport } from "./actions";
 import { notFound } from "next/navigation";
 import { requireStaff } from "@/lib/vigil/auth/session";
@@ -11,6 +13,10 @@ export default async function DomainEngineOperations() {
   await requireStaff("/admin/domains/engine");
   if (!readDomainEngineConfig().enabled) notFound();
   const client = await createClient();
+  const admin = createAdminClient();
+  const launch = await getDomainLaunchProfile(admin);
+  const health = await admin.rpc("domain_operations_health");
+  const operations = health.data as { taxReportingNeedsReview?: number; activeRecordHolds?: number; retentionReviewQueue?: unknown[] } | null;
   const [orders, assets, support] = await Promise.all([
     client
       .from("domain_orders")
@@ -43,6 +49,12 @@ export default async function DomainEngineOperations() {
       <Link href="/admin/domains" className="text-sm underline">
         ← All domain connections
       </Link>
+      <Card className="mt-5">
+        <h2 className="text-lg font-medium">Customer purchasing readiness</h2>
+        <p className="mt-2 text-sm">{launch?.purchasing_enabled ? "Merchant release enabled. Each customer must still approve a current quote and pass funding checks." : launch ? "Search enabled. Purchasing is awaiting the reviewed tax classification, supplier tax treatment and funding acceptance." : "Merchant launch profile is not configured."}</p>
+        <p className="mt-2 text-sm">Tax reporting needing review: {health.error ? "Unavailable — check the worker" : operations?.taxReportingNeedsReview ?? 0} · Active record holds: {operations?.activeRecordHolds ?? 0} · Retention reviews due (up to 100): {operations?.retentionReviewQueue?.length ?? 0}</p>
+        <p className="mt-2 text-sm text-[color:var(--text-secondary)]">Tax reporting retries never charge, refund or register a domain. Records remain protected until retention and any active holds are reviewed.</p>
+      </Card>
       {orders.error || assets.error || support.error ? (
         <Card className="mt-5">
           <p>

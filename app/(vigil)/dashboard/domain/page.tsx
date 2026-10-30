@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getDomainLaunchProfile } from "@/lib/vigil/domain-engine/launch-profile";
 import { hasLiveWebsitePolicy } from "@/lib/vigil/domain-engine/live-policy";
 import { readDomainEngineConfig } from "@/lib/vigil/domain-engine/config";
 import { AuthorizedExistingDomain } from "@/components/vigil/domain-engine/CloudflareDomainConnection";
@@ -36,8 +37,10 @@ export default async function DomainPage({ searchParams }: { searchParams: Promi
   const adminManaging = ctx.staffRole === "admin";
   const liveConfigured=readDomainEngineConfig().enabled && process.env.VIGIL_DOMAIN_LIVE_ENABLED === "true";
   const approvedLiveWebsites = liveConfigured ? await Promise.all(websites.map(async site => await hasLiveWebsitePolicy(createAdminClient(), ctx.organization.id, site.id) ? site.id : null)) : [];
-  const liveDomains = approvedLiveWebsites.some(Boolean);
-  const canFind = (liveDomains || domainHandoffEnabled()) && websites.length > 0;
+  const launchProfile = liveConfigured ? await getDomainLaunchProfile(createAdminClient()) : null;
+  const liveDomains = approvedLiveWebsites.some(Boolean) || Boolean(launchProfile?.purchasing_enabled);
+  const engineSurface = liveConfigured && Boolean(launchProfile);
+  const canFind = (engineSurface || liveDomains || domainHandoffEnabled()) && websites.length > 0;
   const client = await createClient();
   const intents = await Promise.all(websites.map(async website => ({ website, intent: await loadDomainIntent(client, ctx.organization.id, website.id) })));
   const saved = intents.find(({ intent }) => intent && intent.phase !== "cancelled");
@@ -69,12 +72,12 @@ export default async function DomainPage({ searchParams }: { searchParams: Promi
         canReset: ["provisioning", "building", "error"].includes(website.status) && !website.live_url && !website.primary_domain_id && setupDomains.every(item => item.source === "customer_owned" && item.status !== "connected" && (item.verification as { source?: string } | null)?.source !== "provider"),
         domains: setupDomains.map(item => ({ id: item.id, hostname: item.hostname, updated_at: item.updated_at })) };
     })} /> : null}
-    {flow === "choose" ? <DomainOptions managedPurchasing={liveDomains} canFind={canFind} canSetUp={websites.length > 0} savedName={saved?.intent?.hostname} /> : <>
+    {flow === "choose" ? <DomainOptions managedPurchasing={engineSurface || liveDomains} canFind={canFind} canSetUp={websites.length > 0} savedName={saved?.intent?.hostname} /> : <>
       <Link href="/dashboard/domain?flow=choose" className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]"><ArrowLeft className="h-4 w-4" aria-hidden="true" />All domain options</Link>
       {flow === "purchase-preview" ? <Card><DomainPurchasePreview hostname={requestedName} /></Card> : flow === "find" ? <Card>
         {!canFind ? <p className="text-sm text-[color:var(--text-secondary)]">Domain search is unavailable right now. You can return to the options or contact Vigil for help.</p> : selectedWebsite ? <>
           {websites.length > 1 ? <p className="mb-4 text-sm text-[color:var(--text-secondary)]">{selectedWebsite.website.name} · <Link className="underline" href="/dashboard/domain?flow=find&website=choose">Change website</Link></p> : null}
-          {approvedLiveWebsites.includes(selectedWebsite.website.id) ? <DomainWorkspace key={selectedWebsite.website.id} live websiteId={selectedWebsite.website.id} initialHostname={requestedName} initialScreen="search" testWebsites={[{id:selectedWebsite.website.id,label:selectedWebsite.website.name}]} publishableTestKey={process.env.NEXT_PUBLIC_VIGIL_DOMAIN_STRIPE_LIVE_KEY??""} canManage={ctx.role === "owner" && !ctx.isImpersonating} /> : <DomainJourney key={`${selectedWebsite.website.id}:${requestedName}`} websiteId={selectedWebsite.website.id} initial={selectedWebsite.intent} initialHostname={requestedName} canManage={canManage} />}
+          {engineSurface || approvedLiveWebsites.includes(selectedWebsite.website.id) ? <DomainWorkspace discoveryOnly={(!launchProfile?.purchasing_enabled && !approvedLiveWebsites.includes(selectedWebsite.website.id)) || ctx.isImpersonating || ctx.role !== "owner"} key={selectedWebsite.website.id} live websiteId={selectedWebsite.website.id} initialHostname={requestedName} initialScreen="search" testWebsites={[{id:selectedWebsite.website.id,label:selectedWebsite.website.name}]} publishableTestKey={process.env.NEXT_PUBLIC_VIGIL_DOMAIN_STRIPE_LIVE_KEY??""} canManage={ctx.role === "owner" && !ctx.isImpersonating} /> : <DomainJourney key={`${selectedWebsite.website.id}:${requestedName}`} websiteId={selectedWebsite.website.id} initial={selectedWebsite.intent} initialHostname={requestedName} canManage={canManage} />}
         </> : <>
           <h2 className="text-base font-semibold">Which website is this domain for?</h2>
           <form action="/dashboard/domain" className="mt-4 space-y-4">

@@ -48,6 +48,7 @@ type Quote = RegistrarQuote & {
   contactSchema?: ContactSchema;
   subtotalMinor?: number;
   taxMinor?: number;
+  taxPending?: boolean;
   totalMinor?: number;
   serviceFeeMinor?: number;
   policy?: {
@@ -86,6 +87,7 @@ const labels: Record<string, string> = {
 export function DomainWorkspace({
   simulation = false,
   live = false,
+  discoveryOnly = false,
   websiteId,
   initialHostname = "",
   initialScreen = "choose",
@@ -100,6 +102,7 @@ export function DomainWorkspace({
 }: {
   simulation?: boolean;
   live?: boolean;
+  discoveryOnly?: boolean;
   websiteId?: string;
   initialHostname?: string;
   initialScreen?: "choose" | "search" | "progress";
@@ -113,7 +116,7 @@ export function DomainWorkspace({
   onExistingSaved?: (domain: { id: string; fqdn: string }) => void;
 }) {
   const router = useRouter();
-  const endpoint = live
+  const endpoint = discoveryOnly ? "/api/domain-engine/discovery" : live
     ? "/api/domain-engine/live"
     : stripeTest
       ? "/api/domain-engine/test"
@@ -127,7 +130,7 @@ export function DomainWorkspace({
   const [input, setInput] = useState(
     initialHostname || (simulation ? "willow-pine-demo" : ""),
   );
-  const [results, setResults] = useState<RegistrarQuote[]>([]);
+  const [results, setResults] = useState<(RegistrarQuote & { taxPending?: boolean })[]>([]);
   const [quote, setQuote] = useState<Quote | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -148,6 +151,7 @@ export function DomainWorkspace({
   const orderId = useRef<string | null>(null);
   const intent = useRef<string | null>(null);
   const sequence = useRef(0);
+  const addressSequence = useRef(0);
   const actionEpoch = useRef(0);
   const [contact, setContact] = useState({
     additional: {} as Record<string, string>,
@@ -206,7 +210,7 @@ export function DomainWorkspace({
     }
   }
   useEffect(() => {
-    if (live && !canManage) return;
+    if (discoveryOnly || (live && !canManage)) return;
     const controller = new AbortController();
     const restoreEpoch = actionEpoch.current;
     void fetch(endpoint, {
@@ -249,7 +253,7 @@ export function DomainWorkspace({
           );
       });
     return () => controller.abort();
-  }, [endpoint, stripeTest, live, websiteId, canManage]);
+  }, [endpoint, stripeTest, live, websiteId, canManage, discoveryOnly]);
   const pollingOrderId = view.order?.id;
   useEffect(() => {
     if (!live || !canManage || screen !== "progress" || !pollingOrderId) return;
@@ -311,7 +315,7 @@ export function DomainWorkspace({
   }
   async function purchase(event: React.FormEvent) {
     event.preventDefault();
-    if (!quote) return;
+    if (!quote || discoveryOnly || (live && quote.taxPending)) return;
     const data = await call({
       action: "purchase",
       approval: {
@@ -333,6 +337,24 @@ export function DomainWorkspace({
         window.history.replaceState(null, "", location);
         setCheckout({ orderId: data.orderId, clientSecret: data.clientSecret });
       } else setScreen("progress");
+    }
+  }
+  async function calculateFinalPrice() {
+    if (!quote || !live || discoveryOnly) return;
+    const current = addressSequence.current;
+    const data = await call({ action: "tax_quote", quoteId: quote.id, address: contact.address });
+    if (data && current === addressSequence.current) {
+      setQuote({ ...quote, ...data.quote });
+      setTerms(false);
+      intent.current = crypto.randomUUID();
+    }
+  }
+  function changeAddress(key: keyof typeof contact.address, value: string) {
+    addressSequence.current++;
+    setContact(current => ({ ...current, address: { ...current.address, [key]: value } }));
+    if (live && quote) {
+      setQuote({ ...quote, taxPending: true });
+      setTerms(false);
     }
   }
   function field(
@@ -369,7 +391,7 @@ export function DomainWorkspace({
             ? "Domain released"
             : null;
 
-  if (live && !canManage)
+  if (live && !canManage && !discoveryOnly)
     return (
       <p role="status">
         The customer owner must sign in directly to authorize domain purchases
@@ -509,7 +531,7 @@ export function DomainWorkspace({
               autoCapitalize="none"
               autoCorrect="off"
             />
-            <button className={styles.primary} disabled={busy || !canManage}>
+            <button className={styles.primary} disabled={busy || (!canManage && !discoveryOnly)}>
               <Search size={17} />
               {busy ? "Searching…" : "Search domains"}
             </button>
@@ -531,7 +553,7 @@ export function DomainWorkspace({
                         ? "Premium domain"
                         : "Available now"
                       : result.availability === "unsupported"
-                        ? "Not included in this test fixture"
+                        ? live ? "Not available for this service" : "Not included in this test fixture"
                         : "Unavailable or unconfirmed"}
                   </p>
                 </div>
@@ -540,7 +562,7 @@ export function DomainWorkspace({
                     <>
                       <strong>
                         {money(result.registration.amountMinor)}
-                        <small> / first year</small>
+                        <small> / first year{result.taxPending || discoveryOnly ? " before tax" : ""}</small>
                       </strong>
                       <p>
                         Renews at approximately{" "}
@@ -552,7 +574,7 @@ export function DomainWorkspace({
                 <button
                   className={styles.secondary}
                   disabled={
-                    busy || result.availability !== "available" || !canManage
+                    busy || result.availability !== "available" || (!canManage && !discoveryOnly)
                   }
                   onClick={() => void select(result)}
                 >
@@ -595,25 +617,25 @@ export function DomainWorkspace({
               ← Choose another name
             </button>
             <h3>Make it yours.</h3>
-            {!simulation && !live ? (
+            {discoveryOnly || (!simulation && !live) ? (
               <div className={styles.notice}>
                 <ShieldCheck size={20} />
                 <div>
-                  <strong>Registration is awaiting approval.</strong>
+                  <strong>{discoveryOnly ? "Search now. Purchasing is being prepared." : "Registration is awaiting approval."}</strong>
                   <p>
-                    This is a discovery result, not a reservation or purchase.
-                    Vigil will enable checkout after the registrar confirms
-                    client ownership and the service terms are approved. You
-                    will not need a separate Vercel account for Vigil-managed
-                    purchasing.
+                    This name is available to search, but it is not reserved.
+                    The price shown includes Vigil’s service fee and is before tax.
+                    Your final total will be shown before you approve payment.
+                    You can keep using your website preview while purchasing is prepared.
+                    You will not need a separate Vercel account.
                   </p>
                 </div>
               </div>
             ) : (
               <>
                 <p>
-                  {live
-                    ? "Confirm the legal owner and approve the exact name, one-year term and final price. Use the client's real registrant details. A verification email will be sent by the registrar."
+                  {live && !discoveryOnly
+                    ? "Confirm the legal owner and approve the exact name, one-year term and final price. Enter accurate registrant details. A verification email will be sent by the registrar."
                     : "Confirm the legal registrant and approve the exact name, term and test price. Use fictional contact details in this workspace."}
                 </p>
                 <p>
@@ -640,17 +662,10 @@ export function DomainWorkspace({
                       {label}
                       <input
                         required
+                        readOnly={live && key === "country"}
                         maxLength={key === "country" ? 2 : 200}
                         value={contact.address[key]}
-                        onChange={(event) =>
-                          setContact({
-                            ...contact,
-                            address: {
-                              ...contact.address,
-                              [key]: event.target.value,
-                            },
-                          })
-                        }
+                        onChange={(event) => changeAddress(key, event.target.value)}
                       />
                     </label>
                   ))}
@@ -678,6 +693,11 @@ export function DomainWorkspace({
                     ))}
                   </div>
                 ) : null}
+                {live && quote.taxPending ? <div className={styles.notice}>
+                  <div><p>Confirm your US address, then calculate tax to see the final total. Your address is shared with Stripe for tax calculation.</p>
+                    <button type="button" className={styles.primary} disabled={busy} onClick={() => void calculateFinalPrice()}>{busy ? "Calculating…" : "Calculate final price"}</button>
+                  </div>
+                </div> : null}
                 <label className={styles.check}>
                   <input
                     type="checkbox"
@@ -710,11 +730,12 @@ export function DomainWorkspace({
                     required
                     type="checkbox"
                     checked={terms}
+                    disabled={live && quote.taxPending}
                     onChange={(event) => setTerms(event.target.checked)}
                   />
                   <span>
                     I approve <b>{quote.fqdn}</b> for one year at{" "}
-                    <b>{money(quote.registration?.amountMinor)}</b>, the renewal
+                    <b>{quote.taxPending ? "the final price calculated above" : money(quote.registration?.amountMinor)}</b>, the renewal
                     choice above, and the{" "}
                     <a
                       href={
@@ -747,14 +768,14 @@ export function DomainWorkspace({
                 </label>
                 <button
                   className={styles.primary}
-                  disabled={busy || !terms || !transmit || !canManage}
+                  disabled={busy || !terms || !transmit || !canManage || (live && quote.taxPending)}
                   type="submit"
                 >
                   {busy
                     ? live
                       ? "Preparing secure checkout…"
                       : "Processing test order…"
-                    : live
+                    : live && quote.taxPending ? "Calculate the final price first" : live
                       ? `Authorize ${money(quote.registration?.amountMinor)} & register`
                       : `Authorize ${money(quote.registration?.amountMinor)} test payment & register`}
                 </button>
@@ -799,7 +820,7 @@ export function DomainWorkspace({
               <div>
                 <dt>Tax {simulation ? "(test)" : ""}</dt>
                 <dd>
-                  {quote.taxMinor != null
+                  {quote.taxPending ? "Calculated after your address" : quote.taxMinor != null
                     ? money(quote.taxMinor)
                     : simulation
                       ? "$0.00"
@@ -808,7 +829,7 @@ export function DomainWorkspace({
               </div>
               <div>
                 <dt>
-                  {live
+                  {quote.taxPending || discoveryOnly ? "Total before tax" : live
                     ? "Total today"
                     : simulation
                       ? "Total today (test)"

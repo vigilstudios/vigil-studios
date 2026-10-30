@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getDomainLaunchProfile } from "@/lib/vigil/domain-engine/launch-profile";
 import { hasLiveWebsitePolicy } from "@/lib/vigil/domain-engine/live-policy";
 import { canManageDomainSetup } from "@/lib/vigil/domain-access";
 import { resumeStep, stepsForProjectKind, type StepKey } from "@/lib/vigil/onboarding/brief";
@@ -50,13 +51,16 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
       }
     : null;
 
-  const liveDomainEnabled = Boolean(website && readDomainEngineConfig().enabled && process.env.VIGIL_DOMAIN_LIVE_ENABLED === "true" && await hasLiveWebsitePolicy(createAdminClient(), ctx.organization.id, website.id));
+  const launchProfile = readDomainEngineConfig().enabled ? await getDomainLaunchProfile(createAdminClient()) : null;
+  const websitePolicy = Boolean(website && readDomainEngineConfig().enabled && process.env.VIGIL_DOMAIN_LIVE_ENABLED === "true" && await hasLiveWebsitePolicy(createAdminClient(), ctx.organization.id, website.id));
+  const liveDomainEnabled = Boolean(website && readDomainEngineConfig().enabled && process.env.VIGIL_DOMAIN_LIVE_ENABLED === "true" && (launchProfile || websitePolicy));
 
   return (
     <OnboardingWizard
       projectId={project.id}
       websiteId={(domainHandoffEnabled() || liveDomainEnabled) ? website?.id ?? null : null}
       liveDomainEnabled={liveDomainEnabled}
+      domainDiscoveryOnly={(!launchProfile?.purchasing_enabled && !websitePolicy) || ctx.isImpersonating || ctx.role !== "owner"}
       domainLiveKey={process.env.NEXT_PUBLIC_VIGIL_DOMAIN_STRIPE_LIVE_KEY??""}
       initialIntent={intent}
       projectKind={project.kind}

@@ -38,6 +38,7 @@ export type WizardProps = {
   canManageDomain: boolean;
   canPurchaseDomain?: boolean;
   liveDomainEnabled?:boolean;
+  domainDiscoveryOnly?:boolean;
   domainLiveKey?:string;
 };
 
@@ -172,7 +173,7 @@ export function OnboardingWizard(props: WizardProps) {
           ) : step === "brand" ? (
             <BrandStep key="brand" initial={brief.brand} projectKind={props.projectKind} projectId={props.projectId} organizationId={props.organizationId} assets={assets} onAssets={setAssets} save={(d, c) => saveSection("brand", d, c)} onSaveState={setSaveState} onBack={() => go(prev("brand"))} onNext={() => go(next("brand"))} />
           ) : step === "domain" ? (
-            <DomainStep canPurchase={props.canPurchaseDomain ?? false} liveDomainEnabled={props.liveDomainEnabled} domainLiveKey={props.domainLiveKey} websiteId={props.websiteId} initialIntent={props.initialIntent} key="domain" initial={brief.domain} projectId={props.projectId} businessName={businessName} domain={domain} onDomain={setDomain} canManage={props.canManageDomain} save={(d, c) => saveSection("domain", d, c)} onSaveState={setSaveState} onBack={() => go(prev("domain"))} onNext={() => go(next("domain"))} />
+            <DomainStep discoveryOnly={props.domainDiscoveryOnly} canPurchase={props.canPurchaseDomain ?? false} liveDomainEnabled={props.liveDomainEnabled} domainLiveKey={props.domainLiveKey} websiteId={props.websiteId} initialIntent={props.initialIntent} key="domain" initial={brief.domain} projectId={props.projectId} businessName={businessName} domain={domain} onDomain={setDomain} canManage={props.canManageDomain} save={(d, c) => saveSection("domain", d, c)} onSaveState={setSaveState} onBack={() => go(prev("domain"))} onNext={() => go(next("domain"))} />
           ) : (
             <ReviewStep key="review" brief={brief} projectKind={props.projectKind} assets={assets} domain={domain} onEdit={(s) => go(s)} onSend={send} sending={sending} error={sendError} onBack={() => go(prev("review"))} />
           )}

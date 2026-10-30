@@ -16,11 +16,14 @@ export const livePolicySchema = z.object({
   max_registrar_minor: z.number().int().positive().max(100000),
   max_client_minor: z.number().int().positive().max(100000000),
   service_fee_minor: z.number().int().nonnegative(),
-  tax_rate_bps: z.number().int().min(0).max(10000),
+  tax_mode: z.enum(["reviewed_rate", "stripe"]).default("reviewed_rate"),
+  tax_code: z.string().nullable().optional(),
+  fee_tax_code: z.string().nullable().optional(),
+  tax_rate_bps: z.number().int().min(0).max(10000).nullable(),
   tax_description: z.string(),
-  registrant_country: z.string().regex(/^[A-Z]{2}$/),
-  registrant_region: z.string().min(1),
-  registrant_postal_code: z.string().min(1),
+  registrant_country: z.literal("US"),
+  registrant_region: z.string().min(1).nullable(),
+  registrant_postal_code: z.string().min(1).nullable(),
   terms_version: z.string().min(1),
   terms_url: z.string().url(),
   registration_agreement_url: z.string().url(),
@@ -91,8 +94,9 @@ export function retailDomainAmount(cost: number, policy: LiveDomainPolicy) {
     throw liveUnavailable(
       "That domain exceeds the approved registrar cost limit.",
     );
+  if (policy.tax_mode === "reviewed_rate" && policy.tax_rate_bps == null) throw liveUnavailable("A reviewed tax rate is required.");
   const subtotal = cost + policy.service_fee_minor,
-    tax = Math.ceil((subtotal * policy.tax_rate_bps) / 10000),
+    tax = policy.tax_mode === "stripe" ? 0 : Math.ceil((subtotal * (policy.tax_rate_bps ?? 0)) / 10000),
     total = subtotal + tax;
   if (!Number.isSafeInteger(total) || total > policy.max_client_minor)
     throw liveUnavailable(

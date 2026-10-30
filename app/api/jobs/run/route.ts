@@ -80,7 +80,17 @@ async function handle(request: NextRequest) {
         error: "domain_lifecycle_failed",
       }));
     }
+    let domainTax: unknown = null;
+    if (process.env.VIGIL_DOMAIN_ENGINE_ENABLED === "true" && process.env.VIGIL_DOMAIN_LIVE_ENABLED === "true") {
+      const { reconcileDomainTax } = await import("@/lib/vigil/domain-engine/tax");
+      domainTax = await reconcileDomainTax(admin).catch(() => ({ error: "domain_tax_reconciliation_failed" }));
+    }
+    const domainRecords = process.env.VIGIL_DOMAIN_ENGINE_ENABLED === "true"
+      ? await admin.rpc("domain_record_review_queue", { p_limit: 100 }).then(r => r.error ? { error: "domain_records_review_failed" } : { reviewDue: Array.isArray(r.data) ? r.data.length : 0 })
+      : null;
     return NextResponse.json({
+      domainRecords,
+      domainTax,
       worker,
       ran: outcomes.length,
       outcomes,
