@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
     }
     const { data: current, error: currentError } = await client
       .from("domain_orders")
-      .select("*,domain_quotes(total_minor,currency,live_policy_id)")
+      .select("*,domain_quotes(total_minor,subtotal_minor,tax_minor,currency,live_policy_id)")
       .eq("id", order.id)
       .eq("organization_id", ctx.organization.id)
       .single();
@@ -268,6 +268,7 @@ export async function POST(request: NextRequest) {
           id: current.id,
           fqdn: current.fqdn,
           totalMinor: current.domain_quotes.total_minor,
+          priceBreakdown: { registrationMinor: current.domain_quotes.subtotal_minor - p.service_fee_minor, serviceFeeMinor: p.service_fee_minor, taxMinor: current.domain_quotes.tax_minor },
           currency: current.domain_quotes.currency,
           registrationState: current.registration_state,
           paymentState: current.payment_state,

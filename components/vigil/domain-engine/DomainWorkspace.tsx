@@ -24,6 +24,7 @@ type OrderView = {
   id: string;
   fqdn: string;
   totalMinor: number;
+  priceBreakdown?: { registrationMinor: number; serviceFeeMinor: number; taxMinor: number };
   currency: string;
   registrationState: string;
   paymentState: string;
@@ -982,6 +983,11 @@ export function DomainWorkspace({
                           : "Manual renewal"}
                       </dd>
                     </div>
+                    {order.priceBreakdown ? <>
+                      <div><dt>Registration</dt><dd>{money(order.priceBreakdown.registrationMinor)}</dd></div>
+                      <div><dt>Vigil service fee</dt><dd>{money(order.priceBreakdown.serviceFeeMinor)}</dd></div>
+                      <div><dt>Sales tax</dt><dd>{money(order.priceBreakdown.taxMinor)}</dd></div>
+                    </> : null}
                     <div>
                       <dt>Receipt {simulation ? "(test)" : ""}</dt>
                       <dd>

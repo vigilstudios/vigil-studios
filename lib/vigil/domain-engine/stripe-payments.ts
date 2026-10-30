@@ -47,6 +47,14 @@ class StripeDomainPayments<E extends "test" | "live"> implements DomainPaymentOp
         "The payment return address is invalid.",
       );
     url.searchParams.set("order", order.id);
+    const b = order.billingBreakdown;
+    if ((this.environment === "live" && !b) || (b && (
+      ![b.registrationMinor, b.serviceFeeMinor, b.taxMinor].every(n => Number.isSafeInteger(n) && n >= 0) || b.registrationMinor <= 0 ||
+      b.registrationMinor !== order.registrarAmountMinor || b.registrationMinor + b.serviceFeeMinor + b.taxMinor !== order.totalMinor
+    ))) throw new DomainEngineError("domain_price_mismatch", "The itemized domain price needs reconciliation before checkout.", 503);
+    const item = (name: string, amount: number) => ({ quantity: 1, price_data: { currency: order.currency, unit_amount: amount, product_data: { name } } });
+    const registrationLabel = `${order.fqdn} — ${order.years} year domain registration${this.environment === "test" ? " (test)" : ""}`;
+    const lineItems = b ? [item(registrationLabel, b.registrationMinor), ...(b.serviceFeeMinor > 0 ? [item("Vigil domain automation service fee", b.serviceFeeMinor)] : []), ...(b.taxMinor > 0 ? [item("Sales tax", b.taxMinor)] : [])] : [item(registrationLabel, order.totalMinor)];
     const session = await this.stripe.checkout.sessions.create(
       {
         mode: "payment",
@@ -55,18 +63,9 @@ class StripeDomainPayments<E extends "test" | "live"> implements DomainPaymentOp
         wallet_options: { link: { display: "never" } },
         return_url: url.toString(),
         redirect_on_completion: "if_required",
-        line_items: [
-          {
-            quantity: 1,
-            price_data: {
-              currency: order.currency,
-              unit_amount: order.totalMinor,
-              product_data: {
-                name: `${order.fqdn} — ${order.years} year domain registration${this.environment === "test" ? " (test)" : ""}`,
-              },
-            },
-          },
-        ],
+        // Tax was already calculated and consented to. Do not calculate it twice.
+        automatic_tax: { enabled: false },
+        line_items: lineItems,
         metadata: {
           domain_order_id: order.id,
           organization_id: order.organizationId,

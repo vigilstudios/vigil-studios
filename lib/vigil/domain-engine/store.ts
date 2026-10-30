@@ -101,6 +101,7 @@ export class SupabaseDomainOrderStore implements DomainOrderStore {
       environment: order.environment as OrderContext["environment"],
       registrarAmountMinor: context.registrar_cost_minor,
       totalMinor: quote.total_minor,
+      billingBreakdown: { registrationMinor: context.registrar_cost_minor, serviceFeeMinor: quote.subtotal_minor - context.registrar_cost_minor, taxMinor: quote.tax_minor },
       currency: quote.currency,
       quoteExpiresAt: quote.expires_at,
       registrationState:
