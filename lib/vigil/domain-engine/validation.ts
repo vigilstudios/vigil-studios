@@ -36,5 +36,6 @@ export const purchaseApprovalSchema = z
     autoRenew: z.boolean(),
     acceptTerms: z.literal(true),
     acceptContactTransmission: z.literal(true),
+    authorizeLaunchConnection: z.boolean().optional(),
   })
   .strict();

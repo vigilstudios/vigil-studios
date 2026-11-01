@@ -6,6 +6,7 @@ import { deployWebsite, finalizeWebsiteLaunch, provisionWebsite, syncDeployment 
 import { notifyCustomerDeployment } from "./services/deployment-notifications";
 import { beginDomainVerification, verifyDomain } from "./services/domain";
 import { notifyDomainReadiness } from "./services/domain-readiness-notifications";
+import { notifyRegisteredDomainReady } from "./services/registered-domain-notifications";
 import { provisionOrder } from "./services/orders";
 import { provisionWebsiteRepository } from "./services/repository";
 import { provisionWebsiteContact } from "./contact/provision";
@@ -33,6 +34,7 @@ export const JOB_KINDS = {
   domainConnect: "domain.connect",
   domainVerify: "domain.verify",
   domainReadinessNotify: "domain.readiness.notify",
+  domainRegistrationReadyNotify: "domain.registration.ready.notify",
 
   domainPurchase: "domain.purchase",
   domainLifecycleSync: "domain.lifecycle.sync",
@@ -56,6 +58,11 @@ export function registerJobHandler(kind: string, handler: JobHandler): void {
 }
 
 const builtInHandlers: Record<JobKind, JobHandler> = {
+  [JOB_KINDS.domainRegistrationReadyNotify]: async ({ admin, job }) => {
+    const result = await notifyRegisteredDomainReady(admin, job);
+    if (result.status === "waiting") throw new RetryLater("Waiting for confirmed domain registration, payment and email verification.", 15 * 60);
+    return result;
+  },
   [JOB_KINDS.domainReadinessNotify]: async ({ admin, job }) => {
     const result = await notifyDomainReadiness(admin, job);
     if (result.status === "waiting") throw new RetryLater("Waiting for verified domain ownership before notifying staff.", 15 * 60);

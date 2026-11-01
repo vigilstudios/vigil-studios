@@ -226,6 +226,12 @@ export async function prepareLiveCheckout(
     throw liveUnavailable(
       "Approve a current quote and the displayed registration terms.",
     );
+  if (approval.authorizeLaunchConnection) {
+    const { error: authorizationError } = await admin.rpc("authorize_managed_domain_launch", {
+      p_order_id: id, p_organization_id: org, p_actor_id: actor,
+    });
+    if (authorizationError) throw liveUnavailable("Your connection permission could not be saved. No payment was started.");
+  }
   const store = new LiveDomainOrderStore(admin);
   const order = await store.load(id);
   await authorizeLiveAction(admin, id, "checkout");

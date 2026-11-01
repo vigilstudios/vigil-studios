@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, CheckCircle2, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ExternalLink, Globe2, Loader2 } from "lucide-react";
 import { REGISTRAR_GUIDES, REGISTRAR_OPTIONS, VERCEL_DOMAINS_URL } from "@/lib/vigil/domain-guides";
 import type { RegistrarKey } from "@/lib/vigil/onboarding/brief";
 import { domainGuideScreens, guideEncouragement, guideOutcome, guideStorageKey, restoreGuideScreen, visibleGuideRecords, type GuideDomain } from "@/lib/vigil/domain-guide-flow";
 import { inputClass } from "./ui";
 import { VercelDomainIllustration } from "./VercelDomainIllustration";
+import styles from "./domain-engine/domain-workspace.module.css";
 import { DomainCelebration } from "./DomainCelebration";
 
 export type { GuideDomain } from "@/lib/vigil/domain-guide-flow";
@@ -51,8 +52,8 @@ export function DomainGuide({ domain, registrar, afterPurchase = false, onRegist
   const title = help ? "Need a hand?" : final === "connected" ? "Your domain is connected" : final === "waiting_launch" ? "Ownership verified — more steps to come" : final === "waiting_connection" ? "Finishing your secure connection" : final === "preparing" ? "We’re preparing your guide" : screen.title;
   const success = final === "connected";
   const progress = success ? 100 : final === "waiting_launch" ? 45 : final === "waiting_connection" ? 95 : final === "preparing" ? 0 : domain.cutoverReady ? 50 + Math.round((index + 1) / (screens.length + 1) * 40) : Math.round((index + 1) / (screens.length + 1) * 40);
-  return <section aria-label="Guided domain setup" className="relative min-w-0 space-y-5">
-    <p className="break-all text-sm text-[color:var(--text-secondary)]">{domain.hostname}</p>
+  return <section aria-label="Guided domain setup" className={`${styles.workspace} ${styles.guide} relative min-w-0 space-y-5`}>
+    <p className={styles.eyebrow}><Globe2 size={14} aria-hidden="true" />{domain.hostname}</p>
     {!help ? <div className="space-y-2">
       <p className="text-sm font-semibold text-[color:var(--accent)]">{final === "connected" ? "You did it — your website is live!" : final === "waiting_launch" ? "Great progress. Stay here for your next records." : final === "waiting_connection" ? "You’re so close! We’re finishing the secure connection." : final === "preparing" ? "We’re getting everything ready for you." : guideEncouragement(screen)}</p>
       <div role="progressbar" aria-label="Domain setup progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} aria-valuetext={success ? "Domain connected" : final === "waiting_launch" ? "Ownership verified; waiting for additional connection records. Setup is not complete." : final === "waiting_connection" ? "DNS verified; waiting for the secure connection" : final === "preparing" ? "Preparing your guide" : screen.kind === "check" ? domain.cutoverReady ? "Checking the final connection" : "Checking domain ownership; additional records follow" : `${domain.cutoverReady ? "Connection" : "Ownership"} guide step ${index + 1} of ${screens.length}`} className="h-1.5 overflow-hidden rounded-full bg-[color:var(--border)]"><div className="h-full rounded-full bg-[color:var(--accent-fill,var(--accent))]" style={{ width: `${progress}%` }} /></div>

@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState, type ReactNode } from "react";
-import { inputClass } from "@/components/vigil/ui";
+import { Cloud, ListChecks, LockKeyhole } from "lucide-react";
+import { DomainSectionHeading } from "./DomainSetupUI";
+import styles from "./domain-workspace.module.css";
 type Plan = {
   id: string;
   status: string;
@@ -21,29 +23,23 @@ export function AuthorizedExistingDomain({
 }) {
   const [automatic, setAutomatic] = useState(false);
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap gap-3">
+    <div className={styles.workspace}>
+      <div className={styles.providerOptions} aria-label="Connection method">
         <button
           type="button"
-          className={
-            automatic
-              ? "btn-secondary min-h-11 text-sm"
-              : "btn-primary min-h-11 text-sm"
-          }
+          aria-pressed={!automatic}
           onClick={() => setAutomatic(false)}
         >
-          Guided setup
+          <ListChecks size={16} aria-hidden="true" />
+          Step-by-step setup
         </button>
         <button
           type="button"
-          className={
-            automatic
-              ? "btn-primary min-h-11 text-sm"
-              : "btn-secondary min-h-11 text-sm"
-          }
+          aria-pressed={automatic}
           onClick={() => setAutomatic(true)}
         >
-          Connect Cloudflare automatically
+          <Cloud size={16} aria-hidden="true" />
+          Use Cloudflare
         </button>
       </div>
       {automatic ? (
@@ -103,18 +99,26 @@ function CloudflareDomainConnection({ domainId }: { domainId: string }) {
     return () => abort.abort();
   }, [domainId]);
   return (
-    <section aria-label="Authorize Cloudflare DNS" className="space-y-4">
-      <h2 className="font-semibold">
-        Let Vigil connect your Cloudflare domain
-      </h2>
-      <p className="text-sm">
-        Use a Cloudflare API token restricted to this domain, with Zone Read and
-        DNS Edit permissions. You will review the exact changes before Vigil
-        submits them. Email and unrelated records are preserved.
-      </p>
+    <section aria-label="Authorize Cloudflare DNS" className={styles.ownedForm}>
+      <DomainSectionHeading icon={Cloud} title="Connect through Cloudflare">
+        If Cloudflare manages your address, Vigil can prepare the connection for
+        you.
+      </DomainSectionHeading>
+      <div className={styles.notice}>
+        <LockKeyhole size={18} aria-hidden="true" />
+        <div>
+          <strong>You stay in control</strong>
+          <p>
+            This option needs a Cloudflare API token, not your password. Limit
+            it to this domain with Zone Read and DNS Edit permissions. You’ll
+            review every change before it is applied. Existing email and
+            unrelated records are preserved.
+          </p>
+        </div>
+      </div>
       {!plan || ["expired", "canceled"].includes(plan.status) ? (
         <form
-          className="space-y-4"
+          className={styles.ownedForm}
           onSubmit={(e) => {
             e.preventDefault();
             void call({
@@ -139,10 +143,9 @@ function CloudflareDomainConnection({ domainId }: { domainId: string }) {
           >
             Create a token limited to this zone
           </a>
-          <label className="block space-y-2 text-sm">
+          <label className={styles.field}>
             <span>Cloudflare API token</span>
             <input
-              className={inputClass}
               type="password"
               autoComplete="off"
               value={token}
@@ -151,7 +154,7 @@ function CloudflareDomainConnection({ domainId }: { domainId: string }) {
               maxLength={500}
             />
           </label>
-          <label className="flex gap-2 text-sm">
+          <label className={styles.check}>
             <input
               type="checkbox"
               required
@@ -164,14 +167,14 @@ function CloudflareDomainConnection({ domainId }: { domainId: string }) {
               does not change DNS.
             </span>
           </label>
-          <p className="text-xs">
+          <p className={styles.note}>
             The token is encrypted server-side for this short-lived connection
             plan and cleared after successful use. An uncertain submission
             retains it for up to 24 hours for read-only recovery. Revoke the
             token in Cloudflare after setup if you no longer need it.
           </p>
           <button
-            className="btn-primary min-h-11 text-sm"
+            className={styles.primary}
             disabled={busy || !access || !token}
           >
             Review connection plan
@@ -183,12 +186,12 @@ function CloudflareDomainConnection({ domainId }: { domainId: string }) {
           deployment before marking the domain connected.
         </p>
       ) : (
-        <div className="space-y-4">
+        <div className={styles.ownedForm}>
           <p className="text-sm">
             Review each change. Approval expires at{" "}
             {new Date(plan.expiresAt).toLocaleTimeString()}.
           </p>
-          <ul className="space-y-2 text-sm">
+          <ul className={styles.records}>
             {plan.changes.map((c, i) => (
               <li
                 key={i}
@@ -214,7 +217,7 @@ function CloudflareDomainConnection({ domainId }: { domainId: string }) {
           {plan.changes.length === 0 ? (
             <p className="text-sm">The required records are already present.</p>
           ) : null}
-          <label className="flex gap-2 text-sm">
+          <label className={styles.check}>
             <input
               type="checkbox"
               checked={consent}
@@ -226,7 +229,7 @@ function CloudflareDomainConnection({ domainId }: { domainId: string }) {
             </span>
           </label>
           <button
-            className="btn-primary min-h-11 text-sm"
+            className={styles.primary}
             disabled={busy || !consent}
             onClick={() =>
               void call({
@@ -263,7 +266,7 @@ function CloudflareDomainConnection({ domainId }: { domainId: string }) {
         </p>
       ) : null}
       {error ? (
-        <p role="alert" className="text-sm text-[color:var(--status-bad)]">
+        <p role="alert" className={styles.error}>
           {error}
         </p>
       ) : null}

@@ -176,6 +176,7 @@ export async function prepareManagedDns(
   organizationId: string,
   actorId: string,
   provider: DeploymentProvider,
+  launchOrderId?: string,
 ) {
   const ctx = await loadManagedRegistrarContext(
     admin,
@@ -195,7 +196,7 @@ export async function prepareManagedDns(
     ))
   )
     throw unavailable(
-      "Approve Deploy Live and wait for its production build before connecting website routing.",
+      "Vigil will connect this address after the website reviews are complete and its production build is ready.",
     );
   const { data: domain, error } = await admin
     .from("domains")
@@ -250,13 +251,16 @@ export async function prepareManagedDns(
     ctx.assetRef,
   );
   const { data, error: saveError } = await admin.rpc(
-    ctx.registration.environment === "live"
-      ? "create_live_managed_dns_plan"
+    launchOrderId && ctx.registration.environment === "live"
+      ? "create_managed_launch_dns_plan"
+      : ctx.registration.environment === "live"
+        ? "create_live_managed_dns_plan"
       : "create_managed_dns_plan",
     {
       p_registration_id: registrationId,
       p_actor_id: actorId,
       p_plan: plan as unknown as Json,
+      ...(launchOrderId ? { p_order_id: launchOrderId } : {}),
     },
   );
   const parsed = z

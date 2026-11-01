@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { assertProductionDeployAllowed, beginDomainVerification, activateDomainVerification } = vi.hoisted(() => ({
+const { assertProductionDeployAllowed, beginDomainVerification, activateDomainVerification, prepareManagedWebsiteLaunch, managedLaunchContext, connectManagedDomainAtLaunch } = vi.hoisted(() => ({
   assertProductionDeployAllowed: vi.fn(),
   beginDomainVerification: vi.fn().mockResolvedValue(undefined),
   activateDomainVerification: vi.fn(),
+  prepareManagedWebsiteLaunch: vi.fn(), managedLaunchContext: vi.fn(), connectManagedDomainAtLaunch: vi.fn(),
 }));
 vi.mock("@/lib/vigil/project-reviews", () => ({ assertProductionDeployAllowed }));
+vi.mock("../domain-engine/launch-handoff", () => ({ prepareManagedWebsiteLaunch, managedLaunchContext, connectManagedDomainAtLaunch }));
 vi.mock("../services/domain", () => ({ beginDomainVerification, activateDomainVerification }));
 
 import { deployWebsite, syncDeployment } from "../services/deployment";
@@ -35,6 +37,9 @@ describe("deployment service review enforcement", () => {
   beforeEach(() => {
     assertProductionDeployAllowed.mockReset().mockResolvedValue(undefined);
     beginDomainVerification.mockClear();
+    prepareManagedWebsiteLaunch.mockReset().mockResolvedValue(undefined);
+    managedLaunchContext.mockReset().mockResolvedValue(null);
+    connectManagedDomainAtLaunch.mockReset().mockResolvedValue(undefined);
     activateDomainVerification.mockReset().mockImplementation(async (admin, domainId) => {
       await admin.from("domains").update({ status: "connected", verification: { canonical_hostname: "example.com" } }).eq("id", domainId);
       return { connected: true };
@@ -86,4 +91,37 @@ describe("deployment service review enforcement", () => {
 
     await expect(deployWebsite(db.asClient(), "site_1", { environment: "production" }, provider())).rejects.toThrow(/Configure and verify DNS/);
   });
+  it("does not prepare or connect a managed domain until website approvals permit production", async () => {
+    assertProductionDeployAllowed.mockRejectedValueOnce(new Error("Client and Vigil approvals required"));
+    const db = new FakeAdmin({
+      websites: [{ id: "site_1", organization_id: "org_1", status: "building" }],
+      provider_links: [{ provider: "other", resource_kind: "repository", entity_type: "website", entity_id: "site_1", external_id: "123", metadata: { full_name: "vigil/site" } }],
+    });
+    const deploymentProvider = provider();
+    await expect(deployWebsite(db.asClient(), "site_1", { environment: "production" }, deploymentProvider)).rejects.toThrow("approvals required");
+    expect(prepareManagedWebsiteLaunch).not.toHaveBeenCalled();
+    expect(connectManagedDomainAtLaunch).not.toHaveBeenCalled();
+    expect(deploymentProvider.triggerDeployment).not.toHaveBeenCalled();
+  });
+
+  it("connects an opted-in managed domain only after the approved production build becomes ready", async () => {
+    const db = new FakeAdmin({
+      websites: [{ id: "site_1", organization_id: "org_1", status: "building" }],
+      domains: [{ id: "domain_1", organization_id: "org_1", website_id: "site_1", hostname: "example.com", managed_registration_id: "registration_1", status: "pending", dns_ok: false }],
+      provider_links: [{ provider: "other", resource_kind: "repository", entity_type: "website", entity_id: "site_1", external_id: "123", metadata: { full_name: "vigil/site" } }],
+    });
+    managedLaunchContext.mockResolvedValue({ ownerId: "owner_1" });
+    const deploymentProvider = provider();
+    const ready = { externalId: "production_1", status: "ready", environment: "production", url: "https://production.test", createdAt: "2026-11-01T12:00:00Z", readyAt: "2026-11-01T12:01:00Z", error: null } as const;
+    vi.mocked(deploymentProvider.triggerDeployment).mockResolvedValueOnce({ ...ready, status: "building", readyAt: null });
+    const result = await deployWebsite(db.asClient(), "site_1", { environment: "production" }, deploymentProvider);
+    expect(connectManagedDomainAtLaunch).not.toHaveBeenCalled();
+    expect(db.rows("websites")[0].status).toBe("building");
+    vi.mocked(deploymentProvider.getDeployment).mockResolvedValueOnce(ready);
+    await syncDeployment(db.asClient(), result.deploymentId, deploymentProvider);
+    expect(connectManagedDomainAtLaunch).toHaveBeenCalledWith(db.asClient(), expect.objectContaining({ managed_registration_id: "registration_1" }), deploymentProvider);
+    expect(connectManagedDomainAtLaunch.mock.invocationCallOrder[0]).toBeLessThan(activateDomainVerification.mock.invocationCallOrder[0]);
+    expect(db.rows("websites")[0]).toMatchObject({ status: "live", live_url: "https://example.com" });
+  });
+
 });

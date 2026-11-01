@@ -60,6 +60,7 @@ target -f "$ROOT/supabase/test/domain-handoff.test.sql"
 
 echo "▸ domain readiness notification assertions"
 target -f "$ROOT/supabase/test/domain-readiness.test.sql"
+target -f "$ROOT/supabase/test/domain-launch-handoff.test.sql"
 
 echo "▸ admin domain management assertions"
 target -f "$ROOT/supabase/test/admin-domain-setup.test.sql"

@@ -258,9 +258,14 @@ export async function POST(request: NextRequest) {
           .neq("status", "resolved")
       : { data: [], error: null };
     if (supportError) throw liveUnavailable();
+    const { data: launchHandoff, error: handoffError } = await admin.rpc("managed_domain_handoff_status", {
+      p_order_id: current.id, p_organization_id: ctx.organization.id,
+    });
+    if (handoffError) throw liveUnavailable("Your saved domain handoff could not be loaded. Refresh to try again.");
     return NextResponse.json(
       {
         ok: true,
+        launchHandoff,
         transferRequested: support?.some((s) => s.kind === "release") ?? false,
         registrationId: current.registration_id,
         policy: publicDomainPolicy(p),
