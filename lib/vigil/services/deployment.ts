@@ -10,6 +10,7 @@ import { activateDomainVerification, beginDomainVerification } from "./domain";
 import { advanceWebsiteProjectStatus } from "./project-status";
 import { publishPreviewToReview } from "@/lib/vigil/express-preview-review";
 import { assertWebsiteRepositoryReady } from "./repository";
+import { prepareManagedWebsiteLaunch, managedLaunchContext, connectManagedDomainAtLaunch } from "../domain-engine/launch-handoff";
 
 /**
  * DeploymentService: Vigil Website -> DeploymentProvider.
@@ -91,6 +92,7 @@ export async function deployWebsite(
   // publish each version for the customer to review.
   if (environment === "production") {
     await assertProductionDeployAllowed(admin, websiteId);
+    await prepareManagedWebsiteLaunch(admin, websiteId);
     await assertDomainsReadyForLaunch(admin, websiteId);
   }
   const { siteExternalId, organizationId } = await provisionWebsite(admin, websiteId, provider);
@@ -178,6 +180,7 @@ export async function syncDeployment(
   // polling path if it was created outside deployWebsite.
   if (deployment.environment === "production") {
     await assertProductionDeployAllowed(admin, deployment.website_id);
+    await prepareManagedWebsiteLaunch(admin, deployment.website_id);
     await assertDomainsReadyForLaunch(admin, deployment.website_id);
   }
   const externalId = await findExternalId(admin, {
@@ -214,10 +217,14 @@ export async function syncDeployment(
 }
 
 async function assertDomainsReadyForLaunch(admin: DbClient, websiteId: string): Promise<void> {
-  const { data: domains, error } = await admin.from("domains").select("id, hostname, status, dns_ok, verification").eq("website_id", websiteId).neq("status", "released");
+  const { data: domains, error } = await admin.from("domains").select("id, hostname, status, dns_ok, verification, managed_registration_id, organization_id").eq("website_id", websiteId).neq("status", "released");
   if (error) throw error;
+  const automaticallyConnected = new Set<string>();
+  for (const domain of domains ?? []) {
+    if (domain.managed_registration_id && await managedLaunchContext(admin, domain.managed_registration_id, domain.organization_id, websiteId)) automaticallyConnected.add(domain.id);
+  }
   const pending = (domains ?? []).filter((domain) => {
-    if (domain.status === "connected") return false;
+    if (domain.status === "connected" || automaticallyConnected.has(domain.id)) return false;
     const verification = domain.verification as { launch_ready?: boolean; source?: string } | null;
     return !(domain.dns_ok && (verification?.launch_ready || verification?.source === "provider"));
   });
@@ -233,9 +240,10 @@ async function prepareWebsiteDomains(admin: DbClient, websiteId: string, provide
 }
 
 async function activateWebsiteDomains(admin: DbClient, websiteId: string, provider: DeploymentProvider): Promise<string[]> {
-  const { data: domains, error } = await admin.from("domains").select("id").eq("website_id", websiteId).neq("status", "released");
+  const { data: domains, error } = await admin.from("domains").select("id,managed_registration_id,organization_id,website_id").eq("website_id", websiteId).neq("status", "released");
   if (error) throw error;
   for (const domain of domains ?? []) {
+    await connectManagedDomainAtLaunch(admin, domain, provider);
     await activateDomainVerification(admin, domain.id, provider);
   }
   return (domains ?? []).map((domain) => domain.id);

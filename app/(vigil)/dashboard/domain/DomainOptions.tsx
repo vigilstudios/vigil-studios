@@ -1,22 +1,103 @@
 import Link from "next/link";
-import { ArrowRight, Globe2, Link2 } from "lucide-react";
+import { ArrowRight, Search, Link2, CircleHelp } from "lucide-react";
+import styles from "@/components/vigil/domain-engine/domain-workspace.module.css";
 
-/** Each entry opens its own guide, so the two setup forms never compete. */
-export function DomainOptions({ canFind, canSetUp, savedName, managedPurchasing=false }: { managedPurchasing?:boolean; canFind: boolean; canSetUp: boolean; savedName?: string }) {
+/** Only the selected path opens a setup form. */
+export function DomainOptions({
+  canFind,
+  canSetUp,
+  savedName,
+  managedPurchasing = false,
+}: {
+  managedPurchasing?: boolean;
+  canFind: boolean;
+  canSetUp: boolean;
+  savedName?: string;
+}) {
   const options = [
-    { title: "Find your domain", description: savedName ? `Continue setting up ${savedName}, or search for a new name.` : managedPurchasing ? "Choose your domain and register it inside Vigil. Your domain stays yours." : "Search for a name and buy it through your own Vercel account.", href: "/dashboard/domain?flow=find", icon: Globe2, enabled: canFind },
-    { title: "Already own one", description: "Use your existing web address. We’ll guide you through the setup.", href: "/dashboard/domain?flow=own", icon: Link2, enabled: canSetUp },
+    {
+      title: "Find a new address",
+      label: "Find your domain",
+      description: savedName
+        ? `Continue with ${savedName}, or find a new name.`
+        : managedPurchasing
+          ? "Choose a name for your business. Register and pay right here in Vigil."
+          : "Find your name. We’ll guide you through buying it with Vercel.",
+      action: "Find my address",
+      href: "/dashboard/domain?flow=find",
+      icon: Search,
+      enabled: canFind,
+    },
+    {
+      title: "Use an address I own",
+      label: "Already own one",
+      description:
+        "Use your existing web address. Keep it with your provider and connect it to your website.",
+      action: "Use my address",
+      href: "/dashboard/domain?flow=own",
+      icon: Link2,
+      enabled: canSetUp,
+    },
   ];
-  return <nav aria-label="Domain setup options" className="grid w-full gap-4 sm:grid-cols-2">
-    {options.map(({ title, description, href, icon: Icon, enabled }) => {
-      const content = <>
-        <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[color:var(--bg-surface-soft)] text-[color:var(--accent)]"><Icon className="h-5 w-5" aria-hidden="true" /></span>
-        <span className="mt-5 flex items-center justify-between gap-3 text-base font-semibold">{title}<ArrowRight className="h-4 w-4 shrink-0 text-[color:var(--accent)]" aria-hidden="true" /></span>
-        <span className="mt-2 block text-sm leading-6 text-[color:var(--text-secondary)]">{description}</span>
-        {!enabled ? <span className="mt-3 block text-xs text-[color:var(--text-secondary)]">{canSetUp ? "Domain search is temporarily unavailable." : "Your website setup is being prepared."}</span> : null}
-      </>;
-      const style = "block min-w-0 rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-6 text-left break-words focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[color:var(--accent)]";
-      return enabled ? <Link key={title} href={href} className={`${style} hover:border-[color:var(--accent)]`} aria-label={title}>{content}</Link> : <div key={title} aria-disabled="true" className={`${style} opacity-60`}>{content}</div>;
-    })}
-  </nav>;
+  return (
+    <>
+      <nav aria-label="Domain setup options" className={styles.choices}>
+        {options.map(
+          ({
+            title,
+            label,
+            description,
+            action,
+            href,
+            icon: Icon,
+            enabled,
+          }) => {
+            const content = (
+              <>
+                <span className={styles.icon}>
+                  <Icon size={22} aria-hidden="true" />
+                </span>
+                <span className={styles.choiceTitle}>{title}</span>
+                <span className={styles.choiceDescription}>{description}</span>
+                <span className={styles.link}>
+                  {enabled
+                    ? action
+                    : canSetUp
+                      ? "Search is temporarily unavailable"
+                      : "Your website setup is being prepared"}
+                  {enabled ? <ArrowRight size={16} aria-hidden="true" /> : null}
+                </span>
+              </>
+            );
+            return enabled ? (
+              <Link
+                key={title}
+                href={href}
+                className={styles.choice}
+                aria-label={label}
+              >
+                {content}
+              </Link>
+            ) : (
+              <div key={title} aria-disabled="true" className={styles.choice}>
+                {content}
+              </div>
+            );
+          },
+        )}
+      </nav>
+      <details className={styles.disclosure}>
+        <summary>
+          <CircleHelp size={16} aria-hidden="true" />
+          Not sure if you have a domain?
+        </summary>
+        <p>
+          Look for a website address you’ve purchased, such as yourbusiness.com.
+          You might have a receipt from GoDaddy, Name.com, Squarespace, or
+          another provider. A social media username isn’t a domain. Your preview
+          stays available while you decide.
+        </p>
+      </details>
+    </>
+  );
 }

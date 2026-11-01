@@ -20,7 +20,7 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
-import { SiteFrame } from "@/components/vigil/SiteFrame";
+import { DashboardSiteFrame } from "@/components/vigil/DashboardSiteFrame";
 import { DownloadSiteButton } from "@/components/vigil/DownloadSiteButton";
 import { formatDate, formatRelative } from "@/lib/vigil/format";
 import { contactInitials, sourceLabel } from "@/lib/vigil/leads/presentation";
@@ -51,12 +51,11 @@ export function WebsitePanel({ data }: { data: OverviewData }) {
     <div className="ov-website">
       <div className="ov-website-workspace">
         <div className="ov-preview">
-          <SiteFrame
+          <DashboardSiteFrame
             key={`${data.site.id}:${data.site.last_deployed_at}`}
             src={data.site.live_url!}
             title={`${data.site.name} live preview`}
             address={host}
-            desktopHeight={900}
           />
         </div>
         <aside className="ov-website-meta" aria-label="Website details">

@@ -2,7 +2,22 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
+  AlertTriangle,
+  Loader2,
   ArrowRight,
+  ArrowLeft,
+  Link2,
+  CircleHelp,
+  UserRound,
+  MapPin,
+  Mail,
+  FileText,
+  CreditCard,
+  Eye,
+  LockKeyhole,
+  Pencil,
+  CalendarDays,
+  ReceiptText,
   Check,
   Globe2,
   Search,
@@ -18,13 +33,24 @@ import type {
 import styles from "./domain-workspace.module.css";
 import { useRouter } from "next/navigation";
 import { EmbeddedTestCheckout } from "./EmbeddedTestCheckout";
-import { ManagedDomainConnection } from "./ManagedDomainConnection";
+import { DomainCelebration } from "@/components/vigil/DomainCelebration";
+import {
+  DomainIntro,
+  DomainReadyHandoff,
+  DomainSectionHeading,
+  DomainSetupSteps,
+} from "./DomainSetupUI";
+import { customerDomainProgress } from "@/lib/vigil/domain-engine/customer-progress";
 
 type OrderView = {
   id: string;
   fqdn: string;
   totalMinor: number;
-  priceBreakdown?: { registrationMinor: number; serviceFeeMinor: number; taxMinor: number };
+  priceBreakdown?: {
+    registrationMinor: number;
+    serviceFeeMinor: number;
+    taxMinor: number;
+  };
   currency: string;
   registrationState: string;
   paymentState: string;
@@ -43,6 +69,7 @@ type View = {
   existing?: { fqdn: string; status: string; supported: boolean } | null;
   transferRequested?: boolean;
   registrationId?: string | null;
+  launchHandoff?: { automaticConnection: boolean; staffNotified: boolean };
 };
 type Quote = RegistrarQuote & {
   id: string;
@@ -76,7 +103,7 @@ const labels: Record<string, string> = {
   manual_review: "Vigil is reviewing this order",
   registered: "Registered",
   failed: "Registration did not complete",
-  ready_for_launch: "Ready for your approved launch",
+  ready_for_launch: "Ready for Vigil’s website launch",
   live: "Website connected",
   authorized: "Payment authorized",
   paid: "Payment confirmed",
@@ -97,7 +124,6 @@ export function DomainWorkspace({
   stripeTest = false,
   testRegistrar = "mock",
   testClientName,
-  testWebsites = [],
   publishableTestKey = "",
   projectId,
   onExistingSaved,
@@ -118,21 +144,33 @@ export function DomainWorkspace({
   onExistingSaved?: (domain: { id: string; fqdn: string }) => void;
 }) {
   const router = useRouter();
-  const endpoint = discoveryOnly ? "/api/domain-engine/discovery" : live
-    ? "/api/domain-engine/live"
-    : stripeTest
-      ? "/api/domain-engine/test"
-      : simulation
-        ? "/api/domain-engine/demo"
-        : "/api/domain-engine";
+  const endpoint = discoveryOnly
+    ? "/api/domain-engine/discovery"
+    : live
+      ? "/api/domain-engine/live"
+      : stripeTest
+        ? "/api/domain-engine/test"
+        : simulation
+          ? "/api/domain-engine/demo"
+          : "/api/domain-engine";
   const [screen, setScreen] = useState<
     "choose" | "search" | "review" | "progress" | "existing"
   >(initialScreen);
   const [view, setView] = useState<View>({});
+  const [restoring, setRestoring] = useState(
+    !discoveryOnly && (!live || canManage),
+  );
+  const [restoreFailed, setRestoreFailed] = useState(false);
   const [input, setInput] = useState(
     initialHostname || (simulation ? "willow-pine-demo" : ""),
   );
-  const [results, setResults] = useState<(RegistrarQuote & { taxPending?: boolean })[]>([]);
+  const [results, setResults] = useState<
+    (RegistrarQuote & { taxPending?: boolean })[]
+  >([]);
+  const [reviewSection, setReviewSection] = useState<"details" | "confirm">(
+    "details",
+  );
+  const [searched, setSearched] = useState(false);
   const [quote, setQuote] = useState<Quote | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -150,6 +188,8 @@ export function DomainWorkspace({
     orderId: string;
     clientSecret: string;
   } | null>(null);
+  const workspaceRef = useRef<HTMLElement>(null);
+  const firstRender = useRef(true);
   const orderId = useRef<string | null>(null);
   const intent = useRef<string | null>(null);
   const sequence = useRef(0);
@@ -233,10 +273,11 @@ export function DomainWorkspace({
     })
       .then(async (response) => {
         const data = await response.json();
-        if (controller.signal.aborted || actionEpoch.current !== restoreEpoch) return;
+        if (controller.signal.aborted || actionEpoch.current !== restoreEpoch)
+          return;
         if (!response.ok || !data.ok)
           throw new Error(
-            data.error || "The test workspace could not be restored.",
+            data.error || "Your saved domain setup could not be loaded.",
           );
         if (data.order?.id) {
           orderId.current = data.order.id;
@@ -247,12 +288,20 @@ export function DomainWorkspace({
         setView(data);
       })
       .catch((error) => {
-        if (!controller.signal.aborted && actionEpoch.current === restoreEpoch)
+        if (
+          !controller.signal.aborted &&
+          actionEpoch.current === restoreEpoch
+        ) {
+          setRestoreFailed(true);
           setError(
             error instanceof Error
               ? error.message
-              : "The test workspace could not be restored.",
+              : "Your saved domain setup could not be loaded.",
           );
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setRestoring(false);
       });
     return () => controller.abort();
   }, [endpoint, stripeTest, live, websiteId, canManage, discoveryOnly]);
@@ -298,9 +347,13 @@ export function DomainWorkspace({
   async function search() {
     const current = ++sequence.current;
     const data = await call({ action: "search", input });
-    if (data && current === sequence.current) setResults(data.results);
+    if (data && current === sequence.current) {
+      setResults(data.results);
+      setSearched(true);
+    }
   }
   async function select(result: RegistrarQuote) {
+    setReviewSection("details");
     if (!simulation && !stripeTest && !live) {
       setQuote({ ...result, id: "discovery-only" });
       setScreen("review");
@@ -317,7 +370,16 @@ export function DomainWorkspace({
   }
   async function purchase(event: React.FormEvent) {
     event.preventDefault();
-    if (!quote || discoveryOnly || (live && quote.taxPending)) return;
+    if (
+      !quote ||
+      discoveryOnly ||
+      !terms ||
+      !transmit ||
+      busy ||
+      reviewSection !== "confirm" ||
+      (live && quote.taxPending)
+    )
+      return;
     const data = await call({
       action: "purchase",
       approval: {
@@ -329,6 +391,7 @@ export function DomainWorkspace({
         autoRenew,
         acceptTerms: terms,
         acceptContactTransmission: transmit,
+        authorizeLaunchConnection: terms,
       },
     });
     if (data) {
@@ -342,18 +405,38 @@ export function DomainWorkspace({
     }
   }
   async function calculateFinalPrice() {
-    if (!quote || !live || discoveryOnly) return;
+    if (!quote || !live || discoveryOnly) return false;
     const current = addressSequence.current;
-    const data = await call({ action: "tax_quote", quoteId: quote.id, address: contact.address });
+    const data = await call({
+      action: "tax_quote",
+      quoteId: quote.id,
+      address: contact.address,
+    });
     if (data && current === addressSequence.current) {
       setQuote({ ...quote, ...data.quote });
       setTerms(false);
       intent.current = crypto.randomUUID();
+      return true;
     }
+    return false;
+  }
+  function requestSupport(event: React.MouseEvent<HTMLButtonElement>) {
+    void call({ action: "support", kind: event.currentTarget.dataset.kind });
+  }
+  async function reviewDetails(event: React.FormEvent) {
+    event.preventDefault();
+    if (busy) return;
+    if (live && quote?.taxPending && !(await calculateFinalPrice())) return;
+    setTerms(false);
+    setTransmit(false);
+    setReviewSection("confirm");
   }
   function changeAddress(key: keyof typeof contact.address, value: string) {
     addressSequence.current++;
-    setContact(current => ({ ...current, address: { ...current.address, [key]: value } }));
+    setContact((current) => ({
+      ...current,
+      address: { ...current.address, [key]: value },
+    }));
     if (live && quote) {
       setQuote({ ...quote, taxPending: true });
       setTerms(false);
@@ -371,6 +454,16 @@ export function DomainWorkspace({
           required={key !== "organization"}
           maxLength={key === "organization" ? 200 : 254}
           type={type}
+          placeholder={key === "phone" ? "+12125550100" : undefined}
+          autoComplete={
+            {
+              firstName: "given-name",
+              lastName: "family-name",
+              organization: "organization",
+              email: "email",
+              phone: "tel",
+            }[key]
+          }
           value={contact[key]}
           onChange={(event) =>
             setContact({ ...contact, [key]: event.target.value })
@@ -393,6 +486,23 @@ export function DomainWorkspace({
             ? "Domain released"
             : null;
 
+  const checkoutOpen = Boolean(checkout);
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    const selector =
+      screen === "review" && !checkoutOpen
+        ? window.matchMedia("(max-width: 640px)").matches
+          ? `.${styles.summary} h3`
+          : `.${styles.panel} h3`
+        : "h2, h3";
+    const heading = workspaceRef.current?.querySelector<HTMLElement>(selector);
+    heading?.focus({ preventScroll: true });
+    heading?.scrollIntoView({ block: "nearest" });
+  }, [screen, reviewSection, checkoutOpen]);
+
   if (live && !canManage && !discoveryOnly)
     return (
       <p role="status">
@@ -401,12 +511,98 @@ export function DomainWorkspace({
       </p>
     );
 
+  if (restoring || restoreFailed)
+    return (
+      <section
+        className={styles.workspace}
+        aria-label="Domain and hosting setup"
+      >
+        <div className={styles.panel}>
+          <DomainSectionHeading
+            icon={restoreFailed ? CircleHelp : Globe2}
+            title={
+              restoreFailed
+                ? "Let’s recover your saved setup"
+                : "Loading your domain setup"
+            }
+          >
+            {restoreFailed
+              ? "We couldn’t check your saved order. Try loading it again before starting a new purchase."
+              : "Checking for a saved address or order so you can continue where you left off."}
+          </DomainSectionHeading>
+          {restoreFailed ? (
+            <>
+              <p className={styles.error} role="alert">
+                {error}
+              </p>
+              <button
+                className={styles.primary}
+                disabled={busy}
+                onClick={async () => {
+                  if (simulation && !stripeTest) {
+                    const data = await call({
+                      action: "reset",
+                      scenario: "normal",
+                    });
+                    if (data) {
+                      orderId.current = null;
+                      setQuote(null);
+                      setCheckout(null);
+                      setResults([]);
+                      setRestoreFailed(false);
+                      setScreen("choose");
+                    }
+                  } else window.location.reload();
+                }}
+              >
+                {simulation && !stripeTest
+                  ? "Start a fresh fictional test"
+                  : "Try again"}
+                <RefreshCw size={15} aria-hidden="true" />
+              </button>
+            </>
+          ) : (
+            <p className={styles.note} role="status">
+              <Loader2
+                size={17}
+                className="animate-spin motion-reduce:animate-none"
+                aria-hidden="true"
+              />
+              Loading saved setup…
+            </p>
+          )}
+        </div>
+      </section>
+    );
+
+  const previewOnly = discoveryOnly || (!simulation && !stripeTest && !live);
+  const progress = order ? customerDomainProgress(order, registration) : null;
+  const currentStep = checkout
+    ? 2
+    : screen === "review"
+      ? reviewSection === "details" && !previewOnly
+        ? 1
+        : 2
+      : screen === "progress"
+        ? !order
+          ? 0
+          : progress?.tone === "success" || progress?.tone === "ready"
+            ? 4
+            : order.registrationState === "awaiting_payment"
+              ? 2
+              : 3
+        : 0;
+
   return (
-    <section className={styles.workspace} aria-label="Domain and hosting setup">
+    <section
+      ref={workspaceRef}
+      className={styles.workspace}
+      aria-label="Domain and hosting setup"
+    >
       {simulation ? (
         <div className={styles.simulation}>
           <span>
-            <ShieldCheck size={17} /> TEST WORKSPACE ·{" "}
+            <ShieldCheck size={16} aria-hidden="true" /> TEST WORKSPACE ·{" "}
             {testClientName ?? view.client?.name ?? "Willow & Pine"}
           </span>
           <p>
@@ -416,38 +612,21 @@ export function DomainWorkspace({
           </p>
         </div>
       ) : null}
-      <div className={styles.header}>
-        <div>
-          <div className={styles.eyebrow}>YOUR ADDRESS ON THE INTERNET</div>
-          <h2>A home for your website.</h2>
-          <p>
-            Find a new domain or connect the one you already own. Vigil handles
-            the technical steps.
-          </p>
+      {screen === "choose" ? (
+        <DomainIntro />
+      ) : (
+        <div className={styles.pageHeader}>
+          <span className={styles.eyebrow}>
+            <Globe2 size={14} aria-hidden="true" /> YOUR WEBSITE ADDRESS
+          </span>
         </div>
-        <Globe2 className={styles.orb} size={46} strokeWidth={1} />
-      </div>
-      <nav className={styles.tabs} aria-label="Domain setup steps">
-        {(
-          [
-            ["choose", "Choose a path"],
-            ["search", "Find a domain"],
-            ["progress", "Your domain"],
-          ] as const
-        ).map(([key, label]) => (
-          <button
-            key={key}
-            type="button"
-            disabled={busy}
-            aria-current={screen === key ? "step" : undefined}
-            onClick={() => setScreen(key)}
-          >
-            {label}
-          </button>
-        ))}
-      </nav>
+      )}
+      {screen !== "choose" && screen !== "existing" ? (
+        <DomainSetupSteps current={currentStep} />
+      ) : null}
       {notice ? (
-        <p role="status" className={styles.note}>
+        <p role="status" className={styles.notice}>
+          <Check size={18} aria-hidden="true" />
           {notice}
         </p>
       ) : null}
@@ -460,60 +639,73 @@ export function DomainWorkspace({
         {busy ? "Working…" : ""}
       </div>
       {screen === "choose" ? (
-        <div className={styles.choices}>
-          <button
-            className={styles.choice}
-            disabled={busy}
-            aria-label="Find a new domain"
-            onClick={() => setScreen("search")}
-          >
-            <span className={styles.icon}>
-              <Search size={22} />
-            </span>
-            <h3>Find a new domain</h3>
+        <>
+          <div className={styles.choices}>
+            <button
+              type="button"
+              className={styles.choice}
+              disabled={busy}
+              aria-label="Find a new domain"
+              onClick={() => setScreen("search")}
+            >
+              <span className={styles.icon}>
+                <Search size={22} aria-hidden="true" />
+              </span>
+              <h3>Find a new address</h3>
+              <p>
+                Choose a name for your business. Register and pay right here in
+                Vigil.
+              </p>
+              <span className={styles.link}>
+                Find my address <ArrowRight size={16} aria-hidden="true" />
+              </span>
+            </button>
+            <button
+              type="button"
+              className={styles.choice}
+              disabled={busy}
+              aria-label="Use a domain I own"
+              onClick={() =>
+                live
+                  ? router.push("/dashboard/domain?flow=own")
+                  : setScreen("existing")
+              }
+            >
+              <span className={styles.icon}>
+                <Link2 size={22} aria-hidden="true" />
+              </span>
+              <h3>Use an address I own</h3>
+              <p>
+                Already bought a domain? Keep it with your provider and connect
+                it to your website.
+              </p>
+              <span className={styles.link}>
+                Connect my address <ArrowRight size={16} aria-hidden="true" />
+              </span>
+            </button>
+          </div>
+          <details className={styles.disclosure}>
+            <summary>
+              <CircleHelp size={16} aria-hidden="true" />
+              Not sure if you have a domain?
+            </summary>
             <p>
-              Choose your name, review the price and keep everything together in
-              Vigil.
+              Look for a web address you’ve purchased, such as yourbusiness.com.
+              You might have a receipt from GoDaddy, Name.com, Squarespace, or
+              another provider. A social media username isn’t a domain. You can
+              leave this for later and keep using your website preview.
             </p>
-            <span className={styles.link}>
-              Find your name <ArrowRight size={16} />
-            </span>
-          </button>
-          <button
-            className={styles.choice}
-            disabled={busy}
-            aria-label="Use a domain I own"
-            onClick={() =>
-              live
-                ? router.push("/dashboard/domain?flow=own")
-                : setScreen("existing")
-            }
-          >
-            <span className={styles.icon}>
-              <Globe2 size={22} />
-            </span>
-            <h3>Use a domain I own</h3>
-            <p>
-              Keep your domain where it is. Approve the connection with your DNS
-              provider.
-            </p>
-            <span className={styles.link}>
-              Connect your domain <ArrowRight size={16} />
-            </span>
-          </button>
-          <p className={styles.note}>
-            <Clock3 size={16} /> Not ready yet? Your website preview remains
-            available. You can return here before launch.
-          </p>
-        </div>
+          </details>
+        </>
       ) : null}
-      {screen === "search" ? (
+      {screen === "search" && !checkout ? (
         <div className={styles.panel}>
-          <h3>Find a name that feels like you.</h3>
-          <p>
-            Enter your business name or an exact domain. Availability can change
-            until registration completes.
-          </p>
+          <DomainSectionHeading icon={Search} title="Find your website address">
+            Start with your business name. We’ll show you what’s available.
+          </DomainSectionHeading>
+          <label className={styles.searchLabel} htmlFor="domain-search">
+            Business name or domain
+          </label>
           <form
             className={styles.search}
             onSubmit={(event) => {
@@ -521,42 +713,60 @@ export function DomainWorkspace({
               void search();
             }}
           >
-            <label className={styles.sr} htmlFor="domain-search">
-              Business name or domain
-            </label>
             <input
               id="domain-search"
               value={input}
               maxLength={253}
-              onChange={(event) => setInput(event.target.value)}
-              placeholder="yourbusiness.com"
+              required
+              onChange={(event) => {
+                setInput(event.target.value);
+                setSearched(false);
+              }}
+              placeholder="e.g. willowandpine.com"
               autoCapitalize="none"
               autoCorrect="off"
+              spellCheck={false}
+              disabled={busy}
             />
-            <button className={styles.primary} disabled={busy || (!canManage && !discoveryOnly)}>
-              <Search size={17} />
-              {busy ? "Searching…" : "Search domains"}
+            <button
+              className={styles.primary}
+              disabled={busy || (!canManage && !discoveryOnly)}
+            >
+              <Search size={17} aria-hidden="true" />
+              {busy ? "Searching…" : "Search addresses"}
             </button>
           </form>
-          {!simulation && !live ? (
-            <p className={styles.note}>
-              Availability and prices are from Vercel. Purchases remain disabled
-              while client ownership and service terms are approved.
-            </p>
-          ) : null}
-          <div className={styles.results}>
+          <p className={styles.note}>
+            {discoveryOnly
+              ? "You can explore names here. The customer owner must sign in directly to purchase an eligible domain."
+              : live
+                ? "Register inside Vigil. No separate registrar account needed."
+                : simulation
+                  ? "Try willow-pine-demo to explore this fictional example."
+                  : "Availability and prices are from Vercel. Purchasing is not enabled for this account."}
+          </p>
+          <div className={styles.results} aria-live="polite" aria-busy={busy}>
             {results.map((result) => (
               <div className={styles.result} key={result.fqdn}>
                 <div>
-                  <strong>{result.fqdn}</strong>
+                  <div className={styles.resultName}>
+                    {result.availability === "available" ? (
+                      <Check size={17} aria-hidden="true" />
+                    ) : (
+                      <Globe2 size={17} aria-hidden="true" />
+                    )}
+                    <strong>{result.fqdn}</strong>
+                  </div>
                   <p>
                     {result.availability === "available"
                       ? result.premium
-                        ? "Premium domain"
-                        : "Available now"
+                        ? "Premium address"
+                        : "Available to register"
                       : result.availability === "unsupported"
-                        ? live ? "Not available for this service" : "Not included in this test fixture"
-                        : "Unavailable or unconfirmed"}
+                        ? live || discoveryOnly
+                          ? "Not available through this service"
+                          : "Not included in this test fixture"
+                        : "Not available. Try another name."}
                   </p>
                 </div>
                 <div className={styles.price}>
@@ -564,32 +774,62 @@ export function DomainWorkspace({
                     <>
                       <strong>
                         {money(result.registration.amountMinor)}
-                        <small> / first year{result.taxPending || discoveryOnly ? " before tax" : ""}</small>
+                        <small>
+                          {" "}
+                          / first year
+                          {result.taxPending || discoveryOnly
+                            ? " before tax"
+                            : ""}
+                        </small>
                       </strong>
                       <p>
-                        Renews at approximately{" "}
-                        {money(result.renewal?.amountMinor)}/year
+                        Renewal estimate {money(result.renewal?.amountMinor)}
+                        /year
                       </p>
                     </>
                   ) : null}
                 </div>
                 <button
+                  type="button"
                   className={styles.secondary}
                   disabled={
-                    busy || result.availability !== "available" || (!canManage && !discoveryOnly)
+                    busy ||
+                    result.availability !== "available" ||
+                    (!canManage && !discoveryOnly)
                   }
                   onClick={() => void select(result)}
+                  aria-label={`Choose ${result.fqdn}`}
                 >
-                  Review name <ArrowRight size={15} />
+                  {discoveryOnly ? "View price" : "Choose address"}
+                  <ArrowRight size={15} aria-hidden="true" />
                 </button>
               </div>
             ))}
+            {searched && !busy && !results.length && !error ? (
+              <p className={styles.note}>
+                No results yet. Try your full business name or an exact address
+                such as yourbusiness.com.
+              </p>
+            ) : null}
           </div>
+          {results.length ? (
+            <p className={styles.note}>
+              <Clock3 size={15} aria-hidden="true" />
+              Availability can change. Your address is secured only after
+              registration is confirmed.
+            </p>
+          ) : null}
         </div>
       ) : null}
       {checkout ? (
         <div className={styles.panel}>
-          <h3>{live ? "Approve your payment" : "Approve your test payment"}</h3>
+          <DomainSectionHeading
+            icon={LockKeyhole}
+            title={live ? "Secure payment" : "Secure test payment"}
+          >
+            Finish payment below. We’ll confirm your registration on the next
+            screen.
+          </DomainSectionHeading>
           <EmbeddedTestCheckout
             live={live}
             clientSecret={checkout.clientSecret}
@@ -606,125 +846,366 @@ export function DomainWorkspace({
               });
             }}
           />
+          <button
+            type="button"
+            className={styles.textButton}
+            disabled={busy}
+            onClick={async () => {
+              const data = await call({
+                action: "status",
+                orderId: checkout.orderId,
+              });
+              if (data) {
+                setCheckout(null);
+                setScreen("progress");
+              }
+            }}
+          >
+            <ArrowLeft size={14} aria-hidden="true" />
+            Return to saved order
+          </button>
         </div>
       ) : null}
       {screen === "review" && quote && !checkout ? (
         <div className={styles.review}>
-          <form className={styles.panel} onSubmit={purchase}>
-            <button
-              type="button"
-              className={styles.textButton}
-              onClick={() => setScreen("search")}
-            >
-              ← Choose another name
-            </button>
-            <h3>Make it yours.</h3>
-            {discoveryOnly || (!simulation && !live) ? (
-              <div className={styles.notice}>
-                <ShieldCheck size={20} />
+          <aside className={styles.summary} aria-label="Your domain price">
+            <span className={styles.eyebrow}>
+              <Globe2 size={13} aria-hidden="true" />
+              YOUR SELECTED ADDRESS
+            </span>
+            <h3 tabIndex={-1}>{quote.fqdn}</h3>
+            <p>Registered for one year · Owned by you</p>
+            {reviewSection === "confirm" || previewOnly ? (
+              <dl>
                 <div>
-                  <strong>{discoveryOnly ? "Search preview — no purchase will be submitted." : "Registration is awaiting approval."}</strong>
+                  <dt>Registration · 1 year</dt>
+                  <dd>
+                    {money(
+                      quote.subtotalMinor != null
+                        ? quote.subtotalMinor - (quote.serviceFeeMinor ?? 0)
+                        : quote.registration?.amountMinor,
+                    )}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Vigil service fee {simulation ? "(test)" : ""}</dt>
+                  <dd>
+                    {quote.serviceFeeMinor != null
+                      ? money(quote.serviceFeeMinor)
+                      : simulation
+                        ? "$0.00"
+                        : "Not quoted"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Sales tax {simulation ? "(test)" : ""}</dt>
+                  <dd>
+                    {quote.taxPending
+                      ? "After your address"
+                      : quote.taxMinor != null
+                        ? money(quote.taxMinor)
+                        : simulation
+                          ? "$0.00"
+                          : "Not quoted"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>
+                    {quote.taxPending || discoveryOnly
+                      ? "Before tax"
+                      : "Total today"}
+                    {simulation ? " (test)" : ""}
+                  </dt>
+                  <dd>{money(quote.registration?.amountMinor)}</dd>
+                </div>
+              </dl>
+            ) : (
+              <dl>
+                <div>
+                  <dt>First year{quote.taxPending ? " before tax" : ""}</dt>
+                  <dd>{money(quote.registration?.amountMinor)}</dd>
+                </div>
+              </dl>
+            )}
+            <p className={styles.note}>
+              {quote.taxPending
+                ? "We’ll calculate tax from your address before you approve the total."
+                : "Your final price is shown before you continue to payment."}
+            </p>
+            <p className={styles.note}>
+              <Clock3 size={15} aria-hidden="true" />A search result isn’t a
+              reservation. Registration confirms your address.
+            </p>
+          </aside>
+          <form
+            className={styles.panel}
+            onSubmit={
+              reviewSection === "details" && !previewOnly
+                ? reviewDetails
+                : purchase
+            }
+          >
+            <DomainSectionHeading
+              icon={
+                previewOnly
+                  ? Eye
+                  : reviewSection === "details"
+                    ? UserRound
+                    : CreditCard
+              }
+              title={
+                previewOnly
+                  ? "Your address, at a glance"
+                  : reviewSection === "details"
+                    ? "Who will own this address?"
+                    : "Everything look right?"
+              }
+            >
+              {previewOnly
+                ? "Explore the price before you decide."
+                : reviewSection === "details"
+                  ? "Use the legal details of the person or business registering the domain."
+                  : "Review your address, owner details and total before continuing to payment."}
+            </DomainSectionHeading>
+            {previewOnly ? (
+              <div className={styles.notice}>
+                <ShieldCheck size={20} aria-hidden="true" />
+                <div>
+                  <strong>
+                    Search preview. No purchase will be submitted.
+                  </strong>
                   <p>
-                    This name is available to search, but it is not reserved.
-                    The price shown includes Vigil’s service fee and is before tax.
-                    Purchasing requires an eligible customer owner account and an enabled purchase policy.
-                    The final total is shown before payment approval. Your website preview remains available.
-                    You will not need a separate Vercel account.
+                    This address is not reserved. The price includes Vigil’s
+                    service fee and is before tax. Purchasing requires an
+                    eligible customer owner account and an enabled purchase
+                    policy. Your final total is shown before payment approval.
                   </p>
                 </div>
               </div>
-            ) : (
+            ) : reviewSection === "details" ? (
               <>
-                <p>
-                  {live && !discoveryOnly
-                    ? "Confirm the legal owner and approve the exact name, one-year term and final price. Use the registrant’s billing address for this US launch. If the registrant and billing addresses differ, contact Vigil before purchasing. A verification email will be sent by the registrar."
-                    : "Confirm the legal registrant and approve the exact name, term and test price. Use fictional contact details in this workspace."}
-                </p>
-                <p>
-                  If you enter an organization, it will be recorded as the legal
-                  domain holder. Use the legal name of your business, or leave this
-                  blank when registering as an individual.
-                </p>
-                <div className={styles.formGrid}>
-                  {field("firstName", "First name")}
-                  {field("lastName", "Last name")}
-                  {field("organization", "Organization (optional)")}
-                  {field("email", "Registrant email", "email")}
-                  {field("phone", "Phone including country code", "tel")}
-                  {(
-                    [
-                      ["line1", "Street address"],
-                      ["city", "City"],
-                      ["region", "State / region"],
-                      ["postalCode", "Postal code"],
-                      ["country", "Country code"],
-                    ] as const
-                  ).map(([key, label]) => (
-                    <label className={styles.field} key={key}>
-                      {label}
-                      <input
-                        required
-                        readOnly={live && key === "country"}
-                        maxLength={key === "country" ? 2 : 200}
-                        value={contact.address[key]}
-                        onChange={(event) => changeAddress(key, event.target.value)}
-                      />
-                    </label>
-                  ))}
-                </div>
-                {quote.contactSchema?.additional.length ? (
+                <fieldset className={styles.subsection} disabled={busy}>
+                  <legend>
+                    <UserRound size={16} aria-hidden="true" />
+                    Domain owner
+                  </legend>
+                  <p>
+                    The owner keeps the rights to this address, even if you
+                    leave Vigil.
+                  </p>
                   <div className={styles.formGrid}>
-                    {quote.contactSchema.additional.map((extra) => (
-                      <label className={styles.field} key={extra.key}>
-                        {extra.label}
-                        <input
-                          required={extra.required}
-                          maxLength={200}
-                          value={contact.additional[extra.key] ?? ""}
-                          onChange={(event) =>
-                            setContact({
-                              ...contact,
-                              additional: {
-                                ...contact.additional,
-                                [extra.key]: event.target.value,
-                              },
-                            })
-                          }
-                        />
+                    {field("firstName", "First name")}
+                    {field("lastName", "Last name")}
+                    <div className={styles.fullField}>
+                      {field("organization", "Legal business name (optional)")}
+                      <p className={styles.note}>
+                        If entered, this business becomes the legal domain
+                        holder. Leave blank to register as an individual.
+                      </p>
+                    </div>
+                    {field("email", "Owner’s email", "email")}
+                    {field("phone", "Phone with country code", "tel")}
+                  </div>
+                  <p className={styles.note}>
+                    <Mail size={15} aria-hidden="true" />
+                    {live
+                      ? "Name.com, our registration provider, will email this owner to verify the domain. Use an inbox you can access."
+                      : "The registrar will send an email to verify ownership. Use fictional details in this test."}
+                  </p>
+                </fieldset>
+                <fieldset className={styles.subsection} disabled={busy}>
+                  <legend>
+                    <MapPin size={16} aria-hidden="true" />
+                    Owner’s address
+                  </legend>
+                  <p>
+                    {live
+                      ? "Use the same address for registration and billing. We share it with Stripe to calculate the final tax. If those addresses differ, contact Vigil before buying."
+                      : "These details are required to register a domain. Use a fictional address for this test."}
+                  </p>
+                  <div className={styles.formGrid}>
+                    {(
+                      [
+                        ["line1", "Street address", "address-line1"],
+                        [
+                          "line2",
+                          "Apartment / suite (optional)",
+                          "address-line2",
+                        ],
+                        ["city", "City", "address-level2"],
+                        ["region", "State / region", "address-level1"],
+                        ["postalCode", "ZIP / postal code", "postal-code"],
+                        ["country", "Country code", "country"],
+                      ] as const
+                    ).map(([key, label, autoComplete]) => (
+                      <label
+                        className={`${styles.field} ${key === "line1" || key === "line2" ? styles.fullField : ""}`}
+                        key={key}
+                      >
+                        {live && key === "country" ? "Country" : label}
+                        {live && key === "country" ? (
+                          <select
+                            value={contact.address.country}
+                            onChange={(event) =>
+                              changeAddress("country", event.target.value)
+                            }
+                            autoComplete={autoComplete}
+                          >
+                            <option value="US">United States</option>
+                          </select>
+                        ) : (
+                          <input
+                            required={key !== "line2"}
+                            autoComplete={autoComplete}
+                            maxLength={key === "country" ? 2 : 200}
+                            value={contact.address[key]}
+                            onChange={(event) =>
+                              changeAddress(key, event.target.value)
+                            }
+                          />
+                        )}
                       </label>
                     ))}
                   </div>
+                  {live && quote.policy?.automaticPurchaseRegions ? (
+                    <p className={styles.scopeNote}>
+                      Online registration currently supports{" "}
+                      {quote.policy.automaticPurchaseRegions.join(", ")}{" "}
+                      addresses. Contact Vigil for help elsewhere.
+                    </p>
+                  ) : null}
+                </fieldset>
+                {quote.contactSchema?.additional.length ? (
+                  <fieldset className={styles.subsection} disabled={busy}>
+                    <legend>
+                      <FileText size={16} aria-hidden="true" />
+                      Details required for this address
+                    </legend>
+                    <div className={styles.formGrid}>
+                      {quote.contactSchema.additional.map((extra) => (
+                        <label className={styles.field} key={extra.key}>
+                          {extra.label}
+                          <input
+                            required={extra.required}
+                            maxLength={200}
+                            value={contact.additional[extra.key] ?? ""}
+                            onChange={(event) =>
+                              setContact({
+                                ...contact,
+                                additional: {
+                                  ...contact.additional,
+                                  [extra.key]: event.target.value,
+                                },
+                              })
+                            }
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
                 ) : null}
-                {live && quote.policy?.automaticPurchaseRegions ? <p className={styles.scopeNote}>Automatic purchasing currently supports {quote.policy.automaticPurchaseRegions.join(", ")} addresses. Contact Vigil for assistance elsewhere.</p> : null}
-                {live && quote.taxPending ? <div className={styles.notice}>
-                  <div><p>Confirm your US address, then calculate tax to see the final total. Your address is shared with Stripe for tax calculation.</p>
-                    <button type="button" className={styles.primary} disabled={busy} onClick={() => void calculateFinalPrice()}>{busy ? "Calculating…" : "Calculate final price"}</button>
+                <div className={styles.formActions}>
+                  <button
+                    type="button"
+                    className={styles.textButton}
+                    disabled={busy}
+                    onClick={() => setScreen("search")}
+                  >
+                    <ArrowLeft size={14} aria-hidden="true" />
+                    Change address
+                  </button>
+                  <button
+                    type="submit"
+                    className={styles.primary}
+                    disabled={busy}
+                  >
+                    {busy ? "Calculating total…" : "Review price"}
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={styles.contactReview}>
+                  <div>
+                    <strong>Registered to</strong>
+                    <button
+                      type="button"
+                      className={styles.textButton}
+                      disabled={busy}
+                      onClick={() => {
+                        setReviewSection("details");
+                        setTerms(false);
+                        setTransmit(false);
+                      }}
+                    >
+                      <Pencil size={13} aria-hidden="true" />
+                      Edit details
+                    </button>
                   </div>
-                </div> : null}
-                <label className={styles.check}>
-                  <input
-                    type="checkbox"
-                    checked={autoRenew}
-                    disabled={live || testRegistrar === "namecom"}
-                    onChange={(event) => setAutoRenew(event.target.checked)}
-                  />
-                  <span>
-                    {live
-                      ? `Renewal is manual. Vigil will remind you before expiry; a renewal requires a separate request and approval. The current registrar estimate is ${money(quote.renewal?.amountMinor)} per year.`
-                      : testRegistrar === "namecom"
-                        ? `Automatic renewal stays off during this sandbox test. The renewal estimate is ${money(quote.renewal?.amountMinor)} per year.`
-                        : `Enable annual renewal for this test domain. The renewal estimate is ${money(quote.renewal?.amountMinor)} per year; future changes require advance notice.`}
-                  </span>
-                </label>
+                  <p>
+                    {contact.organization ||
+                      `${contact.firstName} ${contact.lastName}`}
+                  </p>
+                  <p>
+                    {contact.email} · {contact.phone}
+                  </p>
+                  <p>
+                    {[
+                      contact.address.line1,
+                      contact.address.line2,
+                      contact.address.city,
+                      contact.address.region,
+                      contact.address.postalCode,
+                      contact.address.country,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </p>
+                </div>
+                {live || testRegistrar === "namecom" ? (
+                  <div className={styles.renewal}>
+                    <div>
+                      <CalendarDays size={16} aria-hidden="true" />
+                      One year, with manual renewal
+                    </div>
+                    <p>
+                      Renewal estimate: {money(quote.renewal?.amountMinor)}
+                      /year.{" "}
+                      {live
+                        ? "Vigil will remind you before expiry. Renewal needs a separate request and approval."
+                        : "Automatic renewal is off for this sandbox test."}
+                    </p>
+                  </div>
+                ) : (
+                  <label className={styles.check}>
+                    <input
+                      type="checkbox"
+                      checked={autoRenew}
+                      onChange={(event) => {
+                        setAutoRenew(event.target.checked);
+                        setTerms(false);
+                      }}
+                    />
+                    <span>
+                      Enable annual renewal for this test domain. Renewal
+                      estimate: {money(quote.renewal?.amountMinor)}/year; future
+                      changes require advance notice.
+                    </span>
+                  </label>
+                )}
                 <label className={styles.check}>
                   <input
                     required
                     type="checkbox"
                     checked={transmit}
                     onChange={(event) => setTransmit(event.target.checked)}
+                    disabled={busy}
                   />
                   <span>
-                    {live ? "I confirm these registrant details, including this billing address, and approve sending the required contact details to the registrar." : "I confirm these registrant details and approve sending them to the registrar."}
+                    {live
+                      ? "I confirm these registrant details, including this billing address, and approve sending the required contact details to the registrar."
+                      : "I confirm these registrant details and approve sending them to the registrar."}
                   </span>
                 </label>
                 <label className={styles.check}>
@@ -732,12 +1213,12 @@ export function DomainWorkspace({
                     required
                     type="checkbox"
                     checked={terms}
-                    disabled={live && quote.taxPending}
+                    disabled={busy || (live && quote.taxPending)}
                     onChange={(event) => setTerms(event.target.checked)}
                   />
                   <span>
-                    I approve <b>{quote.fqdn}</b> for one year at{" "}
-                    <b>{quote.taxPending ? "the final price calculated above" : money(quote.registration?.amountMinor)}</b>, the renewal
+                    I approve <b>{quote.fqdn}</b> for <b>one year</b> at{" "}
+                    <b>{money(quote.registration?.amountMinor)}</b>, the renewal
                     choice above, and the{" "}
                     <a
                       href={
@@ -748,8 +1229,8 @@ export function DomainWorkspace({
                       target="_blank"
                       rel="noreferrer"
                     >
-                      {live ? "service terms" : "test service terms"}{" "}
-                      <ExternalLink size={12} />
+                      {live ? "service terms" : "test service terms"}
+                      <ExternalLink size={11} aria-hidden="true" />
                     </a>
                     .{" "}
                     {live && quote.policy ? (
@@ -762,102 +1243,80 @@ export function DomainWorkspace({
                         >
                           registrar registration agreement
                         </a>
-                        .{" "}
+                        .
                       </>
                     ) : null}
-                    Domain registration is separate from website hosting.
+                    {" "}I authorize Vigil to connect this address to this website automatically after our website reviews and approvals, when Vigil deploys it. Existing email records will be preserved.
                   </span>
                 </label>
-                <button
-                  className={styles.primary}
-                  disabled={busy || !terms || !transmit || !canManage || (live && quote.taxPending)}
-                  type="submit"
-                >
-                  {busy
-                    ? live
-                      ? "Preparing secure checkout…"
-                      : "Processing test order…"
-                    : live && quote.taxPending ? "Calculate the final price first" : live
-                      ? `Authorize ${money(quote.registration?.amountMinor)} & register`
-                      : `Authorize ${money(quote.registration?.amountMinor)} test payment & register`}
-                </button>
+                <div className={styles.formActions}>
+                  <button
+                    type="button"
+                    className={styles.textButton}
+                    disabled={busy}
+                    onClick={() => setScreen("search")}
+                  >
+                    <ArrowLeft size={14} aria-hidden="true" />
+                    Change address
+                  </button>
+                  <button
+                    className={styles.primary}
+                    disabled={
+                      busy ||
+                      !terms ||
+                      !transmit ||
+                      !canManage ||
+                      (live && quote.taxPending)
+                    }
+                    type="submit"
+                  >
+                    <LockKeyhole size={15} aria-hidden="true" />
+                    {busy
+                      ? "Preparing checkout…"
+                      : live
+                        ? `Continue to payment · ${money(quote.registration?.amountMinor)}`
+                        : `Simulate purchase · ${money(quote.registration?.amountMinor)}`}
+                  </button>
+                </div>
                 <p className={styles.note}>
+                  <ShieldCheck size={15} aria-hidden="true" />
                   {live
-                    ? "Continue to secure Stripe checkout. Payment is authorized first and captured after registration is confirmed. Vigil never receives your card number."
+                    ? "Secure Stripe checkout. Payment is authorized first and charged after registration is confirmed. Vigil never receives your card number."
                     : stripeTest
-                      ? "Continue to embedded Stripe test checkout. Use test card details only; Vigil never receives card numbers."
-                      : "No card details are collected. This demonstration simulates an authorization and capture; it cannot charge a card."}
+                      ? "Embedded Stripe test checkout. Use test card details only."
+                      : "No card details are collected. This demonstration cannot charge you."}
                 </p>
               </>
             )}
+            {previewOnly ? (
+              <button
+                type="button"
+                className={styles.textButton}
+                onClick={() => setScreen("search")}
+              >
+                <ArrowLeft size={14} aria-hidden="true" />
+                Choose another address
+              </button>
+            ) : null}
           </form>
-          <aside className={styles.summary}>
-            <span className={styles.eyebrow}>YOUR SELECTED DOMAIN</span>
-            <h3>{quote.fqdn}</h3>
-            <dl>
-              <div>
-                <dt>Registration term</dt>
-                <dd>1 year</dd>
-              </div>
-              <div>
-                <dt>Registration</dt>
-                <dd>
-                  {money(
-                    quote.subtotalMinor != null
-                      ? quote.subtotalMinor - (quote.serviceFeeMinor ?? 0)
-                      : quote.registration?.amountMinor,
-                  )}
-                </dd>
-              </div>
-              <div>
-                <dt>Vigil service fee {simulation ? "(test)" : ""}</dt>
-                <dd>
-                  {quote.serviceFeeMinor != null
-                    ? money(quote.serviceFeeMinor)
-                    : simulation
-                      ? "$0.00"
-                      : "Not quoted"}
-                </dd>
-              </div>
-              <div>
-                <dt>Tax {simulation ? "(test)" : ""}</dt>
-                <dd>
-                  {quote.taxPending ? "Calculated after your address" : quote.taxMinor != null
-                    ? money(quote.taxMinor)
-                    : simulation
-                      ? "$0.00"
-                      : "Not quoted"}
-                </dd>
-              </div>
-              <div>
-                <dt>
-                  {quote.taxPending || discoveryOnly ? "Total before tax" : live
-                    ? "Total today"
-                    : simulation
-                      ? "Total today (test)"
-                      : "Registrar price before tax"}
-                </dt>
-                <dd>{money(quote.registration?.amountMinor)}</dd>
-              </div>
-            </dl>
-            <p>
-              <ShieldCheck size={16} /> Your name stays visible until you
-              approve. A search result is not a reservation.
-            </p>
-          </aside>
         </div>
       ) : null}
-      {screen === "progress" ? (
+      {screen === "progress" && !checkout ? (
         <div className={styles.panel}>
           {!order ? (
             <>
-              <h3>Your domain will appear here.</h3>
-              <p>Choose a name to start, or keep using your website preview.</p>
+              <DomainSectionHeading
+                icon={Globe2}
+                title="Your address will appear here"
+              >
+                Choose an address to start, or keep using your website preview.
+              </DomainSectionHeading>
               <button
                 className={styles.primary}
                 onClick={() => setScreen("search")}
               >
-                Find a domain <ArrowRight size={16} />
+                Find an address
+                <ArrowRight size={16} aria-hidden="true" />
               </button>
             </>
           ) : (
@@ -865,14 +1324,9 @@ export function DomainWorkspace({
               <div className={styles.statusHead}>
                 <div>
                   <span className={styles.eyebrow}>
-                    DOMAIN SETUP{" "}
-                    {stripeTest
-                      ? "· TEST MODE"
-                      : simulation
-                        ? "· SIMULATED"
-                        : ""}
+                    YOUR DOMAIN{simulation ? " · TEST" : ""}
                   </span>
-                  <h3>{order.fqdn}</h3>
+                  <h3 tabIndex={-1}>{order.fqdn}</h3>
                 </div>
                 <span className={styles.badge}>
                   {assetStateLabel ??
@@ -884,7 +1338,37 @@ export function DomainWorkspace({
                     order.registrationState}
                 </span>
               </div>
-              <ol className={styles.timeline}>
+              {progress ? (
+                <div
+                  className={styles.statusMessage}
+                  role="status"
+                  data-tone={progress.tone}
+                >
+                  {progress.tone === "ready" ? <DomainCelebration domainId={order.id} milestone="ready" /> : null}
+                  {progress.tone === "success" || progress.tone === "ready" ? (
+                    <ShieldCheck size={27} aria-hidden="true" />
+                  ) : progress.tone === "attention" ? (
+                    <AlertTriangle size={25} aria-hidden="true" />
+                  ) : (
+                    <Globe2 size={27} aria-hidden="true" />
+                  )}
+                  <div>
+                    <h4>{progress.title}</h4>
+                    <p>
+                      {simulation && !live
+                        ? progress.description.replace(
+                            "Name.com",
+                            "the test registrar",
+                          )
+                        : progress.description}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+              <ol
+                className={styles.timeline}
+                aria-label="Registration and connection status"
+              >
                 {[
                   {
                     label: labels[order.paymentState] ?? order.paymentState,
@@ -902,22 +1386,24 @@ export function DomainWorkspace({
                   {
                     label:
                       registration?.contactVerification === "verified"
-                        ? "Registrant email verified"
-                        : "Verify the registrant email",
+                        ? "Owner’s email verified"
+                        : registration
+                          ? "Verify owner’s email"
+                          : "Owner’s email pending",
                     done: registration?.contactVerification === "verified",
                   },
                   {
                     label:
                       order.connectionState === "live" && !assetStateLabel
                         ? "Website connected securely"
-                        : assetStateLabel
-                          ? "Resolve the domain status before connecting"
-                          : "Waiting for your approved Deploy Live",
-                    done: order.connectionState === "live" && !assetStateLabel,
+                        : progress?.tone === "ready" ? "Ready for Vigil’s website launch" : "Website connection pending",
+                    done: (order.connectionState === "live" || progress?.tone === "ready") && !assetStateLabel,
                   },
                 ].map((step, index) => (
                   <li key={index} data-done={step.done}>
-                    <span>{step.done ? <Check size={16} /> : index + 1}</span>
+                    <span aria-hidden="true">
+                      {step.done ? <Check size={14} /> : index + 1}
+                    </span>
                     {step.label}
                   </li>
                 ))}
@@ -942,73 +1428,25 @@ export function DomainWorkspace({
                   }}
                 >
                   {live ? "Resume checkout" : "Resume test checkout"}
+                  <ArrowRight size={16} aria-hidden="true" />
                 </button>
               ) : null}
-              {order.reason ? (
-                <p className={styles.notice}>{reasonText(order.reason)}</p>
-              ) : null}
-              {registration &&
-              registration.contactVerification !== "verified" &&
-              order.reason !== "contact_required" ? (
+              {order.reason &&
+              ![
+                "contact_required",
+                "capture_failed",
+                "provider_unknown",
+                "refund_pending",
+              ].includes(order.reason) ? (
                 <p className={styles.notice}>
-                  {reasonText("contact_required")}
+                  {reasonText(order.reason, simulation)}
                 </p>
               ) : null}
-              {registration?.status === "expired" ? (
-                <p className={styles.notice}>
-                  This domain has expired. Contact Vigil to review renewal
-                  before reconnecting the website.
-                </p>
-              ) : null}
-              {registration ? (
-                <div className={styles.manage}>
-                  <h4>Manage your domain</h4>
-                  <dl>
-                    <div>
-                      <dt>Expires {simulation ? "(test)" : ""}</dt>
-                      <dd>
-                        {registration.expiresAt
-                          ? new Date(
-                              registration.expiresAt,
-                            ).toLocaleDateString()
-                          : "Checking"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Renewal preference</dt>
-                      <dd>
-                        {registration.autoRenew
-                          ? live
-                            ? "Enabled at registrar — needs review"
-                            : "Automatic renewal approved"
-                          : "Manual renewal"}
-                      </dd>
-                    </div>
-                    {order.priceBreakdown ? <>
-                      <div><dt>Registration</dt><dd>{money(order.priceBreakdown.registrationMinor)}</dd></div>
-                      <div><dt>Vigil service fee</dt><dd>{money(order.priceBreakdown.serviceFeeMinor)}</dd></div>
-                      <div><dt>Sales tax</dt><dd>{money(order.priceBreakdown.taxMinor)}</dd></div>
-                    </> : null}
-                    <div>
-                      <dt>Receipt {simulation ? "(test)" : ""}</dt>
-                      <dd>
-                        {money(order.totalMinor)} · {labels[order.paymentState]}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-              ) : null}
-              {(live || (stripeTest && testRegistrar === "namecom")) &&
-              view.registrationId &&
-              order.paymentState === "paid" ? (
-                <ManagedDomainConnection
-                  key={view.registrationId}
-                  registrationId={view.registrationId}
-                  live={live}
-                  contactVerified={
-                    registration?.contactVerification === "verified"
-                  }
-                  websites={testWebsites}
+              {progress?.tone === "ready" ? (
+                <DomainReadyHandoff
+                  simulation={simulation}
+                  automaticConnection={view.launchHandoff?.automaticConnection === true}
+                  staffNotified={view.launchHandoff?.staffNotified === true}
                 />
               ) : null}
               {simulation && !stripeTest ? (
@@ -1022,55 +1460,14 @@ export function DomainWorkspace({
                       Simulate email verification
                     </button>
                   ) : null}
-                  {order.registrationState === "registered" &&
-                  order.connectionState !== "live" ? (
-                    <button
-                      className={styles.primary}
-                      disabled={
-                        busy ||
-                        registration?.contactVerification !== "verified" ||
-                        order.paymentState !== "paid"
-                      }
-                      onClick={() => void call({ action: "launch" })}
-                    >
-                      Simulate approved Deploy Live
-                    </button>
-                  ) : null}
                   <button
                     className={styles.secondary}
                     disabled={busy}
                     onClick={() => void call({ action: "reconcile" })}
                   >
-                    <RefreshCw size={15} /> Recheck test status
+                    <RefreshCw size={15} aria-hidden="true" />
+                    Recheck test status
                   </button>
-                  {registration ? (
-                    <>
-                      <button
-                        className={styles.secondary}
-                        disabled={busy}
-                        onClick={() =>
-                          void call({
-                            action: "renewal",
-                            enabled: !registration.autoRenew,
-                            consent: true,
-                          })
-                        }
-                      >
-                        {registration.autoRenew
-                          ? "Approve manual renewal"
-                          : "Approve automatic renewal"}
-                      </button>
-                      <button
-                        className={styles.secondary}
-                        disabled={busy || view.transferRequested}
-                        onClick={() => void call({ action: "transfer" })}
-                      >
-                        {view.transferRequested
-                          ? "Transfer assistance requested"
-                          : "Request domain release / transfer"}
-                      </button>
-                    </>
-                  ) : null}
                 </div>
               ) : null}
               {live && order.connectionState === "live" && !assetStateLabel ? (
@@ -1080,72 +1477,164 @@ export function DomainWorkspace({
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Visit your website <ExternalLink size={14} />
+                  Visit your website
+                  <ExternalLink size={14} aria-hidden="true" />
                 </a>
               ) : null}
-              {live && view.registrationId ? (
+              {stripeTest || live ? (
                 <div className={styles.actions}>
-                  {(
-                    [
-                      ["renewal", "Request renewal"],
-                      ["contact_verification", "Get verification help"],
-                      ["payment_reconciliation", "Get payment help"],
-                    ] as const
-                  ).map(([kind, label]) => (
-                    <button
-                      key={kind}
-                      className={styles.secondary}
-                      disabled={busy}
-                      onClick={() =>
-                        void call({ action: "support", kind }).then(
-                          (result) => {
-                            if (result)
-                              setNotice(
-                                "Your request is saved. Vigil will review it; no registrar change or additional charge was submitted.",
-                              );
-                          },
-                        )
-                      }
-                    >
-                      {label}
-                    </button>
-                  ))}
+                  <button
+                    className={styles.secondary}
+                    disabled={busy}
+                    onClick={() => void call({ action: "reconcile" })}
+                  >
+                    <RefreshCw size={15} aria-hidden="true" />
+                    {busy ? "Checking…" : "Refresh status"}
+                  </button>
                 </div>
               ) : null}
-              {!simulation && view.registrationId ? (
-                <button
-                  className={styles.secondary}
-                  disabled={busy || view.transferRequested || !canManage}
-                  onClick={() =>
-                    void call({
-                      ...(live
-                        ? { action: "support", kind: "release" }
-                        : {
+              {registration ? (
+                <details className={styles.disclosure}>
+                  <summary>
+                    <ReceiptText size={16} aria-hidden="true" />
+                    Registration & receipt
+                  </summary>
+                  <div className={styles.manage}>
+                    <dl>
+                      <div>
+                        <dt>Expires {simulation ? "(test)" : ""}</dt>
+                        <dd>
+                          {registration.expiresAt
+                            ? new Date(
+                                registration.expiresAt,
+                              ).toLocaleDateString()
+                            : "Checking"}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Renewal</dt>
+                        <dd>
+                          {registration.autoRenew
+                            ? live
+                              ? "Enabled at registrar · needs review"
+                              : "Automatic renewal approved"
+                            : "Manual renewal"}
+                        </dd>
+                      </div>
+                      {order.priceBreakdown ? (
+                        <>
+                          <div>
+                            <dt>Registration</dt>
+                            <dd>
+                              {money(order.priceBreakdown.registrationMinor)}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Vigil service fee</dt>
+                            <dd>
+                              {money(order.priceBreakdown.serviceFeeMinor)}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Sales tax</dt>
+                            <dd>{money(order.priceBreakdown.taxMinor)}</dd>
+                          </div>
+                        </>
+                      ) : null}
+                      <div>
+                        <dt>Order total {simulation ? "(test)" : ""}</dt>
+                        <dd>
+                          {money(order.totalMinor)} ·{" "}
+                          {labels[order.paymentState] ?? order.paymentState}
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+                </details>
+              ) : null}
+              {(view.registrationId && (!simulation || live)) ||
+              (simulation && !stripeTest && registration) ? (
+                <details className={styles.disclosure}>
+                  <summary>
+                    <CircleHelp size={16} aria-hidden="true" />
+                    Help & domain settings
+                  </summary>
+                  <p>
+                    Need to renew, update ownership details, or move your
+                    address? Vigil can help. A request does not change your
+                    registration or charge you.
+                  </p>
+                  <div className={styles.actions}>
+                    {live ? (
+                      (
+                        [
+                          ["renewal", "Request renewal"],
+                          ["contact_verification", "Get verification help"],
+                          ["payment_reconciliation", "Get payment help"],
+                          ["release", "Request domain release / transfer"],
+                        ] as const
+                      ).map(([kind, label]) => (
+                        <button
+                          key={kind}
+                          className={styles.secondary}
+                          disabled={
+                            busy ||
+                            (kind === "release" && view.transferRequested)
+                          }
+                          data-kind={kind}
+                          onClick={requestSupport}
+                        >
+                          {label}
+                        </button>
+                      ))
+                    ) : simulation && !stripeTest && registration ? (
+                      <>
+                        <button
+                          className={styles.secondary}
+                          disabled={busy}
+                          onClick={() =>
+                            void call({
+                              action: "renewal",
+                              enabled: !registration.autoRenew,
+                              consent: true,
+                            })
+                          }
+                        >
+                          {registration.autoRenew
+                            ? "Approve manual renewal"
+                            : "Approve automatic renewal"}
+                        </button>
+                        <button
+                          className={styles.secondary}
+                          disabled={busy || view.transferRequested}
+                          onClick={() => void call({ action: "transfer" })}
+                        >
+                          {view.transferRequested
+                            ? "Transfer assistance requested"
+                            : "Request domain release / transfer"}
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        className={styles.secondary}
+                        disabled={busy || view.transferRequested || !canManage}
+                        onClick={() =>
+                          void call({
                             action: "transfer",
                             registrationId: view.registrationId,
-                          }),
-                    })
-                  }
-                >
-                  {view.transferRequested
-                    ? "Transfer assistance requested"
-                    : "Request domain release / transfer"}
-                </button>
-              ) : null}
-              {stripeTest || live ? (
-                <button
-                  className={styles.secondary}
-                  disabled={busy}
-                  onClick={() => void call({ action: "reconcile" })}
-                >
-                  {live
-                    ? "Recheck domain and payment status"
-                    : "Recheck authoritative test status"}
-                </button>
+                          })
+                        }
+                      >
+                        Request domain release / transfer
+                      </button>
+                    )}
+                  </div>
+                </details>
               ) : null}
               <p className={styles.note}>
-                Your website preview remains available throughout setup.
-                Registration does not publish the site.
+                <Eye size={15} aria-hidden="true" />
+                Your website preview stays available. Registering an address
+                doesn’t publish the website.
               </p>
             </>
           )}
@@ -1153,12 +1642,15 @@ export function DomainWorkspace({
       ) : null}
       {screen === "existing" ? (
         <div className={styles.panel}>
-          <h3>Keep your domain. Connect your website.</h3>
-          <p>
-            We identify where your DNS is managed. Supported providers ask you
-            to sign in and approve the exact website changes; Vigil never asks
-            for your password.
-          </p>
+          <DomainSectionHeading
+            icon={Link2}
+            title="Use the address you already own"
+          >
+            Enter your web address. We’ll help connect it to your website.
+          </DomainSectionHeading>
+          <label className={styles.searchLabel} htmlFor="existing-domain">
+            Your existing domain
+          </label>
           <form
             className={styles.search}
             onSubmit={(event) => {
@@ -1167,21 +1659,22 @@ export function DomainWorkspace({
               void call({ action: "existing", fqdn: existing, supported });
             }}
           >
-            <label className={styles.sr} htmlFor="existing-domain">
-              Your existing domain
-            </label>
             <input
               id="existing-domain"
               value={existing}
               onChange={(event) => setExisting(event.target.value)}
               placeholder="yourbusiness.com"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               required
             />
             <button
               className={styles.primary}
               disabled={busy || !canManage || stripeTest}
             >
-              Check connection <ArrowRight size={16} />
+              Check connection
+              <ArrowRight size={16} aria-hidden="true" />
             </button>
           </form>
           {simulation ? (
@@ -1199,20 +1692,19 @@ export function DomainWorkspace({
               <h4>{view.existing.fqdn}</h4>
               {view.existing.status === "assistance_required" ? (
                 <p>
-                  Assistance required. Your request is visible to Vigil; we will
-                  arrange supported delegated access. Please do not send a
-                  password.
+                  Your request is visible to Vigil. We’ll help you connect this
+                  address with your provider. Please don’t send a password.
                 </p>
               ) : view.existing.status === "ready_for_launch" ? (
                 <p>
-                  <Check size={17} /> Connection authorized and ready for the
-                  approved launch. Existing email records are preserved.
+                  Connection authorized and ready for the approved launch.
+                  Existing email records are preserved.
                 </p>
               ) : (
                 <>
                   <p>
                     {simulation
-                      ? "Test DNS provider found. Review these simulated website-only changes:"
+                      ? "Review these simulated website-only changes:"
                       : "Your provider must approve a supported connection before DNS can be changed."}
                   </p>
                   {simulation ? (
@@ -1240,7 +1732,7 @@ export function DomainWorkspace({
                           void call({ action: "authorize_dns", consent: true })
                         }
                       >
-                        Simulate provider sign-in & approval
+                        Simulate connection approval
                       </button>
                     </>
                   ) : (
@@ -1253,11 +1745,26 @@ export function DomainWorkspace({
               )}
             </div>
           ) : null}
+          <button
+            className={styles.textButton}
+            type="button"
+            disabled={busy}
+            onClick={() => setScreen("choose")}
+          >
+            <ArrowLeft size={14} aria-hidden="true" />
+            All domain options
+          </button>
         </div>
       ) : null}
       {simulation && !stripeTest ? (
         <details className={styles.testControls}>
-          <summary>Test recovery scenarios</summary>
+          <summary>Demo operator controls</summary>
+          {order?.registrationState === "registered" && order.connectionState !== "live" ? (
+            <div className={styles.testLaunch}>
+              <p>Admin simulation only: imagine the website has completed all client and Vigil reviews, and Vigil has deployed the final production build.</p>
+              <button className={styles.secondary} disabled={busy || registration?.contactVerification !== "verified" || order.paymentState !== "paid"} onClick={() => void call({ action: "launch" })}>Simulate Vigil admin deployment</button>
+            </div>
+          ) : null}
           <label className={styles.field}>
             Scenario
             <select
@@ -1284,6 +1791,8 @@ export function DomainWorkspace({
               if (data) {
                 setResults([]);
                 setQuote(null);
+                setCheckout(null);
+                orderId.current = null;
                 setScreen("choose");
               }
             }}
@@ -1295,18 +1804,16 @@ export function DomainWorkspace({
     </section>
   );
 }
-function reasonText(reason: string) {
+function reasonText(reason: string, simulation = false) {
   return (
     (
       {
         payment_failed:
-          "Payment was not completed. Recheck the order status before choosing a fresh quote.",
+          "Payment was not completed. Recheck your saved order and resume its checkout, or contact Vigil for help.",
         quote_expired:
           "The quote expired. Review a fresh quote before approving another payment.",
-        price_changed:
-          "The price changed before registration. The test authorization was released; approve a fresh quote to continue.",
-        unavailable:
-          "The name became unavailable. The test authorization was released.",
+        price_changed: `The price changed before registration. The ${simulation ? "test " : ""}authorization was released; review a fresh quote to continue.`,
+        unavailable: `The name became unavailable. The ${simulation ? "test " : ""}authorization was released.`,
         provider_unknown:
           "The registrar response is uncertain. Vigil will reconcile the existing order before considering another purchase.",
         capture_failed:

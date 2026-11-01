@@ -34,7 +34,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
   const client = await createClient();
   const { data: website } = await client.from("websites").select("id").eq("organization_id", ctx.organization.id).eq("project_id", project.id).maybeSingle();
   const intent = website ? await loadDomainIntent(client, ctx.organization.id, website.id) : null;
-  const domainRow = domains.find(d => d.id === brief.domain?.domainId && d.website_id === website?.id) ?? (intent && intent.phase !== "cancelled" ? domains.find(d => d.website_id === website?.id && d.hostname === intent.hostname && d.status !== "released") : null) ?? null;
+  const domainRow = domains.find(d => d.id === brief.domain?.domainId && d.website_id === website?.id) ?? (intent && intent.phase !== "cancelled" ? domains.find(d => d.website_id === website?.id && d.hostname === intent.hostname && d.status !== "released") : null) ?? domains.find(d => d.website_id === website?.id && d.managed_registration_id && d.status !== "released") ?? null;
   const domainSetup = domainRow
     ? {
         domainId: domainRow.id,
@@ -51,7 +51,8 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
       }
     : null;
 
-  const launchProfile = readDomainEngineConfig().enabled ? await getDomainLaunchProfile(createAdminClient()) : null;
+  const liveConfigured = readDomainEngineConfig().enabled && process.env.VIGIL_DOMAIN_LIVE_ENABLED === "true";
+  const launchProfile = liveConfigured ? await getDomainLaunchProfile(createAdminClient()) : null;
   const websitePolicy = Boolean(website && readDomainEngineConfig().enabled && process.env.VIGIL_DOMAIN_LIVE_ENABLED === "true" && await hasLiveWebsitePolicy(createAdminClient(), ctx.organization.id, website.id));
   const liveDomainEnabled = Boolean(website && readDomainEngineConfig().enabled && process.env.VIGIL_DOMAIN_LIVE_ENABLED === "true" && (launchProfile || websitePolicy));
 
@@ -60,6 +61,8 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
       projectId={project.id}
       websiteId={(domainHandoffEnabled() || liveDomainEnabled) ? website?.id ?? null : null}
       liveDomainEnabled={liveDomainEnabled}
+      managedDomain={Boolean(domainRow?.managed_registration_id)}
+      cloudflareConnectionEnabled={process.env.VIGIL_DOMAIN_CLOUDFLARE_ENABLED === "true" && ctx.role === "owner" && !ctx.isImpersonating}
       domainDiscoveryOnly={(!launchProfile?.purchasing_enabled && !websitePolicy) || ctx.isImpersonating || ctx.role !== "owner"}
       domainLiveKey={process.env.NEXT_PUBLIC_VIGIL_DOMAIN_STRIPE_LIVE_KEY??""}
       initialIntent={intent}

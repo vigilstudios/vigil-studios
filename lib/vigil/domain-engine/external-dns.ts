@@ -72,7 +72,7 @@ async function ready(
     ))
   )
     throw liveUnavailable(
-      "Approve Deploy Live and wait for its production build before changing website routing.",
+      "Vigil will prepare website routing after the website reviews are complete and its production build is ready.",
     );
   const discovery = await discoverDomainDns(d.hostname);
   if (discovery.dnsProvider !== "cloudflare")

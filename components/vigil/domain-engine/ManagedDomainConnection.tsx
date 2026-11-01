@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Link2, ShieldCheck } from "lucide-react";
+import { DomainSectionHeading } from "./DomainSetupUI";
 import type { ExpectedDnsRecord } from "@/lib/vigil/domain-engine/contracts";
 import styles from "./domain-workspace.module.css";
 
@@ -94,16 +96,13 @@ export function ManagedDomainConnection({
       className={`${styles.manage} ${styles.connection}`}
       aria-label={live ? "Connect your website" : "Connect the test website"}
     >
-      <h4>Connect your website{live ? "" : " · Sandbox test"}</h4>
-      <p>
-        Choose the website, then approve its website records. Existing email and
-        security records are preserved.
-      </p>
-      <p>
-        {live
-          ? "Website routing is prepared for your approved Deploy Live. Vigil checks public DNS and HTTPS before marking the site connected."
-          : "This test uses an isolated deployment fixture. Public DNS, HTTPS and Deploy Live remain unverified."}
-      </p>
+      <DomainSectionHeading
+        icon={Link2}
+        title={live ? "Connect your website" : "Connect the test website"}
+      >
+        Choose your website, then review and approve its connection. Your email
+        settings stay in place.
+      </DomainSectionHeading>
       {!bound ? (
         <>
           <label htmlFor="managed-domain-website">Website</label>
@@ -142,7 +141,9 @@ export function ManagedDomainConnection({
               });
               if (result) {
                 setBound(true);
-                setMessage("Website selected. Review its DNS plan next.");
+                setMessage(
+                  "Website selected. Review the connection changes next.",
+                );
               }
             }}
           >
@@ -167,18 +168,19 @@ export function ManagedDomainConnection({
             if (result) setPlan(result);
           }}
         >
-          {live ? "Review website records" : "Review test DNS plan"}
+          {live ? "Review connection" : "Review test DNS plan"}
         </button>
       ) : null}
       {plan ? (
         <div>
           <p>
+            These settings tell the internet where to find your website.
             {plan.changes === 0
               ? "These website records are already present."
               : `${plan.changes} website record${plan.changes === 1 ? "" : "s"} will be added.`}{" "}
             Approval expires at {new Date(plan.expiresAt).toLocaleTimeString()}.
           </p>
-          <ul>
+          <ul className={styles.records}>
             {plan.records.map((record, index) => (
               <li key={index}>
                 <code>
@@ -187,7 +189,7 @@ export function ManagedDomainConnection({
               </li>
             ))}
           </ul>
-          <label>
+          <label className={styles.check}>
             <input
               type="checkbox"
               checked={consent}
@@ -210,7 +212,7 @@ export function ManagedDomainConnection({
                 setMessage(
                   live
                     ? "Website records saved. Email records preserved. Vigil is checking DNS and HTTPS for your approved launch."
-                    : "Sandbox DNS saved. Email records preserved. Public DNS, HTTPS and your approved Deploy Live are still pending.",
+                    : "Sandbox DNS saved. Email records preserved. Public DNS, HTTPS and Vigil’s approved website deployment are still pending.",
                 );
                 setPlan(null);
                 setConsent(false);
@@ -223,11 +225,17 @@ export function ManagedDomainConnection({
             {plan.status === "claimed" || plan.status === "review"
               ? "Recheck existing DNS submission"
               : live
-                ? "Apply approved website records"
+                ? "Approve & connect website"
                 : "Apply approved test records"}
           </button>
         </div>
       ) : null}
+      <p className={styles.note}>
+        <ShieldCheck size={15} aria-hidden="true" />
+        {live
+          ? "We check the address and secure HTTPS connection before marking your site connected. Connecting prepares the approved launch; it does not approve publishing."
+          : "Sandbox only. Public DNS, HTTPS and Vigil’s website deployment remain unverified."}
+      </p>
       {live && !contactVerified ? (
         <p role="status">
           Verify the registrar email, then recheck your domain status before
@@ -235,7 +243,11 @@ export function ManagedDomainConnection({
         </p>
       ) : null}
       {message && !plan ? <p role="status">{message}</p> : null}
-      {error ? <p role="alert">{error}</p> : null}
+      {error ? (
+        <p role="alert" className={styles.error}>
+          {error}
+        </p>
+      ) : null}
       {busy ? <p role="status">Checking the connection…</p> : null}
     </section>
   );

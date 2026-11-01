@@ -1,0 +1,14 @@
+.dashboard-site-frame {
+  border-color: color-mix(in srgb, var(--border) 65%, transparent);
+  border-radius: 6px;
+}
+.dashboard-site-frame[data-viewport="mobile"] { border-radius: 16px; }
+.dashboard-site-frame > div:first-child {
+  height: 30px;
+  padding-inline: 6px;
+  gap: 5px;
+}
+.dashboard-site-frame > div:first-child > span:first-child { display: none; }
+.dashboard-site-frame > div:first-child > span:nth-child(2) { background: transparent; font-size: 10px; }
+.dashboard-site-frame button { height: 25px; width: 25px; }
+.dashboard-site-frame button svg { width: 12px; height: 12px; }

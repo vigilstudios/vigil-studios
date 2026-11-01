@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { approveExpressPreview, requestExpressPreviewChanges } from "@/lib/vigil/actions/express-preview";
 import type { ExpressPreviewReview } from "@/lib/vigil/express-preview-review";
 
-export function ExpressPreviewDecision({ websiteId, review }: { websiteId: string; review: ExpressPreviewReview }) {
+export function ExpressPreviewDecision({ websiteId, review, appearance = "panel" }: { websiteId: string; review: ExpressPreviewReview; appearance?: "panel" | "embedded" }) {
   const router = useRouter();
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState("");
@@ -29,7 +29,7 @@ export function ExpressPreviewDecision({ websiteId, review }: { websiteId: strin
 
   if (review.status === "approved") {
     return (
-      <section className="rounded-xl border border-[color:var(--accent)]/40 bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_7%,var(--bg-surface))] p-4">
+      <section className={appearance === "embedded" ? "express-decision-embedded" : "rounded-xl border border-[color:var(--accent)]/40 bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_7%,var(--bg-surface))] p-4"}>
         <div className="flex items-start gap-3">
           <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[color:var(--accent)]" />
           <div>
@@ -43,7 +43,7 @@ export function ExpressPreviewDecision({ websiteId, review }: { websiteId: strin
 
   if (review.status === "changes_requested" || review.status === "revision_in_progress") {
     return (
-      <section className="rounded-xl border border-amber-500/35 bg-amber-500/5 p-4">
+      <section className={appearance === "embedded" ? "express-decision-embedded" : "rounded-xl border border-amber-500/35 bg-amber-500/5 p-4"}>
         <p className="font-semibold">Your changes are with the team</p>
         <p className="mt-1 text-xs leading-5 text-[color:var(--text-secondary)]">
           Your included Express revision has been submitted. A new preview will appear here when it is ready.
@@ -54,7 +54,7 @@ export function ExpressPreviewDecision({ websiteId, review }: { websiteId: strin
 
   if (review.status !== "awaiting_feedback") return null;
   return (
-    <section className="rounded-xl border border-[color:var(--accent)]/45 bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_6%,var(--bg-surface))] p-4">
+    <section className={appearance === "embedded" ? "express-decision-embedded" : "rounded-xl border border-[color:var(--accent)]/45 bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_6%,var(--bg-surface))] p-4"}>
       <div className="flex items-start gap-3">
         <MessageSquareText className="mt-0.5 h-5 w-5 shrink-0 text-[color:var(--accent)]" />
         <div className="min-w-0 flex-1">
@@ -69,13 +69,13 @@ export function ExpressPreviewDecision({ websiteId, review }: { websiteId: strin
               Approve preview
             </button>
             {canRequestChanges ? (
-              <button type="button" disabled={pending} onClick={() => setShowFeedback((value) => !value)} className="btn-secondary min-h-10 text-sm">
+              <button type="button" disabled={pending} aria-expanded={showFeedback} aria-controls={`express-feedback-panel-${websiteId}`} onClick={() => setShowFeedback((value) => !value)} className="btn-secondary min-h-10 text-sm">
                 Request changes
               </button>
             ) : null}
           </div>
           {showFeedback && canRequestChanges ? (
-            <div className="mt-3">
+            <div className="mt-3" id={`express-feedback-panel-${websiteId}`}>
               <label htmlFor={`express-feedback-${websiteId}`} className="text-xs font-medium">Your consolidated changes</label>
               <textarea
                 id={`express-feedback-${websiteId}`}
@@ -94,7 +94,7 @@ export function ExpressPreviewDecision({ websiteId, review }: { websiteId: strin
               </div>
             </div>
           ) : null}
-          {error ? <p className="mt-2 text-xs text-[color:var(--status-bad)]">{error}</p> : null}
+          {error ? <p role="alert" className="mt-2 text-xs text-[color:var(--status-bad)]">{error}</p> : null}
         </div>
       </div>
     </section>

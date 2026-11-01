@@ -3936,6 +3936,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      authorize_managed_domain_launch: {
+        Args: {
+          p_actor_id: string
+          p_order_id: string
+          p_organization_id: string
+        }
+        Returns: undefined
+      }
       bind_live_managed_domain: {
         Args: {
           p_actor_id: string
@@ -4126,6 +4134,15 @@ export type Database = {
         Args: { p_actor_id: string; p_plan: Json; p_registration_id: string }
         Returns: Json
       }
+      create_managed_launch_dns_plan: {
+        Args: {
+          p_actor_id: string
+          p_order_id: string
+          p_plan: Json
+          p_registration_id: string
+        }
+        Returns: Json
+      }
       create_taxed_domain_quote: {
         Args: {
           p_actor_id: string
@@ -4271,6 +4288,22 @@ export type Database = {
           p_organization_id: string
           p_registration_id: string
         }
+        Returns: Json
+      }
+      managed_domain_handoff_status: {
+        Args: { p_order_id: string; p_organization_id: string }
+        Returns: Json
+      }
+      managed_domain_launch_context: {
+        Args: {
+          p_organization_id: string
+          p_registration_id: string
+          p_website_id: string
+        }
+        Returns: Json
+      }
+      managed_website_launch_requests: {
+        Args: { p_website_id: string }
         Returns: Json
       }
       mark_contact_widget_creation: {
@@ -4813,6 +4846,7 @@ export type Database = {
           approval_reference: string
           approved_by: string
           created_at: string
+          dns_approved: boolean
           fee_tax_code: string | null
           id: string
           max_client_minor: number
@@ -4840,6 +4874,7 @@ export type Database = {
           approval_reference: string
           approved_by: string
           created_at?: string
+          dns_approved?: boolean
           fee_tax_code?: string | null
           id?: string
           max_client_minor: number
@@ -4867,6 +4902,7 @@ export type Database = {
           approval_reference?: string
           approved_by?: string
           created_at?: string
+          dns_approved?: boolean
           fee_tax_code?: string | null
           id?: string
           max_client_minor?: number
@@ -5285,6 +5321,7 @@ export type Database = {
           expires_at: string
           finished_at: string | null
           id: string
+          launch_authorization_order_id: string | null
           organization_id: string
           plan: Json
           registration_id: string
@@ -5300,6 +5337,7 @@ export type Database = {
           expires_at?: string
           finished_at?: string | null
           id?: string
+          launch_authorization_order_id?: string | null
           organization_id: string
           plan: Json
           registration_id: string
@@ -5315,11 +5353,56 @@ export type Database = {
           expires_at?: string
           finished_at?: string | null
           id?: string
+          launch_authorization_order_id?: string | null
           organization_id?: string
           plan?: Json
           registration_id?: string
           requested_by?: string
           status?: string
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "managed_domain_dns_plans_launch_authorization_order_id_fkey"
+            columns: ["launch_authorization_order_id"]
+            isOneToOne: false
+            referencedRelation: "managed_domain_launch_authorizations"
+            referencedColumns: ["order_id"]
+          },
+        ]
+      }
+      managed_domain_launch_authorizations: {
+        Row: {
+          authorized_by: string
+          consent_version: string
+          consented_at: string
+          fqdn: string
+          order_id: string
+          organization_id: string
+          registrar_scope: string
+          revoked_at: string | null
+          website_id: string
+        }
+        Insert: {
+          authorized_by: string
+          consent_version?: string
+          consented_at?: string
+          fqdn: string
+          order_id: string
+          organization_id: string
+          registrar_scope: string
+          revoked_at?: string | null
+          website_id: string
+        }
+        Update: {
+          authorized_by?: string
+          consent_version?: string
+          consented_at?: string
+          fqdn?: string
+          order_id?: string
+          organization_id?: string
+          registrar_scope?: string
+          revoked_at?: string | null
           website_id?: string
         }
         Relationships: []
@@ -5463,6 +5546,10 @@ export type Database = {
       queue_contact_setup: { Args: { p_website: string }; Returns: undefined }
       queue_domain_readiness_alert: {
         Args: { p_domain: string }
+        Returns: undefined
+      }
+      queue_registered_domain_ready: {
+        Args: { p_registration_id: string }
         Returns: undefined
       }
       rate_limit: {
