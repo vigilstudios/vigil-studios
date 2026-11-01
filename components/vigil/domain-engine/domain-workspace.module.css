@@ -546,3 +546,10 @@
   flex-shrink: 0;
   accent-color: var(--de-green);
 }
+
+.scopeNote {
+  margin: 1rem 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}

@@ -37,6 +37,7 @@ export type OrderContext = {
   registrar: RegistrarName;
   environment: "test" | "live";
   registrarAmountMinor: number;
+  maximumRegistrarTotalMinor?: number;
   totalMinor: number;
   billingBreakdown?: { registrationMinor: number; serviceFeeMinor: number; taxMinor: number };
   currency: string;
@@ -202,6 +203,7 @@ export async function processDomainOrder(
         amountMinor: order.registrarAmountMinor,
         currency: order.currency,
       },
+      maximumRegistrarTotalMinor: order.maximumRegistrarTotalMinor,
       contact: order.contact,
       acceptanceId: order.acceptanceId,
     });
@@ -267,6 +269,7 @@ async function applyRegistrarResult(
         amountMinor: order.registrarAmountMinor,
         currency: order.currency,
       },
+      maximumRegistrarTotalMinor: order.maximumRegistrarTotalMinor,
       contact: order.contact,
       acceptanceId: order.acceptanceId,
     });

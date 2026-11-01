@@ -23,9 +23,17 @@ function taxClient() {
   return new Stripe(key, { apiVersion: "2025-08-27.basil", timeout: 10000, maxNetworkRetries: 1 });
 }
 
+export function assertDomainTaxRegion(policy: LiveDomainPolicy, address: unknown) {
+  const a = usTaxAddressSchema.parse(address);
+  if (policy.allowed_regions && !policy.allowed_regions.includes(a.region))
+    throw liveUnavailable("Automatic domain purchasing currently supports New York addresses. Contact Vigil for assistance in your state. No payment was created.");
+  return a;
+}
+
 /** A saved business classification is required; the account-wide default is never used. */
 export async function calculateDomainTax(policy: LiveDomainPolicy, address: unknown, registrarMinor: number, quoteId: string, stripe: Stripe = taxClient(), environment: "live" | "test" = "live") {
   const a = usTaxAddressSchema.parse(address);
+  assertDomainTaxRegion(policy, a);
   if (policy.tax_mode !== "stripe" || !/^txcd_\d{8}$/.test(policy.tax_code ?? "") || !/^txcd_\d{8}$/.test(policy.fee_tax_code ?? "") || !Number.isSafeInteger(registrarMinor) || registrarMinor <= 0 || registrarMinor > policy.max_registrar_minor) throw liveUnavailable("This domain needs a reviewed tax classification.");
   const account = await stripe.accounts.retrieve();
   if (account.id !== policy.stripe_account) throw liveUnavailable("Domain billing account needs review.");

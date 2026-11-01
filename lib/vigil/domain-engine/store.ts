@@ -22,6 +22,7 @@ type PrivateContext = {
   acceptance: Tables<"domain_acceptances">;
   contact: { id: string; encrypted_payload: string };
   registrar_cost_minor: number;
+  maximum_registrar_total_minor?: number;
 };
 
 export class SupabaseDomainOrderStore implements DomainOrderStore {
@@ -100,6 +101,7 @@ export class SupabaseDomainOrderStore implements DomainOrderStore {
       registrar: order.registrar as OrderContext["registrar"],
       environment: order.environment as OrderContext["environment"],
       registrarAmountMinor: context.registrar_cost_minor,
+      maximumRegistrarTotalMinor: context.maximum_registrar_total_minor ?? context.registrar_cost_minor,
       totalMinor: quote.total_minor,
       billingBreakdown: { registrationMinor: context.registrar_cost_minor, serviceFeeMinor: quote.subtotal_minor - context.registrar_cost_minor, taxMinor: quote.tax_minor },
       currency: quote.currency,

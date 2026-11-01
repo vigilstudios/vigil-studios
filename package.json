@@ -15,7 +15,7 @@
     "design:runtime": "node scripts/build-design-runtime.mjs",
     "prebuild": "node scripts/verify-image-runtime.mjs && npm run design:runtime && npm run contact:runtime",
     "predev": "npm run design:runtime && npm run contact:runtime",
-    "test:dependency-security": "node --test scripts/verify-eslint-glob-security.mjs",
+    "test:dependency-security": "node --test scripts/verify-eslint-glob-security.mjs scripts/verify-minimatch-security.mjs",
     "contact:runtime": "node scripts/build-contact-runtime.mjs",
     "pretest": "npm run design:runtime"
   },
@@ -64,11 +64,13 @@
     "typescript": "^5",
     "vitest": "4.1.12",
     "vite": "7.3.7",
-    "fast-glob": "file:tools/next-eslint-glob"
+    "fast-glob": "file:tools/next-eslint-glob",
+    "minimatch": "file:tools/eslint-minimatch"
   },
   "overrides": {
     "@next/eslint-plugin-next@16.4.3": {
       "fast-glob": "$fast-glob"
-    }
+    },
+    "minimatch": "$minimatch"
   }
 }

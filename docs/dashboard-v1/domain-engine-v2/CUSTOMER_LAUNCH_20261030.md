@@ -1,3 +1,7 @@
+# Current release update
+
+The owner has authorized an interim reserve-backed release. See [INTERIM_PURCHASING_20261101.md](INTERIM_PURCHASING_20261101.md) for the NY-only checkout policy, supplier reconciliation and private reserve ledger. The earlier blanket wait-for-support gate below is historical; actual production activation is established by the release readback, not this runbook.
+
 # Customer domain launch — 30 October 2026
 
 The owner approved a US-only launch, ordinary one-year `.com` registrations, a $20 registrar ceiling, $30 checkout ceiling including tax, a $5 one-time service fee, manual renewals, the versioned domain terms and a seven-year minimum transaction/consent retention policy. Approval does not establish tax classification, a government registration, a supplier tax exemption, prepaid credit or a client's consent.

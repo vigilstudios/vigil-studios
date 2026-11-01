@@ -23,7 +23,7 @@ import { namecomContactPayload } from "./namecom-sandbox";
 import { domainCandidates } from "./search";
 import { checkoutOrderView } from "./client-order-view";
 import { ensureDomainWebsitePolicy } from "./launch-profile";
-import { calculateDomainTax, assertTaxQuoteContact, reconcileDomainTax, usTaxAddressSchema } from "./tax";
+import { calculateDomainTax, assertTaxQuoteContact, reconcileDomainTax, usTaxAddressSchema, assertDomainTaxRegion } from "./tax";
 
 async function websitePolicy(admin: DbClient, org: string, website: string, fqdn?: string, actor?: string) {
   try { return await loadLivePolicy(admin, org, website, fqdn); }
@@ -136,7 +136,7 @@ export async function calculateLiveDomainQuote(admin: DbClient, org: string, web
     p_calculation_id: calculation.calculationId, p_address_digest: calculation.addressDigest,
     p_tax_minor: calculation.taxMinor, p_total_minor: calculation.totalMinor,
     p_provider_expires_at: calculation.providerExpiresAt, p_stripe_account: p.stripe_account,
-    p_breakdown: calculation.breakdown,
+    p_breakdown: calculation.breakdown, p_region: a.region,
   });
   if (saveError || !id) throw liveUnavailable("The final price could not be saved. No payment was created.");
   return { id, fqdn: q.fqdn, availability: "available", years: 1, premium: false, expiresAt: new Date(Math.min(Date.parse(q.expires_at), Date.parse(calculation.providerExpiresAt))).toISOString(),
@@ -176,6 +176,7 @@ export async function prepareLiveCheckout(
     q.fqdn,
     q.live_policy_id,
   );
+  if (p.allowed_regions) assertDomainTaxRegion(p, approval.contact.address);
   if (p.tax_mode === "stripe") {
     usTaxAddressSchema.parse(approval.contact.address);
     await assertTaxQuoteContact(admin, q.id, org, approval.contact.address);

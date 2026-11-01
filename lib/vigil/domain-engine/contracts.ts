@@ -59,6 +59,8 @@ export type RegistrarDomain = {
   expiresAt: string | null;
   autoRenew: boolean;
   contactVerification: "pending" | "verified" | "failed";
+  /** Verified receipt amounts; supplier tax is Vigil expense, never extra customer tax. */
+  supplierReceipt?: { baseMinor: number; taxMinor: number; totalMinor: number };
 };
 
 /** Created only after the server binds durable quote, consent and payment evidence. */
@@ -69,6 +71,8 @@ export type VerifiedRegistrationRequest = {
   years: number;
   autoRenew: boolean;
   expectedRegistrarPrice: Money;
+  /** Server policy ceiling including supported supplier tax; defaults to exact base. */
+  maximumRegistrarTotalMinor?: number;
   contact: RegistrantContact;
   acceptanceId: string;
   /** Server-bound receipt reference, supplied only during reconciliation. */

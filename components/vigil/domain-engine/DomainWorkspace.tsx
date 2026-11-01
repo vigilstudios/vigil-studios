@@ -57,6 +57,7 @@ type Quote = RegistrarQuote & {
     registrationAgreementUrl: string;
     renewalModel: string;
     taxDescription: string;
+    automaticPurchaseRegions?: string[] | null;
   };
 };
 const money = (minor: number | null | undefined) =>
@@ -694,6 +695,7 @@ export function DomainWorkspace({
                     ))}
                   </div>
                 ) : null}
+                {live && quote.policy?.automaticPurchaseRegions ? <p className={styles.scopeNote}>Automatic purchasing currently supports {quote.policy.automaticPurchaseRegions.join(", ")} addresses. Contact Vigil for assistance elsewhere.</p> : null}
                 {live && quote.taxPending ? <div className={styles.notice}>
                   <div><p>Confirm your US address, then calculate tax to see the final total. Your address is shared with Stripe for tax calculation.</p>
                     <button type="button" className={styles.primary} disabled={busy} onClick={() => void calculateFinalPrice()}>{busy ? "Calculating…" : "Calculate final price"}</button>
