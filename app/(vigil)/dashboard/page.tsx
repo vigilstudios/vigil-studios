@@ -208,7 +208,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
             </>
           ) : (
             <div className="flex h-full flex-col justify-between gap-3">
-              <StatusLine tone="neutral" label="No domain connected" hint="Use a domain you own, or search and buy directly from Vercel." />
+              <StatusLine tone="neutral" label="No domain connected" hint="Use a domain you own, or find a new one through Vigil." />
               <ButtonLink href="/dashboard/domain" variant="secondary" className="!px-3 !py-1.5 self-start text-xs">{domainIntents.length ? "Manage domain choices" : "Find or connect a domain"}</ButtonLink>
             </div>
           )}

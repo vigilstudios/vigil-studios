@@ -120,3 +120,36 @@ describe("prepared Name.com production transport", () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
 });
+
+// All calls below use mocked provider transport; no billable operation is submitted.
+describe("bounded supplier tax reconciliation", () => {
+  const receipt = (tax: number, total = 12 + tax) => ({ id: 123, currency: "USD", status: "success", finalAmount: total, totalCapture: total, totalRefund: 0, orderItems: [{ name: request.fqdn, type: "registration", status: "success", duration: 1, interval: "year", price: 12, quantity: 1, taxAmount: tax }] });
+  it("accepts exact base plus separately stated supplier tax, without increasing customer payment", async () => {
+    const fetcher = vi.fn().mockResolvedValueOnce(reply({ orders: [receipt(1.20)] })).mockResolvedValueOnce(reply(domain));
+    const registrar = new NamecomProductionRegistrar("fixture", "fake", 2000, undefined, fetcher);
+    const result = await registrar.getDomainStatus(request.fqdn, { ...request, maximumRegistrarTotalMinor: 1700, registrarOrderRef: `${registrar.accountScope}:order:123` });
+    expect(result?.supplierReceipt).toEqual({ baseMinor: 1200, taxMinor: 120, totalMinor: 1320 });
+    expect(fetcher.mock.calls.every(([,options]) => options.method === "GET")).toBe(true);
+  });
+  it.each(["no_allowance", "over_cap", "unexplained_extra", "negative_tax", "changed_base", "add_on"])("refuses unsafe receipt: %s", async kind => {
+    const r = receipt(kind === "negative_tax" ? -1 : kind === "over_cap" ? 9 : 1.20);
+    if (kind === "unexplained_extra") r.finalAmount++;
+    if (kind === "changed_base") r.orderItems[0].price++;
+    if (kind === "add_on") r.orderItems.push({ ...r.orderItems[0], type: "whois_privacy", price: 1, taxAmount: 0 });
+    const fetcher = vi.fn().mockResolvedValueOnce(reply({ orders: [r] })).mockResolvedValueOnce(reply(domain));
+    const registrar = new NamecomProductionRegistrar("fixture", "fake", 2000, undefined, fetcher);
+    await expect(registrar.getDomainStatus(request.fqdn, { ...request, maximumRegistrarTotalMinor: kind === "no_allowance" ? undefined : 1700, registrarOrderRef: `${registrar.accountScope}:order:123` })).rejects.toThrow();
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+  it("checks funding for the entire approved supplier allowance before submitting", async () => {
+    const fetcher = vi.fn().mockResolvedValueOnce(reply(discovery)).mockResolvedValueOnce(reply(pricing)).mockResolvedValueOnce(reply({ balance: 12 }));
+    const registrar = new NamecomProductionRegistrar("fixture", "fake", 2000, { registration: vi.fn(), dns: vi.fn() }, fetcher);
+    await expect(registrar.register({ ...request, maximumRegistrarTotalMinor: 1700 })).rejects.toThrow("review registrar funding");
+    expect(fetcher.mock.calls.some(([url]) => new URL(url).pathname === "/core/v1/domains")).toBe(false);
+  });
+  it("retains the original order and reconciles a bounded totalPaid difference", async () => {
+    const fetcher = vi.fn().mockResolvedValueOnce(reply(discovery)).mockResolvedValueOnce(reply(pricing)).mockResolvedValueOnce(reply({ balance: 20 })).mockResolvedValueOnce(reply({ order: 123, totalPaid: 13.20, domain }));
+    const registrar = new NamecomProductionRegistrar("fixture", "fake", 2000, { registration: vi.fn(), dns: vi.fn() }, fetcher);
+    expect(await registrar.register({ ...request, maximumRegistrarTotalMinor: 1700 })).toMatchObject({ externalId: `${registrar.accountScope}:order:123`, status: "succeeded" });
+  });
+});

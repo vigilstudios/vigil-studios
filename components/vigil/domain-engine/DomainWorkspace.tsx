@@ -57,6 +57,7 @@ type Quote = RegistrarQuote & {
     registrationAgreementUrl: string;
     renewalModel: string;
     taxDescription: string;
+    automaticPurchaseRegions?: string[] | null;
   };
 };
 const money = (minor: number | null | undefined) =>
@@ -622,12 +623,12 @@ export function DomainWorkspace({
               <div className={styles.notice}>
                 <ShieldCheck size={20} />
                 <div>
-                  <strong>{discoveryOnly ? "Search now. Purchasing is being prepared." : "Registration is awaiting approval."}</strong>
+                  <strong>{discoveryOnly ? "Search preview — no purchase will be submitted." : "Registration is awaiting approval."}</strong>
                   <p>
                     This name is available to search, but it is not reserved.
                     The price shown includes Vigil’s service fee and is before tax.
-                    Your final total will be shown before you approve payment.
-                    You can keep using your website preview while purchasing is prepared.
+                    Purchasing requires an eligible customer owner account and an enabled purchase policy.
+                    The final total is shown before payment approval. Your website preview remains available.
                     You will not need a separate Vercel account.
                   </p>
                 </div>
@@ -694,6 +695,7 @@ export function DomainWorkspace({
                     ))}
                   </div>
                 ) : null}
+                {live && quote.policy?.automaticPurchaseRegions ? <p className={styles.scopeNote}>Automatic purchasing currently supports {quote.policy.automaticPurchaseRegions.join(", ")} addresses. Contact Vigil for assistance elsewhere.</p> : null}
                 {live && quote.taxPending ? <div className={styles.notice}>
                   <div><p>Confirm your US address, then calculate tax to see the final total. Your address is shared with Stripe for tax calculation.</p>
                     <button type="button" className={styles.primary} disabled={busy} onClick={() => void calculateFinalPrice()}>{busy ? "Calculating…" : "Calculate final price"}</button>

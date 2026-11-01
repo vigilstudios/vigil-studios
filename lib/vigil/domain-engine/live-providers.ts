@@ -36,6 +36,7 @@ export function liveRegistrar(
           saved.acceptanceId !== request.acceptanceId ||
           saved.registrarAmountMinor !==
             request.expectedRegistrarPrice.amountMinor ||
+          saved.maximumRegistrarTotalMinor !== request.maximumRegistrarTotalMinor ||
           JSON.stringify(saved.contact) !== JSON.stringify(request.contact)
         )
           throw liveUnavailable();

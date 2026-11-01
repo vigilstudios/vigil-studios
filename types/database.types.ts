@@ -4135,6 +4135,7 @@ export type Database = {
           p_organization_id: string
           p_provider_expires_at: string
           p_quote_id: string
+          p_region?: string
           p_stripe_account: string
           p_tax_minor: number
           p_total_minor: number
@@ -4146,6 +4147,7 @@ export type Database = {
         Args: { p_order_id: string }
         Returns: Json
       }
+      domain_financial_summary: { Args: never; Returns: Json }
       domain_launch_profile: { Args: never; Returns: Json }
       domain_live_policy: {
         Args: {
@@ -4807,6 +4809,7 @@ export type Database = {
       domain_launch_profiles: {
         Row: {
           allowed_country: string
+          allowed_regions: string[] | null
           approval_reference: string
           approved_by: string
           created_at: string
@@ -4818,10 +4821,12 @@ export type Database = {
           registrar_scope: string
           registration_agreement_url: string
           renewal_policy_version: string
+          reserve_service_fee: boolean
           retention_days: number
           revoked_at: string | null
           service_fee_minor: number
           stripe_account: string
+          supplier_tax_allowance_minor: number
           supplier_tax_reference: string | null
           tax_code: string | null
           tax_review_reference: string | null
@@ -4831,6 +4836,7 @@ export type Database = {
         }
         Insert: {
           allowed_country: string
+          allowed_regions?: string[] | null
           approval_reference: string
           approved_by: string
           created_at?: string
@@ -4842,10 +4848,12 @@ export type Database = {
           registrar_scope: string
           registration_agreement_url: string
           renewal_policy_version: string
+          reserve_service_fee?: boolean
           retention_days: number
           revoked_at?: string | null
           service_fee_minor: number
           stripe_account: string
+          supplier_tax_allowance_minor?: number
           supplier_tax_reference?: string | null
           tax_code?: string | null
           tax_review_reference?: string | null
@@ -4855,6 +4863,7 @@ export type Database = {
         }
         Update: {
           allowed_country?: string
+          allowed_regions?: string[] | null
           approval_reference?: string
           approved_by?: string
           created_at?: string
@@ -4866,10 +4875,12 @@ export type Database = {
           registrar_scope?: string
           registration_agreement_url?: string
           renewal_policy_version?: string
+          reserve_service_fee?: boolean
           retention_days?: number
           revoked_at?: string | null
           service_fee_minor?: number
           stripe_account?: string
+          supplier_tax_allowance_minor?: number
           supplier_tax_reference?: string | null
           tax_code?: string | null
           tax_review_reference?: string | null
@@ -4881,6 +4892,7 @@ export type Database = {
       }
       domain_live_policies: {
         Row: {
+          allowed_regions: string[] | null
           approval_reference: string
           approved_by: string
           created_at: string
@@ -4900,10 +4912,12 @@ export type Database = {
           registration_agreement_url: string
           renewal_model: string
           renewal_policy_version: string
+          reserve_service_fee: boolean
           retention_days: number
           revoked_at: string | null
           service_fee_minor: number
           stripe_account: string
+          supplier_tax_allowance_minor: number
           tax_code: string | null
           tax_description: string
           tax_mode: string
@@ -4914,6 +4928,7 @@ export type Database = {
           website_id: string
         }
         Insert: {
+          allowed_regions?: string[] | null
           approval_reference: string
           approved_by: string
           created_at?: string
@@ -4933,10 +4948,12 @@ export type Database = {
           registration_agreement_url: string
           renewal_model: string
           renewal_policy_version: string
+          reserve_service_fee?: boolean
           retention_days: number
           revoked_at?: string | null
           service_fee_minor: number
           stripe_account: string
+          supplier_tax_allowance_minor?: number
           tax_code?: string | null
           tax_description: string
           tax_mode?: string
@@ -4947,6 +4964,7 @@ export type Database = {
           website_id: string
         }
         Update: {
+          allowed_regions?: string[] | null
           approval_reference?: string
           approved_by?: string
           created_at?: string
@@ -4966,10 +4984,12 @@ export type Database = {
           registration_agreement_url?: string
           renewal_model?: string
           renewal_policy_version?: string
+          reserve_service_fee?: boolean
           retention_days?: number
           revoked_at?: string | null
           service_fee_minor?: number
           stripe_account?: string
+          supplier_tax_allowance_minor?: number
           tax_code?: string | null
           tax_description?: string
           tax_mode?: string
@@ -5014,6 +5034,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      domain_order_financials: {
+        Row: {
+          created_at: string
+          currency: string
+          order_id: string
+          organization_id: string
+          quoted_registrar_minor: number
+          reserve_minor: number
+          reserve_state: string
+          service_fee_minor: number
+          supplier_tax_minor: number
+          supplier_total_minor: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency: string
+          order_id: string
+          organization_id: string
+          quoted_registrar_minor: number
+          reserve_minor: number
+          reserve_state: string
+          service_fee_minor: number
+          supplier_tax_minor: number
+          supplier_total_minor: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          order_id?: string
+          organization_id?: string
+          quoted_registrar_minor?: number
+          reserve_minor?: number
+          reserve_state?: string
+          service_fee_minor?: number
+          supplier_tax_minor?: number
+          supplier_total_minor?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       domain_quote_costs: {
         Row: {
@@ -5128,6 +5190,7 @@ export type Database = {
           state: string
           stripe_account: string
           tax_minor: number
+          tax_region: string | null
           total_minor: number
           transaction_link_id: string | null
         }
@@ -5146,6 +5209,7 @@ export type Database = {
           state?: string
           stripe_account: string
           tax_minor: number
+          tax_region?: string | null
           total_minor: number
           transaction_link_id?: string | null
         }
@@ -5164,6 +5228,7 @@ export type Database = {
           state?: string
           stripe_account?: string
           tax_minor?: number
+          tax_region?: string | null
           total_minor?: number
           transaction_link_id?: string | null
         }
@@ -5403,6 +5468,15 @@ export type Database = {
       rate_limit: {
         Args: { p_key: string; p_limit: number; p_window_seconds: number }
         Returns: boolean
+      }
+      record_live_domain_registration_base: {
+        Args: {
+          p_account_scope: string
+          p_domain: Json
+          p_external_id: string
+          p_order_id: string
+        }
+        Returns: string
       }
       resolve_entitlements: {
         Args: { p_org: string }

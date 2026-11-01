@@ -16,6 +16,9 @@ export const livePolicySchema = z.object({
   max_registrar_minor: z.number().int().positive().max(100000),
   max_client_minor: z.number().int().positive().max(100000000),
   service_fee_minor: z.number().int().nonnegative(),
+  allowed_regions: z.array(z.string().regex(/^[A-Z]{2}$/)).nullable().optional(),
+  reserve_service_fee: z.boolean().default(false),
+  supplier_tax_allowance_minor: z.number().int().nonnegative().default(0),
   tax_mode: z.enum(["reviewed_rate", "stripe"]).default("reviewed_rate"),
   tax_code: z.string().nullable().optional(),
   fee_tax_code: z.string().nullable().optional(),
@@ -131,6 +134,7 @@ export function publicDomainPolicy(p: LiveDomainPolicy) {
     renewalPolicyVersion: p.renewal_policy_version,
     renewalModel: p.renewal_model,
     taxDescription: p.tax_description,
+    automaticPurchaseRegions: p.allowed_regions ?? null,
   };
 }
 

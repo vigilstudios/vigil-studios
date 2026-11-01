@@ -293,7 +293,7 @@ class NamecomCoreRegistrar<E extends DomainEnvironment>
       );
     // Funding can change after checkout. A failed read cannot permit a purchase.
     if (this.environment === "live") {
-      await this.assertRegistrationFunding(request.expectedRegistrarPrice.amountMinor);
+      await this.assertRegistrationFunding(this.receiptCeiling(request));
       // Recheck authority immediately before the irreversible submission.
       await this.authority.registration(request);
     }
@@ -335,8 +335,8 @@ class NamecomCoreRegistrar<E extends DomainEnvironment>
       if (
         result.data.domain.autorenewEnabled ||
         result.data.domain.domainName !== name ||
-        minor(result.data.totalPaid) !==
-          request.expectedRegistrarPrice.amountMinor
+        (minor(result.data.totalPaid) < request.expectedRegistrarPrice.amountMinor ||
+          minor(result.data.totalPaid) > this.receiptCeiling(request))
       )
         throw invalidResponse();
       this.assertOwner(result.data.domain, request);
@@ -381,12 +381,13 @@ class NamecomCoreRegistrar<E extends DomainEnvironment>
       throw invalidResponse();
     const receipt = await this.receipt(approved.registrarOrderRef);
     const items = receipt.orderItems.filter((i) => i.type === "registration");
+    const supplierTaxMinor = nonnegativeMinor(items[0]?.taxAmount ?? 0);
+    const supplierTotalMinor = approved.expectedRegistrarPrice.amountMinor + supplierTaxMinor;
     if (
+      supplierTotalMinor > this.receiptCeiling(approved) ||
       receipt.status !== "success" ||
-      minor(receipt.finalAmount) !==
-        approved.expectedRegistrarPrice.amountMinor ||
-      minor(receipt.totalCapture) !==
-        approved.expectedRegistrarPrice.amountMinor ||
+      minor(receipt.finalAmount) !== supplierTotalMinor ||
+      minor(receipt.totalCapture) !== supplierTotalMinor ||
       receipt.totalRefund !== 0 ||
       items.length !== 1 ||
       items[0].status !== "success" ||
@@ -395,7 +396,6 @@ class NamecomCoreRegistrar<E extends DomainEnvironment>
       items[0].interval !== "year" ||
       items[0].quantity !== 1 ||
       minor(items[0].price) !== approved.expectedRegistrarPrice.amountMinor ||
-      (items[0].taxAmount ?? 0) !== 0 ||
       receipt.orderItems.some(
         (i) =>
           i !== items[0] &&
@@ -409,7 +409,16 @@ class NamecomCoreRegistrar<E extends DomainEnvironment>
       throw invalidResponse();
     const asset = await this.readRegisteredDomain(name, approved);
     if (asset?.autoRenew) throw invalidResponse();
-    return asset;
+    return asset ? { ...asset, supplierReceipt: {
+      baseMinor: approved.expectedRegistrarPrice.amountMinor,
+      taxMinor: supplierTaxMinor,
+      totalMinor: supplierTotalMinor,
+    } } : null;
+  }
+  private receiptCeiling(request: VerifiedRegistrationRequest) {
+    const ceiling = request.maximumRegistrarTotalMinor ?? request.expectedRegistrarPrice.amountMinor;
+    if (!Number.isSafeInteger(ceiling) || ceiling < request.expectedRegistrarPrice.amountMinor || ceiling > this.maxCostMinor) throw invalidResponse();
+    return ceiling;
   }
   /** Saved registration references come only from server-side provider_links after receipt reconciliation. */
   async getRegisteredDomainStatus(
@@ -696,4 +705,9 @@ function minor(value: number) {
   )
     throw invalidResponse();
   return amount;
+}
+
+function nonnegativeMinor(value: number) {
+  if (value === 0) return 0;
+  return minor(value);
 }

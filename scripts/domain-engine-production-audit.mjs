@@ -47,8 +47,11 @@ if (stripeConfigured) {
   const webhook = endpoints.data?.data?.find(item => item.url === "https://www.vigilstudios.co/api/webhooks/domain-stripe-live");
   check("Separate domain webhook enabled", Boolean(webhook && webhook.status === "enabled"), { http: endpoints.status, status: webhook?.status ?? "missing", apiVersion: webhook?.api_version ?? null, eventCount: webhook?.enabled_events?.length ?? 0 });
   check("Stripe Tax configuration active", tax.status === 200 && tax.data?.status === "active", { http: tax.status, status: tax.data?.status ?? null });
-  check("Stripe Tax has an active registration", registrations.status === 200 && registrations.data?.data?.some(item => item.status === "active"),
-    { http: registrations.status, activeRegistrationCount: registrations.data?.data?.filter(item => item.status === "active").length ?? 0 });
+  // Collection obligations determine registrations, not the other way around.
+  // Reading an empty list successfully is not an infrastructure failure or an
+  // instruction to create a government-registration claim in Stripe.
+  check("Stripe Tax registrations readable", registrations.status === 200 && Array.isArray(registrations.data?.data),
+    { http: registrations.status, activeRegistrationCount: registrations.data?.data?.filter(item => item.status === "active").length ?? null, classificationAndCollectionObligationsVerified: false });
 }
 
 let databaseUrl;
