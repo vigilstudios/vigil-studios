@@ -32,6 +32,17 @@ describe("Express library documents",()=>{
   expect(files.find(f=>f.path==="site/index.html")?.content).toContain('/_vigil/runtime/');
  });
  it("refuses an unpublished or missing variant",async()=>{await expect(expressRepositoryFiles(stored(null),"missing")).rejects.toThrow(/not published/);});
+ it("exports new customer Express sites through isolated frozen content runtimes",async()=>{
+  const manifest=JSON.parse(readFileSync(path.join(process.cwd(),"public/design-engine-runtime/manifest.json"),"utf8"));
+  const published={...draft,site:blankExpressSite(id,"Customer website"),engineVersion:manifest.version};
+  const fake=new FakeAdmin({express_variants:[{slug:"blank",published}],websites:[{id,organization_id:"org-a",project_id:"project-a"}],projects:[{id:"project-a",organization_id:"org-a",intake_completed_at:null}]});
+  const files=await expressRepositoryFiles(fake.asClient(),"blank",id);
+  const snapshot=fake.rows("website_content_runtimes")[0];
+  expect(snapshot).toMatchObject({website_id:id,organization_id:"org-a",engine_version:manifest.version,binding_keys:[]});
+  const config=JSON.parse(String(files.find(file=>file.path==="site/vercel.json")!.content));
+  expect(config.rewrites[0]).toEqual({source:"/",destination:`https://www.vigilstudios.co/api/content/${id}/runtime/${snapshot.id}/${published.site.pages[0].id}?review=published`});
+  expect(files.find(file=>file.path==="site/index.html")?.content).toContain("vigil-site");
+ });
  it("uses an immutable preview slug when a variant is renamed",()=>{expect(catalogEntry("creator",{...draft,variant:"Renamed"}).previewUrl).toBe("/express-preview/creator");});
 });
 

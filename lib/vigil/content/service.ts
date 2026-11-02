@@ -1,4 +1,5 @@
 import 'server-only';
+import {ensureOnboardingCatalog,connectOnboardingCatalog} from './onboarding-catalog';
 import { z } from 'zod';
 import {createAdminClient} from '@/lib/supabase/admin';
 import type {DbClient} from '@/lib/vigil/types';
@@ -8,6 +9,7 @@ import {moduleSchema,bindingSchema,parseRecords,publicationIssues,type ContentRe
 import {applyBindings,discoverBindings,configForPublished,type BoundCollection,type AdapterConfig} from './professional';
 import {publicRecords} from './media';
 import {featuredIssues,featuredPolicy} from './featured';
+import {parseSiteDefinition} from '@/design-engine/site/persistence';
 import {projectDocument} from '@/lib/vigil/professional/document';
 export async function contentSites(client:DbClient,org:string){
  const {data,error}=await client.from('websites').select('id,name,status,project_id,live_url,preview_url').eq('organization_id',org).order('created_at');if(error)throw error;
@@ -26,9 +28,13 @@ export async function authorizeCollection(client:DbClient,org:string,id:string){
 export async function validateDelivery(admin:DbClient,website:string,org:string,collectionId:string,records:ContentRecord[],publishing=true){
  const collections=(await contentCollections(admin,website,org)).map(c=>publishing&&c.id===collectionId?c:{...c,config:configForPublished(c.config),records:c.publishedRecords??[]});const collection=collections.find(c=>c.id===collectionId);if(!collection)throw new ForbiddenError();
  const features=featuredIssues(records,featuredPolicy(collection.config,collection.binding.module,collection.binding.adapter),true);if(features.length)throw new ValidationError(features[0]);
+ if(collection.config.deliveryPending)throw new ValidationError('Your items are saved. Vigil needs to connect this collection to your website before it can be published.');
  if(collection.binding.adapter==='professional'){
-  const {data:workspace,error}=await admin.from('design_workspaces').select('site_definition,project_id').eq('website_id',website).eq('organization_id',org).maybeSingle();if(error)throw error;if(!workspace)throw new ValidationError('The website binding needs attention from Vigil. Your published content is unchanged.');
-  try{applyBindings(projectDocument(workspace.site_definition,workspace.project_id),collections.filter(c=>c.binding.adapter==='professional'&&(c.id===collectionId||c.publishedRevision!==null)).map(c=>({...c,config:{...c.config,publishedFeatured:c.id===collectionId&&publishing?undefined:c.config.publishedFeatured},records:publicRecords(c.id===collectionId?records:c.records,website,c.id,true)})),true,'published');}catch{throw new ValidationError('These entries do not fit the website section. Check required fields and the number of entries. Your published version is unchanged.');}
+  const {data:workspace,error}=await admin.from('design_workspaces').select('site_definition,project_id').eq('website_id',website).eq('organization_id',org).maybeSingle();if(error)throw error;
+  let document=workspace?projectDocument(workspace.site_definition,workspace.project_id):null;
+  if(!document){const {data:runtime,error:runtimeError}=await admin.from('website_content_runtimes').select('site_definition').eq('website_id',website).eq('organization_id',org).contains('binding_keys',[collection.binding.key]).order('created_at',{ascending:false}).limit(1).maybeSingle();if(runtimeError)throw runtimeError;if(runtime)document=parseSiteDefinition(runtime.site_definition);}
+  if(!document)throw new ValidationError('The website binding needs attention from Vigil. Your published content is unchanged.');
+  try{applyBindings(document,collections.filter(c=>c.binding.adapter==='professional'&&(c.id===collectionId||c.publishedRevision!==null)).map(c=>({...c,config:{...c.config,publishedFeatured:c.id===collectionId&&publishing?undefined:c.config.publishedFeatured},records:publicRecords(c.id===collectionId?records:c.records,website,c.id,true)})),true,'published');}catch{throw new ValidationError('These entries do not fit the website section. Check required fields and the number of entries. Your published version is unchanged.');}
  }
 }
 export async function saveCollection(client:DbClient,org:string,actor:string,id:string,expected:number,input:unknown,intent:'draft'|'publish'|'unpublish'|'trash'){
@@ -43,12 +49,24 @@ export async function saveCollection(client:DbClient,org:string,actor:string,id:
  if(error){if((error.code==='PT409'||error.code==='40001'))throw new ValidationError('Someone saved this collection in another window. Reload before saving; your changes remain here.');throw new ValidationError('Content could not be saved. Check your access and fields, then try again.');}return {revision:data!};
 }
 /** Explicit, idempotent backfill from a validated site document. Existing collections are never overwritten. */
-export async function ensureProfessionalBindings(admin:DbClient,website:string,org:string,site:Parameters<typeof discoverBindings>[0]){
- const discovered=discoverBindings(site,website),existing=await contentCollections(admin,website,org),seen=new Set(existing.map(c=>c.binding.key));
- const keys=new Set(discovered.map(c=>c.binding.key));
- for(const c of existing.filter(c=>c.binding.adapter==='professional'&&c.config.autoDiscovered&&!keys.has(c.binding.key))){const {error}=await admin.from('website_content_collections').update({enabled:false}).eq('id',c.id).eq('website_id',website);if(error)throw error;}
+export async function ensureProfessionalBindings(admin:DbClient,website:string,org:string,site:Parameters<typeof discoverBindings>[0],modules?:string[],awaitingIntake=false){
+ await ensureOnboardingCatalog(admin,website,org);
+ const discovered=discoverBindings(site,website).filter(c=>!modules||modules.includes(c.binding.module)),existing=await contentCollections(admin,website,org),seen=new Set(existing.map(c=>c.binding.key));
+ const keys=new Set([...discovered.map(c=>c.binding.key),...site.pages.flatMap(p=>p.sections.flatMap(s=>Object.values(s.contentHub??{}).flatMap(v=>v.catalogue?[v.catalogue]:[])))]);
+ for(const c of existing.filter(c=>c.binding.adapter==='professional'&&c.config.autoDiscovered&&c.publishedRevision===null&&!keys.has(c.binding.key))){const {error}=await admin.from('website_content_collections').update({enabled:false}).eq('id',c.id).eq('website_id',website);if(error)throw error;}
  for(const c of discovered){if(seen.has(c.binding.key))continue;
-  const {error}=await admin.from('website_content_collections').upsert({website_id:website,organization_id:org,key:c.binding.key,module:c.binding.module,label:c.binding.label,page_id:c.binding.pageId,section_id:c.binding.sectionId,field:c.binding.field,adapter:'professional',config:c.config as unknown as Json,draft:c.records as unknown as Json}, {onConflict:'website_id,key',ignoreDuplicates:true});if(error)throw error;
+  if(c.binding.module==='team'){
+   const {data:retired,error}=await admin.from('website_content_collections').select('id').eq('website_id',website).eq('organization_id',org).eq('key',c.binding.key).eq('module','team').eq('enabled',false).maybeSingle();if(error)throw error;
+   if(retired){const {error}=await admin.from('website_content_collections').update({enabled:true}).eq('id',retired.id).eq('website_id',website).eq('organization_id',org);if(error)throw error;continue;}
+  }
+  const pending=existing.filter(p=>p.config.deliveryPending&&p.config.catalogSource&&p.binding.module===c.binding.module&&p.publishedRevision===null);
+  if(pending.length===1&&discovered.filter(d=>d.binding.module===c.binding.module).length===1){
+   const linked=connectOnboardingCatalog(pending[0],c);
+   const {data:updated,error}=await admin.from('website_content_collections').update({key:c.binding.key,page_id:c.binding.pageId,section_id:c.binding.sectionId,field:c.binding.field,adapter:'professional',config:linked.config as unknown as Json,revision:pending[0].revision+1}).eq('id',pending[0].id).eq('organization_id',org).eq('website_id',website).eq('revision',pending[0].revision).select('id');
+   if(error)throw error;if(!updated?.length)throw new ValidationError('The item collection changed during setup. Retry without discarding the saved content.');
+   continue;
+  }
+  const {error}=await admin.from('website_content_collections').upsert({website_id:website,organization_id:org,key:c.binding.key,module:c.binding.module,label:c.binding.label,page_id:c.binding.pageId,section_id:c.binding.sectionId,field:c.binding.field,adapter:'professional',config:{...c.config,...(awaitingIntake?{awaitingIntake:true}:{})} as unknown as Json,draft:c.records as unknown as Json}, {onConflict:'website_id,key',ignoreDuplicates:true});if(error)throw error;
  }
  return contentCollections(admin,website,org);
 }

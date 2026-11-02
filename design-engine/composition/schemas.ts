@@ -1,3 +1,4 @@
+import { teamSectionSchemas } from "./team-schema";
 import {contentHubSettingsSchema,validateContentHubSettings,type ContentHubSettings} from '../content/settings';
 import { presentationSchema, type PresentationSettings } from "../presentation/schema";
 import { creatorSectionSchemas } from "./creator-schemas";
@@ -42,6 +43,7 @@ const portraitTreatment = treatmentSchema.extend({ geometry: z.literal("portrait
 const intro = { title: text.max(180), description: text.max(600), action: linkSchema, eyebrow: text.max(100).optional() };
 const nav = { logo: logoSchema.optional(), brand: text.max(80), home: linkSchema.shape.href, links: z.array(linkSchema).min(2).max(7), action: linkSchema.optional() };
 export const sectionSchemas = {
+  ...teamSectionSchemas,
   ...creatorSectionSchemas,
   ...endingSectionSchemas,
   ...importSectionSchemas,

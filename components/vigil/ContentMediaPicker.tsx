@@ -6,13 +6,14 @@ import type {ContentMedia} from '@/lib/vigil/content/contract';
 import type {LibraryAsset} from '@/lib/vigil/content/library';
 import {formatMb} from '@/lib/vigil/files';
 import './content-media-picker.css';
-export function ContentMediaPicker({website,collection,imagesOnly=false,onChoose,onClose,onBusy}:{website:string;collection:string;imagesOnly?:boolean;onChoose:(media:ContentMedia,url:string)=>void;onClose:()=>void;onBusy:(busy:boolean)=>void}){
+export type ContentLibraryServices={load:(signal:AbortSignal)=>Promise<LibraryAsset[]>;choose:(asset:LibraryAsset)=>Promise<{media:ContentMedia;url:string}>};
+export function ContentMediaPicker({website,collection,imagesOnly=false,onChoose,onClose,onBusy,services}:{website:string;collection:string;imagesOnly?:boolean;onChoose:(media:ContentMedia,url:string)=>void;onClose:()=>void;onBusy:(busy:boolean)=>void;services?:ContentLibraryServices}){
  const [assets,setAssets]=useState<LibraryAsset[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[search,setSearch]=useState(''),[type,setType]=useState<'all'|'image'|'video'>(imagesOnly?'image':'all'),[choosing,setChoosing]=useState<string|null>(null);
  const endpoint=`/api/content/${website}/library?collection=${collection}`;
- useEffect(()=>{const controller=new AbortController();fetch(endpoint,{signal:controller.signal}).then(async response=>{const data=await response.json();if(!response.ok)throw new Error(data.error);setAssets(data.assets);}).catch(e=>{if(!controller.signal.aborted)setError(e instanceof Error?e.message:'Your Files library could not load.');}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});return()=>controller.abort();},[endpoint]);
+ useEffect(()=>{const controller=new AbortController();(services?services.load(controller.signal):fetch(endpoint,{signal:controller.signal}).then(async response=>{const data=await response.json();if(!response.ok)throw new Error(data.error);return data.assets as LibraryAsset[];})).then(setAssets).catch(e=>{if(!controller.signal.aborted)setError(e instanceof Error?e.message:'Your Files library could not load.');}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});return()=>controller.abort();},[endpoint,services]);
  async function choose(asset:LibraryAsset){
   if(choosing)return;setChoosing(asset.id);onBusy(true);setError('');
-  try{const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:asset.id})}),data=await response.json();if(!response.ok)throw new Error(data.error);onChoose(data.media,data.url);onClose();}
+  try{if(services){const data=await services.choose(asset);onChoose(data.media,data.url);onClose();return;}const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:asset.id})}),data=await response.json();if(!response.ok)throw new Error(data.error);onChoose(data.media,data.url);onClose();}
   catch(e){setError(e instanceof Error?e.message:'This file could not be selected.');}finally{setChoosing(null);onBusy(false);}
  }
  const shown=assets.filter(a=>(!imagesOnly||a.type==='image')&&(type==='all'||a.type===type)&&a.name.toLowerCase().includes(search.toLowerCase()));

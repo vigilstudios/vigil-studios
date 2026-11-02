@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, useSyncExternalStore, useTransition } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { clsx } from "clsx";
@@ -8,6 +8,7 @@ import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { markStep } from "@/lib/vigil/actions/onboarding";
 import { ONBOARDING_LATER_HREF } from "@/lib/vigil/onboarding/constants";
+import { startVirtueArrival } from "@/lib/vigil/onboarding/virtue-arrival";
 import type { SpeechLine } from "./VirtueSpeech";
 import { PasswordForm } from "./PasswordForm";
 import { VirtueOrb } from "./VirtueOrb";
@@ -24,7 +25,6 @@ export function VirtueWelcome({ projectId, lines, linesAfterPassword, passwordLi
   const orbControls = useAnimationControls();
   const reduceMotion = useReducedMotion();
   const orbHost = useRef<HTMLDivElement | null>(null);
-  const entered = useRef(false);
   const speech = useSpeaking();
   const [spoken, setSpoken] = useState(false);
   // Stage 1 (when needed): choose a password. Stage 2: the welcome and "Let's begin".
@@ -38,24 +38,9 @@ export function VirtueWelcome({ projectId, lines, linesAfterPassword, passwordLi
   const [hidden, setHidden] = useState(false);
   const [pending, start] = useTransition();
 
-  useLayoutEffect(() => {
-    if (!portalHost || !orbHost.current || entered.current) return;
-    entered.current = true;
-    if (reduceMotion) {
-      orbControls.set({ x: 0, y: 0, scale: 1, rotate: 0, opacity: 1 });
-      const frame = window.requestAnimationFrame(() => setArrived(true));
-      return () => window.cancelAnimationFrame(frame);
-    }
-    const offset = dockOffset(orbHost.current);
-    orbControls.set({ x: offset.x, y: offset.y, scale: 0.28, rotate: -10, opacity: 1 });
-    void orbControls.start({
-      x: [offset.x, offset.x * 0.46, 0],
-      y: [offset.y, offset.y * 0.72, 0],
-      scale: [0.28, 0.58, 1],
-      rotate: [-10, 3, 0],
-      opacity: 1,
-      transition: { duration: 1.05, times: [0, 0.55, 1], ease: [0.22, 1, 0.36, 1] },
-    }).then(() => setArrived(true));
+  useEffect(() => {
+    if (!portalHost || !orbHost.current) return;
+    return startVirtueArrival(orbControls, dockOffset(orbHost.current), Boolean(reduceMotion), () => setArrived(true));
   }, [orbControls, portalHost, reduceMotion]);
 
   const begin = () =>

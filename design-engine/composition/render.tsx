@@ -1,3 +1,4 @@
+import { Team } from "../sections/creators/Team";
 import {featuredDisplaySection} from '../content/settings';
 import { PresentationSurface } from "../presentation/PresentationSurface";
 import { resolvePresentation } from "../presentation/schema";
@@ -123,6 +124,7 @@ function renderSectionBody(section: SectionInstance): ReactNode {
     case "footer.split": return <SplitFooter {...section}/>;
     case "footer.banner": return <BannerFooter {...section}/>;
     case "proof.social-reach": return <SocialReach {...section}/>;
+    case "about.team": return <Team {...section}/>;
     case "about.creator-profile": return <CreatorProfile {...section}/>;
     case "work.expand-rail": return <ExpandRailGallery {...section}/>;
     case "work.card-rail": return <CardRailGallery {...section}/>;

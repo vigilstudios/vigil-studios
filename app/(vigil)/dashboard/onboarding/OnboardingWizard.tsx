@@ -51,10 +51,13 @@ export function OnboardingWizard(props: WizardProps) {
   const [assets, setAssets] = useState<SignedAsset[]>(props.initialAssets);
   const [domain, setDomain] = useState<DomainSetup | null>(props.initialDomain);
   const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [failedDrafts, setFailedDrafts] = useState<Partial<Record<SectionKey, unknown>>>({});
+  const [submissionConflict, setSubmissionConflict] = useState(false);
   const [sentAt, setSentAt] = useState<string | null>(props.completedAt);
   const [sendError, setSendError] = useState<string | null>(null);
   const [sending, startSending] = useTransition();
-  const locked = Boolean(sentAt);
+  const locked = Boolean(sentAt || props.completedAt || submissionConflict);
   const businessName = brief.basics?.businessName || props.businessName;
   const steps: StepKey[] = stepsForProjectKind(props.projectKind).filter((key) => key !== "welcome") as StepKey[];
 
@@ -70,16 +73,26 @@ export function OnboardingWizard(props: WizardProps) {
 
   const saveSection = useCallback(
     async (section: SectionKey, data: unknown, completed = false): Promise<boolean> => {
-      if (locked) return true;
-      const res = await saveBriefSection(props.projectId, section, data, completed);
-      if (res.ok) {
-        setBrief(res.data.brief);
-        return true;
+      const preserve = () => setFailedDrafts(current => ({ ...current, [section]: data }));
+      if (locked) { preserve(); setSaveError("This brief has already been submitted. Your new answers have not been saved."); return false; }
+      try {
+        const res = await saveBriefSection(props.projectId, section, data, completed);
+        if (res.ok) {
+          setBrief(res.data.brief);
+          setSaveError(null);
+          setFailedDrafts(current => { const next = { ...current }; delete next[section]; return next; });
+          return true;
+        }
+        preserve();
+        setSaveError(res.error);
+        if (res.code === "intake_submitted") { setSubmissionConflict(true); router.refresh(); }
+      } catch {
+        preserve();
+        setSaveError("Your answers could not be saved. Please try again.");
       }
-      console.warn("autosave failed:", res.error);
       return false;
     },
-    [props.projectId, locked]
+    [props.projectId, locked, router]
   );
 
   const next = (from: StepKey) => steps[Math.min(steps.length - 1, steps.indexOf(from) + 1)];
@@ -95,7 +108,18 @@ export function OnboardingWizard(props: WizardProps) {
       } else setSendError(res.error);
     });
 
-  if (sentAt) return <SentView brief={brief} assets={assets} domain={domain} projectKind={props.projectKind} />;
+  const saveNotice = saveError ? <div role="alert" className="mb-5 space-y-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] p-4 text-sm">
+    <p className="font-medium">{saveError}</p>
+    {Object.keys(failedDrafts).length > 0 && <>
+      <p className="text-[13px] leading-5 text-[color:var(--text-secondary)]">You can download a copy of your unsaved answers before leaving this page.</p>
+      <button type="button" className="btn-secondary min-h-10 !px-3 text-[13px]" onClick={() => {
+        const url = URL.createObjectURL(new Blob([JSON.stringify({ projectId: props.projectId, sections: failedDrafts }, null, 2)], { type: "application/json" }));
+        const link = document.createElement("a"); link.href = url; link.download = "vigil-unsaved-onboarding.json"; link.click();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }}>Download unsaved answers</button>
+    </>}
+  </div> : null;
+  if (locked) return <div className="mx-auto max-w-2xl">{saveNotice}<SentView brief={props.completedAt ? props.initialBrief : brief} assets={assets} domain={domain} projectKind={props.projectKind} /></div>;
 
   const line = virtueLine(step, { firstName: props.firstName, businessName, noun: brief.offerings?.noun === "menu" ? "menu items" : brief.offerings?.noun === "products" ? "products" : "services" });
   const completion = briefCompletion(brief, props.projectKind);
@@ -162,6 +186,7 @@ export function OnboardingWizard(props: WizardProps) {
         </nav>
         <h1 className="mt-5 text-lg font-semibold tracking-tight sm:text-xl lg:mt-0">{STEP_TITLES[step]}</h1>
         <div className="mt-5 max-w-3xl">
+          {saveNotice}
           {step === "basics" ? (
             <BasicsStep key="basics" initial={brief.basics} businessName={businessName} save={(d, c) => saveSection("basics", d, c)} onSaveState={setSaveState} onBack={() => router.push("/dashboard")} onNext={() => go(next("basics"))} />
           ) : step === "kickoff" ? (
@@ -169,7 +194,7 @@ export function OnboardingWizard(props: WizardProps) {
           ) : step === "strategy" ? (
             <StrategyStep projectKind={props.projectKind} key="strategy" initial={brief.strategy} save={(d, c) => saveSection("strategy", d, c)} onSaveState={setSaveState} onBack={() => go(prev("strategy"))} onNext={() => go(next("strategy"))} />
           ) : step === "offerings" ? (
-            <OfferingsStep key="offerings" initial={brief.offerings} save={(d, c) => saveSection("offerings", d, c)} onSaveState={setSaveState} onBack={() => go(prev("offerings"))} onNext={() => go(next("offerings"))} />
+            <OfferingsStep key="offerings" initial={brief.offerings} projectId={props.projectId} organizationId={props.organizationId} assets={assets} onAssets={setAssets} save={(d, c) => saveSection("offerings", d, c)} onSaveState={setSaveState} onBack={() => go(prev("offerings"))} onNext={() => go(next("offerings"))} />
           ) : step === "about" ? (
             <AboutStep key="about" initial={brief.about} businessName={businessName} save={(d, c) => saveSection("about", d, c)} onSaveState={setSaveState} onBack={() => go(prev("about"))} onNext={() => go(next("about"))} />
           ) : step === "brand" ? (

@@ -1,17 +1,16 @@
 "use client";
 
-import { AssetPreviewImage } from "@/components/vigil/AssetPreviewImage";
-
 import { useEffect, useState } from "react";
-import { ImagePlus, Trash2, Upload } from "lucide-react";
+import { ImagePlus, Upload, Fingerprint, Palette, Images, LayoutTemplate, Globe2, Paintbrush } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
-import { recordProjectAssets, removeProjectAsset, updateAssetCaption } from "@/lib/vigil/actions/onboarding";
-import { brandSchema, type Brand, type ProjectKind } from "@/lib/vigil/onboarding/brief";
+import { recordProjectAssets, removeProjectAsset } from "@/lib/vigil/actions/onboarding";
+import { brandSchema, logoCompletionIssue, type Brand, type ProjectKind } from "@/lib/vigil/onboarding/brief";
 import { assetPath, IMAGE_ACCEPT, LOGO_ACCEPT, MAX_PHOTOS, PROJECT_ASSETS_BUCKET, validateAssets, type AssetKind } from "@/lib/vigil/onboarding/assets";
 import type { SignedAsset } from "@/lib/vigil/queries/onboarding";
-import { formatBytes } from "@/lib/vigil/attachments";
 import { FileUploadButton } from "@/components/vigil/FileUploadButton";
-import { ChoiceCards, Field, StepFooter, TextArea, TextInput, useAutosave, VirtueAside, type SaveState } from "../wizard-ui";
+import { TeamFields } from "./TeamFields";
+import { AssetTile } from "./AssetTile";
+import { OnboardingSection, ChoiceCards, Field, StepFooter, TextArea, TextInput, useAutosave, VirtueAside, type SaveState } from "../wizard-ui";
 
 type Props = {
   initial: Brand | undefined;
@@ -29,7 +28,21 @@ type Props = {
 type UploadState = { kind: AssetKind; done: number; total: number } | null;
 
 export function BrandStep({ initial, projectKind, projectId, organizationId, assets, onAssets, save, onSaveState, onBack, onNext }: Props) {
-  const [data, setData] = useState<Brand>(() => initial ?? brandSchema.parse({}));
+  const hasLogo = assets.some((asset) => asset.kind === "logo");
+  const [data, setData] = useState<Brand>(() => {
+    const brand = initial ?? brandSchema.parse({});
+    const mode = brand.logo.mode ?? (hasLogo ? "upload" : "vigil");
+    return { ...brand, logo: { ...brand.logo, mode }, colours: { ...brand.colours, mode: (!hasLogo || mode !== "upload") && brand.colours.mode === "logo" ? "vigil" : brand.colours.mode } };
+  });
+  const logoMode = data.logo.mode ?? (hasLogo ? "upload" : "vigil");
+  const canUseLogoColours = hasLogo && logoMode === "upload";
+  // Only a selected, uploaded logo can provide the website's colours.
+  if (!canUseLogoColours && data.colours.mode === "logo") {
+    setData({ ...data, colours: { ...data.colours, mode: "vigil" } });
+  }
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const [teamBusy, setTeamBusy] = useState(false);
+  const [teamError, setTeamError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState<UploadState>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -38,7 +51,6 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
 
   const logos = assets.filter((a) => a.kind === "logo");
   const photos = assets.filter((a) => a.kind === "photo");
-  const documents = assets.filter((a) => a.kind === "document");
   const inspiration = assets.filter((a) => a.kind === "other");
 
   /** Browser-direct upload to Storage, then record the rows. */
@@ -65,6 +77,7 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
     if (uploaded.length > 0) {
       const res = await recordProjectAssets(projectId, kind, uploaded);
       if (res.ok) {
+        if (kind === "logo" && res.data.recorded.length > 0) setLogoError(null);
         failed.push(...res.data.failed);
         // Local object URLs until the page reloads with signed ones.
         const recorded = res.data.recorded.map((r) => {
@@ -82,12 +95,17 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
   };
 
   const remove = async (asset: SignedAsset) => {
-    onAssets(assets.filter((a) => a.id !== asset.id));
     const res = await removeProjectAsset(asset.id);
     if (!res.ok) setUploadError(res.error);
+    else onAssets(assets.filter((a) => a.id !== asset.id));
   };
 
   const continueNext = async () => {
+    const logoIssue = logoCompletionIssue({ ...data.logo, mode: logoMode }, hasLogo);
+    if (logoIssue) { setLogoError(logoIssue); document.getElementById(logoMode === "upload" ? "logoUpload" : "logoWordmark")?.focus(); return; }
+    setLogoError(null);
+    if (data.team.enabled && (!data.team.members.length || data.team.members.some(member => !member.name.trim()))) { setTeamError("Add a name for each team member, or turn off Showcase my team to skip this section."); return; }
+    setTeamError(null);
     setBusy(true);
     const ok = await flush();
     const done = ok && (await save(data, true));
@@ -98,12 +116,18 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
   const set = <K extends keyof Brand>(k: K, v: Brand[K]) => setData((d) => ({ ...d, [k]: v }));
 
   return (
-    <div className="space-y-6">
+    <fieldset disabled={teamBusy || Boolean(uploading) || busy} className="min-w-0 space-y-6">
       {/* Logo */}
-      <section>
-        <p className="mb-1 text-xs font-medium text-[color:var(--text-secondary)]">Logo <span className="font-normal opacity-70">(optional)</span></p>
+      <OnboardingSection icon={Fingerprint} title="Logo" description="Use an existing logo, tell us your wordmark text, or let Vigil suggest one." optional>
+        <ChoiceCards name="Logo choice" value={logoMode} onChange={mode => { set("logo", { ...data.logo, mode }); setLogoError(null); }} options={[
+          { value: "upload", label: "Upload a logo", hint: "Use a logo you already have." },
+          { value: "wordmark", label: "Type a wordmark", hint: "Your name, styled as a text logo." },
+          { value: "vigil", label: "Let Vigil propose one", hint: "We will suggest a simple wordmark." },
+        ]} />
+        {logoMode === "upload" ? <div id="logoUpload" tabIndex={-1} className="space-y-3 outline-none">
+        {logoError && <p role="alert" className="text-sm text-[color:var(--status-bad)]">{logoError}</p>}
         {logos.length > 0 ? (
-          <ul className="mb-2 flex flex-wrap gap-2">
+          <ul className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
             {logos.map((a) => (
               <AssetTile key={a.id} asset={a} onRemove={() => remove(a)} />
             ))}
@@ -112,20 +136,21 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
         <FileUploadButton ariaLabel="Upload your logo" accept={LOGO_ACCEPT} disabled={Boolean(uploading)} onFiles={(files) => void upload(files, "logo")} className="min-h-11 items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 text-xs hover:border-[color:var(--accent)]">
           <Upload className="h-4 w-4" /> {logos.length ? "Add another version" : "Upload your logo"} <span className="opacity-70">· PNG, SVG, JPEG or PDF</span>
         </FileUploadButton>
-        {logos.length === 0 ? <p className="mt-1 text-[11px] text-[color:var(--text-secondary)]">No logo yet? Skip this; the team can propose a simple wordmark.</p> : null}
-      </section>
+        </div> : logoMode === "wordmark" ? <Field id="logoWordmark" label="Wordmark text" hint="Enter the exact spelling and capitalisation you want in your logo." error={logoError}>
+          <TextInput id="logoWordmark" value={data.logo.wordmark} onChange={event => { set("logo", { ...data.logo, wordmark: event.target.value }); setLogoError(null); }} maxLength={160} placeholder="e.g. Northline Studio" aria-describedby="logoWordmark-hint" aria-invalid={Boolean(logoError)} />
+        </Field> : <p className="text-[13px] leading-5 text-[color:var(--text-secondary)]">We will propose a simple wordmark for you to review with your website design.</p>}
+      </OnboardingSection>
 
       {/* Colours */}
-      <section>
-        <p className="mb-2 text-xs font-medium text-[color:var(--text-secondary)]">Brand colours</p>
+      <OnboardingSection icon={Palette} title="Brand colours" description="Choose a direction for your website's palette.">
         <ChoiceCards
           name="Brand colours"
           value={data.colours.mode}
           onChange={(mode) => set("colours", { ...data.colours, mode })}
           options={[
-            { value: "logo", label: "Use my logo's colours", hint: "The team matches the site to the logo." },
+            { value: "logo", label: "Use my logo's colours", hint: canUseLogoColours ? "The team matches the site to the logo." : hasLogo ? "Select Upload a logo to use its colours." : "Upload a logo first to use its colours.", disabled: !canUseLogoColours },
             { value: "pick", label: "I'll pick", hint: "Choose one or two colours below." },
-            { value: "vigil", label: "You choose", hint: "Trust the team's judgement." },
+            { value: "vigil", label: "Let Vigil choose", hint: "Trust the team's judgement." },
           ]}
         />
         {data.colours.mode === "pick" ? (
@@ -139,12 +164,10 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
             ))}
           </div>
         ) : null}
-      </section>
+      </OnboardingSection>
 
       {/* Photos */}
-      <section>
-        <p className="mb-1 text-xs font-medium text-[color:var(--text-secondary)]">Photos <span className="font-normal opacity-70">(optional · up to {MAX_PHOTOS})</span></p>
-        <p className="mb-2 text-[11px] text-[color:var(--text-secondary)]">The place, the people, the work. Phone photos are fine. Add a caption if it helps. Videos and more photos can go in Files in your dashboard, any time.</p>
+      <OnboardingSection icon={Images} title="Photos" description={`The place, the people, the work. Add up to ${MAX_PHOTOS} photos; phone photos are fine. You can add videos and more images in Files later.`} optional>
         {photos.length > 0 ? (
           <ul className="mb-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
             {photos.map((a) => (
@@ -155,42 +178,27 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
         <FileUploadButton ariaLabel="Add photos" accept={IMAGE_ACCEPT} multiple disabled={Boolean(uploading)} onFiles={(files) => void upload(files, "photo")} className="min-h-11 items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 text-xs hover:border-[color:var(--accent)]">
           <ImagePlus className="h-4 w-4" /> {uploading?.kind === "photo" ? `Uploading ${Math.min(uploading.done + 1, uploading.total)} of ${uploading.total}…` : "Add photos"}
         </FileUploadButton>
-      </section>
+      </OnboardingSection>
 
-      {/* Documents */}
-      <section>
-        <p className="mb-1 text-xs font-medium text-[color:var(--text-secondary)]">Menus, price lists, brochures <span className="font-normal opacity-70">(optional)</span></p>
-        {documents.length > 0 ? (
-          <ul className="mb-2 flex flex-wrap gap-2">
-            {documents.map((a) => (
-              <AssetTile key={a.id} asset={a} onRemove={() => remove(a)} />
-            ))}
-          </ul>
-        ) : null}
-        <FileUploadButton ariaLabel="Upload menus, price lists or brochures" accept="application/pdf,image/png,image/jpeg,image/webp" multiple disabled={Boolean(uploading)} onFiles={(files) => void upload(files, "document")} className="min-h-11 items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 text-xs hover:border-[color:var(--accent)]">
-          <Upload className="h-4 w-4" /> Upload a file
-        </FileUploadButton>
-      </section>
+      <TeamFields value={data.team} onChange={team => set("team", team)} projectId={projectId} organizationId={organizationId} assets={assets} onAssets={onAssets} disabled={teamBusy || Boolean(uploading) || busy} onBusy={setTeamBusy} />
+      {teamError && <p role="alert" className="text-xs text-[color:var(--status-bad)]">{teamError}</p>}
 
       {projectKind !== "express" ? (
-        <section>
-          <p className="mb-1 text-xs font-medium text-[color:var(--text-secondary)]">Layouts, sketches and visual inspiration <span className="font-normal opacity-70">(optional)</span></p>
-          <p className="mb-2 text-[11px] text-[color:var(--text-secondary)]">Upload screenshots, mood boards, rough wireframes or PDFs to explain what matters. Professional uses these to guide section selection, typography and composition from our premium design systems; bespoke component invention requires separate scope.</p>
+        <OnboardingSection icon={LayoutTemplate} title="Layouts, sketches and inspiration" description="Share screenshots, mood boards, rough wireframes or PDFs. These guide your design; bespoke components need a separately agreed scope." optional>
           {inspiration.length > 0 ? (
             <ul className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
               {inspiration.map((asset) => <AssetTile key={asset.id} asset={asset} onRemove={() => remove(asset)} captionable />)}
             </ul>
           ) : null}
           <FileUploadButton ariaLabel="Add inspiration files" accept="application/pdf,image/png,image/jpeg,image/webp,image/gif" multiple disabled={Boolean(uploading)} onFiles={(files) => void upload(files, "other")} className="min-h-11 items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 text-xs hover:border-[color:var(--accent)]"><Upload className="h-4 w-4" /> Add inspiration files</FileUploadButton>
-        </section>
+        </OnboardingSection>
       ) : null}
 
       {uploadError ? <p role="alert" className="text-xs text-[color:var(--status-bad)]">{uploadError}</p> : null}
       {uploading ? <VirtueAside state="working">Uploading {uploading.done} of {uploading.total}… files go straight to your private storage.</VirtueAside> : null}
 
       {/* Social */}
-      <section>
-        <p className="mb-2 text-xs font-medium text-[color:var(--text-secondary)]">Where else are you online? <span className="font-normal opacity-70">(optional)</span></p>
+      <OnboardingSection icon={Globe2} title="Where else are you online?" description="Connect your website with the profiles and listings customers already know." optional>
         <div className="grid gap-3 sm:grid-cols-2">
           {(
             [
@@ -207,8 +215,9 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
             </Field>
           ))}
         </div>
-      </section>
+      </OnboardingSection>
 
+      <OnboardingSection icon={Paintbrush} title="Design preferences" description="Tell us what feels right for your business and anything we should avoid." optional>
       {projectKind !== "express" ? (
         <>
           <Field id="brandDirection" label="Describe the style, mood or feeling you want" optional hint="Words are enough: warm and editorial, bold and energetic, quiet luxury, playful, technical, traditional.">
@@ -224,39 +233,9 @@ export function BrandStep({ initial, projectKind, projectId, organizationId, ass
         <TextArea id="brandNotes" rows={3} value={data.notes} onChange={(e) => set("notes", e.target.value)} maxLength={1000} />
       </Field>
 
-      <StepFooter onBack={onBack} onNext={continueNext} busy={busy || Boolean(uploading)} />
-    </div>
-  );
-}
+      </OnboardingSection>
 
-function AssetTile({ asset, onRemove, captionable }: { asset: SignedAsset; onRemove: () => void; captionable?: boolean }) {
-  const [caption, setCaption] = useState(asset.caption ?? "");
-  const isImage = asset.content_type.startsWith("image/");
-  return (
-    <li className="relative w-full overflow-hidden rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface-soft)]">
-      <div className="flex aspect-square items-center justify-center overflow-hidden">
-        {isImage && asset.url ? (
-          <AssetPreviewImage src={asset.url} alt={asset.caption ?? asset.file_name} className="h-full w-full object-cover" />
-        ) : (
-          <span className="px-2 text-center text-[10px] font-semibold uppercase text-[color:var(--text-secondary)]">{asset.content_type === "application/pdf" ? "PDF" : asset.file_name.split(".").pop()}</span>
-        )}
-      </div>
-      <button type="button" aria-label={`Remove ${asset.file_name}`} onClick={onRemove} className="absolute right-1 top-1 inline-flex h-8 w-8 items-center justify-center rounded-md bg-black/60 text-white hover:bg-black/80">
-        <Trash2 className="h-3.5 w-3.5" />
-      </button>
-      {captionable ? (
-        <input
-          aria-label={`Caption for ${asset.file_name}`}
-          value={caption}
-          placeholder="Caption"
-          onChange={(e) => setCaption(e.target.value)}
-          onBlur={() => { if ((asset.caption ?? "") !== caption) void updateAssetCaption(asset.id, caption); }}
-          className="w-full border-t border-[color:var(--border)] bg-transparent px-2 py-1.5 text-[11px] focus:outline-none"
-          maxLength={200}
-        />
-      ) : (
-        <p className="truncate px-2 py-1.5 text-[11px] text-[color:var(--text-secondary)]" title={asset.file_name}>{asset.file_name} · {formatBytes(asset.size_bytes)}</p>
-      )}
-    </li>
+      <StepFooter onBack={onBack} onNext={continueNext} busy={busy || Boolean(uploading) || teamBusy} />
+    </fieldset>
   );
 }

@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { clsx } from "clsx";
+import { Target, Users, PanelsTopLeft, MousePointer2, FileText, Compass, CalendarDays, StickyNote } from "lucide-react";
 import { strategySchema, type Strategy } from "@/lib/vigil/onboarding/brief";
-import { ChoiceCards, Field, StepFooter, TextArea, TextInput, useAutosave, VirtueAside, type SaveState } from "../wizard-ui";
+import { OnboardingSection, ChoiceCards, Field, StepFooter, TextArea, TextInput, useAutosave, VirtueAside, type SaveState } from "../wizard-ui";
 
 type Props = {
   initial: Strategy | undefined;
@@ -76,6 +77,7 @@ export function StrategyStep({ initial, projectKind="professional", save, onSave
 
   return (
     <div className="space-y-6">
+      <OnboardingSection icon={Target} title="Goals and success" description="Help us focus the website on the outcome that matters most.">
       <Field id="primary-goal" label="What is the main job of the new site?">
         <ChoiceCards
           name="Primary site goal"
@@ -96,13 +98,16 @@ export function StrategyStep({ initial, projectKind="professional", save, onSave
         <TextArea id="success" rows={3} value={data.success} onChange={(event) => set("success", event.target.value)} maxLength={600} placeholder="For example: more qualified quote requests, fewer basic phone questions, or 20 online bookings a week." />
       </Field>
 
+      </OnboardingSection>
+
+      <OnboardingSection icon={Users} title="Your audience" description="Tell us who we are designing for.">
       <Field id="audience" label="Who are the most important people the site needs to speak to?" hint="Describe the customer, client or community in plain language.">
         <TextArea id="audience" rows={4} value={data.audience} onChange={(event) => set("audience", event.target.value)} maxLength={1000} />
       </Field>
 
-      <fieldset>
-        <legend className="text-[13px] font-medium">Which pages do you expect?</legend>
-        <p className="mt-1 text-[11px] text-[color:var(--text-secondary)]">This is a starting point. We will confirm the final structure with you.</p>
+      </OnboardingSection>
+
+      <OnboardingSection icon={PanelsTopLeft} title="Pages and structure" description="Which pages do you expect? This is a starting point; we will confirm the final structure with you.">
         <div className="mt-3 max-w-[14rem]">
           <Field id="estimated-pages" label="Approximate primary pages" optional hint={projectKind==="custom"?"Growth Site page scope is agreed with the team. Legal and utility pages do not count.":"Professional includes up to 8. Legal and utility pages do not count."}>
             <TextInput id="estimated-pages" type="number" min={1} max={100} value={data.estimatedPageCount ?? ""} onChange={(event) => set("estimatedPageCount", event.target.value ? Number(event.target.value) : null)} />
@@ -111,19 +116,19 @@ export function StrategyStep({ initial, projectKind="professional", save, onSave
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {PAGE_OPTIONS.map((option) => <CheckOption key={option.value} checked={data.pages.includes(option.value)} label={option.label} onChange={() => toggle("pages", option.value)} />)}
         </div>
-        {data.pages.includes("other") ? <TextArea className="mt-2" rows={2} value={data.otherPages} onChange={(event) => set("otherPages", event.target.value)} maxLength={500} placeholder="Other pages or sections you have in mind" /> : null}
+        {data.pages.includes("other") ? <Field id="other-pages" label="Other pages" optional><TextArea id="other-pages" rows={2} value={data.otherPages} onChange={(event) => set("otherPages", event.target.value)} maxLength={500} placeholder="Other pages or sections you have in mind" /></Field> : null}
         {projectKind!=="custom"&&(data.estimatedPageCount ?? 0) > 8 ? <div className="mt-3"><VirtueAside>Professional includes eight primary pages. Our team will review the additional pages and confirm any add-on before work begins.</VirtueAside></div> : null}
-      </fieldset>
+      </OnboardingSection>
 
-      <fieldset>
-        <legend className="text-[13px] font-medium">What should visitors be able to do?</legend>
+      <OnboardingSection icon={MousePointer2} title="Website features" description="What should visitors be able to do? Select the tools and functions you have in mind.">
         <div className="mt-2 grid gap-2 sm:grid-cols-2">
           {FEATURE_OPTIONS.map((option) => <CheckOption key={option.value} checked={data.features.includes(option.value)} label={option.label} onChange={() => toggle("features", option.value)} />)}
         </div>
-        <TextArea className="mt-2" rows={3} value={data.featureNotes} onChange={(event) => set("featureNotes", event.target.value)} maxLength={1000} placeholder="Tell us how these should work, including any tools you already use." />
+        <Field id="feature-notes" label="How should these features work?" optional><TextArea id="feature-notes" rows={3} value={data.featureNotes} onChange={(event) => set("featureNotes", event.target.value)} maxLength={1000} placeholder="Include any tools you already use." /></Field>
         {data.features.some((feature) => ["ecommerce", "memberships", "native_booking", "custom_api"].includes(feature)) ? <div className="mt-3"><VirtueAside>That may need a custom or add-on scope. Our team will review it with you before the build begins; nothing extra is added without your approval.</VirtueAside></div> : null}
-      </fieldset>
+      </OnboardingSection>
 
+      <OnboardingSection icon={FileText} title="Written content" description="Let us know what you already have and where you need help.">
       <Field id="content-status" label="How ready is your written content?">
         <ChoiceCards
           name="Content readiness"
@@ -137,22 +142,23 @@ export function StrategyStep({ initial, projectKind="professional", save, onSave
         />
       </Field>
 
-      <fieldset>
-        <legend className="text-[13px] font-medium">Sites you like <span className="font-normal opacity-70">(optional)</span></legend>
-        <p className="mt-1 text-[11px] text-[color:var(--text-secondary)]">Up to three. Tell us what you like; we will not copy another site.</p>
+      </OnboardingSection>
+
+      <OnboardingSection icon={Compass} title="Sites you like" description="Share up to three references and what you like about each. These guide the direction; we will not copy another site." optional>
         <div className="mt-2 space-y-3">
           {[0, 1, 2].map((index) => {
             const reference = data.references[index] ?? { url: "", notes: "" };
             return (
               <div key={index} className="grid gap-2 rounded-xl border border-[color:var(--border)] p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-                <TextInput aria-label={`Reference site ${index + 1}`} value={reference.url} onChange={(event) => set("references", updateReference(data.references, index, "url", event.target.value))} placeholder="https://example.com" />
-                <TextInput aria-label={`What you like about reference ${index + 1}`} value={reference.notes} onChange={(event) => set("references", updateReference(data.references, index, "notes", event.target.value))} placeholder="What do you like about it?" />
+                <Field id={`reference-${index}`} label={`Reference site ${index + 1}`}><TextInput id={`reference-${index}`} aria-label={`Reference site ${index + 1}`} value={reference.url} onChange={(event) => set("references", updateReference(data.references, index, "url", event.target.value))} placeholder="https://example.com" /></Field>
+                <Field id={`reference-notes-${index}`} label="What do you like about it?"><TextInput id={`reference-notes-${index}`} aria-label={`What you like about reference ${index + 1}`} value={reference.notes} onChange={(event) => set("references", updateReference(data.references, index, "notes", event.target.value))} placeholder="Layout, colours, photography…" /></Field>
               </div>
             );
           })}
         </div>
-      </fieldset>
+      </OnboardingSection>
 
+      <OnboardingSection icon={CalendarDays} title="Approval and timing" description="Who should we work with, and is there a date to keep in mind?" optional>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field id="approver-name" label="Who gives final approval?" optional>
           <TextInput id="approver-name" value={data.approver.name} onChange={(event) => set("approver", { ...data.approver, name: event.target.value })} maxLength={120} placeholder="Name" />
@@ -166,9 +172,14 @@ export function StrategyStep({ initial, projectKind="professional", save, onSave
         <TextInput id="target-launch" value={data.targetLaunch} onChange={(event) => set("targetLaunch", event.target.value)} maxLength={120} placeholder="For example: opening in March, or no fixed date" />
       </Field>
 
+      </OnboardingSection>
+
+      <OnboardingSection icon={StickyNote} title="Anything else" description="Add questions or details you would like to discuss before design starts." optional>
       <Field id="strategy-notes" label="Anything else we should discuss before design starts?" optional>
         <TextArea id="strategy-notes" rows={4} value={data.notes} onChange={(event) => set("notes", event.target.value)} maxLength={1200} />
       </Field>
+
+      </OnboardingSection>
 
       <StepFooter onBack={onBack} onNext={continueNext} busy={busy} />
     </div>

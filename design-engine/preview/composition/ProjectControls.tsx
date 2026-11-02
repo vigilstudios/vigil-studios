@@ -1,4 +1,5 @@
 "use client";
+import { hubOwnsProductPath } from "../../content/products";
 import { useState } from "react";
 import type { SectionInstance } from "../../composition/schemas";
 import type { WorkspaceAsset } from "@/lib/vigil/professional/document";
@@ -37,9 +38,9 @@ export function ProjectSectionControls({ section, assets, sources, onChange }: {
 }) {
   const [sourceIndex, setSourceIndex] = useState("0"), [fieldIndex, setFieldIndex] = useState("0");
   const [notice, setNotice] = useState("");
-  const fields = textSlots(section.content).map(path => ["content", ...path]);
+  const fields = textSlots(section.content).map(path => ["content", ...path]).filter(path => !hubOwnsProductPath(section,path));
   return <section className="composition-panel"><h2>Client sources</h2><p>Apply a source explicitly. New onboarding answers never replace your edited composition.</p>
-    {mediaSlots(section).map(slot => <label key={slot.path.join(".")}>{slot.label}<select aria-label={`Client asset · ${slot.label}`} value={assets.find(asset => asset.url === sourceAt(section, slot.path))?.id ?? ""} onChange={event => {
+    {mediaSlots(section).filter(slot => !hubOwnsProductPath(section,slot.path)).map(slot => <label key={slot.path.join(".")}>{slot.label}<select aria-label={`Client asset · ${slot.label}`} value={assets.find(asset => asset.url === sourceAt(section, slot.path))?.id ?? ""} onChange={event => {
       const asset = assets.find(asset => asset.id === event.target.value);
       if (!asset) return;
       const updated = patchPath(section, slot.path, asset.url);

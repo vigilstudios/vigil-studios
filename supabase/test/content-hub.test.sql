@@ -176,6 +176,34 @@ select public.save_website_content('cb000000-0000-4000-8000-000000000048',6,curr
 select hub_test.ok((select config->'publishedFeatured'->>'featuredSlotBudget'='1' and published_revision=7 from public.website_content_collections where id='cb000000-0000-4000-8000-000000000048'),'Publish commits policy and selected rows atomically');
 reset role;
 
+-- Founder-approved Express catalogue editing uses Care+ and the same launch boundary.
+select hub_test.ok(vigil.content_eligible('cb000000-0000-4000-8000-000000000024'),'Express with an attributed premium plan is eligible');
+select hub_test.ok(not vigil.content_authoring_access('cb000000-0000-4000-8000-000000000024','cb000000-0000-4000-8000-000000000003'),'Express member cannot author before launch');
+update public.websites set status='live' where id='cb000000-0000-4000-8000-000000000024';
+insert into public.website_content_collections(id,website_id,organization_id,key,module,label,page_id,section_id,field,adapter,config) values
+('cb000000-0000-4000-8000-000000000050','cb000000-0000-4000-8000-000000000024','cb000000-0000-4000-8000-000000000011','express-services','services','Services','home','services','services','standalone','{"deliveryPending":true}');
+select set_config('hub_test.catalog','[{"id":"cb000000-0000-4000-8000-000000000060","slug":"consultation","deleted":false,"featured":false,"data":{"title":"Consultation","description":"Advice","category":"Services","priceLabel":"$50","media":[],"link":""}}]',true);
+select set_config('request.jwt.claims','{"role":"service_role"}',true);set local role service_role;
+select public.save_website_content('cb000000-0000-4000-8000-000000000050',1,current_setting('hub_test.catalog')::jsonb,'draft','cb000000-0000-4000-8000-000000000001');
+select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000050',2,current_setting('hub_test.catalog')::jsonb,'publish','cb000000-0000-4000-8000-000000000001')$q$,'unconnected intake catalog cannot publish');
+select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000050',2,current_setting('hub_test.catalog')::jsonb,'draft','cb000000-0000-4000-8000-000000000003')$q$,'read-only Express member cannot edit catalog');
+reset role;
+update public.subscriptions set plan_id=(select id from public.plans where code='basic') where website_id='cb000000-0000-4000-8000-000000000024';
+select hub_test.ok(not vigil.content_eligible('cb000000-0000-4000-8000-000000000024'),'Express Basic cannot borrow another website Care plan');
+select hub_test.ok((select jsonb_array_length(draft)=1 from public.website_content_collections where id='cb000000-0000-4000-8000-000000000050'),'downgrade retains the item draft');
+
+-- Team is optional authoring data, with image-only portraits and normal revision/publication guards.
+insert into public.website_content_collections(id,website_id,organization_id,key,module,label,page_id,section_id,field,adapter,config) values
+('cb000000-0000-4000-8000-000000000051','cb000000-0000-4000-8000-000000000024','cb000000-0000-4000-8000-000000000011','express-team','team','The team','home','team','members','standalone','{"deliveryPending":true}');
+select set_config('hub_test.team','[{"id":"cb000000-0000-4000-8000-000000000061","slug":"taylor","deleted":false,"featured":false,"data":{"title":"Taylor","role":"Designer","description":"Customer biography","media":[]}}]',true);
+select set_config('request.jwt.claims','{"role":"service_role"}',true);set local role service_role;
+select public.save_website_content('cb000000-0000-4000-8000-000000000051',1,current_setting('hub_test.team')::jsonb,'draft','cb000000-0000-4000-8000-000000000001');
+select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000051',2,current_setting('hub_test.team')::jsonb,'publish','cb000000-0000-4000-8000-000000000001')$q$,'unimplemented Express Team component cannot publish');
+select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000051',2,jsonb_set(current_setting('hub_test.team')::jsonb,'{0,data,media}','[{"type":"video","src":"https://example.test/team.mp4","alt":"A video"}]'),'draft','cb000000-0000-4000-8000-000000000001')$q$,'team entries reject video portraits');
+select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000051',2,jsonb_set(current_setting('hub_test.team')::jsonb,'{0,data,media}','[{"type":"image","src":"https://example.test/a.jpg","alt":"Portrait"},{"type":"image","src":"https://example.test/b.jpg","alt":"Portrait"}]'),'draft','cb000000-0000-4000-8000-000000000001')$q$,'team entries reject more than one portrait');
+select hub_test.fails($q$select public.save_website_content('cb000000-0000-4000-8000-000000000051',2,current_setting('hub_test.team')::jsonb,'draft','cb000000-0000-4000-8000-000000000003')$q$,'read-only members cannot edit team profiles');
+reset role;
+
 update public.websites set status='archived' where id='cb000000-0000-4000-8000-000000000022';
 select hub_test.ok(not vigil.content_access('cb000000-0000-4000-8000-000000000022'),'archived website denied');
 select set_config('request.jwt.claims','{"role":"anon"}',true);set local role anon;

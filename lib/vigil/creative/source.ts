@@ -84,7 +84,7 @@ function buildRequirements(org: SourceOrganization, website: SourceWebsite, proj
     content: strategy ? { status: strategy.contentStatus } : null,
     references: (strategy?.references ?? []).filter((r) => r.url || r.notes),
     domain: brief.domain ? { answer: brief.domain.answer, hostname: brief.domain.hostname || null, preferredNames: brief.domain.preferredNames } : null,
-    brandConstraints: brief.brand ? { avoid: brief.brand.avoid, direction: brief.brand.direction, colours: brief.brand.colours } : null,
+    brandConstraints: brief.brand ? { avoid: brief.brand.avoid, direction: brief.brand.direction, colours: brief.brand.colours, logo: { mode: brief.brand.logo.mode ?? (assets.some(asset => asset.kind === "logo") ? "upload" : "vigil"), wordmark: brief.brand.logo.mode === "wordmark" ? brief.brand.logo.wordmark : null } } : null,
     assets: { count: assets.length, byKind: countBy(assets.map((a) => a.kind)) },
   };
 }
@@ -109,12 +109,13 @@ function renderBriefMarkdown(orgName: string, brief: Brief, assets: SourceAssetS
     field("Email", b.email);
     const address = [b.address.line1, b.address.line2, b.address.city, b.address.region, b.address.postal, b.address.country].filter(Boolean).join(", ");
     field("Address", address);
-    if (b.hours.byAppointment) field("Hours", "By appointment");
+    if (b.hours.notApplicable) field("Hours", "Not applicable. Do not display opening hours on the website.");
+    else if (b.hours.byAppointment) field("Hours", "By appointment");
     else {
       const days = b.hours.days.filter((d) => d.closed || d.open || d.close).map((d) => `${DAY_LABELS[d.day]}: ${d.closed ? "closed" : `${d.open || "?"}–${d.close || "?"}`}`);
       if (days.length) field("Hours", (b.hours.sameEveryDay ? "Same every day. " : "") + days.join("; "));
     }
-    field("Hours notes", b.hours.notes);
+    if (!b.hours.notApplicable) field("Hours notes", b.hours.notes);
   }
 
   const s = brief.strategy;
@@ -144,9 +145,20 @@ function renderBriefMarkdown(orgName: string, brief: Brief, assets: SourceAssetS
     for (const sec of o.sections) {
       if (!sec.items.length) continue;
       if (sec.name) lines.push(`### ${sec.name}`, "");
-      bullets(sec.items.map((item) => [item.name, item.price ? `(${item.price})` : "", item.description ? `— ${item.description}` : ""].filter(Boolean).join(" ")));
+      bullets(sec.items.map((item) => [item.name, item.price ? `(${item.price})` : "", item.description ? `— ${item.description}` : "", item.imageAssetIds.length ? `Images (in order; first is cover): ${item.imageAssetIds.map(id => `${assets.find(a => a.id === id)?.fileName ?? "Unavailable image"} [asset ${id}]`).join(", ")}` : ""].filter(Boolean).join(" ")));
     }
     field("Notes", o.notes);
+  }
+
+  const team = brief.brand?.team;
+  if (team?.enabled && team.members.some(member => member.name.trim())) {
+    section("The team (requested website component)");
+    lines.push("Include an editable Team component linked to the Team collection in Content Hub. If the Express implementation lacks this component, flag it for Vigil before publication.", "");
+    for (const member of team.members.filter(member => member.name.trim())) {
+      lines.push(`### ${member.name}`, "");
+      field("Role", member.role); field("Bio", member.bio);
+      field("Portrait", member.imageAssetIds.map(id => `${assets.find(asset => asset.id === id)?.fileName ?? "Unavailable image"} [asset ${id}]`).join(", "));
+    }
   }
 
   const a = brief.about;
@@ -160,6 +172,10 @@ function renderBriefMarkdown(orgName: string, brief: Brief, assets: SourceAssetS
   const br = brief.brand;
   if (br) {
     section("Brand");
+    const logoMode = br.logo.mode ?? (assets.some(asset => asset.kind === "logo") ? "upload" : "vigil");
+    field("Logo choice", logoMode === "upload" ? "Use the uploaded logo" : logoMode === "wordmark" ? "Use the customer's typed wordmark" : "Vigil should propose a simple wordmark for customer review");
+    if (logoMode === "wordmark") field("Wordmark text", br.logo.wordmark);
+    if (logoMode !== "upload" && assets.some(asset => asset.kind === "logo")) field("Retained logo files", "These are reference files, not the selected logo direction.");
     const colours = br.colours.mode === "logo" ? "Use the logo's colours" : br.colours.mode === "vigil" ? "Vigil chooses" : [br.colours.primary, br.colours.secondary].filter(Boolean).join(", ") || "Customer picks (none given)";
     field("Colours", colours);
     field("Direction", br.direction);
