@@ -1,3 +1,4 @@
+import { makeTeamSection } from "../team-fixture";
 import { makeCreatorSection } from "../creator-fixtures";
 import { creatorSectionIds, type CreatorSectionId } from "../../composition/creator-schemas";
 import { makeEndingSection } from "../ending-fixtures";
@@ -35,6 +36,7 @@ const intro = { title: "A landscape worth understanding.", description: "We turn
 
 /** Review assets and copy are imported here only, never by reusable implementations. */
 export function makeSection<K extends SectionId>(component: K, id: string): SectionInstance<K> {
+  if(component === "about.team") return makeTeamSection(id) as SectionInstance<K>;
   if((creatorSectionIds as readonly string[]).includes(component)) return makeCreatorSection(component as CreatorSectionId,id) as unknown as SectionInstance<K>;
   if(endingSectionIds.includes(component as EndingSectionId)) return makeEndingSection(component as EndingSectionId,id) as unknown as SectionInstance<K>;
   if((importSectionIds as readonly string[]).includes(component)) return makeImportSection(component as ImportSectionId,id) as unknown as SectionInstance<K>;

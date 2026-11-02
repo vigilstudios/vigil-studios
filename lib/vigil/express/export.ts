@@ -1,4 +1,5 @@
 import "server-only";
+import { ensureProfessionalBindings } from "@/lib/vigil/content/service";
 import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import path from "node:path";
@@ -45,6 +46,19 @@ export async function expressRepositoryFiles(client: DbClient, slug: string, web
  if(!draft.engineVersion)throw new ValidationError("Published variant has no pinned engine version.");
  const manifest=await runtimeManifest(websiteId ? undefined : draft.engineVersion);
  files.push({path:"site/index.html",content:expressHtml(draft,`/_vigil/runtime/${manifest.version}`,false,undefined,websiteId)});
+ if(websiteId) {
+  const {data:website,error:websiteError}=await client.from("websites").select("organization_id,project_id").eq("id",websiteId).single();
+  if(websiteError)throw websiteError;
+  const {data:project,error:projectError}=await client.from("projects").select("intake_completed_at").eq("id",website.project_id!).eq("organization_id",website.organization_id).single();
+  if(projectError)throw projectError;
+  const site=bindWebsiteInquiryForms(draft.site);
+  const collections=await ensureProfessionalBindings(client,websiteId,website.organization_id,site,["products","services","team"],!project.intake_completed_at);
+  const hash=createHash("sha256").update(websiteId+serializeSite(site)+manifest.version).digest("hex");
+  const snapshotId=`${hash.slice(0,8)}-${hash.slice(8,12)}-4${hash.slice(13,16)}-a${hash.slice(17,20)}-${hash.slice(20,32)}`;
+  const {error:snapshotError}=await client.from("website_content_runtimes").upsert({id:snapshotId,website_id:websiteId,organization_id:website.organization_id,site_definition:site as unknown as import("@/types/database.types").Json,engine_version:manifest.version,binding_keys:collections.filter(c=>c.binding.adapter==='professional').map(c=>c.binding.key)}, {onConflict:"id",ignoreDuplicates:true});
+  if(snapshotError)throw snapshotError;
+  files.push({path:"site/vercel.json",content:JSON.stringify({cleanUrls:true,trailingSlash:false,git:{deploymentEnabled:false},rewrites:site.pages.map(page=>({source:"/",destination:`https://www.vigilstudios.co/api/content/${websiteId}/runtime/${snapshotId}/${page.id}?review=published`}))},null,2)});
+ }
  files.push({path:".vigil/express-template.json",content:JSON.stringify({slug,variant:draft.variant,engineVersion:manifest.version,site:draft.site},null,2)});
  for(const file of manifest.files) {
   const bytes=await readFile(path.join(process.cwd(),"public/design-engine-runtime",manifest.version,file.path));

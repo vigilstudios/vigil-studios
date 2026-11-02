@@ -1,3 +1,4 @@
+import { makeTeamSection } from "./team-fixture";
 import { makeCreatorSection } from "./creator-fixtures";
 import { makeEndingSection } from "./ending-fixtures";
 import { creatorPackageFor, creatorImage } from "./creator-image-packages";
@@ -175,6 +176,7 @@ export function renderDesignPreview(
     </div>
   );
   switch (id) {
+    case "about.team": return renderPreviewSection(makeTeamSection("individual-team",config.structure,config));
     case "proof.social-reach": case "about.creator-profile": return renderPreviewSection(makeCreatorSection(id,"individual-creator",config));
     case "cta.editorial": case "cta.signal": case "contact.inquiry":
     case "footer.sitemap": case "footer.compact": case "footer.split": case "footer.banner":

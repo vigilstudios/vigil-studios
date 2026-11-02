@@ -11,6 +11,29 @@ const project = (brief: unknown = sampleBrief()) => ({ id: "proj_1", name: "Embe
 const assets = [{ id: "a1", kind: "logo", fileName: "logo.svg", contentType: "image/svg+xml", sizeBytes: 1200, caption: null }];
 
 describe("source snapshot", () => {
+  it("carries the selected wordmark direction instead of treating retained logo files as selected", () => {
+    const brief = { ...sampleBrief(), brand: { logo: { mode: "wordmark", wordmark: "Northline Studio" } } };
+    const snapshot = buildSourceSnapshot({ organization, website, project: project(brief), assets });
+    expect(snapshot.customerBriefMarkdown).toContain("**Wordmark text:** Northline Studio");
+    expect(snapshot.customerBriefMarkdown).toContain("These are reference files, not the selected logo direction.");
+    expect(snapshot.projectRequirements.brandConstraints).toMatchObject({ logo: { mode: "wordmark", wordmark: "Northline Studio" } });
+    const proposed = buildSourceSnapshot({ organization, website, project: project({ ...brief, brand: { logo: { mode: "vigil", wordmark: "Northline Studio" } } }), assets });
+    expect(proposed.customerBriefMarkdown).toContain("Vigil should propose a simple wordmark for customer review");
+    expect(proposed.customerBriefMarkdown).not.toContain("**Wordmark text:**");
+    expect(buildSourceSnapshot({ organization, website, project: project({ brand: {} }), assets }).projectRequirements.brandConstraints).toMatchObject({ logo: { mode: "upload", wordmark: null } });
+  });
+  it("carries the no-opening-hours instruction without publishing a retained schedule or notes", () => {
+    const brief = sampleBrief();
+    const snapshot = buildSourceSnapshot({ organization, website, project: project({
+      ...brief,
+      basics: { ...brief.basics, hours: { ...brief.basics.hours, notApplicable: true, byAppointment: true, notes: "Closed on public holidays" } },
+    }), assets });
+    expect(snapshot.customerBriefMarkdown).toContain("Do not display opening hours on the website.");
+    expect(snapshot.customerBriefMarkdown).not.toContain("17:00");
+    expect(snapshot.customerBriefMarkdown).not.toContain("By appointment");
+    expect(snapshot.customerBriefMarkdown).not.toContain("Closed on public holidays");
+  });
+
   it("keeps the customer's words and drops internal and private fields", () => {
     const snapshot = buildSourceSnapshot({ organization, website, project: project(), assets });
     const raw = snapshot.onboardingRaw as { strategy: { approver: Record<string, unknown> }; domain: Record<string, unknown>; progress?: unknown; kickoff?: unknown };

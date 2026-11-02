@@ -1,3 +1,5 @@
+import { createAdminClient } from "@/lib/supabase/admin";
+import { teamReadiness } from "@/lib/vigil/content/team-readiness";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -46,6 +48,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
   const isAdmin = staff.staffRole === "admin";
   const briefProject = projects.find((p) => !["closed", "cancelled"].includes(p.status)) ?? projects[0] ?? null;
   const brief = briefProject ? parseBrief(briefProject.brief) : null;
+  const teamSetup = briefProject ? await teamReadiness(createAdminClient(), org.id, briefProject, websites.find(site => site.project_id === briefProject.id)) : null;
   const briefAssets = briefProject ? await getProjectAssets(briefProject.id) : [];
   const briefDomain = brief?.domain?.domainId ? domains.find((d) => d.id === brief.domain?.domainId) ?? null : null;
   const openInvites = invites.filter((i) => !i.accepted_at && !i.revoked_at && !i.declined_at);
@@ -67,6 +70,10 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
         }
       />
 
+      {teamSetup && !teamSetup.ready && <div role="status" className="mb-4 rounded-xl border border-[color:var(--status-warn)] bg-[color:var(--bg-surface-soft)] p-4">
+        <h2 className="text-sm font-semibold">Team component needs attention</h2><p className="mt-1 text-sm text-[color:var(--text-secondary)]">{teamSetup.count} team profile{teamSetup.count === 1 ? "" : "s"} requested. {teamSetup.message}</p>
+        {briefProject?.kind !== "express" && <Link href={`/admin/lab/project/${briefProject!.id}`} className="mt-2 inline-flex min-h-10 items-center text-sm font-medium text-[color:var(--accent)]">Open project in Lab</Link>}
+      </div>}
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <div className="flex items-center justify-between">

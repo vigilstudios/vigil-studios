@@ -14,7 +14,7 @@ export const STEP_TITLES: Record<StepKey, string> = {
   strategy: "Site goals and scope",
   offerings: "What you offer",
   about: "About you",
-  brand: "Brand and photos",
+  brand: "Brand, photos, and team",
   domain: "Your domain",
   review: "Review and send",
 };
@@ -45,7 +45,7 @@ export function virtueLine(step: StepKey, ctx: { firstName?: string | null; busi
     case "offerings":
       return {
         title: "Now, what do you offer?",
-        body: `List your ${ctx.noun ?? "services"} the way you'd explain them to someone new. Prices are optional; rough is fine.`,
+        body: `List your ${ctx.noun ?? "services"} the way you'd explain them to someone new. Prices are optional; rough is fine. You can also upload a menu, price list or brochure here.`,
       };
     case "about":
       return {
@@ -55,7 +55,7 @@ export function virtueLine(step: StepKey, ctx: { firstName?: string | null; busi
     case "brand":
       return {
         title: "Show me how it should look.",
-        body: "Your logo, colours and photos. Phone photos are fine; the team picks the best ones and tidies them up.",
+        body: "Your logo, colours, photos and the people behind your business. Phone photos are fine; we will pick the best ones and tidy them up.",
       };
     case "domain":
       return {
@@ -75,7 +75,7 @@ export function welcomeSpeech(ctx: { firstName?: string | null; businessName: st
   const name = ctx.firstName ? `, ${ctx.firstName}` : "";
   const greeting = ctx.afterPassword ? "Thank you. Welcome to Vigil." : `Hello${name}. I'm Virtue.`;
   return [
-    { text: `${greeting} This is your dashboard, where you'll see your website, domain and plan, and I'll be around whenever you need me. First, I'd like to learn about ${ctx.businessName} so the team can start building; it takes about ten minutes and saves as you go.` },
+    { text: `${greeting} This is your dashboard, where you'll see your website, domain and plan, and I'll be around whenever you need me. First, I'd like to learn about your business so the team can start building; it takes about ten minutes and saves as you go.` },
   ];
 }
 

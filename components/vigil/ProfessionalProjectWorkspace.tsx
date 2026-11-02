@@ -19,7 +19,7 @@ export function ProfessionalProjectWorkspace({ data }: { data: ProjectWorkspace 
   <section className="composition-panel"><h2>Client brief</h2><pre>{JSON.stringify(data.brief,null,2)}</pre></section>
   <section className="composition-panel"><h2>Media</h2>{data.assets.length ? data.assets.map(asset => <p key={asset.id}><a href={asset.previewUrl} target="_blank" rel="noreferrer">{asset.file_name}</a></p>) : <p>Customer uploads will appear here.</p>}</section>
  </>;
- return <DesktopLabShell><CompositionLab key={data.project.id} workspaceSwitch={<><Link href="/admin/lab/projects">← Client projects</Link><span>{data.customer.name} · {data.project.name}</span></>} project={{ id: data.project.id, site: data.workspace.site_definition, assets: data.assets, sources, context, save: async site => {
+ return <DesktopLabShell><CompositionLab key={data.project.id} workspaceSwitch={<><Link href="/admin/lab/projects">← Client projects</Link><span>{data.customer.name} · {data.project.name}</span></>} project={{ id: data.project.id, site: data.workspace.site_definition, assets: data.assets, productCatalogues: data.productCatalogues, sources, context, save: async site => {
   const result = await saveProfessionalSite(data.project.id, site, revision.current,contentRevisions.current);
   if (!result.ok) throw new Error(result.error); revision.current = result.data.revision;contentRevisions.current=result.data.contentRevisions;
  } }}/></DesktopLabShell>;

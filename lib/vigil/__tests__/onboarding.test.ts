@@ -4,8 +4,40 @@ import { assetPath, validateAssets } from "../onboarding/assets";
 import { REGISTRAR_GUIDES, REGISTRAR_OPTIONS, registrarFromNameservers } from "../domain-guides";
 import { afterSendLine, virtueLine, welcomeSpeech, STEP_TITLES } from "../onboarding/virtue-copy";
 import { welcomeWasDeferred } from "../onboarding/constants";
+import { assertLogoChoice } from "../services/onboarding-logo";
+import { FakeAdmin } from "./fake-admin";
+
+describe("selected logo requirements", () => {
+  const logoFile = { organization_id: "org", project_id: "project", kind: "logo", bucket_id: "project-assets", object_path: "org/project/logo.svg", content_type: "image/svg+xml", size_bytes: 1200 };
+  it("blocks an upload choice without a logo, including after its removal", async () => {
+    const db = new FakeAdmin({ project_assets: [logoFile] });
+    await expect(assertLogoChoice(db.asClient(), "org", "project", { mode: "upload", wordmark: "" })).resolves.toBeUndefined();
+    db.rows("project_assets").splice(0);
+    await expect(assertLogoChoice(db.asClient(), "org", "project", { mode: "upload", wordmark: "" })).rejects.toThrow("Upload your logo before continuing");
+  });
+  it.each([
+    { organization_id: "other" }, { project_id: "other" }, { kind: "photo" },
+    { object_path: "other/project/logo.svg" }, { size_bytes: 0 }, { content_type: "video/mp4" },
+  ])("does not accept an unrelated or incomplete file: %j", async patch => {
+    const db = new FakeAdmin({ project_assets: [{ ...logoFile, ...patch }] });
+    await expect(assertLogoChoice(db.asClient(), "org", "project", { mode: "upload", wordmark: "" })).rejects.toThrow("Upload your logo before continuing");
+  });
+  it("allows a proposal or typed wordmark without requiring an upload", async () => {
+    const db = new FakeAdmin({});
+    await expect(assertLogoChoice(db.asClient(), "org", "project", { mode: "vigil", wordmark: "" })).resolves.toBeUndefined();
+    await expect(assertLogoChoice(db.asClient(), "org", "project", { mode: "wordmark", wordmark: "Northline" })).resolves.toBeUndefined();
+    await expect(assertLogoChoice(db.asClient(), "org", "project", { mode: "wordmark", wordmark: " " })).rejects.toThrow("Enter your wordmark text");
+  });
+});
 
 describe("brief schema", () => {
+  it("keeps legacy logo preferences inferable and retains typed wordmarks across choices", () => {
+    expect(SECTION_SCHEMAS.brand.parse({}).logo).toEqual({ mode: null, wordmark: "" });
+    const brand = SECTION_SCHEMAS.brand.parse({ logo: { mode: "wordmark", wordmark: "Northline Studio" } });
+    expect(parseBrief({ brand }).brand?.logo).toEqual({ mode: "wordmark", wordmark: "Northline Studio" });
+    expect(SECTION_SCHEMAS.brand.parse({ ...brand, logo: { ...brand.logo, mode: "vigil" } }).logo.wordmark).toBe("Northline Studio");
+    expect(SECTION_SCHEMAS.brand.safeParse({ logo: { mode: "wordmark", wordmark: "x".repeat(161) } }).success).toBe(false);
+  });
   it("defers Virtue only for the project that chose to look around", () => {
     expect(welcomeWasDeferred("project-a", "project-a")).toBe(true);
     expect(welcomeWasDeferred("project-a", "project-b")).toBe(false);
@@ -35,6 +67,22 @@ describe("brief schema", () => {
     expect(SECTION_SCHEMAS.brand.safeParse({ colours: { mode: "pick", primary: "not-a-colour" } }).success).toBe(false);
     expect(SECTION_SCHEMAS.domain.safeParse({ answer: "need", preferredNames: ["a.com", "b.com", "c.com", "d.com"] }).success).toBe(false);
     expect(SECTION_SCHEMAS.domain.safeParse({ answer: "own", hostname: "x.com", registrar: "godaddy" }).success).toBe(true);
+  });
+
+  it("keeps existing briefs readable when opening-hours applicability is absent", () => {
+    const brief = parseBrief({ basics: { businessName: "Studio", hours: { byAppointment: true } } });
+    expect(brief.basics?.hours.notApplicable).toBe(false);
+    expect(brief.basics?.hours.byAppointment).toBe(true);
+  });
+
+  it("saves the no-opening-hours choice without losing a previous schedule", () => {
+    const basics = emptyBasics("Creator studio");
+    basics.hours.days[0].open = "09:00";
+    basics.hours.days[0].close = "17:00";
+    basics.hours.notApplicable = true;
+    const saved = SECTION_SCHEMAS.basics.parse(JSON.parse(JSON.stringify(basics)));
+    expect(saved.hours.notApplicable).toBe(true);
+    expect(saved.hours.days[0]).toMatchObject({ open: "09:00", close: "17:00" });
   });
 
   it("adds kickoff and strategy only for Professional and Custom onboarding", () => {

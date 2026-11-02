@@ -11,7 +11,7 @@ export function PromoBanner({ fixed = false, publicOnly = false }: { fixed?: boo
   const path = usePathname();
   const [paused, setPaused] = useState(false);
   const { promotion } = CREATOR_CAMPAIGN;
-  if (!promotion.enabled || (publicOnly && (/^\/(admin|dashboard)(\/|$)/.test(path)))) return null;
+  if (!promotion.enabled || (publicOnly && (/^\/(admin|dashboard|content-hub-preview)(\/|$)/.test(path)))) return null;
   const message = <><span>For creators &amp; influencers</span><span aria-hidden="true">✦</span><strong>{promotion.percentOff}% off</strong><span>Express &amp; Professional builds</span><span aria-hidden="true">✦</span><span>Build fee only</span><ArrowUpRight size={13} aria-hidden="true" /></>;
   return <aside className={`creator-promo-banner ${fixed ? "creator-promo-fixed" : ""}`} aria-label="Creator promotion" data-paused={paused}>
     <CampaignLink prefetch={false} href="/creators#creator-hero" activateCampaignOnClick={CREATOR_CAMPAIGN.id} event="creator_promotion_banner_click" placement="site_banner" className="creator-promo-link">

@@ -6,9 +6,10 @@ import { clsx } from "clsx";
 import { ArrowLeft, ArrowRight, Check, Copy } from "lucide-react";
 import { VirtueOrb, type VirtueOrbState } from "@/components/vigil/VirtueOrb";
 import { VirtueSpeech } from "@/components/vigil/VirtueSpeech";
-import { inputClass, labelClass } from "@/components/vigil/ui";
+import { inputClass } from "@/components/vigil/ui";
 import { ONBOARDING_LATER_HREF } from "@/lib/vigil/onboarding/constants";
 import type { VirtueLine } from "@/lib/vigil/onboarding/virtue-copy";
+export { OnboardingSection } from "@/components/vigil/OnboardingSection";
 
 /** Virtue's line for a step: the orb speaks it, word by word, then settles. */
 export function VirtueSays({ line, state = "idle", size = "md", onSpeaking }: { line: VirtueLine; state?: VirtueOrbState; size?: "md" | "lg"; onSpeaking?: (speaking: boolean) => void }) {
@@ -45,7 +46,7 @@ export type SaveState = "idle" | "saving" | "saved" | "error";
 export function SaveIndicator({ state }: { state: SaveState }) {
   return (
     <span className="text-[11px] text-[color:var(--text-secondary)]" aria-live="polite">
-      {state === "saving" ? "Saving…" : state === "saved" ? "Saved" : state === "error" ? "Could not save. Check your connection." : ""}
+      {state === "saving" ? "Saving…" : state === "saved" ? "Saved" : state === "error" ? "Not saved. See the message below." : ""}
     </span>
   );
 }
@@ -95,12 +96,12 @@ export function StepFooter({
 export function Field({ id, label, hint, optional, children, error }: { id: string; label: string; hint?: string; optional?: boolean; children: ReactNode; error?: string | null }) {
   return (
     <div>
-      <label htmlFor={id} className={labelClass}>
+      <label htmlFor={id} className="mb-1.5 block text-sm font-medium leading-5 text-[color:var(--text-primary)]">
         {label}
         {optional ? <span className="ml-1 font-normal opacity-70">(optional)</span> : null}
       </label>
       {children}
-      {hint ? <p className="mt-1 text-[11px] text-[color:var(--text-secondary)]">{hint}</p> : null}
+      {hint ? <p id={`${id}-hint`} className="mt-1.5 text-[13px] leading-5 text-[color:var(--text-secondary)]">{hint}</p> : null}
       {error ? <p className="mt-1 text-xs text-[color:var(--status-bad)]">{error}</p> : null}
     </div>
   );
@@ -115,28 +116,29 @@ export function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
 }
 
 /** Big, tappable choice cards for one-of questions. */
-export function ChoiceCards<T extends string>({ value, onChange, options, name }: { value: T | null; onChange: (v: T) => void; options: { value: T; label: string; hint?: string }[]; name: string }) {
+export function ChoiceCards<T extends string>({ value, onChange, options, name }: { value: T | null; onChange: (v: T) => void; options: { value: T; label: string; hint?: string; disabled?: boolean }[]; name: string }) {
   return (
     <div role="radiogroup" aria-label={name} className={clsx("grid gap-2", options.length % 3 === 0 ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
       {options.map((o) => {
-        const active = o.value === value;
+        const active = !o.disabled && o.value === value;
         return (
           <button
             key={o.value}
             type="button"
             role="radio"
             aria-checked={active}
+            disabled={o.disabled}
             onClick={() => onChange(o.value)}
             className={clsx(
               "min-h-14 rounded-xl border px-4 py-3 text-left transition-colors",
-              active ? "border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_10%,transparent)]" : "border-[color:var(--border)] hover:border-[color:var(--text-secondary)]"
+              o.disabled ? "cursor-not-allowed border-[color:var(--border)] bg-[color:var(--bg-surface-soft)] text-[color:var(--text-secondary)] opacity-50" : active ? "border-[color:var(--accent)] bg-[color-mix(in_srgb,var(--accent-fill,var(--accent))_10%,transparent)]" : "border-[color:var(--border)] hover:border-[color:var(--text-secondary)]"
             )}
           >
-            <span className="flex items-center gap-2 text-[13px] font-semibold">
-              <span className={clsx("inline-flex h-4 w-4 items-center justify-center rounded-full border", active ? "border-[color:var(--accent)] bg-[color:var(--accent-fill,var(--accent))] text-[color:var(--on-accent)]" : "border-[color:var(--border)]")}>{active ? <Check className="h-3 w-3" /> : null}</span>
+            <span className="flex items-start gap-2 text-sm font-semibold leading-5">
+              <span className={clsx("mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border", active ? "border-[color:var(--accent)] bg-[color:var(--accent-fill,var(--accent))] text-[color:var(--on-accent)]" : "border-[color:var(--border)]")}>{active ? <Check className="h-3 w-3" /> : null}</span>
               {o.label}
             </span>
-            {o.hint ? <span className="mt-1 block text-xs text-[color:var(--text-secondary)]">{o.hint}</span> : null}
+            {o.hint ? <span className="mt-1.5 block text-[13px] leading-5 text-[color:var(--text-secondary)]">{o.hint}</span> : null}
           </button>
         );
       })}

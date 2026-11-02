@@ -15,7 +15,7 @@ describe('Lab configured featured sections',()=>{
  it.each(cases.map(s=>[s.component,s] as const))('%s derives positions from its actual schema and preserves the full collection',(_name,section)=>{
   const [cap]=collectionCapabilities(section.component,sectionSchemas[section.component]);expect(cap).toBeDefined();
   const capacity=Math.max(1,cap.minimum),featured=parseSection({...section,contentHub:{[cap.field]:{mode:'featured',capacity,label:'Selected work'}}});
-  const site=document(featured),[collection]=discoverBindings(site,website),total=collection.records.length;
+  const site=document(featured),collection=discoverBindings(site,website).find(c=>c.binding.field===cap.field)!,total=collection.records.length;
   expect(collection.config.featuredSlotBudget).toBe(capacity);expect(collection.records.filter(r=>r.featured)).toHaveLength(capacity);
   const preview=applyBindings(site,[collection],false,'draft');const rows=recordsFromLab(preview,collection);
   expect(rows).toHaveLength(total);expect(rows.filter(r=>!r.deleted)).toHaveLength(total);expect(rows.filter(r=>r.featured)).toHaveLength(capacity);

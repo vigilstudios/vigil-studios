@@ -1,7 +1,7 @@
 import "server-only";
 import {createAdminClient} from '@/lib/supabase/admin';
 import {ensureProfessionalBindings,contentCollections} from '@/lib/vigil/content/service';
-import {applyBindings,recordsFromLab,configFromLab} from '@/lib/vigil/content/professional';
+import {applyBindings,recordsFromLab,configFromLab,productCatalogue} from '@/lib/vigil/content/professional';
 import {publicRecords} from '@/lib/vigil/content/media';
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -71,7 +71,7 @@ export async function loadProjectWorkspace(client: DbClient, projectId: string) 
   const collections=await ensureProfessionalBindings(createAdminClient(),website.id,project.organization_id,document);
   const bound=collections.filter(c=>c.binding.adapter==='professional');
   const editorSite=applyBindings(document,bound.map(c=>({...c,records:publicRecords(c.records,website.id,c.id,true).map(r=>({...r,data:'media' in r.data?{...r.data,media:r.data.media.map(m=>({...m,src:m.id?m.src+'&draft=1':m.src,poster:m.posterId?m.poster+'&draft=1':m.poster}))}:r.data}))})),false,'draft');
-  return { project, website, contentRevisions:Object.fromEntries(bound.map(c=>[c.id,c.revision])), workspace: { ...workspace, site_definition: editorSite },
+  return { project, website, productCatalogues:bound.filter(c=>c.binding.module==='products').map(c=>productCatalogue({...c,records:publicRecords(c.records,website.id,c.id,true)})), contentRevisions:Object.fromEntries(bound.map(c=>[c.id,c.revision])), workspace: { ...workspace, site_definition: editorSite },
     customer: org.data, creative: creative.data, deployments: deployments.data ?? [], repository,
     assets: media, brief: parseBrief(project.brief) };
 }

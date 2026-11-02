@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check } from "lucide-react";
+import { Check, Compass, CalendarDays } from "lucide-react";
 import { CalendlyPopup } from "@/components/CalendlyModal";
 import { kickoffSchema, type Kickoff } from "@/lib/vigil/onboarding/brief";
-import { ChoiceCards, StepFooter, VirtueAside, useAutosave, type SaveState } from "../wizard-ui";
+import { OnboardingSection, ChoiceCards, StepFooter, VirtueAside, useAutosave, type SaveState } from "../wizard-ui";
 
 type Props = {
   initial: Kickoff | undefined;
@@ -40,6 +40,7 @@ export function KickoffStep({ initial, save, onSaveState, onBack, onNext, onFini
 
   return (
     <div className="space-y-6">
+      <OnboardingSection icon={Compass} title="How would you like to begin?" description="Work through the brief at your pace, or talk it through with our team.">
       <ChoiceCards
         name="How to begin"
         value={data.mode}
@@ -54,14 +55,14 @@ export function KickoffStep({ initial, save, onSaveState, onBack, onNext, onFini
         <VirtueAside>I&apos;ll turn your answers and uploads into one organized brief for the Vigil design team.</VirtueAside>
       ) : null}
 
+      </OnboardingSection>
+
       {data.mode === "call" ? (
-        <div className="rounded-xl border border-[color:var(--border)] p-4">
-          <h2 className="text-sm font-semibold">Choose a time with our team</h2>
-          <p className="mt-1 text-xs leading-5 text-[color:var(--text-secondary)]">Once the call is booked, you can finish for now or add ideas and files while you wait.</p>
+        <OnboardingSection icon={CalendarDays} title="Choose a time with our team" description="Once the call is booked, you can finish for now or add ideas and files while you wait.">
           <CalendlyPopup onEventScheduled={() => void booked()} className="btn-primary mt-4 min-h-11 w-full !px-4 text-sm sm:w-auto">{data.callBooked ? "Choose a different time" : "Open calendar"}</CalendlyPopup>
           {!data.callBooked ? <button type="button" onClick={() => void booked()} className="ml-0 mt-2 min-h-11 px-3 text-xs underline sm:ml-2 sm:mt-0">I already booked my call</button> : null}
           {data.callBooked ? <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-[color:var(--status-good)]"><Check className="h-3.5 w-3.5" /> Kickoff call booked</p> : null}
-        </div>
+        </OnboardingSection>
       ) : null}
 
       {data.mode === "call" && data.callBooked ? (

@@ -8,17 +8,20 @@ import { BLOG_IMAGE_BUCKET } from "@/lib/vigil/blog/media-contract";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/vigil/audit";
-import { ForbiddenError, NotFoundError, ValidationError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
+import { NotFoundError, ValidationError, VigilError, toActionError, type ActionResult } from "@/lib/vigil/auth/errors";
 import { assertOrgRole, requireOrgContextOrThrow, type OrgContext } from "@/lib/vigil/auth/session";
 import { button, escapeHtml, layout, sendEmail, staffNotificationAddress } from "@/lib/vigil/email";
 import { enqueueJob, JOB_KINDS } from "@/lib/vigil/jobs";
 import { assertTransition, domainTransitions } from "@/lib/vigil/lifecycle";
 import { REGISTRAR_GUIDES } from "@/lib/vigil/domain-guides";
 import { domainKind } from "@/lib/vigil/domains";
-import { domainSchema, parseBrief, SECTION_SCHEMAS, STEP_KEYS, type Brief, type RegistrarKey, type SectionKey, type StepKey } from "@/lib/vigil/onboarding/brief";
+import { domainSchema, parseBrief, SECTION_SCHEMAS, STEP_KEYS, type Brief, type Offerings, type Brand, type RegistrarKey, type SectionKey, type StepKey } from "@/lib/vigil/onboarding/brief";
 import { PROJECT_ASSETS_BUCKET, validateAssets, type AssetKind } from "@/lib/vigil/onboarding/assets";
 import { resolveEntitlements } from "@/lib/vigil/entitlements";
 import { fileLimitsFor, recordUploadedFiles } from "@/lib/vigil/services/project-files";
+import { assertOfferingImages, assertProjectImages } from "@/lib/vigil/services/offering-images";
+import { assertLogoChoice } from "@/lib/vigil/services/onboarding-logo";
+import { getProjectAssets, type SignedAsset } from "@/lib/vigil/queries/onboarding";
 import { detectRegistrar, guidedDomainRecords, type DnsRecord } from "@/lib/vigil/services/dns";
 import { beginDomainVerification, normalizeHostname, verifyDomain } from "@/lib/vigil/services/domain";
 import type { Json } from "@/types/database.types";
@@ -57,7 +60,7 @@ const STEP_EMAIL_LABELS: Record<SectionKey, string> = {
   strategy: "Site goals and scope",
   offerings: "What you offer",
   about: "About you",
-  brand: "Brand and photos",
+  brand: "Brand, photos, and team",
   domain: "Domain",
 };
 
@@ -80,7 +83,7 @@ export async function saveBriefSection(projectId: string, section: SectionKey, d
     const ctx = await requireOrgContextOrThrow();
     await enforceRateLimit(`autosave:user:${ctx.user.id}`, RATE_LIMITS.autosaveUser);
     const { supabase, project, brief } = await loadProject(ctx, projectId);
-    if (project.intake_completed_at) throw new ForbiddenError("This brief has already been sent to Vigil. Use Requests to change something.");
+    if (project.intake_completed_at) throw new VigilError("intake_submitted", "This brief has already been submitted. Your new answers have not been saved.", 409);
     const schema = SECTION_SCHEMAS[section];
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
@@ -88,6 +91,9 @@ export async function saveBriefSection(projectId: string, section: SectionKey, d
       for (const i of parsed.error.issues) (issues[i.path.join(".") || "_"] ??= []).push(i.message);
       throw new ValidationError("Check the highlighted fields.", issues);
     }
+    if (section === "offerings") await assertOfferingImages(supabase, ctx.organization.id, projectId, parsed.data as Offerings);
+    if (section === "brand" && completed) await assertLogoChoice(supabase, ctx.organization.id, projectId, (parsed.data as Brand).logo);
+    if (section === "brand") { const team = (parsed.data as Brand).team; if (team.enabled) await assertProjectImages(supabase, ctx.organization.id, projectId, team.members.flatMap(member => member.imageAssetIds)); }
     // The domain step's `domainId` names a `domains` row that only the server
     // creates (startOnboardingDomain). The client echoes it back on autosave,
     // so it must be the row already on the brief or one this organization
@@ -137,6 +143,17 @@ export async function markStep(projectId: string, step: StepKey, completed = fal
 
 export type UploadedAsset = { path: string; name: string; type: string; size: number; caption?: string | null; checksum?: string | null };
 
+/** Refresh the same private project library used by the Files page. */
+export async function getOnboardingAssets(projectId: string): Promise<ActionResult<SignedAsset[]>> {
+  try {
+    const ctx = await requireOrgContextOrThrow();
+    await loadProject(ctx, projectId);
+    return { ok: true, data: await getProjectAssets(projectId) };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
 /**
  * Record files the browser uploaded straight to the project-assets bucket
  * from the wizard. Same path as the Files page: the organization's limits
@@ -152,6 +169,8 @@ export async function recordProjectAssets(projectId: string, kind: AssetKind, up
     const rejected = uploaded.filter((f) => bad.has(f.name) || bad.has("*")).map((f) => f.name);
     const limits = fileLimitsFor(await resolveEntitlements(ctx.organization.id));
     const result = await recordUploadedFiles(supabase, ctx, project, accepted, limits, kind);
+    revalidatePath("/dashboard/files");
+    revalidatePath(`/admin/organizations/${ctx.organization.id}`);
     revalidatePath("/dashboard/onboarding");
     return { ok: true, data: { recorded: result.recorded, failed: [...rejected, ...result.failed] } };
   } catch (error) {
@@ -175,9 +194,18 @@ export async function removeProjectAsset(assetId: string): Promise<ActionResult<
   try {
     const ctx = await requireOrgContextOrThrow();
     const supabase = await createClient();
-    const { data: asset, error } = await supabase.from("project_assets").select("id, object_path, organization_id, bucket_id").eq("id", assetId).maybeSingle();
+    const { data: asset, error } = await supabase.from("project_assets").select("id, object_path, organization_id, project_id, bucket_id").eq("id", assetId).maybeSingle();
     if (error) throw error;
     if (!asset || asset.organization_id !== ctx.organization.id) throw new NotFoundError("File not found.");
+    const { data: project, error: projectError } = await supabase.from("projects").select("brief").eq("id", asset.project_id).eq("organization_id", ctx.organization.id).maybeSingle();
+    if (projectError) throw projectError;
+    const linkedBrief = parseBrief(project?.brief);
+    if (linkedBrief.offerings?.sections.some(section => section.items.some(item => item.imageAssetIds.includes(asset.id))) || linkedBrief.brand?.team.enabled && linkedBrief.brand.team.members.some(member => member.imageAssetIds.includes(asset.id))) {
+      const { data: registered, error: mediaError } = await supabase.from("website_content_media").select("id").eq("id", asset.id).eq("organization_id", ctx.organization.id).maybeSingle();
+      if (mediaError) throw mediaError;
+      if (!registered) throw new ValidationError("This image is linked to an onboarding item or team member. Unlink it from that item before deleting it from Files.");
+      // Once imported, Content Hub's draft/published references own deletion protection.
+    }
     let blogPath: string | null = null;
     if (asset.bucket_id === BLOG_IMAGE_BUCKET) {
       await assertOrgRole(ctx, ["owner", "manager"]);
@@ -187,7 +215,7 @@ export async function removeProjectAsset(assetId: string): Promise<ActionResult<
       blogPath = image?.object_path ?? null;
     }
     const { error: delError } = await supabase.from("project_assets").delete().eq("id", assetId);
-    if (delError?.code === "23503") throw new ValidationError("Remove this image from its Blog posts and save them before deleting the file.");
+    if (delError?.code === "23503") throw new ValidationError(asset.bucket_id === BLOG_IMAGE_BUCKET ? "Remove this image from its Blog posts and save them before deleting the file." : "Remove this file from its Content Hub entries and save them before deleting it.");
     if (delError) throw delError;
     if (blogPath) {
       const { error: cleanupError } = await createAdminClient().storage.from(BLOG_IMAGE_BUCKET).remove([blogPath]);
@@ -379,6 +407,12 @@ export async function submitIntake(projectId: string): Promise<ActionResult<{ co
     if (project.intake_completed_at) return { ok: true, data: { completedAt: project.intake_completed_at } };
     if (!brief.basics?.businessName) throw new ValidationError("Tell me the business name before sending.");
 
+    if (brief.offerings) await assertOfferingImages(supabase, ctx.organization.id, projectId, brief.offerings);
+    if (brief.brand) await assertLogoChoice(supabase, ctx.organization.id, projectId, brief.brand.logo);
+    if (brief.brand?.team.enabled) {
+      if (!brief.brand.team.members.length || brief.brand.team.members.some(member => !member.name.trim())) throw new ValidationError("Add a name for each team member, or turn off Showcase my team.");
+      await assertProjectImages(supabase, ctx.organization.id, projectId, brief.brand.team.members.flatMap(member => member.imageAssetIds));
+    }
     const completedAt = new Date().toISOString();
     const finished = withProgress(brief, "review", true);
     const { error } = await supabase.from("projects").update({ brief: finished as unknown as Json, intake_completed_at: completedAt }).eq("id", projectId);

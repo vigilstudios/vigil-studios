@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAX_PHOTOS } from "./assets";
 
 /**
  * The customer's brief: everything the guided onboarding collects, stored
@@ -42,11 +43,12 @@ export const basicsSchema = z.object({
     country: optionalText(80),
   }).default({ line1: "", line2: "", city: "", region: "", postal: "", country: "" }),
   hours: z.object({
+    notApplicable: z.boolean().default(false),
     sameEveryDay: z.boolean().default(false),
     byAppointment: z.boolean().default(false),
     days: z.array(hoursDaySchema).default(() => DAYS.map((day) => ({ day, closed: false, open: "", close: "" }))),
     notes: optionalText(300),
-  }).default({ sameEveryDay: false, byAppointment: false, days: DAYS.map((day) => ({ day, closed: false, open: "", close: "" })), notes: "" }),
+  }).default({ notApplicable: false, sameEveryDay: false, byAppointment: false, days: DAYS.map((day) => ({ day, closed: false, open: "", close: "" })), notes: "" }),
 });
 
 export const kickoffSchema = z.object({
@@ -81,6 +83,7 @@ export const offeringItemSchema = z.object({
   name: trimmed(120),
   description: optionalText(400),
   price: optionalText(40),
+  imageAssetIds: z.array(z.string().uuid()).max(MAX_PHOTOS).refine(ids => new Set(ids).size === ids.length, "Choose each image only once per item.").default([]),
 });
 
 export const offeringSectionSchema = z.object({
@@ -94,7 +97,7 @@ export const offeringsSchema = z.object({
   noun: z.enum(["services", "menu", "products", "other"]).default("services"),
   sections: z.array(offeringSectionSchema).max(20).default([]),
   notes: optionalText(600),
-});
+}).refine(value => value.sections.reduce((count, section) => count + section.items.length, 0) <= 500, "Use up to 500 items across your sections.");
 
 export const aboutSchema = z.object({
   story: optionalText(2000),
@@ -103,6 +106,21 @@ export const aboutSchema = z.object({
 });
 
 export const brandSchema = z.object({
+  logo: z.object({
+    // Legacy briefs resolve from their existing uploaded logo, if present.
+    mode: z.enum(["upload", "wordmark", "vigil"]).nullable().default(null),
+    wordmark: optionalText(160),
+  }).default({ mode: null, wordmark: "" }),
+  team: z.object({
+    enabled: z.boolean().default(false),
+    members: z.array(z.object({
+      id: z.string().uuid(),
+      name: optionalText(160),
+      role: optionalText(160),
+      bio: optionalText(2000),
+      imageAssetIds: z.array(z.string().uuid()).max(1).default([]),
+    })).max(50).refine(members => new Set(members.map(member => member.id)).size === members.length, "Each team member needs a unique identity.").default([]),
+  }).default({ enabled: false, members: [] }),
   colours: z.object({
     mode: z.enum(["logo", "pick", "vigil"]).default("logo"),
     primary: z.string().regex(/^#[0-9a-fA-F]{6}$/).or(z.literal("")).default(""),
@@ -172,6 +190,12 @@ export type Strategy = z.infer<typeof strategySchema>;
 export type Offerings = z.infer<typeof offeringsSchema>;
 export type About = z.infer<typeof aboutSchema>;
 export type Brand = z.infer<typeof brandSchema>;
+/** Partial drafts are allowed; completing the selected logo direction is not. */
+export function logoCompletionIssue(logo: Brand["logo"] | undefined, hasLogo: boolean): string | null {
+  if (logo?.mode === "upload" && !hasLogo) return "Upload your logo before continuing, or choose another logo option.";
+  if (logo?.mode === "wordmark" && !logo.wordmark.trim()) return "Enter your wordmark text, or choose Let Vigil propose one.";
+  return null;
+}
 export type DomainAnswers = z.infer<typeof domainSchema>;
 
 /** Steps that persist a section; `welcome` and `review` do not. */
@@ -217,7 +241,7 @@ export function briefCompletion(brief: Brief, kind: ProjectKind = "express"): { 
     { key: "strategy", label: "Site goals and scope", done: brief.progress.completed.includes("strategy") },
     { key: "offerings", label: "What you offer", done: (brief.offerings?.sections ?? []).some((s) => s.items.length > 0) || Boolean(brief.offerings?.notes) },
     { key: "about", label: "About you", done: Boolean(brief.about?.story || brief.about?.hero) },
-    { key: "brand", label: "Brand and photos", done: brief.progress.completed.includes("brand") },
+    { key: "brand", label: "Brand, photos, and team", done: brief.progress.completed.includes("brand") },
     { key: "domain", label: "Domain", done: brief.domain?.answer != null && (brief.domain.answer !== "own" || Boolean(brief.domain.hostname) || brief.domain.later) },
   ];
   return kind === "express" ? items.filter((item) => item.key !== "kickoff" && item.key !== "strategy") : items;

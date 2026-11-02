@@ -1,3 +1,4 @@
+import { teamSection } from "./team-section";
 import { creatorSections } from "./creator-sections";
 import { endingSections } from "./ending-sections";
 import { importSections } from "./import-sections";
@@ -111,6 +112,7 @@ export const designComponents = [
   ...commerceSections,
   ...evidenceSections,
   ...importSections,
+  teamSection,
   ...creatorSections,
   ...endingSections,
 ] as const satisfies readonly DesignComponentDefinition[];

@@ -198,7 +198,21 @@ export function adaptSectionExample(
     return adaptCreatorSection(section, creator);
   }
   let data: SectionInstance;
-  if (endingSectionIds.includes(id as EndingSectionId))
+  if (section.component === "about.team") {
+    const context = clientExample(adaptation);
+    data = parseSection({
+      ...section,
+      content: {
+        ...section.content,
+        title: `The ${context.brand} team`,
+        introduction: context.note,
+        members: section.content.members.map(member => ({
+          ...member,
+          bio: `${member.name} brings their experience to ${context.brand}. Replace this example with a personal introduction.`,
+        })),
+      },
+    });
+  } else if (endingSectionIds.includes(id as EndingSectionId))
     data = makeEndingSection(id as EndingSectionId,section.id,{adaptation,contentLength:length});
   else if ((importSectionIds as readonly string[]).includes(id))
     data = makeImportSection(id as ImportSectionId,section.id,{adaptation,contentLength:length});

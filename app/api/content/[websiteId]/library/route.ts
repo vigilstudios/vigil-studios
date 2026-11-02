@@ -12,10 +12,10 @@ async function context(request:Request,website:string){
  const ctx=await requireOrgContextOrThrow();await assertOrgRole(ctx,['owner','manager']);
  const client=await createClient(),id=z.string().uuid().parse(new URL(request.url).searchParams.get('collection'));
  const c=await authorizeCollection(client,ctx.organization.id,id);
- if(c.website_id!==website||!['portfolio','gallery','testimonials','products','services'].includes(c.module))throw new ForbiddenError();
+ if(c.website_id!==website||!['portfolio','gallery','testimonials','products','services','team'].includes(c.module))throw new ForbiddenError();
  const {data:site,error}=await client.from('websites').select('project_id').eq('id',website).eq('organization_id',ctx.organization.id).single();
  if(error||!site.project_id)throw new ForbiddenError();
- return {ctx,client,collection:id,project:site.project_id,admin:createAdminClient()};
+ return {ctx,client,collection:id,team:c.module==='team',project:site.project_id,admin:createAdminClient()};
 }
 function failure(error:unknown){return Response.json({error:isVigilError(error)?error.message:'Your Files library could not load. Try again.'},{status:isVigilError(error)?error.status:503,headers});}
 export async function GET(request:Request,{params}:{params:Promise<{websiteId:string}>}){
@@ -29,11 +29,11 @@ export async function GET(request:Request,{params}:{params:Promise<{websiteId:st
 }
 export async function POST(request:Request,{params}:{params:Promise<{websiteId:string}>}){
  try{if(!request.headers.get('origin')||!isSameOriginRequest(request))throw new ForbiddenError();
-  const {websiteId}=await params,{ctx,client,collection,project,admin}=await context(request,websiteId);
+  const {websiteId}=await params,{ctx,client,collection,project,admin,team}=await context(request,websiteId);
   if(Number(request.headers.get('content-length'))>1024)throw new ValidationError('Choose a file from your library.');
   const {id}=z.object({id:z.string().uuid()}).strict().parse(await request.json());
   const {data:a,error}=await admin.from('project_assets').select('id,bucket_id,object_path,content_type,size_bytes,caption').eq('id',id).eq('organization_id',ctx.organization.id).eq('project_id',project).in('bucket_id',['project-assets','content-media']).single();
-  if(error||!a||!libraryMediaType(a.content_type)||!a.object_path.startsWith(`${ctx.organization.id}/${project}/`))throw new ForbiddenError('This file is unavailable for this website.');
+  if(error||!a||team&&libraryMediaType(a.content_type)!=='image'||!libraryMediaType(a.content_type)||!a.object_path.startsWith(`${ctx.organization.id}/${project}/`))throw new ForbiddenError('This file is unavailable for this website.');
   const {data:info,error:infoError}=await admin.storage.from(a.bucket_id).info(a.object_path);if(infoError||!info||Number(info.size)!==a.size_bytes||info.contentType!==a.content_type)throw new ValidationError('This file is still uploading or unavailable. Try again when it finishes.');
   if(a.bucket_id==='project-assets'){const {error}=await client.rpc('attach_content_library_media',{p_collection:collection,p_asset:id});if(error)throw new ValidationError('This file is unavailable or its upload is incomplete.');}
   else{const {data:m,error}=await admin.from('website_content_media').select('id').eq('id',id).eq('website_id',websiteId).eq('organization_id',ctx.organization.id).eq('ready',true).maybeSingle();if(error||!m)throw new ForbiddenError();}

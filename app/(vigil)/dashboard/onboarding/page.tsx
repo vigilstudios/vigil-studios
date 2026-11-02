@@ -58,6 +58,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
 
   return (
     <OnboardingWizard
+      key={project.id}
       projectId={project.id}
       websiteId={(domainHandoffEnabled() || liveDomainEnabled) ? website?.id ?? null : null}
       liveDomainEnabled={liveDomainEnabled}

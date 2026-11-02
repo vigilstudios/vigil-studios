@@ -1,4 +1,5 @@
 "use client";
+import { hubOwnsProductPath } from "../../content/products";
 import { useState } from "react";
 import { ContentTextField } from "./ContentFields";
 import { creatorImagePackages, creatorImageRoles, creatorImage, creatorRoleLabels } from "../creator-image-packages";
@@ -13,7 +14,7 @@ export function MediaControls({
   onChange: (patch: Record<string, unknown>) => void;
 }) {
   const [error, setError] = useState("");
-  const fields = editableMedia(section);
+  const fields = editableMedia(section).filter(field => !hubOwnsProductPath(section,field.path));
   if (!fields.length) return null;
   return (
     <details className="composition-media-controls">

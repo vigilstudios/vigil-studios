@@ -1,3 +1,4 @@
+import { teamContracts } from "./team-contract";
 import { creatorContracts } from "./creator-contracts";
 import { endingContracts } from "./ending-contracts";
 import { importContracts } from "./import-contracts";
@@ -28,6 +29,7 @@ const body = { ...base, usage: "section-oriented", contentConstraints: "See exec
 } as const;
 /** Standard serializable contracts shared by registry, validator, renderer and controls. */
 const authoredSectionContracts = {
+  ...teamContracts,
   ...creatorContracts,
   ...endingContracts,
   ...importContracts,
