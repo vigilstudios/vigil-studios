@@ -1,0 +1,56 @@
+{
+  "date": "2026-11-02",
+  "base": "08c51a8867a52cff8c4121c4ee24d86a38db23a0",
+  "node": "24.19.0",
+  "productionActivation": false,
+  "checks": {
+    "typecheck": "passed",
+    "eslint": "passed; final changed modules rechecked",
+    "fullSuite": {
+      "passed": 3270,
+      "skipped": 1,
+      "filesPassed": 191,
+      "filesSkipped": 1,
+      "workers": 2
+    },
+    "finalTrafficAndEvidenceChecks": {
+      "passed": 72,
+      "files": 5
+    },
+    "database": "all migrations and all RLS suites passed in a fresh disposable local PostgreSQL database; no production migration",
+    "productionBuild": "passed after final application edits",
+    "browser": {
+      "desktop": 1440,
+      "mobile": 390,
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "states": [
+        "current",
+        "empty",
+        "stale",
+        "paused"
+      ],
+      "horizontalOverflow": false,
+      "auditDisclosure": "expanded and visible"
+    },
+    "readOnlyHttpsAdapter": {
+      "target": "https://www.vigilstudios.co",
+      "status": 200,
+      "observedHeaderNames": [
+        "strict-transport-security",
+        "x-content-type-options",
+        "content-security-policy",
+        "referrer-policy"
+      ],
+      "evidenceStored": false
+    }
+  },
+  "limits": [
+    "Provider-mocked unit tests do not establish live account authorization.",
+    "No full private-provider success acceptance or client traffic instrumentation was activated.",
+    "One existing integration suite remains opt-in/skipped.",
+    "Initial concurrent checks caused two pre-existing five-second render-test timeouts; complete suite rerun passed with two workers."
+  ]
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type SVGProps } from "react";
+import Link from "next/link";
 import {
   Activity,
   BrickWall,
@@ -80,8 +81,16 @@ export function SecurityPanel({ data }: { data: OverviewData }) {
           <Shield size={30} strokeWidth={1.4} aria-hidden="true" />
         </div>
         <div>
-          <h3>{title}</h3>
-          <p>{detail}</p>
+          <h3>
+            {state === "pending" && current && report?.coverage === "partial"
+              ? "Limited coverage"
+              : title}
+          </h3>
+          <p>
+            {report?.coverage === "partial"
+              ? "Connected checks cover part of your website security"
+              : detail}
+          </p>
         </div>
       </div>
       <div
@@ -132,7 +141,11 @@ export function SecurityPanel({ data }: { data: OverviewData }) {
                 }
               >
                 <Icon size={14} aria-hidden="true" />
-                <span>{label}</span>
+                <span>
+                  {key === "vulnerabilities" && report?.dependencyOnly
+                    ? "Dependency alerts"
+                    : label}
+                </span>
                 <strong>{text}</strong>
               </li>
             );
@@ -185,6 +198,19 @@ export function SecurityPanel({ data }: { data: OverviewData }) {
           <span>Vulnerabilities · activity · firewall</span>
         )}
       </div>
+      {report?.baseline?.length ? (
+        <p className="ov-data-note">
+          {report.baseline.filter((check) => check.status === "passed").length}{" "}
+          of {report.baseline.length} HTTPS and response-header checks passed.
+          These do not establish firewall or exploit monitoring.
+        </p>
+      ) : null}
+      <Link
+        className="ov-text-link"
+        href={`/dashboard/analytics?website=${data.site.id}`}
+      >
+        View checks and sources
+      </Link>
     </div>
   );
 }
@@ -234,7 +260,7 @@ export function SiteQualityPanel({ data }: { data: OverviewData }) {
         {report ? (
           <>
             <span>
-              {report.device === "mobile" ? "Mobile" : "Desktop"} audit
+              {report.device === "mobile" ? "Mobile" : "Desktop"} lab audit
             </span>
             <span title={report.measuredAt}>
               {formatRelative(report.measuredAt)}
@@ -247,6 +273,18 @@ export function SiteQualityPanel({ data }: { data: OverviewData }) {
           </>
         )}
       </p>
+      {report?.expiresAt &&
+      Date.parse(report.expiresAt) < Date.parse(data.asOf) ? (
+        <p className="ov-data-note">
+          Audit update overdue. These are the last recorded results.
+        </p>
+      ) : null}
+      <Link
+        className="ov-text-link"
+        href={`/dashboard/analytics?website=${data.site.id}`}
+      >
+        View SEO and speed details
+      </Link>
     </div>
   );
 }

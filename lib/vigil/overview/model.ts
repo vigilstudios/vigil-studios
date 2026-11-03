@@ -1,5 +1,6 @@
 import type { Deployment, Domain, Lead, Website } from "@/lib/vigil/types";
 import type { SecurityReport, SiteQualityReport } from "./monitoring";
+import type { WebsiteMeasurements } from "@/lib/vigil/measurements/contract";
 
 export const DAY = 86_400_000;
 export const RANGES = [7, 30, 90] as const;
@@ -238,6 +239,7 @@ export type OverviewData = {
   previewAccent?: string | null;
   security: SecurityReport | null;
   quality: SiteQualityReport | null;
+  measurements?: WebsiteMeasurements;
   organizationName: string;
   userName: string | null;
   site: Pick<

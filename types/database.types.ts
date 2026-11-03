@@ -1447,6 +1447,7 @@ export type Database = {
           actor_user_id: string | null
           body: string
           created_at: string
+          details: Json
           id: string
           kind: string
           lead_id: string
@@ -1456,6 +1457,7 @@ export type Database = {
           actor_user_id?: string | null
           body: string
           created_at?: string
+          details?: Json
           id?: string
           kind: string
           lead_id: string
@@ -1465,6 +1467,7 @@ export type Database = {
           actor_user_id?: string | null
           body?: string
           created_at?: string
+          details?: Json
           id?: string
           kind?: string
           lead_id?: string
@@ -3396,6 +3399,160 @@ export type Database = {
           },
         ]
       }
+      measurement_runner_health: {
+        Row: {
+          finished_at: string | null
+          runner: string
+          started_at: string
+          status: string
+        }
+        Insert: {
+          finished_at?: string | null
+          runner: string
+          started_at: string
+          status: string
+        }
+        Update: {
+          finished_at?: string | null
+          runner?: string
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      website_measurement_connections: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          kind: string
+          last_attempt_at: string | null
+          last_error_code: string | null
+          last_success_at: string | null
+          lease_expires_at: string | null
+          lease_token: string | null
+          next_run_at: string
+          organization_id: string
+          revision: number
+          updated_at: string
+          website_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          kind: string
+          last_attempt_at?: string | null
+          last_error_code?: string | null
+          last_success_at?: string | null
+          lease_expires_at?: string | null
+          lease_token?: string | null
+          next_run_at?: string
+          organization_id: string
+          revision?: number
+          updated_at?: string
+          website_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          kind?: string
+          last_attempt_at?: string | null
+          last_error_code?: string | null
+          last_success_at?: string | null
+          lease_expires_at?: string | null
+          lease_token?: string | null
+          next_run_at?: string
+          organization_id?: string
+          revision?: number
+          updated_at?: string
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_measurement_connections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_measurement_connections_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      website_measurement_snapshots: {
+        Row: {
+          connection_id: string
+          connection_revision: number
+          coverage: string
+          created_at: string
+          expires_at: string
+          id: string
+          observed_at: string
+          organization_id: string
+          payload: Json
+          schema_version: number
+          target_origin: string
+          website_id: string
+        }
+        Insert: {
+          connection_id: string
+          connection_revision: number
+          coverage: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          observed_at: string
+          organization_id: string
+          payload: Json
+          schema_version?: number
+          target_origin: string
+          website_id: string
+        }
+        Update: {
+          connection_id?: string
+          connection_revision?: number
+          coverage?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          observed_at?: string
+          organization_id?: string
+          payload?: Json
+          schema_version?: number
+          target_origin?: string
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_measurement_snapshots_connection_id_organization_i_fkey"
+            columns: ["connection_id", "organization_id", "website_id"]
+            isOneToOne: false
+            referencedRelation: "website_measurement_connections"
+            referencedColumns: ["id", "organization_id", "website_id"]
+          },
+          {
+            foreignKeyName: "website_measurement_snapshots_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_measurement_snapshots_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       website_contact_settings: {
         Row: {
           allowed_origins: string[]
@@ -3874,6 +4031,58 @@ export type Database = {
       accept_pending_invites: { Args: never; Returns: number }
       acknowledge_lead_notification: {
         Args: { p_lead: string; p_org: string; p_provider: string }
+        Returns: undefined
+      }
+      claim_website_measurement: {
+        Args: { p_connection?: string }
+        Returns: {
+          created_at: string
+          enabled: boolean
+          id: string
+          kind: string
+          last_attempt_at: string | null
+          last_error_code: string | null
+          last_success_at: string | null
+          lease_expires_at: string | null
+          lease_token: string | null
+          next_run_at: string
+          organization_id: string
+          revision: number
+          updated_at: string
+          website_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "website_measurement_connections"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      configure_website_measurement: {
+        Args: {
+          p_enabled: boolean
+          p_kind: string
+          p_search_property?: string
+          p_website: string
+        }
+        Returns: string
+      }
+      finish_website_measurement: {
+        Args: {
+          p_connection: string
+          p_coverage?: string
+          p_error?: string
+          p_lease: string
+          p_observed?: string
+          p_origin: string
+          p_payload?: Json
+          p_revision: number
+        }
+        Returns: boolean
+      }
+      prune_website_measurements: { Args: never; Returns: undefined }
+      refresh_website_measurement: {
+        Args: { p_connection: string }
         Returns: undefined
       }
       add_lead_note: {

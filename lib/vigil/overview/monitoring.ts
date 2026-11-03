@@ -8,6 +8,14 @@ export type SecurityCheckKey = (typeof SECURITY_CHECKS)[number]["key"];
 export type SecurityReport = {
   observedAt: string;
   expiresAt: string;
+  coverage?: "partial" | "complete";
+  dependencyOnly?: boolean;
+  baseline?: {
+    id: string;
+    title: string;
+    status: "passed" | "attention" | "unknown";
+    detail: string;
+  }[];
   checks: Record<SecurityCheckKey, "clear" | "alert" | "unknown">;
   /** Unresolved alerts only. Expired checks must never hide an active alert. */
   alerts: {
@@ -52,6 +60,8 @@ export type SiteQualityReport = {
   performance: number | null;
   /** Largest Contentful Paint, in milliseconds; never presented as an invented score. */
   lcpMs: number | null;
+  expiresAt?: string;
+  source?: "lab";
 };
 export function auditScore(value: number | null | undefined): number | null {
   return typeof value === "number" &&

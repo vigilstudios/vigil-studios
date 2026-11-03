@@ -1,9 +1,9 @@
-import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 import { runDueJobs } from "@/lib/vigil/jobs";
 import { reconcileContactSetup } from "@/lib/vigil/contact/provision";
 import { reconcileOrders } from "@/lib/vigil/services/reconcile";
+import { authorizedJobRequest } from "@/lib/vigil/auth/jobs";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -15,18 +15,7 @@ export const maxDuration = 300;
  */
 function authorized(request: NextRequest): boolean {
   // Vercel Cron sends CRON_SECRET; staff tooling sends VIGIL_JOBS_SECRET. Either opens the door.
-  const secrets = [
-    process.env.VIGIL_JOBS_SECRET,
-    process.env.CRON_SECRET,
-  ].filter((s): s is string => Boolean(s));
-  if (secrets.length === 0) return false;
-  const actual = Buffer.from(request.headers.get("authorization") ?? "");
-  return secrets.some((secret) => {
-    const expected = Buffer.from(`Bearer ${secret}`);
-    return (
-      expected.length === actual.length && timingSafeEqual(expected, actual)
-    );
-  });
+  return authorizedJobRequest(request);
 }
 
 async function handle(request: NextRequest) {
@@ -45,9 +34,14 @@ async function handle(request: NextRequest) {
     Math.max(1, Number(request.nextUrl.searchParams.get("limit") ?? 10) || 10),
   );
   const worker = `runner:${process.env.VERCEL_REGION ?? "local"}:${Date.now().toString(36)}`;
+  const heartbeatStartedAt = new Date().toISOString();
 
   try {
     const admin = createAdminClient();
+    if (process.env.VIGIL_MEASUREMENTS_ENABLED === "true") {
+      const { error } = await admin.from("measurement_runner_health").upsert({runner:"jobs",started_at:heartbeatStartedAt,finished_at:null,status:"running"});
+      if (error) console.error("Job heartbeat could not be recorded.");
+    }
     await reconcileContactSetup(admin).catch(() => console.error("Contact setup reconciliation could not run; queued jobs will continue."));
     // Disabling DNS admission must not extend the lifetime of saved credentials.
     await admin.rpc("expire_external_dns_tokens").then(result=>{if(result.error)console.error("Expired DNS token cleanup needs retry.");});
@@ -88,6 +82,10 @@ async function handle(request: NextRequest) {
     const domainRecords = process.env.VIGIL_DOMAIN_ENGINE_ENABLED === "true"
       ? await admin.rpc("domain_record_review_queue", { p_limit: 100 }).then(r => r.error ? { error: "domain_records_review_failed" } : { reviewDue: Array.isArray(r.data) ? r.data.length : 0 })
       : null;
+    if (process.env.VIGIL_MEASUREMENTS_ENABLED === "true") {
+      const { error } = await admin.from("measurement_runner_health").update({finished_at:new Date().toISOString(),status:outcomes.some(row=>row.status==="failed")?"error":"ok"}).eq("runner","jobs").eq("started_at",heartbeatStartedAt);
+      if (error) console.error("Job heartbeat completion could not be recorded.");
+    }
     return NextResponse.json({
       domainRecords,
       domainTax,
