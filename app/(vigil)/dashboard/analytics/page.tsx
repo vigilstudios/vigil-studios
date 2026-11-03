@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { getWebsiteMeasurements } from "@/lib/vigil/queries/measurements";
-import { WebsiteMeasurementsView } from "@/components/vigil/WebsiteMeasurements";
+import { WebsiteReport } from "@/components/vigil/WebsiteReport";
+import {
+  measurementRange,
+  measurementReport,
+  measurementReports,
+} from "@/lib/vigil/measurements/navigation";
 import { PageHeader } from "@/components/vigil/ui";
-export const metadata: Metadata = { title: "Website analytics" };
+export const metadata: Metadata = { title: "Overview report" };
 export default async function WebsiteAnalyticsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ website?: string }>;
+  searchParams: Promise<{ website?: string; range?: string; report?: string }>;
 }) {
   const ctx = await requireOrgContext("/dashboard/analytics"),
     client = await createClient();
@@ -20,7 +24,11 @@ export default async function WebsiteAnalyticsPage({
     .eq("organization_id", ctx.organization.id)
     .order("created_at");
   if (error) throw error;
-  const selected = (await searchParams).website,
+  const query = await searchParams;
+  const range = measurementRange(query.range),
+    report = measurementReport(query.report);
+  const selected =
+      typeof query.website === "string" ? query.website : undefined,
     site = selected
       ? sites?.find((row) => row.id === selected)
       : (sites?.find((row) => row.status === "live") ?? sites?.[0]);
@@ -28,7 +36,7 @@ export default async function WebsiteAnalyticsPage({
   if (!site)
     return (
       <PageHeader
-        title="Website analytics"
+        title={measurementReports[report].title}
         description="Reports will become available when your website is ready."
       />
     );
@@ -38,40 +46,12 @@ export default async function WebsiteAnalyticsPage({
     site.id,
   );
   return (
-    <div>
-      <PageHeader
-        eyebrow={site.name}
-        title="Website analytics"
-        description="Traffic, search visibility, speed and security checks, with the evidence behind each result."
-        actions={
-          <Link
-            href={`/dashboard?website=${site.id}`}
-            className="btn-secondary text-sm"
-          >
-            Back to overview
-          </Link>
-        }
-      />
-      {(sites?.length ?? 0) > 1 ? (
-        <form method="get" className="vm-site-picker">
-          <label htmlFor="measurement-website">Website</label>
-          <select
-            id="measurement-website"
-            name="website"
-            defaultValue={site.id}
-          >
-            {sites?.map((row) => (
-              <option value={row.id} key={row.id}>
-                {row.name}
-              </option>
-            ))}
-          </select>
-          <button className="btn-secondary text-sm" type="submit">
-            View reports
-          </button>
-        </form>
-      ) : null}
-      <WebsiteMeasurementsView data={measurements} />
-    </div>
+    <WebsiteReport
+      site={site}
+      sites={sites ?? []}
+      data={measurements}
+      report={report}
+      range={range}
+    />
   );
 }

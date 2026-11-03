@@ -23,6 +23,7 @@ import {
 import { DashboardSiteFrame } from "@/components/vigil/DashboardSiteFrame";
 import { DownloadSiteButton } from "@/components/vigil/DownloadSiteButton";
 import { formatDate, formatRelative } from "@/lib/vigil/format";
+import { measurementReportHref } from "@/lib/vigil/measurements/navigation";
 import { measurementStateLabels } from "@/lib/vigil/measurements/contract";
 import { contactInitials, sourceLabel } from "@/lib/vigil/leads/presentation";
 import {
@@ -430,9 +431,10 @@ export function TrafficPanel({
       ) : null}
       <Link
         className="ov-text-link"
-        href={`/dashboard/analytics?website=${data.site.id}`}
+        href={measurementReportHref(data.site.id, range, "traffic")}
+        aria-label="View traffic report"
       >
-        View traffic sources and freshness
+        View report
         <ArrowUpRight size={13} />
       </Link>
     </>

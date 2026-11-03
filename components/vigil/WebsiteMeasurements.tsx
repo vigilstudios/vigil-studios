@@ -19,6 +19,13 @@ import {
   type WebsiteMeasurements,
 } from "@/lib/vigil/measurements/contract";
 import { formatDateTime } from "@/lib/vigil/format";
+import type { ReportRange } from "@/lib/vigil/overview/model";
+import {
+  measurementReports,
+  type MeasurementReport,
+} from "@/lib/vigil/measurements/navigation";
+import { TrendChart } from "./overview/OverviewCharts";
+import "./overview/overview.css";
 import "./website-measurements.css";
 
 const icons = {
@@ -58,7 +65,7 @@ function Ranking({
       <h4>{title}</h4>
       {items.length ? (
         <ol>
-          {items.slice(0, 5).map((item, index) => (
+          {items.slice(0, 20).map((item, index) => (
             <li key={`${item.label}:${index}`}>
               <span>{item.label}</span>
               <strong>{item.value.toLocaleString()}</strong>
@@ -71,24 +78,50 @@ function Ranking({
     </div>
   );
 }
-function Evidence({ payload }: { payload: MeasurementPayload }) {
+function Evidence({
+  payload,
+  range,
+}: {
+  payload: MeasurementPayload;
+  range: ReportRange;
+}) {
   switch (payload.kind) {
     case "traffic": {
-      const report = payload.ranges["30"];
+      const report = payload.ranges[`${range}`];
       return (
         <>
           <Facts
             items={[
               {
-                label: "Recorded visitors · 30 days",
+                label: `Recorded visitors · ${range} days`,
                 value: value(report.visitors),
               },
-              { label: "Page views · 30 days", value: value(report.pageViews) },
+              {
+                label: `Page views · ${range} days`,
+                value: value(report.pageViews),
+              },
             ]}
           />
           <p className="vm-context">
             {report.periodStart.slice(0, 10)} to {report.periodEnd.slice(0, 10)}{" "}
             · UTC. Provider-reported visitors; visitor identities reset daily.
+          </p>
+          {report.series.length ? (
+            <div className="vm-trend ov-dashboard">
+              <TrendChart
+                points={report.series}
+                view="area"
+                label="Daily visitors"
+              />
+            </div>
+          ) : (
+            <p className="vm-context">
+              No daily traffic rows were returned for this period.
+            </p>
+          )}
+          <p className="vm-context">
+            Only returned dates appear in the trend. Unreported days are not
+            assumed to have zero visitors.
           </p>
           <Ranking title="Top pages · page views" items={report.pages} />
           <Ranking title="Referrers · visitors" items={report.sources} />
@@ -133,7 +166,10 @@ function Evidence({ payload }: { payload: MeasurementPayload }) {
           </p>
           {payload.issues.length ? (
             <details className="vm-details">
-              <summary>{payload.issues.length} recorded opportunities</summary>
+              <summary>
+                {payload.issues.length} recorded{" "}
+                {payload.issues.length === 1 ? "opportunity" : "opportunities"}
+              </summary>
               <ul>
                 {payload.issues.map((issue) => (
                   <li key={issue.id}>{issue.title}</li>
@@ -275,9 +311,11 @@ function Evidence({ payload }: { payload: MeasurementPayload }) {
 function MeasurementCard({
   kind,
   connection,
+  range,
 }: {
   kind: MeasurementKind;
   connection?: MeasurementConnectionView;
+  range: ReportRange;
 }) {
   const Icon = icons[kind],
     state = connection?.state ?? "not_connected",
@@ -309,7 +347,7 @@ function MeasurementCard({
         </p>
       ) : null}
       {payload ? (
-        <Evidence payload={payload} />
+        <Evidence payload={payload} range={range} />
       ) : (
         <p className="vm-empty">
           {connection?.enabled
@@ -332,9 +370,16 @@ function MeasurementCard({
 }
 export function WebsiteMeasurementsView({
   data,
+  report,
+  range = 30,
 }: {
   data: WebsiteMeasurements;
+  report?: MeasurementReport;
+  range?: ReportRange;
 }) {
+  const kinds: readonly MeasurementKind[] = report
+    ? measurementReports[report].kinds
+    : measurementKinds;
   return (
     <div className="vm-workspace">
       {!data.available ? (
@@ -348,11 +393,12 @@ export function WebsiteMeasurementsView({
           available with their original dates.
         </p>
       ) : null}
-      <div className="vm-grid">
-        {measurementKinds.map((kind) => (
+      <div className="vm-grid" data-report={report}>
+        {kinds.map((kind) => (
           <MeasurementCard
             key={kind}
             kind={kind}
+            range={range}
             connection={data.connections.find((c) => c.kind === kind)}
           />
         ))}

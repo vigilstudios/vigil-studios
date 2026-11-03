@@ -322,9 +322,9 @@ function titleFromPath(pathname: string): string {
 }
 
 function isActive(item: NavItem, pathname: string): boolean {
-  return item.exact
+  return Boolean(item.activePaths?.includes(pathname)) || (item.exact
     ? pathname === item.href
-    : pathname === item.href || pathname.startsWith(`${item.href}/`);
+    : pathname === item.href || pathname.startsWith(`${item.href}/`));
 }
 
 function findActive(groups: NavGroup[], pathname: string): NavItem | undefined {

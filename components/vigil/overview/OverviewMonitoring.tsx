@@ -19,6 +19,8 @@ import {
   securityState,
   speedSeconds,
 } from "@/lib/vigil/overview/monitoring";
+import { measurementReportHref } from "@/lib/vigil/measurements/navigation";
+import type { ReportRange } from "@/lib/vigil/overview/model";
 import type { OverviewData } from "@/lib/vigil/overview/model";
 
 /** The watchful, angular eye used for Vigil's monitoring identity. */
@@ -51,7 +53,13 @@ const monitorIcons = {
   activity: Activity,
   firewall: BrickWall,
 };
-export function SecurityPanel({ data }: { data: OverviewData }) {
+export function SecurityPanel({
+  data,
+  range = 30,
+}: {
+  data: OverviewData;
+  range?: ReportRange;
+}) {
   const [tab, setTab] = useState<"overview" | "alerts">("overview");
   const report = data.security,
     state = securityState(report, data.asOf);
@@ -88,7 +96,7 @@ export function SecurityPanel({ data }: { data: OverviewData }) {
           </h3>
           <p>
             {report?.coverage === "partial"
-              ? "Connected checks cover part of your website security"
+              ? "Connected checks provide limited coverage"
               : detail}
           </p>
         </div>
@@ -201,21 +209,27 @@ export function SecurityPanel({ data }: { data: OverviewData }) {
       {report?.baseline?.length ? (
         <p className="ov-data-note">
           {report.baseline.filter((check) => check.status === "passed").length}{" "}
-          of {report.baseline.length} HTTPS and response-header checks passed.
-          These do not establish firewall or exploit monitoring.
+          of {report.baseline.length} HTTPS/header checks passed.
         </p>
       ) : null}
       <Link
         className="ov-text-link"
-        href={`/dashboard/analytics?website=${data.site.id}`}
+        href={measurementReportHref(data.site.id, range, "security")}
+        aria-label="View security report"
       >
-        View checks and sources
+        View report
       </Link>
     </div>
   );
 }
 
-export function SiteQualityPanel({ data }: { data: OverviewData }) {
+export function SiteQualityPanel({
+  data,
+  range = 30,
+}: {
+  data: OverviewData;
+  range?: ReportRange;
+}) {
   const report = data.quality;
   const speed = speedSeconds(report?.lcpMs);
   return (
@@ -265,6 +279,10 @@ export function SiteQualityPanel({ data }: { data: OverviewData }) {
             <span title={report.measuredAt}>
               {formatRelative(report.measuredAt)}
             </span>
+            {report.expiresAt &&
+            Date.parse(report.expiresAt) < Date.parse(data.asOf) ? (
+              <span>Update overdue · last recorded audit</span>
+            ) : null}
           </>
         ) : (
           <>
@@ -273,17 +291,12 @@ export function SiteQualityPanel({ data }: { data: OverviewData }) {
           </>
         )}
       </p>
-      {report?.expiresAt &&
-      Date.parse(report.expiresAt) < Date.parse(data.asOf) ? (
-        <p className="ov-data-note">
-          Audit update overdue. These are the last recorded results.
-        </p>
-      ) : null}
       <Link
         className="ov-text-link"
-        href={`/dashboard/analytics?website=${data.site.id}`}
+        href={measurementReportHref(data.site.id, range, "quality")}
+        aria-label="View SEO and speed report"
       >
-        View SEO and speed details
+        View report
       </Link>
     </div>
   );

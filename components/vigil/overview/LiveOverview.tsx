@@ -17,6 +17,7 @@ import {
   LAYOUT_METADATA_KEY,
   readLayout,
   type OverviewData,
+  type ReportRange,
 } from "@/lib/vigil/overview/model";
 import { auditTone, isWebsiteLive } from "@/lib/vigil/presenters";
 import { humanizeAction } from "@/lib/vigil/format";
@@ -32,6 +33,7 @@ export async function LiveOverview({
   activity,
   canRequest,
   selectedWebsite,
+  initialRange = 30,
 }: {
   ctx: OrgContext;
   websites: Website[];
@@ -41,6 +43,7 @@ export async function LiveOverview({
   activity: Awaited<ReturnType<typeof getRecentActivity>>;
   canRequest: boolean;
   selectedWebsite?: string;
+  initialRange?: ReportRange;
 }) {
   const liveSites = websites.filter(isWebsiteLive);
   const site =
@@ -125,6 +128,7 @@ export async function LiveOverview({
     <LiveOverviewDashboard
       key={`${ctx.user.id}:${ctx.organization.id}:${site.id}`}
       data={data}
+      initialRange={initialRange}
       initialLayout={readLayout(ctx.user.user_metadata?.[LAYOUT_METADATA_KEY])}
       saveLayout={saveOverviewLayout}
     />

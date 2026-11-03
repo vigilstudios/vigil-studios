@@ -1,6 +1,6 @@
 # Handoff context — Vigil Dashboard V1 → first customer
 
-**Current analytics work (2 November 2026):** measurement-first development approved; implementation review and activation guide in [website measurements](../launch/website-measurements/RELEASE_20261102.md). Branch `codex/analytics-connections` starts from PR #41. Production activation is pending; historical context below is retained.
+**Current analytics work (2 November 2026):** measurement-first development approved; implementation review and activation guide in [website measurements](../launch/website-measurements/RELEASE_20261102.md). Branch `codex/analytics-connections` starts from PR #41. The approved 3 November revision makes Overview the client entry point and removes the additional analytics sidebar item. Production activation is pending; historical context below is retained.
 
 **Written:** 14 Sep 2026, mid-task. The previous session ran out of context.
 **Updated:** 14 Sep 2026 (night) — everything below is built, tested in

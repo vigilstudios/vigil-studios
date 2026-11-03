@@ -30,6 +30,8 @@ export type NavItem = {
   label: string;
   icon: NavIcon;
   exact?: boolean;
+  /** Exact child routes represented by this navigation item. */
+  activePaths?: string[];
   /** Internal workspaces that require a desktop viewport. */
   desktopOnly?: boolean;
   /** Rendered dimmed with a premium crown; the page explains why. */

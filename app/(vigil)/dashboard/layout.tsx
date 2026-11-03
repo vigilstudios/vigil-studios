@@ -90,7 +90,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       {
         items: [
           ...(onboardingNeedsAttention ? [{ href: "/dashboard/onboarding", label: "Getting set up", icon: "virtue" as const, attention: true }] : []),
-          { href: "/dashboard", label: "Overview", icon: "overview", exact: true, attention: anythingNeedsAttention },
+          { href: "/dashboard", label: "Overview", icon: "overview", exact: true, activePaths: ["/dashboard/analytics"], attention: anythingNeedsAttention },
         ],
       },
       {
@@ -100,7 +100,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
         items: [
           ...(showWebsitePreview(websites) ? [{ href: "/dashboard/website", label: "Website Preview", icon: "website" as const, attention: websiteNeedsAttention }] : []),
           { href: "/dashboard/content", label: "Content Hub", icon: "blog", premium: true, locked: !contentAccess, launchLocked:contentLaunchLocked },
-          { href: "/dashboard/analytics", label: "Website analytics", icon: "insights" },
           { href: "/dashboard/files", label: "Files", icon: "files" },
           { href: "/dashboard/requests", label: "Requests", icon: "requests", premium: true, locked: !ent.enabled(FEATURES.requests) },
           { href: "/dashboard/domain", label: "Domain", icon: "domain", attention: domainNeedsAttention },

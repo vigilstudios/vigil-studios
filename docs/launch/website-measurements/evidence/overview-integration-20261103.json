@@ -1,0 +1,62 @@
+{
+  "date": "2026-11-03",
+  "scope": "Overview-first navigation and focused reports; no schema or connector activation changes",
+  "localChecks": {
+    "fullSuite": {
+      "passed": 3277,
+      "skipped": 1,
+      "files": 193,
+      "workers": 2
+    },
+    "focusedFinal": {
+      "passed": 85,
+      "files": 7
+    },
+    "typecheck": "passed",
+    "eslint": "passed; last changed modules rechecked",
+    "productionBuild": "passed"
+  },
+  "browserChecks": {
+    "desktopWidth": 1440,
+    "phoneWidth": 390,
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "reportCardCounts": {
+      "traffic": 1,
+      "quality": 4,
+      "security": 2
+    },
+    "periods": [
+      7,
+      30,
+      90
+    ],
+    "sevenDayTrafficVisitorValue": 73,
+    "ninetyDayTrafficVisitorValue": 628,
+    "overviewToReportValuesMatch": true,
+    "returnPreservesWebsiteAndPeriod": true,
+    "overviewRemainsActiveOnReport": true,
+    "extraAnalyticsSidebarItem": false,
+    "mobileHorizontalOverflow": false,
+    "compactReportLinksFullyInsideCards": true,
+    "states": [
+      "current",
+      "empty",
+      "stale",
+      "paused"
+    ]
+  },
+  "preview": {
+    "url": "http://127.0.0.1:4193/",
+    "entry": "Overview",
+    "data": "fictional only",
+    "projection": "same pure normalized-measurement projection as production"
+  },
+  "production": {
+    "deployed": false,
+    "migrationApplied": false,
+    "providersActivated": false
+  }
+}

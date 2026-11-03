@@ -5,7 +5,7 @@ import {
   type WebsiteMeasurements,
 } from "@/lib/vigil/measurements/contract";
 const timestamp = "2026-11-02T14:00:00.000Z";
-const range = {
+const baseRange = {
   visitors: 243,
   pageViews: 514,
   periodStart: "2026-10-04T00:00:00.000Z",
@@ -41,11 +41,51 @@ const audit = {
     },
   ],
 };
+function trafficRange(days: number, visitors: number, pageViews: number) {
+  const start = new Date(timestamp);
+  start.setUTCHours(0, 0, 0, 0);
+  start.setUTCDate(start.getUTCDate() - (days - 1));
+  return {
+    ...baseRange,
+    visitors,
+    pageViews,
+    pages: [
+      { label: "/", value: Math.round(pageViews * 0.58) },
+      { label: "/services", value: Math.round(pageViews * 0.31) },
+      { label: "/contact", value: pageViews - Math.round(pageViews * 0.58) - Math.round(pageViews * 0.31) },
+    ],
+    sources: [
+      { label: "google.com", value: Math.round(visitors * 0.46) },
+      { label: "Direct / unknown", value: Math.round(visitors * 0.34) },
+      { label: "instagram.com", value: visitors - Math.round(visitors * 0.46) - Math.round(visitors * 0.34) },
+    ],
+    periodStart: start.toISOString(),
+    series: Array.from({ length: days }, (_, index) => {
+      const date = new Date(start.getTime() + index * 86_400_000);
+      return {
+        date: date.toISOString(),
+        label: date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          timeZone: "UTC",
+        }),
+        value: Math.max(
+          1,
+          Math.round(visitors / days + Math.sin(index * 0.7) * 3),
+        ),
+      };
+    }),
+  };
+}
 const payloads: MeasurementPayload[] = [
   {
     kind: "traffic",
     timezone: "UTC",
-    ranges: { "7": range, "30": range, "90": range },
+    ranges: {
+      "7": trafficRange(7, 73, 151),
+      "30": trafficRange(30, 243, 514),
+      "90": trafficRange(90, 628, 1404),
+    },
   },
   { ...audit, device: "mobile" },
   { ...audit, device: "desktop", performance: 98, lcpMs: 1100 },

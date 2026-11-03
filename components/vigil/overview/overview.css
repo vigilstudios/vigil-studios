@@ -2073,7 +2073,12 @@ html[data-theme="light"] .ov-card-health {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+}
+.ov-quality > .ov-text-link,
+.ov-security > .ov-text-link {
+  flex-shrink: 0;
+  font-size: 11px;
 }
 .ov-quality-metric > div:first-child,
 .ov-quality-speed {

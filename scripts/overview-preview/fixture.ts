@@ -9,8 +9,8 @@ export function sampleOverview(
   empty = false,
   disconnected = false,
   alert = false,
+  asOf = "2026-10-26T18:30:00Z",
 ): OverviewData {
-  const asOf = "2026-10-26T18:30:00Z";
   const rows: LeadDatum[] = [];
   for (let day = 0; day < 180; day++) {
     const count = empty

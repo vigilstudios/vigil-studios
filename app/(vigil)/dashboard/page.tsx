@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { measurementRange } from "@/lib/vigil/measurements/navigation";
 import { LiveOverview } from "@/components/vigil/overview/LiveOverview";
 import { PreviewOverview } from "@/components/vigil/overview/PreviewOverview";
 import { EmptyState } from "@/components/vigil/ui";
@@ -23,16 +24,17 @@ import { getOnboardingProject, needsOnboarding } from "@/lib/vigil/queries/onboa
 
 export const metadata: Metadata = { title: "Overview" };
 
-export default async function OverviewPage({ searchParams }: { searchParams: Promise<{ website?: string }> }) {
+export default async function OverviewPage({ searchParams }: { searchParams: Promise<{ website?: string; range?: string }> }) {
   const ctx = await requireOrgContext("/dashboard");
   const orgId = ctx.organization.id;
   const [websites, domains, subscription, projects, activity, ent] = await Promise.all([
     getOrgWebsites(orgId), getOrgDomains(orgId), getOrgSubscription(orgId),
     getOrgProjects(orgId), getRecentActivity(orgId, 10), resolveEntitlements(orgId),
   ]);
-  const selected = (await searchParams).website;
+  const query = await searchParams;
+  const selected = query.website;
   if (websites.some(isWebsiteLive)) {
-    return <LiveOverview ctx={ctx} websites={websites} domains={domains} projects={projects} subscription={subscription} activity={activity} canRequest={ent.enabled(FEATURES.requests)} selectedWebsite={typeof selected === "string" ? selected : undefined} />;
+    return <LiveOverview ctx={ctx} websites={websites} domains={domains} projects={projects} subscription={subscription} activity={activity} canRequest={ent.enabled(FEATURES.requests)} selectedWebsite={typeof selected === "string" ? selected : undefined} initialRange={measurementRange(query.range)} />;
   }
 
   const onboarding = await getOnboardingProject(orgId);
