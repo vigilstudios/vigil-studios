@@ -16,279 +16,362 @@ export type Database = {
     Tables: {
       appointment_events: {
         Row: {
-          id: number
-          appointment_id: string
-          website_id: string
-          organization_id: string
-          kind: string
-          details: Json
           actor_user_id: string | null
+          appointment_id: string
           created_at: string
+          details: Json
+          id: number
+          kind: string
+          organization_id: string
+          website_id: string
         }
         Insert: {
-          id?: number
-          appointment_id: string
-          website_id: string
-          organization_id: string
-          kind: string
-          details?: Json
           actor_user_id?: string | null
+          appointment_id: string
           created_at?: string
+          details?: Json
+          id?: never
+          kind: string
+          organization_id: string
+          website_id: string
         }
         Update: {
-          id?: number
-          appointment_id?: string
-          website_id?: string
-          organization_id?: string
-          kind?: string
-          details?: Json
           actor_user_id?: string | null
+          appointment_id?: string
           created_at?: string
+          details?: Json
+          id?: never
+          kind?: string
+          organization_id?: string
+          website_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "appointment_events_actor_user_id_fkey"
+            columns: ["actor_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_events_appointment_id_website_id_organization__fkey"
+            columns: ["appointment_id", "website_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id", "website_id", "organization_id"]
+          },
+        ]
       }
       appointments: {
         Row: {
-          id: string
-          website_id: string
-          organization_id: string
-          service_id: string
-          resource_id: string
-          lead_id: string | null
-          service_name: string
+          buffer_after: number
+          buffer_before: number
           confirmation_mode: string
-          time_zone: string
-          status: string
-          starts_at: string
+          contact: Json
+          created_at: string
+          duration: number
           ends_at: string
+          guest_token_hash: string | null
+          id: string
+          lead_id: string | null
+          notes: string
+          organization_id: string
+          request_expires_at: string | null
+          requested_start_at: string | null
           reserved_from: string
           reserved_until: string
-          duration: number
-          buffer_before: number
-          buffer_after: number
-          requested_start_at: string | null
-          request_expires_at: string | null
-          contact: Json
-          notes: string
-          submission_key: string | null
-          submission_hash: string | null
-          guest_token_hash: string | null
+          resource_id: string
           revision: number
-          created_at: string
+          service_id: string
+          service_name: string
+          starts_at: string
+          status: string
+          submission_hash: string | null
+          submission_key: string | null
+          time_zone: string
           updated_at: string
+          website_id: string
         }
         Insert: {
-          id?: string
-          website_id: string
-          organization_id: string
-          service_id: string
-          resource_id: string
-          lead_id?: string | null
-          service_name: string
+          buffer_after: number
+          buffer_before: number
           confirmation_mode: string
-          time_zone: string
-          status: string
-          starts_at: string
+          contact: Json
+          created_at?: string
+          duration: number
           ends_at: string
+          guest_token_hash?: string | null
+          id?: string
+          lead_id?: string | null
+          notes?: string
+          organization_id: string
+          request_expires_at?: string | null
+          requested_start_at?: string | null
           reserved_from: string
           reserved_until: string
-          duration: number
-          buffer_before: number
-          buffer_after: number
-          requested_start_at?: string | null
-          request_expires_at?: string | null
-          contact: Json
-          notes?: string
-          submission_key?: string | null
-          submission_hash?: string | null
-          guest_token_hash?: string | null
+          resource_id: string
           revision?: number
-          created_at?: string
+          service_id: string
+          service_name: string
+          starts_at: string
+          status: string
+          submission_hash?: string | null
+          submission_key?: string | null
+          time_zone: string
           updated_at?: string
+          website_id: string
         }
         Update: {
-          id?: string
-          website_id?: string
-          organization_id?: string
-          service_id?: string
-          resource_id?: string
-          lead_id?: string | null
-          service_name?: string
+          buffer_after?: number
+          buffer_before?: number
           confirmation_mode?: string
-          time_zone?: string
-          status?: string
-          starts_at?: string
+          contact?: Json
+          created_at?: string
+          duration?: number
           ends_at?: string
+          guest_token_hash?: string | null
+          id?: string
+          lead_id?: string | null
+          notes?: string
+          organization_id?: string
+          request_expires_at?: string | null
+          requested_start_at?: string | null
           reserved_from?: string
           reserved_until?: string
-          duration?: number
-          buffer_before?: number
-          buffer_after?: number
-          requested_start_at?: string | null
-          request_expires_at?: string | null
-          contact?: Json
-          notes?: string
-          submission_key?: string | null
-          submission_hash?: string | null
-          guest_token_hash?: string | null
+          resource_id?: string
           revision?: number
-          created_at?: string
+          service_id?: string
+          service_name?: string
+          starts_at?: string
+          status?: string
+          submission_hash?: string | null
+          submission_key?: string | null
+          time_zone?: string
           updated_at?: string
+          website_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "appointments_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_resource_id_website_id_organization_id_fkey"
+            columns: ["resource_id", "website_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "booking_resources"
+            referencedColumns: ["id", "website_id", "organization_id"]
+          },
+          {
+            foreignKeyName: "appointments_service_id_website_id_organization_id_fkey"
+            columns: ["service_id", "website_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "booking_services"
+            referencedColumns: ["id", "website_id", "organization_id"]
+          },
+          {
+            foreignKeyName: "booking_lead_same_site"
+            columns: ["lead_id", "website_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id", "website_id", "organization_id"]
+          },
+        ]
       }
       booking_blocks: {
         Row: {
-          id: string
-          resource_id: string
-          website_id: string
-          organization_id: string
-          starts_at: string
-          ends_at: string
-          reason: string
           created_at: string
+          ends_at: string
+          id: string
+          organization_id: string
+          reason: string
+          resource_id: string
+          starts_at: string
+          website_id: string
         }
         Insert: {
-          id?: string
-          resource_id: string
-          website_id: string
-          organization_id: string
-          starts_at: string
-          ends_at: string
-          reason?: string
           created_at?: string
+          ends_at: string
+          id?: string
+          organization_id: string
+          reason?: string
+          resource_id: string
+          starts_at: string
+          website_id: string
         }
         Update: {
-          id?: string
-          resource_id?: string
-          website_id?: string
-          organization_id?: string
-          starts_at?: string
-          ends_at?: string
-          reason?: string
           created_at?: string
+          ends_at?: string
+          id?: string
+          organization_id?: string
+          reason?: string
+          resource_id?: string
+          starts_at?: string
+          website_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "booking_blocks_resource_id_website_id_organization_id_fkey"
+            columns: ["resource_id", "website_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "booking_resources"
+            referencedColumns: ["id", "website_id", "organization_id"]
+          },
+        ]
       }
       booking_resources: {
         Row: {
-          id: string
-          website_id: string
-          organization_id: string
-          name: string
           active: boolean
-          hours: Json
           created_at: string
+          hours: Json
+          id: string
+          name: string
+          organization_id: string
           updated_at: string
+          website_id: string
         }
         Insert: {
-          id?: string
-          website_id: string
-          organization_id: string
-          name: string
           active?: boolean
-          hours?: Json
           created_at?: string
+          hours?: Json
+          id?: string
+          name: string
+          organization_id: string
           updated_at?: string
+          website_id: string
         }
         Update: {
-          id?: string
-          website_id?: string
-          organization_id?: string
-          name?: string
           active?: boolean
-          hours?: Json
           created_at?: string
+          hours?: Json
+          id?: string
+          name?: string
+          organization_id?: string
           updated_at?: string
+          website_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "booking_resources_website_id_organization_id_fkey"
+            columns: ["website_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "booking_settings"
+            referencedColumns: ["website_id", "organization_id"]
+          },
+        ]
       }
       booking_services: {
         Row: {
-          id: string
-          website_id: string
-          organization_id: string
-          resource_id: string
-          name: string
+          active: boolean
+          buffer_after: number
+          buffer_before: number
+          created_at: string
           description: string
           duration: number
-          buffer_before: number
-          buffer_after: number
+          id: string
           mode: string
-          active: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          website_id: string
+          name: string
           organization_id: string
           resource_id: string
-          name: string
+          updated_at: string
+          website_id: string
+        }
+        Insert: {
+          active?: boolean
+          buffer_after?: number
+          buffer_before?: number
+          created_at?: string
           description?: string
           duration: number
-          buffer_before?: number
-          buffer_after?: number
+          id?: string
           mode: string
-          active?: boolean
-          created_at?: string
+          name: string
+          organization_id: string
+          resource_id: string
           updated_at?: string
+          website_id: string
         }
         Update: {
-          id?: string
-          website_id?: string
-          organization_id?: string
-          resource_id?: string
-          name?: string
+          active?: boolean
+          buffer_after?: number
+          buffer_before?: number
+          created_at?: string
           description?: string
           duration?: number
-          buffer_before?: number
-          buffer_after?: number
+          id?: string
           mode?: string
-          active?: boolean
-          created_at?: string
+          name?: string
+          organization_id?: string
+          resource_id?: string
           updated_at?: string
+          website_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "booking_services_resource_id_website_id_organization_id_fkey"
+            columns: ["resource_id", "website_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "booking_resources"
+            referencedColumns: ["id", "website_id", "organization_id"]
+          },
+        ]
       }
       booking_settings: {
         Row: {
-          website_id: string
-          organization_id: string
-          enabled: boolean
-          component_ready: boolean
-          time_zone: string
-          minimum_notice: number
-          horizon_days: number
-          change_notice: number
           availability_acknowledged_at: string | null
+          change_notice: number
+          component_ready: boolean
+          enabled: boolean
+          horizon_days: number
+          minimum_notice: number
+          organization_id: string
+          time_zone: string
           updated_at: string
+          website_id: string
         }
         Insert: {
-          website_id: string
-          organization_id: string
-          enabled?: boolean
-          component_ready?: boolean
-          time_zone?: string
-          minimum_notice?: number
-          horizon_days?: number
-          change_notice?: number
           availability_acknowledged_at?: string | null
+          change_notice?: number
+          component_ready?: boolean
+          enabled?: boolean
+          horizon_days?: number
+          minimum_notice?: number
+          organization_id: string
+          time_zone?: string
           updated_at?: string
+          website_id: string
         }
         Update: {
-          website_id?: string
-          organization_id?: string
-          enabled?: boolean
-          component_ready?: boolean
-          time_zone?: string
-          minimum_notice?: number
-          horizon_days?: number
-          change_notice?: number
           availability_acknowledged_at?: string | null
+          change_notice?: number
+          component_ready?: boolean
+          enabled?: boolean
+          horizon_days?: number
+          minimum_notice?: number
+          organization_id?: string
+          time_zone?: string
           updated_at?: string
+          website_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "booking_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_settings_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: true
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
 
       audit_events: {
@@ -4304,48 +4387,91 @@ export type Database = {
       }
     }
     Functions: {
-      booking_eligible: {Args: {p_website: string}; Returns: boolean}
-      block_booking_days: {Args: {p_resource: string; p_from: string; p_through: string; p_reason: string}; Returns: string}
+      booking_eligible: { Args: { p_website: string }; Returns: boolean }
+      block_booking_days: {
+        Args: {
+          p_from: string
+          p_reason: string
+          p_resource: string
+          p_through: string
+        }
+        Returns: string
+      }
       configure_bookings: {
-        Args: {p_website: string; p_settings: Json; p_component_ready?: boolean}
+        Args: {
+          p_component_ready?: boolean
+          p_settings: Json
+          p_website: string
+        }
         Returns: undefined
       }
       save_booking_resource: {
-        Args: {p_website: string; p_resource: Json}
+        Args: { p_resource: Json; p_website: string }
         Returns: string
       }
       save_booking_service: {
-        Args: {p_website: string; p_service: Json}
+        Args: { p_service: Json; p_website: string }
         Returns: string
       }
       save_booking_block: {
-        Args: {p_resource: string; p_start: string; p_end: string; p_reason: string; p_remove?: string}
+        Args: {
+          p_end: string
+          p_reason: string
+          p_remove?: string
+          p_resource: string
+          p_start: string
+        }
         Returns: string
       }
       booking_public_config: {
-        Args: {p_website: string; p_origin: string}
+        Args: { p_origin: string; p_website: string }
         Returns: Json
       }
       booking_public_slots: {
-        Args: {p_website: string; p_origin: string; p_service: string; p_day: string}
+        Args: {
+          p_day: string
+          p_origin: string
+          p_service: string
+          p_website: string
+        }
         Returns: Json
       }
       create_public_booking: {
-        Args: {p_website: string; p_origin: string; p_service: string; p_start: string; p_key: string; p_hash: string; p_guest_hash: string; p_contact: Json; p_notes: string; p_page?: string}
+        Args: {
+          p_contact: Json
+          p_guest_hash: string
+          p_hash: string
+          p_key: string
+          p_notes: string
+          p_origin: string
+          p_page?: string
+          p_service: string
+          p_start: string
+          p_website: string
+        }
         Returns: Json
       }
       manage_booking: {
-        Args: {p_id: string; p_action: string; p_revision: number; p_start?: string}
+        Args: {
+          p_action: string
+          p_id: string
+          p_revision: number
+          p_start?: string
+        }
         Returns: Json
       }
       manage_guest_booking: {
-        Args: {p_website: string; p_origin: string; p_id: string; p_hash: string; p_action: string; p_start?: string}
+        Args: {
+          p_action: string
+          p_hash: string
+          p_id: string
+          p_origin: string
+          p_start?: string
+          p_website: string
+        }
         Returns: Json
       }
-      expire_booking_requests: {
-        Args: never
-        Returns: number
-      }
+      expire_booking_requests: { Args: never; Returns: number }
 
       accept_invitation: { Args: { p_invite: string }; Returns: string }
       accept_pending_invites: { Args: never; Returns: number }
@@ -5977,6 +6103,57 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      booking_audit: {
+        Args: {
+          p_action: string
+          p_after?: Json
+          p_entity_id: string
+          p_entity_type: string
+          p_metadata?: Json
+          p_org: string
+        }
+        Returns: undefined
+      }
+      booking_entitled: { Args: { p_website: string }; Returns: boolean }
+      booking_hours_valid: { Args: { p_hours: Json }; Returns: boolean }
+      booking_manage: { Args: { p_website: string }; Returns: string }
+      booking_public_site: {
+        Args: { p_new?: boolean; p_origin: string; p_website: string }
+        Returns: Database["public"]["Tables"]["booking_settings"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "booking_settings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      booking_receipt: {
+        Args: { a: Database["public"]["Tables"]["appointments"]["Row"] }
+        Returns: Json
+      }
+      booking_transition: {
+        Args: {
+          p_action: string
+          p_guest?: boolean
+          p_id: string
+          p_revision: number
+          p_start?: string
+        }
+        Returns: Json
+      }
+      booking_window_free: {
+        Args: {
+          p_after: number
+          p_before: number
+          p_duration: number
+          p_now?: string
+          p_resource: string
+          p_skip?: string
+          p_start: string
+        }
+        Returns: boolean
+      }
+
       accept_invitation: { Args: { p_invite: string }; Returns: string }
       accept_invites_for_current_user: { Args: never; Returns: number }
       archive_organization: {
