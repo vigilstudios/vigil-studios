@@ -131,6 +131,7 @@ export function BookingWidget({
       null,
     ),
     [message, setMessage] = useState("");
+  const root = useRef<HTMLDivElement>(null);
   const initialReceipt = useRef<BookingReceipt | null>(null);
   const retry = useRef<{
     fingerprint: string;
@@ -145,6 +146,8 @@ export function BookingWidget({
     const match = location.hash.match(
       /^#vigil-booking=([a-f0-9-]{36})\.([a-f0-9]{64})$/,
     );
+    if (match)
+      root.current?.scrollIntoView({ block: "start", behavior: "auto" });
     const load = match
       ? read<{ appointment: BookingReceipt }>(endpoint, {
           bookingId: match[1],
@@ -300,7 +303,7 @@ export function BookingWidget({
     }
   }
   return (
-    <div className="vigil-booking" data-vigil-booking-component="v1">
+    <div ref={root} className="vigil-booking" data-vigil-booking-component="v1">
       <header>
         <Heading>{title}</Heading>
         <p>{introduction}</p>
