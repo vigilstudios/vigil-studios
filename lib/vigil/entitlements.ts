@@ -15,6 +15,7 @@ export const FEATURES = {
   requests: "requests.enabled",
   requestsMonthlyAllowance: "requests.monthly_allowance",
   leads: "leads.enabled",
+  bookings: "bookings.enabled",
   insights: "insights.enabled",
   insightsLevel: "insights.level",
   virtue: "virtue.enabled",

@@ -28,6 +28,9 @@ trap cleanup EXIT
 admin -c "create database $DBNAME" >/dev/null
 echo "▸ auth shim"
 target -f "$ROOT/supabase/test/auth-shim.sql"
+if [ "${BOOKING_EXISTING_EXTENSION_SCHEMA:-}" = "public" ]; then
+  target -c "create extension btree_gist with schema public"
+fi
 
 for f in "$ROOT"/supabase/migrations/*.sql; do
   echo "▸ $(basename "$f")"
@@ -69,4 +72,8 @@ echo "▸ Gmail connection assertions"
 target -f "$ROOT/supabase/test/gmail.test.sql"
 echo "▸ website measurement assertions"
 target -f "$ROOT/supabase/test/measurements.test.sql"
+echo "▸ native booking assertions"
+target -f "$ROOT/supabase/test/bookings.test.sql"
+echo "▸ competing booking transactions"
+python3 "$ROOT/supabase/test/bookings-concurrency.py" "${PGURL%/*}/$DBNAME"
 echo "✓ migrations and RLS assertions passed"

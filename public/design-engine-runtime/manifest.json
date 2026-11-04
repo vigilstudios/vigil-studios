@@ -1,5 +1,5 @@
 {
-  "version": "v1-c171ad481ca27523cee0",
+  "version": "v1-38c7640b719221dd6609",
   "schemaVersion": 1,
   "files": [
     {
@@ -20,11 +20,11 @@
     },
     {
       "path": "client.css",
-      "sha256": "b13197474aa250f2a260813151f4ee7e38911293ba74fde444d957a72cfe54fc"
+      "sha256": "b88925f632549dd103db9cd98b978310fb9f0e8c4ffcc86a47c1eb85a731da18"
     },
     {
       "path": "client.js",
-      "sha256": "5909729e2919d98e91973f07ac91c3fb2276452d6819cbab4f790cd896be8ef8"
+      "sha256": "ef91b97993dcfd090e101209933f3162cdcdfbba161f99219fad612f825851a5"
     },
     {
       "path": "cormorant-garamond-latin-wght-italic.woff2",

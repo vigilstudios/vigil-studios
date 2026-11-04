@@ -1479,3 +1479,9 @@ Availability now reads the current dated HTTPS observation when that source is e
 ### 2026-11-03 — Full-width chart plots and connected security tone
 
 Removed SVG aspect-ratio letterboxing and moved axis labels inside the plot so both report graphs span the same edges as their footers. Security tint now evaluates the connected checks independently from the full coverage state: passing evidence is blue, findings/failed refreshes orange, and unknown/stale evidence neutral. Partial coverage retains its honest label. Owner deferred broader security monitoring and prioritized native bookings with both instant and approval-based modes per service, followed by Lead Hub outcomes, Insights and Virtue.
+
+### 3 November 2026 — native bookings prepared for review
+
+Added a Care+ opt-in native appointment foundation shared by website components and Lead Hub: service modes, resource availability/buffers, blocked dates, race-safe reservations/approvals/rescheduling, guest links, attendance and immutable evidence. Lab previews use fictional data without submissions. Express Restaurant and Salon/Spa stay contact-only until setup and explicitly advertise optional native compatibility; other known template request forms remain inquiry capture. Onboarding, source handoff and admin readiness record booking needs without publishing availability. No booking migration, client activation, customer communications or calendar connection has been applied to production. See [review package](../launch/bookings/RELEASE_20261103.md).
+
+The earlier chart-width/security-tone change shipped in PR #44; native booking work is a separate release.

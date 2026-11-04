@@ -3,6 +3,7 @@ import {featuredDisplaySection} from '../content/settings';
 import { PresentationSurface } from "../presentation/PresentationSurface";
 import { resolvePresentation } from "../presentation/schema";
 import { EditorialConversion, SignalConversion } from "../sections/endings/Conversion";
+import { NativeBooking } from "../sections/endings/NativeBooking";
 import { InquiryContact } from "../sections/endings/InquiryContact";
 import { SitemapFooter, CompactFooter, SplitFooter, BannerFooter } from "../sections/endings/Footers";
 import { ExpandRailGallery, CardRailGallery } from "../sections/endings/Galleries";
@@ -118,6 +119,7 @@ function renderSectionBody(section: SectionInstance): ReactNode {
   switch (section.component) {
     case "cta.editorial": return <EditorialConversion {...section}/>;
     case "cta.signal": return <SignalConversion {...section}/>;
+    case "contact.booking": return <NativeBooking {...section}/>;
     case "contact.inquiry": return <InquiryContact {...section}/>;
     case "footer.sitemap": return <SitemapFooter {...section}/>;
     case "footer.compact": return <CompactFooter {...section}/>;

@@ -14,6 +14,283 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointment_events: {
+        Row: {
+          id: number
+          appointment_id: string
+          website_id: string
+          organization_id: string
+          kind: string
+          details: Json
+          actor_user_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          appointment_id: string
+          website_id: string
+          organization_id: string
+          kind: string
+          details?: Json
+          actor_user_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          appointment_id?: string
+          website_id?: string
+          organization_id?: string
+          kind?: string
+          details?: Json
+          actor_user_id?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      appointments: {
+        Row: {
+          id: string
+          website_id: string
+          organization_id: string
+          service_id: string
+          resource_id: string
+          lead_id: string | null
+          service_name: string
+          confirmation_mode: string
+          time_zone: string
+          status: string
+          starts_at: string
+          ends_at: string
+          reserved_from: string
+          reserved_until: string
+          duration: number
+          buffer_before: number
+          buffer_after: number
+          requested_start_at: string | null
+          request_expires_at: string | null
+          contact: Json
+          notes: string
+          submission_key: string | null
+          submission_hash: string | null
+          guest_token_hash: string | null
+          revision: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          website_id: string
+          organization_id: string
+          service_id: string
+          resource_id: string
+          lead_id?: string | null
+          service_name: string
+          confirmation_mode: string
+          time_zone: string
+          status: string
+          starts_at: string
+          ends_at: string
+          reserved_from: string
+          reserved_until: string
+          duration: number
+          buffer_before: number
+          buffer_after: number
+          requested_start_at?: string | null
+          request_expires_at?: string | null
+          contact: Json
+          notes?: string
+          submission_key?: string | null
+          submission_hash?: string | null
+          guest_token_hash?: string | null
+          revision?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          website_id?: string
+          organization_id?: string
+          service_id?: string
+          resource_id?: string
+          lead_id?: string | null
+          service_name?: string
+          confirmation_mode?: string
+          time_zone?: string
+          status?: string
+          starts_at?: string
+          ends_at?: string
+          reserved_from?: string
+          reserved_until?: string
+          duration?: number
+          buffer_before?: number
+          buffer_after?: number
+          requested_start_at?: string | null
+          request_expires_at?: string | null
+          contact?: Json
+          notes?: string
+          submission_key?: string | null
+          submission_hash?: string | null
+          guest_token_hash?: string | null
+          revision?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      booking_blocks: {
+        Row: {
+          id: string
+          resource_id: string
+          website_id: string
+          organization_id: string
+          starts_at: string
+          ends_at: string
+          reason: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          resource_id: string
+          website_id: string
+          organization_id: string
+          starts_at: string
+          ends_at: string
+          reason?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          resource_id?: string
+          website_id?: string
+          organization_id?: string
+          starts_at?: string
+          ends_at?: string
+          reason?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      booking_resources: {
+        Row: {
+          id: string
+          website_id: string
+          organization_id: string
+          name: string
+          active: boolean
+          hours: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          website_id: string
+          organization_id: string
+          name: string
+          active?: boolean
+          hours?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          website_id?: string
+          organization_id?: string
+          name?: string
+          active?: boolean
+          hours?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      booking_services: {
+        Row: {
+          id: string
+          website_id: string
+          organization_id: string
+          resource_id: string
+          name: string
+          description: string
+          duration: number
+          buffer_before: number
+          buffer_after: number
+          mode: string
+          active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          website_id: string
+          organization_id: string
+          resource_id: string
+          name: string
+          description?: string
+          duration: number
+          buffer_before?: number
+          buffer_after?: number
+          mode: string
+          active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          website_id?: string
+          organization_id?: string
+          resource_id?: string
+          name?: string
+          description?: string
+          duration?: number
+          buffer_before?: number
+          buffer_after?: number
+          mode?: string
+          active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      booking_settings: {
+        Row: {
+          website_id: string
+          organization_id: string
+          enabled: boolean
+          component_ready: boolean
+          time_zone: string
+          minimum_notice: number
+          horizon_days: number
+          change_notice: number
+          availability_acknowledged_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          website_id: string
+          organization_id: string
+          enabled?: boolean
+          component_ready?: boolean
+          time_zone?: string
+          minimum_notice?: number
+          horizon_days?: number
+          change_notice?: number
+          availability_acknowledged_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          website_id?: string
+          organization_id?: string
+          enabled?: boolean
+          component_ready?: boolean
+          time_zone?: string
+          minimum_notice?: number
+          horizon_days?: number
+          change_notice?: number
+          availability_acknowledged_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+
       audit_events: {
         Row: {
           action: string
@@ -4027,6 +4304,49 @@ export type Database = {
       }
     }
     Functions: {
+      booking_eligible: {Args: {p_website: string}; Returns: boolean}
+      block_booking_days: {Args: {p_resource: string; p_from: string; p_through: string; p_reason: string}; Returns: string}
+      configure_bookings: {
+        Args: {p_website: string; p_settings: Json; p_component_ready?: boolean}
+        Returns: undefined
+      }
+      save_booking_resource: {
+        Args: {p_website: string; p_resource: Json}
+        Returns: string
+      }
+      save_booking_service: {
+        Args: {p_website: string; p_service: Json}
+        Returns: string
+      }
+      save_booking_block: {
+        Args: {p_resource: string; p_start: string; p_end: string; p_reason: string; p_remove?: string}
+        Returns: string
+      }
+      booking_public_config: {
+        Args: {p_website: string; p_origin: string}
+        Returns: Json
+      }
+      booking_public_slots: {
+        Args: {p_website: string; p_origin: string; p_service: string; p_day: string}
+        Returns: Json
+      }
+      create_public_booking: {
+        Args: {p_website: string; p_origin: string; p_service: string; p_start: string; p_key: string; p_hash: string; p_guest_hash: string; p_contact: Json; p_notes: string; p_page?: string}
+        Returns: Json
+      }
+      manage_booking: {
+        Args: {p_id: string; p_action: string; p_revision: number; p_start?: string}
+        Returns: Json
+      }
+      manage_guest_booking: {
+        Args: {p_website: string; p_origin: string; p_id: string; p_hash: string; p_action: string; p_start?: string}
+        Returns: Json
+      }
+      expire_booking_requests: {
+        Args: never
+        Returns: number
+      }
+
       accept_invitation: { Args: { p_invite: string }; Returns: string }
       accept_pending_invites: { Args: never; Returns: number }
       acknowledge_lead_notification: {

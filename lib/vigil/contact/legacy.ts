@@ -9,12 +9,12 @@ export async function mountContactForm(form:HTMLFormElement,endpoint:string):Pro
   event.preventDefault();event.stopImmediatePropagation();if(pending)return;
   if(!form.reportValidity())return;
   const data=Object.fromEntries(new FormData(form));
-  const values={name:String(data.name??''),email:String(data.email??''),phone:String(data.phone??''),message:String(data.message??data.notes??'Booking inquiry'),source:form.dataset.vigilSource??'inquiries',sourcePage:location.origin+location.pathname,
+  const values={name:String(data.name??''),email:String(data.email??''),phone:String(data.phone??''),message:String(data.message??data.notes??data.concern??data.details??(form.hasAttribute('data-vigil-contact-default')?'Website inquiry':'Booking inquiry')),source:form.dataset.vigilSource??'inquiries',sourcePage:location.origin+location.pathname,
    details:Object.fromEntries(Object.entries(data).filter(([name])=>!['name','email','phone','message','notes','cf-turnstile-response'].includes(name)).slice(0,8).map(([name,value])=>[name,String(value).slice(0,500)]))};
   if(!values.name||!values.email){status.textContent='Please include your name and email.';return;}
   const current=JSON.stringify(values);if(current!==fingerprint){key=crypto.randomUUID();fingerprint=current;}
   pending=true;if(button)button.disabled=true;status.textContent='Sending your inquiry…';
-  try{await submitWebsiteInquiry(endpoint,values,token,key,AbortSignal.timeout(15_000));status.textContent='Your inquiry was received. A booking is confirmed separately by the business.';form.reset();key=crypto.randomUUID();fingerprint='';}
+  try{await submitWebsiteInquiry(endpoint,values,token,key,AbortSignal.timeout(15_000));status.textContent=form.hasAttribute('data-vigil-contact-default')?'Your message was received. The business will be in touch.':'Your inquiry was received. A booking is confirmed separately by the business.';form.reset();key=crypto.randomUUID();fingerprint='';}
   catch(error){status.textContent=error instanceof Error?error.message:'Please try again or use email.';}
   finally{pending=false;if(button)button.disabled=false;token='';if(widgetId)window.turnstile?.reset(widgetId);}
  };

@@ -1,5 +1,5 @@
 import type { ComponentType, ReactNode } from 'react';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, CheckCheck, CircleCheck, Clock3, Inbox, Mail, Search, Settings2, SlidersHorizontal } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, CheckCheck, CircleCheck, Clock3, CalendarDays, Inbox, Mail, Search, Settings2, SlidersHorizontal } from 'lucide-react';
 import type { getLeadHub } from '@/lib/vigil/queries/leads';
 import { leadStatuses } from '@/lib/vigil/contact/contract';
 import { formatDateTime, titleCase } from '@/lib/vigil/format';
@@ -12,7 +12,7 @@ export function LeadStatus({ status }: { status: string }) {
   const tone = ['booked', 'won'].includes(status) ? 'good' : status === 'new' ? 'accent' : ['qualified', 'contacted'].includes(status) ? 'info' : 'neutral';
   return <span className="lead-status" data-tone={tone}><span aria-hidden="true" />{titleCase(status)}</span>;
 }
-export function LeadHubView({ data, filters, Link, preferenceForms, replyPreferencesForm, gmailConnectionPanel }: { data: LeadHubData; filters: LeadFilters; Link: HubLink; preferenceForms: Record<string, ReactNode>; replyPreferencesForm: ReactNode; gmailConnectionPanel?: ReactNode }) {
+export function LeadHubView({ data, filters, Link, preferenceForms, replyPreferencesForm, gmailConnectionPanel, bookingsEnabled=false }: { data: LeadHubData; filters: LeadFilters; Link: HubLink; preferenceForms: Record<string, ReactNode>; replyPreferencesForm: ReactNode; gmailConnectionPanel?: ReactNode; bookingsEnabled?:boolean }) {
   const filtered = hasLeadFilters(filters), settingsView = filters.view === 'settings';
   const connected = data.settings.filter(setting => setting.enabled && data.sites.find(site => site.id === setting.website_id)?.status === 'live');
   const waitingLaunch = data.sites.some(site => ['building', 'provisioning'].includes(site.status));
@@ -26,6 +26,7 @@ export function LeadHubView({ data, filters, Link, preferenceForms, replyPrefere
     <nav className="lead-tabs" aria-label="Lead Hub views">
       <Link href={leadHubHref({ ...filters, view: 'inbox', page: 1 })} aria-current={filters.view === 'inbox' ? 'page' : undefined}><Inbox size={15} aria-hidden="true" />Inbox</Link>
       <Link href={leadHubHref({ ...filters, view: 'unread', page: 1 })} aria-current={filters.view === 'unread' ? 'page' : undefined}><Mail size={15} aria-hidden="true" />Unread<span className="lead-count">{data.unread}</span></Link>
+      {bookingsEnabled&&<Link href="/dashboard/leads/bookings"><CalendarDays size={15} aria-hidden="true"/>Bookings</Link>}
       <Link href={leadHubHref({ ...filters, view: 'settings', page: 1 })} aria-current={settingsView ? 'page' : undefined}><SlidersHorizontal size={15} aria-hidden="true" />Settings</Link>
     </nav>
     <div className="lead-connection" data-connected={connected.length > 0}>

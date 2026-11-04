@@ -47,7 +47,7 @@ describe("brief schema", () => {
 
   it("reads garbage as an empty brief and keeps progress defaults", () => {
     const b = parseBrief("nope");
-    expect(b.version).toBe(3);
+    expect(b.version).toBe(4);
     expect(b.progress).toEqual({ lastStep: "welcome", completed: [] });
     expect(parseBrief(null).basics).toBeUndefined();
   });

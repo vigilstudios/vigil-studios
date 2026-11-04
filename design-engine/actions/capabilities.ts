@@ -34,6 +34,7 @@ const authoredActionCapabilities: Record<string, ActionCapabilities> = {
   "about.creator-profile": story("A personal collaboration action follows the biography and interests."),
   "cta.editorial": capability("Two optional conversion actions stay with the measured proposition.", regular, [], regular),
   "cta.signal": capability("Primary and optional secondary conversion actions occupy opaque copy, never unreadable imagery.", {...regular,size:["small","medium","large","display"]}, [], regular),
+  "contact.booking": {classification:"no-action",reason:"Native appointment controls own service/time selection, confirmation and secure management; they are not navigation CTAs.",items:[]},
   "contact.inquiry": capability("Optional booking/email/management and media-kit actions complement a contact directory and real submission boundary.", regular, [], regular),
   "footer.sitemap": capability("Optional site continuation complements typed site-tree, social and legal destinations.", regular),
   "footer.compact": capability("Optional restrained continuation; compact navigation is derived from real page identities.", editorial),
