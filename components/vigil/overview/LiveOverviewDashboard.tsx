@@ -39,6 +39,7 @@ import {
   type PanelId,
   type ReportRange,
 } from "@/lib/vigil/overview/model";
+import { overviewHref } from "@/lib/vigil/measurements/navigation";
 import type { ActionResult } from "@/lib/vigil/auth/errors";
 import {
   ActivityPanel,
@@ -74,18 +75,20 @@ export function LiveOverviewDashboard({
   initialLayout,
   saveLayout,
   sample = false,
+  initialRange = 30,
 }: {
   data: OverviewData;
   initialLayout: LayoutPreference;
   saveLayout: (layout: LayoutPreference) => Promise<ActionResult>;
   sample?: boolean;
+  initialRange?: ReportRange;
 }) {
   const router = useRouter();
   const [layout, setLayout] = useState(() => readLayout(initialLayout));
   const latest = useRef(layout);
   const queued = useRef<LayoutPreference | null>(null);
   const inFlight = useRef(false);
-  const [range, setRange] = useState<ReportRange>(30);
+  const [range, setRange] = useState<ReportRange>(initialRange);
   const [dragging, setDragging] = useState<PanelId | null>(null);
   const [dropTarget, setDropTarget] = useState<PanelId | null>(null);
   const [notice, setNotice] = useState("");
@@ -262,8 +265,8 @@ export function LiveOverviewDashboard({
   );
   const panels: Record<PanelId, ReactNode> = {
     website: <WebsitePanel data={data} />,
-    health: <SecurityPanel data={data} />,
-    quality: <SiteQualityPanel data={data} />,
+    health: <SecurityPanel data={data} range={range} />,
+    quality: <SiteQualityPanel data={data} range={range} />,
     leads: (
       <LeadTrendsPanel
         data={data}
@@ -406,9 +409,7 @@ export function LiveOverviewDashboard({
               <select
                 value={data.site.id}
                 onChange={(event) =>
-                  router.push(
-                    `/dashboard?website=${encodeURIComponent(event.target.value)}`,
-                  )
+                  router.push(overviewHref(event.target.value, range))
                 }
               >
                 {data.sites.map((site) => (
@@ -430,7 +431,17 @@ export function LiveOverviewDashboard({
                 type="button"
                 key={days}
                 aria-pressed={range === days}
-                onClick={() => setRange(days)}
+                onClick={() => {
+                  setRange(days);
+                  const url = new URL(window.location.href);
+                  url.searchParams.set("website", data.site.id);
+                  url.searchParams.set("range", String(days));
+                  window.history.replaceState(
+                    null,
+                    "",
+                    `${url.pathname}${url.search}${url.hash}`,
+                  );
+                }}
               >
                 {days}d
               </button>
@@ -448,6 +459,12 @@ export function LiveOverviewDashboard({
           </button>
         </div>
       </header>
+      {data.measurements?.updatesEnabled === false ? (
+        <p className="ov-warning" role="status">
+          Reporting updates are paused. Saved reports retain their original
+          measurement dates.
+        </p>
+      ) : null}
       {!data.completeHistory && (
         <p className="ov-warning" role="status">
           Trend and status charts include the latest 10,000 records (

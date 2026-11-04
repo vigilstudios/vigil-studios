@@ -8,11 +8,16 @@ import type {
 import { getRecentDeployments } from "@/lib/vigil/queries/dashboard";
 import { getOverviewPalette } from "@/lib/vigil/queries/overview-palette";
 import { getOverviewLeads } from "@/lib/vigil/queries/overview";
+import {
+  getWebsiteMeasurements,
+  overviewMeasurementData,
+} from "@/lib/vigil/queries/measurements";
 import { saveOverviewLayout } from "@/lib/vigil/actions/overview";
 import {
   LAYOUT_METADATA_KEY,
   readLayout,
   type OverviewData,
+  type ReportRange,
 } from "@/lib/vigil/overview/model";
 import { auditTone, isWebsiteLive } from "@/lib/vigil/presenters";
 import { humanizeAction } from "@/lib/vigil/format";
@@ -28,6 +33,7 @@ export async function LiveOverview({
   activity,
   canRequest,
   selectedWebsite,
+  initialRange = 30,
 }: {
   ctx: OrgContext;
   websites: Website[];
@@ -37,6 +43,7 @@ export async function LiveOverview({
   activity: Awaited<ReturnType<typeof getRecentActivity>>;
   canRequest: boolean;
   selectedWebsite?: string;
+  initialRange?: ReportRange;
 }) {
   const liveSites = websites.filter(isWebsiteLive);
   const site =
@@ -47,16 +54,18 @@ export async function LiveOverview({
     null;
   const client = await createClient();
   const asOf = new Date().toISOString();
-  const [leads, releases, requests, previewAccent] = await Promise.all([
-    getOverviewLeads(client, ctx.organization.id, site.id, asOf),
-    getRecentDeployments(site.id, 12),
-    client
-      .from("change_requests")
-      .select("id", { head: true, count: "exact" })
-      .eq("organization_id", ctx.organization.id)
-      .in("status", ["submitted", "triaged", "in_progress", "delivered"]),
-    getOverviewPalette(client, ctx.organization.id, site.id),
-  ]);
+  const [leads, releases, requests, previewAccent, measurements] =
+    await Promise.all([
+      getOverviewLeads(client, ctx.organization.id, site.id, asOf),
+      getRecentDeployments(site.id, 12),
+      client
+        .from("change_requests")
+        .select("id", { head: true, count: "exact" })
+        .eq("organization_id", ctx.organization.id)
+        .in("status", ["submitted", "triaged", "in_progress", "delivered"]),
+      getOverviewPalette(client, ctx.organization.id, site.id),
+      getWebsiteMeasurements(client, ctx.organization.id, site.id, asOf),
+    ]);
   if (requests.error) throw requests.error;
   const data: OverviewData = {
     ...leads,
@@ -83,9 +92,8 @@ export async function LiveOverview({
           last_checked_at: domain.last_checked_at,
         }
       : null,
-    traffic: null, // No customer website analytics source is connected yet. Never invent visitor counts.
-    security: null, // Threat monitoring requires a connected source; SSL/DNS are not security scans.
-    quality: null, // No website audit source is connected yet. Never invent scores.
+    ...overviewMeasurementData(measurements),
+    measurements,
     activity: activity.map((row) => ({
       id: String(row.id),
       title: humanizeAction(row.action),
@@ -120,6 +128,7 @@ export async function LiveOverview({
     <LiveOverviewDashboard
       key={`${ctx.user.id}:${ctx.organization.id}:${site.id}`}
       data={data}
+      initialRange={initialRange}
       initialLayout={readLayout(ctx.user.user_metadata?.[LAYOUT_METADATA_KEY])}
       saveLayout={saveOverviewLayout}
     />

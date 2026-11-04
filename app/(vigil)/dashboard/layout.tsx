@@ -90,7 +90,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       {
         items: [
           ...(onboardingNeedsAttention ? [{ href: "/dashboard/onboarding", label: "Getting set up", icon: "virtue" as const, attention: true }] : []),
-          { href: "/dashboard", label: "Overview", icon: "overview", exact: true, attention: anythingNeedsAttention },
+          { href: "/dashboard", label: "Overview", icon: "overview", exact: true, activePaths: ["/dashboard/analytics"], attention: anythingNeedsAttention },
         ],
       },
       {

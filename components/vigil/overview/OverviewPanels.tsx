@@ -23,6 +23,8 @@ import {
 import { DashboardSiteFrame } from "@/components/vigil/DashboardSiteFrame";
 import { DownloadSiteButton } from "@/components/vigil/DownloadSiteButton";
 import { formatDate, formatRelative } from "@/lib/vigil/format";
+import { measurementReportHref } from "@/lib/vigil/measurements/navigation";
+import { measurementStateLabels } from "@/lib/vigil/measurements/contract";
 import { contactInitials, sourceLabel } from "@/lib/vigil/leads/presentation";
 import {
   STAGE_COLORS,
@@ -313,6 +315,9 @@ export function TrafficPanel({
 }) {
   const [tab, setTab] = useState<"trend" | "sources" | "pages">("trend");
   const report = data.traffic?.[range];
+  const connection = data.measurements?.connections.find(
+    (c) => c.kind === "traffic",
+  );
   return (
     <>
       <div className="ov-traffic-tabs" role="group" aria-label="Traffic report">
@@ -353,12 +358,18 @@ export function TrafficPanel({
                 <strong>{report.pageViews.toLocaleString()}</strong>
               </div>
             </div>
-            <TrendChart
-              points={report.series}
-              view={view}
-              label="Visitors"
-              color="var(--ov-cyan)"
-            />
+            {report.series.length ? (
+              <TrendChart
+                points={report.series}
+                view={view}
+                label="Visitors"
+                color="var(--ov-cyan)"
+              />
+            ) : (
+              <p className="ov-footnote">
+                No daily traffic rows were returned for this period.
+              </p>
+            )}
           </>
         ) : (
           <RankedBars
@@ -404,9 +415,28 @@ export function TrafficPanel({
       )}
       <p className="ov-footnote">
         {report
-          ? "Visitor metrics for the selected period."
-          : "Inquiry capture and website analytics are separate connections."}
+          ? `Vercel Web Analytics · ${connection?.observedAt ? `checked ${formatRelative(connection.observedAt)} · ` : ""}${connection ? measurementStateLabels[connection.state] : "Recorded period"}. Visitor identities reset daily.`
+          : connection?.enabled
+            ? measurementStateLabels[connection.state]
+            : "Inquiry capture and website analytics are separate connections."}
       </p>
+      {data.measurements?.updatesEnabled === false && report ? (
+        <p className="ov-footnote">Scheduled reporting updates are paused.</p>
+      ) : null}
+      {report && connection ? (
+        <p className="ov-footnote">
+          Only returned dates appear in the trend. Missing days are not assumed
+          to have zero visitors.
+        </p>
+      ) : null}
+      <Link
+        className="ov-text-link"
+        href={measurementReportHref(data.site.id, range, "traffic")}
+        aria-label="View traffic report"
+      >
+        View report
+        <ArrowUpRight size={13} />
+      </Link>
     </>
   );
 }

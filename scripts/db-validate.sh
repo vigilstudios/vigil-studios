@@ -67,4 +67,6 @@ target -f "$ROOT/supabase/test/admin-domain-setup.test.sql"
 
 echo "▸ Gmail connection assertions"
 target -f "$ROOT/supabase/test/gmail.test.sql"
+echo "▸ website measurement assertions"
+target -f "$ROOT/supabase/test/measurements.test.sql"
 echo "✓ migrations and RLS assertions passed"

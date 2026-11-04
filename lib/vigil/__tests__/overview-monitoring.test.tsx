@@ -108,7 +108,7 @@ describe("site quality metrics", () => {
     const html = renderToStaticMarkup(<SiteQualityPanel data={data} />);
     expect(html).toContain("Largest Contentful Paint");
     expect(html).toContain("1.8");
-    expect(html).toContain("Mobile audit");
+    expect(html).toContain("Mobile lab audit");
   });
 });
 describe("compact lead status groups", () => {

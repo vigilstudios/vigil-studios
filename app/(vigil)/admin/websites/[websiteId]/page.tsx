@@ -75,6 +75,7 @@ export default async function WebsiteDetailPage({ params }: { params: Promise<{ 
             </div>
           ) : null}
           <Link className="btn-secondary mt-4 inline-flex" href={`/admin/websites/${w.id}/contact`}>Contact &amp; booking settings</Link>
+          <Link className="btn-secondary mt-4 ml-2 inline-flex" href={`/admin/websites/${w.id}/analytics`}>Reporting connections</Link>
           <h3 className="mt-5 text-sm font-semibold">Provider links</h3>
           <ul className="mt-1 text-xs">
             {links.map((l) => (
