@@ -123,9 +123,9 @@ export const searchPayloadSchema = z.object({
   periodStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   periodEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   timezone: z.literal("America/Los_Angeles"),
-  clicks: count,
-  impressions: count,
-  ctr: z.number().min(0).max(1),
+  clicks: count.nullable(),
+  impressions: count.nullable(),
+  ctr: z.number().min(0).max(1).nullable(),
   position: metric,
   queries: z
     .array(

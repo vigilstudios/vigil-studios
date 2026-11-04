@@ -288,7 +288,10 @@ function Evidence({
               },
               {
                 label: "Click-through rate",
-                value: `${(payload.ctr * 100).toFixed(1)}%`,
+                value:
+                  payload.ctr === null
+                    ? "—"
+                    : `${(payload.ctr * 100).toFixed(1)}%`,
               },
               { label: "Average position", value: value(payload.position) },
             ]}
@@ -297,6 +300,12 @@ function Evidence({
             Finalized search data · {payload.periodStart} to {payload.periodEnd}{" "}
             · Pacific time. Search terms may be withheld or limited by Google.
           </p>
+          {payload.clicks === null ? (
+            <p className="vm-context">
+              Search Console returned no data for this period. New properties
+              need time to collect search history.
+            </p>
+          ) : null}
           <Ranking
             title="Top search terms · clicks"
             items={payload.queries.map((query) => ({

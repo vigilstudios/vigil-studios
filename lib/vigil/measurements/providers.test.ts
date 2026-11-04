@@ -30,7 +30,13 @@ describe("traffic source", () => {
         return reply({ data: { visitors: 14, pageviews: 30 } });
       if (url.searchParams.get("by") === "day")
         return reply({
-          data: [{ timestamp: now.toISOString(), visitors: 7, pageviews: 9 }],
+          data: [
+            {
+              timestamp: url.searchParams.get("until"),
+              visitors: 7,
+              pageviews: 9,
+            },
+          ],
         });
       if (url.searchParams.get("by") === "requestPath")
         return reply({
@@ -54,7 +60,7 @@ describe("traffic source", () => {
       now,
       request,
     );
-    expect(request).toHaveBeenCalledTimes(12);
+    expect(request).toHaveBeenCalledTimes(13);
     expect(result.ranges["30"].visitors).toBe(14);
     expect(
       result.ranges["30"].series.reduce((sum, p) => sum + p.value, 0),
@@ -70,6 +76,37 @@ describe("traffic source", () => {
       expect(init?.redirect).toBe("error");
       expect(init?.cache).toBe("no-store");
     }
+  });
+  it("collects a 90-day daily trend within the provider's date cap without double-counting boundaries or summing period visitors", async () => {
+    const spans: [string, string][] = [];
+    const request = vi.fn<typeof fetch>().mockImplementation(async (input) => {
+      const url = new URL(String(input));
+      if (url.pathname.endsWith("count"))
+        return reply({ data: { visitors: 42, pageviews: 90 } });
+      if (url.searchParams.get("by") !== "day") return reply({ data: [] });
+      const since = url.searchParams.get("since")!,
+        until = url.searchParams.get("until")!;
+      if (Date.parse(until) - Date.parse(since) > 61 * 86_400_000)
+        return reply({ error: { code: "invalid_group_by" } }, 400);
+      spans.push([since, until]);
+      return reply({ data: [{ timestamp: since, visitors: 2, pageviews: 3 }] });
+    });
+    const result = await collectTraffic(
+      { ...target, projectId: "prj_client" },
+      { vercelToken: "private" },
+      now,
+      request,
+    );
+    const ninety = spans.slice(2);
+    expect(ninety).toHaveLength(2);
+    expect(Date.parse(ninety[1][0]) - Date.parse(ninety[0][1])).toBe(
+      86_400_000,
+    );
+    expect(result.ranges["90"].series).toHaveLength(2);
+    expect(result.ranges["90"].visitors).toBe(42);
+    expect(
+      result.ranges["90"].series.reduce((sum, point) => sum + point.value, 0),
+    ).toBe(4);
   });
   it("does not turn disabled collection or missing totals into zero visitors", async () => {
     await expect(
@@ -222,6 +259,114 @@ describe("security observations", () => {
     expect(result).toMatchObject({ complete: true, openCount: 1 });
     expect(result.findings[0].reference).toMatch(/^[a-f0-9]{64}$/);
     expect(String(request.mock.calls[0][0])).toContain("state=open");
+    expect(
+      new URL(String(request.mock.calls[0][0])).searchParams.has("page"),
+    ).toBe(false);
+  });
+  it("follows bounded same-repository cursor pagination and preserves completeness", async () => {
+    const alert = (number: number) => ({
+      number,
+      state: "open",
+      created_at: now.toISOString(),
+      security_advisory: { summary: "Update dependency", severity: "high" },
+    });
+    const request = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(
+        Response.json([alert(1)], {
+          headers: {
+            link: '<https://api.github.com/repos/org/client/dependabot/alerts?state=open&per_page=100&after=opaque-cursor>; rel="next"',
+          },
+        }),
+      )
+      .mockResolvedValueOnce(Response.json([alert(2)]));
+    const result = await collectRepository(
+      { ...target, repository: "org/client" },
+      { githubToken: "private" },
+      request,
+    );
+    expect(result).toMatchObject({ complete: true, openCount: 2 });
+    const url = new URL(String(request.mock.calls[1][0]));
+    expect(url.searchParams.get("after")).toBe("opaque-cursor");
+    expect(url.searchParams.has("page")).toBe(false);
+  });
+  it("accepts GitHub's canonical numeric repository cursor link only for the stored binding", async () => {
+    const request = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(
+        Response.json([], {
+          headers: {
+            link: '<https://api.github.com/repositories/12345/dependabot/alerts?after=cursor>; rel="next"',
+          },
+        }),
+      )
+      .mockResolvedValueOnce(Response.json([]));
+    expect(
+      await collectRepository(
+        { ...target, repository: "org/client", repositoryId: "12345" },
+        { githubToken: "private" },
+        request,
+      ),
+    ).toMatchObject({ complete: true });
+    expect(new URL(String(request.mock.calls[1][0])).pathname).toBe(
+      "/repos/org/client/dependabot/alerts",
+    );
+    const foreign = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(
+        Response.json([], {
+          headers: {
+            link: '<https://api.github.com/repositories/99999/dependabot/alerts?after=cursor>; rel="next"',
+          },
+        }),
+      );
+    await expect(
+      collectRepository(
+        { ...target, repository: "org/client", repositoryId: "12345" },
+        { githubToken: "private" },
+        foreign,
+      ),
+    ).rejects.toMatchObject({ code: "invalid_response" });
+    expect(foreign).toHaveBeenCalledTimes(1);
+  });
+  it.each([
+    "https://attacker.example/repos/org/client/dependabot/alerts?after=secret",
+    "https://api.github.com/repos/other/client/dependabot/alerts?after=secret",
+  ])(
+    "refuses a pagination link outside the bound repository: %s",
+    async (next) => {
+      const request = vi
+        .fn<typeof fetch>()
+        .mockResolvedValue(
+          Response.json([], { headers: { link: `<${next}>; rel="next"` } }),
+        );
+      await expect(
+        collectRepository(
+          { ...target, repository: "org/client" },
+          { githubToken: "private" },
+          request,
+        ),
+      ).rejects.toMatchObject({ code: "invalid_response" });
+      expect(request).toHaveBeenCalledTimes(1);
+    },
+  );
+  it("keeps a capped result partial when another cursor remains", async () => {
+    let page = 0;
+    const request = vi.fn<typeof fetch>().mockImplementation(async () =>
+      Response.json([], {
+        headers: {
+          link: `<https://api.github.com/repos/org/client/dependabot/alerts?after=cursor-${++page}>; rel="next"`,
+        },
+      }),
+    );
+    expect(
+      await collectRepository(
+        { ...target, repository: "org/client" },
+        { githubToken: "private" },
+        request,
+      ),
+    ).toMatchObject({ complete: false, openCount: 0 });
+    expect(request).toHaveBeenCalledTimes(5);
   });
   it("does not treat missing repository permission as a clean security report", async () => {
     await expect(
@@ -288,6 +433,34 @@ describe("public network boundary", () => {
   });
 });
 describe("Search Console", () => {
+  it("keeps absent search history unknown instead of inventing zero clicks", async () => {
+    const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+    const request = vi
+      .fn<typeof fetch>()
+      .mockImplementation(async (input) =>
+        String(input).includes("oauth2")
+          ? reply({ access_token: "private-oauth" })
+          : reply({}),
+      );
+    const result = await collectSearch(
+      { ...target, searchProperty: target.origin + "/" },
+      {
+        googleServiceAccount: JSON.stringify({
+          client_email: "reader@client.iam.gserviceaccount.com",
+          private_key: privateKey.export({ type: "pkcs8", format: "pem" }),
+        }),
+      },
+      now,
+      request,
+    );
+    expect(result).toMatchObject({
+      clicks: null,
+      impressions: null,
+      ctr: null,
+      position: null,
+      queries: [],
+    });
+  });
   it("uses read-only OAuth, finalized dates, exact origin filtering and independent totals", async () => {
     const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
     const config = {

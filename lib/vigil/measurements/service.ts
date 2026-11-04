@@ -67,6 +67,8 @@ export async function measurementTarget(
     if (typeof meta?.full_name !== "string")
       throw new MeasurementError("invalid_mapping");
     target.repository = meta.full_name;
+    if (/^\d{1,20}$/.test(link.external_id))
+      target.repositoryId = link.external_id;
   }
   return target;
 }
@@ -138,7 +140,8 @@ export async function runMeasurementBatch(
         if (!payloadMatchesKind(connection.kind as MeasurementKind, payload))
           throw new MeasurementError("invalid_response");
         const coverage =
-          payload.kind === "field" && !payload.sufficient
+          (payload.kind === "field" && !payload.sufficient) ||
+          (payload.kind === "search" && payload.clicks === null)
             ? "insufficient"
             : payload.kind === "repository_security" && !payload.complete
               ? "partial"

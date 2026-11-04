@@ -48,6 +48,9 @@ select public.configure_website_measurement('cf600000-0000-4000-8000-00000000002
 reset role;
 select set_config('request.jwt.claim.role','service_role',true);
 set local role service_role;
+select measurement_test.ok((select count(*)=2 from public.websites where id in ('cf600000-0000-4000-8000-000000000021','cf600000-0000-4000-8000-000000000022')),'worker can resolve website targets through service-role reads');
+select measurement_test.ok((select count(*)=2 from public.organizations where id in ('cf600000-0000-4000-8000-000000000011','cf600000-0000-4000-8000-000000000012')),'worker can resolve organization archive status');
+select measurement_test.ok((select count(*)=1 from public.provider_links where resource_kind='search_console_property'),'worker can resolve provider bindings');
 select measurement_test.ok((select count(*)=0 from public.claim_website_measurement('cf600000-0000-4000-8000-000000000032')),'connections default off');
 select measurement_test.ok((select count(*)=1 from public.claim_website_measurement('cf600000-0000-4000-8000-000000000031')),'enabled live site can be claimed');
 select measurement_test.ok((select count(*)=0 from public.claim_website_measurement('cf600000-0000-4000-8000-000000000031')),'duplicate run cannot acquire lease');

@@ -362,4 +362,36 @@ describe("report presentation", () => {
     expect(html).toContain("enough eligible real-user data");
     expect(html).not.toContain("0ms");
   });
+  it("explains missing search history without showing an invented zero rate", () => {
+    const search: MeasurementConnectionView = {
+      id: "search",
+      kind: "search",
+      enabled: true,
+      revision: 1,
+      lastAttemptAt: now,
+      lastSuccessAt: now,
+      nextRunAt: now,
+      state: "insufficient",
+      observedAt: now,
+      expiresAt: now,
+      payload: {
+        kind: "search",
+        periodStart: "2026-10-01",
+        periodEnd: "2026-10-28",
+        timezone: "America/Los_Angeles",
+        clicks: null,
+        impressions: null,
+        ctr: null,
+        position: null,
+        queries: [],
+      },
+    };
+    const html = renderToStaticMarkup(
+      <WebsiteMeasurementsView
+        data={{ available: true, connections: [search] }}
+      />,
+    );
+    expect(html).toContain("Search Console returned no data for this period");
+    expect(html).not.toContain("0.0%");
+  });
 });

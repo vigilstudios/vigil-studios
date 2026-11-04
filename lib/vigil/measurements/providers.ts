@@ -1,6 +1,7 @@
 import "server-only";
 import { createHash, createSign } from "node:crypto";
 import { z } from "zod";
+import { getVercelOidcToken } from "@vercel/oidc";
 import { DAY, RANGES, rangeStart } from "@/lib/vigil/overview/model";
 import {
   fieldPayloadSchema,
@@ -28,6 +29,8 @@ export type MeasurementConfig = {
   cruxKey?: string;
   githubToken?: string;
   googleServiceAccount?: string;
+  googleWifAudience?: string;
+  googleServiceAccountEmail?: string;
 };
 export function measurementConfig(): MeasurementConfig {
   return {
@@ -38,12 +41,15 @@ export function measurementConfig(): MeasurementConfig {
     cruxKey: process.env.CRUX_API_KEY || process.env.GOOGLE_METRICS_API_KEY,
     githubToken: process.env.GITHUB_SECURITY_TOKEN || process.env.GITHUB_TOKEN,
     googleServiceAccount: process.env.GOOGLE_SEARCH_SERVICE_ACCOUNT_JSON,
+    googleWifAudience: process.env.GOOGLE_SEARCH_WIF_AUDIENCE,
+    googleServiceAccountEmail: process.env.GOOGLE_SEARCH_SERVICE_ACCOUNT_EMAIL,
   };
 }
 export type MeasurementTarget = {
   origin: string;
   projectId?: string;
   repository?: string;
+  repositoryId?: string;
   searchProperty?: string;
 };
 const integer = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
@@ -97,15 +103,20 @@ export async function collectTraffic(
   for (const days of RANGES) {
     const start = new Date(rangeStart(now.toISOString(), days)).toISOString(),
       end = now.toISOString();
-    const query = async (mode: "count" | "aggregate", by?: string) => {
+    const query = async (
+      mode: "count" | "aggregate",
+      by?: string,
+      since = start,
+      until = end,
+    ) => {
       const url = new URL(
         `https://api.vercel.com/v1/query/web-analytics/visits/${mode}`,
       );
       url.searchParams.set("projectId", target.projectId!);
       if (config.vercelTeamId)
         url.searchParams.set("teamId", config.vercelTeamId);
-      url.searchParams.set("since", start);
-      url.searchParams.set("until", end);
+      url.searchParams.set("since", since);
+      url.searchParams.set("until", until);
       // Production only. Do not combine the app's preview traffic with client traffic.
       url.searchParams.set("filter", "environment eq 'production'");
       if (by) {
@@ -115,10 +126,34 @@ export async function collectTraffic(
       return providerJson(url, { headers }, request);
     };
     const total = parse(countResponse, await query("count")).data;
-    const daily = parse(
-      aggregateResponse,
-      await query("aggregate", "day"),
-    ).data;
+    const daily: z.infer<typeof aggregateResponse>["data"] = [];
+    // Vercel limits daily queries to 62 days. Its date bounds are inclusive;
+    // split into non-overlapping 60-day windows without summing visitor totals.
+    for (
+      let cursor = Date.parse(start);
+      cursor <= Date.parse(end);
+      cursor += 60 * DAY
+    ) {
+      const since = new Date(cursor).toISOString();
+      const until = new Date(
+        Math.min(cursor + 59 * DAY, Date.parse(end)),
+      ).toISOString();
+      const rows = parse(
+        aggregateResponse,
+        await query("aggregate", "day", since, until),
+      ).data;
+      for (const row of rows) {
+        if (
+          typeof row.timestamp !== "string" ||
+          !Number.isFinite(Date.parse(row.timestamp))
+        )
+          throw new MeasurementError("invalid_response");
+        const date = new Date(row.timestamp).toISOString().slice(0, 10);
+        if (date < since.slice(0, 10) || date > until.slice(0, 10))
+          throw new MeasurementError("invalid_response");
+      }
+      daily.push(...rows);
+    }
     const sources = parse(
       aggregateResponse,
       await query("aggregate", "referrerHostname"),
@@ -438,6 +473,9 @@ export async function collectRepository(
   const findings: z.infer<typeof repositoryPayloadSchema>["findings"] = [];
   let complete = false,
     openCount = 0;
+  let cursor: string | null = null;
+  const seenCursors = new Set<string>();
+  const endpoint = `https://api.github.com/repos/${target.repository}/dependabot/alerts`;
   const rowSchema = z.object({
     number: integer,
     state: z.literal("open"),
@@ -448,13 +486,19 @@ export async function collectRepository(
     }),
   });
   for (let page = 1; page <= 5; page++) {
+    const url = new URL(endpoint);
+    url.searchParams.set("state", "open");
+    url.searchParams.set("per_page", "100");
+    if (cursor) url.searchParams.set("after", cursor);
+    let nextLink: string | null = null;
+    const capture: typeof fetch = async (input, init) => {
+      const response = await request(input, init);
+      nextLink = response.headers.get("link");
+      return response;
+    };
     const rows = parse(
       z.array(rowSchema).max(100),
-      await providerJson(
-        `https://api.github.com/repos/${target.repository}/dependabot/alerts?state=open&per_page=100&page=${page}`,
-        { headers },
-        request,
-      ),
+      await providerJson(url, { headers }, capture),
     );
     openCount += rows.length;
     for (const row of rows)
@@ -467,10 +511,37 @@ export async function collectRepository(
           severity: row.security_advisory.severity,
           detectedAt: row.created_at,
         });
-    if (rows.length < 100) {
+    const next = String(nextLink ?? "").match(/<([^>]+)>;\s*rel="next"/);
+    if (!next) {
       complete = true;
       break;
     }
+    // Use only the returned cursor, never an upstream-supplied credential destination.
+    let nextUrl: URL;
+    try {
+      nextUrl = new URL(next[1]);
+    } catch {
+      throw new MeasurementError("invalid_response");
+    }
+    cursor = nextUrl.searchParams.get("after");
+    if (
+      nextUrl.origin !== "https://api.github.com" ||
+      !(
+        nextUrl.pathname === new URL(endpoint).pathname ||
+        (target.repositoryId &&
+          /^\d{1,20}$/.test(target.repositoryId) &&
+          nextUrl.pathname ===
+            `/repositories/${target.repositoryId}/dependabot/alerts`)
+      ) ||
+      nextUrl.username ||
+      nextUrl.password ||
+      nextUrl.hash ||
+      !cursor ||
+      cursor.length > 2048 ||
+      seenCursors.has(cursor)
+    )
+      throw new MeasurementError("invalid_response");
+    seenCursors.add(cursor);
   }
   return parse(repositoryPayloadSchema, {
     kind: "repository_security",
@@ -485,11 +556,69 @@ const accountSchema = z.object({
   private_key: z.string().min(100).max(20_000),
   token_uri: z.literal("https://oauth2.googleapis.com/token").optional(),
 });
-async function searchAccessToken(
+export async function searchAccessToken(
   config: MeasurementConfig,
   now: Date,
   request: typeof fetch,
 ) {
+  if (config.googleWifAudience || config.googleServiceAccountEmail) {
+    // No caller-supplied token URLs or credential-source URLs are accepted.
+    // Google verifies the Vercel assertion against the pool's explicit trust policy.
+    if (
+      !/^\/\/iam\.googleapis\.com\/projects\/\d{1,32}\/locations\/global\/workloadIdentityPools\/[a-z][a-z\d-]{3,31}\/providers\/[a-z][a-z\d-]{3,31}$/.test(
+        config.googleWifAudience ?? "",
+      ) ||
+      !/^[a-z][a-z\d-]{4,29}@[a-z][a-z\d-]{4,29}\.iam\.gserviceaccount\.com$/.test(
+        config.googleServiceAccountEmail ?? "",
+      )
+    )
+      throw new MeasurementError("configuration_required");
+    let subjectToken: string;
+    try {
+      subjectToken = await getVercelOidcToken();
+      if (!subjectToken || subjectToken.length > 32_768) throw new Error();
+    } catch {
+      throw new MeasurementError("configuration_required");
+    }
+    const token = parse(
+      z.object({ access_token: z.string().min(1).max(16_384) }),
+      await providerJson(
+        "https://sts.googleapis.com/v1/token",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            grant_type: "urn:ietf:params:oauth:grant-type:token-exchange",
+            audience: config.googleWifAudience!,
+            requested_token_type:
+              "urn:ietf:params:oauth:token-type:access_token",
+            subject_token_type: "urn:ietf:params:oauth:token-type:jwt",
+            subject_token: subjectToken,
+            scope: "https://www.googleapis.com/auth/cloud-platform",
+          }),
+        },
+        request,
+      ),
+    );
+    return parse(
+      z.object({ accessToken: z.string().min(1).max(16_384) }),
+      await providerJson(
+        `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${encodeURIComponent(config.googleServiceAccountEmail!)}:generateAccessToken`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            scope: ["https://www.googleapis.com/auth/webmasters.readonly"],
+            lifetime: "600s",
+          }),
+        },
+        request,
+      ),
+    ).accessToken;
+  }
   if (!config.googleServiceAccount)
     throw new MeasurementError("configuration_required");
   let credentials: z.infer<typeof accountSchema>;
@@ -598,9 +727,9 @@ export async function collectSearch(
     periodStart,
     periodEnd,
     timezone: "America/Los_Angeles",
-    clicks: totals[0]?.clicks ?? 0,
-    impressions: totals[0]?.impressions ?? 0,
-    ctr: totals[0]?.ctr ?? 0,
+    clicks: totals[0]?.clicks ?? null,
+    impressions: totals[0]?.impressions ?? null,
+    ctr: totals[0]?.ctr ?? null,
     position: totals[0]?.impressions ? totals[0].position : null,
     queries: queries.map((item) => ({
       label: label(item.keys?.[0], "Unknown query"),
