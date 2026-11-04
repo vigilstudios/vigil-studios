@@ -56,7 +56,7 @@ import {
   SiteQualityPanel,
   VigilEyeIcon,
 } from "./OverviewMonitoring";
-import { securityState } from "@/lib/vigil/overview/monitoring";
+import { securityState, securityTone } from "@/lib/vigil/overview/monitoring";
 import "./overview.css";
 
 const icons = {
@@ -315,6 +315,20 @@ export function LiveOverviewDashboard({
         data-panel={id}
         data-security-state={
           id === "health" ? securityState(data.security, data.asOf) : undefined
+        }
+        data-security-tone={
+          id === "health"
+            ? securityTone(
+                data.security,
+                data.asOf,
+                data.measurements?.connections.some(
+                  (c) =>
+                    ["site_security", "repository_security"].includes(c.kind) &&
+                    c.enabled &&
+                    c.state === "attention",
+                ),
+              )
+            : undefined
         }
         data-slot={index}
         data-compact={(kind === "work" && index === 1) || undefined}

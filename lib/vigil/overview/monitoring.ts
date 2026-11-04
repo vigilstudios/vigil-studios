@@ -76,3 +76,29 @@ export function speedSeconds(value: number | null | undefined): number | null {
     ? value / 1000
     : null;
 }
+
+/** Tone reflects connected evidence only; it never upgrades partial coverage to secured. */
+export function securityTone(
+  report: SecurityReport | null,
+  asOf: string,
+  failedRefresh = false,
+): "clear" | "attention" | "neutral" {
+  if (!report) return "neutral";
+  if (
+    failedRefresh ||
+    report.alerts.length ||
+    Object.values(report.checks).includes("alert")
+  )
+    return "attention";
+  if (!securityChecksCurrent(report, asOf)) return "neutral";
+  const baseline = report.baseline ?? [];
+  if (baseline.some((c) => c.status === "attention")) return "attention";
+  if (
+    baseline.some((c) => c.status === "unknown") ||
+    (report.dependencyOnly && report.checks.vulnerabilities === "unknown")
+  )
+    return "neutral";
+  return baseline.length || Object.values(report.checks).includes("clear")
+    ? "clear"
+    : "neutral";
+}

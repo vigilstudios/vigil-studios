@@ -7,6 +7,7 @@ import {
 import {
   auditScore,
   securityState,
+  securityTone,
   speedSeconds,
 } from "../overview/monitoring";
 import { leadStatusGroups } from "../overview/model";
@@ -129,4 +130,48 @@ describe("compact lead status groups", () => {
       );
     },
   );
+});
+
+describe("connected security tone", () => {
+  const partial = {
+    ...report,
+    coverage: "partial" as const,
+    dependencyOnly: true,
+    checks: {
+      vulnerabilities: "clear" as const,
+      exploits: "unknown" as const,
+      activity: "unknown" as const,
+      firewall: "unknown" as const,
+    },
+    baseline: [
+      {
+        id: "https",
+        title: "HTTPS",
+        detail: "Observed",
+        status: "passed" as const,
+      },
+    ],
+  };
+  it("colors passing connected checks blue while retaining partial coverage", () => {
+    expect(securityTone(partial, data.asOf)).toBe("clear");
+    expect(securityState(partial, data.asOf)).toBe("pending");
+  });
+  it("colors header failures or failed refreshes orange", () => {
+    expect(
+      securityTone(
+        {
+          ...partial,
+          baseline: [{ ...partial.baseline[0], status: "attention" }],
+        },
+        data.asOf,
+      ),
+    ).toBe("attention");
+    expect(securityTone(partial, data.asOf, true)).toBe("attention");
+  });
+  it("does not color stale or missing evidence blue", () => {
+    expect(
+      securityTone({ ...partial, expiresAt: partial.observedAt }, data.asOf),
+    ).toBe("neutral");
+    expect(securityTone(null, data.asOf)).toBe("neutral");
+  });
 });
