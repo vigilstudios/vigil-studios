@@ -85,7 +85,10 @@ export default async function ReportingConnectionsPage({
     field_performance: Boolean(config.cruxKey),
     site_security: true,
     repository_security: Boolean(config.githubToken),
-    search: Boolean(config.googleServiceAccount),
+    search: Boolean(
+      (config.googleWifAudience && config.googleServiceAccountEmail) ||
+        config.googleServiceAccount,
+    ),
   };
   return (
     <div>
