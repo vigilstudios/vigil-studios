@@ -1475,3 +1475,7 @@ Final live checks also corrected current-day traffic count boundaries and bounde
 ### 2026-11-03 — Align Overview analytics and connect availability evidence
 
 Availability now reads the current dated HTTPS observation when that source is enabled, with stale/failed/unchecked states kept explicit. Removed repeated traffic-card caveats in favor of the full report; traffic and inquiry cards share fixed toolbar, summary, plot and footer rows. Sparse one-day series render an observed dot instead of a degenerate invisible area. Traffic uses royal blue and horizontal ranking gradients. Site quality and lead status now share the existing pointer/keyboard swap and saved-layout behavior. No migrations, provider calls on render or new infrastructure. Focused regression tests cover sparse data, availability freshness and persistence of the new swap pair; browser checks cover aligned plots and stable tab dimensions.
+
+### 2026-11-03 — Full-width chart plots and connected security tone
+
+Removed SVG aspect-ratio letterboxing and moved axis labels inside the plot so both report graphs span the same edges as their footers. Security tint now evaluates the connected checks independently from the full coverage state: passing evidence is blue, findings/failed refreshes orange, and unknown/stale evidence neutral. Partial coverage retains its honest label. Owner deferred broader security monitoring and prioritized native bookings with both instant and approval-based modes per service, followed by Lead Hub outcomes, Insights and Virtue.

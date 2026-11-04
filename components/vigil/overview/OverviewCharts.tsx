@@ -85,8 +85,8 @@ export function TrendChart({
     );
   const width = measured.width || 300,
     height = 180,
-    left = 28,
-    right = 3,
+    left = 0,
+    right = 0,
     top = 16,
     bottom = 26;
   const plotWidth = width - left - right,
@@ -131,6 +131,7 @@ export function TrendChart({
       </div>
       <svg
         viewBox={`0 0 ${width} ${height}`}
+        preserveAspectRatio="none"
         role="group"
         aria-label={`${label}, ${points[0]?.label ?? ""} to ${points.at(-1)?.label ?? ""}`}
       >
@@ -155,9 +156,9 @@ export function TrendChart({
               strokeDasharray="3 5"
             />
             <text
-              x={left - 10}
-              y={y((maximum * tick) / 4) + 4}
-              textAnchor="end"
+              x={left + 1}
+              y={y((maximum * tick) / 4) - 4}
+              textAnchor="start"
               fill="var(--text-secondary)"
               fontSize="12"
             >

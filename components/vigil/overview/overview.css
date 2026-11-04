@@ -1915,10 +1915,10 @@ html[data-theme="light"] .ov-card-health {
   --security-clear-text: #2164b3;
   --security-alert-text: #9e500c;
 }
-.ov-card-health[data-security-state="secured"] {
+.ov-card-health[data-security-tone="clear"] {
   --security-color: #4d9dfa;
 }
-.ov-card-health[data-security-state="alert"] {
+.ov-card-health[data-security-tone="attention"] {
   --security-color: #f29b43;
 }
 .ov-card-health {
