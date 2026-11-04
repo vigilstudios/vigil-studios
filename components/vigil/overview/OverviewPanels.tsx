@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Activity,
-  ArrowDownRight,
   ArrowRight,
   ArrowUpRight,
   Box,
@@ -112,12 +111,42 @@ export function WebsitePanel({ data }: { data: OverviewData }) {
 }
 
 function SiteChecks({ data }: { data: OverviewData }) {
+  const availability = data.measurements?.connections.find(
+    (c) => c.kind === "site_security" && c.enabled,
+  );
+  const observed =
+    availability?.payload?.kind === "site_security"
+      ? availability.payload
+      : null;
+  const current =
+    availability?.state === "current" &&
+    availability.expiresAt &&
+    Date.parse(availability.expiresAt) >= Date.parse(data.asOf);
   const checks = [
     {
       name: "Availability",
       icon: Globe2,
-      value: data.site.last_health_at ? data.site.health_ok : null,
-      at: data.site.last_health_at,
+      value: availability
+        ? current && observed
+          ? observed.statusCode >= 200 &&
+            observed.statusCode < 300 &&
+            observed.checks.some(
+              (c) => c.id === "https" && c.status === "passed",
+            )
+          : null
+        : data.site.last_health_at
+          ? data.site.health_ok
+          : null,
+      at: availability?.observedAt ?? data.site.last_health_at,
+      unknown:
+        availability?.state === "attention"
+          ? "Check failed"
+          : availability?.state === "stale"
+            ? "Needs refresh"
+            : availability
+              ? "Checking"
+              : "Not checked",
+      detail: "Latest recorded HTTPS availability check",
     },
     {
       name: "HTTPS / SSL",
@@ -141,7 +170,7 @@ function SiteChecks({ data }: { data: OverviewData }) {
             <div
               title={
                 check.at
-                  ? `Checked ${formatRelative(check.at)}`
+                  ? `${check.detail ?? check.name} · checked ${formatRelative(check.at)}`
                   : "Check date not recorded"
               }
             >
@@ -154,7 +183,7 @@ function SiteChecks({ data }: { data: OverviewData }) {
               }
             >
               {check.value === null ? (
-                "Pending"
+                (check.unknown ?? "Pending")
               ) : check.value ? (
                 <>
                   <Check size={11} />
@@ -188,45 +217,35 @@ export function LeadTrendsPanel({
 }) {
   const report = data.reports[range];
   return (
-    <>
-      <div className="ov-trend-top">
-        <div className="ov-main-number">
-          <strong>{report.total.toLocaleString()}</strong>
-          <span>{report.total === 1 ? "inquiry" : "inquiries"} received</span>
-          <small
-            className={report.total >= report.previous ? "ov-positive" : ""}
-          >
-            {report.total >= report.previous ? (
-              <ArrowUpRight size={13} />
-            ) : (
-              <ArrowDownRight size={13} />
-            )}
-            {data.completeHistory
-              ? comparison(report.total, report.previous)
-              : "Within the latest 10,000 records"}
-          </small>
-        </div>
+    <div className="ov-report-frame">
+      <div className="ov-report-toolbar">
+        <span className="ov-report-label">Received inquiries</span>
         <ChartSwitcher value={view} onChange={onView} label="Inquiry trends" />
       </div>
-      <TrendChart points={report.series} view={view} label="Inquiries" />
-      <div className="ov-trend-footer">
-        <span>
-          <i />
-          {range === 90 ? "Weekly" : "Daily"} inquiries · UTC · excludes spam
+      <div className="ov-report-metrics ov-main-number">
+        <strong>{report.total.toLocaleString()}</strong>
+        <span>{report.total === 1 ? "inquiry" : "inquiries"}</span>
+        <small className={report.total >= report.previous ? "ov-positive" : ""}>
+          {data.completeHistory
+            ? comparison(report.total, report.previous)
+            : "Latest 10,000 records"}
+        </small>
+      </div>
+      <div className="ov-report-plot">
+        <TrendChart points={report.series} view={view} label="Inquiries" />
+      </div>
+      <div className="ov-report-footer">
+        <span title="UTC · excludes spam">
+          {!data.captureEnabled
+            ? "Capture paused"
+            : `${range === 90 ? "Weekly" : "Daily"} inquiries · UTC`}
         </span>
-        <Link href="/dashboard/leads">
-          Explore Lead Hub
-          <ArrowRight size={13} />
+        <Link className="ov-text-link" href="/dashboard/leads">
+          Lead Hub
+          <ArrowUpRight size={12} />
         </Link>
       </div>
-      {!data.captureEnabled && (
-        <p className="ov-data-note">
-          <Inbox size={13} />
-          Inquiry capture is not active for this website.{" "}
-          <Link href="/dashboard/leads?view=settings">View setup</Link>
-        </p>
-      )}
-    </>
+    </div>
   );
 }
 
@@ -319,9 +338,13 @@ export function TrafficPanel({
     (c) => c.kind === "traffic",
   );
   return (
-    <>
-      <div className="ov-traffic-tabs" role="group" aria-label="Traffic report">
-        <div className="ov-underline-tabs">
+    <div className="ov-report-frame">
+      <div className="ov-report-toolbar">
+        <div
+          className="ov-underline-tabs"
+          role="group"
+          aria-label="Traffic report"
+        >
           {(["trend", "sources", "pages"] as const).map((key) => (
             <button
               type="button"
@@ -337,107 +360,91 @@ export function TrafficPanel({
             </button>
           ))}
         </div>
-        {tab === "trend" && (
+        <div style={{ visibility: tab === "trend" ? "visible" : "hidden" }}>
           <ChartSwitcher
             value={view}
             onChange={onView}
             label="Website traffic"
           />
-        )}
+        </div>
       </div>
-      {report ? (
-        tab === "trend" ? (
-          <>
-            <div className="ov-traffic-metrics">
-              <div>
-                <span>Visitors</span>
-                <strong>{report.visitors.toLocaleString()}</strong>
-              </div>
-              <div>
-                <span>Page views</span>
-                <strong>{report.pageViews.toLocaleString()}</strong>
-              </div>
-            </div>
-            {report.series.length ? (
+      <div className="ov-report-metrics ov-traffic-metrics">
+        <div>
+          <span>Visitors</span>
+          <strong>{report?.visitors.toLocaleString() ?? "—"}</strong>
+        </div>
+        <div>
+          <span>Page views</span>
+          <strong>{report?.pageViews.toLocaleString() ?? "—"}</strong>
+        </div>
+      </div>
+      <div className="ov-report-plot">
+        {report ? (
+          tab === "trend" ? (
+            report.series.length ? (
               <TrendChart
                 points={report.series}
                 view={view}
                 label="Visitors"
-                color="var(--ov-cyan)"
+                color="var(--ov-royal)"
               />
             ) : (
-              <p className="ov-footnote">
-                No daily traffic rows were returned for this period.
-              </p>
-            )}
-          </>
+              <p className="ov-footnote">No daily observations yet.</p>
+            )
+          ) : (
+            <RankedBars
+              items={tab === "sources" ? report.sources : report.pages}
+              label={
+                tab === "sources"
+                  ? "Visitor sources"
+                  : "Top pages by page views"
+              }
+              color="var(--ov-royal)"
+            />
+          )
         ) : (
-          <RankedBars
-            items={tab === "sources" ? report.sources : report.pages}
-            label={
-              tab === "sources" ? "Visitor sources" : "Top pages by page views"
-            }
-            color="var(--ov-cyan)"
-          />
-        )
-      ) : (
-        <div className="ov-unconnected">
-          <div className="ov-empty-chart" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-            <svg viewBox="0 0 400 80">
-              <path
-                d="M0 65 L50 65 L100 65 L150 65 L200 65 L250 65 L300 65 L350 65 L400 65"
-                fill="none"
-                stroke="var(--ov-cyan)"
-                strokeWidth="2"
-                strokeDasharray="5 6"
-              />
-            </svg>
-            <div>
-              <MousePointer2 size={22} />
-            </div>
+          <div className="ov-unconnected">
+            <MousePointer2 size={22} />
+            <h3>Know who’s finding you.</h3>
+            <p>
+              Traffic appears once analytics is connected. No visitor data is
+              available yet.
+            </p>
+            <span className="ov-neutral-pill">
+              {connection?.enabled
+                ? measurementStateLabels[connection.state]
+                : "Analytics not connected"}
+            </span>
           </div>
-          <h3>Know who’s finding you.</h3>
-          <p>
-            Visitor{" "}
-            {tab === "sources"
-              ? "sources"
-              : tab === "pages"
-                ? "and page"
-                : "and traffic"}{" "}
-            trends will appear once website analytics is connected. No visitor
-            data is available yet.
-          </p>
-          <span className="ov-neutral-pill">Analytics not connected</span>
-        </div>
-      )}
-      <p className="ov-footnote">
-        {report
-          ? `Vercel Web Analytics · ${connection?.observedAt ? `checked ${formatRelative(connection.observedAt)} · ` : ""}${connection ? measurementStateLabels[connection.state] : "Recorded period"}. Visitor identities reset daily.`
-          : connection?.enabled
-            ? measurementStateLabels[connection.state]
-            : "Inquiry capture and website analytics are separate connections."}
-      </p>
-      {data.measurements?.updatesEnabled === false && report ? (
-        <p className="ov-footnote">Scheduled reporting updates are paused.</p>
-      ) : null}
-      {report && connection ? (
-        <p className="ov-footnote">
-          Only returned dates appear in the trend. Missing days are not assumed
-          to have zero visitors.
-        </p>
-      ) : null}
-      <Link
-        className="ov-text-link"
-        href={measurementReportHref(data.site.id, range, "traffic")}
-        aria-label="View traffic report"
-      >
-        View report
-        <ArrowUpRight size={13} />
-      </Link>
-    </>
+        )}
+      </div>
+      <div className="ov-report-footer">
+        <span
+          title={
+            connection?.observedAt
+              ? `Vercel Web Analytics · checked ${formatRelative(connection.observedAt)} · visitor identities reset daily; unreported days remain unknown.`
+              : "Vercel Web Analytics"
+          }
+        >
+          {data.measurements?.updatesEnabled === false
+            ? "Updates paused"
+            : connection
+              ? measurementStateLabels[connection.state]
+              : "Not connected"}
+          {connection?.observedAt
+            ? ` · ${formatRelative(connection.observedAt)}`
+            : ""}
+        </span>
+        <Link
+          className="ov-text-link"
+          href={measurementReportHref(data.site.id, range, "traffic")}
+          aria-label="View traffic report"
+        >
+          View report
+          <ArrowUpRight size={12} />
+        </Link>
+      </div>
+    </div>
   );
 }
 

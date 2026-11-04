@@ -31,6 +31,7 @@ import {
   RANGES,
   REPORT_PANELS,
   WORK_PANELS,
+  DETAIL_PANELS,
   canSwapPanels,
   readLayout,
   swapPanels,
@@ -260,6 +261,9 @@ export function LiveOverviewDashboard({
   const reportOrder = layout.order.filter((id) =>
     (REPORT_PANELS as readonly PanelId[]).includes(id),
   );
+  const detailOrder = layout.order.filter((id) =>
+    (DETAIL_PANELS as readonly PanelId[]).includes(id),
+  );
   const workOrder = layout.order.filter((id) =>
     (WORK_PANELS as readonly PanelId[]).includes(id),
   );
@@ -300,7 +304,7 @@ export function LiveOverviewDashboard({
   const renderPanel = (
     id: PanelId,
     index: number,
-    kind: "site" | "reports" | "work",
+    kind: "site" | "details" | "reports" | "work",
     ids: readonly PanelId[],
   ) => {
     const Icon = icons[id];
@@ -495,8 +499,9 @@ export function LiveOverviewDashboard({
         <div className="ov-site-status">
           {renderPanel("health", 0, "site", [])}
           <div className="ov-status-detail-row">
-            {renderPanel("quality", 1, "site", [])}
-            {renderPanel("pipeline", 2, "site", [])}
+            {detailOrder.map((id, index) =>
+              renderPanel(id, index, "details", detailOrder),
+            )}
           </div>
         </div>
       </div>

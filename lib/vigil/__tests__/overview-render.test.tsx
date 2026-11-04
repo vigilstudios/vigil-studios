@@ -4,12 +4,15 @@ import { LiveOverviewDashboard } from "@/components/vigil/overview/LiveOverviewD
 import {
   ActivityPanel,
   InboxPanel,
+  WebsitePanel,
 } from "@/components/vigil/overview/OverviewPanels";
 import { readLayout } from "@/lib/vigil/overview/model";
 import { sampleOverview } from "../../../scripts/overview-preview/fixture";
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
+import { previewMeasurements } from "../../../scripts/measurements-preview/fixture";
+import { TrendChart } from "@/components/vigil/overview/OverviewCharts";
 const save = async () => ({ ok: true as const, data: undefined });
 describe("adaptive working panels", () => {
   it("expands the inbox to five contacts and simplifies it to three in the narrow position", () => {
@@ -77,5 +80,39 @@ describe("overview data truth in the rendered interface", () => {
     expect(html).toContain("Period totals may be incomplete");
     expect(html).toContain("15,000");
     expect(html).not.toContain("+50% vs previous period");
+  });
+});
+
+describe("recorded availability and sparse traffic", () => {
+  it("uses a current measured HTTPS response when legacy health was never checked", () => {
+    const data = {
+      ...sampleOverview(),
+      asOf: "2026-11-02T14:00:00.000Z",
+      measurements: previewMeasurements("current"),
+    };
+    data.site.last_health_at = null;
+    data.domain = null;
+    expect(renderToStaticMarkup(<WebsitePanel data={data} />)).toContain(
+      "Passed",
+    );
+    data.measurements.connections = data.measurements.connections.map((c) => ({
+      ...c,
+      state: "stale" as const,
+    }));
+    const html = renderToStaticMarkup(<WebsitePanel data={data} />);
+    expect(html).toContain("Needs refresh");
+    expect(html).not.toContain("Passed");
+  });
+  it("draws the one actual observation without adding dates", () => {
+    const html = renderToStaticMarkup(
+      <TrendChart
+        points={[{ date: "2026-11-04", label: "Nov 4", value: 1 }]}
+        view="area"
+        label="Visitors"
+      />,
+    );
+    expect(html).toContain("<circle");
+    expect(html).toContain("Nov 4: 1 visitors");
+    expect((html.match(/data-point=/g) || []).length).toBe(1);
   });
 });

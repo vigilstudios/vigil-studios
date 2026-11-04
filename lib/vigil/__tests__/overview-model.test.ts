@@ -141,7 +141,12 @@ describe("personal dashboard layouts", () => {
     expect(layout.statusView).toBe("bars");
     expect(layout.leadView).toBe("table");
   });
+  it("persists the quality/status pair without moving other rows", () => {
+    const order = swapPanels([...PANEL_IDS], "quality", "pipeline");
+    expect(readLayout({ version: 2, order }).order).toEqual(order);
+  });
   it("keeps swaps inside their intended rows", () => {
+    expect(canSwapPanels("quality", "pipeline")).toBe(true);
     expect(canSwapPanels("leads", "pipeline")).toBe(false);
     expect(canSwapPanels("insights", "traffic")).toBe(true);
     expect(canSwapPanels("followup", "activity")).toBe(true);

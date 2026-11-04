@@ -30,6 +30,12 @@ const data = {
   ...overviewMeasurementData(measurements),
   measurements,
 };
+// Explicit sparse-history scenario; all values remain fictional preview data.
+if (params.get("history") === "single" && data.traffic) {
+  for (const days of [7, 30, 90] as const) {
+    data.traffic[days] = {...data.traffic[days], visitors:1, pageViews:3, series:[{date:base.asOf, label:"Nov 2", value:1}]};
+  }
+}
 const report = measurementReport(params.get("report"));
 let initial = readLayout(null);
 try {
