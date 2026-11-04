@@ -7,6 +7,7 @@ export const RANGES = [7, 30, 90] as const;
 export type ReportRange = (typeof RANGES)[number];
 export type ChartView = "area" | "bars" | "table";
 export const REPORT_PANELS = ["insights", "traffic", "leads"] as const;
+export const DETAIL_PANELS = ["quality", "pipeline"] as const;
 export const WORK_PANELS = ["followup", "activity"] as const;
 export const PANEL_IDS = [
   "website",
@@ -64,8 +65,9 @@ export function readLayout(input: unknown): LayoutPreference {
     order: [
       "website",
       "health",
-      "quality",
-      "pipeline",
+      ...(DETAIL_PANELS.every((id) => order.includes(id))
+        ? group(DETAIL_PANELS)
+        : DETAIL_PANELS),
       ...group(REPORT_PANELS),
       ...group(WORK_PANELS),
     ],
@@ -77,7 +79,7 @@ export function readLayout(input: unknown): LayoutPreference {
 export function canSwapPanels(id: PanelId, target: PanelId): boolean {
   return (
     id !== target &&
-    [REPORT_PANELS, WORK_PANELS].some(
+    [DETAIL_PANELS, REPORT_PANELS, WORK_PANELS].some(
       (group) =>
         (group as readonly PanelId[]).includes(id) &&
         (group as readonly PanelId[]).includes(target),

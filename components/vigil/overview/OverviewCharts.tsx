@@ -190,6 +190,16 @@ export function TrendChart({
                 fill={`url(#${gradient}-bar)`}
               />
             )}
+            {view === "area" && points.length === 1 && (
+              <circle
+                cx={x(i)}
+                cy={y(p.value)}
+                r="4.5"
+                fill={color}
+                stroke="var(--ov-card-base, var(--bg-surface))"
+                strokeWidth="2"
+              />
+            )}
             {active === i && (
               <line
                 x1={x(i)}
@@ -347,7 +357,7 @@ export function RankedBars({
             <i
               style={{
                 width: `${(item.value / max) * 100}%`,
-                background: `linear-gradient(180deg, color-mix(in srgb, ${item.color || color} 45%, transparent), ${item.color || color})`,
+                background: `linear-gradient(90deg, color-mix(in srgb, ${item.color || color} 45%, transparent), ${item.color || color})`,
               }}
             />
           </span>

@@ -1,5 +1,6 @@
 .ov-dashboard {
-  --ov-cyan: #19a8a2;
+  --ov-royal: #4161d4;
+  --ov-cyan: var(--ov-royal);
   --ov-purple: #9680ce;
   --ov-blue: #588fc7;
   --ov-lime: #97ad68;
@@ -2223,3 +2224,87 @@ html[data-theme="light"] .ov-card-health {
     column-gap: 2px;
   }
 }
+
+/* Matching report rows keep charts aligned and tab changes inside each card. */
+.ov-row-reports > .ov-card {
+  height: 366px;
+  min-height: 366px;
+}
+.ov-report-frame {
+  display: grid;
+  grid-template-rows: 32px 46px minmax(0, 1fr) 24px;
+  gap: 5px;
+  height: 100%;
+  min-height: 0;
+}
+.ov-report-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+.ov-report-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.ov-report-metrics {
+  min-width: 0;
+  margin: 0;
+}
+.ov-report-metrics.ov-main-number > small {
+  display: inline-flex;
+  margin-left: 8px;
+}
+.ov-report-plot {
+  min-height: 0;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+.ov-report-plot .ov-trend {
+  margin: 0;
+}
+.ov-report-plot .ov-trend > svg {
+  height: 160px;
+}
+.ov-report-plot .ov-chart-readout {
+  margin: 0;
+  min-height: 20px;
+}
+.ov-report-plot .ov-chart-table {
+  height: 180px;
+  max-height: 180px;
+  margin: 0;
+}
+.ov-report-plot .ov-ranked {
+  padding-top: 12px;
+  gap: 16px;
+}
+.ov-report-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+.ov-report-footer > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ov-report-footer > a {
+  flex-shrink: 0;
+  font-size: 11px;
+}
+.ov-status-detail-row .ov-grip {
+  width: 18px;
+  height: 20px;
+}
+.ov-status-detail-row .ov-grip svg {
+  width: 13px;
+}
+
+.ov-report-metrics.ov-traffic-metrics { gap:24px; }
+.ov-status-detail-row { height:263px; }
