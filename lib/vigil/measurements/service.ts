@@ -59,8 +59,13 @@ export async function measurementTarget(
   if (linkError) throw linkError;
   if (links?.length !== 1) throw new MeasurementError("invalid_mapping");
   const link = links[0];
-  if (connection.kind === "traffic") target.projectId = link.external_id;
-  else if (connection.kind === "search")
+  if (connection.kind === "traffic") {
+    target.projectId = link.external_id;
+    const start = (
+      link.metadata as { analytics_collection_started_at?: unknown } | null
+    )?.analytics_collection_started_at;
+    if (typeof start === "string") target.trafficCollectionStartedAt = start;
+  } else if (connection.kind === "search")
     target.searchProperty = link.external_id;
   else {
     const meta = link.metadata as { full_name?: unknown } | null;

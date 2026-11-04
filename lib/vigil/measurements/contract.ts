@@ -53,6 +53,7 @@ export const trafficRangeSchema = z.object({
 export const trafficPayloadSchema = z.object({
   kind: z.literal("traffic"),
   timezone: z.literal("UTC"),
+  collectionStartedAt: z.iso.datetime().nullable().optional(),
   ranges: z.object({
     "7": trafficRangeSchema,
     "30": trafficRangeSchema,

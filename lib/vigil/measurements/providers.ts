@@ -48,6 +48,7 @@ export function measurementConfig(): MeasurementConfig {
 export type MeasurementTarget = {
   origin: string;
   projectId?: string;
+  trafficCollectionStartedAt?: string;
   repository?: string;
   repositoryId?: string;
   searchProperty?: string;
@@ -99,9 +100,21 @@ export async function collectTraffic(
   if (!/^[a-zA-Z\d_-]{1,160}$/.test(target.projectId))
     throw new MeasurementError("invalid_mapping");
   const headers = { Authorization: `Bearer ${config.vercelToken}` };
+  const collectionStartedAt = target.trafficCollectionStartedAt ?? null;
+  if (
+    collectionStartedAt &&
+    (!z.iso.datetime().safeParse(collectionStartedAt).success ||
+      Date.parse(collectionStartedAt) > now.getTime())
+  )
+    throw new MeasurementError("invalid_mapping");
   const ranges: Record<string, unknown> = {};
   for (const days of RANGES) {
-    const start = new Date(rangeStart(now.toISOString(), days)).toISOString(),
+    const start = new Date(
+        Math.max(
+          rangeStart(now.toISOString(), days),
+          collectionStartedAt ? Date.parse(collectionStartedAt) : 0,
+        ),
+      ).toISOString(),
       end = now.toISOString();
     const query = async (
       mode: "count" | "aggregate",
@@ -125,7 +138,13 @@ export async function collectTraffic(
       }
       return providerJson(url, { headers }, request);
     };
-    const total = parse(countResponse, await query("count")).data;
+    // Count truncates its end to midnight; aggregates round it up. Explicitly
+    // include the current UTC day so totals and daily/ranking data agree.
+    const countUntil = new Date(rangeStart(end, 1) + DAY).toISOString();
+    const total = parse(
+      countResponse,
+      await query("count", undefined, start, countUntil),
+    ).data;
     const daily: z.infer<typeof aggregateResponse>["data"] = [];
     // Vercel limits daily queries to 62 days. Its date bounds are inclusive;
     // split into non-overlapping 60-day windows without summing visitor totals.
@@ -173,6 +192,10 @@ export async function collectTraffic(
       if (date < start.slice(0, 10) || date > end.slice(0, 10))
         throw new MeasurementError("invalid_response");
       if (byDay.has(date)) throw new MeasurementError("invalid_response");
+      // The provider fills empty buckets even before tracking was installed.
+      // Without a verified start, retain activity rather than asserting absences.
+      if (!collectionStartedAt && row.visitors === 0 && row.pageviews === 0)
+        continue;
       byDay.set(date, row.visitors);
     }
     ranges[String(days)] = {
@@ -210,6 +233,7 @@ export async function collectTraffic(
   return parse(trafficPayloadSchema, {
     kind: "traffic",
     timezone: "UTC",
+    collectionStartedAt,
     ranges,
   });
 }
@@ -474,6 +498,7 @@ export async function collectRepository(
   let complete = false,
     openCount = 0;
   let cursor: string | null = null;
+  let repositoryId = target.repositoryId;
   const seenCursors = new Set<string>();
   const endpoint = `https://api.github.com/repos/${target.repository}/dependabot/alerts`;
   const rowSchema = z.object({
@@ -523,15 +548,33 @@ export async function collectRepository(
     } catch {
       throw new MeasurementError("invalid_response");
     }
+    if (
+      nextUrl.origin === "https://api.github.com" &&
+      /^\/repositories\/\d+\/dependabot\/alerts$/.test(nextUrl.pathname) &&
+      !repositoryId
+    ) {
+      // Older bindings store a full name; resolve the same repository's ID.
+      const metadata = parse(
+        z.object({ id: integer, full_name: z.string() }),
+        await providerJson(
+          `https://api.github.com/repos/${target.repository}`,
+          { headers },
+          request,
+        ),
+      );
+      if (metadata.full_name.toLowerCase() !== target.repository.toLowerCase())
+        throw new MeasurementError("invalid_mapping");
+      repositoryId = String(metadata.id);
+    }
     cursor = nextUrl.searchParams.get("after");
     if (
       nextUrl.origin !== "https://api.github.com" ||
       !(
         nextUrl.pathname === new URL(endpoint).pathname ||
-        (target.repositoryId &&
-          /^\d{1,20}$/.test(target.repositoryId) &&
+        (repositoryId &&
+          /^\d{1,20}$/.test(repositoryId) &&
           nextUrl.pathname ===
-            `/repositories/${target.repositoryId}/dependabot/alerts`)
+            `/repositories/${repositoryId}/dependabot/alerts`)
       ) ||
       nextUrl.username ||
       nextUrl.password ||

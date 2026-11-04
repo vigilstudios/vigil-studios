@@ -120,8 +120,10 @@ function Evidence({
             </p>
           )}
           <p className="vm-context">
-            Only returned dates appear in the trend. Unreported days are not
-            assumed to have zero visitors.
+            {payload.collectionStartedAt
+              ? `Tracking available since ${payload.collectionStartedAt.slice(0, 10)} UTC; the first day may be partial.`
+              : "Collection start is unverified. Days without recorded activity are omitted."}{" "}
+            Unreported days are not assumed to have zero visitors.
           </p>
           <Ranking title="Top pages · page views" items={report.pages} />
           <Ranking title="Referrers · visitors" items={report.sources} />

@@ -126,6 +126,65 @@ describe("traffic source", () => {
       ),
     ).rejects.toMatchObject({ code: "invalid_response" });
   });
+  it("includes today's counts and omits provider-filled zero buckets when collection history is unknown", async () => {
+    const request = vi.fn<typeof fetch>().mockImplementation(async (input) => {
+      const url = new URL(String(input));
+      if (url.pathname.endsWith("count")) {
+        expect(url.searchParams.get("until")).toBe("2026-11-03T00:00:00.000Z");
+        return reply({ data: { visitors: 1, pageviews: 2 } });
+      }
+      if (url.searchParams.get("by") === "day")
+        return reply({
+          data: [
+            {
+              timestamp: url.searchParams.get("since"),
+              visitors: 0,
+              pageviews: 0,
+            },
+          ],
+        });
+      return reply({ data: [] });
+    });
+    const result = await collectTraffic(
+      { ...target, projectId: "prj_client" },
+      { vercelToken: "private" },
+      now,
+      request,
+    );
+    expect(result.ranges["7"]).toMatchObject({
+      visitors: 1,
+      pageViews: 2,
+      series: [],
+    });
+  });
+  it("limits queries to verified tracking history and retains genuine zero days within it", async () => {
+    const started = "2026-11-01T09:00:00.000Z";
+    const request = vi.fn<typeof fetch>().mockImplementation(async (input) => {
+      const url = new URL(String(input));
+      expect(url.searchParams.get("since")).toBe(started);
+      if (url.pathname.endsWith("count"))
+        return reply({ data: { visitors: 0, pageviews: 0 } });
+      return reply({
+        data:
+          url.searchParams.get("by") === "day"
+            ? [{ timestamp: started, visitors: 0, pageviews: 0 }]
+            : [],
+      });
+    });
+    const result = await collectTraffic(
+      {
+        ...target,
+        projectId: "prj_client",
+        trafficCollectionStartedAt: started,
+      },
+      { vercelToken: "private" },
+      now,
+      request,
+    );
+    expect(result.collectionStartedAt).toBe(started);
+    expect(result.ranges["90"].periodStart).toBe(started);
+    expect(result.ranges["90"].series).toHaveLength(1);
+  });
   it("strips URL credentials, query strings and fragments from path labels", () => {
     expect(
       safePageLabel(
@@ -311,15 +370,13 @@ describe("security observations", () => {
     expect(new URL(String(request.mock.calls[1][0])).pathname).toBe(
       "/repos/org/client/dependabot/alerts",
     );
-    const foreign = vi
-      .fn<typeof fetch>()
-      .mockResolvedValue(
-        Response.json([], {
-          headers: {
-            link: '<https://api.github.com/repositories/99999/dependabot/alerts?after=cursor>; rel="next"',
-          },
-        }),
-      );
+    const foreign = vi.fn<typeof fetch>().mockResolvedValue(
+      Response.json([], {
+        headers: {
+          link: '<https://api.github.com/repositories/99999/dependabot/alerts?after=cursor>; rel="next"',
+        },
+      }),
+    );
     await expect(
       collectRepository(
         { ...target, repository: "org/client", repositoryId: "12345" },
@@ -328,6 +385,34 @@ describe("security observations", () => {
       ),
     ).rejects.toMatchObject({ code: "invalid_response" });
     expect(foreign).toHaveBeenCalledTimes(1);
+  });
+  it("resolves a name-only binding before accepting GitHub's canonical numeric cursor link", async () => {
+    const request = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(
+        Response.json([], {
+          headers: {
+            link: '<https://api.github.com/repositories/12345/dependabot/alerts?after=cursor>; rel="next"',
+          },
+        }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({ id: 12345, full_name: "org/client" }),
+      )
+      .mockResolvedValueOnce(Response.json([]));
+    expect(
+      await collectRepository(
+        { ...target, repository: "org/client" },
+        { githubToken: "private" },
+        request,
+      ),
+    ).toMatchObject({ complete: true });
+    expect(String(request.mock.calls[1][0])).toBe(
+      "https://api.github.com/repos/org/client",
+    );
+    expect(new URL(String(request.mock.calls[2][0])).pathname).toBe(
+      "/repos/org/client/dependabot/alerts",
+    );
   });
   it.each([
     "https://attacker.example/repos/org/client/dependabot/alerts?after=secret",
