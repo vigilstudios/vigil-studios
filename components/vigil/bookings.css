@@ -71,7 +71,7 @@
 }
 .booking-check input {
   margin-top: 3px;
-  accent-color: #4161d4;
+  accent-color: var(--booking-ink);
 }
 .booking-hours {
   display: grid;
@@ -142,7 +142,7 @@
   margin-top: 10px;
 }
 .booking-weekly input[type="checkbox"] {
-  accent-color: #4161d4;
+  accent-color: var(--booking-ink);
 }
 /* Calendar workspace uses the dashboard's shared surface, border and typography tokens. */
 .booking-workspace {
@@ -194,7 +194,7 @@
   color: var(--text-secondary);
 }
 .bc-summary svg {
-  color: #4161d4;
+  color: var(--booking-ink);
 }
 .bc-summary strong {
   font-size: 19px;
@@ -254,7 +254,7 @@
 .bc-modes [aria-pressed="true"] {
   background: var(--bg-primary);
   box-shadow: 0 1px 4px #0001;
-  color: #4161d4;
+  color: var(--booking-ink);
 }
 .bc-layout {
   display: grid;
@@ -411,7 +411,7 @@
   margin-top: 3px;
 }
 .bc-time-head [data-today="true"] strong {
-  color: #4161d4;
+  color: var(--booking-ink);
 }
 .bc-blocks {
   font-size: 9px;
@@ -626,11 +626,11 @@
 
 .booking-workspace .lead-tabs [aria-current="page"] {
   background: #4161d412;
-  color: #3553bc;
+  color: var(--booking-ink);
   border-color: #4161d433;
 }
 .booking-workspace .lead-status[data-tone="accent"] {
-  color: #3553bc;
+  color: var(--booking-ink);
   background: #4161d412;
 }
 .booking-workspace .booking-toolbar .lead-field {
@@ -667,3 +667,7 @@
 .booking-workspace .booking-toolbar {
   min-height: 52px;
 }
+
+/* Brighter royal blue keeps small active labels legible on the dark surface. */
+.booking-workspace { --booking-ink: #a4b2ff; }
+html[data-theme="light"] .booking-workspace { --booking-ink: #3553bc; }
