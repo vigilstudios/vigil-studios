@@ -1,17 +1,22 @@
 import Link from "next/link";
 import { WeeklyAvailabilityEditor } from "@/components/vigil/WeeklyAvailabilityEditor";
 import { z } from "zod";
-import { CalendarDays, Inbox, Settings2 } from "lucide-react";
+import { CalendarDays, Settings2 } from "lucide-react";
 import { getBookings } from "@/lib/vigil/queries/bookings";
 import { bookingTime } from "@/lib/vigil/bookings/contract";
 import { appointmentStatus } from "@/lib/vigil/bookings/data";
 import { ActionButton, ActionForm } from "@/components/vigil/ActionControls";
-import { BookingRescheduleForm } from "@/components/vigil/BookingRescheduleForm";
+import { BookingAppointmentCard } from "@/components/vigil/BookingAppointmentCard";
+import { BookingCalendar } from "@/components/vigil/BookingCalendar";
+import {
+  calendarModes,
+  businessDate,
+  type CalendarMode,
+} from "@/lib/vigil/bookings/calendar";
 import {
   saveBookingResource,
   saveBookingService,
   saveBookingSettings,
-  changeBooking,
   blockBookingDays,
   removeBookingBlock,
 } from "@/lib/vigil/actions/bookings";
@@ -45,6 +50,16 @@ export default async function BookingsPage({
       view,
       page,
       z.uuid().safeParse(params.lead).success ? String(params.lead) : undefined,
+      {
+        mode: calendarModes.includes(params.calendar as CalendarMode)
+          ? (params.calendar as CalendarMode)
+          : "week",
+        date: typeof params.date === "string" ? params.date : undefined,
+        appointment:
+          typeof params.appointment === "string"
+            ? params.appointment
+            : undefined,
+      },
     );
   const canManage =
       Boolean(data.ctx.staffRole) ||
@@ -56,13 +71,9 @@ export default async function BookingsPage({
     <div className="lead-hub booking-workspace">
       <header className="lead-page-heading">
         <div>
-          <h1>Lead Hub</h1>
+          <h1>Bookings</h1>
           <p>Appointments, requests and the next step with every customer.</p>
         </div>
-        <Link href="/dashboard/leads" className="lead-button">
-          <Inbox size={15} />
-          Inbox
-        </Link>
       </header>
       <nav className="lead-tabs" aria-label="Lead Hub views">
         <Link href="/dashboard/leads">Inbox</Link>
@@ -85,20 +96,24 @@ export default async function BookingsPage({
       ) : (
         <>
           <div className="booking-toolbar">
-            <form>
-              <label className="lead-field">
-                Website
-                <select name="website" defaultValue={website}>
-                  {data.sites.map((site) => (
-                    <option key={site.id} value={site.id}>
-                      {site.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <input type="hidden" name="view" value={view} />
-              <button className="lead-button">Choose website</button>
-            </form>
+            {data.sites.length === 1 ? (
+              <strong className="booking-site-name">{data.site?.name}</strong>
+            ) : (
+              <form>
+                <label className="lead-field">
+                  Website
+                  <select name="website" defaultValue={website}>
+                    {data.sites.map((site) => (
+                      <option key={site.id} value={site.id}>
+                        {site.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <input type="hidden" name="view" value={view} />
+                <button className="lead-button">Choose website</button>
+              </form>
+            )}
             <p>
               {data.settings?.enabled && data.eligible
                 ? "Online bookings enabled"
@@ -120,186 +135,68 @@ export default async function BookingsPage({
                 aria-current={view === value ? "page" : undefined}
               >
                 {value === "setup" ? <Settings2 size={15} /> : null}
-                {value[0].toUpperCase() + value.slice(1)}
+                {value === "upcoming"
+                  ? "Calendar"
+                  : value[0].toUpperCase() + value.slice(1)}
               </Link>
             ))}
           </nav>
-          {view !== "setup" ? (
+          {view === "upcoming" && data.calendar ? (
+            <BookingCalendar
+              key={website}
+              website={website}
+              timeZone={data.settings?.time_zone ?? "UTC"}
+              mode={data.calendar.mode}
+              date={data.calendar.date}
+              today={businessDate(data.asOf, data.settings?.time_zone ?? "UTC")}
+              rows={data.appointments.map((a) => ({
+                id: a.id,
+                name: (a.contact as { name?: string }).name ?? "Customer",
+                service: a.service_name,
+                status: appointmentStatus(a, data.asOf),
+                start: a.starts_at,
+                end: a.ends_at,
+                resource: a.resource_id,
+              }))}
+              resources={data.resources.map((r) => ({
+                id: r.id,
+                name: r.name,
+              }))}
+              blocks={data.blocks}
+              truncated={data.count > 500 || data.blocks.length === 500}
+              selected={data.calendar.selected}
+              detail={
+                data.appointments.find(
+                  (a) => a.id === data.calendar?.selected,
+                ) ? (
+                  <BookingAppointmentCard
+                    a={data.appointments.find(
+                      (a) => a.id === data.calendar?.selected,
+                    )!}
+                    website={website}
+                    canManage={canManage}
+                    eligible={data.eligible}
+                    asOf={data.asOf}
+                    events={data.events}
+                  />
+                ) : null
+              }
+            />
+          ) : view !== "setup" ? (
             <>
               <div className="booking-agenda">
                 {data.appointments.length ? (
-                  data.appointments.map((a) => {
-                    const contact = a.contact as {
-                        name?: string;
-                        email?: string;
-                        phone?: string;
-                      },
-                      status = appointmentStatus(a, data.asOf),
-                      open = ["requested", "confirmed"].includes(status);
-                    return (
-                      <article key={a.id} className="lead-detail-panel">
-                        <div className="lead-panel-body">
-                          <header className="booking-appointment-heading">
-                            <div>
-                              <h2>{a.service_name}</h2>
-                              <p>{bookingTime(a.starts_at, a.time_zone)}</p>
-                            </div>
-                            <span
-                              className="lead-status"
-                              data-tone={
-                                status === "confirmed" ? "accent" : "neutral"
-                              }
-                            >
-                              {status.replaceAll("_", " ")}
-                            </span>
-                          </header>
-                          <div className="booking-contact">
-                            <strong>{contact.name}</strong>
-                            <a href={`mailto:${contact.email}`}>
-                              {contact.email}
-                            </a>
-                            {contact.phone && <span>{contact.phone}</span>}
-                            {a.lead_id && (
-                              <Link href={`/dashboard/leads/${a.lead_id}`}>
-                                View inquiry
-                              </Link>
-                            )}
-                          </div>
-                          {a.notes && <p className="lead-message">{a.notes}</p>}
-                          {a.requested_start_at && (
-                            <p>
-                              Requested time change:{" "}
-                              {bookingTime(a.requested_start_at, a.time_zone)}.
-                              The original appointment remains reserved.
-                            </p>
-                          )}
-                          {canManage && open && (
-                            <div className="booking-actions">
-                              {status === "requested" && (
-                                <>
-                                  <ActionButton
-                                    action={changeBooking.bind(
-                                      null,
-                                      website,
-                                      a.id,
-                                      a.revision,
-                                      "confirm",
-                                    )}
-                                    disabled={!data.eligible}
-                                    disabledReason="Care or higher is required to confirm new appointments."
-                                    variant="primary"
-                                  >
-                                    Confirm request
-                                  </ActionButton>
-                                  <ActionButton
-                                    action={changeBooking.bind(
-                                      null,
-                                      website,
-                                      a.id,
-                                      a.revision,
-                                      "decline",
-                                    )}
-                                  >
-                                    Decline
-                                  </ActionButton>
-                                </>
-                              )}
-                              {a.requested_start_at && (
-                                <>
-                                  <ActionButton
-                                    action={changeBooking.bind(
-                                      null,
-                                      website,
-                                      a.id,
-                                      a.revision,
-                                      "approve_reschedule",
-                                    )}
-                                  >
-                                    Approve time change
-                                  </ActionButton>
-                                  <ActionButton
-                                    action={changeBooking.bind(
-                                      null,
-                                      website,
-                                      a.id,
-                                      a.revision,
-                                      "decline_reschedule",
-                                    )}
-                                  >
-                                    Keep current time
-                                  </ActionButton>
-                                </>
-                              )}
-                              <ActionButton
-                                action={changeBooking.bind(
-                                  null,
-                                  website,
-                                  a.id,
-                                  a.revision,
-                                  "cancel",
-                                )}
-                                confirmText="Cancel this appointment?"
-                              >
-                                Cancel
-                              </ActionButton>
-                              {status === "confirmed" &&
-                                Date.parse(a.starts_at) <= data.asOf && (
-                                  <>
-                                    <ActionButton
-                                      action={changeBooking.bind(
-                                        null,
-                                        website,
-                                        a.id,
-                                        a.revision,
-                                        "complete",
-                                      )}
-                                    >
-                                      Mark completed
-                                    </ActionButton>
-                                    <ActionButton
-                                      action={changeBooking.bind(
-                                        null,
-                                        website,
-                                        a.id,
-                                        a.revision,
-                                        "no_show",
-                                      )}
-                                    >
-                                      Mark no-show
-                                    </ActionButton>
-                                  </>
-                                )}
-                              {data.eligible && (
-                                <details>
-                                  <summary>Change time</summary>
-                                  <BookingRescheduleForm
-                                    action={changeBooking.bind(
-                                      null,
-                                      website,
-                                      a.id,
-                                      a.revision,
-                                      "reschedule",
-                                    )}
-                                  />
-                                </details>
-                              )}
-                            </div>
-                          )}
-                          <details>
-                            <summary>Appointment history</summary>
-                            {data.events
-                              .filter((event) => event.appointment_id === a.id)
-                              .map((event) => (
-                                <p key={event.id} className="lead-footnote">
-                                  {event.kind.replaceAll("_", " ")} ·{" "}
-                                  {bookingTime(event.created_at, a.time_zone)}
-                                </p>
-                              ))}
-                          </details>
-                        </div>
-                      </article>
-                    );
-                  })
+                  data.appointments.map((a) => (
+                    <BookingAppointmentCard
+                      key={a.id}
+                      a={a}
+                      website={website}
+                      canManage={canManage}
+                      eligible={data.eligible}
+                      asOf={data.asOf}
+                      events={data.events}
+                    />
+                  ))
                 ) : (
                   <div className="lead-empty">
                     <CalendarDays size={28} />

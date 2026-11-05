@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AppFrame } from "@/components/vigil/AppFrame";
 import { ExpressCatalogue } from "@/components/express/ExpressCatalogue";
 import type { ExpressTemplate } from "@/lib/vigil/express/document";
 import { createRoot } from "react-dom/client";
@@ -8,9 +9,12 @@ import { BasicsStep } from "@/app/(vigil)/dashboard/onboarding/steps/BasicsStep"
 import { basicsSchema } from "@/lib/vigil/onboarding/brief";
 import "@/app/globals.css";
 import "@/components/vigil/vigil.css";
+import "../overview-preview/preview.css";
 import "./preview.css";
 const params = new URLSearchParams(location.search),
-  view = params.get("view") ?? "widget";
+  view =
+    params.get("view") ??
+    (location.pathname.startsWith("/dashboard") ? "upcoming" : "widget");
 document.documentElement.dataset.theme =
   params.get("theme") === "dark" ? "dark" : "light";
 const previewOnly = async () => false;
@@ -56,9 +60,14 @@ const content =
       onNext={() => {}}
     />
   ) : (
-    await BookingsPage({ searchParams: Promise.resolve({ view }) })
+    await BookingsPage({
+      searchParams: Promise.resolve(
+        Object.fromEntries([...params.entries(), ["view", view]]),
+      ),
+    })
   );
-createRoot(document.getElementById("root")!).render(
+const dashboard = ["upcoming", "requests", "history", "setup"].includes(view);
+const review = (
   <>
     <div className="booking-preview-bar">
       <strong>Fictional review · no live changes</strong>
@@ -74,6 +83,94 @@ createRoot(document.getElementById("root")!).render(
         </Link>
       </nav>
     </div>
-    <main className="booking-preview-main">{content}</main>
-  </>,
+    <div className="booking-preview-main">{content}</div>
+  </>
+);
+createRoot(document.getElementById("root")!).render(
+  dashboard ? (
+    <AppFrame
+      homeHref="http://127.0.0.1:4193/"
+      initialCollapsed={false}
+      workspaceBrand={{ name: "Marlow Studio", iconUrl: null }}
+      workspace={<strong>Marlow Studio</strong>}
+      account={
+        <p style={{ padding: 16, fontSize: 11 }}>
+          Care plan · Fictional preview
+        </p>
+      }
+      groups={[
+        {
+          items: [
+            {
+              href: "http://127.0.0.1:4193/",
+              label: "Overview",
+              icon: "overview",
+            },
+          ],
+        },
+        {
+          label: "Website",
+          items: [
+            {
+              href: "/dashboard/content",
+              label: "Content Hub",
+              icon: "website",
+              premium: true,
+            },
+            { href: "/dashboard/files", label: "Files", icon: "files" },
+            {
+              href: "/dashboard/requests",
+              label: "Requests",
+              icon: "requests",
+              premium: true,
+            },
+            { href: "/dashboard/domain", label: "Domain", icon: "domain" },
+            {
+              href: "/dashboard/billing",
+              label: "Subscription",
+              icon: "billing",
+            },
+          ],
+        },
+        {
+          label: "Grow",
+          items: [
+            {
+              href: "/dashboard/leads",
+              label: "Lead Hub",
+              icon: "leads",
+              activePaths: ["/dashboard/leads/bookings"],
+            },
+            {
+              href: "/dashboard/insights",
+              label: "Insights",
+              icon: "insights",
+              disabled: true,
+              badge: "Soon",
+            },
+            {
+              href: "/dashboard/virtue",
+              label: "Virtue",
+              icon: "virtue",
+              disabled: true,
+              badge: "Soon",
+            },
+          ],
+        },
+        {
+          items: [
+            {
+              href: "/dashboard/settings",
+              label: "Settings",
+              icon: "settings",
+            },
+          ],
+        },
+      ]}
+    >
+      {review}
+    </AppFrame>
+  ) : (
+    review
+  ),
 );
