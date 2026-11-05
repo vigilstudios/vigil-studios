@@ -14,6 +14,7 @@ import { createPortal } from "react-dom";
 import { clsx } from "clsx";
 import {
   BarChart3,
+  CalendarDays,
   Briefcase,
   Building2,
   ClipboardList,
@@ -63,6 +64,7 @@ const icons: Record<NavIcon, React.ComponentType<{ className?: string }>> = {
   files: FolderOpen,
   blog: NotebookPen,
   leads: Inbox,
+  bookings: CalendarDays,
   insights: BarChart3,
   virtue: VirtueNavIcon,
   settings: Settings,

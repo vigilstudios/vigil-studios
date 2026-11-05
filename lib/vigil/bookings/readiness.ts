@@ -26,7 +26,7 @@ export async function bookingReadiness(
   return {
     ready: data?.component_ready === true,
     message: data?.component_ready
-      ? "Booking component verified. Eligibility, services and owner activation are managed in Lead Hub."
+      ? "Booking component verified. Eligibility, services and owner activation are managed in Bookings."
       : "Verify the deployed booking component before enabling appointments. The site keeps its contact form until setup is complete.",
   };
 }

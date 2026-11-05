@@ -1,3 +1,4 @@
+import { bookingWorkspaceSites } from "@/lib/vigil/bookings/workspace";
 import {contentSites} from "@/lib/vigil/content/service";
 import {createClient} from "@/lib/supabase/server";
 import { isWebsiteLive, showWebsitePreview } from "@/lib/vigil/presenters";
@@ -41,9 +42,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
     ]);
     const client = await createClient();
     const liveSite = websites.find(isWebsiteLive);
-    const [contentWebsites, iconUrl] = await Promise.all([
+    const [contentWebsites, iconUrl, bookingSites] = await Promise.all([
       contentSites(client, ctx.organization.id),
       liveSite ? getWebsiteIcon(client, ctx.organization.id, liveSite) : Promise.resolve(null),
+      bookingWorkspaceSites(client, ctx.organization.id, websites, projects),
     ]);
     workspaceBrand = { name: liveSite?.name ?? ctx.organization.name, iconUrl };
     const contentAccess=contentWebsites.some(site=>site.access),contentLaunchLocked=!contentAccess&&contentWebsites.some(site=>site.eligible);
@@ -113,6 +115,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         collapsible: true,
         items: [
           { href: "/dashboard/leads", label: "Lead Hub", icon: "leads" },
+          ...(bookingSites.length ? [{ href: "/dashboard/bookings", label: "Bookings", icon: "bookings" as const }] : []),
           { href: "/dashboard/insights", label: "Insights", icon: "insights", locked: true, disabled: true, badge: "Soon" },
           { href: "/dashboard/virtue", label: "Virtue", icon: "virtue", locked: true, disabled: true, badge: "Soon" },
         ],

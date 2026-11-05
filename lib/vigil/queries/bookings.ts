@@ -1,4 +1,5 @@
 import "server-only";
+import { bookingWorkspaceSites } from "../bookings/workspace";
 import {
   calendarRange,
   businessDate,
@@ -17,7 +18,7 @@ export async function getBookings(
   options?: { mode: CalendarMode; date?: string; appointment?: string },
 ) {
   const asOf = Date.now();
-  const ctx = await requireOrgContext("/dashboard/leads/bookings"),
+  const ctx = await requireOrgContext("/dashboard/bookings"),
     client = await createClient();
   const { data: sites, error } = await client
     .from("websites")
@@ -25,9 +26,30 @@ export async function getBookings(
     .eq("organization_id", ctx.organization.id)
     .order("created_at");
   if (error) throw error;
-  const site = sites?.find((s) => s.id === websiteId) ?? sites?.[0];
-  if (!site || process.env.VIGIL_BOOKINGS_ENABLED !== "true")
-    return { asOf, ctx, sites: sites ?? [], site, enabled: false as const };
+  if (!sites?.length || process.env.VIGIL_BOOKINGS_ENABLED !== "true")
+    return {
+      asOf,
+      ctx,
+      sites: sites ?? [],
+      site: undefined,
+      enabled: false as const,
+      notRequested: false,
+    };
+  const visibleSites = await bookingWorkspaceSites(
+    client,
+    ctx.organization.id,
+    sites,
+  );
+  const site = visibleSites.find((s) => s.id === websiteId) ?? visibleSites[0];
+  if (!site)
+    return {
+      asOf,
+      ctx,
+      sites: visibleSites,
+      site,
+      enabled: false as const,
+      notRequested: true,
+    };
   const settings = await client
     .from("booking_settings")
     .select("*")
@@ -130,7 +152,7 @@ export async function getBookings(
     asOf,
     events: events.data ?? [],
     ctx,
-    sites: sites ?? [],
+    sites: visibleSites,
     site,
     enabled: true as const,
     settings: settings.data,

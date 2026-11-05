@@ -33,7 +33,7 @@ async function manager(website: string) {
 }
 function refresh() {
   revalidatePath("/dashboard/leads");
-  revalidatePath("/dashboard/leads/bookings");
+  revalidatePath("/dashboard/bookings");
   revalidatePath("/dashboard");
 }
 function failure(error: { code?: string } | null) {
