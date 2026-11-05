@@ -46,6 +46,11 @@ async function handle(request: NextRequest) {
     // Disabling DNS admission must not extend the lifetime of saved credentials.
     await admin.rpc("expire_external_dns_tokens").then(result=>{if(result.error)console.error("Expired DNS token cleanup needs retry.");});
     const outcomes = await runDueJobs(admin, { worker, limit });
+    if(process.env.VIGIL_GOOGLE_CALENDAR_ENABLED === "true") {
+      const {syncBookingCalendars}=await import("@/lib/vigil/bookings/google/service");
+      await syncBookingCalendars().catch(()=>console.error("Booking calendar sync needs retry."));
+    }
+
     const reconcile =
       request.nextUrl.searchParams.get("reconcile") === "0"
         ? null

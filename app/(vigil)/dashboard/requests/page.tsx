@@ -6,7 +6,11 @@ import { Panel } from "@/components/vigil/widgets";
 import { requireOrgContext } from "@/lib/vigil/auth/session";
 import { FEATURES, resolveEntitlements } from "@/lib/vigil/entitlements";
 import { formatDate, titleCase } from "@/lib/vigil/format";
-import { getOrgChangeRequests, getOrgWebsites, signAttachments } from "@/lib/vigil/queries/dashboard";
+import {
+  getOrgChangeRequests,
+  getOrgWebsites,
+  signAttachments,
+} from "@/lib/vigil/queries/dashboard";
 import { NewRequestForm } from "./NewRequestForm";
 
 export const metadata: Metadata = { title: "Requests" };
@@ -29,7 +33,11 @@ const statusHint: Record<string, string> = {
   declined: "Vigil could not take this on as described; check your email.",
 };
 
-export default async function RequestsPage() {
+export default async function RequestsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ booking?: string }>;
+}) {
   const ctx = await requireOrgContext("/dashboard/requests");
   const ent = await resolveEntitlements(ctx.organization.id);
 
@@ -44,29 +52,61 @@ export default async function RequestsPage() {
     );
   }
 
-  const [requests, websites] = await Promise.all([getOrgChangeRequests(ctx.organization.id), getOrgWebsites(ctx.organization.id)]);
+  const [requests, websites] = await Promise.all([
+    getOrgChangeRequests(ctx.organization.id),
+    getOrgWebsites(ctx.organization.id),
+  ]);
+  const query = await searchParams;
+  const bookingSite = websites.find((w) => w.id === query.booking);
   const allowance = ent.limit(FEATURES.requestsMonthlyAllowance);
-  const signed = await Promise.all(requests.map((r) => signAttachments(r.attachments)));
+  const signed = await Promise.all(
+    requests.map((r) => signAttachments(r.attachments)),
+  );
 
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight sm:text-xl">Requests</h1>
+        <h1 className="text-lg font-semibold tracking-tight sm:text-xl">
+          Requests
+        </h1>
         <p className="mt-0.5 text-xs text-[color:var(--text-secondary)]">
-          {allowance !== null ? `Your plan includes ${allowance} request${allowance === 1 ? "" : "s"} per month. ` : ""}
-          Tell Vigil what to change on your website; attach screenshots or files if that helps explain it.
+          {allowance !== null
+            ? `Your plan includes ${allowance} request${allowance === 1 ? "" : "s"} per month. `
+            : ""}
+          Tell Vigil what to change on your website; attach screenshots or files
+          if that helps explain it.
         </p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-12">
         <Panel className="lg:col-span-5" title="New request">
-          <NewRequestForm websites={websites.map((w) => ({ id: w.id, name: w.name }))} organizationId={ctx.organization.id} />
+          <NewRequestForm
+            websites={websites.map((w) => ({ id: w.id, name: w.name }))}
+            organizationId={ctx.organization.id}
+            initial={
+              bookingSite
+                ? {
+                    websiteId: bookingSite.id,
+                    title: "Add booking to my website",
+                    description:
+                      "I would like to add Vigil bookings to this website. Please review the compatible website component and help me configure services, timezone, availability and confirmation mode.",
+                  }
+                : undefined
+            }
+          />
         </Panel>
 
-        <Panel className="lg:col-span-7" title={`Your requests${requests.length ? ` · ${requests.length}` : ""}`} padded={false}>
+        <Panel
+          className="lg:col-span-7"
+          title={`Your requests${requests.length ? ` · ${requests.length}` : ""}`}
+          padded={false}
+        >
           {requests.length === 0 ? (
             <div className="p-4">
-              <EmptyState title="No requests yet" description="Your submitted requests and their progress will appear here." />
+              <EmptyState
+                title="No requests yet"
+                description="Your submitted requests and their progress will appear here."
+              />
             </div>
           ) : (
             <ul className="divide-y divide-[color:var(--border)]">
@@ -76,14 +116,27 @@ export default async function RequestsPage() {
                     <div className="min-w-0">
                       <p className="text-[13px] font-semibold">{r.title}</p>
                       <p className="mt-0.5 text-[11px] text-[color:var(--text-secondary)]">
-                        {titleCase(r.priority)} priority · {formatDate(r.submitted_at ?? r.created_at)}
-                        {r.website_id ? ` · ${websites.find((w) => w.id === r.website_id)?.name ?? ""}` : ""}
+                        {titleCase(r.priority)} priority ·{" "}
+                        {formatDate(r.submitted_at ?? r.created_at)}
+                        {r.website_id
+                          ? ` · ${websites.find((w) => w.id === r.website_id)?.name ?? ""}`
+                          : ""}
                       </p>
                     </div>
-                    <StatusPill tone={tone[r.status] ?? "neutral"}>{titleCase(r.status)}</StatusPill>
+                    <StatusPill tone={tone[r.status] ?? "neutral"}>
+                      {titleCase(r.status)}
+                    </StatusPill>
                   </div>
-                  {r.description ? <p className="mt-2 whitespace-pre-wrap text-xs text-[color:var(--text-secondary)]">{r.description}</p> : null}
-                  {statusHint[r.status] ? <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">{statusHint[r.status]}</p> : null}
+                  {r.description ? (
+                    <p className="mt-2 whitespace-pre-wrap text-xs text-[color:var(--text-secondary)]">
+                      {r.description}
+                    </p>
+                  ) : null}
+                  {statusHint[r.status] ? (
+                    <p className="mt-2 text-[11px] text-[color:var(--text-secondary)]">
+                      {statusHint[r.status]}
+                    </p>
+                  ) : null}
                   {signed[i].length > 0 ? (
                     <div className="mt-2">
                       <AttachmentList items={signed[i]} compact />

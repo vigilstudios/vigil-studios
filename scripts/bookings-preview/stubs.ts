@@ -10,6 +10,13 @@ export async function getBookings(
   _lead?: string,
   options?: { mode: CalendarMode; date?: string; appointment?: string },
 ) {
+  if (new URLSearchParams(location.search).get("state") === "request")
+    return {
+      ctx: { role: "owner", staffRole: null },
+      enabled: false as const,
+      notRequested: true,
+      site: undefined,
+    };
   const website = "ba000000-0000-4000-8000-000000000021",
     org = "ba000000-0000-4000-8000-000000000011",
     resource = "ba000000-0000-4000-8000-000000000031",
@@ -185,3 +192,30 @@ export const saveBookingResource = () => preview(),
   changeBooking = () => preview(),
   blockBookingDays = () => preview(),
   removeBookingBlock = () => preview();
+
+export async function requireOrgContext() {
+  return {
+    organization: { id: "ba000000-0000-4000-8000-000000000011" },
+    user: { id: "ba000000-0000-4000-8000-000000000012" },
+    role: "owner",
+    isImpersonating: false,
+  };
+}
+export const FEATURES = {
+  bookings: "bookings.enabled",
+  requests: "requests.enabled",
+};
+export async function resolveEntitlements() {
+  return {
+    enabled: () =>
+      new URLSearchParams(location.search).get("state") !== "basic",
+  };
+}
+export async function getOrgWebsites() {
+  return [
+    { id: "ba000000-0000-4000-8000-000000000021", name: "Marlow Studio" },
+  ];
+}
+export async function calendarConnectionStatus() {
+  return { configured: false, connection: null };
+}

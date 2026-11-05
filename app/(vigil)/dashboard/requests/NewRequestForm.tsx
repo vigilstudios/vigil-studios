@@ -4,9 +4,24 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Paperclip, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
-import { attachUploadedFiles, createChangeRequest } from "@/lib/vigil/actions/requests";
-import { ACCEPT_ATTRIBUTE, ATTACHMENTS_BUCKET, MAX_ATTACHMENTS_PER_REQUEST, attachmentPath, formatBytes, validateAttachments } from "@/lib/vigil/attachments";
-import { FormError, FormSuccess, inputClass, labelClass } from "@/components/vigil/ui";
+import {
+  attachUploadedFiles,
+  createChangeRequest,
+} from "@/lib/vigil/actions/requests";
+import {
+  ACCEPT_ATTRIBUTE,
+  ATTACHMENTS_BUCKET,
+  MAX_ATTACHMENTS_PER_REQUEST,
+  attachmentPath,
+  formatBytes,
+  validateAttachments,
+} from "@/lib/vigil/attachments";
+import {
+  FormError,
+  FormSuccess,
+  inputClass,
+  labelClass,
+} from "@/components/vigil/ui";
 import { FileUploadButton } from "@/components/vigil/FileUploadButton";
 
 type Phase = "idle" | "creating" | "uploading" | "recording";
@@ -16,11 +31,22 @@ type Phase = "idle" | "creating" | "uploading" | "recording";
  * request, upload each file from the browser straight to Storage (RLS only
  * allows this organization's folder), then record the rows.
  */
-export function NewRequestForm({ websites, organizationId }: { websites: { id: string; name: string }[]; organizationId: string }) {
+export function NewRequestForm({
+  websites,
+  organizationId,
+  initial,
+}: {
+  websites: { id: string; name: string }[];
+  organizationId: string;
+  initial?: { websiteId: string; title: string; description: string };
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [phase, setPhase] = useState<Phase>("idle");
-  const [progress, setProgress] = useState<{ done: number; total: number }>({ done: 0, total: 0 });
+  const [progress, setProgress] = useState<{ done: number; total: number }>({
+    done: 0,
+    total: 0,
+  });
   const [error, setError] = useState<string | null>(null);
   const [issues, setIssues] = useState<Record<string, string[]>>({});
   const [success, setSuccess] = useState<string | null>(null);
@@ -38,7 +64,7 @@ export function NewRequestForm({ websites, organizationId }: { websites: { id: s
       const created = await createChangeRequest(null, fd);
       if (!created?.ok) {
         setError(created?.error ?? "Something went wrong.");
-        setIssues(created && !created.ok ? created.issues ?? {} : {});
+        setIssues(created && !created.ok ? (created.issues ?? {}) : {});
         setPhase("idle");
         return;
       }
@@ -49,12 +75,30 @@ export function NewRequestForm({ websites, organizationId }: { websites: { id: s
         setPhase("uploading");
         setProgress({ done: 0, total: files.length });
         const supabase = createClient();
-        const uploaded: { path: string; name: string; type: string; size: number }[] = [];
+        const uploaded: {
+          path: string;
+          name: string;
+          type: string;
+          size: number;
+        }[] = [];
         for (const file of files) {
-          const path = attachmentPath(organizationId, created.data.id, file.type, crypto.randomUUID());
-          const { error: uploadError } = await supabase.storage.from(ATTACHMENTS_BUCKET).upload(path, file, { contentType: file.type, upsert: false });
+          const path = attachmentPath(
+            organizationId,
+            created.data.id,
+            file.type,
+            crypto.randomUUID(),
+          );
+          const { error: uploadError } = await supabase.storage
+            .from(ATTACHMENTS_BUCKET)
+            .upload(path, file, { contentType: file.type, upsert: false });
           if (uploadError) failed.push(file.name);
-          else uploaded.push({ path, name: file.name, type: file.type, size: file.size });
+          else
+            uploaded.push({
+              path,
+              name: file.name,
+              type: file.type,
+              size: file.size,
+            });
           setProgress((p) => ({ ...p, done: p.done + 1 }));
         }
         if (uploaded.length > 0) {
@@ -74,7 +118,7 @@ export function NewRequestForm({ websites, organizationId }: { websites: { id: s
           ? `Request submitted. ${attached} file${attached === 1 ? "" : "s"} attached; these did not upload: ${failed.join(", ")}.`
           : attached > 0
             ? `Request submitted with ${attached} attachment${attached === 1 ? "" : "s"}. Vigil will follow up by email.`
-            : "Request submitted. Vigil will follow up by email."
+            : "Request submitted. Vigil will follow up by email.",
       );
       formRef.current?.reset();
       setFiles([]);
@@ -89,14 +133,35 @@ export function NewRequestForm({ websites, organizationId }: { websites: { id: s
         <label htmlFor="title" className={labelClass}>
           What should change?
         </label>
-        <input id="title" name="title" className={inputClass} placeholder="Update our opening hours" maxLength={200} required disabled={busy} />
-        {issues.title ? <p className="mt-1 text-xs text-[color:var(--status-bad)]">{issues.title[0]}</p> : null}
+        <input
+          defaultValue={initial?.title}
+          id="title"
+          name="title"
+          className={inputClass}
+          placeholder="Update our opening hours"
+          maxLength={200}
+          required
+          disabled={busy}
+        />
+        {issues.title ? (
+          <p className="mt-1 text-xs text-[color:var(--status-bad)]">
+            {issues.title[0]}
+          </p>
+        ) : null}
       </div>
       <div>
         <label htmlFor="description" className={labelClass}>
           Details
         </label>
-        <textarea id="description" name="description" rows={4} className={inputClass} placeholder="New hours are Mon–Fri 8–6, Sat 9–2. Closed Sunday." disabled={busy} />
+        <textarea
+          defaultValue={initial?.description}
+          id="description"
+          name="description"
+          rows={4}
+          className={inputClass}
+          placeholder="New hours are Mon–Fri 8–6, Sat 9–2. Closed Sunday."
+          disabled={busy}
+        />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {websites.length > 1 ? (
@@ -104,7 +169,13 @@ export function NewRequestForm({ websites, organizationId }: { websites: { id: s
             <label htmlFor="website_id" className={labelClass}>
               Website
             </label>
-            <select id="website_id" name="website_id" className={inputClass} disabled={busy}>
+            <select
+              defaultValue={initial?.websiteId}
+              id="website_id"
+              name="website_id"
+              className={inputClass}
+              disabled={busy}
+            >
               {websites.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.name}
@@ -119,7 +190,13 @@ export function NewRequestForm({ websites, organizationId }: { websites: { id: s
           <label htmlFor="priority" className={labelClass}>
             Priority
           </label>
-          <select id="priority" name="priority" className={inputClass} defaultValue="normal" disabled={busy}>
+          <select
+            id="priority"
+            name="priority"
+            className={inputClass}
+            defaultValue="normal"
+            disabled={busy}
+          >
             <option value="low">Low</option>
             <option value="normal">Normal</option>
             <option value="high">High</option>
@@ -135,12 +212,19 @@ export function NewRequestForm({ websites, organizationId }: { websites: { id: s
           accept={ACCEPT_ATTRIBUTE}
           multiple
           disabled={busy}
-          onFiles={(selected) => setFiles((prev) => [...prev, ...selected].slice(0, MAX_ATTACHMENTS_PER_REQUEST + 1))}
+          onFiles={(selected) =>
+            setFiles((prev) =>
+              [...prev, ...selected].slice(0, MAX_ATTACHMENTS_PER_REQUEST + 1),
+            )
+          }
           className="flex w-full min-w-0 items-center gap-2 rounded-md border border-dashed border-[color:var(--border)] px-3 py-2.5 text-xs text-[color:var(--text-secondary)] hover:border-[color:var(--accent)] hover:text-[color:var(--text-primary)]"
         >
           <Paperclip className="h-4 w-4" />
           <span>
-            Add images or PDFs <span className="opacity-70">· up to {MAX_ATTACHMENTS_PER_REQUEST} files, 10 MB each</span>
+            Add images or PDFs{" "}
+            <span className="opacity-70">
+              · up to {MAX_ATTACHMENTS_PER_REQUEST} files, 10 MB each
+            </span>
           </span>
         </FileUploadButton>
         {files.length > 0 ? (
@@ -148,17 +232,38 @@ export function NewRequestForm({ websites, organizationId }: { websites: { id: s
             {files.map((f, i) => {
               const problem = problems.find((p) => p.name === f.name);
               return (
-                <li key={`${f.name}-${i}`} className="flex items-center gap-3 px-3 py-1.5 text-xs">
+                <li
+                  key={`${f.name}-${i}`}
+                  className="flex items-center gap-3 px-3 py-1.5 text-xs"
+                >
                   {f.type.startsWith("image/") ? (
                     // eslint-disable-next-line @next/next/no-img-element -- local object URL preview
-                    <img src={URL.createObjectURL(f)} alt="" className="h-8 w-8 rounded object-cover" />
+                    <img
+                      src={URL.createObjectURL(f)}
+                      alt=""
+                      className="h-8 w-8 rounded object-cover"
+                    />
                   ) : (
-                    <span className="flex h-8 w-8 items-center justify-center rounded bg-[color:var(--bg-surface-soft)] text-[10px] font-semibold">PDF</span>
+                    <span className="flex h-8 w-8 items-center justify-center rounded bg-[color:var(--bg-surface-soft)] text-[10px] font-semibold">
+                      PDF
+                    </span>
                   )}
                   <span className="min-w-0 flex-1 truncate">{f.name}</span>
-                  <span className="shrink-0 text-[color:var(--text-secondary)]">{formatBytes(f.size)}</span>
-                  {problem ? <span className="shrink-0 text-[color:var(--status-bad)]">{problem.reason}</span> : null}
-                  <button type="button" aria-label={`Remove ${f.name}`} disabled={busy} onClick={() => setFiles(files.filter((_, j) => j !== i))} className="shrink-0 text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">
+                  <span className="shrink-0 text-[color:var(--text-secondary)]">
+                    {formatBytes(f.size)}
+                  </span>
+                  {problem ? (
+                    <span className="shrink-0 text-[color:var(--status-bad)]">
+                      {problem.reason}
+                    </span>
+                  ) : null}
+                  <button
+                    type="button"
+                    aria-label={`Remove ${f.name}`}
+                    disabled={busy}
+                    onClick={() => setFiles(files.filter((_, j) => j !== i))}
+                    className="shrink-0 text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]"
+                  >
                     <X className="h-3.5 w-3.5" />
                   </button>
                 </li>
@@ -166,13 +271,27 @@ export function NewRequestForm({ websites, organizationId }: { websites: { id: s
             })}
           </ul>
         ) : null}
-        {problems.find((p) => p.name === "*") ? <p className="mt-1 text-xs text-[color:var(--status-bad)]">{problems.find((p) => p.name === "*")!.reason}</p> : null}
+        {problems.find((p) => p.name === "*") ? (
+          <p className="mt-1 text-xs text-[color:var(--status-bad)]">
+            {problems.find((p) => p.name === "*")!.reason}
+          </p>
+        ) : null}
       </div>
 
       <FormError message={error} />
       <FormSuccess message={success} />
-      <button type="submit" className="btn-primary text-sm" disabled={busy || problems.length > 0}>
-        {phase === "creating" ? "Submitting…" : phase === "uploading" ? `Uploading ${progress.done + 1} of ${progress.total}…` : phase === "recording" ? "Finishing…" : "Submit request"}
+      <button
+        type="submit"
+        className="btn-primary text-sm"
+        disabled={busy || problems.length > 0}
+      >
+        {phase === "creating"
+          ? "Submitting…"
+          : phase === "uploading"
+            ? `Uploading ${progress.done + 1} of ${progress.total}…`
+            : phase === "recording"
+              ? "Finishing…"
+              : "Submit request"}
       </button>
     </form>
   );

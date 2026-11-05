@@ -1,4 +1,10 @@
 import Link from "next/link";
+import { requireOrgContext } from "@/lib/vigil/auth/session";
+import { FEATURES, resolveEntitlements } from "@/lib/vigil/entitlements";
+import { getOrgWebsites } from "@/lib/vigil/queries/dashboard";
+import { calendarConnectionStatus } from "@/lib/vigil/bookings/google/service";
+import { BookingGoogleCalendar } from "@/components/vigil/BookingGoogleCalendar";
+import { BookingAccessWall } from "@/components/vigil/BookingAccessWall";
 import { WeeklyAvailabilityEditor } from "@/components/vigil/WeeklyAvailabilityEditor";
 import { z } from "zod";
 import { CalendarDays, Settings2 } from "lucide-react";
@@ -40,6 +46,10 @@ export default async function BookingsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const ctx = await requireOrgContext("/dashboard/bookings"),
+    ent = await resolveEntitlements(ctx.organization.id);
+  if (!ent.enabled(FEATURES.bookings))
+    return <BookingAccessWall mode="upgrade" />;
   const params = await searchParams,
     view = ["requests", "history", "setup"].includes(String(params.view))
       ? String(params.view)
@@ -61,12 +71,30 @@ export default async function BookingsPage({
             : undefined,
       },
     );
+  if (!data.enabled && data.notRequested) {
+    const sites = await getOrgWebsites(ctx.organization.id);
+    const selected = sites.find((s) => s.id === params.website) ?? sites[0];
+    return (
+      <BookingAccessWall
+        mode="request"
+        canRequest={ent.enabled(FEATURES.requests)}
+        websiteId={selected?.id}
+      />
+    );
+  }
   const canManage =
       Boolean(data.ctx.staffRole) ||
       ["owner", "manager"].includes(data.ctx.role),
     website = data.site?.id ?? "",
     href = (v: string, p = 1) =>
       `/dashboard/bookings?website=${website}&view=${v}&page=${p}${z.uuid().safeParse(params.lead).success ? `&lead=${params.lead}` : ""}`;
+  const calendarStatus =
+    data.enabled &&
+    view === "setup" &&
+    !ctx.isImpersonating &&
+    ["owner", "manager"].includes(ctx.role)
+      ? await calendarConnectionStatus(ctx.user.id, website)
+      : { configured: false, connection: null };
   return (
     <div className="lead-hub booking-workspace">
       <header className="lead-page-heading">
@@ -231,6 +259,19 @@ export default async function BookingsPage({
             </>
           ) : (
             <div className="booking-setup">
+              <BookingGoogleCalendar
+                status={calendarStatus}
+                website={website}
+                canConnect={
+                  !ctx.isImpersonating &&
+                  ["owner", "manager"].includes(ctx.role)
+                }
+                notice={
+                  typeof params.calendarNotice === "string"
+                    ? params.calendarNotice
+                    : undefined
+                }
+              />
               <section className="lead-detail-panel">
                 <h2 className="lead-panel-heading">Website activation</h2>
                 <div className="lead-panel-body">
@@ -312,8 +353,8 @@ export default async function BookingsPage({
                       <label className="booking-check">
                         <input type="checkbox" name="acknowledgeAvailability" />
                         I reviewed timezone and availability. I will keep all
-                        unavailable time blocked in Vigil. External calendars
-                        are not synchronized.
+                        unavailable time blocked in Vigil. Google Calendar is an
+                        optional copy. Busy time from Google is not imported.
                       </label>
                       <p className="lead-footnote">
                         Customers receive an on-screen receipt and private

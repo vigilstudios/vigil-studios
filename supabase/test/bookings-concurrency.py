@@ -38,3 +38,13 @@ remaining=sql(f"select count(*) from public.appointments where id in ('{ids[0]}'
 original=sql(f"select count(*) from public.appointments where id in ('{ids[0]}','{ids[1]}') and extract(hour from starts_at at time zone 'UTC') in (14,16)").stdout.strip()
 if remaining!='2' or original!='1':raise RuntimeError('Reschedule lost an existing reservation')
 print('ok - booking concurrency: both reservations retained, with one original slot unchanged')
+# The optional Google copy worker uses a per-connection lease independently of booking reservations.
+sql("begin;"+service_claims+f"select public.save_booking_calendar('{user}','{site}','race-owner@example.test','fictional-refresh-token','fictional-race-calendar');commit;")
+connection=sql(f"select id from vigil.booking_calendar_connections where user_id='{user}' and website_id='{site}'").stdout.strip()
+def claim_copy(_):
+ return subprocess.run(['psql',url,'-X','-qAt','-v','ON_ERROR_STOP=1'],input='begin;\n'+service_claims+f"\nselect coalesce(public.claim_booking_calendar('{connection}')->>'connectionId','none');\nselect pg_sleep(0.2);\ncommit;\n",capture_output=True,text=True)
+with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+ claims=list(executor.map(claim_copy,range(2)))
+if any(r.returncode for r in claims) or sum(connection in r.stdout.splitlines() for r in claims)!=1:
+ raise RuntimeError('Calendar copy lease permitted competing workers')
+print('ok - Google Calendar concurrency: only one worker claims the same connection')
