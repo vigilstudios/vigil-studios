@@ -16,14 +16,14 @@ export type ContactDependencies = {
   siteKey: () => string | undefined;
   verify: (token: string, hostname: string, ip: string, secret: string) => Promise<boolean>;
 };
-export async function verifyTurnstile(token: string, hostname: string, ip: string, secret: string): Promise<boolean> {
+export async function verifyTurnstile(token: string, hostname: string, ip: string, secret: string, action = "contact"): Promise<boolean> {
   const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
     method: "POST", headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(8000),
     body: JSON.stringify({ secret, response: token, ...(ip !== "unknown" ? { remoteip: ip } : {}) }),
   });
   if (!response.ok) throw new ContactError(503, "Verification is unavailable. Please try again or use email.");
   const result = await response.json() as { success?: boolean; hostname?: string; action?: string };
-  return result.success === true && result.hostname === hostname && result.action === "contact";
+  return result.success === true && result.hostname === hostname && result.action === action;
 }
 const defaults: ContactDependencies = {
   credentials: websiteContactCredentials, admin: createAdminClient, secret: () => process.env.TURNSTILE_SECRET_KEY,

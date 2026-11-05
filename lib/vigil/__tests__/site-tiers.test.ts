@@ -7,12 +7,12 @@ describe("website tier capabilities", () => {
     expect(WEBSITE_TIERS.professional.booking).toMatch(/booking/i);
     expect(WEBSITE_TIERS.professional.integrations).toMatch(/standard configurable/i);
     expect(WEBSITE_TIERS.professional.included.join(" ")).toMatch(/CMS/i);
-    expect(WEBSITE_TIERS.professional.excluded.join(" ")).toMatch(/Native booking/i);
+    expect(WEBSITE_TIERS.professional.excluded.join(" ")).toMatch(/Complex scheduling/i);
     expect(WEBSITE_TIERS.express.integrations).toMatch(/template-supported/i);
   });
 
   it("sends standard website needs to checkout and complex scope to consultation", () => {
-    expect(professionalPurchaseRoute(["business_site", "booking_embed", "standard_integrations"])).toBe("checkout");
+    expect(professionalPurchaseRoute(["business_site", "vigil_booking", "booking_embed", "standard_integrations"])).toBe("checkout");
     expect(professionalPurchaseRoute(["business_site", "extra_pages"])).toBe("consult");
     expect(professionalPurchaseRoute(["bespoke_design"])).toBe("consult");
     expect(professionalPurchaseRoute(["portal"])).toBe("consult");

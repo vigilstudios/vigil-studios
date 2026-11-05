@@ -25,3 +25,5 @@ export const useRouter = () => ({
     location.href = previewHref(href);
   },
 });
+// Shared by isolated previews that include marketing campaign links.
+export const useSearchParams = () => new URLSearchParams(location.search);

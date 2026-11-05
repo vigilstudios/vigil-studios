@@ -15,14 +15,15 @@ export const WEBSITE_TIERS = {
     primaryPages: 1,
     design: "Curated industry design, customized around your brand",
     integrations: "Preconfigured or template-supported integrations",
-    booking: "Booking links and compatible template embeds",
+    booking: "Contact-only by default; optional Vigil bookings on compatible designs with Care or higher",
     revisions: 1,
     included: [
       "One page from a curated industry design",
       "Your colours, logo, photos, services and content",
       "Responsive design and basic SEO",
       "Contact, click-to-call and social links",
-      "Supported booking embeds, maps, reviews and payment links",
+      "Optional standard Vigil appointments on compatible designs with Care or higher",
+      "Supported booking links, embeds, maps, reviews and payment links",
     ],
     excluded: ["Multi-page architecture", "Arbitrary layout changes or bespoke art direction", "Custom applications or APIs", "Complex ecommerce", "Advanced automation"],
   },
@@ -35,12 +36,12 @@ export const WEBSITE_TIERS = {
     primaryPages: 8,
     design: "Tailored composition from Vigil’s premium design systems",
     integrations: "Standard configurable third-party integrations",
-    booking: "Booking links and third-party booking embeds",
+    booking: "Vigil appointments with Care or higher, or supported third-party booking links and embeds",
     revisions: 2,
     included: [
       "Up to 8 tailored primary pages",
       "Brand-led composition from premium design systems",
-      "Advanced forms and standard booking integrations",
+      "Advanced forms and standard booking integrations; Vigil appointments with Care or higher",
       "Standard payments, maps, reviews, social and marketing integrations",
       "CMS for configured blogs, portfolios and supported content; self-service editing with Care or higher",
       "Analytics, conversion tracking and SEO foundations",
@@ -53,7 +54,7 @@ export const WEBSITE_TIERS = {
     excluded: [
       "Custom web applications, dashboards or customer portals",
       "Complex authentication or membership platforms",
-      "Native booking infrastructure",
+      "Complex scheduling, table inventory and custom booking infrastructure",
       "Large or operationally complex ecommerce",
       "Custom APIs, multi-system synchronization or complex automation",
       "New bespoke components, design systems or experimental interactions",
@@ -80,6 +81,7 @@ export type WebsiteTierKind = keyof typeof WEBSITE_TIERS;
 export const PROFESSIONAL_QUALIFIERS = [
   { id: "business_site", label: "A tailored business or marketing website", detail: "Up to eight primary pages", outcome: "included" },
   { id: "forms", label: "Contact, quote or multi-step forms", detail: "Including basic lead routing", outcome: "included" },
+  { id: "vigil_booking", label: "Standard Vigil appointments", detail: "Compatible website component and booking management with Care or higher; setup required", outcome: "included" },
   { id: "booking_embed", label: "Booking through a service I already use", detail: "Calendly, Acuity, Square, Vagaro, Fresha, Mindbody or similar", outcome: "included" },
   { id: "basic_payments", label: "Simple payments or deposits", detail: "Stripe, PayPal, Square, payment links or simple service checkout", outcome: "included" },
   { id: "cms", label: "A blog, portfolio, case studies or editable content", detail: "CMS included where it suits the site", outcome: "included" },
@@ -88,7 +90,7 @@ export const PROFESSIONAL_QUALIFIERS = [
   { id: "extra_pages", label: "More than eight primary pages", detail: "Additional pages can be quoted as an add-on", outcome: "consult" },
   { id: "advanced_store", label: "A large or operationally complex online store", detail: "Catalogs, inventory, variants, shipping, fulfillment or marketplace features", outcome: "consult" },
   { id: "portal", label: "Customer accounts, memberships, dashboards or a portal", detail: "This is custom application work", outcome: "custom" },
-  { id: "native_booking", label: "A new custom booking system", detail: "Availability, calendars, reminders, workflows or a booking database", outcome: "custom" },
+  { id: "native_booking", label: "A new custom booking system", detail: "Table inventory, classes, group capacity, deposits or specialized scheduling workflows", outcome: "custom" },
   { id: "custom_systems", label: "Custom APIs or complex automation", detail: "Multi-system synchronization or custom backend logic", outcome: "custom" },
 ] as const;
 

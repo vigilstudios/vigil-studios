@@ -178,7 +178,7 @@ export function renderDesignPreview(
   switch (id) {
     case "about.team": return renderPreviewSection(makeTeamSection("individual-team",config.structure,config));
     case "proof.social-reach": case "about.creator-profile": return renderPreviewSection(makeCreatorSection(id,"individual-creator",config));
-    case "cta.editorial": case "cta.signal": case "contact.inquiry":
+    case "cta.editorial": case "cta.signal": case "contact.inquiry": case "contact.booking":
     case "footer.sitemap": case "footer.compact": case "footer.split": case "footer.banner":
     case "work.expand-rail": case "work.card-rail": case "work.image-expansion": case "work.image-gallery": case "work.apple-cards": case "work.liquid-glass": return renderPreviewSection(makeEndingSection(id,"individual-ending",config));
     case "hero.image-marquee":

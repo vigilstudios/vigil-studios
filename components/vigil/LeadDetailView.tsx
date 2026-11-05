@@ -7,7 +7,7 @@ import { LeadStatus, type HubLink } from './LeadHubView';
 import { leadReplyLink, type LeadReplyPlatform } from '@/lib/vigil/leads/reply';
 
 export type LeadDetailData = Omit<NonNullable<Awaited<ReturnType<typeof getLeadDetail>>>, 'ctx'>;
-export function LeadDetailView({ detail, Link, backHref, updateForm, noteForm, replyPlatform, gmailReplyAction, gmailError }: { detail: LeadDetailData; Link: HubLink; backHref: string; updateForm: ReactNode; noteForm: ReactNode; replyPlatform: LeadReplyPlatform; gmailReplyAction?: ReactNode; gmailError?: boolean }) {
+export function LeadDetailView({ detail, Link, backHref, updateForm, noteForm, replyPlatform, gmailReplyAction, gmailError, bookingsEnabled=false }: { detail: LeadDetailData; Link: HubLink; backHref: string; updateForm: ReactNode; noteForm: ReactNode; replyPlatform: LeadReplyPlatform; gmailReplyAction?: ReactNode; gmailError?: boolean; bookingsEnabled?:boolean }) {
   const { lead, events, notification } = detail;
   const contact = lead.contact as { name?: string; email?: string; phone?: string; details?: Record<string, string> };
   const name = contact.name || 'Website inquiry';
@@ -31,7 +31,8 @@ export function LeadDetailView({ detail, Link, backHref, updateForm, noteForm, r
         {noteForm}
       </div></section>
     </div><aside className="lead-detail-aside" aria-label="Manage this inquiry">
-      <section className="lead-detail-panel" aria-labelledby="lead-manage-title"><h2 className="lead-panel-heading" id="lead-manage-title"><SlidersHorizontal size={16} aria-hidden="true" />Manage inquiry</h2><div className="lead-panel-body"><LeadStatus status={lead.status} />{updateForm}<p className="lead-settings-note">Set Booked once you’ve confirmed an appointment. Opening a scheduler does not book it here.</p></div></section>
+      {bookingsEnabled&&lead.website_id&&<Link className="lead-button" href={`/dashboard/leads/bookings?website=${lead.website_id}&lead=${lead.id}&view=history`}>View linked appointments</Link>}
+      <section className="lead-detail-panel" aria-labelledby="lead-manage-title"><h2 className="lead-panel-heading" id="lead-manage-title"><SlidersHorizontal size={16} aria-hidden="true" />Manage inquiry</h2><div className="lead-panel-body"><LeadStatus status={lead.status} />{updateForm}<p className="lead-settings-note">The inquiry status is a team label. Native appointment confirmations and availability are managed in Bookings.</p></div></section>
       <section className="lead-detail-panel" aria-labelledby="lead-notification-title"><h2 className="lead-panel-heading" id="lead-notification-title"><Mail size={16} aria-hidden="true" />Email notification</h2><div className="lead-panel-body"><p className="lead-delivery">{delivered ? <CircleCheck size={16} aria-hidden="true" /> : <Clock3 size={16} aria-hidden="true" />}{notification ? delivered ? 'Accepted by email provider' : titleCase(notification.status) : 'No notification recorded'}</p>
         <p className="lead-delivery-note">{notification ? `${notification.attempts} ${notification.attempts === 1 ? 'delivery attempt' : 'delivery attempts'}${notification.sent_at ? ` · ${formatDateTime(notification.sent_at)}` : ''}` : 'This earlier inquiry has no queued notification. It is still saved in your inbox.'}</p>
         {notification?.last_error && <p className="lead-delivery-error" role="status">{notification.last_error}<br />Your inquiry is saved. You can reply directly, or ask Vigil to review notification delivery.</p>}

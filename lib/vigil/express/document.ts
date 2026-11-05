@@ -1,3 +1,4 @@
+import { hasNativeBookingComponent } from "./booking-policy";
 import { z } from "zod";
 import { parseSiteDefinition } from "@/design-engine/site/persistence";
 import { assertComposition } from "@/design-engine/composition/validation";
@@ -14,7 +15,7 @@ const metadata = z.object({
  accent: z.string().regex(/^#[0-9a-f]{6}$/i), engineVersion: z.string().regex(/^v1-[a-f0-9]{20}$/).optional(),
 });
 export type ExpressDraft = z.infer<typeof metadata> & ({ kind: "site"; site: SiteDefinition } | { kind: "html"; html: string });
-export type ExpressTemplate = { slug: string; variant: string; industry: string; example: string; description: string; accent: string; status: "available" | "coming"; previewUrl?: string };
+export type ExpressTemplate = { slug: string; variant: string; industry: string; example: string; description: string; accent: string; status: "available" | "coming"; previewUrl?: string; nativeBookings?: boolean };
 export function parseExpressDraft(input: unknown, id?: string, publishing = false): ExpressDraft {
  if (JSON.stringify(input).length > 2_000_000) throw new ValidationError("A variant can contain up to 2 MB of content.");
  const base = metadata.parse(input);
@@ -41,5 +42,5 @@ export function blankExpressSite(id: string, title: string): SiteDefinition {
  return { ...emptyProjectSite(id, title), id: `express-${id}` };
 }
 export function catalogEntry(slug: string, draft: ExpressDraft): ExpressTemplate {
- return { slug, variant: draft.variant, industry: draft.industry, example: draft.example, description: draft.description, accent: draft.accent, status: "available", previewUrl: `/express-preview/${slug}` };
+ return { slug, variant: draft.variant, industry: draft.industry, example: draft.example, description: draft.description, accent: draft.accent, status: "available", nativeBookings: hasNativeBookingComponent(draft), previewUrl: `/express-preview/${slug}` };
 }

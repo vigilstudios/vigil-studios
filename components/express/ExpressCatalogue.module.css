@@ -785,3 +785,5 @@
   font-weight: 700;
   text-transform: uppercase;
 }
+
+.bookingCapability{display:block;min-height:33px;max-width:440px;margin-top:6px;color:var(--text-secondary);font-size:11px;line-height:1.5;}

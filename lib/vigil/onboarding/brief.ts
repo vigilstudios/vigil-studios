@@ -9,7 +9,7 @@ import { MAX_PHOTOS } from "./assets";
  * write (each step validates only its own section).
  */
 
-export const BRIEF_VERSION = 3;
+export const BRIEF_VERSION = 4;
 
 export const STEP_KEYS = ["welcome", "basics", "kickoff", "strategy", "offerings", "about", "brand", "domain", "review"] as const;
 export type StepKey = (typeof STEP_KEYS)[number];
@@ -29,7 +29,16 @@ export const hoursDaySchema = z.object({
   close: z.string().regex(/^\d{2}:\d{2}$/).or(z.literal("")).default(""),
 });
 
+export const bookingNeedsSchema = z.object({
+  approach: z.enum(["contact", "vigil", "existing", "custom"]).nullable().default(null),
+  mode: z.enum(["instant", "approval", "both"]).default("both"),
+  timeZone: optionalText(100),
+  services: optionalText(600),
+  providerUrl: z.url().refine(value => value.startsWith("https://"), "Use an HTTPS booking link.").or(z.literal("")).default(""),
+}).default({ approach: null, mode: "both", timeZone: "", services: "", providerUrl: "" });
+
 export const basicsSchema = z.object({
+  booking: bookingNeedsSchema,
   businessName: trimmed(160).min(1, "What is the business called?"),
   tagline: optionalText(160),
   phone: optionalText(40),

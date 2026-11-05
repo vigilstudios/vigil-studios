@@ -1479,3 +1479,13 @@ Availability now reads the current dated HTTPS observation when that source is e
 ### 2026-11-03 — Full-width chart plots and connected security tone
 
 Removed SVG aspect-ratio letterboxing and moved axis labels inside the plot so both report graphs span the same edges as their footers. Security tint now evaluates the connected checks independently from the full coverage state: passing evidence is blue, findings/failed refreshes orange, and unknown/stale evidence neutral. Partial coverage retains its honest label. Owner deferred broader security monitoring and prioritized native bookings with both instant and approval-based modes per service, followed by Lead Hub outcomes, Insights and Virtue.
+
+### 3 November 2026 — native bookings prepared for review
+
+Added a Care+ opt-in native appointment foundation shared by website components and Lead Hub: service modes, resource availability/buffers, blocked dates, race-safe reservations/approvals/rescheduling, guest links, attendance and immutable evidence. Lab previews use fictional data without submissions. Express Restaurant and Salon/Spa stay contact-only until setup and explicitly advertise optional native compatibility; other known template request forms remain inquiry capture. Onboarding, source handoff and admin readiness record booking needs without publishing availability. No booking migration, client activation, customer communications or calendar connection has been applied to production. See [review package](../launch/bookings/RELEASE_20261103.md).
+
+The earlier chart-width/security-tone change shipped in PR #44; native booking work is a separate release.
+
+### 4 November 2026 — booking calendar and account-access audit
+
+Added day/week/month/daily agenda views to the native booking workspace, with local-date range queries, resource filtering, appointment management details, daylight-saving-aware boundaries and collision layout. Calendar ranges are independent of the paginated requests/history queues. Refreshed shared dashboard surfaces and royal-blue/amber states; loopback review uses fictional records and actual dashboard chrome. No production activation or additional paid services. Captured the owner's next-phase requirements and source audit for pre-purchase accounts, authenticated checkout ownership, prospect dashboards, admin purchaser filters and Google sign-in in `docs/launch/bookings/NEXT_ACCOUNT_ACCESS_20261104.md`.

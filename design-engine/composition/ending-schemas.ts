@@ -39,6 +39,7 @@ const gallery = {content:z.object({...intro,works:records}).strict(),surface:com
 export const endingSectionSchemas = {
   "cta.editorial": z.object({...common,content:z.object(intro).strict(),structure:z.enum(["left","center","right"])}).strict(),
   "cta.signal": z.object({...common,content:z.object({...intro,image:imageSchema.optional()}).strict(),structure:z.enum(["poster","split","reverse"]),height:z.enum(["section","viewport"])}).strict(),
+  "contact.booking": z.object({...common,content:z.object({...intro}).strict(),structure:z.enum(["inline","panel"])}).strict(),
   "contact.inquiry": z.object({...common,content:z.object({...intro,image:imageSchema.optional(),details:destinations,socials:destinations,location:text(300).optional(),hours:text(200).optional(),form:endingFormSchema.optional()}).strict(),structure:z.enum(["information","split","social"]),imagePlacement:z.enum(["none","left","right","background"]).optional(), imageOverlay:z.number().min(0).max(.9).optional(), alignment:z.enum(["left","center","right"]).optional(), appearance:z.enum(["minimal","editorial","panel"]).optional(), formAppearance:inquiryFormAppearanceSchema.optional()}).strict(),
   "footer.sitemap": z.object({...footerCommon,content:z.object(footerContent).strict(),structure:z.enum(["brand-left","brand-above"])}).strict(),
   "footer.compact": z.object({...footerCommon,content:z.object(footerContent).strict(),structure:z.enum(["center","row"]),navigationDepth:z.literal("top-level")}).strict(),

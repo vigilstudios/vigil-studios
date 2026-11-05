@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { AssetPreviewImage } from "./AssetPreviewImage";
-import { Pencil, Building2, Compass, Target, ShoppingBag, BookOpen, Palette, Users, Globe2, type LucideIcon } from "lucide-react";
+import { CalendarDays, Pencil, Building2, Compass, Target, ShoppingBag, BookOpen, Palette, Users, Globe2, type LucideIcon } from "lucide-react";
 import { OnboardingSection } from "./OnboardingSection";
 import { REGISTRAR_GUIDES } from "@/lib/vigil/domain-guides";
 import { DAY_LABELS, type Brief, type ProjectKind, type StepKey } from "@/lib/vigil/onboarding/brief";
@@ -61,6 +61,12 @@ export function BriefSummary({ brief, projectKind = "express", assets, domain, o
           {!brief.kickoff?.mode ? <Empty text="Not chosen yet" /> : null}
         </Section>
       ) : null}
+
+      {brief.basics?.booking?.approach && <Section icon={CalendarDays} title="Booking needs" onEdit={onEdit ? () => onEdit("basics") : undefined}>
+        <Row label="Approach" value={{contact:"Contact only",vigil:"Vigil bookings · Care or higher, setup required",existing:"Existing provider",custom:"Specialized scheduling · scope review"}[brief.basics.booking.approach]} />
+        {brief.basics.booking.approach === "vigil" && <><Row label="Confirmation" value={{instant:"Instant confirmation",approval:"Requests for approval",both:"Choose per service"}[brief.basics.booking.mode]}/><Row label="Timezone" value={brief.basics.booking.timeZone}/><Row label="Bookable services" value={brief.basics.booking.services}/></>}
+        <Row label="Existing booking link" value={brief.basics.booking.providerUrl}/>
+      </Section>}
 
       {projectKind !== "express" || strategy ? (
         <Section icon={Target} title="Site goals and scope" onEdit={onEdit ? () => onEdit("strategy") : undefined}>

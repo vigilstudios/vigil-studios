@@ -118,6 +118,13 @@ function renderBriefMarkdown(orgName: string, brief: Brief, assets: SourceAssetS
     if (!b.hours.notApplicable) field("Hours notes", b.hours.notes);
   }
 
+  const booking = brief.basics?.booking;
+  if(booking?.approach){
+    section("Contact and booking setup");
+    field("Approach",booking.approach);field("Confirmation",booking.mode);field("Business timezone",booking.timeZone);field("Bookable services",booking.services);field("Existing scheduler",booking.providerUrl);
+    if(booking.approach === "vigil") lines.push("Use the shared Vigil booking component on a compatible design. Standard appointments require Care or higher. Keep contact-only as the default until Vigil verifies the component and the owner reviews availability and explicitly enables bookings in Lead Hub. Opening hours must not automatically become bookable time. Specialized scheduling remains separately scoped.", "");
+  }
+
   const s = brief.strategy;
   if (s) {
     section("Goals and scope");
