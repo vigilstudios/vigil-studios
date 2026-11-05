@@ -37,6 +37,12 @@ function database() {
             );
           return (...args: unknown[]) => {
             calls.push({ table, method, args });
+            if (
+              table === "booking_settings" &&
+              method === "select" &&
+              args[0] === "website_id"
+            )
+              response.data = [{ website_id: site }];
             return query;
           };
         },

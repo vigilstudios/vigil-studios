@@ -13,6 +13,7 @@ export type NavIcon =
   | "review"
   | "blog"
   | "files"
+  | "bookings"
   | "leads"
   | "insights"
   | "virtue"

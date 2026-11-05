@@ -4,7 +4,7 @@ import { ExpressCatalogue } from "@/components/express/ExpressCatalogue";
 import type { ExpressTemplate } from "@/lib/vigil/express/document";
 import { createRoot } from "react-dom/client";
 import { BookingWidget } from "@/design-engine/forms/WebsiteBookingHost";
-import BookingsPage from "@/app/(vigil)/dashboard/leads/bookings/page";
+import BookingsPage from "@/app/(vigil)/dashboard/bookings/page";
 import { BasicsStep } from "@/app/(vigil)/dashboard/onboarding/steps/BasicsStep";
 import { basicsSchema } from "@/lib/vigil/onboarding/brief";
 import "@/app/globals.css";
@@ -74,7 +74,7 @@ const review = (
       <nav>
         <Link href="/?view=catalogue">Catalogue</Link>
         <Link href="/?view=widget">Website widget</Link>
-        <Link href="/?view=upcoming">Lead Hub</Link>
+        <Link href="/dashboard/bookings?view=upcoming">Bookings</Link>
         <Link href="/?view=requests">Requests</Link>
         <Link href="/?view=setup">Setup</Link>
         <Link href="/?view=onboarding">Onboarding</Link>
@@ -139,7 +139,11 @@ createRoot(document.getElementById("root")!).render(
               href: "/dashboard/leads",
               label: "Lead Hub",
               icon: "leads",
-              activePaths: ["/dashboard/leads/bookings"],
+            },
+            {
+              href: "/dashboard/bookings",
+              label: "Bookings",
+              icon: "bookings",
             },
             {
               href: "/dashboard/insights",
