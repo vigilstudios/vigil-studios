@@ -86,6 +86,17 @@ export default async function VigilPage() {
                 </li>
               ))}
             </ul>
+            <p className="mt-6 max-w-3xl text-sm leading-6 text-[color:var(--text-secondary)]">
+              Compatible websites on Care and above can add standard appointment
+              booking after setup. Vigil manages availability, requests and
+              confirmed appointments. An optional Google Calendar connection
+              copies appointments and unavailable time to a separate calendar;
+              it does not import your other Google calendars. Read the{" "}
+              <Link href="/calendar-privacy" className="underline underline-offset-4">
+                Calendar connection privacy notice
+              </Link>
+              .
+            </p>
           </Reveal>
         </Container>
       </Section>

@@ -27,6 +27,7 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
     links: [
       { label: "Sign in", href: "/login" },
       { label: "Your dashboard", href: "/dashboard" },
+      { label: "Calendar connection privacy", href: "/calendar-privacy" },
     ],
   },
 ];
