@@ -358,8 +358,8 @@ export default async function BookingsPage({
                       </label>
                       <p className="lead-footnote">
                         Customers receive an on-screen receipt and private
-                        management link. Automated emails, reminders and
-                        calendar connections are not enabled.
+                        management link. Automated customer emails and
+                        reminders are not enabled.
                       </p>
                       {data.ctx.staffRole ? (
                         <>
