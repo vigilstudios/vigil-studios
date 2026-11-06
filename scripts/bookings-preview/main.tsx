@@ -95,7 +95,8 @@ createRoot(document.getElementById("root")!).render(
       workspace={<strong>Marlow Studio</strong>}
       account={
         <p style={{ padding: 16, fontSize: 11 }}>
-          Care plan · Fictional preview
+          {params.get("state") === "basic" ? "Basic" : "Care"} plan · Fictional
+          preview
         </p>
       }
       groups={[
@@ -144,6 +145,8 @@ createRoot(document.getElementById("root")!).render(
               href: "/dashboard/bookings",
               label: "Bookings",
               icon: "bookings",
+              premium: true,
+              locked: params.get("state") === "basic",
             },
             {
               href: "/dashboard/insights",

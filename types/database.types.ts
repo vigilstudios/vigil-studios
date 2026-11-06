@@ -4387,6 +4387,67 @@ export type Database = {
       }
     }
     Functions: {
+      "booking_calendar_status": {
+    Args: {
+        "p_site": string;
+        "p_user": string;
+    };
+    Returns: Json;
+};
+      "booking_calendar_target": {
+    Args: {
+        "p_site": string;
+        "p_user": string;
+    };
+    Returns: Json;
+};
+      "save_booking_calendar": {
+    Args: {
+        "p_calendar": string;
+        "p_email": string;
+        "p_refresh_token": string;
+        "p_site": string;
+        "p_user": string;
+    };
+    Returns: string;
+};
+      "claim_booking_calendar": {
+    Args: {
+        "p_connection"?: string;
+    };
+    Returns: Json;
+};
+      "finish_booking_calendar": {
+    Args: {
+        "p_connection": string;
+        "p_entity": string;
+        "p_error"?: string;
+        "p_event"?: string;
+        "p_kind": string;
+        "p_lease": string;
+        "p_retry_after"?: number;
+        "p_version": number;
+    };
+    Returns: boolean;
+};
+      "remove_booking_calendar": {
+    Args: {
+        "p_site": string;
+        "p_user": string;
+    };
+    Returns: boolean;
+};
+      "booking_calendar_lease_valid": {
+    Args: {
+        "p_connection": string;
+        "p_entity": string;
+        "p_kind": string;
+        "p_lease": string;
+        "p_version": number;
+    };
+    Returns: boolean;
+};
+
       booking_eligible: { Args: { p_website: string }; Returns: boolean }
       block_booking_days: {
         Args: {
@@ -6098,6 +6159,109 @@ export type Database = {
         }
         Relationships: []
       }
+"booking_calendar_connections": {
+    Row: {
+        "account_email": string;
+        "connected_at": string;
+        "enabled": boolean;
+        "error_code": string | null;
+        "id": string;
+        "last_attempted_at": string | null;
+        "last_synced_at": string | null;
+        "lease_token": string | null;
+        "lease_until": string | null;
+        "leased_entity": string | null;
+        "leased_kind": string | null;
+        "leased_version": number | null;
+        "organization_id": string;
+        "status": string;
+        "user_id": string;
+        "vault_secret_id": string | null;
+        "website_id": string;
+    };
+    ComputedFields: never;
+    Insert: {
+        "account_email": string;
+        "connected_at"?: string;
+        "enabled"?: boolean;
+        "error_code"?: string | null;
+        "id"?: string;
+        "last_attempted_at"?: string | null;
+        "last_synced_at"?: string | null;
+        "lease_token"?: string | null;
+        "lease_until"?: string | null;
+        "leased_entity"?: string | null;
+        "leased_kind"?: string | null;
+        "leased_version"?: number | null;
+        "organization_id": string;
+        "status"?: string;
+        "user_id": string;
+        "vault_secret_id"?: string | null;
+        "website_id": string;
+    };
+    Update: {
+        "account_email"?: string;
+        "connected_at"?: string;
+        "enabled"?: boolean;
+        "error_code"?: string | null;
+        "id"?: string;
+        "last_attempted_at"?: string | null;
+        "last_synced_at"?: string | null;
+        "lease_token"?: string | null;
+        "lease_until"?: string | null;
+        "leased_entity"?: string | null;
+        "leased_kind"?: string | null;
+        "leased_version"?: number | null;
+        "organization_id"?: string;
+        "status"?: string;
+        "user_id"?: string;
+        "vault_secret_id"?: string | null;
+        "website_id"?: string;
+    };
+    Relationships: [
+    ];
+};
+"booking_calendar_queue": {
+    Row: {
+        "attempts": number;
+        "connection_id": string;
+        "entity_id": string;
+        "kind": string;
+        "next_attempt_at": string;
+        "version": number;
+    };
+    ComputedFields: never;
+    Insert: {
+        "attempts"?: number;
+        "connection_id": string;
+        "entity_id": string;
+        "kind": string;
+        "next_attempt_at"?: string;
+        "version"?: number;
+    };
+    Update: {
+        "attempts"?: number;
+        "connection_id"?: string;
+        "entity_id"?: string;
+        "kind"?: string;
+        "next_attempt_at"?: string;
+        "version"?: number;
+    };
+    Relationships: [
+        {
+            foreignKeyName: "booking_calendar_queue_connection_id_fkey";
+            columns: [
+                "connection_id"
+            ];
+            isOneToOne: false;
+            referencedRelation: "booking_calendar_connections";
+            referencedColumns: [
+                "id"
+            ];
+        }
+    ];
+};
+
     }
     Views: {
       [_ in never]: never
@@ -6306,6 +6470,18 @@ export type Database = {
           value: Json
         }[]
       }
+"booking_calendar_member": {
+    Args: {
+        "p_site": string;
+        "p_user": string;
+    };
+    Returns: boolean;
+};
+"booking_calendar_service": {
+    Args: Record<PropertyKey, never>;
+    Returns: undefined;
+};
+
     }
     Enums: {
       [_ in never]: never

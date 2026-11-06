@@ -1495,3 +1495,14 @@ Booking release follow-through: PR #45 is merged and the production calendar rou
 ### 4 November 2026 — standalone Bookings workspace
 
 Owner clarified that Scar's site is contact-only and requested Bookings separate from Lead Hub. Bookings now has its own Grow navigation item and `/dashboard/bookings` route, without Lead Hub's tab bar. The former nested route redirects while preserving website, date/view, appointment and inquiry context. Appointment-to-inquiry links remain available between the two workspaces. Booking navigation and its site picker include only businesses that explicitly requested native booking or already have booking settings; paused setups retain history. Contact-only and external-scheduler sites do not get native booking setup requirements. No subscription eligibility activates booking, no Scar business settings were changed, and no migration or service connection is introduced.
+
+### 4 November 2026 — premium booking access and optional Google copy connector (prepared)
+
+Owner revised optional-module discovery: Bookings stays visible with a premium crown. Below Care, show the shared animated preview/blur/upgrade treatment without reading appointment records. Care+ sites that do not use native scheduling get an included setup offer linking to a prefilled Requests form (or support when Requests is unavailable). This supersedes the prior hidden-tab treatment for Scar, while keeping her site contact-only and never submitting/activating anything automatically.
+
+Prepared an owner/manager opt-in, outbound Google Calendar connector: dedicated app-created calendar scope, PKCE/tenant binding, Vault credentials, provider-links-only identifiers, leased/versioned private queue, ETag writes, retry/reconnect/disconnect controls and existing scheduler integration. Google remains an optional copy; native appointments own availability. No Google client, live account connection or production calendar sync is activated by this code. Access/activation review: `docs/launch/bookings/GOOGLE_CALENDAR_ACCESS_20261104.md`.
+
+### 2026-11-05 — Google Calendar acceptance
+
+Completed the owner-approved narrow Calendar API/consent/client setup with production and branch-restricted testing secrets. A separately approved fictional Care owner connected through the isolated dashboard; live Google checks passed for confirmed/request copies, privacy/minimal fields, dashboard rescheduling, approval, cancellation, blocked time and disconnect with encrypted credential removal. Cleared the fictional event copies and confirmed later changes do not queue after disconnect. Production Calendar sync remains off pending public consent publishing; Scar remains contact-only. Also corrected the setup footnote to describe customer emails/reminders separately from the optional Calendar connection. Evidence and preview-only baseline permission adjustments are recorded in `docs/launch/bookings/GOOGLE_CALENDAR_ACCESS_20261104.md`.
+
