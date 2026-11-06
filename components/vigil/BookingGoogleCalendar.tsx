@@ -27,16 +27,14 @@ export function BookingGoogleCalendar({
   const connection = status.connection,
     connected = connection && connection.status !== "disconnected";
   return (
-    <section className="lead-detail-panel">
+    <section className="lead-detail-panel booking-google-panel">
       <h2 className="lead-panel-heading">
         <CalendarDays size={16} /> Google Calendar
       </h2>
       <div className="lead-panel-body">
         <p className="lead-settings-note">
-          Copy this website’s appointments and blocked time into a separate
-          Vigil calendar in your Google account. Vigil manages availability;
-          edits made in Google do not update Vigil. Approval requests appear as
-          tentative and do not reserve time.
+          See Vigil appointments in a separate Google calendar. Optional,
+          one-way sync: manage your schedule and unavailable time in Vigil.
         </p>
         {notice && Object.hasOwn(notices, notice) && (
           <p role="status" className="lead-settings-note">
@@ -88,19 +86,28 @@ export function BookingGoogleCalendar({
             )}
           </div>
         ) : (
-          <p className="lead-settings-note">
-            The business owner or manager can connect their own Google account
-            from their dashboard.
-          </p>
+          <div className="booking-connection-state">
+            <strong>Owner connection required</strong>
+            <p>
+              You’re viewing as Vigil staff or a team member. The business owner
+              or manager will see “Connect Google Calendar” in their own
+              dashboard.
+            </p>
+          </div>
         )}
-        <p className="lead-footnote">
-          Only this site’s calendar is copied. Customer invitations and default
-          Google reminders are not sent. Disconnect removes saved access and
-          stops future copies; existing copies remain in Google.{" "}
-          <Link href="/calendar-privacy" className="underline">
-            Calendar connection privacy
-          </Link>
-        </p>
+        <details>
+          <summary>How sync and privacy work</summary>
+          <p className="lead-footnote">
+            Only this site’s calendar is copied. Customer invitations and
+            default Google reminders are not sent. Disconnect removes saved
+            access and stops future copies; existing copies remain in Google.
+            Changes and busy time from Google are not imported. Approval
+            requests are tentative and do not reserve time.{" "}
+            <Link href="/calendar-privacy" className="underline">
+              Calendar connection privacy
+            </Link>
+          </p>
+        </details>
       </div>
     </section>
   );

@@ -3,6 +3,7 @@ import {
   businessDate,
   validDate,
   calendarRange,
+  calendarHours,
   shiftCalendar,
   positionEvents,
   type CalendarAppointment,
@@ -87,7 +88,7 @@ describe("calendar event layout", () => {
     const previous = positionEvents([overnight], "2026-11-04", zone)[0],
       next = positionEvents([overnight], "2026-11-05", zone)[0];
     expect([previous.top, previous.height]).toEqual([1410, 30]);
-    expect([next.top, next.height]).toEqual([0, 40]);
+    expect([next.top, next.height]).toEqual([0, 30]);
     expect(positionEvents([overnight], "2026-11-06", zone)).toEqual([]);
   });
 });
@@ -114,5 +115,37 @@ it("keeps repeated-hour appointments visible in separate columns", () => {
   ).toEqual([
     [60, 0, 2],
     [60, 1, 2],
+  ]);
+});
+
+it("fits working hours without hiding appointments outside those hours", () => {
+  const resources = [{ hours: [{ day: 3, start: "09:00", end: "17:00" }] }];
+  expect(calendarHours([], resources, ["2026-11-04"], zone)).toEqual({
+    start: 540,
+    end: 1020,
+  });
+  expect(
+    calendarHours(
+      [event("early", "11:15", "12:00"), event("late", "23:00", "23:45")],
+      resources,
+      ["2026-11-04"],
+      zone,
+    ),
+  ).toEqual({ start: 360, end: 1140 });
+  expect(calendarHours([], [], ["2026-11-04"], zone)).toEqual({
+    start: 480,
+    end: 1080,
+  });
+});
+
+it("preserves short appointment duration rather than stretching into the next slot", () => {
+  const p = positionEvents(
+    [event("short", "15:00", "15:15"), event("next", "15:15", "15:30")],
+    "2026-11-04",
+    zone,
+  );
+  expect(p.map((v) => [v.height, v.columns])).toEqual([
+    [15, 1],
+    [15, 1],
   ]);
 });

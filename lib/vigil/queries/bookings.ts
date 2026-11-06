@@ -83,6 +83,10 @@ export async function getBookings(
       .or(
         `status.neq.requested,request_expires_at.gt.${new Date(asOf).toISOString()}`,
       );
+  else if (view === "history")
+    agenda = agenda.or(
+      `status.in.(declined,cancelled,completed,no_show,expired),ends_at.lt.${new Date(asOf).toISOString()},and(status.eq.requested,request_expires_at.lte.${new Date(asOf).toISOString()})`,
+    );
   if (lead) agenda = agenda.eq("lead_id", lead);
   const [resources, services, blocks, appointments, eligible, project] =
     await Promise.all([

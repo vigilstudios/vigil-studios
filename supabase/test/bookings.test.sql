@@ -20,6 +20,12 @@ select booking_test.ok(public.booking_eligible('ba000000-0000-4000-8000-00000000
 select public.save_booking_resource('ba000000-0000-4000-8000-000000000021','{"id":"ba000000-0000-4000-8000-000000000031","name":"Consultant","active":true,"hours":[{"day":0,"start":"00:00","end":"23:45"},{"day":1,"start":"00:00","end":"23:45"},{"day":2,"start":"00:00","end":"23:45"},{"day":3,"start":"00:00","end":"23:45"},{"day":4,"start":"00:00","end":"23:45"},{"day":5,"start":"00:00","end":"23:45"},{"day":6,"start":"00:00","end":"23:45"}]}');
 select public.save_booking_service('ba000000-0000-4000-8000-000000000021','{"id":"ba000000-0000-4000-8000-000000000041","resourceId":"ba000000-0000-4000-8000-000000000031","name":"Consultation","description":"","duration":30,"bufferBefore":15,"bufferAfter":15,"mode":"instant","active":true}');
 select public.save_booking_service('ba000000-0000-4000-8000-000000000021','{"id":"ba000000-0000-4000-8000-000000000042","resourceId":"ba000000-0000-4000-8000-000000000031","name":"Request consultation","description":"","duration":30,"bufferBefore":15,"bufferAfter":15,"mode":"approval","active":true}');
+-- Widget settings are a distinct manager operation and cannot activate a site.
+select set_config('booking_test.experience',(select experience::text from public.booking_settings where website_id='ba000000-0000-4000-8000-000000000021'),true);
+select public.save_booking_experience('ba000000-0000-4000-8000-000000000021',jsonb_set(current_setting('booking_test.experience')::jsonb,'{presentation}','"popup"'));
+select booking_test.ok((select experience->>'presentation'='popup' and not enabled and not component_ready from public.booking_settings where website_id='ba000000-0000-4000-8000-000000000021'),'widget preferences save without activating public bookings');
+select booking_test.fails($q$select public.save_booking_experience('ba000000-0000-4000-8000-000000000021',current_setting('booking_test.experience')::jsonb || '{"enabled":true}')$q$,'22023','presentation cannot include activation');
+select booking_test.fails($q$select public.save_booking_experience('ba000000-0000-4000-8000-000000000022',current_setting('booking_test.experience')::jsonb)$q$,'42501','cross-tenant widget changes refused');
 select booking_test.fails($q$select public.configure_bookings('ba000000-0000-4000-8000-000000000021','{"timeZone":"UTC","enabled":true,"acknowledgeAvailability":true,"minimumNotice":0,"horizonDays":180,"changeNotice":120}')$q$,'22023','eligible plan does not activate unverified component');
 select booking_test.fails($q$select public.configure_bookings('ba000000-0000-4000-8000-000000000021','{"timeZone":"UTC","enabled":false,"acknowledgeAvailability":false,"minimumNotice":0,"horizonDays":180,"changeNotice":120}',true)$q$,'42501','owner cannot assert site compatibility');
 select booking_test.fails($q$select public.configure_bookings('ba000000-0000-4000-8000-000000000021','{"timeZone":"UTC","enabled":null,"acknowledgeAvailability":true,"minimumNotice":0,"horizonDays":180,"changeNotice":120}')$q$,'22023','null activation rejected');
@@ -27,11 +33,15 @@ select booking_test.fails($q$select public.save_booking_resource('ba000000-0000-
 reset role;update public.booking_settings set component_ready=true where website_id='ba000000-0000-4000-8000-000000000021';set local role authenticated;
 select public.configure_bookings('ba000000-0000-4000-8000-000000000021','{"timeZone":"America/New_York","enabled":true,"acknowledgeAvailability":true,"minimumNotice":0,"horizonDays":180,"changeNotice":120}');
 reset role;select set_config('request.jwt.claim.sub','ba000000-0000-4000-8000-000000000003',true);set local role authenticated;
+select booking_test.fails($q$select public.save_booking_experience('ba000000-0000-4000-8000-000000000021',current_setting('booking_test.experience')::jsonb)$q$,'42501','members cannot change website experience');
 select booking_test.fails($q$select public.save_booking_service('ba000000-0000-4000-8000-000000000021','{}')$q$,'42501','member cannot manage services');
 select booking_test.fails($q$select vigil.booking_transition(null,'cancel',1)$q$,'42501','transition helper cannot bypass role checks');
 select booking_test.fails($q$select public.booking_public_config('ba000000-0000-4000-8000-000000000021','https://booking-a.example.test')$q$,'42501','authenticated caller cannot call server booking API');
 reset role;select set_config('request.jwt.claim.role','service_role',true);set local role service_role;
 select booking_test.ok(public.booking_public_config('ba000000-0000-4000-8000-000000000021','https://booking-a.example.test')->>'timeZone'='America/New_York','public config only includes approved website');
+select booking_test.ok(public.booking_public_config('ba000000-0000-4000-8000-000000000021','https://booking-a.example.test')->'experience'->>'presentation'='popup','public config includes approved widget preferences');
+select booking_test.ok(public.booking_public_config('ba000000-0000-4000-8000-000000000021','https://booking-a.example.test')->'services'->0->>'resourceName' is null,'resource names are not public until owner enables the selector');
+select booking_test.ok((public.booking_public_config('ba000000-0000-4000-8000-000000000021','https://booking-a.example.test')->>'maxDate')::date>=(now() at time zone 'America/New_York')::date,'date picker receives the booking horizon');
 select booking_test.fails($q$select public.booking_public_config('ba000000-0000-4000-8000-000000000021','https://wrong.example.test')$q$,'42501','wrong origin refused');
 select set_config('booking_test.start',((current_date+3)+time '15:00')::timestamptz::text,true);
 select booking_test.ok(jsonb_array_length(public.booking_public_slots('ba000000-0000-4000-8000-000000000021','https://booking-a.example.test','ba000000-0000-4000-8000-000000000041',current_date+3))>0,'real UTC availability returned');
@@ -73,8 +83,10 @@ select booking_test.fails($q$select public.booking_public_config('ba000000-0000-
 select booking_test.ok(public.manage_guest_booking('ba000000-0000-4000-8000-000000000021','https://booking-a.example.test',current_setting('booking_test.booking')::uuid,repeat('b',64),'cancel')->>'status'='cancelled','existing guest cancellation survives downgrade');
 reset role;select set_config('request.jwt.claim.role','authenticated',true);select set_config('request.jwt.claim.sub','ba000000-0000-4000-8000-000000000002',true);set local role authenticated;
 select booking_test.ok((select count(*)=0 from public.appointments),'other tenant cannot read appointments');
+select booking_test.fails($q$select public.save_booking_experience('ba000000-0000-4000-8000-000000000021',current_setting('booking_test.experience')::jsonb)$q$,'42501','other tenant cannot alter widget');
 select booking_test.fails($q$select public.manage_booking(current_setting('booking_test.request1')::uuid,'cancel',3)$q$,'42501','other tenant cannot cancel appointments');
 reset role;select set_config('request.jwt.claim.role','anon',true);set local role anon;
+select booking_test.fails($q$select public.save_booking_experience('ba000000-0000-4000-8000-000000000021','{}')$q$,'42501','anonymous cannot alter widget');
 select booking_test.fails($q$select * from public.appointments$q$,'42501','anonymous cannot read appointments');
 select booking_test.fails($q$select public.manage_booking(current_setting('booking_test.request1')::uuid,'cancel',3)$q$,'42501','anonymous cannot invoke management');
 reset role;

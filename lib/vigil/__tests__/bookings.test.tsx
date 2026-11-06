@@ -9,6 +9,8 @@ import {
 import {
   bookingManagementUrl,
   bookingSettingsSchema,
+  bookingExperienceSchema,
+  defaultBookingExperience,
   hoursSchema,
   publicBookingSchema,
 } from "../bookings/contract";
@@ -433,5 +435,48 @@ describe("booking delivery handoff", () => {
       ),
     ).toBeNull();
     vi.unstubAllEnvs();
+  });
+});
+
+describe("website booking experience", () => {
+  it("validates presentation preferences without accepting activation or arbitrary styles", () => {
+    expect(
+      bookingExperienceSchema.safeParse({
+        ...defaultBookingExperience,
+        presentation: "popup",
+        showResource: true,
+      }).success,
+    ).toBe(true);
+    for (const extra of [
+      { enabled: true },
+      { accent: "url(https://outside.example.test)" },
+      { buttonLabel: "" },
+      { resourceLabel: "x".repeat(31) },
+    ])
+      expect(
+        bookingExperienceSchema.safeParse({
+          ...defaultBookingExperience,
+          ...extra,
+        }).success,
+      ).toBe(false);
+  });
+  it("renders the same customer calendar inside an optional popup without live preview credentials", () => {
+    const html = renderToStaticMarkup(
+      createElement(BookingWidget, {
+        preview: true,
+        experience: {
+          ...defaultBookingExperience,
+          presentation: "popup",
+          showResource: true,
+        },
+      }),
+    );
+    expect(html).toContain("<dialog");
+    expect(html).toContain("Close booking");
+    expect(html).toContain("Person or space");
+    expect(html).toContain("November 2030");
+    expect(html).toContain("Continue to your details");
+    expect(html).not.toContain("captchaToken");
+    expect(html).not.toContain("<dialog open");
   });
 });

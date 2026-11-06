@@ -12,10 +12,14 @@ import { TurnstileVerification } from "./WebsiteContactHost";
 import {
   bookingManagementUrl,
   bookingTime,
+  bookingExperience,
+  type BookingExperience,
   type BookingReceipt,
   type BookingSlot,
   type PublicBookingConfig,
 } from "@/lib/vigil/bookings/contract";
+import { BookingDatePicker } from "./BookingDatePicker";
+import { dayStart } from "@/lib/vigil/bookings/calendar";
 import "./bookings.css";
 const Host = createContext<{ endpoint?: string; preview: boolean }>({
   preview: true,
@@ -55,6 +59,8 @@ const fictionalConfig: PublicBookingConfig = {
       description: "A short conversation with your team.",
       duration: 30,
       mode: "instant",
+      resourceId: "example-alex",
+      resourceName: "Alex",
     },
     {
       id: "example-service",
@@ -62,6 +68,8 @@ const fictionalConfig: PublicBookingConfig = {
       description: "A conversation about your next step.",
       duration: 30,
       mode: "approval",
+      resourceId: "example-jordan",
+      resourceName: "Jordan",
     },
   ],
 };
@@ -95,17 +103,19 @@ async function read<T>(endpoint: string, body?: unknown): Promise<T> {
   return data;
 }
 export function BookingWidget({
-  title = "Choose a time",
-  introduction = "Find an appointment that works for you.",
+  title,
+  introduction,
   headingLevel = "h3",
   endpoint: boundEndpoint,
   preview: boundPreview,
+  experience: boundExperience,
 }: {
   headingLevel?: "h2" | "h3";
   title?: string;
   introduction?: string;
   endpoint?: string;
   preview?: boolean;
+  experience?: BookingExperience;
 }) {
   const Heading = headingLevel;
   const host = useContext(Host),
@@ -130,8 +140,22 @@ export function BookingWidget({
     [guest, setGuest] = useState<{ bookingId: string; token: string } | null>(
       null,
     ),
-    [message, setMessage] = useState("");
+    [message, setMessage] = useState(""),
+    [resource, setResource] = useState(""),
+    [step, setStep] = useState<"time" | "details">("time");
+  const experience = boundExperience ?? bookingExperience(config?.experience);
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (receipt && experience.presentation === "popup" && !dialog.current?.open)
+      dialog.current?.showModal();
+  }, [receipt, experience.presentation]);
   const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (step === "details")
+      root.current
+        ?.querySelector<HTMLInputElement>('input[name="name"]')
+        ?.focus();
+  }, [step]);
   const initialReceipt = useRef<BookingReceipt | null>(null);
   const retry = useRef<{
     fingerprint: string;
@@ -207,7 +231,23 @@ export function BookingWidget({
   }, [endpoint, preview, service, day]);
   const queryKey = `${service}:${day}`,
     slots = preview
-      ? fictionalSlots
+      ? fictionalSlots.map((slot, index) => {
+          const start = new Date(
+            Date.parse(
+              dayStart(day || "2030-11-04", fictionalConfig.timeZone),
+            ) +
+              (10 + index * 2) * 3600000,
+          );
+          return {
+            startsAt: start.toISOString(),
+            endsAt: new Date(
+              start.getTime() +
+                (config?.services.find((s) => s.id === service)?.duration ??
+                  30) *
+                  60000,
+            ).toISOString(),
+          };
+        })
       : slotResult.key === queryKey
         ? slotResult.slots
         : [],
@@ -215,6 +255,10 @@ export function BookingWidget({
   const chosen = config?.services.find((value) => value.id === service);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (step !== "details") {
+      if (selected) setStep("details");
+      return;
+    }
     if (busy || !selected || !config) return;
     if (preview) {
       setMessage("Preview only. No appointment was requested or saved.");
@@ -302,14 +346,29 @@ export function BookingWidget({
       setBusy(false);
     }
   }
-  return (
-    <div ref={root} className="vigil-booking" data-vigil-booking-component="v1">
+  const chooseDay = (next: string) => {
+    setDay(next);
+    setSelected("");
+    setError("");
+  };
+  const resourceOptions = [
+    ...new Map(
+      config?.services
+        .filter((s) => s.resourceId && s.resourceName)
+        .map((s) => [s.resourceId!, s.resourceName!]),
+    ).entries(),
+  ];
+  const content = (
+    <>
       <header>
-        <Heading>{title}</Heading>
-        <p>{introduction}</p>
+        <Heading>{title ?? experience.title}</Heading>
+        <p>{introduction ?? experience.introduction}</p>
       </header>
       {preview && (
         <p className="vb-note">Interactive example · no live appointments</p>
+      )}
+      {!config && !receipt && !error && (
+        <p role="status">Loading booking options…</p>
       )}
       {receipt ? (
         <section aria-label="Your appointment" className="vb-receipt">
@@ -359,67 +418,138 @@ export function BookingWidget({
       {config &&
         (!receipt || ["requested", "confirmed"].includes(receipt.status)) && (
           <form onSubmit={submit}>
-            <div className="vb-fields">
-              <label>
-                Service
-                <select
-                  value={service}
-                  onChange={(e) => {
-                    setService(e.target.value);
-                    setSelected("");
-                    setError("");
-                  }}
-                  disabled={!!receipt}
-                >
-                  {config.services.map((value) => (
-                    <option key={value.id} value={value.id}>
-                      {value.name} · {value.duration} min
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Date · {config.timeZone}
-                <input
-                  type="date"
-                  value={day}
-                  min={localDay(config.timeZone)}
-                  disabled={preview}
-                  onChange={(e) => {
-                    setDay(e.target.value);
-                    setSelected("");
-                    setError("");
-                  }}
-                />
-              </label>
-            </div>
-            {loading ? (
-              <p role="status">Loading available times…</p>
-            ) : (
-              <fieldset>
-                <legend>
-                  {receipt ? "Choose a new time" : "Available times"}
-                </legend>
-                <div className="vb-slots">
-                  {slots.map((slot) => (
-                    <button
-                      type="button"
-                      aria-pressed={selected === slot.startsAt}
-                      key={slot.startsAt}
-                      onClick={() => setSelected(slot.startsAt)}
+            <div className="vb-scheduler" hidden={step !== "time" && !receipt}>
+              <aside className="vb-options">
+                <span className="vb-step-label">
+                  01 / CHOOSE YOUR APPOINTMENT
+                </span>
+                {experience.showResource && resourceOptions.length > 0 && (
+                  <label>
+                    {experience.resourceLabel}
+                    <select
+                      value={resource}
+                      disabled={!!receipt}
+                      onChange={(e) => {
+                        const id = e.target.value;
+                        setResource(id);
+                        if (id && chosen?.resourceId !== id)
+                          setService(
+                            config.services.find((s) => s.resourceId === id)
+                              ?.id ?? "",
+                          );
+                        setSelected("");
+                        setError("");
+                      }}
                     >
-                      {bookingTime(slot.startsAt, config.timeZone)}
-                    </button>
-                  ))}
-                </div>
-                {!slots.length && (
-                  <p>
-                    No available times. Try another date or contact the
-                    business.
-                  </p>
+                      <option value="">All options</option>
+                      {resourceOptions.map(([id, name]) => (
+                        <option key={id} value={id}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                 )}
-              </fieldset>
-            )}
+                <label>
+                  Service
+                  <select
+                    value={service}
+                    onChange={(e) => {
+                      setService(e.target.value);
+                      setSelected("");
+                      setError("");
+                    }}
+                    disabled={!!receipt}
+                  >
+                    {config.services
+                      .filter(
+                        (s) =>
+                          !experience.showResource ||
+                          !resource ||
+                          s.resourceId === resource,
+                      )
+                      .map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name} · {s.duration} min
+                        </option>
+                      ))}
+                  </select>
+                </label>
+                {chosen?.description && (
+                  <p className="vb-note">{chosen.description}</p>
+                )}
+                <p className="vb-duration">
+                  {chosen?.duration} minutes ·{" "}
+                  {chosen?.mode === "approval"
+                    ? "Approval required"
+                    : "Instant confirmation"}
+                </p>
+                <p className="vb-note">
+                  Times shown in {config.timeZone.replaceAll("_", " ")}.
+                </p>
+              </aside>
+              <div className="vb-calendar-and-times">
+                {experience.datePicker === "calendar" ? (
+                  <BookingDatePicker
+                    value={day}
+                    min={
+                      preview
+                        ? "2030-11-01"
+                        : (config.minDate ?? localDay(config.timeZone))
+                    }
+                    max={preview ? "2031-11-01" : config.maxDate}
+                    onChange={chooseDay}
+                  />
+                ) : (
+                  <label>
+                    Date
+                    <input
+                      type="date"
+                      value={day}
+                      min={
+                        preview
+                          ? "2030-11-01"
+                          : (config.minDate ?? localDay(config.timeZone))
+                      }
+                      max={config.maxDate}
+                      onChange={(e) => chooseDay(e.target.value)}
+                      required
+                    />
+                  </label>
+                )}
+                {loading ? (
+                  <p role="status">Loading available times…</p>
+                ) : (
+                  <fieldset>
+                    <legend>
+                      {receipt ? "Choose a new time" : "Available times"}
+                    </legend>
+                    <div className="vb-slots">
+                      {slots.map((slot) => (
+                        <button
+                          type="button"
+                          aria-pressed={selected === slot.startsAt}
+                          key={slot.startsAt}
+                          onClick={() => setSelected(slot.startsAt)}
+                        >
+                          {new Intl.DateTimeFormat("en-US", {
+                            timeZone: config.timeZone,
+                            hour: "numeric",
+                            minute: "2-digit",
+                          }).format(new Date(slot.startsAt))}
+                        </button>
+                      ))}
+                    </div>
+                    {!slots.length && (
+                      <p>
+                        No available times. Try another date or contact the
+                        business.
+                      </p>
+                    )}
+                  </fieldset>
+                )}
+              </div>
+            </div>
             {receipt ? (
               <button
                 type="button"
@@ -430,69 +560,139 @@ export function BookingWidget({
               </button>
             ) : (
               <>
-                <p className="vb-note">
-                  {chosen?.mode === "approval"
-                    ? "This service requires approval. A request does not reserve the time."
-                    : "Your appointment is confirmed when it is saved successfully."}
-                </p>
-                <div className="vb-fields">
-                  <label>
-                    Your name
-                    <input
-                      name="name"
-                      autoComplete="name"
-                      maxLength={120}
-                      required
-                    />
-                  </label>
-                  <label>
-                    Email
-                    <input
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      maxLength={254}
-                      required
-                    />
-                  </label>
-                  <label>
-                    Phone (optional)
-                    <input
-                      name="phone"
-                      type="tel"
-                      autoComplete="tel"
-                      maxLength={40}
-                    />
-                  </label>
-                  <label>
-                    Notes (optional)
-                    <textarea name="notes" maxLength={2000} rows={2} />
-                  </label>
-                </div>
-                {!preview && config.siteKey && (
-                  <TurnstileVerification
-                    key={captchaRevision}
-                    siteKey={config.siteKey}
-                    action="booking"
-                    onToken={setToken}
-                  />
+                {step === "time" && (
+                  <button
+                    type="button"
+                    className="vb-continue"
+                    disabled={!selected || loading}
+                    onClick={() => setStep("details")}
+                  >
+                    Continue to your details →
+                  </button>
                 )}
-                <button
-                  type="submit"
-                  disabled={busy || !selected || (!preview && !token)}
+                <div
+                  className="vb-customer-details"
+                  hidden={step !== "details"}
                 >
-                  {busy
-                    ? "Saving…"
-                    : chosen?.mode === "approval"
-                      ? "Request appointment"
-                      : "Confirm appointment"}
-                </button>
+                  <button
+                    type="button"
+                    className="vb-back"
+                    onClick={() => setStep("time")}
+                  >
+                    ← Change appointment
+                  </button>
+                  <span className="vb-step-label">02 / YOUR DETAILS</span>
+                  <strong>{chosen?.name}</strong>
+                  {selected && <p>{bookingTime(selected, config.timeZone)}</p>}
+                  <p className="vb-note">
+                    {chosen?.mode === "approval"
+                      ? "This service requires approval. A request does not reserve the time."
+                      : "Your appointment is confirmed when it is saved successfully."}
+                  </p>
+                  <div className="vb-fields">
+                    <label>
+                      Your name
+                      <input
+                        name="name"
+                        disabled={step !== "details"}
+                        autoComplete="name"
+                        maxLength={120}
+                        required
+                      />
+                    </label>
+                    <label>
+                      Email
+                      <input
+                        name="email"
+                        disabled={step !== "details"}
+                        type="email"
+                        autoComplete="email"
+                        maxLength={254}
+                        required
+                      />
+                    </label>
+                    <label>
+                      Phone (optional)
+                      <input
+                        name="phone"
+                        disabled={step !== "details"}
+                        type="tel"
+                        autoComplete="tel"
+                        maxLength={40}
+                      />
+                    </label>
+                    <label>
+                      Notes (optional)
+                      <textarea
+                        name="notes"
+                        disabled={step !== "details"}
+                        maxLength={2000}
+                        rows={2}
+                      />
+                    </label>
+                  </div>
+                  {!preview && config.siteKey && (
+                    <TurnstileVerification
+                      key={captchaRevision}
+                      siteKey={config.siteKey}
+                      action="booking"
+                      onToken={setToken}
+                    />
+                  )}
+                  <button
+                    type="submit"
+                    disabled={busy || !selected || (!preview && !token)}
+                  >
+                    {busy
+                      ? "Saving…"
+                      : chosen?.mode === "approval"
+                        ? "Request appointment"
+                        : "Confirm appointment"}
+                  </button>
+                </div>
               </>
             )}
           </form>
         )}
       {message && <p role="status">{message}</p>}
       {error && <p role="alert">{error}</p>}
+    </>
+  );
+  return (
+    <div
+      ref={root}
+      className="vigil-booking"
+      data-vigil-booking-component="v1"
+      data-accent={experience.accent}
+    >
+      {experience.presentation === "popup" ? (
+        <>
+          <button
+            type="button"
+            className="vb-launch"
+            onClick={() => dialog.current?.showModal()}
+          >
+            {experience.buttonLabel}
+          </button>
+          <dialog
+            ref={dialog}
+            className="vb-dialog"
+            aria-label={title ?? experience.title}
+          >
+            <button
+              type="button"
+              className="vb-close"
+              aria-label="Close booking"
+              onClick={() => dialog.current?.close()}
+            >
+              ×
+            </button>
+            {content}
+          </dialog>
+        </>
+      ) : (
+        content
+      )}
     </div>
   );
 }

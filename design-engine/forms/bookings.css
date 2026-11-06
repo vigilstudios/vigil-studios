@@ -1,3 +1,348 @@
-.vigil-booking{scroll-margin-top:128px;font-family:inherit;color:inherit;max-width:100%;min-width:0;display:grid;gap:20px}.vigil-booking h2,.vigil-booking h3{font:inherit;font-size:clamp(24px,3vw,40px);line-height:1.15;margin:0 0 12px}.vigil-booking p{line-height:1.6;margin:0}.vigil-booking form,.vb-receipt{display:grid;gap:20px}.vb-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.vigil-booking label{display:grid;gap:8px;font-size:13px;min-width:0}.vigil-booking input,.vigil-booking select,.vigil-booking textarea{width:100%;min-width:0;box-sizing:border-box;font:inherit;color:inherit;background:transparent;border:1px solid currentColor;border-radius:8px;padding:12px}.vigil-booking select option{color:#151515;background:#fff}.vigil-booking fieldset{border:0;padding:0;margin:0;min-width:0}.vigil-booking legend{font-size:13px;margin-bottom:12px}.vb-slots{display:flex;flex-wrap:wrap;gap:8px}.vigil-booking button{font:inherit;cursor:pointer;min-height:44px;padding:12px 16px;border:1px solid currentColor;border-radius:8px;color:inherit;background:transparent}.vigil-booking button[aria-pressed=true],.vigil-booking button[type=submit]{color:var(--vigil-booking-foreground,var(--de-accent-foreground,var(--color-on-primary,#fff)));background:var(--vigil-booking-accent,var(--de-accent,var(--color-primary,#2547b8)));border-color:var(--vigil-booking-accent,var(--de-accent,var(--color-primary,#2547b8)))}.vigil-booking button:disabled{opacity:.45;cursor:default}.vigil-booking :focus-visible{outline:2px solid var(--de-accent,var(--color-focus,#4161d4));outline-offset:3px}.vigil-booking .vb-note{font-size:12px;opacity:.75}.vb-receipt{padding:20px;border:1px solid currentColor;border-radius:12px}.vigil-booking [role=alert]{color:#b55425}@media(max-width:560px){.vb-fields{grid-template-columns:1fr}}
+.vigil-booking {
+  scroll-margin-top: 128px;
+  font-family: inherit;
+  color: inherit;
+  max-width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: 20px;
+}
+.vigil-booking h2,
+.vigil-booking h3 {
+  font: inherit;
+  font-size: clamp(24px, 3vw, 40px);
+  line-height: 1.15;
+  margin: 0 0 12px;
+}
+.vigil-booking p {
+  line-height: 1.6;
+  margin: 0;
+}
+.vigil-booking form,
+.vb-receipt {
+  display: grid;
+  gap: 20px;
+}
+.vb-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.vigil-booking label {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  min-width: 0;
+}
+.vigil-booking input,
+.vigil-booking select,
+.vigil-booking textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  padding: 12px;
+}
+.vigil-booking select option {
+  color: #151515;
+  background: #fff;
+}
+.vigil-booking fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.vigil-booking legend {
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.vb-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.vigil-booking button {
+  font: inherit;
+  cursor: pointer;
+  min-height: 44px;
+  padding: 12px 16px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+}
+.vigil-booking button[aria-pressed="true"],
+.vigil-booking button[type="submit"] {
+  color: var(
+    --vigil-booking-foreground,
+    var(--de-accent-foreground, var(--color-on-primary, #fff))
+  );
+  background: var(
+    --vigil-booking-accent,
+    var(--de-accent, var(--color-primary, #2547b8))
+  );
+  border-color: var(
+    --vigil-booking-accent,
+    var(--de-accent, var(--color-primary, #2547b8))
+  );
+}
+.vigil-booking button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.vigil-booking :focus-visible {
+  outline: 2px solid var(--de-accent, var(--color-focus, #4161d4));
+  outline-offset: 3px;
+}
+.vigil-booking .vb-note {
+  font-size: 12px;
+  opacity: 0.75;
+}
+.vb-receipt {
+  padding: 20px;
+  border: 1px solid currentColor;
+  border-radius: 12px;
+}
+.vigil-booking [role="alert"] {
+  color: #b55425;
+}
+@media (max-width: 560px) {
+  .vb-fields {
+    grid-template-columns: 1fr;
+  }
+}
 
-[data-vigil-booking-compatible="v1"] [hidden]{display:none!important}
+[data-vigil-booking-compatible="v1"] [hidden] {
+  display: none !important;
+}
+/* Booking experience: options alongside a date calendar, then a focused details step. */
+.vigil-booking [hidden] {
+  display: none !important;
+}
+.vigil-booking[data-accent="royal"] {
+  --vigil-booking-accent: #2547b8;
+  --vigil-booking-foreground: #fff;
+}
+.vigil-booking[data-accent="graphite"] {
+  --vigil-booking-accent: #303b4d;
+  --vigil-booking-foreground: #fff;
+}
+.vigil-booking[data-accent="plum"] {
+  --vigil-booking-accent: #72365e;
+  --vigil-booking-foreground: #fff;
+}
+.vigil-booking {
+  gap: 22px;
+}
+.vigil-booking h2,
+.vigil-booking h3 {
+  font-size: clamp(23px, 2.4vw, 32px);
+  letter-spacing: -0.035em;
+  margin-bottom: 8px;
+}
+.vigil-booking header > p {
+  font-size: 13px;
+  opacity: 0.7;
+}
+.vigil-booking form {
+  gap: 20px;
+}
+.vb-scheduler {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.75fr) minmax(240px, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+.vb-options {
+  display: grid;
+  gap: 18px;
+  padding: 4px 24px 0 0;
+  border-right: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+  height: 100%;
+  align-content: start;
+}
+.vb-step-label {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  opacity: 0.6;
+}
+.vb-duration {
+  font-size: 12px;
+  font-weight: 500;
+}
+.vigil-booking input,
+.vigil-booking select,
+.vigil-booking textarea {
+  border-color: color-mix(in srgb, currentColor 22%, transparent);
+  padding: 10px 12px;
+  font-size: 12px;
+}
+.vigil-booking button {
+  font-size: 12px;
+  min-height: 38px;
+  padding: 10px 14px;
+  border-color: color-mix(in srgb, currentColor 20%, transparent);
+}
+.vb-calendar-and-times {
+  min-width: 0;
+  display: grid;
+  gap: 20px;
+}
+.vb-month-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.vb-month-heading strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.vigil-booking .vb-month-heading button {
+  min-height: 32px;
+  width: 32px;
+  padding: 0;
+  font-size: 20px;
+  border-radius: 50%;
+  border: 0;
+}
+.vb-month-weekdays,
+.vb-month-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+.vb-month-weekdays span {
+  font-size: 10px;
+  text-align: center;
+  padding: 6px 0;
+  opacity: 0.55;
+}
+.vigil-booking .vb-month-days button {
+  border: 0;
+  padding: 0;
+  min-height: 32px;
+  height: 32px;
+  font-size: 11px;
+  border-radius: 6px;
+}
+.vb-month-days button[data-outside="true"] {
+  opacity: 0.4;
+}
+.vb-month-days button:disabled {
+  opacity: 0.2;
+}
+.vb-date-picker > .vb-note {
+  margin-top: 14px;
+  font-size: 10px;
+}
+.vigil-booking legend {
+  font-size: 11px;
+  margin-bottom: 10px;
+}
+.vb-slots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+.vigil-booking .vb-slots button {
+  font-size: 11px;
+  padding: 8px 5px;
+  min-height: 36px;
+}
+.vigil-booking .vb-continue,
+.vigil-booking .vb-launch {
+  background: var(--vigil-booking-accent);
+  color: var(--vigil-booking-foreground);
+  border-color: var(--vigil-booking-accent);
+  justify-self: start;
+  padding: 12px 20px;
+}
+.vb-customer-details {
+  display: grid;
+  gap: 18px;
+  max-width: 640px;
+}
+.vigil-booking .vb-back {
+  border: 0;
+  justify-self: start;
+  padding: 0;
+  min-height: 28px;
+  text-decoration: underline;
+}
+.vb-dialog {
+  box-sizing: border-box;
+  width: min(800px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  overflow: auto;
+  padding: 32px;
+  border: 1px solid #d8dce6;
+  border-radius: 18px;
+  background: #fff;
+  color: #182238;
+  margin: auto;
+  font-family: inherit;
+}
+.vb-dialog::backdrop {
+  background: #0e1526a8;
+  backdrop-filter: blur(5px);
+}
+.vb-dialog > header {
+  padding-right: 32px;
+  margin-bottom: 16px;
+}
+.vb-dialog > .vb-note {
+  margin-bottom: 20px;
+}
+.vigil-booking .vb-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin: -14px -12px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: #182238;
+  font-size: 24px;
+  z-index: 1;
+}
+.vb-dialog form {
+  display: grid;
+  gap: 20px;
+}
+@media (max-width: 640px) {
+  .vb-scheduler {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .vb-options {
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+    padding: 0 0 20px;
+    gap: 14px;
+  }
+  .vb-dialog {
+    padding: 24px 20px;
+    max-height: calc(100dvh - 24px);
+    width: calc(100vw - 20px);
+  }
+  .vb-options .vb-note {
+    font-size: 11px;
+  }
+  .vb-slots {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

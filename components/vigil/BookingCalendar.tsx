@@ -1,18 +1,12 @@
 "use client";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import {
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  List,
-  Clock3,
-  Users,
-} from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, List, X } from "lucide-react";
 import {
   calendarRange,
   shiftCalendar,
   positionEvents,
+  calendarHours,
   type CalendarMode,
   type CalendarAppointment,
 } from "@/lib/vigil/bookings/calendar";
@@ -42,14 +36,19 @@ export function BookingCalendar({
   date: string;
   today: string;
   rows: CalendarAppointment[];
-  resources: { id: string; name: string }[];
+  resources: {
+    id: string;
+    name: string;
+    hours?: { day: number; start: string; end: string }[];
+  }[];
   blocks: Block[];
   truncated: boolean;
   selected: string | null;
   detail: ReactNode;
 }) {
   const router = useRouter(),
-    scroll = useRef<HTMLDivElement>(null),
+    dialog = useRef<HTMLDialogElement>(null),
+    requestedDetail = useRef<string | null>(null),
     [resource, setResource] = useState("");
   const range = calendarRange(mode, date, timeZone),
     visible = rows.filter(
@@ -90,8 +89,31 @@ export function BookingCalendar({
     router.push(url.pathname + url.search, { scroll: false });
   }
   useEffect(() => {
-    if (scroll.current) scroll.current.scrollTop = 7 * 64;
-  }, [date, mode]);
+    const linked =
+      selected &&
+      new URL(location.href).searchParams.get("appointment") === selected &&
+      window.matchMedia("(max-width: 1100px)").matches;
+    if (
+      (requestedDetail.current && requestedDetail.current === selected) ||
+      linked
+    ) {
+      if (!dialog.current?.open) dialog.current?.showModal();
+      requestedDetail.current = null;
+    }
+  }, [selected]);
+  const hours = calendarHours(
+    visible,
+    resources.filter((r) => !resource || r.id === resource),
+    days,
+    timeZone,
+  );
+  function selectAppointment(id: string) {
+    if (window.matchMedia("(max-width: 1100px)").matches) {
+      if (id === selected) dialog.current?.showModal();
+      else requestedDetail.current = id;
+    }
+    go(mode, date, id);
+  }
   function event(e: CalendarAppointment, compact = false) {
     return (
       <button
@@ -100,7 +122,7 @@ export function BookingCalendar({
         className={`bc-event ${compact ? "bc-event-compact" : ""}`}
         data-status={e.status}
         data-selected={e.id === selected}
-        onClick={() => go(mode, date, e.id)}
+        onClick={() => selectAppointment(e.id)}
         title={`${e.service} · ${e.name} · ${time(e.start)}–${time(e.end)} · ${timeZone} · ${e.status}`}
         aria-label={`${e.service} with ${e.name}, ${time(e.start)} to ${time(e.end)}, ${timeZone}, ${e.status}`}
       >
@@ -121,30 +143,6 @@ export function BookingCalendar({
     requests = visible.filter((e) => e.status === "requested").length;
   return (
     <section className="bc-workspace" aria-label="Appointment calendar">
-      <div className="bc-summary">
-        <div>
-          <CalendarDays size={18} />
-          <span>
-            <strong>{confirmed}</strong> confirmed
-          </span>
-        </div>
-        <div>
-          <Clock3 size={18} />
-          <span>
-            <strong>{requests}</strong> awaiting approval
-          </span>
-        </div>
-        <div>
-          <Users size={18} />
-          <span>
-            <strong>
-              {resources.filter((r) => !resource || r.id === resource).length}
-            </strong>{" "}
-            people & spaces
-          </span>
-        </div>
-        <p>{timeZone.replaceAll("_", " ")}</p>
-      </div>
       <div className="bc-toolbar">
         <div className="bc-date-nav">
           <button
@@ -209,6 +207,16 @@ export function BookingCalendar({
           blocks. Switch to a shorter period to review the complete schedule.
         </p>
       )}
+      <div className="bc-period-summary">
+        <span>
+          <strong>{confirmed}</strong> confirmed <i />{" "}
+          <strong>{requests}</strong> awaiting approval
+        </span>
+        <span>
+          {timeZone.replaceAll("_", " ")} · {hours.start / 60}:00–
+          {hours.end / 60}:00
+        </span>
+      </div>
       <div className="bc-layout">
         <div className="bc-calendar" data-mode={mode}>
           {mode === "month" ? (
@@ -244,13 +252,13 @@ export function BookingCalendar({
                           {blocked.length} blocked
                         </span>
                       )}
-                      {events.slice(0, 3).map((e) => event(e, true))}
-                      {events.length > 3 && (
+                      {events.slice(0, 1).map((e) => event(e, true))}
+                      {events.length > 1 && (
                         <button
                           className="bc-more"
                           onClick={() => go("day", day)}
                         >
-                          +{events.length - 3} more
+                          +{events.length - 1} more
                         </button>
                       )}
                     </div>
@@ -280,7 +288,7 @@ export function BookingCalendar({
               <div
                 className="bc-time-head"
                 style={{
-                  gridTemplateColumns: `48px repeat(${days.length},minmax(90px,1fr))`,
+                  gridTemplateColumns: `48px repeat(${days.length},minmax(0,1fr))`,
                 }}
               >
                 <span />
@@ -298,45 +306,73 @@ export function BookingCalendar({
               <div
                 className="bc-blocks"
                 style={{
-                  gridTemplateColumns: `48px repeat(${days.length},minmax(90px,1fr))`,
+                  gridTemplateColumns: `48px repeat(${days.length},minmax(0,1fr))`,
                 }}
               >
                 <span>Blocks</span>
                 {days.map((day) => (
                   <div key={day}>
-                    {blocksFor(day).map((b) => (
-                      <span key={b.id} title={b.reason}>
-                        {resources.find((r) => r.id === b.resource_id)?.name} ·{" "}
-                        {b.reason || "Unavailable"}
-                      </span>
-                    ))}
+                    {blocksFor(day)
+                      .slice(0, 1)
+                      .map((b) => (
+                        <span
+                          key={b.id}
+                          title={blocksFor(day)
+                            .map(
+                              (block) =>
+                                `${resources.find((r) => r.id === block.resource_id)?.name ?? ""}: ${block.reason || "Unavailable"}`,
+                            )
+                            .join("; ")}
+                        >
+                          {resources.find((r) => r.id === b.resource_id)?.name}{" "}
+                          · {b.reason || "Unavailable"}
+                          {blocksFor(day).length > 1
+                            ? ` +${blocksFor(day).length - 1} more`
+                            : ""}
+                        </span>
+                      ))}
                   </div>
                 ))}
               </div>
-              <div className="bc-time-scroll" ref={scroll}>
+              <div className="bc-time-scroll">
                 <div
                   className="bc-time-grid"
                   style={{
-                    gridTemplateColumns: `48px repeat(${days.length},minmax(90px,1fr))`,
+                    gridTemplateColumns: `48px repeat(${days.length},minmax(0,1fr))`,
+                    backgroundSize: `100% ${100 / ((hours.end - hours.start) / 60)}%`,
                   }}
                 >
                   <div className="bc-hours">
-                    {Array.from({ length: 24 }, (_, hour) => (
-                      <span key={hour} style={{ top: hour * 64 }}>
-                        {hour === 0
-                          ? "12 AM"
-                          : hour < 12
-                            ? `${hour} AM`
-                            : hour === 12
-                              ? "12 PM"
-                              : `${hour - 12} PM`}
-                      </span>
-                    ))}
+                    {Array.from(
+                      { length: (hours.end - hours.start) / 60 },
+                      (_, index) => {
+                        const hour = hours.start / 60 + index;
+                        return (
+                          <span
+                            key={hour}
+                            style={{
+                              top: `${((hour * 60 - hours.start) / (hours.end - hours.start)) * 100}%`,
+                            }}
+                          >
+                            {hour === 0
+                              ? "12 AM"
+                              : hour < 12
+                                ? `${hour} AM`
+                                : hour === 12
+                                  ? "12 PM"
+                                  : `${hour - 12} PM`}
+                          </span>
+                        );
+                      },
+                    )}
                   </div>
                   {days.map((day) => (
                     <div
                       key={day}
                       className="bc-day-lane"
+                      style={{
+                        backgroundSize: `100% ${100 / ((hours.end - hours.start) / 60)}%`,
+                      }}
                       aria-label={label(day, {
                         weekday: "long",
                         month: "long",
@@ -348,8 +384,8 @@ export function BookingCalendar({
                           key={p.event.id}
                           className="bc-positioned"
                           style={{
-                            top: (p.top * 64) / 60,
-                            height: Math.max(38, (p.height * 64) / 60),
+                            top: `${((p.top - hours.start) / (hours.end - hours.start)) * 100}%`,
+                            height: `${(p.height / (hours.end - hours.start)) * 100}%`,
                             left: `${(p.column / p.columns) * 100}%`,
                             width: `${100 / p.columns}%`,
                           }}
@@ -388,6 +424,21 @@ export function BookingCalendar({
           )}
         </aside>
       </div>
+      <dialog
+        ref={dialog}
+        className="bc-detail-dialog"
+        aria-label="Appointment details"
+      >
+        <button
+          type="button"
+          className="bc-dialog-close"
+          aria-label="Close appointment details"
+          onClick={() => dialog.current?.close()}
+        >
+          <X size={18} />
+        </button>
+        {detail}
+      </dialog>
     </section>
   );
 }
