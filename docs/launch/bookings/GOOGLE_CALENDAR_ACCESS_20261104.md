@@ -14,6 +14,8 @@ Consent brand: **Vigil Studios**, project **vigil-studios**, support/contact **h
 
 Production redirect: `https://www.vigilstudios.co/api/booking-calendar/callback`. Test with a separate client and the exact trusted isolated-preview callback after that deployment exists; do not use wildcard callbacks or expose credentials to unrelated previews. Enable Calendar API in Vigil's approved Google Cloud project, review the consent brand/audience/domain/privacy requirements, and complete Google's publishing/verification requirements as applicable before opening general customer access. Testing-mode consent is not evidence of production readiness.
 
+Consent app homepage: `https://www.vigilstudios.co/products/vigil`, with a factual explanation of compatible Care+ appointments and optional one-way Calendar copies. Link the public disclosure at `https://www.vigilstudios.co/calendar-privacy` from both that page and the shared footer; terms remain `https://www.vigilstudios.co/terms`. These URLs must render publicly before Google's branding review. Saving branding does not publish the audience or activate a client's connection.
+
 Server settings: `GOOGLE_CALENDAR_CLIENT_ID`, `GOOGLE_CALENDAR_CLIENT_SECRET`, `GOOGLE_CALENDAR_REDIRECT_URI`, `VIGIL_GOOGLE_CALENDAR_ENABLED=true`. The flag stays off until setup and live acceptance pass. Client secret is a server setting; refresh tokens are encrypted in Supabase Vault and never stored in Auth metadata or browser-readable rows. Provider ids exist only in `provider_links`.
 
 ## Security and consistency
@@ -39,6 +41,8 @@ This adds no separate hosting service or fixed model/GPU subscription. Google qu
 - [Calendar ownership and calendar lists](https://developers.google.com/workspace/calendar/api/concepts/events-calendars)
 - [Conditional ETag modifications](https://developers.google.com/workspace/calendar/api/guides/version-resources)
 - [Event identifiers and fields](https://developers.google.com/workspace/calendar/api/v3/reference/events)
+- [Production homepage and OAuth policies](https://developers.google.com/identity/protocols/oauth2/policies)
+- [Brand verification and publication](https://developers.google.com/identity/protocols/oauth2/production-readiness/brand-verification)
 
 Validation: the full local application run passed 3,372 tests (one skipped), followed by the added Google-quota retry regression in the focused suite (33 booking tests passed). Typecheck, changed-file lint, production build, complete migration/RLS checks and real competing booking/calendar lease transactions passed. Calendar interfaces were regenerated from the disposable migrated database, retaining existing production/legacy definitions. Both full CI runs, Supabase Preview and Vercel Preview passed for the implementation commit.
 
