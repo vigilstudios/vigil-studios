@@ -23,6 +23,7 @@ Party size is recorded on the appointment, lead evidence and lifecycle receipts;
 - 3,385 tests passed, one skipped; production build/typecheck and changed-source lint passed.
 - Full migration/RLS suite passed, including tenant/member/anonymous refusal, plan/activation gates, capacity boundaries, smallest-fit allocation, private table data, party-bound retries, turnaround, cancellation/reuse, approval reassignment, failed reschedule preservation and whole-restaurant closures.
 - Actual simultaneous PostgreSQL transactions proved that competing parties receive separate tables when available, and only one receives the final fitting table. Existing appointment, approval, reschedule and Google-copy concurrency checks also passed.
+- Hosted isolated Supabase acceptance passed for both the existing booking/RLS suite and the new restaurant suite. Each fixture/temporary test grant was inside a rolled-back transaction; no real business settings or production grants changed.
 - Browser review verified Tables/Dining hours navigation, unsaved table-name preservation, party-size selection through customer details, fictional submission with no write, and no horizontal overflow at 390 × 844.
 
 Fictional review: `http://127.0.0.1:4194/dashboard/bookings?view=setup&business=restaurant` and `http://127.0.0.1:4194/express-preview/restaurant#reserve`.

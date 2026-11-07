@@ -3,7 +3,7 @@ function previewHref(href: string) {
   if (!href.startsWith("/dashboard")) return href;
   const url = new URL(href, location.origin),
     current = new URLSearchParams(location.search);
-  for (const key of ["theme", "state"]) {
+  for (const key of ["theme", "state", "business"]) {
     const value = current.get(key);
     if (value && !url.searchParams.has(key)) url.searchParams.set(key, value);
   }
