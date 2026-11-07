@@ -164,6 +164,14 @@ export async function getBookings(
       },
     ],
   };
+  data.appointments.push({
+    ...data.appointments[0],
+    id: "ba000000-0000-4000-8000-000000000071",
+    starts_at: "2026-11-03T15:00:00Z",
+    ends_at: "2026-11-03T15:30:00Z",
+    status: "completed",
+    contact: { name: "Robin Blake", email: "robin@example.test" },
+  });
   if (view === "upcoming") {
     const range = calendarRange(mode, date, "America/New_York");
     data.appointments = data.appointments.filter(
@@ -174,6 +182,13 @@ export async function getBookings(
       (a) => a.status === "requested",
     );
   }
+  if (view === "history")
+    data.appointments = data.appointments.filter(
+      (a) =>
+        ["completed", "no_show", "cancelled", "declined", "expired"].includes(
+          a.status,
+        ) || Date.parse(a.ends_at) < data.asOf,
+    );
   data.count = data.appointments.length;
   if (data.calendar)
     data.calendar.selected =
@@ -186,6 +201,7 @@ const preview = async () => ({
   ok: false as const,
   error: "Preview only. No changes were saved.",
 });
+export const saveBookingExperience = () => preview();
 export const saveBookingResource = () => preview(),
   saveBookingService = () => preview(),
   saveBookingSettings = () => preview(),
@@ -198,7 +214,8 @@ export async function requireOrgContext() {
     organization: { id: "ba000000-0000-4000-8000-000000000011" },
     user: { id: "ba000000-0000-4000-8000-000000000012" },
     role: "owner",
-    isImpersonating: false,
+    isImpersonating:
+      new URLSearchParams(location.search).get("state") === "staff",
   };
 }
 export const FEATURES = {
@@ -217,5 +234,5 @@ export async function getOrgWebsites() {
   ];
 }
 export async function calendarConnectionStatus() {
-  return { configured: false, connection: null };
+  return { configured: true, connection: null };
 }

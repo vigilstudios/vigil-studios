@@ -11,6 +11,36 @@ export const bookingStatuses = [
   "no_show",
   "expired",
 ] as const;
+export const bookingExperienceSchema = z
+  .object({
+    presentation: z.enum(["inline", "popup"]),
+    datePicker: z.enum(["calendar", "date"]),
+    showResource: z.boolean(),
+    resourceLabel: z.string().trim().min(1).max(30),
+    title: z.string().trim().min(1).max(80),
+    introduction: z.string().trim().max(160),
+    buttonLabel: z.string().trim().min(1).max(40),
+    accent: z.union([
+      z.enum(["site", "royal", "graphite", "plum"]),
+      z.string().regex(/^#[0-9a-f]{6}$/i),
+    ]),
+  })
+  .strict();
+export type BookingExperience = z.infer<typeof bookingExperienceSchema>;
+export const defaultBookingExperience: BookingExperience = {
+  presentation: "inline",
+  datePicker: "calendar",
+  showResource: false,
+  resourceLabel: "Person or space",
+  title: "Choose a time",
+  introduction: "Find an appointment that works for you.",
+  buttonLabel: "Book an appointment",
+  accent: "site",
+};
+export function bookingExperience(value: unknown): BookingExperience {
+  const result = bookingExperienceSchema.safeParse(value);
+  return result.success ? result.data : defaultBookingExperience;
+}
 export const timeZoneSchema = z
   .string()
   .min(1)
@@ -127,6 +157,8 @@ export type PublicBookingService = {
   description: string;
   duration: number;
   mode: (typeof bookingModes)[number];
+  resourceId?: string;
+  resourceName?: string;
 };
 export type PublicBookingConfig = {
   websiteId: string;
@@ -134,6 +166,9 @@ export type PublicBookingConfig = {
   timeZone: string;
   siteKey: string;
   services: PublicBookingService[];
+  experience?: BookingExperience;
+  minDate?: string;
+  maxDate?: string;
 };
 export type BookingReceipt = {
   id: string;

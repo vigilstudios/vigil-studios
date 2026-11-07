@@ -319,12 +319,14 @@ export type Database = {
           },
         ]
       }
+
       booking_settings: {
         Row: {
           availability_acknowledged_at: string | null
           change_notice: number
           component_ready: boolean
           enabled: boolean
+          experience: Json
           horizon_days: number
           minimum_notice: number
           organization_id: string
@@ -337,6 +339,7 @@ export type Database = {
           change_notice?: number
           component_ready?: boolean
           enabled?: boolean
+          experience?: Json
           horizon_days?: number
           minimum_notice?: number
           organization_id: string
@@ -349,6 +352,7 @@ export type Database = {
           change_notice?: number
           component_ready?: boolean
           enabled?: boolean
+          experience?: Json
           horizon_days?: number
           minimum_notice?: number
           organization_id?: string
@@ -4387,6 +4391,11 @@ export type Database = {
       }
     }
     Functions: {
+      save_booking_experience: {
+        Args: { p_experience: Json; p_website: string }
+        Returns: undefined
+      }
+
       "booking_calendar_status": {
     Args: {
         "p_site": string;
@@ -6267,6 +6276,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      booking_experience_valid: { Args: { v: Json }; Returns: boolean }
+
       booking_audit: {
         Args: {
           p_action: string

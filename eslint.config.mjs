@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
     "public/design-engine-runtime/**",
     "lib/vigil/content/generated/server.cjs",
     "public/integrations/vigil-contact-v1.js",
+    "public/integrations/vigil-bookings-v1.js",
   ]),
 ]);
 

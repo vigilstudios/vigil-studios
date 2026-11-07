@@ -93,6 +93,41 @@ export function wallMinutes(value: string, timeZone: string) {
     Number(p.find((v) => v.type === "minute")!.value)
   );
 }
+/** Fit working hours while always including appointments outside those hours. */
+export function calendarHours(
+  events: CalendarAppointment[],
+  resources: { hours?: { day: number; start: string; end: string }[] }[],
+  days: string[],
+  timeZone: string,
+) {
+  const weekdays = new Set(
+    days.map((day) => new Date(day + "T12:00:00Z").getUTCDay()),
+  );
+  const minutes = (s: string) =>
+    Number(s.slice(0, 2)) * 60 + Number(s.slice(3));
+  const windows = resources
+    .flatMap((r) => r.hours ?? [])
+    .filter((h) => weekdays.has(h.day));
+  const placed = days.flatMap((day) => positionEvents(events, day, timeZone));
+  const starts = [
+    ...windows.map((h) => minutes(h.start)),
+    ...placed.map((p) => p.top),
+  ];
+  const ends = [
+    ...windows.map((h) => minutes(h.end)),
+    ...placed.map((p) => p.top + p.height),
+  ];
+  return {
+    start: Math.max(
+      0,
+      Math.floor((starts.length ? Math.min(...starts) : 8 * 60) / 60) * 60,
+    ),
+    end: Math.min(
+      1440,
+      Math.ceil((ends.length ? Math.max(...ends) : 18 * 60) / 60) * 60,
+    ),
+  };
+}
 /** Side-by-side columns for overlapping requests/reservations; no event hides another. */
 export function positionEvents(
   events: CalendarAppointment[],
@@ -113,7 +148,7 @@ export function positionEvents(
       return {
         event,
         top,
-        height: Math.min(1440 - top, Math.max(40, duration)),
+        height: Math.min(1440 - top, Math.max(1, duration)),
       };
     })
     .sort((a, b) => a.top - b.top || a.event.id.localeCompare(b.event.id));

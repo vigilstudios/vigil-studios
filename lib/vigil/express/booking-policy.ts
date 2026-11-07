@@ -12,9 +12,11 @@ export function legacyRestaurant(html: string): boolean {
 }
 /** Default contact copy applies to new previews/exports; deployed customer repositories stay frozen. */
 export function contactFirstHtml(html: string): string {
-  if (html.includes('data-vigil-contact-default="v1"')) return html;
+  if (html.includes('data-vigil-contact-default="v1"'))
+    return optionalFieldServiceBooking(html);
   if (legacySalon(html)) return contactFirstSalon(html);
-  if (!legacyRestaurant(html)) return contactFirstOther(html);
+  if (!legacyRestaurant(html))
+    return optionalFieldServiceBooking(contactFirstOther(html));
   return html
     .replace(
       '<div class="booking" data-reveal>',
@@ -68,7 +70,7 @@ export function contactFirstHtml(html: string): string {
 }
 export function hasNativeBookingComponent(draft: ExpressDraft): boolean {
   return draft.kind === "html"
-    ? legacyRestaurant(draft.html) || legacySalon(draft.html)
+    ? Boolean(legacyBookingKind(draft.html))
     : draft.site.pages.some((page) =>
         page.sections.some(
           (section) => section.component === "contact.booking",
@@ -76,6 +78,36 @@ export function hasNativeBookingComponent(draft: ExpressDraft): boolean {
       );
 }
 
+export function legacyBookingKind(
+  html: string,
+): "restaurant" | "salon" | "home" | "auto" | null {
+  if (legacyRestaurant(html)) return "restaurant";
+  if (legacySalon(html)) return "salon";
+  if (
+    html.includes('id="home-services-config"') &&
+    html.includes('id="request-form"')
+  )
+    return "home";
+  if (
+    html.includes('id="site-config"') &&
+    html.includes('id="request-vehicle"') &&
+    html.includes('id="request-form"')
+  )
+    return "auto";
+  return null;
+}
+function optionalFieldServiceBooking(html: string): string {
+  const kind = legacyBookingKind(html);
+  if (
+    (kind !== "home" && kind !== "auto") ||
+    html.includes('data-vigil-booking-slot="v1"')
+  )
+    return html;
+  return html.replace(
+    /(<form\b[^>]*\bid="request-form"[^>]*>[\s\S]*?<\/form>)/,
+    '<div data-vigil-booking-compatible="v1">$1<div data-vigil-booking-slot="v1" hidden></div></div>',
+  );
+}
 export function legacySalon(html: string): boolean {
   return (
     html.includes('<script id="salon-config" type="application/json">') &&

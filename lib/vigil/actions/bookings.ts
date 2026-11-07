@@ -13,6 +13,7 @@ import {
   bookingServiceSchema,
   bookingSettingsSchema,
   resourceSchema,
+  bookingExperienceSchema,
 } from "../bookings/contract";
 async function manager(website: string) {
   if (process.env.VIGIL_BOOKINGS_ENABLED !== "true")
@@ -30,6 +31,33 @@ async function manager(website: string) {
   if (error) throw error;
   if (!data) throw new ForbiddenError();
   return { client, ctx };
+}
+export async function saveBookingExperience(
+  website: string,
+  form: FormData,
+): Promise<ActionResult> {
+  try {
+    const { client } = await manager(website);
+    const input = bookingExperienceSchema.parse({
+      presentation: form.get("presentation"),
+      datePicker: form.get("datePicker"),
+      showResource: form.has("showResource"),
+      resourceLabel: form.get("resourceLabel"),
+      title: form.get("title"),
+      introduction: form.get("introduction"),
+      buttonLabel: form.get("buttonLabel"),
+      accent: form.get("accent"),
+    });
+    const { error } = await client.rpc("save_booking_experience", {
+      p_website: website,
+      p_experience: input,
+    });
+    failure(error);
+    refresh();
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return toActionError(error);
+  }
 }
 function refresh() {
   revalidatePath("/dashboard/leads");

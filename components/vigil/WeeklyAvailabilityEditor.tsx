@@ -31,8 +31,8 @@ export function WeeklyAvailabilityEditor({
           .map((row, index) => ({ ...row, index }))
           .filter((row) => row.day === n);
         return (
-          <fieldset key={day}>
-            <legend>
+          <div className="booking-weekday-row" key={day}>
+            <div className="booking-weekday-label">
               <label>
                 <input
                   type="checkbox"
@@ -47,65 +47,92 @@ export function WeeklyAvailabilityEditor({
                 />
                 {day}
               </label>
-            </legend>
-            {!rows.length ? (
-              <span className="lead-footnote">Unavailable</span>
-            ) : (
-              <>
-                <div className="booking-hours">
-                  {rows.map((row) => (
-                    <div key={row.index}>
-                      <input
-                        aria-label={`${day} available from ${rows.indexOf(row) + 1}`}
-                        id={`${id}-${n}-${row.index}-start`}
-                        type="time"
-                        required
-                        value={row.start}
-                        onChange={(e) =>
-                          update(row.index, "start", e.target.value)
-                        }
-                      />
-                      <span>to</span>
-                      <input
-                        aria-label={`${day} available until ${rows.indexOf(row) + 1}`}
-                        type="time"
-                        required
-                        value={row.end}
-                        onChange={(e) =>
-                          update(row.index, "end", e.target.value)
-                        }
-                      />
-                      <button
-                        type="button"
-                        className="lead-button"
-                        onClick={() =>
-                          setHours((all) =>
-                            all.filter((_, i) => i !== row.index),
-                          )
-                        }
-                        aria-label={`Remove ${day} window ${rows.indexOf(row) + 1}`}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  className="lead-button"
-                  disabled={rows.length >= 4 || hours.length >= 28}
-                  onClick={() =>
-                    setHours((all) => [
-                      ...all,
-                      { day: n, start: "13:00", end: "17:00" },
-                    ])
-                  }
-                >
-                  Add another {day} window
-                </button>
-              </>
-            )}
-          </fieldset>
+            </div>
+            <div className="booking-weekday-windows">
+              {!rows.length ? (
+                <span className="lead-footnote">Unavailable</span>
+              ) : (
+                <>
+                  <div className="booking-hours">
+                    {rows.map((row) => (
+                      <div key={row.index}>
+                        <input
+                          aria-label={`${day} available from ${rows.indexOf(row) + 1}`}
+                          id={`${id}-${n}-${row.index}-start`}
+                          type="time"
+                          required
+                          value={row.start}
+                          onChange={(e) =>
+                            update(row.index, "start", e.target.value)
+                          }
+                        />
+                        <span>to</span>
+                        <input
+                          aria-label={`${day} available until ${rows.indexOf(row) + 1}`}
+                          type="time"
+                          required
+                          value={row.end}
+                          onChange={(e) =>
+                            update(row.index, "end", e.target.value)
+                          }
+                        />
+                        <button
+                          type="button"
+                          className="lead-button"
+                          onClick={() =>
+                            setHours((all) =>
+                              all.filter((_, i) => i !== row.index),
+                            )
+                          }
+                          aria-label={`Remove ${day} window ${rows.indexOf(row) + 1}`}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    className="lead-button"
+                    disabled={
+                      rows.length >= 4 ||
+                      hours.length >= 28 ||
+                      rows.some((r) => r.end > "22:00")
+                    }
+                    onClick={() =>
+                      setHours((all) => {
+                        const end = rows.reduce(
+                          (v, r) => (r.end > v ? r.end : v),
+                          "00:00",
+                        );
+                        const startMinutes =
+                          Number(end.slice(0, 2)) * 60 +
+                          Number(end.slice(3)) +
+                          30;
+                        const time = (v: number) =>
+                          `${Math.floor(v / 60)
+                            .toString()
+                            .padStart(
+                              2,
+                              "0",
+                            )}:${(v % 60).toString().padStart(2, "0")}`;
+                        return [
+                          ...all,
+                          {
+                            day: n,
+                            start: time(startMinutes),
+                            end: time(startMinutes + 60),
+                          },
+                        ];
+                      })
+                    }
+                  >
+                    + Add hours
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
         );
       })}
     </div>

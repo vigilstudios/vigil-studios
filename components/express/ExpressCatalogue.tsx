@@ -434,7 +434,7 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
                 {active.industry} / {active.variant}{offer.percentOff ? ` · ${offer.percentOff}% off` : ""}
               </p>
               <h2>{active.example}</h2>
-              <span className={styles.bookingCapability}>{active.status === "available" ? active.nativeBookings ? "Contact-only by default · Optional Vigil bookings with Care or higher" : "Contact inquiries by default" : ""}</span>
+              <span className={styles.bookingCapability}>{active.status === "available" ? active.nativeBookings ? "Booking preview · Optional with Care+ · Contact-only without Care+" : "Contact inquiries by default" : ""}</span>
             </div>
 
             <div className={styles.actions}>

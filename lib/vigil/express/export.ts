@@ -1,5 +1,6 @@
 import "server-only";
-import { contactFirstHtml } from "./booking-policy";
+import { contactFirstHtml, legacyBookingKind } from "./booking-policy";
+import { bookingPreviewHtml } from "./booking-preview";
 import { ensureProfessionalBindings } from "@/lib/vigil/content/service";
 import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
@@ -29,6 +30,8 @@ export function expressHtml(
 ): string {
   if (draft.kind === "html") {
     const html = contactFirstHtml(draft.html);
+    const kind = legacyBookingKind(draft.html);
+    if (preview && kind) return bookingPreviewHtml(html, kind);
     return !preview && websiteId ? bindLegacyContact(html, websiteId) : html;
   }
   const boundSite =
