@@ -18,6 +18,7 @@ import {
   bookingManagementUrl,
   bookingTime,
   bookingExperience,
+  defaultBookingExperience,
   type BookingExperience,
   type BookingReceipt,
   type BookingSlot,
@@ -133,11 +134,21 @@ export function BookingWidget({
         ...fictionalConfig,
         services: fictionalConfig.services.map((s, i) => ({
           ...s,
+          ...(previewKind === "restaurant"
+            ? {
+                allocation: "table_pool" as const,
+                minParty: 1,
+                maxParty: 8,
+                duration: 90,
+                resourceId: undefined,
+                resourceName: undefined,
+              }
+            : {}),
           name:
             previewKind === "restaurant"
               ? i
-                ? "Private event consultation"
-                : "Group visit consultation"
+                ? "Dining reservation"
+                : "Lunch reservation"
               : previewKind === "home"
                 ? i
                   ? "Project assessment"
@@ -151,7 +162,7 @@ export function BookingWidget({
                     : "Follow-up appointment",
           description:
             previewKind === "restaurant"
-              ? "Discuss your visit with the team. This example does not reserve a dining table."
+              ? "Choose your party size and a time. We will assign a suitable table."
               : previewKind === "home"
                 ? "Discuss your project with the team. Add your project location in the notes."
                 : previewKind === "auto"
@@ -181,8 +192,26 @@ export function BookingWidget({
     ),
     [message, setMessage] = useState(""),
     [resource, setResource] = useState(""),
+    [party, setParty] = useState(2),
     [step, setStep] = useState<"time" | "details">("time");
+  const chosen = config?.services.find((value) => value.id === service);
+  const partySize =
+    receipt?.partySize ??
+    (chosen?.allocation === "table_pool"
+      ? Math.max(chosen.minParty ?? 1, Math.min(party, chosen.maxParty ?? 30))
+      : undefined);
   const experience = boundExperience ?? bookingExperience(config?.experience);
+  const dining = !!partySize;
+  const widgetTitle =
+    title ??
+    (dining && experience.title === defaultBookingExperience.title
+      ? "Reserve a table"
+      : experience.title);
+  const widgetIntroduction =
+    introduction ??
+    (dining && experience.introduction === defaultBookingExperience.introduction
+      ? "Choose your party size and an available time."
+      : experience.introduction);
   const accent =
     bookingAccentPresets[experience.accent] ??
     (experience.accent.startsWith("#") ? experience.accent : null);
@@ -251,9 +280,9 @@ export function BookingWidget({
   useEffect(() => {
     if (preview || !service || !day || !endpoint) return;
     let cancelled = false;
-    const key = `${service}:${day}`;
+    const key = `${service}:${day}:${partySize ?? ""}`;
     read<{ slots: BookingSlot[] }>(
-      `${endpoint}?service=${encodeURIComponent(service)}&day=${encodeURIComponent(day)}`,
+      `${endpoint}?service=${encodeURIComponent(service)}&day=${encodeURIComponent(day)}${partySize ? `&party=${partySize}` : ""}`,
     )
       .then((value) => {
         if (!cancelled) {
@@ -270,8 +299,8 @@ export function BookingWidget({
     return () => {
       cancelled = true;
     };
-  }, [endpoint, preview, service, day]);
-  const queryKey = `${service}:${day}`,
+  }, [endpoint, preview, service, day, partySize]);
+  const queryKey = `${service}:${day}:${partySize ?? ""}`,
     slots = preview
       ? fictionalSlots.map((slot, index) => {
           const start = new Date(
@@ -294,7 +323,6 @@ export function BookingWidget({
         ? slotResult.slots
         : [],
     loading = !preview && !!service && !!day && slotResult.key !== queryKey;
-  const chosen = config?.services.find((value) => value.id === service);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (step !== "details") {
@@ -317,7 +345,7 @@ export function BookingWidget({
         phone: String(form.get("phone") ?? ""),
         notes: String(form.get("notes") ?? ""),
       };
-    const fingerprint = JSON.stringify([service, selected, contact]);
+    const fingerprint = JSON.stringify([service, selected, contact, partySize]);
     if (retry.current?.fingerprint !== fingerprint)
       retry.current = {
         fingerprint,
@@ -333,6 +361,7 @@ export function BookingWidget({
       const result = await read<{ appointment: BookingReceipt }>(endpoint, {
         sourcePage: location.origin + location.pathname,
         serviceId: service,
+        ...(partySize ? { partySize } : {}),
         startsAt: selected,
         submissionId: pending.id,
         managementToken: pending.token,
@@ -403,8 +432,8 @@ export function BookingWidget({
   const content = (
     <>
       <header>
-        <Heading>{title ?? experience.title}</Heading>
-        <p>{introduction ?? experience.introduction}</p>
+        <Heading>{widgetTitle}</Heading>
+        <p>{widgetIntroduction}</p>
       </header>
       {preview && (
         <p className="vb-note">Interactive example · no live appointments</p>
@@ -418,10 +447,13 @@ export function BookingWidget({
             {receipt.status === "requested"
               ? "Request received · awaiting approval"
               : receipt.status === "confirmed"
-                ? "Appointment confirmed"
+                ? receipt.partySize
+                  ? "Reservation confirmed"
+                  : "Appointment confirmed"
                 : receipt.status.replaceAll("_", " ")}
           </strong>
           <p>{receipt.serviceName}</p>
+          {receipt.partySize && <p>Party of {receipt.partySize}</p>}
           <p>{bookingTime(receipt.startsAt, receipt.timeZone)}</p>
           {receipt.status === "requested" && (
             <p>
@@ -463,7 +495,7 @@ export function BookingWidget({
             <div className="vb-scheduler" hidden={step !== "time" && !receipt}>
               <aside className="vb-options">
                 <span className="vb-step-label">
-                  01 / CHOOSE YOUR APPOINTMENT
+                  01 / CHOOSE YOUR {dining ? "RESERVATION" : "APPOINTMENT"}
                 </span>
                 {experience.showResource && resourceOptions.length > 0 && (
                   <label>
@@ -517,6 +549,34 @@ export function BookingWidget({
                       ))}
                   </select>
                 </label>
+                {partySize && (
+                  <label>
+                    Party size
+                    <select
+                      value={partySize}
+                      disabled={!!receipt}
+                      onChange={(e) => {
+                        setParty(Number(e.target.value));
+                        setSelected("");
+                        setError("");
+                      }}
+                    >
+                      {Array.from(
+                        {
+                          length:
+                            (chosen?.maxParty ?? 30) -
+                            (chosen?.minParty ?? 1) +
+                            1,
+                        },
+                        (_, i) => i + (chosen?.minParty ?? 1),
+                      ).map((n) => (
+                        <option key={n} value={n}>
+                          {n} {n === 1 ? "guest" : "guests"}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
                 {chosen?.description && (
                   <p className="vb-note">{chosen.description}</p>
                 )}
@@ -625,6 +685,7 @@ export function BookingWidget({
                   </button>
                   <span className="vb-step-label">02 / YOUR DETAILS</span>
                   <strong>{chosen?.name}</strong>
+                  {partySize && <p>Party of {partySize}</p>}
                   {selected && <p>{bookingTime(selected, config.timeZone)}</p>}
                   <p className="vb-note">
                     {chosen?.mode === "approval"
@@ -688,8 +749,12 @@ export function BookingWidget({
                     {busy
                       ? "Saving…"
                       : chosen?.mode === "approval"
-                        ? "Request appointment"
-                        : "Confirm appointment"}
+                        ? dining
+                          ? "Request reservation"
+                          : "Request appointment"
+                        : dining
+                          ? "Confirm reservation"
+                          : "Confirm appointment"}
                   </button>
                 </div>
               </>
@@ -722,13 +787,12 @@ export function BookingWidget({
             className="vb-launch"
             onClick={() => dialog.current?.showModal()}
           >
-            {experience.buttonLabel}
+            {dining &&
+            experience.buttonLabel === defaultBookingExperience.buttonLabel
+              ? "Reserve a table"
+              : experience.buttonLabel}
           </button>
-          <dialog
-            ref={dialog}
-            className="vb-dialog"
-            aria-label={title ?? experience.title}
-          >
+          <dialog ref={dialog} className="vb-dialog" aria-label={widgetTitle}>
             <button
               type="button"
               className="vb-close"

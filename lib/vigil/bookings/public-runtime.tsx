@@ -52,6 +52,13 @@ export async function connect(
         "form#booking-form, form#request-form, h3, .preview-note",
       )
       .forEach((node) => (node.hidden = true));
+    const groupNote = panel?.querySelector<HTMLElement>(".group-note");
+    if (
+      groupNote?.textContent ===
+      "For reservations or group visits, please call us."
+    )
+      groupNote.textContent =
+        "For larger parties or special requests, please call us.";
     return mount(element, websiteId);
   } catch {
     /* Keep the contact fallback when paused, ineligible or unavailable. */

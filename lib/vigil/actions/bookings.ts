@@ -14,6 +14,8 @@ import {
   bookingSettingsSchema,
   resourceSchema,
   bookingExperienceSchema,
+  bookingTableSchema,
+  hoursSchema,
 } from "../bookings/contract";
 async function manager(website: string) {
   if (process.env.VIGIL_BOOKINGS_ENABLED !== "true")
@@ -128,6 +130,50 @@ export async function saveBookingResource(
     return toActionError(error);
   }
 }
+export async function saveBookingDiningHours(
+  website: string,
+  form: FormData,
+): Promise<ActionResult> {
+  try {
+    const { client } = await manager(website);
+    const hours = hoursSchema.parse(
+      JSON.parse(z.string().max(8000).parse(form.get("hours"))),
+    );
+    const { error } = await client.rpc("save_booking_dining_hours", {
+      p_website: website,
+      p_hours: hours,
+    });
+    failure(error);
+    refresh();
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+export async function saveBookingTable(
+  website: string,
+  form: FormData,
+): Promise<ActionResult> {
+  try {
+    const { client } = await manager(website);
+    const table = bookingTableSchema.parse({
+      ...(form.get("id") ? { id: form.get("id") } : {}),
+      name: form.get("name"),
+      active: form.has("active"),
+      minParty: Number(form.get("minParty")),
+      maxParty: Number(form.get("maxParty")),
+    });
+    const { error } = await client.rpc("save_booking_table", {
+      p_website: website,
+      p_table: table,
+    });
+    failure(error);
+    refresh();
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
 export async function saveBookingService(
   website: string,
   form: FormData,
@@ -136,7 +182,12 @@ export async function saveBookingService(
     const { client } = await manager(website),
       input = bookingServiceSchema.parse({
         ...(form.get("id") ? { id: form.get("id") } : {}),
-        resourceId: form.get("resourceId"),
+        allocation:
+          form.get("resourceId") === "table_pool" ? "table_pool" : "fixed",
+        resourceId:
+          form.get("resourceId") === "table_pool"
+            ? null
+            : form.get("resourceId"),
         name: form.get("name"),
         description: form.get("description"),
         duration: Number(form.get("duration")),
@@ -202,7 +253,20 @@ export async function blockBookingDays(
 ): Promise<ActionResult> {
   try {
     const { client } = await manager(website),
-      id = z.uuid().parse(form.get("resource"));
+      id = z
+        .union([z.uuid(), z.literal("all_tables")])
+        .parse(form.get("resource"));
+    if (id === "all_tables") {
+      const { error } = await client.rpc("block_booking_dining_days", {
+        p_website: website,
+        p_from: z.iso.date().parse(form.get("from")),
+        p_through: z.iso.date().parse(form.get("through")),
+        p_reason: z.string().max(300).parse(form.get("reason")),
+      });
+      failure(error);
+      refresh();
+      return { ok: true, data: undefined };
+    }
     const { data } = await client
       .from("booking_resources")
       .select("id")

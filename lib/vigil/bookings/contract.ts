@@ -97,10 +97,24 @@ export const resourceSchema = z
     hours: hoursSchema,
   })
   .strict();
+export const bookingTableSchema = z
+  .object({
+    id: z.uuid().optional(),
+    name: z.string().trim().min(1).max(120),
+    active: z.boolean(),
+    minParty: z.number().int().min(1).max(30),
+    maxParty: z.number().int().min(1).max(30),
+  })
+  .strict()
+  .refine(
+    (v) => v.minParty <= v.maxParty,
+    "Minimum party size must not exceed the table capacity.",
+  );
 export const bookingServiceSchema = z
   .object({
     id: z.uuid().optional(),
-    resourceId: z.uuid(),
+    resourceId: z.uuid().nullable(),
+    allocation: z.enum(["fixed", "table_pool"]).default("fixed"),
     name: z.string().trim().min(1).max(120),
     description: z.string().trim().max(600),
     duration: z
@@ -124,11 +138,19 @@ export const bookingServiceSchema = z
     mode: z.enum(bookingModes),
     active: z.boolean(),
   })
-  .strict();
+  .strict()
+  .refine(
+    (v) =>
+      v.allocation === "table_pool"
+        ? v.resourceId === null
+        : v.resourceId !== null,
+    "Choose a person or space, or automatic table assignment.",
+  );
 export const publicBookingSchema = z
   .object({
     sourcePage: z.url().max(2048),
     serviceId: z.uuid(),
+    partySize: z.number().int().min(1).max(30).optional(),
     startsAt: z.iso.datetime(),
     submissionId: z.uuid(),
     managementToken: z.string().regex(/^[a-f0-9]{64}$/),
@@ -159,6 +181,9 @@ export type PublicBookingService = {
   mode: (typeof bookingModes)[number];
   resourceId?: string;
   resourceName?: string;
+  allocation?: "fixed" | "table_pool";
+  minParty?: number;
+  maxParty?: number;
 };
 export type PublicBookingConfig = {
   websiteId: string;
@@ -181,6 +206,7 @@ export type BookingReceipt = {
   requestedStart: string | null;
   changeDeadline: string;
   expiresAt: string | null;
+  partySize?: number | null;
 };
 export type BookingSlot = { startsAt: string; endsAt: string };
 export function bookingTime(value: string, timeZone: string) {

@@ -81,7 +81,7 @@ export type WebsiteTierKind = keyof typeof WEBSITE_TIERS;
 export const PROFESSIONAL_QUALIFIERS = [
   { id: "business_site", label: "A tailored business or marketing website", detail: "Up to eight primary pages", outcome: "included" },
   { id: "forms", label: "Contact, quote or multi-step forms", detail: "Including basic lead routing", outcome: "included" },
-  { id: "vigil_booking", label: "Standard Vigil appointments", detail: "Compatible website component and booking management with Care or higher; setup required", outcome: "included" },
+  { id: "vigil_booking", label: "Vigil appointments or table reservations", detail: "Compatible website component and booking management with Care or higher; setup required", outcome: "included" },
   { id: "booking_embed", label: "Booking through a service I already use", detail: "Calendly, Acuity, Square, Vagaro, Fresha, Mindbody or similar", outcome: "included" },
   { id: "basic_payments", label: "Simple payments or deposits", detail: "Stripe, PayPal, Square, payment links or simple service checkout", outcome: "included" },
   { id: "cms", label: "A blog, portfolio, case studies or editable content", detail: "CMS included where it suits the site", outcome: "included" },
@@ -90,7 +90,7 @@ export const PROFESSIONAL_QUALIFIERS = [
   { id: "extra_pages", label: "More than eight primary pages", detail: "Additional pages can be quoted as an add-on", outcome: "consult" },
   { id: "advanced_store", label: "A large or operationally complex online store", detail: "Catalogs, inventory, variants, shipping, fulfillment or marketplace features", outcome: "consult" },
   { id: "portal", label: "Customer accounts, memberships, dashboards or a portal", detail: "This is custom application work", outcome: "custom" },
-  { id: "native_booking", label: "A new custom booking system", detail: "Table inventory, classes, group capacity, deposits or specialized scheduling workflows", outcome: "custom" },
+  { id: "native_booking", label: "A new custom booking system", detail: "Table combinations, waitlists, classes, group sessions, deposits or specialized scheduling workflows", outcome: "custom" },
   { id: "custom_systems", label: "Custom APIs or complex automation", detail: "Multi-system synchronization or custom backend logic", outcome: "custom" },
 ] as const;
 

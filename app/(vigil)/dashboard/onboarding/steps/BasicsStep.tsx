@@ -340,7 +340,7 @@ export function BasicsStep({
       <OnboardingSection
         icon={CalendarDays}
         title="How should customers contact or book with you?"
-        description="Express sites start with contact only. Standard Vigil appointments are available on compatible sites with Care or higher, after setup."
+        description="Express sites start with contact only. Vigil appointments and table reservations are available on compatible sites with Care or higher, after setup."
       >
         <ChoiceCards
           name="Booking approach"
@@ -355,7 +355,7 @@ export function BasicsStep({
             {
               value: "vigil",
               label: "Vigil bookings",
-              hint: "Appointments and approval requests managed in Lead Hub. Care or higher required.",
+              hint: "Appointments, table reservations and approval requests managed in Bookings. Care or higher required.",
             },
             {
               value: "existing",
@@ -365,7 +365,7 @@ export function BasicsStep({
             {
               value: "custom",
               label: "Specialized scheduling",
-              hint: "Table inventory, classes, group capacity or deposits. Discuss the scope with Vigil.",
+              hint: "Table combinations, waitlists, classes, group sessions or deposits. Discuss the scope with Vigil.",
             },
           ]}
         />

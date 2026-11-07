@@ -62,12 +62,13 @@ export type Database = {
           },
         ]
       }
+
       appointments: {
         Row: {
           buffer_after: number
           buffer_before: number
           confirmation_mode: string
-          contact: Json
+          contact: NonNullable<Json>
           created_at: string
           duration: number
           ends_at: string
@@ -76,6 +77,7 @@ export type Database = {
           lead_id: string | null
           notes: string
           organization_id: string
+          party_size: number | null
           request_expires_at: string | null
           requested_start_at: string | null
           reserved_from: string
@@ -92,11 +94,12 @@ export type Database = {
           updated_at: string
           website_id: string
         }
+        ComputedFields: never
         Insert: {
           buffer_after: number
           buffer_before: number
           confirmation_mode: string
-          contact: Json
+          contact: NonNullable<Json>
           created_at?: string
           duration: number
           ends_at: string
@@ -105,6 +108,7 @@ export type Database = {
           lead_id?: string | null
           notes?: string
           organization_id: string
+          party_size?: number | null
           request_expires_at?: string | null
           requested_start_at?: string | null
           reserved_from: string
@@ -125,7 +129,7 @@ export type Database = {
           buffer_after?: number
           buffer_before?: number
           confirmation_mode?: string
-          contact?: Json
+          contact?: NonNullable<Json>
           created_at?: string
           duration?: number
           ends_at?: string
@@ -134,6 +138,7 @@ export type Database = {
           lead_id?: string | null
           notes?: string
           organization_id?: string
+          party_size?: number | null
           request_expires_at?: string | null
           requested_start_at?: string | null
           reserved_from?: string
@@ -181,6 +186,7 @@ export type Database = {
           },
         ]
       }
+
       booking_blocks: {
         Row: {
           created_at: string
@@ -222,22 +228,30 @@ export type Database = {
           },
         ]
       }
+
       booking_resources: {
         Row: {
           active: boolean
           created_at: string
-          hours: Json
+          hours: NonNullable<Json>
           id: string
+          kind: string
+          max_party: number | null
+          min_party: number | null
           name: string
           organization_id: string
           updated_at: string
           website_id: string
         }
+        ComputedFields: never
         Insert: {
           active?: boolean
           created_at?: string
-          hours?: Json
+          hours?: NonNullable<Json>
           id?: string
+          kind?: string
+          max_party?: number | null
+          min_party?: number | null
           name: string
           organization_id: string
           updated_at?: string
@@ -246,8 +260,11 @@ export type Database = {
         Update: {
           active?: boolean
           created_at?: string
-          hours?: Json
+          hours?: NonNullable<Json>
           id?: string
+          kind?: string
+          max_party?: number | null
+          min_party?: number | null
           name?: string
           organization_id?: string
           updated_at?: string
@@ -263,9 +280,11 @@ export type Database = {
           },
         ]
       }
+
       booking_services: {
         Row: {
           active: boolean
+          allocation: string
           buffer_after: number
           buffer_before: number
           created_at: string
@@ -275,12 +294,14 @@ export type Database = {
           mode: string
           name: string
           organization_id: string
-          resource_id: string
+          resource_id: string | null
           updated_at: string
           website_id: string
         }
+        ComputedFields: never
         Insert: {
           active?: boolean
+          allocation?: string
           buffer_after?: number
           buffer_before?: number
           created_at?: string
@@ -290,12 +311,13 @@ export type Database = {
           mode: string
           name: string
           organization_id: string
-          resource_id: string
+          resource_id?: string | null
           updated_at?: string
           website_id: string
         }
         Update: {
           active?: boolean
+          allocation?: string
           buffer_after?: number
           buffer_before?: number
           created_at?: string
@@ -305,7 +327,7 @@ export type Database = {
           mode?: string
           name?: string
           organization_id?: string
-          resource_id?: string
+          resource_id?: string | null
           updated_at?: string
           website_id?: string
         }
@@ -325,8 +347,9 @@ export type Database = {
           availability_acknowledged_at: string | null
           change_notice: number
           component_ready: boolean
+          dining_hours: NonNullable<Json>
           enabled: boolean
-          experience: Json
+          experience: NonNullable<Json>
           horizon_days: number
           minimum_notice: number
           organization_id: string
@@ -334,12 +357,14 @@ export type Database = {
           updated_at: string
           website_id: string
         }
+        ComputedFields: never
         Insert: {
           availability_acknowledged_at?: string | null
           change_notice?: number
           component_ready?: boolean
+          dining_hours?: NonNullable<Json>
           enabled?: boolean
-          experience?: Json
+          experience?: NonNullable<Json>
           horizon_days?: number
           minimum_notice?: number
           organization_id: string
@@ -351,8 +376,9 @@ export type Database = {
           availability_acknowledged_at?: string | null
           change_notice?: number
           component_ready?: boolean
+          dining_hours?: NonNullable<Json>
           enabled?: boolean
-          experience?: Json
+          experience?: NonNullable<Json>
           horizon_days?: number
           minimum_notice?: number
           organization_id?: string
@@ -4391,71 +4417,91 @@ export type Database = {
       }
     }
     Functions: {
+      block_booking_dining_days: {
+        Args: {
+          p_from: string
+          p_reason: string
+          p_through: string
+          p_website: string
+        }
+        Returns: number
+      }
+
+      save_booking_dining_hours: {
+        Args: { p_hours: Json; p_website: string }
+        Returns: undefined
+      }
+
+      save_booking_table: {
+        Args: { p_table: Json; p_website: string }
+        Returns: string
+      }
+
       save_booking_experience: {
         Args: { p_experience: Json; p_website: string }
         Returns: undefined
       }
 
-      "booking_calendar_status": {
-    Args: {
-        "p_site": string;
-        "p_user": string;
-    };
-    Returns: Json;
-};
-      "booking_calendar_target": {
-    Args: {
-        "p_site": string;
-        "p_user": string;
-    };
-    Returns: Json;
-};
-      "save_booking_calendar": {
-    Args: {
-        "p_calendar": string;
-        "p_email": string;
-        "p_refresh_token": string;
-        "p_site": string;
-        "p_user": string;
-    };
-    Returns: string;
-};
-      "claim_booking_calendar": {
-    Args: {
-        "p_connection"?: string;
-    };
-    Returns: Json;
-};
-      "finish_booking_calendar": {
-    Args: {
-        "p_connection": string;
-        "p_entity": string;
-        "p_error"?: string;
-        "p_event"?: string;
-        "p_kind": string;
-        "p_lease": string;
-        "p_retry_after"?: number;
-        "p_version": number;
-    };
-    Returns: boolean;
-};
-      "remove_booking_calendar": {
-    Args: {
-        "p_site": string;
-        "p_user": string;
-    };
-    Returns: boolean;
-};
-      "booking_calendar_lease_valid": {
-    Args: {
-        "p_connection": string;
-        "p_entity": string;
-        "p_kind": string;
-        "p_lease": string;
-        "p_version": number;
-    };
-    Returns: boolean;
-};
+      booking_calendar_status: {
+        Args: {
+          p_site: string
+          p_user: string
+        }
+        Returns: Json
+      }
+      booking_calendar_target: {
+        Args: {
+          p_site: string
+          p_user: string
+        }
+        Returns: Json
+      }
+      save_booking_calendar: {
+        Args: {
+          p_calendar: string
+          p_email: string
+          p_refresh_token: string
+          p_site: string
+          p_user: string
+        }
+        Returns: string
+      }
+      claim_booking_calendar: {
+        Args: {
+          p_connection?: string
+        }
+        Returns: Json
+      }
+      finish_booking_calendar: {
+        Args: {
+          p_connection: string
+          p_entity: string
+          p_error?: string
+          p_event?: string
+          p_kind: string
+          p_lease: string
+          p_retry_after?: number
+          p_version: number
+        }
+        Returns: boolean
+      }
+      remove_booking_calendar: {
+        Args: {
+          p_site: string
+          p_user: string
+        }
+        Returns: boolean
+      }
+      booking_calendar_lease_valid: {
+        Args: {
+          p_connection: string
+          p_entity: string
+          p_kind: string
+          p_lease: string
+          p_version: number
+        }
+        Returns: boolean
+      }
 
       booking_eligible: { Args: { p_website: string }; Returns: boolean }
       block_booking_days: {
@@ -4497,15 +4543,18 @@ export type Database = {
         Args: { p_origin: string; p_website: string }
         Returns: Json
       }
+
       booking_public_slots: {
         Args: {
           p_day: string
           p_origin: string
+          p_party?: number
           p_service: string
           p_website: string
         }
         Returns: Json
       }
+
       create_public_booking: {
         Args: {
           p_contact: Json
@@ -4515,12 +4564,14 @@ export type Database = {
           p_notes: string
           p_origin: string
           p_page?: string
+          p_party?: number
           p_service: string
           p_start: string
           p_website: string
         }
         Returns: Json
       }
+
       manage_booking: {
         Args: {
           p_action: string
@@ -6168,114 +6219,122 @@ export type Database = {
         }
         Relationships: []
       }
-"booking_calendar_connections": {
-    Row: {
-        "account_email": string;
-        "connected_at": string;
-        "enabled": boolean;
-        "error_code": string | null;
-        "id": string;
-        "last_attempted_at": string | null;
-        "last_synced_at": string | null;
-        "lease_token": string | null;
-        "lease_until": string | null;
-        "leased_entity": string | null;
-        "leased_kind": string | null;
-        "leased_version": number | null;
-        "organization_id": string;
-        "status": string;
-        "user_id": string;
-        "vault_secret_id": string | null;
-        "website_id": string;
-    };
-    ComputedFields: never;
-    Insert: {
-        "account_email": string;
-        "connected_at"?: string;
-        "enabled"?: boolean;
-        "error_code"?: string | null;
-        "id"?: string;
-        "last_attempted_at"?: string | null;
-        "last_synced_at"?: string | null;
-        "lease_token"?: string | null;
-        "lease_until"?: string | null;
-        "leased_entity"?: string | null;
-        "leased_kind"?: string | null;
-        "leased_version"?: number | null;
-        "organization_id": string;
-        "status"?: string;
-        "user_id": string;
-        "vault_secret_id"?: string | null;
-        "website_id": string;
-    };
-    Update: {
-        "account_email"?: string;
-        "connected_at"?: string;
-        "enabled"?: boolean;
-        "error_code"?: string | null;
-        "id"?: string;
-        "last_attempted_at"?: string | null;
-        "last_synced_at"?: string | null;
-        "lease_token"?: string | null;
-        "lease_until"?: string | null;
-        "leased_entity"?: string | null;
-        "leased_kind"?: string | null;
-        "leased_version"?: number | null;
-        "organization_id"?: string;
-        "status"?: string;
-        "user_id"?: string;
-        "vault_secret_id"?: string | null;
-        "website_id"?: string;
-    };
-    Relationships: [
-    ];
-};
-"booking_calendar_queue": {
-    Row: {
-        "attempts": number;
-        "connection_id": string;
-        "entity_id": string;
-        "kind": string;
-        "next_attempt_at": string;
-        "version": number;
-    };
-    ComputedFields: never;
-    Insert: {
-        "attempts"?: number;
-        "connection_id": string;
-        "entity_id": string;
-        "kind": string;
-        "next_attempt_at"?: string;
-        "version"?: number;
-    };
-    Update: {
-        "attempts"?: number;
-        "connection_id"?: string;
-        "entity_id"?: string;
-        "kind"?: string;
-        "next_attempt_at"?: string;
-        "version"?: number;
-    };
-    Relationships: [
-        {
-            foreignKeyName: "booking_calendar_queue_connection_id_fkey";
-            columns: [
-                "connection_id"
-            ];
-            isOneToOne: false;
-            referencedRelation: "booking_calendar_connections";
-            referencedColumns: [
-                "id"
-            ];
+      booking_calendar_connections: {
+        Row: {
+          account_email: string
+          connected_at: string
+          enabled: boolean
+          error_code: string | null
+          id: string
+          last_attempted_at: string | null
+          last_synced_at: string | null
+          lease_token: string | null
+          lease_until: string | null
+          leased_entity: string | null
+          leased_kind: string | null
+          leased_version: number | null
+          organization_id: string
+          status: string
+          user_id: string
+          vault_secret_id: string | null
+          website_id: string
         }
-    ];
-};
-
+        ComputedFields: never
+        Insert: {
+          account_email: string
+          connected_at?: string
+          enabled?: boolean
+          error_code?: string | null
+          id?: string
+          last_attempted_at?: string | null
+          last_synced_at?: string | null
+          lease_token?: string | null
+          lease_until?: string | null
+          leased_entity?: string | null
+          leased_kind?: string | null
+          leased_version?: number | null
+          organization_id: string
+          status?: string
+          user_id: string
+          vault_secret_id?: string | null
+          website_id: string
+        }
+        Update: {
+          account_email?: string
+          connected_at?: string
+          enabled?: boolean
+          error_code?: string | null
+          id?: string
+          last_attempted_at?: string | null
+          last_synced_at?: string | null
+          lease_token?: string | null
+          lease_until?: string | null
+          leased_entity?: string | null
+          leased_kind?: string | null
+          leased_version?: number | null
+          organization_id?: string
+          status?: string
+          user_id?: string
+          vault_secret_id?: string | null
+          website_id?: string
+        }
+        Relationships: []
+      }
+      booking_calendar_queue: {
+        Row: {
+          attempts: number
+          connection_id: string
+          entity_id: string
+          kind: string
+          next_attempt_at: string
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          attempts?: number
+          connection_id: string
+          entity_id: string
+          kind: string
+          next_attempt_at?: string
+          version?: number
+        }
+        Update: {
+          attempts?: number
+          connection_id?: string
+          entity_id?: string
+          kind?: string
+          next_attempt_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_calendar_queue_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "booking_calendar_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      booking_choose_resource: {
+        Args: {
+          p_after: number
+          p_before: number
+          p_duration: number
+          p_fixed: string
+          p_party: number
+          p_skip?: string
+          p_start: string
+          p_website: string
+        }
+        Returns: string
+      }
+
       booking_experience_valid: { Args: { v: Json }; Returns: boolean }
 
       booking_audit: {
@@ -6481,18 +6540,17 @@ export type Database = {
           value: Json
         }[]
       }
-"booking_calendar_member": {
-    Args: {
-        "p_site": string;
-        "p_user": string;
-    };
-    Returns: boolean;
-};
-"booking_calendar_service": {
-    Args: Record<PropertyKey, never>;
-    Returns: undefined;
-};
-
+      booking_calendar_member: {
+        Args: {
+          p_site: string
+          p_user: string
+        }
+        Returns: boolean
+      }
+      booking_calendar_service: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
@@ -6511,12 +6569,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -6540,11 +6598,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -6565,11 +6623,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -6590,11 +6648,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -6607,11 +6665,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never) = never,
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

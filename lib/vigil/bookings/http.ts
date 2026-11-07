@@ -94,13 +94,15 @@ export async function handleBookings(
     if (request.method === "GET") {
       const url = new URL(request.url),
         service = url.searchParams.get("service"),
-        day = url.searchParams.get("day");
+        day = url.searchParams.get("day"),
+        party = url.searchParams.get("party");
       if (service || day) {
         if (
           !z.uuid().safeParse(service).success ||
           !day ||
           !/^\d{4}-\d{2}-\d{2}$/.test(day) ||
-          !Number.isFinite(Date.parse(day))
+          !Number.isFinite(Date.parse(day)) ||
+          (party !== null && !/^(?:[1-9]|[12][0-9]|30)$/.test(party))
         )
           throw new ContactError(422, "Choose a valid service and date.");
         const { data, error } = await admin.rpc("booking_public_slots", {
@@ -108,6 +110,7 @@ export async function handleBookings(
           p_origin: origin,
           p_service: service!,
           p_day: day,
+          ...(party !== null ? { p_party: Number(party) } : {}),
         });
         if (error)
           throw new ContactError(
@@ -204,6 +207,7 @@ export async function handleBookings(
         contact,
         input.notes ?? "",
         bookingHash(input.managementToken),
+        ...(input.partySize ? [input.partySize] : []),
       ]),
     );
     const { data, error } = await admin.rpc("create_public_booking", {
@@ -217,6 +221,7 @@ export async function handleBookings(
       p_contact: contact,
       p_notes: input.notes ?? "",
       p_page: input.sourcePage,
+      ...(input.partySize ? { p_party: input.partySize } : {}),
     });
     if (error) {
       if (error.code === "23P01")

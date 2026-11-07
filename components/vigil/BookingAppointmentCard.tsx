@@ -11,6 +11,7 @@ export function BookingAppointmentCard({
   eligible,
   asOf,
   events,
+  resourceName,
 }: {
   a: Appointment;
   website: string;
@@ -23,6 +24,7 @@ export function BookingAppointmentCard({
     kind: string;
     created_at: string;
   }[];
+  resourceName?: string;
 }) {
   const contact = a.contact as {
       name?: string;
@@ -38,6 +40,14 @@ export function BookingAppointmentCard({
           <div>
             <h2>{a.service_name}</h2>
             <p>{bookingTime(a.starts_at, a.time_zone)}</p>
+            {a.party_size && (
+              <p>
+                Party of {a.party_size} ·{" "}
+                {status === "requested"
+                  ? "Table assigned on confirmation"
+                  : (resourceName ?? "Table assignment")}
+              </p>
+            )}
           </div>
           <span
             className="lead-status"

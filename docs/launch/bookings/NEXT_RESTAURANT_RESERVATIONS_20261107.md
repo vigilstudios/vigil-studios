@@ -2,6 +2,8 @@
 
 Owner selected the first restaurant release on November 7: party sizes, table capacities, dining duration and automatic assignment. Table combinations, waitlists, floor-plan editing, deposits and point-of-sale integration follow later. Account access is the next phase after restaurant reservations; its accepted requirements are in `NEXT_ACCOUNT_ACCESS_20261104.md`.
 
+Implementation is now prepared for review; see [implementation and validation](RESTAURANT_RESERVATIONS_20261107.md). Production rollout has not occurred for this phase.
+
 ## Product flow
 
 An eligible restaurant explicitly enables a dining service after entering its tables, seating capacities and dining hours. Existing appointment services remain available. Each dining service controls duration, turnaround time, notice, booking horizon and instant confirmation versus approval, retaining the already accepted choice per service. The website widget shows party size before date/time selection. Guests choose available times; staff manage the assigned table in Bookings. The guest does not choose an arbitrary table or see invented capacity.
