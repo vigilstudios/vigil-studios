@@ -258,9 +258,9 @@
 }
 .vigil-booking .vb-continue,
 .vigil-booking .vb-launch {
-  background: var(--vigil-booking-accent);
-  color: var(--vigil-booking-foreground);
-  border-color: var(--vigil-booking-accent);
+  background: var(--vb-accent);
+  color: var(--vb-accent-ink);
+  border-color: var(--vb-accent);
   justify-self: start;
   padding: 12px 20px;
 }
@@ -345,4 +345,46 @@
   .vb-slots {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
+
+/* Site palettes lead by default; owners may override only this widget’s accent. */
+.vigil-booking {
+  --vb-accent: var(
+    --vigil-booking-accent,
+    var(--de-accent, var(--color-primary, var(--accent, #2547b8)))
+  );
+  --vb-accent-ink: var(
+    --vigil-booking-foreground,
+    var(--de-accent-foreground, var(--color-on-primary, var(--on-accent, #fff)))
+  );
+}
+.vigil-booking button[aria-pressed="true"],
+.vigil-booking button[type="submit"] {
+  background: var(--vb-accent);
+  border-color: var(--vb-accent);
+  color: var(--vb-accent-ink);
+}
+.vigil-booking :focus-visible {
+  outline-color: var(--vb-accent);
+}
+.vb-dialog {
+  background: var(
+    --vigil-booking-surface,
+    var(--de-surface, var(--color-surface, var(--bg-secondary, #fff)))
+  );
+  color: var(
+    --vigil-booking-text,
+    var(--de-foreground, var(--color-text, var(--text-primary, #182238)))
+  );
+  border-color: var(
+    --vigil-booking-border,
+    var(--de-border, var(--color-border, #d8dce6))
+  );
+}
+.vigil-booking .vb-close {
+  background: var(
+    --vigil-booking-surface,
+    var(--de-surface, var(--color-surface, var(--bg-secondary, #fff)))
+  );
+  color: inherit;
 }

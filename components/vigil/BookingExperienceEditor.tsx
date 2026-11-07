@@ -51,7 +51,9 @@ export function BookingExperienceEditor({
         <div className="lead-panel-body">
           <p className="lead-settings-note">
             Choose how customers book on a compatible website. Publishing these
-            preferences does not activate online bookings.
+            preferences does not activate online bookings. Website colors come
+            from your site design; an accent override only changes this booking
+            component.
           </p>
           {canManage ? (
             <ActionForm
@@ -116,20 +118,39 @@ export function BookingExperienceEditor({
                 <label className="lead-field">
                   Accent
                   <select
-                    name="accent"
-                    value={value.accent}
+                    value={
+                      value.accent.startsWith("#") ? "custom" : value.accent
+                    }
                     onChange={(e) =>
                       set(
                         "accent",
-                        e.target.value as BookingExperience["accent"],
+                        e.target.value === "custom"
+                          ? "#2547b8"
+                          : e.target.value,
                       )
                     }
                   >
+                    <option value="site">Use website colors (default)</option>
                     <option value="royal">Royal blue</option>
                     <option value="graphite">Graphite</option>
                     <option value="plum">Plum</option>
+                    <option value="custom">Custom accent</option>
                   </select>
                 </label>
+                <input type="hidden" name="accent" value={value.accent} />
+                {value.accent.startsWith("#") && (
+                  <label className="lead-field">
+                    Custom accent
+                    <input
+                      type="color"
+                      value={value.accent}
+                      onChange={(e) => set("accent", e.target.value)}
+                    />
+                    <small>
+                      {value.accent} · text contrast adjusts automatically.
+                    </small>
+                  </label>
+                )}
                 <label className="lead-field">
                   Person or space label
                   <input

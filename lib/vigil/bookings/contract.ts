@@ -20,7 +20,10 @@ export const bookingExperienceSchema = z
     title: z.string().trim().min(1).max(80),
     introduction: z.string().trim().max(160),
     buttonLabel: z.string().trim().min(1).max(40),
-    accent: z.enum(["royal", "graphite", "plum"]),
+    accent: z.union([
+      z.enum(["site", "royal", "graphite", "plum"]),
+      z.string().regex(/^#[0-9a-f]{6}$/i),
+    ]),
   })
   .strict();
 export type BookingExperience = z.infer<typeof bookingExperienceSchema>;
@@ -32,7 +35,7 @@ export const defaultBookingExperience: BookingExperience = {
   title: "Choose a time",
   introduction: "Find an appointment that works for you.",
   buttonLabel: "Book an appointment",
-  accent: "royal",
+  accent: "site",
 };
 export function bookingExperience(value: unknown): BookingExperience {
   const result = bookingExperienceSchema.safeParse(value);

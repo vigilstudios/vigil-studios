@@ -39,4 +39,4 @@ describe("Express catalogue creator offer", () => {
   });
 });
 
- it("flags native booking compatibility with the approved Care minimum",()=>{const html=renderToStaticMarkup(createElement(ExpressCatalogue,{templates:[{...templates[0],nativeBookings:true}]}));expect(html).toContain("Contact-only by default");expect(html).toContain("Optional Vigil bookings with Care or higher");});
+ it("flags native booking compatibility with the approved Care minimum",()=>{const html=renderToStaticMarkup(createElement(ExpressCatalogue,{templates:[{...templates[0],nativeBookings:true}]}));expect(html).toContain("Contact-only without Care+");expect(html).toContain("Optional with Care+");});

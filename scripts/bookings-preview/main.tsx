@@ -21,6 +21,7 @@ const previewOnly = async () => false;
 const templates: ExpressTemplate[] = [
   {
     slug: "restaurant",
+    previewUrl: "/express-preview/restaurant",
     industry: "Restaurant",
     variant: "Signature",
     example: "Marlow & Fen",
@@ -31,6 +32,7 @@ const templates: ExpressTemplate[] = [
   },
   {
     slug: "salon-spa",
+    previewUrl: "/express-preview/salon-spa",
     industry: "Salon & Spa",
     variant: "Quiet",
     example: "Still & Form",
@@ -40,6 +42,20 @@ const templates: ExpressTemplate[] = [
     nativeBookings: true,
   },
 ];
+templates.push(
+  ...[
+    { slug: "home-services", industry: "Home Services", accent: "#eab65b" },
+    { slug: "auto-services", industry: "Auto Repair", accent: "#241a27" },
+  ].map((t) => ({
+    ...t,
+    variant: "Signature",
+    example: "Example business",
+    description: "Optional Care+ bookings",
+    status: "available" as const,
+    nativeBookings: true,
+    previewUrl: `/express-preview/${t.slug}`,
+  })),
+);
 const content =
   view === "catalogue" ? (
     <ExpressCatalogue templates={templates} />
@@ -78,9 +94,7 @@ const review = (
         <Link href="/?view=requests">Requests</Link>
         <Link href="/?view=setup">Setup</Link>
         <Link href="/?view=onboarding">Onboarding</Link>
-        <Link href="/express-templates/restaurant.html#reserve">
-          Restaurant
-        </Link>
+        <Link href="/express-preview/restaurant#reserve">Restaurant</Link>
       </nav>
     </div>
     <div className="booking-preview-main">{content}</div>

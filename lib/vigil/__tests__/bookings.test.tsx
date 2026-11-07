@@ -357,7 +357,11 @@ describe("Express booking default and onboarding continuity", () => {
       expect(html).toContain('name="email"');
       expect(html).not.toContain('name="date"');
       expect(html).not.toContain('name="day"');
-      expect(contactFirstHtml(html)).toBe(html);
+      const normalized = contactFirstHtml(html);
+      expect(contactFirstHtml(normalized)).toBe(normalized);
+      if (["home-services", "auto-services"].includes(name))
+        expect(normalized).toContain('data-vigil-booking-slot="v1"');
+      else expect(normalized).toBe(html);
       const live = expressHtml(
         {
           kind: "html",
@@ -376,7 +380,7 @@ describe("Express booking default and onboarding continuity", () => {
       expect(live).toContain("VigilContact.mountContactForm");
       expect(live).not.toContain('<p class="preview-note">');
       expect(live.includes("VigilBookings.connect")).toBe(
-        ["restaurant", "salon-spa"].includes(name),
+        ["restaurant", "salon-spa", "home-services", "auto-services"].includes(name),
       );
     },
   );

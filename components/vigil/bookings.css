@@ -1570,3 +1570,55 @@ html[data-theme="light"] .booking-workspace {
   background: transparent;
   padding: 0;
 }
+
+/* Equal touch targets and horizontal breathing room across booking controls. */
+.booking-workspace > .lead-tabs {
+  gap: 8px;
+}
+.booking-workspace > .lead-tabs a {
+  padding: 10px 18px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.bc-toolbar button,
+.bc-toolbar select {
+  min-height: 36px;
+  padding: 8px 12px;
+}
+.bc-modes button {
+  min-width: 52px;
+  justify-content: center;
+}
+.booking-widget-switch button {
+  min-height: 36px;
+  padding: 8px 16px;
+}
+.booking-workspace .booking-actions button,
+.booking-workspace .lead-form > div:last-child > button[type="submit"] {
+  min-height: 38px;
+  padding: 9px 16px;
+}
+@media (max-width: 760px) {
+  .booking-workspace > .lead-tabs {
+    gap: 4px;
+  }
+  .booking-workspace > .lead-tabs a {
+    padding: 10px 12px;
+  }
+  .bc-toolbar button,
+  .bc-toolbar select {
+    padding: 8px 10px;
+  }
+}
+.booking-workspace > .lead-tabs a {
+  min-width: 90px;
+}
+@media (max-width: 760px) {
+  .booking-workspace > .lead-tabs a {
+    min-width: 0;
+    flex: 1;
+  }
+}

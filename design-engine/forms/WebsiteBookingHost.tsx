@@ -7,7 +7,12 @@ import {
   useState,
   type FormEvent,
   type ReactNode,
+  type CSSProperties,
 } from "react";
+import {
+  bookingAccentForeground,
+  bookingAccentPresets,
+} from "@/lib/vigil/bookings/appearance";
 import { TurnstileVerification } from "./WebsiteContactHost";
 import {
   bookingManagementUrl,
@@ -109,6 +114,7 @@ export function BookingWidget({
   endpoint: boundEndpoint,
   preview: boundPreview,
   experience: boundExperience,
+  previewKind,
 }: {
   headingLevel?: "h2" | "h3";
   title?: string;
@@ -116,13 +122,46 @@ export function BookingWidget({
   endpoint?: string;
   preview?: boolean;
   experience?: BookingExperience;
+  previewKind?: "restaurant" | "salon" | "home" | "auto";
 }) {
   const Heading = headingLevel;
   const host = useContext(Host),
     endpoint = boundEndpoint ?? host.endpoint,
     preview = boundPreview ?? host.preview;
+  const sampleConfig = previewKind
+    ? {
+        ...fictionalConfig,
+        services: fictionalConfig.services.map((s, i) => ({
+          ...s,
+          name:
+            previewKind === "restaurant"
+              ? i
+                ? "Private event consultation"
+                : "Group visit consultation"
+              : previewKind === "home"
+                ? i
+                  ? "Project assessment"
+                  : "Estimate consultation"
+                : previewKind === "auto"
+                  ? i
+                    ? "Diagnostic appointment"
+                    : "Maintenance visit"
+                  : i
+                    ? "Styling consultation"
+                    : "Follow-up appointment",
+          description:
+            previewKind === "restaurant"
+              ? "Discuss your visit with the team. This example does not reserve a dining table."
+              : previewKind === "home"
+                ? "Discuss your project with the team. Add your project location in the notes."
+                : previewKind === "auto"
+                  ? "Choose a shop appointment. Add your vehicle and concern in the notes."
+                  : "Choose a time with your stylist.",
+        })),
+      }
+    : fictionalConfig;
   const [config, setConfig] = useState<PublicBookingConfig | null>(
-      preview ? fictionalConfig : null,
+      preview ? sampleConfig : null,
     ),
     [service, setService] = useState(preview ? "example-service" : ""),
     [day, setDay] = useState(preview ? "2030-11-04" : ""),
@@ -144,6 +183,9 @@ export function BookingWidget({
     [resource, setResource] = useState(""),
     [step, setStep] = useState<"time" | "details">("time");
   const experience = boundExperience ?? bookingExperience(config?.experience);
+  const accent =
+    bookingAccentPresets[experience.accent] ??
+    (experience.accent.startsWith("#") ? experience.accent : null);
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     if (receipt && experience.presentation === "popup" && !dialog.current?.open)
@@ -664,6 +706,14 @@ export function BookingWidget({
       className="vigil-booking"
       data-vigil-booking-component="v1"
       data-accent={experience.accent}
+      style={
+        accent
+          ? ({
+              "--vigil-booking-accent": accent,
+              "--vigil-booking-foreground": bookingAccentForeground(accent),
+            } as CSSProperties)
+          : undefined
+      }
     >
       {experience.presentation === "popup" ? (
         <>
