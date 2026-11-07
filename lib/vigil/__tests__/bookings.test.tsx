@@ -13,6 +13,7 @@ import {
   defaultBookingExperience,
   hoursSchema,
   publicBookingSchema,
+  bookingTableSchema,
 } from "../bookings/contract";
 import { BookingWidget } from "@/design-engine/forms/WebsiteBookingHost";
 import {
@@ -86,6 +87,94 @@ function request(
 }
 afterEach(() => vi.unstubAllGlobals());
 describe("native booking boundary", () => {
+  it("validates party sizes and never accepts a guest-selected table", async () => {
+    for (const body of [
+      { ...input, partySize: 0 },
+      { ...input, partySize: 31 },
+      { ...input, partySize: 2.5 },
+      { ...input, tableId: id },
+    ]) {
+      const { deps, rpc } = fixture();
+      expect((await handleBookings(request(body), website, deps)).status).toBe(
+        422,
+      );
+      expect(
+        rpc.mock.calls.some(([name]) => name === "create_public_booking"),
+      ).toBe(false);
+    }
+    expect(
+      bookingTableSchema.safeParse({
+        name: "Table 1",
+        active: true,
+        minParty: 5,
+        maxParty: 2,
+      }).success,
+    ).toBe(false);
+  });
+  it("binds party size to authoritative availability and the submission fingerprint", async () => {
+    const first = fixture(),
+      second = fixture();
+    await handleBookings(
+      request({ ...input, partySize: 2 }),
+      website,
+      first.deps,
+    );
+    await handleBookings(
+      request({ ...input, partySize: 4 }),
+      website,
+      second.deps,
+    );
+    const creation = (rpc: typeof first.rpc) =>
+      rpc.mock.calls.find(
+        ([n]) => n === "create_public_booking",
+      ) as unknown as [string, Record<string, unknown>];
+    expect(creation(first.rpc)[1].p_party).toBe(2);
+    expect(creation(second.rpc)[1].p_party).toBe(4);
+    expect(creation(first.rpc)[1].p_hash).not.toBe(
+      creation(second.rpc)[1].p_hash,
+    );
+    await handleBookings(
+      request(
+        null,
+        "GET",
+        origin,
+        `?service=${service}&day=2026-12-12&party=4`,
+      ),
+      website,
+      first.deps,
+    );
+    expect(first.rpc).toHaveBeenCalledWith(
+      "booking_public_slots",
+      expect.objectContaining({ p_party: 4 }),
+    );
+    expect(
+      (
+        await handleBookings(
+          request(
+            null,
+            "GET",
+            origin,
+            `?service=${service}&day=2026-12-12&party=2.5`,
+          ),
+          website,
+          first.deps,
+        )
+      ).status,
+    ).toBe(422);
+  });
+  it("shows party selection for a restaurant without exposing table identifiers", () => {
+    const html = renderToStaticMarkup(
+      createElement(BookingWidget, {
+        preview: true,
+        previewKind: "restaurant",
+      }),
+    );
+    expect(html).toContain("Party size");
+    expect(html).toContain("Dining reservation");
+    expect(html).toContain("90 min");
+    expect(html).not.toContain("This example does not reserve a dining table");
+    expect(html).not.toContain("Table 1");
+  });
   it("requires explicit rollout and registered origin before touching booking records", async () => {
     const { deps, rpc } = fixture();
     deps.enabled = () => false;
@@ -380,7 +469,9 @@ describe("Express booking default and onboarding continuity", () => {
       expect(live).toContain("VigilContact.mountContactForm");
       expect(live).not.toContain('<p class="preview-note">');
       expect(live.includes("VigilBookings.connect")).toBe(
-        ["restaurant", "salon-spa", "home-services", "auto-services"].includes(name),
+        ["restaurant", "salon-spa", "home-services", "auto-services"].includes(
+          name,
+        ),
       );
     },
   );

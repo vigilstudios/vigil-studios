@@ -38,6 +38,22 @@ remaining=sql(f"select count(*) from public.appointments where id in ('{ids[0]}'
 original=sql(f"select count(*) from public.appointments where id in ('{ids[0]}','{ids[1]}') and extract(hour from starts_at at time zone 'UTC') in (14,16)").stdout.strip()
 if remaining!='2' or original!='1':raise RuntimeError('Reschedule lost an existing reservation')
 print('ok - booking concurrency: both reservations retained, with one original slot unchanged')
+# Table allocation shares the same site lock and independent overlap constraint.
+pool='bb000000-0000-4000-8000-000000000043'
+sql(f"""update public.booking_settings set dining_hours=(select jsonb_agg(jsonb_build_object('day',d,'start','00:00','end','23:45')) from generate_series(0,6)d) where website_id='{site}';
+insert into public.booking_resources(id,website_id,organization_id,name,kind,min_party,max_party) values
+('bb000000-0000-4000-8000-000000000032','{site}','{org}','Small table','table',1,2),
+('bb000000-0000-4000-8000-000000000033','{site}','{org}','Large table','table',1,6);
+insert into public.booking_services(id,website_id,organization_id,resource_id,name,duration,mode,active,allocation) values('{pool}','{site}','{org}',null,'Dining',90,'instant',true,'table_pool');""")
+def create_pool(hour,key,party):
+ return f"select public.create_public_booking('{site}','https://race.example.test','{pool}',(current_date+3)+time '{hour}:00','bb000000-0000-4000-8000-{key:012d}',repeat('a',64),repeat('b',64),'{{\"name\":\"Fictional diner\",\"email\":\"diner@example.test\"}}','','',{party})->>'id';"
+def run_pool(key):return sql('begin;'+service_claims+create_pool(11,key,2)+'select pg_sleep(0.15);commit;',False)
+with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:pool_results=list(executor.map(run_pool,[11,12]))
+if any(r.returncode for r in pool_results):raise RuntimeError('Two available tables did not accept competing parties: '+str([r.stderr for r in pool_results]))
+assigned=sql(f"select count(distinct resource_id) from public.appointments where service_id='{pool}' and status='confirmed'").stdout.strip()
+if assigned!='2':raise RuntimeError('Competing parties received the same table')
+print('ok - restaurant concurrency: competing parties receive different fitting tables')
+compete(service_claims,[create_pool(15,13,6),create_pool(15,14,6)],'only one party wins the final fitting table')
 # The optional Google copy worker uses a per-connection lease independently of booking reservations.
 sql("begin;"+service_claims+f"select public.save_booking_calendar('{user}','{site}','race-owner@example.test','fictional-refresh-token','fictional-race-calendar');commit;")
 connection=sql(f"select id from vigil.booking_calendar_connections where user_id='{user}' and website_id='{site}'").stdout.strip()

@@ -164,6 +164,41 @@ export async function getBookings(
       },
     ],
   };
+  if (new URLSearchParams(location.search).get("business") === "restaurant") {
+    data.site.name = data.sites[0].name = "Marlow Kitchen";
+    Object.assign(data.settings, {
+      dining_hours: [0, 1, 2, 3, 4, 5, 6].map((day) => ({
+        day,
+        start: "11:00",
+        end: "22:00",
+      })),
+    });
+    data.resources = [2, 4, 6].map((seats, i) => ({
+      ...data.resources[0],
+      id: i ? `ba000000-0000-4000-8000-00000000003${i + 1}` : resource,
+      name: `Table ${i + 1}`,
+      kind: "table",
+      min_party: 1,
+      max_party: seats,
+    }));
+    Object.assign(data.services[0], {
+      resource_id: null,
+      allocation: "table_pool",
+      name: "Dining reservation",
+      description: "Reserve a table for your party.",
+      duration: 90,
+      buffer_after: 15,
+    });
+    data.appointments.forEach((a, i) => {
+      Object.assign(a, {
+        service_name: "Dining reservation",
+        party_size: [2, 4, 6][i % 3],
+        resource_id: data.resources[i % 3].id,
+        duration: 90,
+      });
+      a.ends_at = new Date(Date.parse(a.starts_at) + 90 * 60000).toISOString();
+    });
+  }
   data.appointments.push({
     ...data.appointments[0],
     id: "ba000000-0000-4000-8000-000000000071",
@@ -202,6 +237,8 @@ const preview = async () => ({
   error: "Preview only. No changes were saved.",
 });
 export const saveBookingExperience = () => preview();
+export const saveBookingTable = () => preview();
+export const saveBookingDiningHours = () => preview();
 export const saveBookingResource = () => preview(),
   saveBookingService = () => preview(),
   saveBookingSettings = () => preview(),

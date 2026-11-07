@@ -4,6 +4,7 @@ import {
 } from "./BookingWorkspace";
 import { BookingExperienceEditor } from "./BookingExperienceEditor";
 import { BookingGoogleCalendar } from "./BookingGoogleCalendar";
+import { BookingTablesSetup } from "./BookingTablesSetup";
 import { WeeklyAvailabilityEditor } from "./WeeklyAvailabilityEditor";
 import { ActionButton, ActionForm } from "./ActionControls";
 import { bookingTime } from "@/lib/vigil/bookings/contract";
@@ -224,18 +225,28 @@ export function BookingSetup({
               );
               return (
                 <BookingEditorCollection
-                  items={data.resources.map((resource) => ({
-                    id: resource.id,
-                    name: resource.name,
-                    description: `${resource.active ? "Active" : "Inactive"} · ${(resource.hours as unknown[]).length} weekly windows`,
-                    content: editor(resource),
-                  }))}
+                  items={data.resources
+                    .filter((r) => r.kind !== "table")
+                    .map((resource) => ({
+                      id: resource.id,
+                      name: resource.name,
+                      description: `${resource.active ? "Active" : "Inactive"} · ${(resource.hours as unknown[]).length} weekly windows`,
+                      content: editor(resource),
+                    }))}
                   add={canManage && data.eligible ? editor(null) : undefined}
                 />
               );
             })()}
           </div>
         </section>,
+        <BookingTablesSetup
+          key="tables"
+          website={website}
+          resources={data.resources}
+          hours={data.settings?.dining_hours}
+          timeZone={data.settings?.time_zone ?? "business timezone"}
+          canManage={canManage && data.eligible}
+        />,
         <section key="services" className="lead-detail-panel">
           <h2 className="lead-panel-heading">Services</h2>
           <div className="lead-panel-body">
@@ -265,16 +276,28 @@ export function BookingSetup({
                           />
                         </label>
                         <label className="lead-field">
-                          Person or space
+                          Assignment
                           <select
                             name="resourceId"
-                            defaultValue={service?.resource_id}
+                            defaultValue={
+                              service?.allocation === "table_pool"
+                                ? "table_pool"
+                                : (service?.resource_id ??
+                                  data.resources.find((r) => r.kind !== "table")
+                                    ?.id ??
+                                  "table_pool")
+                            }
                           >
-                            {data.resources.map((r) => (
-                              <option key={r.id} value={r.id}>
-                                {r.name}
-                              </option>
-                            ))}
+                            <option value="table_pool">
+                              Automatic table assignment
+                            </option>
+                            {data.resources
+                              .filter((r) => r.kind !== "table")
+                              .map((r) => (
+                                <option key={r.id} value={r.id}>
+                                  {r.name}
+                                </option>
+                              ))}
                           </select>
                         </label>
                         <label className="lead-field">
@@ -312,7 +335,7 @@ export function BookingSetup({
                           />
                         </label>
                         <label className="lead-field">
-                          Buffer after (minutes)
+                          Turnaround after (minutes)
                           <input
                             name="bufferAfter"
                             type="number"
@@ -323,6 +346,11 @@ export function BookingSetup({
                           />
                         </label>
                       </div>
+                      <p className="lead-footnote">
+                        For dining, duration is the time the table is reserved.
+                        Turnaround adds time before the next party. Automatic
+                        assignment uses Tables & dining hours.
+                      </p>
                       <label className="lead-field">
                         Description
                         <textarea
@@ -365,7 +393,8 @@ export function BookingSetup({
             })()}
             {!data.resources.length && (
               <p>
-                Add a person or appointment space before creating a service.
+                Add a person, appointment space or dining table before creating
+                a service.
               </p>
             )}
           </div>
@@ -386,8 +415,11 @@ export function BookingSetup({
               >
                 <div className="lead-form-fields">
                   <label className="lead-field">
-                    Person or space
+                    Person, space or table
                     <select name="resource" required>
+                      {data.resources.some((r) => r.kind === "table") && (
+                        <option value="all_tables">All dining tables</option>
+                      )}
                       {data.resources.map((r) => (
                         <option key={r.id} value={r.id}>
                           {r.name}

@@ -85,6 +85,10 @@ export default async function BookingsPage({
     data.enabled && recordAppointment ? (
       <BookingAppointmentCard
         a={recordAppointment}
+        resourceName={
+          data.resources.find((r) => r.id === recordAppointment.resource_id)
+            ?.name
+        }
         website={website}
         canManage={canManage}
         eligible={data.eligible}
@@ -190,7 +194,7 @@ export default async function BookingsPage({
                 rows={data.appointments.map((a) => ({
                   id: a.id,
                   name: (a.contact as { name?: string }).name ?? "Customer",
-                  service: a.service_name,
+                  service: `${a.service_name}${a.party_size ? ` · ${a.party_size} guests` : ""}`,
                   status: appointmentStatus(a, data.asOf),
                   start: a.starts_at,
                   end: a.ends_at,
@@ -199,7 +203,9 @@ export default async function BookingsPage({
                 resources={data.resources.map((r) => ({
                   id: r.id,
                   name: r.name,
-                  hours: r.hours as {
+                  hours: (r.kind === "table"
+                    ? (data.settings?.dining_hours ?? [])
+                    : r.hours) as {
                     day: number;
                     start: string;
                     end: string;
@@ -219,6 +225,15 @@ export default async function BookingsPage({
                         )!
                       }
                       website={website}
+                      resourceName={
+                        data.resources.find(
+                          (r) =>
+                            r.id ===
+                            data.appointments.find(
+                              (a) => a.id === data.calendar?.selected,
+                            )?.resource_id,
+                        )?.name
+                      }
                       canManage={canManage}
                       eligible={data.eligible}
                       asOf={data.asOf}

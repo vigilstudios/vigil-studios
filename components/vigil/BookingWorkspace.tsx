@@ -6,6 +6,7 @@ import {
   Globe,
   Link2,
   SlidersHorizontal,
+  Table2,
   Users,
   X,
 } from "lucide-react";
@@ -122,6 +123,12 @@ const sections = [
     icon: Users,
   },
   {
+    id: "tables",
+    label: "Tables & dining hours",
+    description: "Restaurant reservations",
+    icon: Table2,
+  },
+  {
     id: "services",
     label: "Services",
     description: "What customers can book",
@@ -191,8 +198,8 @@ export function BookingSetupWorkspace({
             </button>
           ))}
           <p>
-            Appointments reserve one person or space. Table reservations and
-            group capacity are a separate service.
+            Appointment services reserve a person or space. Dining services
+            assign an available table that fits the party.
           </p>
         </nav>
         <div className="booking-setup-content">
@@ -218,6 +225,40 @@ export function BookingSetupWorkspace({
         </div>
       </div>
     </BookingViewport>
+  );
+}
+
+export function BookingDiningPanels({
+  tables,
+  hours,
+}: {
+  tables: ReactNode;
+  hours: ReactNode;
+}) {
+  const [view, setView] = useState<"tables" | "hours">("tables");
+  return (
+    <>
+      <div className="bc-toolbar">
+        <div className="bc-modes" role="group" aria-label="Restaurant setup">
+          <button
+            type="button"
+            aria-pressed={view === "tables"}
+            onClick={() => setView("tables")}
+          >
+            Tables
+          </button>
+          <button
+            type="button"
+            aria-pressed={view === "hours"}
+            onClick={() => setView("hours")}
+          >
+            Dining hours
+          </button>
+        </div>
+      </div>
+      <div hidden={view !== "tables"}>{tables}</div>
+      <div hidden={view !== "hours"}>{hours}</div>
+    </>
   );
 }
 

@@ -4,6 +4,11 @@ export function bookingPreviewHtml(
   kind: "restaurant" | "salon" | "home" | "auto",
 ) {
   if (!html.includes('data-vigil-booking-slot="v1"')) return html;
+  if (kind === "restaurant")
+    html = html.replaceAll(
+      "For reservations or group visits, please call us.",
+      "For larger parties or special requests, please call us.",
+    );
   const disclosure =
     '<p class="vigil-booking-plan-note">Online booking is optional with Vigil Care or higher, after setup. Without Care+, this section defaults to a contact form. This is an interactive example; no appointment is saved.</p>';
   html = html.replace(
