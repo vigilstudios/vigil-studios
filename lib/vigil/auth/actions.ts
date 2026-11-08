@@ -292,8 +292,12 @@ export async function signInWithGoogle(
   const { data, error } = await client.auth.signInWithOAuth({
     provider: "google",
     options: {
+      scopes: "openid email profile",
       redirectTo: `${await siteOrigin()}/auth/callback`,
-      queryParams: { prompt: "select_account" },
+      queryParams: {
+        prompt: "select_account",
+        include_granted_scopes: "false",
+      },
       skipBrowserRedirect: true,
     },
   });

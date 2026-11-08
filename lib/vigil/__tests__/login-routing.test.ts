@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
 import type { Viewer } from "../auth/session";
 import type { StaffRole } from "../types";
@@ -31,7 +31,7 @@ vi.mock("@/lib/vigil/rate-limit", () => ({
   RATE_LIMITS: { passwordEmail: {}, passwordIp: {} },
 }));
 
-import { signInWithPassword } from "../auth/actions";
+import { signInWithGoogle, signInWithPassword } from "../auth/actions";
 import { loginDestination } from "../auth/redirects";
 import { resolveLoginDestination } from "../auth/login-destination";
 import { GET as callback } from "@/app/(vigil)/auth/callback/route";
@@ -91,6 +91,55 @@ function confirmation(next?: string, cookieNext?: string) {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.viewer = null;
+});
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
+describe("optional Google sign-in", () => {
+  it("stays inactive before provider acceptance", async () => {
+    vi.stubEnv("VIGIL_GOOGLE_AUTH_ENABLED", "false");
+    expect(await signInWithGoogle(null, passwordForm())).toMatchObject({
+      ok: false,
+      code: "auth",
+    });
+    expect(mocks.client).not.toHaveBeenCalled();
+  });
+  it("requests only basic identity and keeps the verified callback and session preference", async () => {
+    vi.stubEnv("VIGIL_GOOGLE_AUTH_ENABLED", "true");
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", origin);
+    const { client, auth } = session(null),
+      url = "https://accounts.google.com/o/oauth2/v2/auth?fixture=1";
+    const oauth = vi.fn().mockResolvedValue({ data: { url }, error: null });
+    Object.assign(client, { auth: { ...auth, signInWithOAuth: oauth } });
+    const form = passwordForm("//evil.example");
+    form.set("remember", "browser");
+    await expect(signInWithGoogle(null, form)).rejects.toThrow(
+      `NEXT_REDIRECT:${url}`,
+    );
+    expect(oauth).toHaveBeenCalledWith({
+      provider: "google",
+      options: {
+        scopes: "openid email profile",
+        redirectTo: origin + "/auth/callback",
+        queryParams: {
+          prompt: "select_account",
+          include_granted_scopes: "false",
+        },
+        skipBrowserRedirect: true,
+      },
+    });
+    expect(mocks.setCookie).toHaveBeenCalledWith(
+      "vigil-next",
+      "/dashboard",
+      expect.anything(),
+    );
+    expect(mocks.setCookie).toHaveBeenCalledWith(
+      "vigil-session-mode",
+      "browser",
+      expect.not.objectContaining({ maxAge: expect.anything() }),
+    );
+  });
 });
 
 describe("login destination policy", () => {
