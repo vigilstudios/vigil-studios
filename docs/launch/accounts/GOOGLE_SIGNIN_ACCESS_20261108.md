@@ -7,7 +7,7 @@ This is separate from the existing Calendar connector. No new Google sign-in cli
 | Google project | Existing `vigil-studios` project |
 | Clients | Dedicated web clients for Vigil account sign-in, production and isolated preview separately |
 | Production callback | `https://fotqwyfoqzjmcchwjpof.supabase.co/auth/v1/callback` |
-| Preview callback | Exact Auth callback of the new account-access Supabase branch, recorded before creating the preview client |
+| Preview callback | `https://eovwyctkveyvaerhqyeo.supabase.co/auth/v1/callback` — isolated `codex/account-access` branch |
 | Requested access | OpenID, email and profile; basic name/email/photo only |
 | Credential destination | Corresponding Supabase Auth Google provider settings, never client bundles or Calendar credentials |
 | App switch | `VIGIL_GOOGLE_AUTH_ENABLED=true` only in an accepted environment |

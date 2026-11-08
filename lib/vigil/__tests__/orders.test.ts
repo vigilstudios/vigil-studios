@@ -675,6 +675,75 @@ describe("completeCheckout + provisionOrder", () => {
     expect(fake.rows("subscriptions")).toHaveLength(1);
   });
 
+  it("passes verified provider customer identity to the allocator for legacy sessions", async () => {
+    const fake = seed(),
+      provider = new NullBillingProvider();
+    fake.rows("orders").push({
+      id: "legacy-order",
+      status: "paid",
+      email: "legacy@example.test",
+      business_name: "Legacy studio",
+      project_kind: "express",
+      plan_id: PLAN,
+      metadata: { checkout_session: "legacy-session" },
+    });
+    vi.spyOn(provider, "getCheckoutSession").mockResolvedValue({
+      externalId: "legacy-session",
+      status: "complete",
+      paymentStatus: "paid",
+      customerExternalId: "verified-provider-customer",
+      customerEmail: "legacy@example.test",
+      subscriptionExternalId: null,
+      amountTotalCents: null,
+      currency: null,
+      reference: { order_id: "legacy-order" },
+    });
+    const rpc = vi.spyOn(fake, "rpc");
+    await provisionOrder(
+      fake.asClient(),
+      "legacy-order",
+      provider,
+      "https://app.test",
+    );
+    expect(rpc).toHaveBeenCalledWith(
+      "allocate_order_project",
+      expect.objectContaining({
+        p_order_id: "legacy-order",
+        p_customer_ref: "verified-provider-customer",
+      }),
+    );
+  });
+
+  it("retries an unallocated legacy purchase when provider identity is unavailable", async () => {
+    const fake = seed(),
+      provider = new NullBillingProvider();
+    fake
+      .rows("orders")
+      .push({
+        id: "legacy-unavailable",
+        status: "paid",
+        email: "legacy@example.test",
+        business_name: "Legacy studio",
+        project_kind: "express",
+        plan_id: PLAN,
+        metadata: { checkout_session: "missing-session" },
+      });
+    vi.spyOn(provider, "getCheckoutSession").mockRejectedValue(
+      new Error("provider unavailable"),
+    );
+    await expect(
+      provisionOrder(
+        fake.asClient(),
+        "legacy-unavailable",
+        provider,
+        "https://app.test",
+      ),
+    ).rejects.toMatchObject({ retryable: true });
+    expect(fake.rows("organizations")).toHaveLength(0);
+    expect(fake.rows("projects")).toHaveLength(0);
+    expect(fake.rows("orders")[0].status).toBe("paid");
+  });
+
   it("creates one isolated design workspace for a Professional purchase", async () => {
     const fake = seed();
     fake.rows("orders").push({

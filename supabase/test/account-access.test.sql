@@ -42,8 +42,9 @@ select account_test.fails($q$select public.allocate_order_project('da000000-0000
 reset role;select set_config('request.jwt.claim.sub','da000000-0000-4000-8000-000000000002',true);set local role authenticated;
 select account_test.ok((select count(*)=0 from public.my_purchase_orders),'other customer cannot read buyer purchase');
 reset role;update public.orders set status='paid',paid_at=now() where id='da000000-0000-4000-8000-000000000021';
+insert into public.provider_links(provider,resource_kind,external_id,entity_type,entity_id) values('other','customer','account_fixture_legacy_customer','organization','da000000-0000-4000-8000-000000000011');
 select set_config('request.jwt.claim.role','service_role',true);set local role service_role;
-select set_config('account_test.allocated',public.allocate_order_project('da000000-0000-4000-8000-000000000021','account-fixture-studio','other')::text,true);
+select set_config('account_test.allocated',public.allocate_order_project('da000000-0000-4000-8000-000000000021','account-fixture-studio','other','account_fixture_legacy_customer')::text,true);
 select account_test.ok((current_setting('account_test.allocated')::jsonb->>'organizationId')::uuid<>'da000000-0000-4000-8000-000000000011','billing email and business name cannot adopt another private business');
 select account_test.ok(public.allocate_order_project('da000000-0000-4000-8000-000000000021','account-fixture-studio','other')=current_setting('account_test.allocated')::jsonb,'duplicate allocation returns same business/project/site');
 reset role;
@@ -60,6 +61,12 @@ select account_test.ok((public.list_customer_accounts('purchased','account-fixtu
 select account_test.ok((public.list_customer_accounts('no_purchase','account-fixture',1)->>'total')::integer=3,'unpaid and unverified prospects remain visible');
 select account_test.ok((public.list_customer_accounts('pending','account-fixture',1)->>'total')::integer=0,'paid orders are not labelled pending');
 select account_test.fails($q$select public.list_customer_accounts('all','',0)$q$,'22023','invalid pagination refused');
+reset role;
+insert into public.orders(id,email,business_name,status) values('da000000-0000-4000-8000-000000000025','legacy-fixture@example.test','Legacy provider business','paid');
+select set_config('request.jwt.claim.role','service_role',true);set local role service_role;
+select account_test.ok(public.allocate_order_project('da000000-0000-4000-8000-000000000025','legacy-provider-business','other','account_fixture_legacy_customer')->>'organizationId'='da000000-0000-4000-8000-000000000011','legacy paid sessions retain business identity from a verified provider customer reference');
+reset role;select set_config('request.jwt.claim.role','authenticated',true);set local role authenticated;
+select account_test.ok((public.list_customer_accounts('purchased','account-fixture',1)->>'total')::integer=2,'staff purchaser filter includes existing owners of legacy paid businesses');
 reset role;select set_config('request.jwt.claim.role','anon',true);set local role anon;
 select account_test.fails($q$select * from public.my_purchase_orders$q$,'42501','anonymous has no purchase projection');
 select account_test.fails($q$select public.list_customer_accounts()$q$,'42501','anonymous cannot list accounts');

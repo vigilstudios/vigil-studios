@@ -10,6 +10,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { generatedConfirmationUrl } from "@/lib/vigil/auth/generated-link";
 import {
   NotFoundError,
+  ProviderError,
   ProviderNotConfiguredError,
   ValidationError,
 } from "@/lib/vigil/auth/errors";
@@ -408,6 +409,18 @@ export async function provisionOrder(
 
   const providerName = providerEnum(provider.name);
 
+  const sessionRef = (order.metadata as { checkout_session?: string } | null)
+    ?.checkout_session;
+  const checkout = sessionRef
+    ? await provider.getCheckoutSession(sessionRef).catch(() => null)
+    : null;
+  if (!order.buyer_user_id && !order.organization_id && sessionRef && !checkout)
+    throw new ProviderError(
+      provider.name,
+      "Could not verify the legacy checkout's customer identity.",
+      { retryable: true },
+    );
+
   // One database transaction owns organization, exact buyer membership, project and website identity.
   const { data: allocation, error: allocationError } = await admin.rpc(
     "allocate_order_project",
@@ -415,6 +428,7 @@ export async function provisionOrder(
       p_order_id: orderId,
       p_slug: slugify(order.business_name) || "customer",
       p_provider: providerName,
+      p_customer_ref: checkout?.customerExternalId ?? undefined,
     },
   );
   if (allocationError) throw allocationError;
@@ -439,13 +453,8 @@ export async function provisionOrder(
   //    otherwise a manual active row (staff-created orders paid off-platform).
   let subscriptionId = order.subscription_id;
   if (!subscriptionId) {
-    const sessionRef = (order.metadata as { checkout_session?: string } | null)
-      ?.checkout_session;
     let linked: string | null = null;
     if (sessionRef) {
-      const checkout = await provider
-        .getCheckoutSession(sessionRef)
-        .catch(() => null);
       if (checkout?.customerExternalId) {
         await upsertProviderLink(admin, {
           provider: providerName,
