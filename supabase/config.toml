@@ -30,3 +30,7 @@ additional_redirect_urls = [
 [auth.email.template.magic_link]
 subject = "Sign in to Vigil"
 content_path = "./supabase/templates/magic_link.html"
+
+[auth.email.template.confirmation]
+subject = "Confirm your Vigil account"
+content_path = "./supabase/templates/confirmation.html"

@@ -2312,11 +2312,13 @@ export type Database = {
           },
         ]
       }
+
       orders: {
         Row: {
           build_amount_cents: number | null
           build_price_id: string | null
           business_name: string
+          buyer_user_id: string | null
           checkout_token: string
           contact_name: string | null
           created_at: string
@@ -2326,7 +2328,7 @@ export type Database = {
           error: Json | null
           expires_at: string | null
           id: string
-          metadata: Json
+          metadata: NonNullable<Json>
           organization_id: string | null
           paid_at: string | null
           plan_amount_cents: number | null
@@ -2340,10 +2342,12 @@ export type Database = {
           template_slug: string | null
           updated_at: string
         }
+        ComputedFields: never
         Insert: {
           build_amount_cents?: number | null
           build_price_id?: string | null
           business_name: string
+          buyer_user_id?: string | null
           checkout_token?: string
           contact_name?: string | null
           created_at?: string
@@ -2353,7 +2357,7 @@ export type Database = {
           error?: Json | null
           expires_at?: string | null
           id?: string
-          metadata?: Json
+          metadata?: NonNullable<Json>
           organization_id?: string | null
           paid_at?: string | null
           plan_amount_cents?: number | null
@@ -2371,6 +2375,7 @@ export type Database = {
           build_amount_cents?: number | null
           build_price_id?: string | null
           business_name?: string
+          buyer_user_id?: string | null
           checkout_token?: string
           contact_name?: string | null
           created_at?: string
@@ -2380,7 +2385,7 @@ export type Database = {
           error?: Json | null
           expires_at?: string | null
           id?: string
-          metadata?: Json
+          metadata?: NonNullable<Json>
           organization_id?: string | null
           paid_at?: string | null
           plan_amount_cents?: number | null
@@ -2400,6 +2405,13 @@ export type Database = {
             columns: ["build_price_id"]
             isOneToOne: false
             referencedRelation: "build_prices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_buyer_user_id_fkey"
+            columns: ["buyer_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -2446,6 +2458,7 @@ export type Database = {
           },
         ]
       }
+
       organization_invites: {
         Row: {
           accepted_at: string | null
@@ -4397,6 +4410,42 @@ export type Database = {
       }
     }
     Views: {
+      my_purchase_orders: {
+        Row: {
+          build_amount_cents: number | null
+          business_name: string | null
+          created_at: string | null
+          currency: string | null
+          id: string | null
+          organization_id: string | null
+          paid_at: string | null
+          plan_amount_cents: number | null
+          plan_name: string | null
+          project_id: string | null
+          project_kind: Database["public"]["Enums"]["project_kind"] | null
+          provisioned_at: string | null
+          status: Database["public"]["Enums"]["order_status"] | null
+          template_slug: string | null
+        }
+        ComputedFields: never
+        Relationships: [
+          {
+            foreignKeyName: "orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+
       published_express_variants: {
         Row: {
           published: Json | null
@@ -4417,6 +4466,16 @@ export type Database = {
       }
     }
     Functions: {
+      list_customer_accounts: {
+        Args: { p_filter?: string; p_page?: number; p_search?: string }
+        Returns: Json
+      }
+
+      claim_checkout_order: {
+        Args: { p_buyer: string; p_order: string; p_token: string }
+        Returns: undefined
+      }
+
       block_booking_dining_days: {
         Args: {
           p_from: string
@@ -4604,6 +4663,7 @@ export type Database = {
         Args: { p_lead: string; p_note: string }
         Returns: undefined
       }
+
       allocate_order_project: {
         Args: {
           p_customer_ref?: string
@@ -4613,6 +4673,7 @@ export type Database = {
         }
         Returns: Json
       }
+
       apply_provider_subscription: {
         Args: {
           p_customer_ref: string
@@ -5346,31 +5407,15 @@ export type Database = {
       domain_kind: "apex" | "subdomain"
       domain_source: "purchased_via_vigil" | "customer_owned" | "vigil_managed"
       domain_status:
-        | "pending"
-        | "verifying"
-        | "connected"
-        | "error"
-        | "expired"
-        | "released"
+        "pending" | "verifying" | "connected" | "error" | "expired" | "released"
       feature_value_kind: "boolean" | "limit" | "text"
       file_category: "brand_asset" | "document" | "content" | "deliverable"
       job_status: "queued" | "running" | "succeeded" | "failed" | "canceled"
       lead_status:
-        | "new"
-        | "contacted"
-        | "qualified"
-        | "won"
-        | "lost"
-        | "spam"
-        | "booked"
+        "new" | "contacted" | "qualified" | "won" | "lost" | "spam" | "booked"
       membership_status: "active" | "suspended"
       order_status:
-        | "pending"
-        | "paid"
-        | "provisioned"
-        | "failed"
-        | "refunded"
-        | "expired"
+        "pending" | "paid" | "provisioned" | "failed" | "refunded" | "expired"
       org_role: "owner" | "manager" | "member"
       organization_status: "active" | "suspended" | "offboarding" | "closed"
       project_asset_kind: "logo" | "photo" | "document" | "other" | "video"
@@ -6569,12 +6614,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -6596,13 +6641,12 @@ export type Tables<
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -6621,13 +6665,12 @@ export type TablesInsert<
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -6646,13 +6689,12 @@ export type TablesUpdate<
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -6665,11 +6707,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

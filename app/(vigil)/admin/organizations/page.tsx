@@ -1,83 +1,56 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Card, PageHeader, StatusPill, Table, tdClass, thClass } from "@/components/vigil/ui";
+import OrganizationsDirectory from "./OrganizationsDirectory";
 import { requireStaff } from "@/lib/vigil/auth/session";
-import { formatDate, titleCase } from "@/lib/vigil/format";
-import { listOrganizations } from "@/lib/vigil/queries/admin";
-import { NewOrganizationForm } from "./NewOrganizationForm";
-
-export const metadata: Metadata = { title: "Customers" };
-
-export default async function OrganizationsPage({ searchParams }: { searchParams: Promise<{ q?: string; archived?: string }> }) {
+import { listCustomerAccounts } from "@/lib/vigil/queries/accounts";
+import {
+  accountFilters,
+  type AccountFilter,
+} from "@/lib/vigil/accounts/directory";
+import { CustomerAccounts } from "@/components/vigil/CustomerAccounts";
+export const metadata: Metadata = { title: "Customer accounts" };
+export default async function CustomersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    q?: string;
+    status?: string;
+    page?: string;
+    view?: string;
+    archived?: string;
+  }>;
+}) {
   await requireStaff("/admin/organizations");
-  const { q, archived: archivedParam } = await searchParams;
-  const archived = archivedParam === "1";
-  const orgs = await listOrganizations(q, archived);
-
-  return (
-    <div>
-      <PageHeader title={archived ? "Archived customers" : "Customers"} description={archived ? "Hidden customers awaiting restoration or permanent deletion." : "Every active organization Vigil works for."} />
-
-      <div className="mb-4">
-        <Link className="text-sm underline" href={archived ? "/admin/organizations" : "/admin/organizations?archived=1"}>
-          {archived ? "Back to active customers" : "View archived customers"}
+  const params = await searchParams;
+  if (params.view === "businesses" || params.archived === "1")
+    return (
+      <div>
+        <Link
+          href="/admin/organizations"
+          className="mb-5 inline-flex text-xs underline"
+        >
+          Customer accounts
         </Link>
+        <OrganizationsDirectory searchParams={Promise.resolve(params)} />
       </div>
-
-      {!archived ? <Card className="mb-4">
-        <h2 className="text-base font-semibold">New customer</h2>
-        <p className="mt-1 text-xs text-[color:var(--text-secondary)]">Creates the organization and, if an owner email is given, an invitation that accepts itself on their first sign-in.</p>
-        <NewOrganizationForm />
-      </Card> : null}
-
-      <form className="mb-3 flex gap-2" action="/admin/organizations">
-        {archived ? <input type="hidden" name="archived" value="1" /> : null}
-        <input name="q" defaultValue={q ?? ""} placeholder="Search by name" className="w-full max-w-xs rounded-lg border border-[color:var(--border)] bg-transparent px-3 py-2 text-sm" />
-        <button className="btn-secondary !px-3 text-sm">Search</button>
-      </form>
-
-      <Table>
-        <thead>
-          <tr>
-            <th className={thClass}>Organization</th>
-            <th className={thClass}>Status</th>
-            <th className={thClass}>Websites</th>
-            <th className={thClass}>Plan</th>
-            <th className={thClass}>Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orgs.length === 0 ? (
-            <tr>
-              <td className={tdClass} colSpan={5}>
-                No organizations yet.
-              </td>
-            </tr>
-          ) : (
-            orgs.map((o) => {
-              const sub = o.subscriptions.find((s) => ["active", "trialing", "past_due"].includes(s.status));
-              return (
-                <tr key={o.id}>
-                  <td className={tdClass}>
-                    <Link href={`/admin/organizations/${o.id}`} className="font-medium underline">
-                      {o.name}
-                    </Link>
-                    <div className="text-xs text-[color:var(--text-secondary)]">{o.slug}</div>
-                  </td>
-                  <td className={tdClass}>
-                    <StatusPill tone={o.status === "active" ? "good" : o.status === "suspended" ? "bad" : "warn"}>{titleCase(o.status)}</StatusPill>
-                  </td>
-                  <td className={tdClass}>
-                    {o.websites.length} ({o.websites.filter((w) => w.status === "live").length} live)
-                  </td>
-                  <td className={tdClass}>{sub?.plan?.name ?? "No plan"}</td>
-                  <td className={tdClass}>{formatDate(o.created_at)}</td>
-                </tr>
-              );
-            })
-          )}
-        </tbody>
-      </Table>
-    </div>
+    );
+  const query =
+    typeof params.q === "string" ? params.q.trim().slice(0, 120) : "";
+  const filter: AccountFilter = accountFilters.includes(
+    params.status as AccountFilter,
+  )
+    ? (params.status as AccountFilter)
+    : "all";
+  const page = Math.min(
+    100000,
+    Math.max(1, Math.floor(Number(params.page) || 1)),
+  );
+  return (
+    <CustomerAccounts
+      data={await listCustomerAccounts(filter, query, page)}
+      filter={filter}
+      query={query}
+      page={page}
+    />
   );
 }

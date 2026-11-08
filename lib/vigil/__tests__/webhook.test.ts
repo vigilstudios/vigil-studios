@@ -1,9 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getBillingProvider } from "../providers/registry";
-import type { BillingEvent, BillingSubscriptionSnapshot } from "../providers/types";
+import type {
+  BillingEvent,
+  BillingSubscriptionSnapshot,
+} from "../providers/types";
 import { startCheckout } from "../services/orders";
 import { receiveBillingEvent } from "../services/webhook";
 import { FakeAdmin } from "./fake-admin";
+const BUYER = "da000000-0000-4000-8000-000000000001";
 
 vi.spyOn(console, "info").mockImplementation(() => undefined);
 vi.spyOn(console, "error").mockImplementation(() => undefined);
@@ -15,18 +19,63 @@ const BUILD = "build_express";
 function seed() {
   return new FakeAdmin({
     plans: [{ id: PLAN, code: "care", name: "Vigil Care", is_active: true }],
-    plan_prices: [{ id: PRICE, plan_id: PLAN, amount_cents: 9900, currency: "usd", interval: "month", interval_count: 1, is_active: true }],
-    build_prices: [{ id: BUILD, kind: "express", name: "Vigil Express", amount_cents: 59900, currency: "usd", is_active: true }],
+    plan_prices: [
+      {
+        id: PRICE,
+        plan_id: PLAN,
+        amount_cents: 9900,
+        currency: "usd",
+        interval: "month",
+        interval_count: 1,
+        is_active: true,
+      },
+    ],
+    build_prices: [
+      {
+        id: BUILD,
+        kind: "express",
+        name: "Vigil Express",
+        amount_cents: 59900,
+        currency: "usd",
+        is_active: true,
+      },
+    ],
     provider_links: [
-      { provider: "other", resource_kind: "price", external_id: "price_ext_care", entity_type: "plan_price", entity_id: PRICE },
-      { provider: "other", resource_kind: "price", external_id: "price_ext_build", entity_type: "build_price", entity_id: BUILD },
+      {
+        provider: "other",
+        resource_kind: "price",
+        external_id: "price_ext_care",
+        entity_type: "plan_price",
+        entity_id: PRICE,
+      },
+      {
+        provider: "other",
+        resource_kind: "price",
+        external_id: "price_ext_build",
+        entity_type: "build_price",
+        entity_id: BUILD,
+      },
     ],
   });
 }
 
 let events = 0;
-function checkoutCompleted(orderId: string | null, sessionId: string, snapshot: Awaited<ReturnType<ReturnType<typeof getBillingProvider>["getCheckoutSession"]>>, eventId = `evt_${++events}`): BillingEvent {
-  return { externalEventId: eventId, type: "checkout.completed", rawType: "checkout.session.completed", checkout: snapshot!, reference: orderId ? { order_id: orderId } : undefined, raw: { id: eventId, session: sessionId } };
+function checkoutCompleted(
+  orderId: string | null,
+  sessionId: string,
+  snapshot: Awaited<
+    ReturnType<ReturnType<typeof getBillingProvider>["getCheckoutSession"]>
+  >,
+  eventId = `evt_${++events}`,
+): BillingEvent {
+  return {
+    externalEventId: eventId,
+    type: "checkout.completed",
+    rawType: "checkout.session.completed",
+    checkout: snapshot!,
+    reference: orderId ? { order_id: orderId } : undefined,
+    raw: { id: eventId, session: sessionId },
+  };
 }
 
 describe("receiveBillingEvent", () => {
@@ -35,29 +84,83 @@ describe("receiveBillingEvent", () => {
   let sessionId: string;
   beforeEach(async () => {
     fake = seed();
-    ({ orderId } = await startCheckout(fake.asClient(), { email: "owner@marlowandfen.test", businessName: "Marlow & Fen", projectKind: "express", templateSlug: "restaurant", planCode: "care", appUrl: "https://app.test" }, getBillingProvider()));
-    sessionId = (fake.rows("orders")[0].metadata as { checkout_session: string }).checkout_session;
+    ({ orderId } = await startCheckout(
+      fake.asClient(),
+      {
+        email: "owner@marlowandfen.test",
+        businessName: "Marlow & Fen",
+        projectKind: "express",
+        templateSlug: "restaurant",
+        planCode: "care",
+        appUrl: "https://app.test",
+        buyerUserId: BUYER,
+      },
+      getBillingProvider(),
+    ));
+    sessionId = (
+      fake.rows("orders")[0].metadata as { checkout_session: string }
+    ).checkout_session;
   });
 
   it("records the event, marks the order paid and provisions it in one delivery", async () => {
     const snapshot = await getBillingProvider().getCheckoutSession(sessionId);
-    const res = await receiveBillingEvent(fake.asClient(), checkoutCompleted(orderId, sessionId, snapshot));
+    const res = await receiveBillingEvent(
+      fake.asClient(),
+      checkoutCompleted(orderId, sessionId, snapshot),
+    );
     expect(res).toEqual({ duplicate: false, outcome: "provisioning" });
     expect(fake.rows("orders")[0]).toMatchObject({ status: "provisioned" });
     expect(fake.rows("organizations")).toHaveLength(1);
-    expect(fake.rows("webhook_events")[0]).toMatchObject({ event_type: "checkout.session.completed", status: "processed" });
+    expect(fake.rows("webhook_events")[0]).toMatchObject({
+      event_type: "checkout.session.completed",
+      status: "processed",
+    });
     expect(fake.rows("webhook_events")[0].processed_at).toBeTruthy();
   });
 
   it("provisions Professional access but waits for staff before creating a repository", async () => {
     const professional = seed();
-    professional.rows("build_prices").push({ id: "build_professional", kind: "professional", name: "Professional Site", amount_cents: 149900, currency: "usd", is_active: true });
+    professional.rows("build_prices").push({
+      id: "build_professional",
+      kind: "professional",
+      name: "Professional Site",
+      amount_cents: 149900,
+      currency: "usd",
+      is_active: true,
+    });
     const provider = getBillingProvider();
-    const checkout = await startCheckout(professional.asClient(), { email: "owner@professional.test", businessName: "Professional Co", projectKind: "professional", planCode: "care", buildAmountOverrideCents: 175000, appUrl: "https://app.test" }, provider);
-    const session = (professional.rows("orders")[0].metadata as { checkout_session: string }).checkout_session;
-    await receiveBillingEvent(professional.asClient(), checkoutCompleted(checkout.orderId, session, await provider.getCheckoutSession(session)));
-    expect(professional.rows("orders")[0]).toMatchObject({ status: "provisioned", project_kind: "professional", build_amount_cents: 175000 });
-    expect(professional.rows("provisioning_jobs").map((job) => job.kind)).toEqual(["order.provision"]);
+    const checkout = await startCheckout(
+      professional.asClient(),
+      {
+        email: "owner@professional.test",
+        businessName: "Professional Co",
+        projectKind: "professional",
+        planCode: "care",
+        buildAmountOverrideCents: 175000,
+        appUrl: "https://app.test",
+        buyerUserId: BUYER,
+      },
+      provider,
+    );
+    const session = (
+      professional.rows("orders")[0].metadata as { checkout_session: string }
+    ).checkout_session;
+    await receiveBillingEvent(
+      professional.asClient(),
+      checkoutCompleted(
+        checkout.orderId,
+        session,
+        await provider.getCheckoutSession(session),
+      ),
+    );
+    expect(professional.rows("orders")[0]).toMatchObject({
+      status: "provisioned",
+      project_kind: "professional",
+      build_amount_cents: 175000,
+    });
+    expect(
+      professional.rows("provisioning_jobs").map((job) => job.kind),
+    ).toEqual(["order.provision"]);
     expect(professional.rows("websites")[0].repository_ref ?? null).toBeNull();
   });
 
@@ -70,71 +173,161 @@ describe("receiveBillingEvent", () => {
     expect(fake.rows("webhook_events")).toHaveLength(1);
     expect(fake.rows("organizations")).toHaveLength(1);
     expect(fake.rows("provisioning_jobs")).toHaveLength(2);
-    expect(fake.rows("provisioning_jobs").map((job) => job.kind)).toEqual(["order.provision", "website.repository"]);
+    expect(fake.rows("provisioning_jobs").map((job) => job.kind)).toEqual([
+      "order.provision",
+      "website.repository",
+    ]);
   });
 
   it("allows only one concurrent retry of a failed event", async () => {
     const provider = getBillingProvider();
     let finish!: (value: null) => void;
-    const subscription = vi.spyOn(provider, "getSubscription").mockImplementation(() => new Promise(resolve => { finish = resolve; }));
-    const event: BillingEvent = { externalEventId: "evt_retry", type: "invoice.paid", rawType: "invoice.paid", subscriptionExternalId: "sub_retry", raw: {} };
-    fake.rows("webhook_events").push({ id: "inbox_retry", provider: "other", event_id: event.externalEventId, status: "failed" });
+    const subscription = vi
+      .spyOn(provider, "getSubscription")
+      .mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            finish = resolve;
+          }),
+      );
+    const event: BillingEvent = {
+      externalEventId: "evt_retry",
+      type: "invoice.paid",
+      rawType: "invoice.paid",
+      subscriptionExternalId: "sub_retry",
+      raw: {},
+    };
+    fake.rows("webhook_events").push({
+      id: "inbox_retry",
+      provider: "other",
+      event_id: event.externalEventId,
+      status: "failed",
+    });
     const first = receiveBillingEvent(fake.asClient(), event, provider);
     await vi.waitFor(() => expect(subscription).toHaveBeenCalledTimes(1));
-    await expect(receiveBillingEvent(fake.asClient(), event, provider)).rejects.toThrow(/in progress/);
+    await expect(
+      receiveBillingEvent(fake.asClient(), event, provider),
+    ).rejects.toThrow(/in progress/);
     finish(null);
-    await expect(first).resolves.toEqual({ duplicate: false, outcome: "ignored" });
-    await expect(receiveBillingEvent(fake.asClient(), event, provider)).resolves.toEqual({ duplicate: true });
+    await expect(first).resolves.toEqual({
+      duplicate: false,
+      outcome: "ignored",
+    });
+    await expect(
+      receiveBillingEvent(fake.asClient(), event, provider),
+    ).resolves.toEqual({ duplicate: true });
     expect(subscription).toHaveBeenCalledTimes(1);
     expect(fake.rows("webhook_events")).toHaveLength(1);
     subscription.mockRestore();
   });
 
   it("reclaims a received event left behind by a timed-out handler", async () => {
-    const event: BillingEvent = { externalEventId: "evt_crashed", type: "ignored", rawType: "unknown", raw: {} };
-    fake.rows("webhook_events").push({ id: "crashed", provider: "other", event_id: event.externalEventId, status: "received", received_at: new Date(Date.now() - 11 * 60_000).toISOString() });
-    await expect(receiveBillingEvent(fake.asClient(), event)).resolves.toEqual({ duplicate: false, outcome: "ignored" });
+    const event: BillingEvent = {
+      externalEventId: "evt_crashed",
+      type: "ignored",
+      rawType: "unknown",
+      raw: {},
+    };
+    fake.rows("webhook_events").push({
+      id: "crashed",
+      provider: "other",
+      event_id: event.externalEventId,
+      status: "received",
+      received_at: new Date(Date.now() - 11 * 60_000).toISOString(),
+    });
+    await expect(receiveBillingEvent(fake.asClient(), event)).resolves.toEqual({
+      duplicate: false,
+      outcome: "ignored",
+    });
     expect(fake.rows("webhook_events")[0].status).toBe("ignored");
     expect(fake.rows("webhook_events")).toHaveLength(1);
   });
 
   it("does not finish or fail an event claimed by a newer delivery", async () => {
     const provider = getBillingProvider();
-    const subscription = vi.spyOn(provider, "getSubscription").mockImplementation(async () => {
-      fake.rows("webhook_events")[0].received_at = "2099-01-01T00:00:00.000Z";
-      return null;
-    });
+    const subscription = vi
+      .spyOn(provider, "getSubscription")
+      .mockImplementation(async () => {
+        fake.rows("webhook_events")[0].received_at = "2099-01-01T00:00:00.000Z";
+        return null;
+      });
     try {
-      const event: BillingEvent = { externalEventId: "evt_reclaimed", type: "invoice.paid", rawType: "invoice.paid", subscriptionExternalId: "sub_reclaimed", raw: {} };
-      await expect(receiveBillingEvent(fake.asClient(), event, provider)).rejects.toThrow(/lease was reclaimed/);
-      expect(fake.rows("webhook_events")[0]).toMatchObject({ status: "received", received_at: "2099-01-01T00:00:00.000Z" });
+      const event: BillingEvent = {
+        externalEventId: "evt_reclaimed",
+        type: "invoice.paid",
+        rawType: "invoice.paid",
+        subscriptionExternalId: "sub_reclaimed",
+        raw: {},
+      };
+      await expect(
+        receiveBillingEvent(fake.asClient(), event, provider),
+      ).rejects.toThrow(/lease was reclaimed/);
+      expect(fake.rows("webhook_events")[0]).toMatchObject({
+        status: "received",
+        received_at: "2099-01-01T00:00:00.000Z",
+      });
       expect(fake.rows("webhook_events")[0].processed_at).toBeUndefined();
-    } finally { subscription.mockRestore(); }
+    } finally {
+      subscription.mockRestore();
+    }
   });
 
   it("finds the order through the session link when the reference is missing, and ignores unknown sessions", async () => {
     const snapshot = await getBillingProvider().getCheckoutSession(sessionId);
-    const res = await receiveBillingEvent(fake.asClient(), checkoutCompleted(null, sessionId, snapshot));
+    const res = await receiveBillingEvent(
+      fake.asClient(),
+      checkoutCompleted(null, sessionId, snapshot),
+    );
     expect(res).toEqual({ duplicate: false, outcome: "provisioning" });
 
-    const stranger = await receiveBillingEvent(fake.asClient(), checkoutCompleted(null, "cs_unknown", { ...snapshot!, externalId: "cs_unknown" }));
+    const stranger = await receiveBillingEvent(
+      fake.asClient(),
+      checkoutCompleted(null, "cs_unknown", {
+        ...snapshot!,
+        externalId: "cs_unknown",
+      }),
+    );
     expect(stranger).toEqual({ duplicate: false, outcome: "ignored" });
-    expect(fake.rows("webhook_events").at(-1)).toMatchObject({ status: "ignored" });
+    expect(fake.rows("webhook_events").at(-1)).toMatchObject({
+      status: "ignored",
+    });
   });
 
   it("recovers a provision job that failed earlier: the webhook re-queues it", async () => {
     fake.rows("orders")[0].status = "paid";
-    fake.rows("provisioning_jobs").push({ id: "j_failed", kind: "order.provision", idempotency_key: `order.provision:${orderId}`, status: "failed", attempts: 3, max_attempts: 8, scheduled_for: new Date(0).toISOString(), payload: { order_id: orderId } });
+    fake.rows("provisioning_jobs").push({
+      id: "j_failed",
+      kind: "order.provision",
+      idempotency_key: `order.provision:${orderId}`,
+      status: "failed",
+      attempts: 3,
+      max_attempts: 8,
+      scheduled_for: new Date(0).toISOString(),
+      payload: { order_id: orderId },
+    });
     const snapshot = await getBillingProvider().getCheckoutSession(sessionId);
-    const res = await receiveBillingEvent(fake.asClient(), checkoutCompleted(orderId, sessionId, snapshot));
+    const res = await receiveBillingEvent(
+      fake.asClient(),
+      checkoutCompleted(orderId, sessionId, snapshot),
+    );
     expect(res).toEqual({ duplicate: false, outcome: "provisioning" });
     expect(fake.rows("orders")[0].status).toBe("provisioned");
-    expect(fake.rows("provisioning_jobs")[0]).toMatchObject({ id: "j_failed", status: "succeeded", attempts: 4 });
+    expect(fake.rows("provisioning_jobs")[0]).toMatchObject({
+      id: "j_failed",
+      status: "succeeded",
+      attempts: 4,
+    });
   });
 
   it("does not provision when the session is not paid", async () => {
     const snapshot = await getBillingProvider().getCheckoutSession(sessionId);
-    const res = await receiveBillingEvent(fake.asClient(), checkoutCompleted(orderId, sessionId, { ...snapshot!, paymentStatus: "unpaid" }));
+    const res = await receiveBillingEvent(
+      fake.asClient(),
+      checkoutCompleted(orderId, sessionId, {
+        ...snapshot!,
+        paymentStatus: "unpaid",
+      }),
+    );
     expect(res).toEqual({ duplicate: false, outcome: "order pending" });
     expect(fake.rows("organizations")).toHaveLength(0);
   });
@@ -142,9 +335,16 @@ describe("receiveBillingEvent", () => {
   it("applies subscription events to the linked row and flags ones it cannot attribute", async () => {
     // Provision first so the subscription and its provider link exist.
     const snapshot = await getBillingProvider().getCheckoutSession(sessionId);
-    await receiveBillingEvent(fake.asClient(), checkoutCompleted(orderId, sessionId, snapshot));
+    await receiveBillingEvent(
+      fake.asClient(),
+      checkoutCompleted(orderId, sessionId, snapshot),
+    );
     const sub = fake.rows("subscriptions")[0];
-    const link = fake.rows("provider_links").find((l) => l.resource_kind === "subscription" && l.entity_id === sub.id)!;
+    const link = fake
+      .rows("provider_links")
+      .find(
+        (l) => l.resource_kind === "subscription" && l.entity_id === sub.id,
+      )!;
 
     const updated: BillingSubscriptionSnapshot = {
       externalId: String(link.external_id),
@@ -157,12 +357,38 @@ describe("receiveBillingEvent", () => {
       canceledAt: null,
       trialEnd: null,
     };
-    const res = await receiveBillingEvent(fake.asClient(), { externalEventId: "evt_sub_1", type: "subscription.updated", rawType: "customer.subscription.updated", subscription: updated, raw: {} });
-    expect(res).toEqual({ duplicate: false, outcome: "subscription subscription.updated" });
-    expect(sub).toMatchObject({ status: "past_due", cancel_at_period_end: true, current_period_end: "2026-10-01T00:00:00.000Z" });
+    const res = await receiveBillingEvent(fake.asClient(), {
+      externalEventId: "evt_sub_1",
+      type: "subscription.updated",
+      rawType: "customer.subscription.updated",
+      subscription: updated,
+      raw: {},
+    });
+    expect(res).toEqual({
+      duplicate: false,
+      outcome: "subscription subscription.updated",
+    });
+    expect(sub).toMatchObject({
+      status: "past_due",
+      cancel_at_period_end: true,
+      current_period_end: "2026-10-01T00:00:00.000Z",
+    });
 
-    const unknown = await receiveBillingEvent(fake.asClient(), { externalEventId: "evt_sub_2", type: "subscription.updated", rawType: "customer.subscription.updated", subscription: { ...updated, externalId: "sub_stranger", customerExternalId: "cus_stranger" }, raw: {} });
-    expect(unknown).toEqual({ duplicate: false, outcome: "subscription unattributed" });
+    const unknown = await receiveBillingEvent(fake.asClient(), {
+      externalEventId: "evt_sub_2",
+      type: "subscription.updated",
+      rawType: "customer.subscription.updated",
+      subscription: {
+        ...updated,
+        externalId: "sub_stranger",
+        customerExternalId: "cus_stranger",
+      },
+      raw: {},
+    });
+    expect(unknown).toEqual({
+      duplicate: false,
+      outcome: "subscription unattributed",
+    });
     expect(fake.rows("subscriptions")).toHaveLength(1);
   });
 
@@ -172,11 +398,28 @@ describe("receiveBillingEvent", () => {
     // Make completing the checkout impossible: the order row vanishes between insert and handling.
     const savedOrder = { ...fake.rows("orders")[0] };
     fake.rows("orders").length = 0;
-    await expect(receiveBillingEvent(fake.asClient(), checkoutCompleted(orderId, sessionId, snapshot, "evt_boom"), provider)).rejects.toThrow(/not found/);
-    expect(fake.rows("webhook_events")[0]).toMatchObject({ event_id: "evt_boom", status: "failed" });
-    expect((fake.rows("webhook_events")[0].error as { message: string }).message).toMatch(/not found/);
+    await expect(
+      receiveBillingEvent(
+        fake.asClient(),
+        checkoutCompleted(orderId, sessionId, snapshot, "evt_boom"),
+        provider,
+      ),
+    ).rejects.toThrow(/not found/);
+    expect(fake.rows("webhook_events")[0]).toMatchObject({
+      event_id: "evt_boom",
+      status: "failed",
+    });
+    expect(
+      (fake.rows("webhook_events")[0].error as { message: string }).message,
+    ).toMatch(/not found/);
     fake.rows("orders").push(savedOrder);
-    await expect(receiveBillingEvent(fake.asClient(), checkoutCompleted(orderId, sessionId, snapshot, "evt_boom"), provider)).resolves.toEqual({ duplicate: false, outcome: "provisioning" });
+    await expect(
+      receiveBillingEvent(
+        fake.asClient(),
+        checkoutCompleted(orderId, sessionId, snapshot, "evt_boom"),
+        provider,
+      ),
+    ).resolves.toEqual({ duplicate: false, outcome: "provisioning" });
     expect(fake.rows("webhook_events")).toHaveLength(1);
     expect(fake.rows("webhook_events")[0].status).toBe("processed");
     expect(fake.rows("projects")).toHaveLength(1);

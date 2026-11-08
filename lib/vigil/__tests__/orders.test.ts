@@ -1,8 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NullBillingProvider } from "../providers/null";
-import { completeCheckout, provisionOrder, startCheckout } from "../services/orders";
+import {
+  completeCheckout,
+  provisionOrder,
+  startCheckout,
+} from "../services/orders";
 import { CREATOR_CAMPAIGN } from "@/lib/creator-campaign";
 import { FakeAdmin } from "./fake-admin";
+const BUYER = "da000000-0000-4000-8000-000000000001";
 
 // No Supabase secret in tests: the welcome email falls back to /login and
 // logs a dry run. Keep the console quiet.
@@ -17,17 +22,66 @@ function seed() {
   return new FakeAdmin({
     plans: [{ id: PLAN, code: "care", name: "Vigil Care", is_active: true }],
     plan_prices: [
-      { id: PRICE, plan_id: PLAN, amount_cents: 4900, currency: "usd", interval: "month", interval_count: 1, is_active: true },
-      { id: "price_care_year3", plan_id: PLAN, amount_cents: 132300, currency: "usd", interval: "year", interval_count: 3, is_active: true },
+      {
+        id: PRICE,
+        plan_id: PLAN,
+        amount_cents: 4900,
+        currency: "usd",
+        interval: "month",
+        interval_count: 1,
+        is_active: true,
+      },
+      {
+        id: "price_care_year3",
+        plan_id: PLAN,
+        amount_cents: 132300,
+        currency: "usd",
+        interval: "year",
+        interval_count: 3,
+        is_active: true,
+      },
     ],
     build_prices: [
-      { id: BUILD, kind: "express", name: "Express Site", amount_cents: 59900, currency: "usd", is_active: true },
-      { id: "build_custom", kind: "custom", name: "Custom Build", amount_cents: null, currency: "usd", is_active: true },
+      {
+        id: BUILD,
+        kind: "express",
+        name: "Express Site",
+        amount_cents: 59900,
+        currency: "usd",
+        is_active: true,
+      },
+      {
+        id: "build_custom",
+        kind: "custom",
+        name: "Custom Build",
+        amount_cents: null,
+        currency: "usd",
+        is_active: true,
+      },
     ],
     provider_links: [
-      { provider: "other", resource_kind: "price", external_id: "price_ext_care", entity_type: "plan_price", entity_id: PRICE, metadata: { mode: "test" } },
-      { provider: "other", resource_kind: "price", external_id: "price_ext_build", entity_type: "build_price", entity_id: BUILD },
-      { provider: "other", resource_kind: "price", external_id: "price_ext_care_3y", entity_type: "plan_price", entity_id: "price_care_year3" },
+      {
+        provider: "other",
+        resource_kind: "price",
+        external_id: "price_ext_care",
+        entity_type: "plan_price",
+        entity_id: PRICE,
+        metadata: { mode: "test" },
+      },
+      {
+        provider: "other",
+        resource_kind: "price",
+        external_id: "price_ext_build",
+        entity_type: "build_price",
+        entity_id: BUILD,
+      },
+      {
+        provider: "other",
+        resource_kind: "price",
+        external_id: "price_ext_care_3y",
+        entity_type: "plan_price",
+        entity_id: "price_care_year3",
+      },
     ],
   });
 }
@@ -41,7 +95,19 @@ describe("startCheckout", () => {
   it("creates a pending order, both line items, and links the checkout session", async () => {
     const provider = new NullBillingProvider();
     const spy = vi.spyOn(provider, "createCheckoutSession");
-    const res = await startCheckout(fake.asClient(), { email: "Buyer@Example.com", businessName: "  Marlow & Fen ", projectKind: "express", templateSlug: "restaurant", planCode: "care", appUrl: "https://app.test" }, provider);
+    const res = await startCheckout(
+      fake.asClient(),
+      {
+        email: "Buyer@Example.com",
+        businessName: "  Marlow & Fen ",
+        projectKind: "express",
+        templateSlug: "restaurant",
+        planCode: "care",
+        appUrl: "https://app.test",
+        buyerUserId: BUYER,
+      },
+      provider,
+    );
 
     const order = fake.rows("orders")[0];
     expect(order.status).toBe("pending");
@@ -54,36 +120,124 @@ describe("startCheckout", () => {
 
     const input = spy.mock.calls[0][0];
     expect(input.mode).toBe("subscription");
-    expect(input.lineItems).toEqual([{ priceExternalId: "price_ext_care" }, { priceExternalId: "price_ext_build" }]);
+    expect(input.lineItems).toEqual([
+      { priceExternalId: "price_ext_care" },
+      { priceExternalId: "price_ext_build" },
+    ]);
     expect(order.metadata).not.toHaveProperty("creator_promotion");
-    expect(input.successUrl).toBe(`https://app.test/checkout/success?order=${order.id}`);
-    expect(input.reference).toMatchObject({ order_id: order.id, plan_code: "care", project_kind: "express", template_slug: "restaurant" });
+    expect(input.successUrl).toBe(
+      `https://app.test/checkout/success?order=${order.id}`,
+    );
+    expect(input.reference).toMatchObject({
+      order_id: order.id,
+      plan_code: "care",
+      project_kind: "express",
+      template_slug: "restaurant",
+    });
     expect(input.allowPromotionCodes).toBe(true);
 
-    const link = fake.rows("provider_links").find((l) => l.resource_kind === "checkout_session");
+    const link = fake
+      .rows("provider_links")
+      .find((l) => l.resource_kind === "checkout_session");
     expect(link).toMatchObject({ entity_type: "order", entity_id: order.id });
-    expect((order.metadata as { checkout_session: string }).checkout_session).toBe(link?.external_id);
+    expect(
+      (order.metadata as { checkout_session: string }).checkout_session,
+    ).toBe(link?.external_id);
   });
 
   it("redeems the published code on the build only and prevents stacking", async () => {
     const provider = new NullBillingProvider();
     const spy = vi.spyOn(provider, "createCheckoutSession");
-    await startCheckout(fake.asClient(), { email: "buyer@example.test", businessName: "Creator", projectKind: "express", planCode: "care", billingPeriod: "year3", promotionCode: " influence ", appUrl: "https://app.test" }, provider);
-    expect(fake.rows("orders")[0]).toMatchObject({ build_amount_cents: 50915, plan_amount_cents: 132300, metadata: { creator_promotion: { code: "INFLUENCE", percent_off: 15, original_build_amount_cents: 59900, discount_amount_cents: 8985 } } });
-    expect(spy.mock.calls[0][0]).toMatchObject({ allowPromotionCodes: false, lineItems: [{ priceExternalId: "price_ext_care_3y" }, { adHoc: { amountCents: 50915, currency: "usd" } }] });
+    await startCheckout(
+      fake.asClient(),
+      {
+        email: "buyer@example.test",
+        businessName: "Creator",
+        projectKind: "express",
+        planCode: "care",
+        billingPeriod: "year3",
+        promotionCode: " influence ",
+        appUrl: "https://app.test",
+        buyerUserId: BUYER,
+      },
+      provider,
+    );
+    expect(fake.rows("orders")[0]).toMatchObject({
+      build_amount_cents: 50915,
+      plan_amount_cents: 132300,
+      metadata: {
+        creator_promotion: {
+          code: "INFLUENCE",
+          percent_off: 15,
+          original_build_amount_cents: 59900,
+          discount_amount_cents: 8985,
+        },
+      },
+    });
+    expect(spy.mock.calls[0][0]).toMatchObject({
+      allowPromotionCodes: false,
+      lineItems: [
+        { priceExternalId: "price_ext_care_3y" },
+        { adHoc: { amountCents: 50915, currency: "usd" } },
+      ],
+    });
   });
 
   it("rejects invalid, disabled and ineligible codes before creating an order or payment session", async () => {
     const provider = new NullBillingProvider();
     const spy = vi.spyOn(provider, "createCheckoutSession");
-    const request = { email: "buyer@example.test", businessName: "Creator", projectKind: "express" as const, planCode: "care", appUrl: "https://app.test", promotionCode: "INFLUENCE" };
-    await expect(startCheckout(fake.asClient(), { ...request, promotionCode: "WRONG" }, provider)).rejects.toThrow(/promo code/);
-    await expect(startCheckout(fake.asClient(), { ...request, projectKind: "custom", buildAmountOverrideCents: 350000 }, provider)).rejects.toThrow(/promo code/);
-    await expect(startCheckout(fake.asClient(), { ...request, existingOrderId: "quoted", buildAmountOverrideCents: 42000 }, provider)).rejects.toThrow(/promo code/);
+    const request = {
+      email: "buyer@example.test",
+      businessName: "Creator",
+      projectKind: "express" as const,
+      planCode: "care",
+      appUrl: "https://app.test",
+      promotionCode: "INFLUENCE",
+    };
+    await expect(
+      startCheckout(
+        fake.asClient(),
+        { ...request, promotionCode: "WRONG", buyerUserId: BUYER },
+        provider,
+      ),
+    ).rejects.toThrow(/promo code/);
+    await expect(
+      startCheckout(
+        fake.asClient(),
+        {
+          ...request,
+          projectKind: "custom",
+          buildAmountOverrideCents: 350000,
+          buyerUserId: BUYER,
+        },
+        provider,
+      ),
+    ).rejects.toThrow(/promo code/);
+    await expect(
+      startCheckout(
+        fake.asClient(),
+        {
+          ...request,
+          existingOrderId: "quoted",
+          buildAmountOverrideCents: 42000,
+          buyerUserId: BUYER,
+        },
+        provider,
+      ),
+    ).rejects.toThrow(/promo code/);
     const enabled = CREATOR_CAMPAIGN.promotion.enabled;
     CREATOR_CAMPAIGN.promotion.enabled = false;
-    try { await expect(startCheckout(fake.asClient(), request, provider)).rejects.toThrow(/promo code/); }
-    finally { CREATOR_CAMPAIGN.promotion.enabled = enabled; }
+    try {
+      await expect(
+        startCheckout(
+          fake.asClient(),
+          { ...request, buyerUserId: BUYER },
+          provider,
+        ),
+      ).rejects.toThrow(/promo code/);
+    } finally {
+      CREATOR_CAMPAIGN.promotion.enabled = enabled;
+    }
     expect(fake.rows("orders")).toHaveLength(0);
     expect(spy).not.toHaveBeenCalled();
   });
@@ -91,21 +245,84 @@ describe("startCheckout", () => {
   it("bills the chosen period and records which price row was bought", async () => {
     const provider = new NullBillingProvider();
     const spy = vi.spyOn(provider, "createCheckoutSession");
-    await startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", billingPeriod: "year3", appUrl: "https://app.test" }, provider);
-    expect(fake.rows("orders")[0]).toMatchObject({ plan_price_id: "price_care_year3", plan_amount_cents: 132300 });
-    expect(spy.mock.calls[0][0].lineItems[0]).toEqual({ priceExternalId: "price_ext_care_3y" });
+    await startCheckout(
+      fake.asClient(),
+      {
+        email: "a@b.c",
+        businessName: "X",
+        projectKind: "express",
+        planCode: "care",
+        billingPeriod: "year3",
+        appUrl: "https://app.test",
+        buyerUserId: BUYER,
+      },
+      provider,
+    );
+    expect(fake.rows("orders")[0]).toMatchObject({
+      plan_price_id: "price_care_year3",
+      plan_amount_cents: 132300,
+    });
+    expect(spy.mock.calls[0][0].lineItems[0]).toEqual({
+      priceExternalId: "price_ext_care_3y",
+    });
     expect(spy.mock.calls[0][0].reference.billing_period).toBe("year3");
-    await expect(startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", billingPeriod: "year", appUrl: "https://app.test" }, provider)).rejects.toThrow(/annual price/);
+    await expect(
+      startCheckout(
+        fake.asClient(),
+        {
+          email: "a@b.c",
+          businessName: "X",
+          projectKind: "express",
+          planCode: "care",
+          billingPeriod: "year",
+          appUrl: "https://app.test",
+          buyerUserId: BUYER,
+        },
+        provider,
+      ),
+    ).rejects.toThrow(/annual price/);
   });
 
   it("supports immediate Professional checkout at the catalog build price", async () => {
-    fake.rows("build_prices").push({ id: "build_professional", kind: "professional", name: "Professional Site", amount_cents: 149900, currency: "usd", is_active: true });
-    fake.rows("provider_links").push({ provider: "other", resource_kind: "price", external_id: "price_ext_professional", entity_type: "build_price", entity_id: "build_professional" });
+    fake.rows("build_prices").push({
+      id: "build_professional",
+      kind: "professional",
+      name: "Professional Site",
+      amount_cents: 149900,
+      currency: "usd",
+      is_active: true,
+    });
+    fake.rows("provider_links").push({
+      provider: "other",
+      resource_kind: "price",
+      external_id: "price_ext_professional",
+      entity_type: "build_price",
+      entity_id: "build_professional",
+    });
     const provider = new NullBillingProvider();
     const spy = vi.spyOn(provider, "createCheckoutSession");
-    await startCheckout(fake.asClient(), { email: "owner@professional.test", businessName: "Professional Co", promotionCode: "INFLUENCE", projectKind: "professional", planCode: "care", appUrl: "https://app.test" }, provider);
-    expect(fake.rows("orders")[0]).toMatchObject({ project_kind: "professional", build_amount_cents: 127415, template_slug: null });
-    expect(spy.mock.calls[0][0].lineItems).toMatchObject([{ priceExternalId: "price_ext_care" }, { adHoc: { amountCents: 127415 } }]);
+    await startCheckout(
+      fake.asClient(),
+      {
+        email: "owner@professional.test",
+        businessName: "Professional Co",
+        promotionCode: "INFLUENCE",
+        projectKind: "professional",
+        planCode: "care",
+        appUrl: "https://app.test",
+        buyerUserId: BUYER,
+      },
+      provider,
+    );
+    expect(fake.rows("orders")[0]).toMatchObject({
+      project_kind: "professional",
+      build_amount_cents: 127415,
+      template_slug: null,
+    });
+    expect(spy.mock.calls[0][0].lineItems).toMatchObject([
+      { priceExternalId: "price_ext_care" },
+      { adHoc: { amountCents: 127415 } },
+    ]);
   });
 
   it("keeps regular catalogue charges and promotion-code behavior when the campaign is disabled", async () => {
@@ -114,104 +331,345 @@ describe("startCheckout", () => {
     try {
       const provider = new NullBillingProvider();
       const spy = vi.spyOn(provider, "createCheckoutSession");
-      await startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, provider);
+      await startCheckout(
+        fake.asClient(),
+        {
+          email: "a@b.c",
+          businessName: "X",
+          projectKind: "express",
+          planCode: "care",
+          appUrl: "https://app.test",
+          buyerUserId: BUYER,
+        },
+        provider,
+      );
       expect(fake.rows("orders")[0].build_amount_cents).toBe(59900);
-      expect(spy.mock.calls[0][0].lineItems).toEqual([{ priceExternalId: "price_ext_care" }, { priceExternalId: "price_ext_build" }]);
+      expect(spy.mock.calls[0][0].lineItems).toEqual([
+        { priceExternalId: "price_ext_care" },
+        { priceExternalId: "price_ext_build" },
+      ]);
       expect(spy.mock.calls[0][0].allowPromotionCodes).toBe(true);
-    } finally { CREATOR_CAMPAIGN.promotion.enabled = enabled; }
+    } finally {
+      CREATOR_CAMPAIGN.promotion.enabled = enabled;
+    }
   });
 
   it("honors staff quotes and keeps a creator retry amount without discounting it twice", async () => {
     const provider = new NullBillingProvider();
     const spy = vi.spyOn(provider, "createCheckoutSession");
-    fake.rows("orders").push({ id: "quoted", status: "pending", checkout_token: "quoted_token", metadata: { staff_note: "Approved quote" } });
-    await startCheckout(fake.asClient(), { email: "a@b.c", businessName: "Quoted", projectKind: "express", planCode: "care", existingOrderId: "quoted", buildAmountOverrideCents: 42000, appUrl: "https://app.test" }, provider);
-    expect(fake.rows("orders")[0]).toMatchObject({ build_amount_cents: 42000, metadata: { staff_note: "Approved quote" } });
+    fake.rows("orders").push({
+      id: "quoted",
+      status: "pending",
+      checkout_token: "quoted_token",
+      metadata: { staff_note: "Approved quote" },
+    });
+    await startCheckout(
+      fake.asClient(),
+      {
+        email: "a@b.c",
+        businessName: "Quoted",
+        projectKind: "express",
+        planCode: "care",
+        existingOrderId: "quoted",
+        buildAmountOverrideCents: 42000,
+        appUrl: "https://app.test",
+        buyerUserId: BUYER,
+      },
+      provider,
+    );
+    expect(fake.rows("orders")[0]).toMatchObject({
+      build_amount_cents: 42000,
+      metadata: { staff_note: "Approved quote" },
+    });
     expect(spy.mock.calls[0][0].allowPromotionCodes).toBe(true);
-    const first = await startCheckout(fake.asClient(), { email: "a@b.c", businessName: "New", promotionCode: "INFLUENCE", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, provider);
-    await startCheckout(fake.asClient(), { email: "a@b.c", businessName: "New", projectKind: "express", planCode: "care", existingOrderId: first.orderId, buildAmountOverrideCents: 50915, appUrl: "https://app.test" }, provider);
-    const retry = fake.rows("orders").find(order => order.id === first.orderId);
-    expect(retry).toMatchObject({ build_amount_cents: 50915, metadata: { creator_promotion: { original_build_amount_cents: 59900 } } });
+    const first = await startCheckout(
+      fake.asClient(),
+      {
+        email: "a@b.c",
+        businessName: "New",
+        promotionCode: "INFLUENCE",
+        projectKind: "express",
+        planCode: "care",
+        appUrl: "https://app.test",
+        buyerUserId: BUYER,
+      },
+      provider,
+    );
+    await startCheckout(
+      fake.asClient(),
+      {
+        email: "a@b.c",
+        businessName: "New",
+        projectKind: "express",
+        planCode: "care",
+        existingOrderId: first.orderId,
+        buildAmountOverrideCents: 50915,
+        appUrl: "https://app.test",
+        buyerUserId: BUYER,
+      },
+      provider,
+    );
+    const retry = fake
+      .rows("orders")
+      .find((order) => order.id === first.orderId);
+    expect(retry).toMatchObject({
+      build_amount_cents: 50915,
+      metadata: { creator_promotion: { original_build_amount_cents: 59900 } },
+    });
     expect(spy.mock.calls.at(-1)?.[0].allowPromotionCodes).toBe(false);
   });
 
   it("retains the synced build-price gate during the offer and rejects a currency mismatch", async () => {
     fake.rows("provider_links").splice(1, 1);
-    await expect(startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", promotionCode: "INFLUENCE", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, new NullBillingProvider())).rejects.toThrow(/not been synced/);
+    await expect(
+      startCheckout(
+        fake.asClient(),
+        {
+          email: "a@b.c",
+          businessName: "X",
+          promotionCode: "INFLUENCE",
+          projectKind: "express",
+          planCode: "care",
+          appUrl: "https://app.test",
+          buyerUserId: BUYER,
+        },
+        new NullBillingProvider(),
+      ),
+    ).rejects.toThrow(/not been synced/);
     expect(fake.rows("orders")).toHaveLength(0);
     fake.rows("build_prices")[0].currency = "eur";
-    await expect(startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", promotionCode: "INFLUENCE", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, new NullBillingProvider())).rejects.toThrow(/currencies must match/);
+    await expect(
+      startCheckout(
+        fake.asClient(),
+        {
+          email: "a@b.c",
+          businessName: "X",
+          promotionCode: "INFLUENCE",
+          projectKind: "express",
+          planCode: "care",
+          appUrl: "https://app.test",
+          buyerUserId: BUYER,
+        },
+        new NullBillingProvider(),
+      ),
+    ).rejects.toThrow(/currencies must match/);
   });
 
   it("marks a self-serve order failed when the provider refuses to open a payment page", async () => {
     const provider = new NullBillingProvider();
-    vi.spyOn(provider, "createCheckoutSession").mockRejectedValue(new Error("customer_update can only be used with customer"));
-    await expect(startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, provider)).rejects.toThrow(/customer_update/);
+    vi.spyOn(provider, "createCheckoutSession").mockRejectedValue(
+      new Error("customer_update can only be used with customer"),
+    );
+    await expect(
+      startCheckout(
+        fake.asClient(),
+        {
+          email: "a@b.c",
+          businessName: "X",
+          projectKind: "express",
+          planCode: "care",
+          appUrl: "https://app.test",
+          buyerUserId: BUYER,
+        },
+        provider,
+      ),
+    ).rejects.toThrow(/customer_update/);
     expect(fake.rows("orders")[0]).toMatchObject({ status: "failed" });
   });
 
   it("quotes a custom build as an ad-hoc line and reuses a staff-created order", async () => {
-    fake.rows("orders").push({ id: "ord_staff", status: "pending", checkout_token: "tok", email: "c@x.com", business_name: "Cigar Lounge", project_kind: "custom", metadata: {} });
+    fake.rows("orders").push({
+      id: "ord_staff",
+      status: "pending",
+      checkout_token: "tok",
+      email: "c@x.com",
+      business_name: "Cigar Lounge",
+      project_kind: "custom",
+      metadata: {},
+    });
     const provider = new NullBillingProvider();
     const spy = vi.spyOn(provider, "createCheckoutSession");
-    const res = await startCheckout(fake.asClient(), { email: "c@x.com", businessName: "Cigar Lounge", projectKind: "custom", planCode: "care", existingOrderId: "ord_staff", buildAmountOverrideCents: 350000, appUrl: "https://app.test" }, provider);
+    const res = await startCheckout(
+      fake.asClient(),
+      {
+        email: "c@x.com",
+        businessName: "Cigar Lounge",
+        projectKind: "custom",
+        planCode: "care",
+        existingOrderId: "ord_staff",
+        buildAmountOverrideCents: 350000,
+        appUrl: "https://app.test",
+        buyerUserId: BUYER,
+      },
+      provider,
+    );
     expect(res.orderId).toBe("ord_staff");
     expect(fake.rows("orders")).toHaveLength(1);
     const items = spy.mock.calls[0][0].lineItems;
     expect(items[0]).toEqual({ priceExternalId: "price_ext_care" });
-    expect(items[1]).toMatchObject({ adHoc: { amountCents: 350000, currency: "usd" } });
-    expect(spy.mock.calls[0][0].cancelUrl).toBe("https://app.test/checkout/tok?canceled=1");
+    expect(items[1]).toMatchObject({
+      adHoc: { amountCents: 350000, currency: "usd" },
+    });
+    expect(spy.mock.calls[0][0].cancelUrl).toBe(
+      "https://app.test/checkout/tok?canceled=1",
+    );
   });
 
   it("refuses a plan without an approved price and a plan that was never synced", async () => {
     fake.rows("plan_prices")[0].amount_cents = null;
-    await expect(startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, new NullBillingProvider())).rejects.toThrow(/approved monthly price/);
+    await expect(
+      startCheckout(
+        fake.asClient(),
+        {
+          email: "a@b.c",
+          businessName: "X",
+          projectKind: "express",
+          planCode: "care",
+          appUrl: "https://app.test",
+          buyerUserId: BUYER,
+        },
+        new NullBillingProvider(),
+      ),
+    ).rejects.toThrow(/approved monthly price/);
     fake.rows("plan_prices")[0].amount_cents = 4900;
     fake.rows("provider_links").splice(0, 1);
-    await expect(startCheckout(fake.asClient(), { email: "a@b.c", businessName: "X", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, new NullBillingProvider())).rejects.toThrow(/not been synced/);
+    await expect(
+      startCheckout(
+        fake.asClient(),
+        {
+          email: "a@b.c",
+          businessName: "X",
+          projectKind: "express",
+          planCode: "care",
+          appUrl: "https://app.test",
+          buyerUserId: BUYER,
+        },
+        new NullBillingProvider(),
+      ),
+    ).rejects.toThrow(/not been synced/);
     expect(fake.rows("orders")).toHaveLength(0);
   });
 });
 
 describe("completeCheckout + provisionOrder", () => {
-  it("turns a paid order into an organization, owner invite, project, website and subscription — once", async () => {
+  it("turns a paid order into the exact buyer's business, project, website and subscription — once", async () => {
     const fake = seed();
     const provider = new NullBillingProvider();
-    const { orderId } = await startCheckout(fake.asClient(), { email: "owner@lounge.com", businessName: "Cigar Lounge", projectKind: "express", templateSlug: "restaurant", planCode: "care", appUrl: "https://app.test" }, provider);
-    const sessionId = (fake.rows("orders")[0].metadata as { checkout_session: string }).checkout_session;
+    const { orderId } = await startCheckout(
+      fake.asClient(),
+      {
+        email: "owner@lounge.com",
+        businessName: "Cigar Lounge",
+        projectKind: "express",
+        templateSlug: "restaurant",
+        planCode: "care",
+        appUrl: "https://app.test",
+        buyerUserId: BUYER,
+      },
+      provider,
+    );
+    const sessionId = (
+      fake.rows("orders")[0].metadata as { checkout_session: string }
+    ).checkout_session;
     const checkout = (await provider.getCheckoutSession(sessionId))!;
 
-    const paid = await completeCheckout(fake.asClient(), orderId, checkout, provider);
+    const paid = await completeCheckout(
+      fake.asClient(),
+      orderId,
+      checkout,
+      provider,
+    );
     expect(paid.status).toBe("paid");
     // A second delivery of the same event is a no-op.
-    expect((await completeCheckout(fake.asClient(), orderId, checkout, provider)).status).toBe("paid");
+    expect(
+      (await completeCheckout(fake.asClient(), orderId, checkout, provider))
+        .status,
+    ).toBe("paid");
 
-    const first = await provisionOrder(fake.asClient(), orderId, provider, "https://app.test");
+    const first = await provisionOrder(
+      fake.asClient(),
+      orderId,
+      provider,
+      "https://app.test",
+    );
     expect(first.alreadyProvisioned).toBe(false);
 
     const org = fake.rows("organizations")[0];
-    expect(org).toMatchObject({ name: "Cigar Lounge", slug: "cigar-lounge", billing_email: "owner@lounge.com" });
-    expect(fake.rows("organization_invites")[0]).toMatchObject({ organization_id: org.id, email: "owner@lounge.com", role: "owner" });
+    expect(org).toMatchObject({
+      name: "Cigar Lounge",
+      billing_email: "owner@lounge.com",
+    });
+    expect(String(org.slug)).toMatch(/^cigar-lounge-/);
+    expect(fake.rows("organization_members")[0]).toMatchObject({
+      organization_id: org.id,
+      user_id: BUYER,
+      role: "owner",
+      status: "active",
+    });
+    expect(fake.rows("organization_invites")).toHaveLength(0);
     const project = fake.rows("projects")[0];
-    expect(project).toMatchObject({ organization_id: org.id, kind: "express", status: "intake", template_slug: "restaurant", source_ref: `order:${orderId}` });
+    expect(project).toMatchObject({
+      organization_id: org.id,
+      kind: "express",
+      status: "intake",
+      template_slug: "restaurant",
+      source_ref: `order:${orderId}`,
+    });
     const site = fake.rows("websites")[0];
-    expect(site).toMatchObject({ organization_id: org.id, project_id: project.id, template_slug: "restaurant" });
+    expect(site).toMatchObject({
+      organization_id: org.id,
+      project_id: project.id,
+      template_slug: "restaurant",
+    });
     const sub = fake.rows("subscriptions")[0];
-    expect(sub).toMatchObject({ organization_id: org.id, plan_id: PLAN, plan_price_id: PRICE, status: "active" });
+    expect(sub).toMatchObject({
+      organization_id: org.id,
+      plan_id: PLAN,
+      plan_price_id: PRICE,
+      status: "active",
+    });
     // From the provider's snapshot, not the manual fallback: it carries a period and a link.
     expect(sub.current_period_end).toBeTruthy();
-    expect(fake.rows("provider_links").find((l) => l.resource_kind === "subscription")?.entity_id).toBe(sub.id);
-    const customer = fake.rows("provider_links").find((l) => l.resource_kind === "customer" && l.entity_type === "organization");
+    expect(
+      fake
+        .rows("provider_links")
+        .find((l) => l.resource_kind === "subscription")?.entity_id,
+    ).toBe(sub.id);
+    const customer = fake
+      .rows("provider_links")
+      .find(
+        (l) =>
+          l.resource_kind === "customer" && l.entity_type === "organization",
+      );
     expect(customer?.entity_id).toBe(org.id);
-    expect(fake.rows("orders")[0]).toMatchObject({ status: "provisioned", organization_id: org.id, project_id: project.id, subscription_id: sub.id });
-    expect(fake.audit.find((a) => a.p_action === "order.provisioned")).toBeTruthy();
+    expect(fake.rows("orders")[0]).toMatchObject({
+      status: "provisioned",
+      organization_id: org.id,
+      project_id: project.id,
+      subscription_id: sub.id,
+    });
+    expect(
+      fake.audit.find((a) => a.p_action === "order.provisioned"),
+    ).toBeTruthy();
 
     // Provisioning re-asserts the price link it saw on the subscription; the sync's stamp must survive.
-    const priceLink = fake.rows("provider_links").find((l) => l.resource_kind === "price" && l.entity_id === PRICE);
+    const priceLink = fake
+      .rows("provider_links")
+      .find((l) => l.resource_kind === "price" && l.entity_id === PRICE);
     expect(priceLink?.metadata).toEqual({ mode: "test" });
 
-    const again = await provisionOrder(fake.asClient(), orderId, provider, "https://app.test");
-    expect(again).toEqual({ organizationId: org.id, websiteId: site.id, projectKind: "express", alreadyProvisioned: true });
+    const again = await provisionOrder(
+      fake.asClient(),
+      orderId,
+      provider,
+      "https://app.test",
+    );
+    expect(again).toEqual({
+      organizationId: org.id,
+      websiteId: site.id,
+      projectKind: "express",
+      alreadyProvisioned: true,
+    });
     expect(fake.rows("organizations")).toHaveLength(1);
     expect(fake.rows("projects")).toHaveLength(1);
     expect(fake.rows("subscriptions")).toHaveLength(1);
@@ -219,64 +677,196 @@ describe("completeCheckout + provisionOrder", () => {
 
   it("creates one isolated design workspace for a Professional purchase", async () => {
     const fake = seed();
-    fake.rows("orders").push({ id: "professional-order", status: "paid", email: "professional@example.test", business_name: "Professional Client", project_kind: "professional", plan_id: PLAN, metadata: {} });
-    await provisionOrder(fake.asClient(), "professional-order", new NullBillingProvider(), "https://app.test");
-    const project = fake.rows("projects")[0], website = fake.rows("websites")[0];
+    fake.rows("orders").push({
+      id: "professional-order",
+      status: "paid",
+      email: "professional@example.test",
+      business_name: "Professional Client",
+      project_kind: "professional",
+      plan_id: PLAN,
+      metadata: {},
+    });
+    await provisionOrder(
+      fake.asClient(),
+      "professional-order",
+      new NullBillingProvider(),
+      "https://app.test",
+    );
+    const project = fake.rows("projects")[0],
+      website = fake.rows("websites")[0];
     expect(fake.rows("design_workspaces")).toHaveLength(1);
-    expect(fake.rows("design_workspaces")[0]).toMatchObject({ project_id: project.id, website_id: website.id, organization_id: project.organization_id, site_definition: { id: `project-${project.id}`, title: project.name } });
-    await provisionOrder(fake.asClient(), "professional-order", new NullBillingProvider(), "https://app.test");
+    expect(fake.rows("design_workspaces")[0]).toMatchObject({
+      project_id: project.id,
+      website_id: website.id,
+      organization_id: project.organization_id,
+      site_definition: { id: `project-${project.id}`, title: project.name },
+    });
+    await provisionOrder(
+      fake.asClient(),
+      "professional-order",
+      new NullBillingProvider(),
+      "https://app.test",
+    );
     expect(fake.rows("design_workspaces")).toHaveLength(1);
   });
 
   it("refuses to provision an unpaid order and picks a free slug", async () => {
     const fake = seed();
-    fake.rows("organizations").push({ id: "org_1", slug: "cigar-lounge", name: "Cigar Lounge" });
-    fake.rows("orders").push({ id: "ord_1", status: "pending", email: "a@b.c", business_name: "Cigar Lounge", project_kind: "express", plan_id: PLAN, metadata: {} });
-    await expect(provisionOrder(fake.asClient(), "ord_1", new NullBillingProvider(), "https://app.test")).rejects.toThrow(/not paid/);
+    fake
+      .rows("organizations")
+      .push({ id: "org_1", slug: "cigar-lounge", name: "Cigar Lounge" });
+    fake.rows("orders").push({
+      id: "ord_1",
+      status: "pending",
+      email: "a@b.c",
+      business_name: "Cigar Lounge",
+      project_kind: "express",
+      plan_id: PLAN,
+      metadata: {},
+    });
+    await expect(
+      provisionOrder(
+        fake.asClient(),
+        "ord_1",
+        new NullBillingProvider(),
+        "https://app.test",
+      ),
+    ).rejects.toThrow(/not paid/);
     fake.rows("orders")[0].status = "paid";
-    await provisionOrder(fake.asClient(), "ord_1", new NullBillingProvider(), "https://app.test");
-    expect(fake.rows("organizations").map((o) => o.slug)).toEqual(["cigar-lounge", "cigar-lounge-2"]);
+    await provisionOrder(
+      fake.asClient(),
+      "ord_1",
+      new NullBillingProvider(),
+      "https://app.test",
+    );
+    expect(fake.rows("organizations")).toHaveLength(2);
+    expect(String(fake.rows("organizations")[1].slug)).toMatch(
+      /^cigar-lounge-/,
+    );
     // No checkout session on a staff-paid order: a manual active subscription is created.
-    expect(fake.rows("subscriptions")[0]).toMatchObject({ plan_id: PLAN, status: "active" });
+    expect(fake.rows("subscriptions")[0]).toMatchObject({
+      plan_id: PLAN,
+      status: "active",
+    });
   });
 
   it("completeCheckout leaves unpaid, already-paid and unknown orders alone", async () => {
     const fake = seed();
     const provider = new NullBillingProvider();
-    const { orderId } = await startCheckout(fake.asClient(), { email: "a@b.c", businessName: "Shop", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, provider);
-    const sessionId = (fake.rows("orders")[0].metadata as { checkout_session: string }).checkout_session;
+    const { orderId } = await startCheckout(
+      fake.asClient(),
+      {
+        email: "a@b.c",
+        businessName: "Shop",
+        projectKind: "express",
+        planCode: "care",
+        appUrl: "https://app.test",
+        buyerUserId: BUYER,
+      },
+      provider,
+    );
+    const sessionId = (
+      fake.rows("orders")[0].metadata as { checkout_session: string }
+    ).checkout_session;
     const checkout = (await provider.getCheckoutSession(sessionId))!;
 
-    expect((await completeCheckout(fake.asClient(), orderId, { ...checkout, paymentStatus: "unpaid" }, provider)).status).toBe("pending");
-    await expect(completeCheckout(fake.asClient(), "ord_ghost", checkout, provider)).rejects.toThrow(/not found/);
+    expect(
+      (
+        await completeCheckout(
+          fake.asClient(),
+          orderId,
+          { ...checkout, paymentStatus: "unpaid" },
+          provider,
+        )
+      ).status,
+    ).toBe("pending");
+    await expect(
+      completeCheckout(fake.asClient(), "ord_ghost", checkout, provider),
+    ).rejects.toThrow(/not found/);
 
-    const paid = await completeCheckout(fake.asClient(), orderId, checkout, provider);
+    const paid = await completeCheckout(
+      fake.asClient(),
+      orderId,
+      checkout,
+      provider,
+    );
     expect(paid.status).toBe("paid");
     expect(paid.paid_at).toBeTruthy();
     // A later "paid" for the same order changes nothing, and a refunded one is never revived.
     fake.rows("orders")[0].status = "refunded";
-    expect((await completeCheckout(fake.asClient(), orderId, checkout, provider)).status).toBe("refunded");
+    expect(
+      (await completeCheckout(fake.asClient(), orderId, checkout, provider))
+        .status,
+    ).toBe("refunded");
   });
 
   it("resumes a half-finished provisioning without duplicating what already exists", async () => {
     const fake = seed();
     const provider = new NullBillingProvider();
-    const { orderId } = await startCheckout(fake.asClient(), { email: "owner@bakery.test", businessName: "Bakery", projectKind: "express", planCode: "care", appUrl: "https://app.test" }, provider);
-    const sessionId = (fake.rows("orders")[0].metadata as { checkout_session: string }).checkout_session;
-    await completeCheckout(fake.asClient(), orderId, (await provider.getCheckoutSession(sessionId))!, provider);
+    const { orderId } = await startCheckout(
+      fake.asClient(),
+      {
+        email: "owner@bakery.test",
+        businessName: "Bakery",
+        projectKind: "express",
+        planCode: "care",
+        appUrl: "https://app.test",
+        buyerUserId: BUYER,
+      },
+      provider,
+    );
+    const sessionId = (
+      fake.rows("orders")[0].metadata as { checkout_session: string }
+    ).checkout_session;
+    await completeCheckout(
+      fake.asClient(),
+      orderId,
+      (await provider.getCheckoutSession(sessionId))!,
+      provider,
+    );
 
     // A previous attempt got as far as the organization and the invite, then died.
-    fake.rows("organizations").push({ id: "org_half", name: "Bakery", slug: "bakery", billing_email: "owner@bakery.test" });
-    fake.rows("organization_invites").push({ id: "inv_half", organization_id: "org_half", email: "owner@bakery.test", role: "owner", revoked_at: null });
+    fake.rows("organizations").push({
+      id: "org_half",
+      name: "Bakery",
+      slug: "bakery",
+      billing_email: "owner@bakery.test",
+    });
+    fake.rows("organization_invites").push({
+      id: "inv_half",
+      organization_id: "org_half",
+      email: "owner@bakery.test",
+      role: "owner",
+      revoked_at: null,
+    });
+    fake.rows("organization_members").push({
+      organization_id: "org_half",
+      user_id: BUYER,
+      role: "owner",
+      status: "active",
+    });
     fake.rows("orders")[0].organization_id = "org_half";
 
-    const res = await provisionOrder(fake.asClient(), orderId, provider, "https://app.test");
-    expect(res).toEqual({ organizationId: "org_half", websiteId: fake.rows("websites")[0].id, projectKind: "express", alreadyProvisioned: false });
+    const res = await provisionOrder(
+      fake.asClient(),
+      orderId,
+      provider,
+      "https://app.test",
+    );
+    expect(res).toEqual({
+      organizationId: "org_half",
+      websiteId: fake.rows("websites")[0].id,
+      projectKind: "express",
+      alreadyProvisioned: false,
+    });
     expect(fake.rows("organizations")).toHaveLength(1);
     expect(fake.rows("organization_invites")).toHaveLength(1);
     expect(fake.rows("projects")).toHaveLength(1);
     expect(fake.rows("websites")).toHaveLength(1);
     expect(fake.rows("subscriptions")).toHaveLength(1);
-    expect(fake.rows("orders")[0]).toMatchObject({ status: "provisioned", organization_id: "org_half" });
+    expect(fake.rows("orders")[0]).toMatchObject({
+      status: "provisioned",
+      organization_id: "org_half",
+    });
   });
 });

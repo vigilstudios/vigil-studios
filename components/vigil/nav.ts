@@ -40,6 +40,7 @@ export type NavItem = {
   launchLocked?: boolean;
   /** Coming-soon destination: visible with a lock, without a navigation target. */
   disabled?: boolean;
+  disabledReason?: string;
   /** Paid feature indicator, independent of current access. */
   premium?: boolean;
   /** Small trailing tag such as "Soon". */

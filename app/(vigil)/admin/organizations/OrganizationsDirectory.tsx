@@ -1,0 +1,134 @@
+import Link from "next/link";
+import {
+  Card,
+  PageHeader,
+  StatusPill,
+  Table,
+  tdClass,
+  thClass,
+} from "@/components/vigil/ui";
+import { requireStaff } from "@/lib/vigil/auth/session";
+import { formatDate, titleCase } from "@/lib/vigil/format";
+import { listOrganizations } from "@/lib/vigil/queries/admin";
+import { NewOrganizationForm } from "./NewOrganizationForm";
+
+export default async function OrganizationsDirectory({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; archived?: string }>;
+}) {
+  await requireStaff("/admin/organizations");
+  const { q, archived: archivedParam } = await searchParams;
+  const archived = archivedParam === "1";
+  const orgs = await listOrganizations(q, archived);
+
+  return (
+    <div>
+      <PageHeader
+        title={archived ? "Archived customers" : "Customers"}
+        description={
+          archived
+            ? "Hidden customers awaiting restoration or permanent deletion."
+            : "Every active organization Vigil works for."
+        }
+      />
+
+      <div className="mb-4">
+        <Link
+          className="text-sm underline"
+          href={
+            archived
+              ? "/admin/organizations?view=businesses"
+              : "/admin/organizations?view=businesses&archived=1"
+          }
+        >
+          {archived ? "Back to active customers" : "View archived customers"}
+        </Link>
+      </div>
+
+      {!archived ? (
+        <Card className="mb-4">
+          <h2 className="text-base font-semibold">New customer</h2>
+          <p className="mt-1 text-xs text-[color:var(--text-secondary)]">
+            Creates the organization and, if an owner email is given, an
+            invitation that accepts itself on their first sign-in.
+          </p>
+          <NewOrganizationForm />
+        </Card>
+      ) : null}
+
+      <form className="mb-3 flex gap-2" action="/admin/organizations">
+        <input type="hidden" name="view" value="businesses" />
+        {archived ? <input type="hidden" name="archived" value="1" /> : null}
+        <input
+          name="q"
+          defaultValue={q ?? ""}
+          placeholder="Search by name"
+          className="w-full max-w-xs rounded-lg border border-[color:var(--border)] bg-transparent px-3 py-2 text-sm"
+        />
+        <button className="btn-secondary !px-3 text-sm">Search</button>
+      </form>
+
+      <Table>
+        <thead>
+          <tr>
+            <th className={thClass}>Organization</th>
+            <th className={thClass}>Status</th>
+            <th className={thClass}>Websites</th>
+            <th className={thClass}>Plan</th>
+            <th className={thClass}>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          {orgs.length === 0 ? (
+            <tr>
+              <td className={tdClass} colSpan={5}>
+                No organizations yet.
+              </td>
+            </tr>
+          ) : (
+            orgs.map((o) => {
+              const sub = o.subscriptions.find((s) =>
+                ["active", "trialing", "past_due"].includes(s.status),
+              );
+              return (
+                <tr key={o.id}>
+                  <td className={tdClass}>
+                    <Link
+                      href={`/admin/organizations/${o.id}`}
+                      className="font-medium underline"
+                    >
+                      {o.name}
+                    </Link>
+                    <div className="text-xs text-[color:var(--text-secondary)]">
+                      {o.slug}
+                    </div>
+                  </td>
+                  <td className={tdClass}>
+                    <StatusPill
+                      tone={
+                        o.status === "active"
+                          ? "good"
+                          : o.status === "suspended"
+                            ? "bad"
+                            : "warn"
+                      }
+                    >
+                      {titleCase(o.status)}
+                    </StatusPill>
+                  </td>
+                  <td className={tdClass}>
+                    {o.websites.length} (
+                    {o.websites.filter((w) => w.status === "live").length} live)
+                  </td>
+                  <td className={tdClass}>{sub?.plan?.name ?? "No plan"}</td>
+                  <td className={tdClass}>{formatDate(o.created_at)}</td>
+                </tr>
+              );
+            })
+          )}
+        </tbody>
+      </Table>
+    </div>
+  );
+}
