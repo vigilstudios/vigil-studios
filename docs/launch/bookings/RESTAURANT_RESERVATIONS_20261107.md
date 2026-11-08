@@ -2,6 +2,8 @@
 
 Prepared on `codex/restaurant-reservations` after the booking redesign shipped in PR #50. Migration 66 is validated locally; it has not been applied to production. No client has been enabled for dining reservations.
 
+Release update, November 8: PR #51 shipped migration 66 after fresh private schema/data backups. Production generated types match all 44 booking/reservation/appointment definitions, allowing generator-only metadata notation differences. PR #52 then versioned widget JS/CSS by their content hash; browser review at the existing production restaurant preview confirmed the reservation widget and party-size selector load even after caching the prior script. Production has only the paused fictional booking demo, with component readiness off; Scar has no booking settings and remains contact-only. No restaurant client was activated. Account access is the next phase.
+
 ## Customer and business experience
 
 Restaurant guests choose a dining service, party size, date and available time in the same embedded/popup widget. Party size follows through to the confirmation step and private receipt. Requests explicitly do not reserve capacity until confirmed. Table names and identifiers stay private.

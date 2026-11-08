@@ -23,6 +23,10 @@ additional_redirect_urls = [
   "http://127.0.0.1:3000/**",
 ]
 
+[auth.email]
+# Public registration and purchase ownership require real email verification.
+enable_confirmations = true
+
 # The magic link lands on the app's /auth/confirm, which verifies on a POST
 # that inbox link scanners never trigger, and works in any browser rather
 # than only the one that requested it. (Template edits need a paid plan or
@@ -30,3 +34,7 @@ additional_redirect_urls = [
 [auth.email.template.magic_link]
 subject = "Sign in to Vigil"
 content_path = "./supabase/templates/magic_link.html"
+
+[auth.email.template.confirmation]
+subject = "Confirm your Vigil account"
+content_path = "./supabase/templates/confirmation.html"

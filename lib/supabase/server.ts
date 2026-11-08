@@ -4,6 +4,10 @@ import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import type { Database } from "@/types/database.types";
 import { requirePublicSupabaseEnv } from "./env";
+import {
+  SESSION_MODE_COOKIE,
+  sessionCookieOptions,
+} from "@/lib/vigil/auth/persistence";
 
 /**
  * Request-scoped Supabase client for Server Components, Server Actions and
@@ -21,7 +25,14 @@ export async function createClient() {
       setAll(cookiesToSet) {
         try {
           cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(name, value, options);
+            cookieStore.set(
+              name,
+              value,
+              sessionCookieOptions(
+                options,
+                cookieStore.get(SESSION_MODE_COOKIE)?.value,
+              ),
+            );
           });
         } catch {
           // Server Components cannot set cookies; proxy.ts refreshes the

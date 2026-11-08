@@ -1,6 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getPublicSupabaseEnv } from "./env";
+import {
+  SESSION_MODE_COOKIE,
+  sessionCookieOptions,
+} from "@/lib/vigil/auth/persistence";
 
 export type ProxySession = {
   response: NextResponse;
@@ -12,7 +16,9 @@ export type ProxySession = {
  * present. Only an optimistic signal: real authorization happens in the Data
  * Access Layer and in row-level security.
  */
-export async function refreshSession(request: NextRequest): Promise<ProxySession> {
+export async function refreshSession(
+  request: NextRequest,
+): Promise<ProxySession> {
   let response = NextResponse.next({ request });
   const env = getPublicSupabaseEnv();
   if (!env) return { response, userId: null };
@@ -23,10 +29,19 @@ export async function refreshSession(request: NextRequest): Promise<ProxySession
         return request.cookies.getAll();
       },
       setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        cookiesToSet.forEach(({ name, value }) =>
+          request.cookies.set(name, value),
+        );
         response = NextResponse.next({ request });
         cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options)
+          response.cookies.set(
+            name,
+            value,
+            sessionCookieOptions(
+              options,
+              request.cookies.get(SESSION_MODE_COOKIE)?.value,
+            ),
+          ),
         );
       },
     },

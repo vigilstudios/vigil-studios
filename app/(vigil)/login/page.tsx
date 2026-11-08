@@ -9,6 +9,8 @@ import { getViewer } from "@/lib/vigil/auth/session";
 export const metadata: Metadata = { title: "Sign in" };
 
 const errorMessages: Record<string, string> = {
+  email_unverified:
+    "Confirm your email before purchasing. You can request a fresh sign-in link below.",
   missing_code: "That sign-in link was incomplete. Request a new one below.",
   link_invalid: "That sign-in link is not valid. Request a new one below.",
   link_expired: "That sign-in link has expired. Request a new one below.",
@@ -23,30 +25,46 @@ export default async function LoginPage({
   const viewer = await getViewer();
   if (viewer) redirect(loginDestination(params.next, viewer.staffRole));
   const next = safeNextPath(params.next);
-  const error = params.error ? errorMessages[params.error] ?? "Something went wrong. Please try again." : null;
+  const error = params.error
+    ? (errorMessages[params.error] ?? "Something went wrong. Please try again.")
+    : null;
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-2" aria-label="Vigil Studios home">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2"
+            aria-label="Vigil Studios home"
+          >
             <Logo size="lg" />
           </Link>
-          <h1 className="mt-6 text-2xl font-semibold tracking-tight">Sign in to Vigil</h1>
+          <h1 className="mt-6 text-2xl font-semibold tracking-tight">
+            Sign in to Vigil
+          </h1>
           <p className="mt-2 text-sm text-[color:var(--text-secondary)]">
-            Sign in with your password, or have a one-time link emailed to you.
+            Your website, customers and business, in one place.
           </p>
         </div>
 
         <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-6">
-          <LoginForm next={next} initialError={error} initialEmail={params.email ?? ""} />
+          <LoginForm
+            next={next}
+            initialError={error}
+            initialEmail={params.email ?? ""}
+            googleEnabled={process.env.VIGIL_GOOGLE_AUTH_ENABLED === "true"}
+          />
         </div>
 
         <p className="mt-6 text-center text-xs text-[color:var(--text-secondary)]">
-          Access is by invitation from Vigil Studios. Need help?{" "}
-          <a href="mailto:hello@vigilstudios.co" className="underline">
-            hello@vigilstudios.co
-          </a>
+          New to Vigil?{" "}
+          <Link
+            href={`/signup?next=${encodeURIComponent(next)}`}
+            className="font-medium text-[color:var(--text-primary)] underline"
+          >
+            Create an account
+          </Link>
         </p>
       </div>
     </main>

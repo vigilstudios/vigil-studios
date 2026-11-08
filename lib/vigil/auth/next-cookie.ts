@@ -4,10 +4,9 @@ import type { NextRequest, NextResponse } from "next/server";
 import { safeNextPath } from "./redirects";
 
 /**
- * Where to send someone after they finish signing in. Carried in a short-lived
- * cookie rather than on the magic link, because Supabase validates the
- * redirect URL exactly against its allow-list and a query string is enough to
- * fall back to the site URL.
+ * Short-lived return destination for OAuth and legacy PKCE/email flows.
+ * New email links also carry a validated destination in their path so they
+ * work in another browser without this cookie.
  */
 export const NEXT_COOKIE = "vigil-next";
 const MAX_AGE_SECONDS = 15 * 60;

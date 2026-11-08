@@ -116,7 +116,7 @@ export async function reconcileOrders(admin: DbClient, options: ReconcileOptions
     const res = await sendWelcome(order.email, order.business_name, appUrl).catch((err) => ({ sent: false, error: err instanceof Error ? err.message : String(err) }));
     await admin
       .from("orders")
-      .update({ metadata: { ...meta, welcome_email: { ...welcome, sent: res.sent, error: res.error ?? null, retried: true, retried_at: now.toISOString() } } as unknown as Json })
+      .update({ metadata: { ...meta, welcome_email: { ...welcome, sent: res.sent, error: res.error ?? null, retried: true, retried_at: now.toISOString() } } as unknown as NonNullable<Json> })
       .eq("id", order.id);
     if (res.sent) report.welcomeResent.push(order.id);
     else toAlert.push({ id: order.id, business_name: order.business_name, email: order.email, paid_at: null });
@@ -158,7 +158,7 @@ export async function reconcileOrders(admin: DbClient, options: ReconcileOptions
       for (const o of toAlert) {
         const { data: row } = await admin.from("orders").select("metadata").eq("id", o.id).maybeSingle();
         const meta = (row?.metadata as Record<string, unknown> | null) ?? {};
-        await admin.from("orders").update({ metadata: { ...meta, reconcile: { notified_at: now.toISOString() } } as unknown as Json }).eq("id", o.id);
+        await admin.from("orders").update({ metadata: { ...meta, reconcile: { notified_at: now.toISOString() } } as unknown as NonNullable<Json> }).eq("id", o.id);
       }
     }
   }

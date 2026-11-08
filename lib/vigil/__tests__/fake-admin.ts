@@ -9,7 +9,11 @@ import type { DbClient } from "@/lib/vigil/types";
  * covered by supabase/test/rls.test.sql.
  */
 type Row = Record<string, unknown>;
-type QueryResult = { data: Row[] | null; error: { code?: string; message: string } | null; count?: number | null };
+type QueryResult = {
+  data: Row[] | null;
+  error: { code?: string; message: string } | null;
+  count?: number | null;
+};
 type Filter = (r: Row) => boolean;
 
 export class FakeAdmin {
@@ -18,7 +22,11 @@ export class FakeAdmin {
   private seq = 0;
 
   constructor(seed: Record<string, Row[]> = {}) {
-    for (const [name, rows] of Object.entries(seed)) this.tables.set(name, rows.map((r) => ({ ...r })));
+    for (const [name, rows] of Object.entries(seed))
+      this.tables.set(
+        name,
+        rows.map((r) => ({ ...r })),
+      );
   }
 
   rows(table: string): Row[] {
@@ -29,7 +37,8 @@ export class FakeAdmin {
   from(table: string) {
     const rows = this.rows(table);
     const filters: Filter[] = [];
-    const apply = (list: Row[]) => list.filter((r) => filters.every((f) => f(r)));
+    const apply = (list: Row[]) =>
+      list.filter((r) => filters.every((f) => f(r)));
     const nextId = () => `id_${++this.seq}`;
     const uniqueKeys: Record<string, string[][]> = {
       provisioning_jobs: [["idempotency_key"]],
@@ -42,16 +51,36 @@ export class FakeAdmin {
     // Column defaults the real schema applies on insert.
     const defaults: Record<string, () => Row> = {
       provisioning_jobs: () => ({ attempts: 0, status: "queued" }),
-      orders: () => ({ status: "pending", checkout_token: `tok_${++this.seq}`, metadata: {}, currency: "usd" }),
-      webhook_events: () => ({ status: "received", received_at: new Date().toISOString() }),
+      orders: () => ({
+        status: "pending",
+        checkout_token: `tok_${++this.seq}`,
+        metadata: {},
+        currency: "usd",
+      }),
+      webhook_events: () => ({
+        status: "received",
+        received_at: new Date().toISOString(),
+      }),
       projects: () => ({ status: "draft", brief: {} }),
       websites: () => ({ status: "provisioning" }),
       domains: () => ({ status: "pending" }),
       subscriptions: () => ({ status: "incomplete" }),
-      creative_workspaces: () => ({ status: "not_started", generated_files: {}, warnings: [], asset_counts: {}, workflow_version: 1 }),
+      creative_workspaces: () => ({
+        status: "not_started",
+        generated_files: {},
+        warnings: [],
+        asset_counts: {},
+        workflow_version: 1,
+      }),
     };
     const conflictsWith = (payload: Row, ignore?: Row) =>
-      (uniqueKeys[table] ?? []).some((cols) => cols.every((c) => payload[c] !== undefined) && rows.some((r) => r !== ignore && cols.every((c) => r[c] === payload[c])));
+      (uniqueKeys[table] ?? []).some(
+        (cols) =>
+          cols.every((c) => payload[c] !== undefined) &&
+          rows.some(
+            (r) => r !== ignore && cols.every((c) => r[c] === payload[c]),
+          ),
+      );
 
     const builder = {
       _mode: "select" as "select" | "insert" | "update" | "upsert" | "delete",
@@ -95,9 +124,13 @@ export class FakeAdmin {
         return builder;
       },
       not(col: string, op: string, val: unknown) {
-        if(op==="is")filters.push(r=>val===null?r[col]!=null:r[col]!==val);
+        if (op === "is")
+          filters.push((r) => (val === null ? r[col] != null : r[col] !== val));
         if (op === "in") {
-          const list = String(val).replace(/^\(|\)$/g, "").split(",").map((s) => s.trim());
+          const list = String(val)
+            .replace(/^\(|\)$/g, "")
+            .split(",")
+            .map((s) => s.trim());
           filters.push((r) => !list.includes(String(r[col])));
         }
         return builder;
@@ -121,7 +154,8 @@ export class FakeAdmin {
       upsert(payload: Row, opts?: { onConflict?: string }) {
         builder._mode = "upsert";
         builder._payload = payload;
-        builder._conflict = opts?.onConflict?.split(",").map((s) => s.trim()) ?? null;
+        builder._conflict =
+          opts?.onConflict?.split(",").map((s) => s.trim()) ?? null;
         return builder;
       },
       delete() {
@@ -130,14 +164,25 @@ export class FakeAdmin {
       },
       run(): QueryResult {
         if (builder._mode === "insert" && builder._payload) {
-          if (conflictsWith(builder._payload)) return { data: null, error: { code: "23505", message: "duplicate key" } };
-          const row = { id: nextId(), ...(defaults[table]?.() ?? {}), created_at: new Date().toISOString(), ...builder._payload };
+          if (conflictsWith(builder._payload))
+            return {
+              data: null,
+              error: { code: "23505", message: "duplicate key" },
+            };
+          const row = {
+            id: nextId(),
+            ...(defaults[table]?.() ?? {}),
+            created_at: new Date().toISOString(),
+            ...builder._payload,
+          };
           rows.push(row);
           return { data: [row], error: null };
         }
         if (builder._mode === "upsert" && builder._payload) {
           const cols = builder._conflict ?? ["id"];
-          const hit = rows.find((r) => cols.every((c) => r[c] === builder._payload![c]));
+          const hit = rows.find((r) =>
+            cols.every((c) => r[c] === builder._payload![c]),
+          );
           if (hit) {
             Object.assign(hit, builder._payload);
             return { data: [hit], error: null };
@@ -149,7 +194,11 @@ export class FakeAdmin {
         if (builder._mode === "update" && builder._payload) {
           const hit = apply(rows);
           for (const r of hit) {
-            if (conflictsWith({ ...r, ...builder._payload }, r)) return { data: null, error: { code: "23505", message: "duplicate key" } };
+            if (conflictsWith({ ...r, ...builder._payload }, r))
+              return {
+                data: null,
+                error: { code: "23505", message: "duplicate key" },
+              };
             Object.assign(r, builder._payload);
           }
           return { data: hit, error: null };
@@ -160,7 +209,11 @@ export class FakeAdmin {
           return { data: hit, error: null };
         }
         const data = apply(rows);
-        return { data, error: null, count: builder._count ? data.length : null };
+        return {
+          data,
+          error: null,
+          count: builder._count ? data.length : null,
+        };
       },
       async maybeSingle() {
         const r = builder.run();
@@ -168,7 +221,10 @@ export class FakeAdmin {
       },
       async single() {
         const r = builder.run();
-        return { data: r.data?.[0] ?? null, error: r.error ?? (r.data?.length ? null : { message: "no rows" }) };
+        return {
+          data: r.data?.[0] ?? null,
+          error: r.error ?? (r.data?.length ? null : { message: "no rows" }),
+        };
       },
       // Awaiting the builder directly resolves to the query result, as supabase-js does.
       then<T>(resolve: (v: QueryResult) => T) {
@@ -179,15 +235,133 @@ export class FakeAdmin {
   }
 
   async rpc(name: string, args: Record<string, unknown>) {
-    if(name==='save_content_design_workspace'){
-      const workspace=this.rows('design_workspaces').find(r=>r.project_id===args.p_project&&r.revision===args.p_expected);
-      if(!workspace)return {data:null,error:{code:'40001',message:'Stale workspace'}};
-      workspace.site_definition=args.p_site;workspace.revision=Number(workspace.revision)+1;return {data:workspace.revision,error:null};
+    if (name === "claim_checkout_order") {
+      const order = this.rows("orders").find(
+        (o) => o.id === args.p_order && o.status === "pending",
+      );
+      if (
+        !order ||
+        (order.buyer_user_id && order.buyer_user_id !== args.p_buyer)
+      )
+        return { data: null, error: { code: "42501", message: "Wrong buyer" } };
+      order.buyer_user_id = args.p_buyer;
+      return { data: null, error: null };
+    }
+    if (name === "allocate_order_project") {
+      // Orchestration fake only. Auth, tenant, locking and capacity guarantees are exercised against PostgreSQL.
+      const order = this.rows("orders").find((o) => o.id === args.p_order_id);
+      if (!order || !["paid", "provisioned"].includes(String(order.status)))
+        return { data: null, error: { message: "Paid order required" } };
+      let organization = this.rows("organizations").find(
+        (o) => o.id === order.organization_id,
+      );
+      if (!organization && order.buyer_user_id)
+        organization = this.rows("organizations").find(
+          (o) =>
+            String(o.name).trim().toLowerCase() ===
+              String(order.business_name).trim().toLowerCase() &&
+            this.rows("organization_members").some(
+              (m) =>
+                m.organization_id === o.id &&
+                m.user_id === order.buyer_user_id &&
+                m.role === "owner" &&
+                m.status === "active",
+            ),
+        );
+      if (!organization) {
+        organization = {
+          id: `id_${++this.seq}`,
+          name: order.business_name,
+          slug: `${args.p_slug}-${String(order.id).replace(/[^a-z0-9]/g, "")}`,
+          billing_email: order.email,
+        };
+        this.rows("organizations").push(organization);
+        if (order.buyer_user_id)
+          this.rows("organization_members").push({
+            organization_id: organization.id,
+            user_id: order.buyer_user_id,
+            role: "owner",
+            status: "active",
+          });
+      }
+      if (
+        !order.buyer_user_id &&
+        !this.rows("organization_invites").some(
+          (i) =>
+            i.organization_id === organization.id && i.email === order.email,
+        )
+      )
+        this.rows("organization_invites").push({
+          id: `id_${++this.seq}`,
+          organization_id: organization.id,
+          email: order.email,
+          role: "owner",
+        });
+      let project = this.rows("projects").find(
+        (p) =>
+          p.id === order.project_id || p.source_ref === `order:${order.id}`,
+      );
+      if (!project) {
+        project = {
+          id: `id_${++this.seq}`,
+          organization_id: organization.id,
+          name: `${order.business_name} website`,
+          kind: order.project_kind,
+          status: "intake",
+          template_slug: order.template_slug,
+          source_ref: `order:${order.id}`,
+          brief: {},
+        };
+        this.rows("projects").push(project);
+      }
+      let website = this.rows("websites").find(
+        (w) => w.project_id === project.id,
+      );
+      if (!website) {
+        website = {
+          id: `id_${++this.seq}`,
+          organization_id: organization.id,
+          project_id: project.id,
+          name: `${order.business_name} website`,
+          template_slug: order.template_slug,
+          hosting_mode: "dedicated",
+          status: "provisioning",
+        };
+        this.rows("websites").push(website);
+      }
+      order.organization_id = organization.id;
+      order.project_id = project.id;
+      return {
+        data: {
+          organizationId: organization.id,
+          projectId: project.id,
+          websiteId: website.id,
+        },
+        error: null,
+      };
+    }
+    if (name === "save_content_design_workspace") {
+      const workspace = this.rows("design_workspaces").find(
+        (r) =>
+          r.project_id === args.p_project && r.revision === args.p_expected,
+      );
+      if (!workspace)
+        return {
+          data: null,
+          error: { code: "40001", message: "Stale workspace" },
+        };
+      workspace.site_definition = args.p_site;
+      workspace.revision = Number(workspace.revision) + 1;
+      return { data: workspace.revision, error: null };
     }
     if (name === "claim_jobs") {
       const now = Date.now();
       const due = this.rows("provisioning_jobs")
-        .filter((j) => j.status === "queued" && new Date(String(j.scheduled_for ?? 0)).getTime() <= now)
+        .filter(
+          (j) =>
+            j.status === "queued" &&
+            new Date(String(j.scheduled_for ?? 0)).getTime() <= now,
+        )
         .slice(0, Number(args.p_limit ?? 10));
       for (const j of due) {
         j.status = "running";
@@ -200,7 +374,15 @@ export class FakeAdmin {
     if (name === "log_audit_event") {
       this.audit.push({ ...args });
       // Also visible as a row, the way reconciliation reads it back.
-      this.rows("audit_events").push({ id: ++this.seq, action: args.p_action, entity_type: args.p_entity_type, entity_id: args.p_entity_id ?? null, organization_id: args.p_org ?? null, after: args.p_after ?? null, created_at: new Date().toISOString() });
+      this.rows("audit_events").push({
+        id: ++this.seq,
+        action: args.p_action,
+        entity_type: args.p_entity_type,
+        entity_id: args.p_entity_id ?? null,
+        organization_id: args.p_org ?? null,
+        after: args.p_after ?? null,
+        created_at: new Date().toISOString(),
+      });
       return { data: null, error: null };
     }
     return { data: null, error: { message: `unknown rpc ${name}` } };

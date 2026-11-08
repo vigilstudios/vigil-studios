@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+  </head>
+  <body
+    style="
+      margin: 0;
+      background: #f5f6f8;
+      color: #17201b;
+      font:
+        15px/1.6 Arial,
+        sans-serif;
+    "
+  >
+    <main
+      style="
+        max-width: 520px;
+        margin: 40px auto;
+        padding: 32px;
+        background: white;
+        border-radius: 16px;
+      "
+    >
+      <h1 style="font-size: 24px; letter-spacing: -0.5px">Welcome to Vigil</h1>
+      <p>
+        Confirm your email to open your account. You can explore your dashboard
+        and choose a website whenever you're ready.
+      </p>
+      <p style="margin: 28px 0">
+        <a
+          href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&amp;type=signup"
+          style="
+            display: inline-block;
+            padding: 13px 22px;
+            background: #10d45a;
+            color: #102218;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+          "
+          >Confirm your email</a
+        >
+      </p>
+      <p style="font-size: 12px; color: #64706a">
+        No purchase has been made. If you didn't request an account, you can
+        ignore this email.
+      </p>
+      <p style="font-size: 12px; color: #64706a">
+        Vigil Studios ·
+        <a
+          href="https://www.vigilstudios.co/account-privacy"
+          style="color: inherit"
+          >Account privacy</a
+        >
+      </p>
+    </main>
+  </body>
+</html>
