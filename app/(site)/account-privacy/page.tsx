@@ -16,7 +16,7 @@ export default function AccountPrivacy() {
           <SectionIntro
             eyebrow="Account privacy"
             title="Your account. Your business."
-            lead="Account registration, purchases and optional Google sign-in. Effective 7 November 2026."
+            lead="Account registration, purchases and optional Google sign-in. Effective 8 November 2026."
           />
           <div className="mt-12 space-y-8 text-[15px] leading-7 text-[color:var(--text-secondary)]">
             <section>

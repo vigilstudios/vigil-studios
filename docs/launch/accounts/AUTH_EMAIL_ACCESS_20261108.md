@@ -2,11 +2,13 @@
 
 Inspection found production and the new preview using Supabase's built-in SMTP, with email auto-confirmation enabled. The built-in sender only delivers to organization team addresses, so it cannot support public customer registration. A paid Supabase plan does not remove that restriction.
 
-The isolated preview now requires email confirmation, disallows unverified email sign-in, uses the branded scanner-safe confirmation/magic-link templates and restricts redirects to its exact app host. Fictional Auth acceptance creates links through the admin API without sending messages. Production Auth configuration has been backed up privately and is unchanged pending this connection/release decision.
+The isolated preview requires email confirmation, disallows unverified email sign-in, uses the branded scanner-safe confirmation/magic-link templates and restricts redirects to its exact app host. Fictional Auth acceptance creates links through the admin API without sending messages. The owner approved the exact production delivery setup and one test to `hello@vigilstudios.co` on November 8; do not request that approval again.
 
-The existing Resend send-only credential successfully authenticated to its SMTP server over verified TLS on port 465. This probe sent no message and did not store the credential in Supabase. Production delivery configuration and the single owner test remain pending approval.
+Production now uses the existing Resend send-only credential in Supabase Auth SMTP over TLS on port 465, with required email confirmation and unverified email sign-in disabled. The branded templates were read back and verified. Existing CAPTCHA, session, SMS, secure-email-change and other provider settings were preserved; no subscription was purchased. The email cap is 20/hour, with 60 seconds between repeated sends to a recipient.
 
-## Concrete setup for approval
+The single approved sign-in/verification test arrived in the owner's inbox from Vigil Studios, linked directly to the production confirmation page, waited for Continue, and opened the existing account. `shouldCreateUser=false` prevented creating another account. No customer, outreach or booking email was sent. Private delivery evidence remains outside the repository. Do not repeat the send without fresh authorization; the approved one-message test is complete.
+
+## Approved setup
 
 - Use the existing Vigil Resend account and existing send-only API credential. Its restricted permission was verified without reading email contents or sending a message. No new subscription or service plan is purchased.
 - Store that credential only as the production Supabase Auth SMTP password. Host `smtp.resend.com`, TLS port `465`, username `resend`, sender `hello@vigilstudios.co`, display name `Vigil Studios`.

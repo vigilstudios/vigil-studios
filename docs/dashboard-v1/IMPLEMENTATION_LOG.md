@@ -1533,3 +1533,12 @@ Prepared PR #53 after restaurant reservations and the widget-cache correction sh
 Hosted isolated acceptance proved scanner-safe confirmation, selected-package return, no business created at registration, profile settings, sign-out, exact buyer provisioning from a simulated paid order, onboarding, foreign-receipt refusal and staff directory/account/order links. No real payment, email, client setting or external repository/deployment was created. Preview baseline table grants were matched to existing production permissions with RLS retained; production grants were unchanged.
 
 Release gates found during inspection: production currently auto-confirms email and has no custom SMTP, so public signup needs confirmation enforcement and approved existing-Resend Auth delivery. Google sign-in remains hidden pending dedicated client/provider approval and acceptance. Both concrete access plans are under docs/launch/accounts. Migration 67 and new production Auth/provider settings have not been applied. Scar remains contact-only.
+
+
+### November 8 — approved account connections and migration
+
+The owner approved the dedicated Google sign-in clients and existing-Resend authentication delivery setup. Production Auth now requires email verification and uses Resend SMTP with its existing send-only credential; one approved email to hello@vigilstudios.co arrived and opened the existing account. No additional test message or client communication was sent. Existing CAPTCHA/session/SMS/secure-email-change settings were checked after the update.
+
+Dedicated Google production/preview clients were stored only in corresponding Supabase Auth settings. The isolated owner sign-in passed with basic name/photo/email consent, no business/staff privilege and returning-package preservation. Explicit scopes and include_granted_scopes=false are tested. Google's Verification Center reports verified branding and no sensitive/restricted-scope verification requirement. Production Google activation follows public privacy rollout/checks.
+
+Fresh private native PostgreSQL backups captured the public/vigil schema (764,035 bytes) and data (3,606,092 bytes). Applied only migration 67; all five generated production account definitions match the checked-in types with generator-only notation normalization. No historical order ownership was backfilled. Code rollout/final smoke checks follow; Scar remains contact-only.

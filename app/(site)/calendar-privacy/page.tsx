@@ -17,9 +17,24 @@ export default function CalendarPrivacy() {
           <SectionIntro
             eyebrow="Google Calendar connection privacy"
             title="Your bookings. Your choice to connect."
-            lead="An optional calendar connection. Effective 4 November 2026."
+            lead="An optional calendar connection. Updated 8 November 2026."
           />
           <div className="mt-12 space-y-8 text-[15px] leading-7 text-[color:var(--text-secondary)]">
+            <section>
+              <h2 className="text-xl font-semibold text-[color:var(--text-primary)]">
+                Signing in with Google
+              </h2>
+              <p className="mt-3">
+                Google sign-in shares your name, email address and profile image
+                with Vigil to create or open your account. It does not connect
+                Google Calendar, Gmail or contacts. Read our{" "}
+                <Link className="underline" href="/account-privacy">
+                  account privacy notice
+                </Link>{" "}
+                for how we use and protect account information. Calendar access
+                below is a separate, optional connection.
+              </p>
+            </section>
             <section>
               <h2 className="text-xl font-semibold text-[color:var(--text-primary)]">
                 What the connection does
