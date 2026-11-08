@@ -1,6 +1,6 @@
 # Accounts before purchase
 
-Prepared in PR #53 on `codex/account-access` after restaurant reservations shipped in PR #51 and the website-widget cache correction in PR #52. Migration 67 was applied to production after fresh private schema/data backups. Production account screens and Google activation follow the checked release steps below; Google remains disabled by default until provider acceptance.
+Prepared in PR #53 on `codex/account-access` after restaurant reservations shipped in PR #51 and the website-widget cache correction in PR #52. Migration 67 was applied to production after fresh private schema/data backups. Follow-up migration 68 explicitly removes hosted default write grants from the customer purchase projection. Production account screens and Google activation follow the checked release steps below; Google remains disabled by default until provider acceptance.
 
 ## Customer experience
 
@@ -41,3 +41,5 @@ No new model infrastructure, paid communication provider, live client booking ac
 Evidence: [signup](evidence/signup-desktop-20261107.png), [prospect dashboard](evidence/prospect-dashboard-20261107.png), [admin accounts](evidence/admin-accounts-desktop-20261107.png), [phone signup](evidence/signup-mobile-20261107.png), [dark phone dashboard](evidence/prospect-mobile-dark-20261107.png).
 
 Hosted evidence: [prospect](evidence/hosted-prospect-20261108.png), [owned onboarding](evidence/hosted-owned-onboarding-20261108.png), [receipt refusal](evidence/hosted-receipt-denied-20261108.png), [account directory](evidence/hosted-admin-accounts-20261108.png), [account detail](evidence/hosted-account-detail-20261108.png). Review branch: `https://vigil-studios-git-codex-account-access-vigilstudio-projects.vercel.app`.
+
+The production permission audit found default DML grants on the new purchase view. Migration 68 revokes all defaults and grants SELECT only to authenticated users. The full local migration/RLS/concurrency suite passes with an explicit hosted-default privilege assertion; no historical order is reassigned.

@@ -35,6 +35,7 @@ delete from public.orders where id='da000000-0000-4000-8000-000000000024';
 delete from public.organization_members where organization_id='da000000-0000-4000-8000-000000000011' and user_id='da000000-0000-4000-8000-000000000001';
 reset role;select set_config('request.jwt.claim.role','authenticated',true);select set_config('request.jwt.claim.sub','da000000-0000-4000-8000-000000000001',true);set local role authenticated;
 select account_test.ok((select count(*)=1 from public.my_purchase_orders),'buyer sees own pending purchase before business provisioning');
+select account_test.ok(not has_table_privilege('authenticated','public.my_purchase_orders','INSERT,UPDATE,DELETE'),'customer purchase projection is SELECT-only under hosted default grants');
 select account_test.ok((select not(to_jsonb(p)?'checkout_token') and not(to_jsonb(p)?'metadata') and not(to_jsonb(p)?'notes') and not(to_jsonb(p)?'error') from public.my_purchase_orders p limit 1),'customer purchase DTO excludes capabilities and private staff data');
 select account_test.fails($q$select public.list_customer_accounts()$q$,'42501','customer cannot read account directory');
 select account_test.fails($q$select public.claim_checkout_order('da000000-0000-4000-8000-000000000021','da000000-0000-4000-8000-000000000001',repeat('a',64))$q$,'42501','browser cannot call service-only claim function');
