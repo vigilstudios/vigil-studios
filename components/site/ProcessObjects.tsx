@@ -84,18 +84,19 @@ function CorrespondenceCabinet() {
       <Solid x={-91} y={-52} z={0} width={177} depth={111} height={13} />
       <Solid x={-82} y={-50} z={13} width={159} depth={102} height={143} />
       <Solid x={-86} y={-54} z={156} width={168} depth={111} height={8} />
-      <g className={styles.drawer}>
-        <Solid x={-73} y={17} z={104} width={137} depth={66} height={31} />
-        <polygon className={styles.recess} points={outline([-64,27,136],[55,27,136],[55,74,136],[-64,74,136])} />
-        <path className={styles.detail} d={line([-30,27,136],[-30,74,136]) + line([14,27,136],[14,74,136])} />
-        <path className={styles.ink} d={line([-20,83,119],[-20,88,119],[18,88,119],[18,83,119])} />
-      </g>
       {[21, 64].map((z) => (
         <g key={z}>
           <Solid x={-73} y={50} z={z} width={137} depth={5} height={32} />
           <path className={styles.ink} d={line([-19,55,z+14],[-19,60,z+14],[17,60,z+14],[17,55,z+14])} />
         </g>
       ))}
+      {/* The extended drawer passes in front of the lower drawer faces. */}
+      <g className={styles.drawer}>
+        <Solid x={-73} y={17} z={104} width={137} depth={66} height={31} />
+        <polygon className={styles.recess} points={outline([-64,27,136],[55,27,136],[55,74,136],[-64,74,136])} />
+        <path className={styles.detail} d={line([-30,27,136],[-30,74,136]) + line([14,27,136],[14,74,136])} />
+        <path className={styles.ink} d={line([-20,83,119],[-20,88,119],[18,88,119],[18,83,119])} />
+      </g>
       <g className={styles.letter}>
         <polygon className={styles.paper} points={outline([-32,25,171],[41,25,171],[41,69,171],[-32,69,171])} />
         <path className={styles.signal} d={line([-32,25,171],[5,54,171],[41,25,171])} />
@@ -106,26 +107,35 @@ function CorrespondenceCabinet() {
 }
 
 function ReservationPress() {
+  const [dateX, dateY] = project([0, 40, 45]);
+  const [handleX, handleY] = project([105, -28, 123]);
   return (
     <>
       <Solid x={-92} y={-69} z={0} width={185} depth={125} height={13} />
       <Solid x={-66} y={-44} z={13} width={132} depth={87} height={31} />
+      <path className={styles.detail} d={line([-58,43,26],[56,43,26])} />
       <Solid x={-63} y={-44} z={44} width={25} depth={34} height={112} />
-      <Solid x={41} y={-44} z={44} width={24} depth={34} height={112} />
-      <Solid x={-65} y={-48} z={155} width={132} depth={45} height={14} />
-      <path className={styles.detail} d={line([-55,-49,163],[58,-49,163]) + line([-58,43,26],[56,43,26])} />
       <g className={styles.ticket}>
         <polygon className={styles.paper} points={outline([-38,6,45],[36,6,45],[36,102,45],[-38,102,45])} />
-        <path className={styles.detail} d={line([-28,37,45],[23,37,45]) + line([-28,47,45],[4,47,45]) + line([-28,57,45],[15,57,45])} />
         <path className={styles.guide} d={line([-37,70,45],[35,70,45])} />
-        <path className={styles.signal} d={line([-4,82,45],[3,91,45],[20,78,45])} />
+        <g transform={`matrix(.866 .5 -.866 .5 ${dateX} ${dateY})`}>
+          <text className={styles.dateInk} textAnchor="middle">
+            <tspan x="0" y="-5" fontSize="14">NOV</tspan>
+            <tspan x="0" y="18" fontSize="28">18</tspan>
+          </text>
+        </g>
       </g>
+      {/* The ram overlaps the stamp head. The right pillar and beam cover the assembly. */}
       <g className={styles.stamp}>
-        <Solid x={-8} y={-20} z={99} width={17} depth={16} height={56} />
         <Solid x={-33} y={-23} z={89} width={68} depth={42} height={12} />
+        <Solid x={-5} y={-17} z={99} width={11} depth={10} height={56} />
       </g>
+      <Solid x={-8} y={-20} z={108} width={17} depth={16} height={48} />
+      <Solid x={41} y={-44} z={44} width={24} depth={34} height={112} />
+      <Solid x={-65} y={-48} z={155} width={132} depth={45} height={14} />
+      <path className={styles.detail} d={line([-55,-49,163],[58,-49,163])} />
       <path className={styles.ink} d={line([61,-21,145],[95,-28,117],[105,-28,123])} />
-      <circle className={styles.signalDot} cx={project([105,-28,123])[0]} cy={project([105,-28,123])[1]} r="4" />
+      <circle className={styles.signalDot} cx={handleX} cy={handleY} r="4" />
     </>
   );
 }

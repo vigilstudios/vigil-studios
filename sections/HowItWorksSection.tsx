@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { journeyStages } from "@/components/site/journey-stages";
 import { clamp, PHASE, rng, setStoryProgress } from "@/components/site/story/progress";
+import { ProcessHeading } from "@/components/site/ProcessHeading";
 import { ProcessObject } from "@/components/site/ProcessObjects";
 import styles from "./home-process.module.css";
 
@@ -144,7 +145,7 @@ export function HowItWorksSection({ hero }: { hero: ReactNode }) {
                     <div className={styles.copy}>
                       <p className={styles.eyebrow}><span /> The Vigil process <b>0{index + 1} / 0{journeyStages.length}</b></p>
                       <p className={styles.chapterName}>{name}</p>
-                      <h3 id={`${id}-title`}>{title}</h3>
+                      <ProcessHeading id={`${id}-title`} title={title} active={active === index} />
                       <p className={styles.description}>{body}</p>
                       <Link href={href} prefetch={false} className={styles.detailLink}>{link} <ArrowUpRight size={15} aria-hidden /></Link>
                     </div>
@@ -169,7 +170,7 @@ export function HowItWorksSection({ hero }: { hero: ReactNode }) {
               ))}
             </ol>
           </nav>
-          <a href="#start" className={styles.skip}>Find where you are <ArrowDown size={15} aria-hidden /></a>
+          <a href="#start" className={`btn-primary ${styles.skip}`}>Find where you are <ArrowDown size={15} aria-hidden /></a>
         </div>
       </div>
       <div className={styles.stop} ref={originRef} data-home-snap aria-hidden="true" />

@@ -56,6 +56,14 @@
 .signal { stroke: var(--object-signal); }
 .signalDot { stroke: var(--object-signal); fill: var(--object-signal); }
 
+.dateInk {
+  fill: var(--object-signal);
+  stroke: none;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-weight: 700;
+  letter-spacing: .045em;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .figure[data-active="true"] .ruler { animation: align 1.4s .15s ease-out both; }
   .figure[data-active="true"] .blueprint .signal { stroke-dasharray: 1; animation: sketch .85s .45s ease-out both; }
@@ -64,6 +72,7 @@
   .figure[data-active="true"] .letter { animation: deliver 1.45s .25s ease-out both; }
   .figure[data-active="true"] .stamp { animation: stamp 1.4s .2s ease-in-out both; }
   .figure[data-active="true"] .ticket { animation: feed 1.55s .15s ease-out both; }
+  .figure[data-active="true"] .dateInk { animation: print 1.4s .2s step-end both; }
   .figure[data-active="true"] .scope { transform-origin: 260px 166px; animation: aim 1.5s .15s cubic-bezier(.2,.8,.3,1) both; }
   .figure[data-active="true"] .constellation { animation: acquire 1s .7s ease both; }
 }
@@ -71,10 +80,11 @@
 @keyframes align { from { transform: translate(24px, -14px); } to { transform: translate(0, 0); } }
 @keyframes sketch { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 @keyframes lift { 0%, 18% { transform: translateY(23px); } 100% { transform: translateY(-34px); } }
-@keyframes open { from { transform: translate(19px, -11px); } to { transform: translate(-22px, 13px); } }
+@keyframes open { from { transform: translate(24.25px, -14px); } to { transform: translate(-22px, 13px); } }
 @keyframes deliver { from { transform: translate(37px, -60px); opacity: 0; } to { transform: translate(-28px, 28px); opacity: 1; } }
-@keyframes stamp { 0%, 21%, 80%, 100% { transform: translateY(0); } 53%, 62% { transform: translateY(35px); } }
-@keyframes feed { 0%, 45% { transform: translate(23px, -14px); } 100% { transform: translate(-16px, 9px); } }
+@keyframes stamp { 0%, 22%, 82%, 100% { transform: translateY(0); } 54%, 63% { transform: translateY(44px); } }
+@keyframes feed { 0%, 62% { transform: translate(34.64px, -20px); } 100% { transform: translate(-16px, 9px); } }
+@keyframes print { from { opacity: 0; } 54%, to { opacity: 1; } }
 @keyframes aim { from { transform: rotate(8deg); } to { transform: rotate(-21deg); } }
 @keyframes acquire { from { opacity: .15; } to { opacity: 1; } }
 

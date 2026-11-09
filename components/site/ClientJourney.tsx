@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, CircleDot, Layers3 } from "lucide-react";
+import { ProcessHeading } from "./ProcessHeading";
 import { ProcessObject } from "./ProcessObjects";
 import { journeyStages } from "./journey-stages";
 import styles from "./client-journey.module.css";
@@ -36,7 +37,7 @@ export function ClientJourney() {
         <div id={`${id}-detail`} className={styles.detail} aria-live="polite">
           <div key={step.name} className={styles.detailCopy}>
             <p className={styles.kicker}><CircleDot size={13} aria-hidden /> {step.label}</p>
-            <h3>{step.title}</h3>
+            <ProcessHeading title={step.title} active />
             <p>{step.body}</p>
             <Link href={step.href}>{step.link} <ArrowRight size={16} aria-hidden /></Link>
           </div>

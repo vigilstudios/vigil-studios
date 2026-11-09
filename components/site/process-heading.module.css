@@ -1,0 +1,28 @@
+@media (prefers-reduced-motion: no-preference) {
+  .heading[data-typing="true"] .character {
+    --typing-tick: 24ms;
+    --typing-delay: calc(110ms + var(--character) * var(--typing-tick));
+    position: relative;
+    animation: type-letter 1ms step-end var(--typing-delay) both;
+  }
+
+  .heading[data-typing="true"] .character::after {
+    position: absolute;
+    inset: .12em -.055em .12em auto;
+    width: .035em;
+    background: var(--process-ink, var(--accent));
+    content: "";
+    animation: type-caret var(--typing-tick) step-end var(--typing-delay) both;
+    pointer-events: none;
+  }
+}
+
+@keyframes type-letter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes type-caret {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
