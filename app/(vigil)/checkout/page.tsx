@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { publishedExpressTemplates } from "@/lib/vigil/express/library";
 import { getCheckoutCatalog } from "@/lib/vigil/queries/checkout";
@@ -44,6 +46,12 @@ export default async function CheckoutPage({
           (t) => t.slug === slug && t.status === "available",
         ) ?? null)
       : null;
+  if (projectKind === "express" && !template)
+    return (
+      <CheckoutShell title="Choose your Express design" subtitle="Preview a design before choosing a plan and paying.">
+        <Link href="/express" className="btn-primary min-h-11">Browse Express designs</Link>
+      </CheckoutShell>
+    );
   const catalog = await getCheckoutCatalog();
   const build = catalog.builds.find((b) => b.kind === projectKind) ?? null;
 
@@ -56,7 +64,7 @@ export default async function CheckoutPage({
             ? `Your ${template.industry} website`
             : "Start your Vigil website"
       }
-      subtitle="Choose your hosting plan and confirm your details."
+      subtitle="Review your build and choose the Vigil plan that goes with it."
     >
       {params.canceled ? (
         <p className="mb-4 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-surface)] px-3 py-2 text-xs text-[color:var(--text-secondary)]">
@@ -65,6 +73,7 @@ export default async function CheckoutPage({
         </p>
       ) : null}
       <CheckoutForm
+        requestId={randomUUID()}
         plans={catalog.plans}
         build={
           build?.synced
@@ -87,7 +96,7 @@ export default async function CheckoutPage({
         }}
         accountEmail={viewer.user.email!}
         locked={null}
-        termsUrl={process.env.NEXT_PUBLIC_TERMS_URL ?? null}
+        termsUrl={process.env.NEXT_PUBLIC_TERMS_URL || "/terms"}
         refundNote={process.env.NEXT_PUBLIC_REFUND_NOTE ?? null}
       />
     </CheckoutShell>

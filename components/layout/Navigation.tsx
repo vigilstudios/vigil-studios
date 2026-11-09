@@ -61,6 +61,7 @@ export function Navigation() {
   }, [home]);
 
   const pages = [
+    { href: "/process", label: "Process" },
     { href: "/pricing", label: "Pricing" },
     { href: "/#get-started", label: "Contact" },
   ];
@@ -87,7 +88,7 @@ export function Navigation() {
             : "border-transparent bg-transparent"
       }`}
     >
-      <div className="grid h-11 grid-cols-[1fr_auto] items-center px-5 md:h-16 md:grid-cols-[1fr_auto_1fr] md:px-10">
+      <div className="grid h-11 grid-cols-[1fr_auto] items-center px-5 md:h-16 md:grid-cols-[1fr_auto_1fr] md:px-6 xl:px-10">
         <Link
           prefetch={false}
           href="/"
@@ -98,7 +99,7 @@ export function Navigation() {
         </Link>
 
         {/* Desktop */}
-        <div className="hidden h-full items-center gap-[34px] md:flex">
+        <div className="hidden h-full items-center gap-4 md:flex xl:gap-[34px]">
           <ProductsMenu />
           {pages.map((item) => (
             <Link
@@ -111,7 +112,7 @@ export function Navigation() {
             </Link>
           ))}
         </div>
-        <div className="hidden items-center justify-end gap-[30px] md:flex">
+        <div className="hidden items-center justify-end gap-3 md:flex xl:gap-[30px]">
           <Link prefetch={false} href="/login" className={quiet}>
             Sign in
           </Link>

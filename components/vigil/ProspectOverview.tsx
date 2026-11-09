@@ -9,8 +9,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { getMyPurchases } from "@/lib/vigil/queries/account";
-import { Card, StatusPill } from "./ui";
-import { formatDate } from "@/lib/vigil/format";
+import { Card } from "./ui";
+import { PurchaseList } from "./PurchaseList";
 
 export function ProspectOverviewContent({
   name,
@@ -79,51 +79,7 @@ export function ProspectOverviewContent({
           </p>
         </div>
       </Card>
-      {!!purchases.length && (
-        <Card className="!rounded-2xl !p-5">
-          <h2 className="font-semibold">Your purchases</h2>
-          <div className="mt-3 divide-y divide-[color:var(--border)]">
-            {purchases.map((p) => (
-              <div
-                key={p.id}
-                className="flex flex-wrap items-center justify-between gap-3 py-4"
-              >
-                <div>
-                  <p className="text-sm font-medium">{p.business_name}</p>
-                  <p className="mt-1 text-xs text-[color:var(--text-secondary)]">
-                    {p.project_kind} website · {formatDate(p.created_at ?? "")}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <StatusPill
-                    tone={
-                      p.status === "paid" || p.status === "provisioned"
-                        ? "good"
-                        : "neutral"
-                    }
-                  >
-                    {p.status === "paid"
-                      ? "Preparing your project"
-                      : p.status === "provisioned"
-                        ? "Ready"
-                        : p.status === "pending"
-                          ? "Checkout started"
-                          : p.status}
-                  </StatusPill>
-                  {p.status === "pending" && (
-                    <Link
-                      href={`/dashboard/purchases/${p.id}`}
-                      className="text-xs font-medium underline"
-                    >
-                      Continue checkout
-                    </Link>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
+      {!!purchases.length && <PurchaseList purchases={purchases} />}
       <section>
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-sm font-semibold">

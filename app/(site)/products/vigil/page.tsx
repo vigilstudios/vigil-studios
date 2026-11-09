@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, CreditCard, Globe, Lock, MonitorSmartphone, RefreshCw, Shield } from "lucide-react";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardRow } from "@/components/site/Cards";
-import { DashboardMock } from "@/components/site/DashboardMock";
+import { WorkspaceFeatures } from "@/components/site/WorkspaceFeatures";
 import { Chip, Container, Eyebrow, Section, SectionIntro } from "@/components/site/primitives";
 import { Reveal } from "@/components/site/Reveal";
 import { planBullets, planHasVirtue } from "@/lib/vigil/plan-presentation";
@@ -15,7 +15,7 @@ import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
 
 export const metadata: Metadata = {
   title: "The Vigil platform | Vigil Studios",
-  description: "Vigil is the dashboard and the team behind every Vigil website: hosting, domain, security, updates, requests and billing, said in outcomes rather than settings.",
+  description: "Manage website inquiries, bookings, reports, updates, hosting, and billing with Vigil.",
   alternates: { canonical: "/products/vigil" },
 };
 
@@ -34,23 +34,19 @@ export default async function VigilPage() {
   return (
     <>
       {/* Landing: the words, then the dashboard itself, cropped like a window onto the product. */}
-      <section className="relative overflow-hidden pt-32 sm:pt-40">
+      <section className="relative overflow-hidden pb-14 pt-32 sm:pb-20 sm:pt-40">
         <Container>
           <Reveal>
-            <SectionIntro eyebrow="Vigil" tone="teal" title={VIGIL_PAGE.title} lead={VIGIL_PAGE.lead} />
+            <SectionIntro heading="h1" eyebrow="Vigil" tone="teal" title={VIGIL_PAGE.title} lead={VIGIL_PAGE.lead} />
           </Reveal>
           <Reveal delay={0.1} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link href={VIGIL_PAGE.primary.href} className="btn-primary min-h-12 !px-6 text-sm font-semibold">{VIGIL_PAGE.primary.label} <ArrowRight className="ml-2 h-4 w-4" /></Link>
             <Link href={VIGIL_PAGE.secondary.href} className="btn-secondary min-h-12 !px-6 text-sm font-medium">{VIGIL_PAGE.secondary.label}</Link>
           </Reveal>
-          <Reveal delay={0.2} className="relative mt-14 sm:mt-20">
-            <div className="overflow-hidden rounded-t-2xl border border-b-0 border-[color:var(--border)] bg-[color:var(--bg-primary)] shadow-[0_-20px_80px_-40px_rgba(0,0,0,0.6)]">
-              <DashboardMock className="max-h-[520px]" />
-            </div>
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-[linear-gradient(to_bottom,transparent,var(--bg-section-alt))]" aria-hidden />
-          </Reveal>
         </Container>
       </section>
+
+      <WorkspaceFeatures detail />
 
       <Section alt id="experience">
         <Container>
@@ -86,17 +82,6 @@ export default async function VigilPage() {
                 </li>
               ))}
             </ul>
-            <p className="mt-6 max-w-3xl text-sm leading-6 text-[color:var(--text-secondary)]">
-              Compatible websites on Care and above can add standard appointment
-              booking after setup. Vigil manages availability, requests and
-              confirmed appointments. An optional Google Calendar connection
-              copies appointments and unavailable time to a separate calendar;
-              it does not import your other Google calendars. Read the{" "}
-              <Link href="/calendar-privacy" className="underline underline-offset-4">
-                Calendar connection privacy notice
-              </Link>
-              .
-            </p>
           </Reveal>
         </Container>
       </Section>
@@ -141,7 +126,7 @@ export default async function VigilPage() {
                   <Eyebrow tone="violet">Virtue</Eyebrow>
                   <Chip tone="violet">Growth · Priority</Chip>
                 </div>
-                <h2 className="text-2xl font-semibold tracking-tight">The employee who lives in this dashboard.</h2>
+                <h2 className="text-2xl font-semibold tracking-tight">A guide to getting set up.</h2>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)]">She guides setup on every plan. Ongoing lead follow-up, missed-call text-back and reviews are in development for eligible Growth and Priority subscriptions.</p>
               </div>
               <Link href="/products/virtue" className="btn-secondary min-h-11 shrink-0 !px-5 !py-2 text-sm font-semibold">Meet Virtue <ArrowRight className="ml-1.5 h-4 w-4" /></Link>

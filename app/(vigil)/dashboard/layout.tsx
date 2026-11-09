@@ -323,6 +323,7 @@ export default async function DashboardLayout({
       },
       {
         items: [
+          { href: "/dashboard/purchases", label: "Purchases", icon: "billing" },
           { href: "/dashboard/settings", label: "Settings", icon: "settings" },
         ],
       },

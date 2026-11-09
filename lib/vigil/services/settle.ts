@@ -40,7 +40,7 @@ export async function settleOrder(admin: DbClient, orderId: string, options: { p
     if (sessionRef) {
       const checkout = await provider.getCheckoutSession(sessionRef).catch(() => null);
       if (checkout && (checkout.paymentStatus === "paid" || checkout.paymentStatus === "no_payment_required")) {
-        status = (await completeCheckout(admin, orderId, checkout, provider)).status;
+        status = (await completeCheckout(admin, orderId, checkout)).status;
         if (status === "paid") actions.push("completed");
       }
     }

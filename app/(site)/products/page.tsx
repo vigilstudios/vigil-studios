@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Check, CreditCard, Globe, Lock, MonitorSmartphone, RefreshCw, Shield } from "lucide-react";
+import { WorkspaceFeatures } from "@/components/site/WorkspaceFeatures";
 import { WebsiteFitCallout } from "@/components/site/WebsiteFitCallout";
 import { Footer } from "@/components/layout/Footer";
 import { Chip, Container, Eyebrow, Section, SectionIntro } from "@/components/site/primitives";
@@ -14,7 +15,7 @@ import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
 
 export const metadata: Metadata = {
   title: "Products | Vigil Studios",
-  description: "Websites built for you, the Vigil platform that keeps them running, and Virtue, the AI employee inside it.",
+  description: "Explore Vigil website packages, managed care, Lead Hub, Bookings, reporting, and guided setup.",
   alternates: { canonical: "/products" },
 };
 
@@ -34,7 +35,7 @@ export default async function ProductsPage() {
     <>
       <Section className="pt-32 sm:pt-40">
         <Container>
-          <SectionIntro eyebrow="Products" title="A website to start with. A platform that keeps it running. An employee inside it." lead="Three parts, one relationship. This page walks through each one and what it costs." />
+          <SectionIntro heading="h1" eyebrow="Products" title="A website built for you. A workspace for everything after." lead="Choose a build, pick a Vigil plan, and bring the tools you need into your dashboard." />
           <div className="mt-8 flex flex-wrap gap-2">
             <Link href="/products/websites" className="btn-secondary min-h-10 !px-4 !py-1.5 text-sm">Websites <ArrowUpRight className="ml-1 h-3.5 w-3.5" /></Link>
             <Link href="/products/vigil" className="btn-secondary min-h-10 !px-4 !py-1.5 text-sm">The Vigil platform <ArrowUpRight className="ml-1 h-3.5 w-3.5" /></Link>
@@ -70,6 +71,8 @@ export default async function ProductsPage() {
           <p className="mt-4 text-center text-xs text-[color:var(--text-secondary)]">{templates.filter((t) => t.status === "available").length} industries ready today · {templates.filter((t) => t.status === "coming").length} under construction</p>
         </Container>
       </Section>
+
+      <WorkspaceFeatures />
 
       <Section id="vigil">
         <Container>
@@ -117,7 +120,7 @@ export default async function ProductsPage() {
                 <Eyebrow tone="violet">Virtue</Eyebrow>
                 <Chip tone="violet">Growth · Priority</Chip>
               </div>
-              <h2 className="text-2xl font-semibold tracking-tight">The employee who lives in your dashboard.</h2>
+              <h2 className="text-2xl font-semibold tracking-tight">A guide for your first steps.</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)]">Virtue guides setup for every customer. Ongoing lead follow-up, missed-call text-back and reviews are in development for eligible Growth and Priority subscriptions.</p>
             </div>
             <Link href="/products/virtue" className="btn-secondary min-h-11 shrink-0 !px-5 !py-2 text-sm font-semibold">Meet Virtue <ArrowRight className="ml-1.5 h-4 w-4" /></Link>

@@ -12,6 +12,8 @@ import { requireAdminOrThrow, requireStaffOrThrow } from "@/lib/vigil/auth/sessi
 import { button, escapeHtml, layout, sendEmail } from "@/lib/vigil/email";
 import { enqueueJob, JOB_KINDS, runDueJobs } from "@/lib/vigil/jobs";
 import { syncCatalogToProvider, type SyncReport } from "@/lib/vigil/services/catalog";
+import { hasCheckoutAttempt } from "@/lib/vigil/services/orders";
+import { getBillingProvider } from "@/lib/vigil/providers/registry";
 import { isPublishedExpressSlug } from "@/lib/vigil/express/library";
 
 async function appUrl(): Promise<string> {
@@ -121,13 +123,23 @@ export async function markOrderPaidAndProvision(orderId: string): Promise<Action
     await requireStaffOrThrow();
     if (!hasAdminClient()) throw new ProviderNotConfiguredError("Service role");
     const admin = createAdminClient();
-    const { data: order } = await admin.from("orders").select("id, status").eq("id", orderId).maybeSingle();
+    const { data: order, error: readError } = await admin.from("orders")
+      .select("id, status, metadata, updated_at").eq("id", orderId).maybeSingle();
+    if (readError) throw readError;
     if (!order) throw new NotFoundError();
     if (order.status === "pending") {
-      const { error } = await admin.from("orders").update({ status: "paid", paid_at: new Date().toISOString() }).eq("id", orderId);
+      if (hasCheckoutAttempt(order.metadata))
+        throw new ValidationError("This order has a Stripe payment attempt. Confirm it in Stripe and use reconciliation.");
+      const { data, error } = await admin.from("orders")
+        .update({ status: "paid", paid_at: new Date().toISOString() })
+        .eq("id", orderId).eq("status", "pending").eq("updated_at", order.updated_at)
+        .select("id").maybeSingle();
       if (error) throw error;
+      if (!data) throw new ValidationError("This order changed. Reload and check its payment status.");
+    } else if (order.status !== "paid" && order.status !== "provisioned") {
+      throw new ValidationError("This order can no longer be marked paid.");
     }
-    await enqueueJob(admin, { kind: JOB_KINDS.orderProvision, idempotencyKey: `order.provision:${orderId}`, payload: { order_id: orderId }, maxAttempts: 8 });
+    await enqueueJob(admin, { kind: JOB_KINDS.orderProvision, idempotencyKey: `order.provision:${orderId}`, payload: { order_id: orderId }, maxAttempts: 8, requeueFailed: true });
     const outcomes = await runDueJobs(admin, { worker: "console", limit: 5 });
     const mine = outcomes.find((o) => o.kind === JOB_KINDS.orderProvision);
     if (mine && mine.status === "failed") throw new ValidationError(mine.error ?? "Provisioning failed.");
@@ -144,8 +156,29 @@ export async function cancelOrder(orderId: string): Promise<ActionResult> {
   try {
     await requireStaffOrThrow();
     const supabase = await createClient();
-    const { error } = await supabase.from("orders").update({ status: "expired" }).eq("id", orderId).eq("status", "pending");
+    const { data: order, error: readError } = await supabase.from("orders")
+      .select("status, metadata, updated_at").eq("id", orderId).maybeSingle();
+    if (readError) throw readError;
+    if (!order || order.status !== "pending") throw new ValidationError("Only an unpaid order can be closed.");
+    const metadata = order.metadata as { checkout_session?: string; checkout_attempt?: unknown } | null;
+    if (metadata?.checkout_session) {
+      const provider = getBillingProvider();
+      const session = await provider.getCheckoutSession(metadata.checkout_session);
+      if (!session || session.status === "complete")
+        throw new ValidationError("Confirm the payment status in Stripe before closing this order.");
+      if (session.status === "open") {
+        if (!provider.expireCheckoutSession)
+          throw new ValidationError("Expire the open payment session in Stripe before closing this order.");
+        await provider.expireCheckoutSession(session.externalId);
+      }
+    } else if (metadata?.checkout_attempt) {
+      throw new ValidationError("A payment page may still be opening. Check the order in Stripe before closing it.");
+    }
+    const { data, error } = await supabase.from("orders").update({ status: "expired" })
+      .eq("id", orderId).eq("status", "pending").eq("updated_at", order.updated_at)
+      .select("id").maybeSingle();
     if (error) throw error;
+    if (!data) throw new ValidationError("This order changed. Reload and check its payment status.");
     revalidatePath("/admin/orders");
     return { ok: true, data: undefined };
   } catch (error) {

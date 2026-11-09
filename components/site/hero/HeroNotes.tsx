@@ -16,7 +16,11 @@ import { PHASE, rng, subscribeStory } from "@/components/site/story/progress";
  * inside a ref: nothing here re-renders React.
  */
 type Pair = [problem: string, handled: string, tone?: "warn"];
+const BOOKING_ALERT: Pair = ["Booking request received", "Booking confirmed", "warn"];
+const LEAD_ALERT: Pair = ["New website inquiry", "New inquiry in Lead Hub"];
 const PAIRS: Pair[] = [
+  BOOKING_ALERT,
+  LEAD_ALERT,
   ["SSL certificate needs attention", "SSL and security managed", "warn"],
   ["Is the site online?", "Website status in your dashboard"],
   ["Deployment ready", "Site published on your domain"],
@@ -29,7 +33,6 @@ const PAIRS: Pair[] = [
   ["Image too large", "Images optimized for the site", "warn"],
   ["Need the site's code", "Export from your dashboard"],
   ["Send brand photos", "Assets saved for the team"],
-  ["New website enquiry", "Contact details reach your business"],
   ["Original interactions needed", "Bespoke work scoped with the team", "warn"],
   ["Lead follow-up automation", "In development for eligible plans", "warn"],
   ["Website ready for review", "Your feedback reaches the team"],
@@ -65,10 +68,13 @@ export function HeroNotes({ good = false, items, avoid, count }: { good?: boolea
     resize.observe(host);
     const phone = () => width < 760;
     const slots: Slot[] = [];
-    let deck: number[] = [];
     const pool: Pair[] = goodItems ? goodItems.map((t) => [t, t]) : PAIRS;
+    const shuffled = () => pool.map((_, i) => i).sort(() => Math.random() - 0.5);
+    // Introduce both new dashboard alerts in the first rotation.
+    const first = goodItems ? [] : [pool.indexOf(LEAD_ALERT), pool.indexOf(BOOKING_ALERT)];
+    let deck = [...shuffled().filter((index) => !first.includes(index)), ...first];
     const next = () => {
-      if (!deck.length) deck = pool.map((_, i) => i).sort(() => Math.random() - 0.5);
+      if (!deck.length) deck = shuffled();
       return pool[deck.pop()!];
     };
     // an ellipse around the mark (which sits at 50 % / 45 %), never over the words below it, never off the edge;

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { parseBrief, type Brief } from "@/lib/vigil/onboarding/brief";
 import type { Project } from "@/lib/vigil/types";
@@ -10,15 +11,17 @@ import type { Project } from "@/lib/vigil/types";
  * collecting details, else the newest that is not closed. Null means the
  * organization has no project to onboard.
  */
-export const getOnboardingProject = cache(async (organizationId: string): Promise<{ project: Project; brief: Brief } | null> => {
+export const getOnboardingProject = cache(async (organizationId: string, projectId?: string): Promise<{ project: Project; brief: Brief } | null> => {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const query = supabase
     .from("projects")
     .select("*")
     .eq("organization_id", organizationId)
     .not("status", "in", "(closed,cancelled)")
     .order("created_at", { ascending: false })
     .limit(10);
+  if (projectId && z.uuid().safeParse(projectId).success) query.eq("id", projectId);
+  const { data, error } = await query;
   if (error) throw error;
   const rows = data ?? [];
   const project = rows.find((p) => p.status === "intake" && !p.intake_completed_at) ?? rows.find((p) => p.status === "intake" || p.status === "draft") ?? rows[0] ?? null;

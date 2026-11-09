@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createAdminClient, hasAdminClient } from "@/lib/supabase/admin";
 import { publishedExpressTemplates } from "@/lib/vigil/express/library";
 import { getCheckoutCatalog } from "@/lib/vigil/queries/checkout";
 import { CheckoutForm } from "../CheckoutForm";
 import { CheckoutShell } from "../CheckoutShell";
 import Link from "next/link";
+import { billingPeriod } from "@/lib/vigil/billing-periods";
+import { getBillingProvider } from "@/lib/vigil/providers/registry";
 import { requireCheckoutViewer } from "@/lib/vigil/auth/checkout-access";
 
 export const metadata: Metadata = {
@@ -30,7 +32,7 @@ export default async function TokenCheckoutPage({
   const { data: order } = await admin
     .from("orders")
     .select(
-      "id, status, email, buyer_user_id, expires_at, contact_name, business_name, project_kind, template_slug, build_amount_cents, currency, plan:plans(code)",
+      "id, status, email, buyer_user_id, expires_at, contact_name, business_name, project_kind, template_slug, build_amount_cents, currency, metadata, plan:plans(code), price:plan_prices(interval,interval_count)",
     )
     .eq("checkout_token", token)
     .maybeSingle();
@@ -46,9 +48,10 @@ export default async function TokenCheckoutPage({
           Sign in with the account this order was prepared for, or contact Vigil
           if it needs to be updated.
         </p>
-        <Link href="/dashboard" className="btn-secondary mt-5 min-h-11 text-sm">
-          Back to dashboard
-        </Link>
+        <form action={`/auth/signout?next=${encodeURIComponent(`/checkout/${token}`)}`} method="post" className="mt-5 flex flex-wrap gap-2">
+          <button type="submit" className="btn-primary min-h-11 text-sm">Switch accounts</button>
+          <Link href="/dashboard" className="btn-secondary min-h-11 text-sm">Back to dashboard</Link>
+        </form>
       </CheckoutShell>
     );
   }
@@ -70,18 +73,20 @@ export default async function TokenCheckoutPage({
       </CheckoutShell>
     );
 
-  if (order.status !== "pending") {
-    return (
-      <CheckoutShell title="This order is already complete">
-        <p className="text-sm text-[color:var(--text-secondary)]">
-          Thanks, payment for {order.business_name} has been received.{" "}
-          <Link href="/login" className="underline">
-            Sign in
-          </Link>{" "}
-          to continue your onboarding.
-        </p>
-      </CheckoutShell>
-    );
+  if (order.status !== "pending")
+    redirect(`/checkout/success?order=${order.id}`);
+
+  const sessionRef = (order.metadata as { checkout_session?: string } | null)?.checkout_session;
+  if (sessionRef) {
+    const session = await getBillingProvider().getCheckoutSession(sessionRef).catch(() => null);
+    if (session?.status === "complete") redirect(`/checkout/success?order=${order.id}`);
+    if (session?.status === "open" && session.url)
+      return (
+        <CheckoutShell title={`Resume payment for ${order.business_name}`} subtitle="Your order is saved. Continue to Stripe to review the same payment.">
+          <a href={session.url} className="btn-primary min-h-11">Resume secure checkout</a>
+          <Link href="/dashboard" className="btn-secondary ml-2 min-h-11">Back to dashboard</Link>
+        </CheckoutShell>
+      );
   }
 
   const catalog = await getCheckoutCatalog();
@@ -131,10 +136,11 @@ export default async function TokenCheckoutPage({
           businessName: order.business_name,
           contactName: order.contact_name ?? undefined,
           planCode: order.plan?.code,
+          billingPeriod: order.price ? billingPeriod(order.price.interval, order.price.interval_count)?.key : undefined,
         }}
         accountEmail={viewer.user.email!}
         locked={{ orderId: order.id, checkoutToken: token }}
-        termsUrl={process.env.NEXT_PUBLIC_TERMS_URL ?? null}
+        termsUrl={process.env.NEXT_PUBLIC_TERMS_URL || "/terms"}
         refundNote={process.env.NEXT_PUBLIC_REFUND_NOTE ?? null}
       />
     </CheckoutShell>

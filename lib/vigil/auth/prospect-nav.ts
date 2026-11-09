@@ -102,6 +102,7 @@ export const prospectNavigation: NavGroup[] = [
   },
   {
     items: [
+      { href: "/dashboard/purchases", label: "Purchases", icon: "billing" },
       { href: "/dashboard/settings", label: "Settings", icon: "settings" },
     ],
   },

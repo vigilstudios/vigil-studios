@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { Footer } from "@/components/layout/Footer";
 import { Container, Section, SectionIntro } from "@/components/site/primitives";
@@ -19,17 +20,17 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
   return (
     <>
       {/* The whole price in one room: Websites (paid once) and Subscriptions (ongoing), one tab at a time. */}
-      <Section id="pricing" fill className="md:py-20!">
+      <Section id="pricing" className="pt-28 sm:pt-36">
         <Container>
           <Reveal>
-            <SectionIntro align="center" eyebrow="Pricing" title="One payment to build. One plan to keep it running." />
+            <SectionIntro heading="h1" align="center" eyebrow="Pricing" title="Pay once for the build. Pick a plan for what follows." lead="Your first payment includes your website build and the first billing period. You’ll see both before checkout." />
           </Reveal>
           <Reveal delay={0.1} className="mt-8">
             <PricingTabs plans={plans} builds={builds} initialTab={initialTab} />
           </Reveal>
           <Reveal delay={0.2}>
             <p className="mx-auto mt-5 max-w-5xl text-center text-xs leading-5 text-[color:var(--text-secondary)]">
-              Care and higher include self-service Content Hub editing for configured Professional and Growth websites, plus changes performed by Vigil’s team. Express and Basic keep the Hub locked. Every Vigil website needs a plan; Basic is the floor. Prices in USD; annual and three-year plans are paid up front. Cancel any time; your site and domain stay yours.
+              Basic covers managed hosting. Care and higher add website change requests and optional Bookings on compatible sites. Content Hub editing is available on eligible Professional and Growth sites with Care or higher. <Link href="/products/vigil#workspace" className="underline underline-offset-4">Explore the workspace.</Link> Prices are in USD. Annual and three-year plans are paid up front.
             </p>
           </Reveal>
         </Container>

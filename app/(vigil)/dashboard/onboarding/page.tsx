@@ -21,12 +21,12 @@ export const metadata: Metadata = { title: "Getting set up" };
  * Virtue-guided onboarding. One project per organization goes through it;
  * the brief in `projects.brief` is the single source of what was answered.
  */
-export default async function OnboardingPage({ searchParams }: { searchParams: Promise<{ step?: string }> }) {
+export default async function OnboardingPage({ searchParams }: { searchParams: Promise<{ step?: string; project?: string }>  }) {
   const ctx = await requireOrgContext("/dashboard/onboarding");
-  const found = await getOnboardingProject(ctx.organization.id);
+  const { step: requested, project: projectId } = await searchParams;
+  const found = await getOnboardingProject(ctx.organization.id, projectId);
   if (!found) redirect("/dashboard");
   const { project, brief } = found;
-  const { step: requested } = await searchParams;
   const projectSteps = stepsForProjectKind(project.kind);
   const initialStep: StepKey = requested && (projectSteps as readonly string[]).includes(requested) ? (requested as StepKey) : resumeStep(brief, project.kind);
 

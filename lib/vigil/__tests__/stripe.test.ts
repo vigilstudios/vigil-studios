@@ -36,13 +36,13 @@ describe("StripeBillingProvider.createCheckoutSession", () => {
       mode: "subscription",
       lineItems: [{ priceExternalId: "price_care_month" }, { adHoc: { name: "Express build", amountCents: 50915, currency: "usd" } }],
       customerEmail: "test@example.test", successUrl: "https://example.test/success", cancelUrl: "https://example.test/cancel",
-      reference: { order_id: "ord_offer" }, allowPromotionCodes: false,
+      reference: { order_id: "ord_offer" }, allowPromotionCodes: false, idempotencyKey: "checkout-attempt",
     });
     expect(create).toHaveBeenCalledWith(expect.objectContaining({
       mode: "subscription", allow_promotion_codes: false,
       line_items: [{ price: "price_care_month", quantity: 1 }, { quantity: 1, price_data: { currency: "usd", unit_amount: 50915, product_data: { name: "Express build" } } }],
       subscription_data: { metadata: { order_id: "ord_offer" } },
-    }));
+    }), { idempotencyKey: "checkout-attempt" });
     create.mockRestore();
   });
 });

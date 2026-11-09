@@ -54,7 +54,7 @@ export class StripeBillingProvider implements BillingProvider {
         billing_address_collection: input.collectTax ? "required" : "auto",
         // Stripe only allows customer_update when the session is for an existing customer.
         ...(input.collectTax && input.customerExternalId ? { customer_update: { address: "auto", name: "auto" } } : {}),
-      })
+      }, { idempotencyKey: input.idempotencyKey })
     );
     if (!session.url) throw new ProviderError("stripe", "Stripe did not return a checkout URL.", { retryable: true });
     return { url: session.url, externalId: session.id };
@@ -63,6 +63,10 @@ export class StripeBillingProvider implements BillingProvider {
   async getCheckoutSession(externalId: string) {
     const s = await this.call(() => this.stripe.checkout.sessions.retrieve(externalId));
     return toCheckout(s);
+  }
+
+  async expireCheckoutSession(externalId: string) {
+    await this.call(() => this.stripe.checkout.sessions.expire(externalId));
   }
 
   /** Products and prices are found by lookup_key so re-running the sync is idempotent. */
@@ -123,9 +127,10 @@ export class StripeBillingProvider implements BillingProvider {
     const base = { externalEventId: event.id, rawType: event.type, raw: event };
     switch (event.type) {
       case "checkout.session.completed":
-      case "checkout.session.async_payment_succeeded": {
+      case "checkout.session.async_payment_succeeded":
+      case "checkout.session.async_payment_failed": {
         const s = event.data.object;
-        return { ...base, type: "checkout.completed", checkout: toCheckout(s), reference: s.metadata ?? {} };
+        return { ...base, type: event.type === "checkout.session.async_payment_failed" ? "checkout.failed" : "checkout.completed", checkout: toCheckout(s), reference: s.metadata ?? {} };
       }
       case "customer.subscription.created":
         return { ...base, type: "subscription.created", subscription: toSubscription(event.data.object), reference: event.data.object.metadata ?? {} };
@@ -188,6 +193,7 @@ function toSubscription(s: Stripe.Subscription): BillingSubscriptionSnapshot {
 function toCheckout(s: Stripe.Checkout.Session): BillingCheckoutSnapshot {
   return {
     externalId: s.id,
+    ...(s.url ? { url: s.url } : {}),
     status: (s.status ?? "open") as BillingCheckoutSnapshot["status"],
     paymentStatus: s.payment_status,
     customerExternalId: typeof s.customer === "string" ? s.customer : s.customer?.id ?? null,

@@ -44,6 +44,7 @@ export type BillingCheckoutInput = {
   reference: Record<string, string>;
   allowPromotionCodes?: boolean;
   collectTax?: boolean;
+  idempotencyKey?: string;
 };
 
 export type CheckoutLineItem =
@@ -53,6 +54,7 @@ export type CheckoutLineItem =
 export type BillingCheckoutSnapshot = {
   externalId: string;
   status: "open" | "complete" | "expired";
+  url?: string | null;
   paymentStatus: "paid" | "unpaid" | "no_payment_required";
   customerExternalId: string | null;
   customerEmail: string | null;
@@ -96,6 +98,7 @@ export type BillingEvent = {
     | "invoice.paid"
     | "invoice.payment_failed"
     | "checkout.completed"
+    | "checkout.failed"
     | "ignored";
   rawType: string;
   subscription?: BillingSubscriptionSnapshot;
@@ -113,6 +116,7 @@ export interface BillingProvider {
   createCustomer(input: BillingCustomerInput): Promise<{ externalId: string }>;
   createCheckoutSession(input: BillingCheckoutInput): Promise<{ url: string; externalId: string }>;
   getCheckoutSession(externalId: string): Promise<BillingCheckoutSnapshot | null>;
+  expireCheckoutSession?(externalId: string): Promise<void>;
   /** Create-or-reuse a product + price for a catalog row; returns the provider price id. */
   ensurePrice(input: CatalogPriceInput): Promise<{ externalId: string; created: boolean }>;
   getSubscription(externalId: string): Promise<BillingSubscriptionSnapshot | null>;

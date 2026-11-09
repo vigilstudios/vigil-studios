@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { safeNextPath } from "@/lib/vigil/auth/redirects";
 import { isSameOriginRequest, requestOrigin } from "@/lib/vigil/auth/origin";
 
 /**
@@ -12,5 +13,8 @@ export async function POST(request: NextRequest) {
   }
   const supabase = await createClient();
   await supabase.auth.signOut();
-  return NextResponse.redirect(`${requestOrigin(request)}/login`, { status: 303 });
+  const login = new URL("/login", requestOrigin(request));
+  const next = request.nextUrl.searchParams.get("next");
+  if (next) login.searchParams.set("next", safeNextPath(next));
+  return NextResponse.redirect(login, { status: 303 });
 }

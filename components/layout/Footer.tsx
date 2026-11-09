@@ -8,7 +8,7 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
     links: [
       { label: "Websites", href: "/products/websites" },
       { label: "Vigil Express catalogue", href: "/express" },
-      { label: "Vigil", href: "/products/vigil" },
+      { label: "Vigil dashboard", href: "/products/vigil" },
       { label: "Virtue", href: "/products/virtue" },
     ],
   },
@@ -16,7 +16,7 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
     title: "Company",
     links: [
       { label: "Pricing", href: "/pricing" },
-      { label: "How it works", href: "/#how-it-works" },
+      { label: "How it works", href: "/process" },
       { label: "Questions", href: "/#faq" },
       { label: "Contact", href: "/#get-started" },
       { label: "Service agreement", href: "/terms" },
@@ -25,6 +25,7 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
   {
     title: "Customers",
     links: [
+      { label: "Create a free account", href: "/signup" },
       { label: "Sign in", href: "/login" },
       { label: "Your dashboard", href: "/dashboard" },
       { label: "Calendar connection privacy", href: "/calendar-privacy" },

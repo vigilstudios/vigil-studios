@@ -14,6 +14,7 @@ import {
   markOrderPaidAndProvision,
 } from "@/lib/vigil/actions/admin-orders";
 import { requireStaff } from "@/lib/vigil/auth/session";
+import { hasCheckoutAttempt } from "@/lib/vigil/services/orders";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatMoney, titleCase } from "@/lib/vigil/format";
 import { describePrice } from "@/lib/vigil/billing-periods";
@@ -176,7 +177,7 @@ export default async function OrdersPage({
               </td>
               <td className={tdClass}>
                 <div className="flex flex-col gap-1">
-                  {o.status === "pending" || o.status === "paid" ? (
+                  {o.status === "paid" || (o.status === "pending" && !hasCheckoutAttempt(o.metadata)) ? (
                     <ActionButton
                       variant="link"
                       action={markOrderPaidAndProvision.bind(null, o.id)}

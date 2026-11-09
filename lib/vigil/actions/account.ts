@@ -34,13 +34,16 @@ export async function openPurchasedBusiness(orderId: string) {
   const viewer = await requireViewerOrThrow();
   const { data: order, error } = await createAdminClient()
     .from("orders")
-    .select("buyer_user_id,organization_id,status")
+    .select("buyer_user_id,organization_id,project_id,status")
     .eq("id", z.uuid().parse(orderId))
     .maybeSingle();
   if (error) throw error;
   if (
     !order ||
+    order.status !== "provisioned" ||
+    order.buyer_user_id !== viewer.user.id ||
     !order.organization_id ||
+    !order.project_id ||
     !viewer.memberships.some((m) => m.organization.id === order.organization_id)
   )
     throw new ForbiddenError(
@@ -53,5 +56,5 @@ export async function openPurchasedBusiness(orderId: string) {
     path: "/",
     maxAge: 365 * 86400,
   });
-  redirect("/dashboard/onboarding");
+  redirect(`/dashboard/onboarding?project=${encodeURIComponent(order.project_id)}`);
 }

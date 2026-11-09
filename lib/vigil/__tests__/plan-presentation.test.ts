@@ -11,7 +11,8 @@ describe("customer plan presentation", () => {
   it("distinguishes eligibility from rollout for unfinished tools", () => {
     const includes = PLAN_FEATURE_LABELS.map(([code, label]) => ({ code, label, on: true }));
     expect(planHasVirtue(includes)).toBe(true);
-    for (const code of ["virtue.enabled", "leads.enabled", "insights.enabled"]) {
+    expect(includes.find(({ code }) => code === "bookings.enabled")?.label).toBe("Optional Bookings on compatible sites");
+    for (const code of ["virtue.enabled", "insights.enabled"]) {
       expect(includes.find((feature) => feature.code === code)?.label).toContain("in development");
     }
   });

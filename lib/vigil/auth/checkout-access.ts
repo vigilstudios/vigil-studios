@@ -20,10 +20,10 @@ export function checkoutReturnPath(params: Record<string, unknown>) {
   }
   return `/checkout${query.size ? `?${query}` : ""}`;
 }
-export async function requireCheckoutViewer(next: string) {
+export async function requireCheckoutViewer(next: string, entry: "signup" | "login" = "signup") {
   const viewer = await getViewer();
   if (!viewer)
-    redirect(`/signup?next=${encodeURIComponent(safeNextPath(next))}`);
+    redirect(`/${entry}?next=${encodeURIComponent(safeNextPath(next))}`);
   if (!viewer.user.email_confirmed_at || !viewer.user.email)
     redirect(
       `/login?error=email_unverified&next=${encodeURIComponent(safeNextPath(next))}`,

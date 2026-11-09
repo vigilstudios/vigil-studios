@@ -21,11 +21,11 @@ export function Eyebrow({ children, tone = "accent" }: { children: ReactNode; to
   );
 }
 
-export function SectionIntro({ eyebrow, tone, title, lead, align = "left", className }: { eyebrow?: string; tone?: "accent" | "violet" | "amber" | "teal" | "muted"; title: ReactNode; lead?: ReactNode; align?: "left" | "center"; className?: string }) {
+export function SectionIntro({ eyebrow, tone, title, lead, align = "left", heading: Heading = "h2", className }: { eyebrow?: string; tone?: "accent" | "violet" | "amber" | "teal" | "muted"; title: ReactNode; lead?: ReactNode; align?: "left" | "center"; heading?: "h1" | "h2"; className?: string }) {
   return (
     <div className={clsx("max-w-2xl", align === "center" && "mx-auto text-center", className)}>
       {eyebrow ? <Eyebrow tone={tone}>{eyebrow}</Eyebrow> : null}
-      <h2 className="text-3xl font-semibold tracking-tight text-[color:var(--text-primary)] sm:text-4xl">{title}</h2>
+      <Heading className={clsx("font-semibold tracking-tight text-[color:var(--text-primary)]", Heading === "h1" ? "font-[family-name:var(--font-space-grotesk)] text-4xl leading-[1.04] sm:text-6xl" : "text-3xl sm:text-4xl")}>{title}</Heading>
       {lead ? <p className="mt-4 text-base leading-7 text-[color:var(--text-secondary)] sm:text-lg sm:leading-8">{lead}</p> : null}
     </div>
   );
