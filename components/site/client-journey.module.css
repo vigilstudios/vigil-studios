@@ -82,21 +82,11 @@
 .stops button[aria-pressed="true"] { border-color: var(--accent); color: var(--text-primary); background: color-mix(in srgb, var(--accent) 11%, var(--bg-primary)); }
 .stops button[aria-pressed="true"] svg { color: var(--accent); }
 .number { font: 500 .65rem/1 var(--font-jetbrains-mono), monospace; }
-.detail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.25rem, 5vw, 5rem); align-items: center; margin-top: .6rem; padding: clamp(1rem, 4vw, 3.5rem); border: 1px solid var(--border); border-radius: .9rem; background: var(--bg-primary); }
+.detail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.25rem, 5vw, 5rem); align-items: center; margin-top: .6rem; padding: clamp(1rem, 4vw, 3.5rem) 0; }
 .detailCopy h3 { margin-block: .6rem .85rem; font: 600 clamp(1.65rem, 3.7vw, 3.7rem)/1.04 var(--font-space-grotesk), sans-serif; letter-spacing: -.055em; text-wrap: balance; }
 .detailCopy a { margin-top: .7rem; color: var(--accent); }
-.detailCopy, .signalPanel { animation: arrive .28s ease-out both; }
+.detailCopy { animation: arrive .28s ease-out both; }
 @keyframes arrive { from { opacity: .45; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-.signalFrame { position: relative; padding: clamp(.75rem, 3vw, 2rem); border: 1px solid #345143; border-radius: .8rem; background: radial-gradient(ellipse at top right, #264c39, #0d1913 72%); color: #e7f3e9; }
-.frameMark { position: absolute; right: .2rem; bottom: .2rem; color: #a3c4b044; pointer-events: none; }
-.signalPanel { position: relative; z-index: 1; overflow: hidden; border: 1px solid #a6e6bd4d; border-radius: .65rem; background: #101d17; }
-.signalHeader { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .85rem .75rem; color: #cbe9d4; font: 500 .66rem/1.4 var(--font-jetbrains-mono), monospace; letter-spacing: .06em; text-transform: uppercase; }
-.signalHeader span, .signalRow span { display: flex; align-items: center; gap: .45rem; }
-.signalHeader small { color: #a3c4b0; text-align: right; font-size: .58rem; }
-.signalRow { display: flex; justify-content: space-between; gap: .5rem; align-items: center; padding: .75rem; border-top: 1px solid #a6e6bd29; font-size: .8rem; line-height: 1.2; }
-.signalRow span:last-child { flex: none; font-size: .68rem; color: #adc9b7; }
-.signalRow span.signalAccent { color: #a3f5b9; }
-
 @media (max-width: 56rem) {
   .stops button { grid-template-columns: 1fr; justify-items: center; gap: .4rem; text-align: center; }
 }
@@ -107,7 +97,7 @@
   .stops button { padding: .5rem .12rem; font-size: clamp(.68rem, 2.8vw, .85rem); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .detailCopy, .signalPanel { animation: none; }
+  .detailCopy { animation: none; }
   .stops button { transition: none; }
 }
 

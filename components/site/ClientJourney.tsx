@@ -2,7 +2,8 @@
 
 import { useId, useState } from "react";
 import Link from "next/link";
-import { ArrowDownRight, ArrowRight, Check, CircleDot, Layers3 } from "lucide-react";
+import { ArrowRight, CircleDot, Layers3 } from "lucide-react";
+import { ProcessObject } from "./ProcessObjects";
 import { journeyStages } from "./journey-stages";
 import styles from "./client-journey.module.css";
 
@@ -39,21 +40,7 @@ export function ClientJourney() {
             <p>{step.body}</p>
             <Link href={step.href}>{step.link} <ArrowRight size={16} aria-hidden /></Link>
           </div>
-          <div className={styles.signalFrame} aria-hidden="true">
-            <div key={step.name} className={styles.signalPanel}>
-              <div className={styles.signalHeader}>
-                <span><step.icon size={16} /> {step.name}</span>
-                <small>Illustrative preview</small>
-              </div>
-              {step.signals.map(([label, status], index) => (
-                <div className={styles.signalRow} key={label}>
-                  <span><i />{label}</span>
-                  <span className={index === 2 ? styles.signalAccent : undefined}>{index === 2 && <Check size={12} />}{status}</span>
-                </div>
-              ))}
-            </div>
-            <ArrowDownRight className={styles.frameMark} size={38} strokeWidth={1} />
-          </div>
+          <ProcessObject key={step.name} stage={step.name} active />
         </div>
       </div>
     </section>
