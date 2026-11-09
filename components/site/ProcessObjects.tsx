@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import type { journeyStages } from "./journey-stages";
 import styles from "./process-objects.module.css";
 
@@ -79,6 +79,9 @@ function LaunchPad() {
 }
 
 function CorrespondenceCabinet() {
+  const id = useId();
+  const trayClip = `${id}-tray`;
+  const sideClip = `${id}-side`;
   return (
     <>
       <Solid x={-91} y={-52} z={0} width={177} depth={111} height={13} />
@@ -90,11 +93,27 @@ function CorrespondenceCabinet() {
           <path className={styles.ink} d={line([-19,55,z+14],[-19,60,z+14],[17,60,z+14],[17,55,z+14])} />
         </g>
       ))}
-      {/* The extended drawer passes in front of the lower drawer faces. */}
+      {/* Fixed clips hide the parts of the moving drawer behind the cabinet face. */}
+      <defs>
+        <clipPath id={sideClip}>
+          <polygon points={outline([64,55,104],[64,110,104],[64,110,135],[64,55,135])} />
+        </clipPath>
+        <clipPath id={trayClip}>
+          <polygon points={outline([-73,55,135],[64,55,135],[64,110,135],[-73,110,135])} />
+        </clipPath>
+      </defs>
+      <g clipPath={`url(#${sideClip})`}>
+        <polygon className={`${styles.right} ${styles.drawer}`} points={outline([64,17,104],[64,83,104],[64,83,135],[64,17,135])} />
+      </g>
+      <g clipPath={`url(#${trayClip})`}>
+        <g className={styles.drawer}>
+          <polygon className={styles.top} points={outline([-73,17,135],[64,17,135],[64,83,135],[-73,83,135])} />
+          <polygon className={styles.recess} points={outline([-64,27,135],[55,27,135],[55,74,135],[-64,74,135])} />
+          <path className={styles.detail} d={line([-30,27,135],[-30,74,135]) + line([14,27,135],[14,74,135])} />
+        </g>
+      </g>
       <g className={styles.drawer}>
-        <Solid x={-73} y={17} z={104} width={137} depth={66} height={31} />
-        <polygon className={styles.recess} points={outline([-64,27,136],[55,27,136],[55,74,136],[-64,74,136])} />
-        <path className={styles.detail} d={line([-30,27,136],[-30,74,136]) + line([14,27,136],[14,74,136])} />
+        <polygon className={styles.left} points={outline([-73,83,104],[64,83,104],[64,83,135],[-73,83,135])} />
         <path className={styles.ink} d={line([-20,83,119],[-20,88,119],[18,88,119],[18,83,119])} />
       </g>
       <g className={styles.letter}>

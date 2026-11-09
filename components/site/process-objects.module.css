@@ -64,12 +64,18 @@
   letter-spacing: .045em;
 }
 
+/* The drawer face starts on the same plane as the two closed drawers. */
+.drawer { transform: translate(24.248px, -14px); }
+.letter { opacity: 0; }
+.figure[data-active="true"] .drawer { transform: translate(-21.65px, 12.5px); }
+.figure[data-active="true"] .letter { opacity: 1; transform: translate(-28px, 28px); }
+
 @media (prefers-reduced-motion: no-preference) {
   .figure[data-active="true"] .ruler { animation: align 1.4s .15s ease-out both; }
   .figure[data-active="true"] .blueprint .signal { stroke-dasharray: 1; animation: sketch .85s .45s ease-out both; }
   .figure[data-active="true"] .rocket { animation: lift 1.65s .1s cubic-bezier(.3,.01,.3,1) both; }
   .figure[data-active="true"] .drawer { animation: open .95s .2s cubic-bezier(.2,.8,.25,1) both; }
-  .figure[data-active="true"] .letter { animation: deliver 1.45s .25s ease-out both; }
+  .figure[data-active="true"] .letter { animation: deliver .95s .62s ease-out both; }
   .figure[data-active="true"] .stamp { animation: stamp 1.4s .2s ease-in-out both; }
   .figure[data-active="true"] .ticket { animation: feed 1.55s .15s ease-out both; }
   .figure[data-active="true"] .dateInk { animation: print 1.4s .2s step-end both; }
@@ -80,7 +86,7 @@
 @keyframes align { from { transform: translate(24px, -14px); } to { transform: translate(0, 0); } }
 @keyframes sketch { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 @keyframes lift { 0%, 18% { transform: translateY(23px); } 100% { transform: translateY(-34px); } }
-@keyframes open { from { transform: translate(24.25px, -14px); } to { transform: translate(-22px, 13px); } }
+@keyframes open { from { transform: translate(24.248px, -14px); } }
 @keyframes deliver { from { transform: translate(37px, -60px); opacity: 0; } to { transform: translate(-28px, 28px); opacity: 1; } }
 @keyframes stamp { 0%, 22%, 82%, 100% { transform: translateY(0); } 54%, 63% { transform: translateY(44px); } }
 @keyframes feed { 0%, 62% { transform: translate(34.64px, -20px); } 100% { transform: translate(-16px, 9px); } }
