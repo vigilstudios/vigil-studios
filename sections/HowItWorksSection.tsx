@@ -67,8 +67,44 @@ export function HowItWorksSection({ hero }: { hero: ReactNode }) {
       if (Math.abs(correction) > 2) root.scrollTo({ top: root.scrollTop + correction, behavior: "instant" });
     };
 
+    let wheelTime = -Infinity;
+    let wheelDistance = 0;
+    let movedThisGesture = false;
+    const onWheel = (event: WheelEvent) => {
+      if (event.ctrlKey || event.shiftKey || !event.cancelable || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+
+      const height = origin.offsetHeight;
+      const position = -distanceToStop(root, origin) / height;
+      const last = journeyStages.length;
+      const atPackages = Math.abs(position - last - 1) * height <= 2;
+      if (position < 0 || (position > last + 2 / height && !(atPackages && event.deltaY < 0))) return;
+      if (position <= 2 / height && event.deltaY < 0) return;
+
+      // A mouse notch is much smaller than a chapter. Advance once per wheel
+      // gesture so short notches work without a trackpad fling skipping chapters.
+      event.preventDefault();
+      const now = performance.now();
+      if (now - wheelTime > 160) {
+        wheelDistance = 0;
+        movedThisGesture = false;
+      }
+      wheelTime = now;
+      if (movedThisGesture) return;
+
+      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? height : 1;
+      wheelDistance += event.deltaY * unit;
+      if (Math.abs(wheelDistance) < 20) return;
+      movedThisGesture = true;
+      const next = Math.round(position) + Math.sign(wheelDistance);
+      root.scrollTo({
+        top: root.scrollTop + (next - position) * height,
+        behavior: motion.matches ? "instant" : "smooth",
+      });
+    };
+
     root.addEventListener("scroll", schedule, { passive: true });
     root.addEventListener("scrollend", settle);
+    root.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("resize", schedule);
     motion.addEventListener("change", schedule);
     update();
@@ -76,6 +112,7 @@ export function HowItWorksSection({ hero }: { hero: ReactNode }) {
       cancelAnimationFrame(frame);
       root.removeEventListener("scroll", schedule);
       root.removeEventListener("scrollend", settle);
+      root.removeEventListener("wheel", onWheel);
       window.removeEventListener("resize", schedule);
       motion.removeEventListener("change", schedule);
       setStoryProgress(0);
