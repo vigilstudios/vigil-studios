@@ -38,6 +38,8 @@
 .detailCopy a:hover { text-decoration: underline; text-underline-offset: 4px; }
 
 .journey {
+  position: relative;
+  z-index: 1;
   padding-block: clamp(3rem, 8vw, 7rem);
   scroll-margin-top: calc(var(--creator-promo-height, 0px) + 4rem);
   border-block: 1px solid var(--border);

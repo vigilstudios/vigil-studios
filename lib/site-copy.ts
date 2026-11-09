@@ -69,7 +69,8 @@ export const HOW_IT_WORKS_HEAD = {
 export const COMPARISON = [
   { dimension: "Website", builder: "You build and configure it", vigil: "Built for you by a person" },
   { dimension: "Operations", builder: "You operate the platform", vigil: "Vigil runs hosting, domain, security and updates" },
-  { dimension: "Changes", builder: "You edit the site yourself", vigil: "You send a request; Care and up handle it" },
+  { dimension: "Changes", builder: "You edit the site yourself", vigil: "Request updates on Care and above, or edit supported content in Content Hub" },
+  { dimension: "Inquiries and bookings", builder: "You connect and manage separate tools", vigil: "Connected inquiries appear in Lead Hub, with optional Bookings on compatible Care and higher sites" },
   { dimension: "Automation", builder: "You configure the tools", vigil: "Virtue automation is in development for Growth and Priority subscriptions" },
   { dimension: "Support", builder: "Help articles and a ticket queue", vigil: "A team that knows your site" },
   { dimension: "Leaving", builder: "Often tied to the builder", vigil: "Your code and your domain go with you" },
@@ -113,7 +114,7 @@ export const START = {
 /** The close: one line, three ways in, and the good news that pops up around the viewport while the reader decides. */
 export const GET_STARTED = {
   title: "Ready when you are.",
-  line: "No builders to learn · no settings to babysit · someone always watching",
+  line: "Your website, inquiries, and ongoing care in one workspace",
   primary: { label: PACKAGE_FINDER_LABEL, href: PACKAGE_FINDER_HREF },
   call: "Book a call",
   email: "hello@vigilstudios.co",
@@ -126,7 +127,9 @@ export const GET_STARTED = {
     "Cancel any time and keep your site",
     "A person replies within one business day",
     "Managed hosting, SSL and security on every plan",
-    "Virtue sets up every customer",
+    "Virtue guides you through setup",
+    "Website inquiries go to Lead Hub",
+    "Optional Bookings on compatible Care and higher sites",
     "The build is paid once, not rented",
     "No builders, no plugins, nothing to learn",
     "Export your site whenever you like",
@@ -206,6 +209,8 @@ export const FAQ = [
   { q: "Do you use templates?", a: "Express uses a curated industry foundation with a proven layout, customized with your brand and content. Professional offers much broader section selection and page composition from our premium design systems. Growth adds bespoke design and development when a project needs something beyond those systems." },
   { q: "How many pages and revisions are included?", a: "Express includes one page and one consolidated revision round. Professional includes up to eight primary pages and two rounds. Legal and simple utility pages do not count toward those eight; extra primary pages are quoted separately. Nested pages use the same primary-page allowance. Growth pages, revisions and timeline follow the written scope." },
   { q: "Can you add booking, payments or custom functionality?", a: "Express supports links and embeds compatible with its chosen design. Professional includes standard booking embeds, advanced forms, simple payments, analytics and third-party integrations, plus CMS where appropriate. Vigil Bookings is optional on compatible Care and higher websites after setup. Discuss complex commerce, custom APIs and portals with us before buying." },
+  { q: "How do I manage inquiries and bookings after launch?", a: "Once your contact form is connected, website inquiries appear in Lead Hub so you can reply and track what happened. Compatible websites on Care and above can add Vigil Bookings for appointments or table reservations after setup." },
+  { q: "Can I see how my website is doing or update it myself?", a: "Overview shows traffic, inquiries, and site health where sources are connected. On Care and above, you can request changes from the team. Eligible Professional and Growth sites can also edit supported content in Content Hub." },
   { q: "Do I own my website?", a: "Yes. The site-specific code, content and assets built for you are yours under the service agreement. Vigil's platform, shared templates and Virtue stay ours; your site does not depend on them to exist." },
   { q: "What happens if I cancel?", a: "Hosting and the dashboard end at the close of your billing period. You get a clean export of your site and keep your domain. No lock-in, no ransom." },
   { q: "Do I have to deal with DNS or my registrar?", a: "Only if you already own a domain, and even then Virtue gives you the exact records for your registrar with copy buttons and checks them for you. If you need a domain, we register it in your name." },

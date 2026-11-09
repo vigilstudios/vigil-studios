@@ -42,14 +42,10 @@ export function Navigation() {
         setIsScrolled(scrollTop > 50);
         return;
       }
-      // Home: the first section is the pinned story; the bar stays clear until the section after it reaches the bar.
-      const next = (container ?? document).querySelector(
-        "main > section + section",
-      ) as HTMLElement | null;
-      const navHeight = navRef.current?.offsetHeight ?? 64;
-      setIsScrolled(
-        next ? next.getBoundingClientRect().top <= navHeight : scrollTop > 50,
-      );
+      // Stay transparent over the wireframe, then back the nav over chapter copy.
+      const process = document.getElementById("how-it-works");
+      const navBottom = navRef.current?.getBoundingClientRect().bottom ?? 64;
+      setIsScrolled(process ? process.getBoundingClientRect().top <= navBottom : scrollTop > 50);
     };
     target.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll);
