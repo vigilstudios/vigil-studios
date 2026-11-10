@@ -247,13 +247,13 @@ export function ExpressCatalogue({ amountCents = null, currency = "usd", templat
         <header className={styles.header}>
           <div className={styles.heading}>
             <p>Vigil Express</p>
-            <h1 id="catalogue-title">Choose your starting point.</h1>
+            <h1 id="catalogue-title">See your website before you buy.</h1>
           </div>
           <p className={styles.description}>
             A polished single page from a curated industry design, customized with
-            your brand, content and imagery. One design direction and one revision
-            round; a separate recurring Vigil plan is required. First look within
-            two business days of completed onboarding.
+            your brand and content. Preview a design, then choose your ongoing
+            Vigil plan at checkout. Contact forms can feed Lead Hub. Look for
+            designs with optional Bookings on Care and above.
           </p>
         </header>
 

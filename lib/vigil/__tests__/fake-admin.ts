@@ -41,6 +41,7 @@ export class FakeAdmin {
       list.filter((r) => filters.every((f) => f(r)));
     const nextId = () => `id_${++this.seq}`;
     const uniqueKeys: Record<string, string[][]> = {
+      orders: [["id"], ["checkout_token"]],
       provisioning_jobs: [["idempotency_key"]],
       provider_links: [["provider", "resource_kind", "external_id"]],
       webhook_events: [["provider", "event_id"]],
@@ -92,7 +93,8 @@ export class FakeAdmin {
         return builder;
       },
       eq(col: string, val: unknown) {
-        filters.push((r) => r[col] === val);
+        const [field, key] = col.split("->>");
+        filters.push((r) => (key ? (r[field] as Row | undefined)?.[key] : r[field]) === val);
         return builder;
       },
       neq(col: string, val: unknown) {
@@ -235,6 +237,28 @@ export class FakeAdmin {
   }
 
   async rpc(name: string, args: Record<string, unknown>) {
+    if (name === "apply_provider_subscription") {
+      const links = this.rows("provider_links");
+      const lookup = (kind: string, ref: unknown, type: string) => links.find(
+        (link) => link.provider === args.p_provider && link.resource_kind === kind &&
+          link.external_id === ref && link.entity_type === type,
+      );
+      const rows = this.rows("subscriptions");
+      const link = lookup("subscription", args.p_external_id, "subscription");
+      let row = link && rows.find((sub) => sub.id === link.entity_id);
+      const created = !row;
+      if (!row) {
+        const customer = lookup("customer", args.p_customer_ref, "organization");
+        const priceLink = lookup("price", args.p_price_ref, "plan_price");
+        const price = this.rows("plan_prices").find((item) => item.id === priceLink?.entity_id);
+        if (!customer || !price) return { data: { subscriptionId: null, created: false }, error: null };
+        row = { id: `rpc_subscription_${rows.length + 1}`, organization_id: customer.entity_id, plan_id: price.plan_id, plan_price_id: price.id };
+        rows.push(row);
+        links.push({ provider: args.p_provider, resource_kind: "subscription", external_id: args.p_external_id, entity_type: "subscription", entity_id: row.id });
+      }
+      Object.assign(row, args.p_snapshot);
+      return { data: { subscriptionId: row.id, created }, error: null };
+    }
     if (name === "claim_checkout_order") {
       const order = this.rows("orders").find(
         (o) => o.id === args.p_order && o.status === "pending",

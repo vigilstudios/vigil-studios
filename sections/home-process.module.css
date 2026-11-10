@@ -1,0 +1,162 @@
+.opening {
+  --process-ink: var(--accent-fill, var(--accent));
+  --process-border: color-mix(in srgb, var(--text-primary) 25%, var(--bg-primary));
+  --chapter-screen: calc(100dvh - var(--creator-promo-height, 0px));
+  isolation: isolate;
+  background: var(--bg-primary);
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  height: var(--chapter-screen);
+  margin-bottom: calc(-1 * var(--chapter-screen));
+  overflow: hidden;
+}
+
+.stop { height: var(--chapter-screen); pointer-events: none; }
+.hero { position: absolute; z-index: 2; inset: 0; opacity: var(--hero-opacity, 1); }
+.hero[inert] { pointer-events: none; }
+
+.viewport { position: absolute; inset: 0; overflow: hidden; }
+.track { display: flex; width: 100%; height: 100%; transform: translate3d(var(--story-x, 100%), 0, 0); }
+
+.chapter {
+  position: relative;
+  flex: 0 0 100%;
+  display: grid;
+  min-width: 0;
+  align-items: center;
+  padding: clamp(4.8rem, 9svh, 6.5rem) 0 8.15rem;
+  color: var(--text-primary);
+}
+
+.scene {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4.5vw, 5rem);
+  align-items: center;
+  width: min(100% - clamp(2rem, 9vw, 10rem), 76rem);
+  margin-inline: auto;
+}
+
+.eyebrow, .chapterName {
+  font: 500 .68rem/1.5 var(--font-jetbrains-mono), monospace;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+.eyebrow { display: flex; align-items: center; gap: .55rem; color: var(--process-ink); width: fit-content; }
+.eyebrow > span { width: .35rem; height: .35rem; border-radius: 100%; background: var(--process-ink); }
+.eyebrow b { padding-left: .65rem; border-left: 1px solid var(--process-border); font-weight: 500; }
+.chapterName { margin-top: clamp(.8rem, 2.7svh, 1.9rem); color: var(--process-ink); width: fit-content; }
+.copy h3 {
+  max-width: 13ch;
+  margin-block: .48rem .9rem;
+  font: 600 clamp(2.5rem, 5.55vw, 5.9rem)/.99 var(--font-space-grotesk), sans-serif;
+  letter-spacing: -.063em;
+  text-wrap: balance;
+}
+.description { max-width: 43ch; font-size: clamp(.94rem, 1.3vw, 1.09rem); line-height: 1.58; color: var(--text-secondary); }
+.detailLink { display: inline-flex; min-height: 2.75rem; align-items: center; gap: .45rem; margin-top: .38rem; color: var(--text-primary); font-size: .86rem; font-weight: 600; }
+.detailLink svg { color: var(--process-ink); }
+.detailLink:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+.controls {
+  position: absolute;
+  z-index: 3;
+  inset: auto 0 0;
+  display: grid;
+  justify-items: center;
+  gap: .42rem;
+  padding: 0 1rem max(.8rem, env(safe-area-inset-bottom));
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+}
+.controls[data-visible="true"] { visibility: visible; opacity: 1; }
+
+.rail { width: min(100%, 29rem); pointer-events: auto; }
+.rail ol {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rail ol::before, .rail ol::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  top: 1.15rem;
+  left: 10%;
+  width: 80%;
+  height: 1px;
+  background: var(--process-border);
+}
+.rail ol::after { width: calc(80% * var(--completed)); background: var(--process-ink); transition: width .4s ease; }
+.rail li { position: relative; z-index: 1; }
+.rail a { display: grid; justify-items: center; gap: .27rem; min-height: 3rem; padding: .12rem; border-radius: .35rem; color: var(--text-secondary); font-size: .69rem; font-weight: 600; }
+.marker { display: grid; place-items: center; width: 2rem; height: 2rem; border: 1px solid var(--process-border); border-radius: 100%; background: var(--bg-primary); }
+.rail a:hover, .rail a[aria-current="step"] { color: var(--text-primary); }
+.rail a[data-completed="true"] .marker,
+.rail a:hover .marker { border-color: var(--process-ink); color: var(--text-primary); }
+.rail a[aria-current="step"] .marker { color: var(--on-accent); background: var(--process-ink); border-color: var(--process-ink); }
+
+.skip {
+  min-height: 2.75rem;
+  gap: .55rem;
+  padding: .4rem 1rem;
+  font-size: .82rem;
+  font-weight: 600;
+  pointer-events: auto;
+}
+.rail a:focus-visible, .skip:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
+
+@media (max-width: 47rem) {
+  .scene { grid-template-columns: minmax(0, 1fr); gap: .55rem; width: min(100% - 2rem, 31rem); }
+  .chapter { padding: 3.75rem 0 7.2rem; }
+  .copy h3 { max-width: 17ch; margin-block: .3rem .55rem; font-size: clamp(2.13rem, 7.6vw, 4rem); }
+  .chapterName { margin-top: .65rem; }
+  .detailLink { margin-top: .12rem; }
+}
+
+@media (max-width: 47rem) and (max-height: 43rem) {
+  .chapter { align-items: start; padding-top: 3.1rem; }
+  .scene { gap: .06rem; }
+  .chapterName { display: none; }
+  .copy h3 { max-width: none; margin-block: .38rem .4rem; font-size: clamp(1.63rem, 7.25vw, 2.65rem); }
+  .description { font-size: .84rem; line-height: 1.43; }
+  .controls { gap: .23rem; padding-bottom: max(.55rem, env(safe-area-inset-bottom)); }
+}
+
+@media (min-width: 47.01rem) and (max-height: 34rem) {
+  .chapter { align-items: start; padding: 4.4rem 0 6.45rem; }
+  .scene { gap: 1.5rem; }
+  .chapterName { display: none; }
+  .copy h3 { max-width: none; margin-block: .25rem .3rem; font-size: clamp(1.35rem, 2.7vw, 2.28rem); }
+  .description { max-width: none; font-size: .79rem; line-height: 1.36; }
+  .detailLink { margin-top: 0; }
+  .controls { gap: .15rem; padding-bottom: .35rem; }
+  .rail a { gap: .15rem; min-height: 2.75rem; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .copy h3 { transition: opacity .16s ease; }
+  .chapter[inert] .copy h3 { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail ol::after, .controls { transition: none; }
+}
+
+@media (scripting: none) {
+  .stage { position: relative; height: auto; margin-bottom: 0; overflow: visible; }
+  .hero { position: relative; height: var(--chapter-screen); }
+  .viewport { position: relative; overflow: visible; }
+  .track { display: block; transform: none; }
+  .chapter { padding: 3rem 0; }
+  .stop { display: none; }
+}

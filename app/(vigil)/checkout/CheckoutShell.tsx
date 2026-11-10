@@ -15,7 +15,7 @@ export function CheckoutShell({ title, subtitle, children, centered }: { title?:
             <Link href="/" aria-label="Vigil home" className="flex items-center">
               <Logo size="sm" />
             </Link>
-            <Link href="/login" className="text-xs text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">Already a customer? Sign in</Link>
+            <Link href="/dashboard" className="text-xs text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">Your dashboard</Link>
           </div>
         </header>
         <main className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6">{children}</main>
@@ -31,7 +31,7 @@ export function CheckoutShell({ title, subtitle, children, centered }: { title?:
             <Logo size="sm" />
             <span className="text-sm font-semibold">Vigil Studios</span>
           </Link>
-          <Link href="/login" className="text-xs text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">Already a customer? Sign in</Link>
+          <Link href="/dashboard" className="text-xs text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]">Your dashboard</Link>
         </div>
       </header>
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">

@@ -7,20 +7,12 @@ import { HeroWords } from "@/components/site/hero/HeroWords";
 import { WireMark } from "@/components/site/hero/WireMark";
 import { HERO } from "@/lib/site-copy";
 
-/**
- * The hero: the first act on the story's stage (see StoryStage). Theme-aware, with a
- * grid of small Vigil stars, the V* in the middle as a slowly turning
- * wireframe, notifications around it that arrive as problems and leave
- * handled. The words type in; as the visitor scrolls they untype and the
- * mark unravels, and the second act takes over the same screen. The
- * corner brackets are the HUD language of the navigation.
- */
+/** The opening wireframe and its alerts share the stationary grid with the process. */
 const corner = "pointer-events-none absolute z-[4] hidden h-[18px] w-[18px] border-[rgba(var(--scene-ink-rgb),0.35)] md:block";
 
 export function HeroSection() {
   return (
-    <div className="hero-layer absolute inset-0 isolate flex h-full flex-col overflow-hidden bg-[color:var(--bg-primary)] text-[color:var(--text-primary)]">
-      <div className="hero-grid absolute inset-0" aria-hidden />
+    <div className="hero-layer absolute inset-0 isolate flex h-full flex-col overflow-hidden text-[color:var(--text-primary)]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_55%_at_50%_45%,rgba(var(--scene-bg-rgb),0)_0%,rgba(var(--scene-bg-rgb),0.55)_100%)]" aria-hidden />
       <WireMark className="absolute inset-0 block h-full w-full" />
       <HeroNotes />

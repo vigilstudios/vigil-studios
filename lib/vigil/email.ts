@@ -13,7 +13,7 @@ const REPLY_TO = process.env.EMAIL_REPLY_TO || "hello@vigilstudios.co";
 
 export type EmailMessage = { to: string; subject: string; html: string; text: string };
 
-export async function sendEmail(message: EmailMessage): Promise<{ sent: boolean; id?: string; error?: string }> {
+export async function sendEmail(message: EmailMessage, idempotencyKey?: string): Promise<{ sent: boolean; id?: string; error?: string }> {
   const key = process.env.RESEND_API_KEY;
   if (!key) {
     // Welcome and invitation emails carry a one-click sign-in link. Printing
@@ -26,7 +26,7 @@ export async function sendEmail(message: EmailMessage): Promise<{ sent: boolean;
   }
   try {
     const resend = new Resend(key);
-    const { data, error } = await resend.emails.send({ from: FROM, to: message.to, replyTo: REPLY_TO, subject: message.subject, html: message.html, text: message.text });
+    const { data, error } = await resend.emails.send({ from: FROM, to: message.to, replyTo: REPLY_TO, subject: message.subject, html: message.html, text: message.text }, idempotencyKey ? { idempotencyKey } : undefined);
     if (error) {
       console.error(`[email] send failed to=${message.to} subject=${JSON.stringify(message.subject)}: ${error.message}`);
       return { sent: false, error: error.message };

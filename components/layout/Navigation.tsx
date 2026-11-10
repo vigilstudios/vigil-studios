@@ -42,14 +42,10 @@ export function Navigation() {
         setIsScrolled(scrollTop > 50);
         return;
       }
-      // Home: the first section is the pinned story; the bar stays clear until the section after it reaches the bar.
-      const next = (container ?? document).querySelector(
-        "main > section + section",
-      ) as HTMLElement | null;
-      const navHeight = navRef.current?.offsetHeight ?? 64;
-      setIsScrolled(
-        next ? next.getBoundingClientRect().top <= navHeight : scrollTop > 50,
-      );
+      // Stay transparent over the wireframe, then back the nav over chapter copy.
+      const process = document.getElementById("how-it-works");
+      const navBottom = navRef.current?.getBoundingClientRect().bottom ?? 64;
+      setIsScrolled(process ? process.getBoundingClientRect().top <= navBottom : scrollTop > 50);
     };
     target.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll);
@@ -61,6 +57,7 @@ export function Navigation() {
   }, [home]);
 
   const pages = [
+    { href: "/process", label: "Process" },
     { href: "/pricing", label: "Pricing" },
     { href: "/#get-started", label: "Contact" },
   ];
@@ -87,7 +84,7 @@ export function Navigation() {
             : "border-transparent bg-transparent"
       }`}
     >
-      <div className="grid h-11 grid-cols-[1fr_auto] items-center px-5 md:h-16 md:grid-cols-[1fr_auto_1fr] md:px-10">
+      <div className="grid h-11 grid-cols-[1fr_auto] items-center px-5 md:h-16 md:grid-cols-[1fr_auto_1fr] md:px-6 xl:px-10">
         <Link
           prefetch={false}
           href="/"
@@ -98,7 +95,7 @@ export function Navigation() {
         </Link>
 
         {/* Desktop */}
-        <div className="hidden h-full items-center gap-[34px] md:flex">
+        <div className="hidden h-full items-center gap-4 md:flex xl:gap-[34px]">
           <ProductsMenu />
           {pages.map((item) => (
             <Link
@@ -111,7 +108,7 @@ export function Navigation() {
             </Link>
           ))}
         </div>
-        <div className="hidden items-center justify-end gap-[30px] md:flex">
+        <div className="hidden items-center justify-end gap-3 md:flex xl:gap-[30px]">
           <Link prefetch={false} href="/login" className={quiet}>
             Sign in
           </Link>

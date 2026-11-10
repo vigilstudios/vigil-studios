@@ -168,7 +168,7 @@ describe("runDueJobs", () => {
     expect(sent).toHaveBeenCalledTimes(1);
     const mail = sent.mock.calls[0][0];
     expect(mail.subject).toBe("Needs attention: order.provision failed");
-    expect(mail.text).toMatch(/paid and has no account yet/);
+    expect(mail.text).toMatch(/purchase still needs attention/);
     expect(mail.text).toMatch(/ord_9/);
     expect(mail.text).toMatch(/customer deleted/);
   });

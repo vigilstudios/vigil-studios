@@ -455,26 +455,48 @@ describe("startCheckout", () => {
     ).rejects.toThrow(/currencies must match/);
   });
 
-  it("marks a self-serve order failed when the provider refuses to open a payment page", async () => {
+  it("reuses the order and frozen session request after an ambiguous provider response", async () => {
     const provider = new NullBillingProvider();
-    vi.spyOn(provider, "createCheckoutSession").mockRejectedValue(
-      new Error("customer_update can only be used with customer"),
-    );
-    await expect(
-      startCheckout(
-        fake.asClient(),
-        {
-          email: "a@b.c",
-          businessName: "X",
-          projectKind: "express",
-          planCode: "care",
-          appUrl: "https://app.test",
-          buyerUserId: BUYER,
-        },
-        provider,
-      ),
-    ).rejects.toThrow(/customer_update/);
-    expect(fake.rows("orders")[0]).toMatchObject({ status: "failed" });
+    const create = provider.createCheckoutSession.bind(provider);
+    const spy = vi.spyOn(provider, "createCheckoutSession")
+      .mockRejectedValueOnce(new Error("provider response lost"))
+      .mockImplementation(create);
+    const request = {
+      email: "a@b.c", businessName: "Vigil QA", projectKind: "express" as const,
+      planCode: "care", appUrl: "https://app.test", buyerUserId: BUYER,
+      requestId: "ca000000-0000-4000-8000-000000000001",
+    };
+    await expect(startCheckout(fake.asClient(), request, provider)).rejects.toThrow("provider response lost");
+    expect(fake.rows("orders")[0]).toMatchObject({ status: "pending" });
+
+    const resumed = await startCheckout(fake.asClient(), { ...request, businessName: "Changed" }, provider);
+    expect(resumed.orderId).toBe(request.requestId);
+    expect(spy.mock.calls[0][0]).toEqual(spy.mock.calls[1][0]);
+    expect(fake.rows("orders")).toHaveLength(1);
+    expect(fake.rows("orders")[0].business_name).toBe("Vigil QA");
+
+    await startCheckout(fake.asClient(), request, provider);
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
+
+  it("resumes an open Stripe session even when the form submits new selections", async () => {
+    const provider = new NullBillingProvider();
+    const request = {
+      email: "a@b.c", businessName: "Vigil QA", projectKind: "express" as const,
+      planCode: "care", appUrl: "https://app.test", buyerUserId: BUYER,
+      requestId: "ca000000-0000-4000-8000-000000000001",
+    };
+    const first = await startCheckout(fake.asClient(), request, provider);
+    const ref = (fake.rows("orders")[0].metadata as { checkout_session: string }).checkout_session;
+    const session = (await provider.getCheckoutSession(ref))!;
+    vi.spyOn(provider, "getCheckoutSession").mockResolvedValue({
+      ...session, status: "open", paymentStatus: "unpaid", url: "https://stripe.test/resume",
+    });
+    const create = vi.spyOn(provider, "createCheckoutSession");
+    const resumed = await startCheckout(fake.asClient(), { ...request, billingPeriod: "year3" }, provider);
+    expect(resumed).toEqual({ orderId: first.orderId, url: "https://stripe.test/resume" });
+    expect(create).not.toHaveBeenCalled();
+    expect(fake.rows("orders")[0].plan_price_id).toBe(PRICE);
   });
 
   it("quotes a custom build as an ad-hoc line and reuses a staff-created order", async () => {
@@ -577,12 +599,11 @@ describe("completeCheckout + provisionOrder", () => {
       fake.asClient(),
       orderId,
       checkout,
-      provider,
     );
     expect(paid.status).toBe("paid");
     // A second delivery of the same event is a no-op.
     expect(
-      (await completeCheckout(fake.asClient(), orderId, checkout, provider))
+      (await completeCheckout(fake.asClient(), orderId, checkout))
         .status,
     ).toBe("paid");
 
@@ -845,26 +866,24 @@ describe("completeCheckout + provisionOrder", () => {
           fake.asClient(),
           orderId,
           { ...checkout, paymentStatus: "unpaid" },
-          provider,
         )
       ).status,
     ).toBe("pending");
     await expect(
-      completeCheckout(fake.asClient(), "ord_ghost", checkout, provider),
+      completeCheckout(fake.asClient(), "ord_ghost", checkout),
     ).rejects.toThrow(/not found/);
 
     const paid = await completeCheckout(
       fake.asClient(),
       orderId,
       checkout,
-      provider,
     );
     expect(paid.status).toBe("paid");
     expect(paid.paid_at).toBeTruthy();
     // A later "paid" for the same order changes nothing, and a refunded one is never revived.
     fake.rows("orders")[0].status = "refunded";
     expect(
-      (await completeCheckout(fake.asClient(), orderId, checkout, provider))
+      (await completeCheckout(fake.asClient(), orderId, checkout))
         .status,
     ).toBe("refunded");
   });
@@ -891,7 +910,6 @@ describe("completeCheckout + provisionOrder", () => {
       fake.asClient(),
       orderId,
       (await provider.getCheckoutSession(sessionId))!,
-      provider,
     );
 
     // A previous attempt got as far as the organization and the invite, then died.

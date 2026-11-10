@@ -81,7 +81,7 @@ export async function handleBillingEvent(admin: DbClient, event: BillingEvent, p
     case "checkout.completed": {
       const orderId = event.reference?.order_id ?? (await orderIdForSession(admin, providerName, event.checkout?.externalId));
       if (!orderId || !event.checkout) return "ignored";
-      const order = await completeCheckout(admin, orderId, event.checkout, provider);
+      const order = await completeCheckout(admin, orderId, event.checkout);
       if (order.status !== "paid") return `order ${order.status}`;
       // A failed earlier attempt (say, from the success page) must not block this one.
       await enqueueJob(admin, { kind: JOB_KINDS.orderProvision, idempotencyKey: `order.provision:${orderId}`, payload: { order_id: orderId }, maxAttempts: 8, requeueFailed: true });
@@ -89,6 +89,18 @@ export async function handleBillingEvent(admin: DbClient, event: BillingEvent, p
       // Leave downstream repository/model work to the background runner.
       await runDueJobs(admin, { worker: "webhook", limit: 1 });
       return "provisioning";
+    }
+    case "checkout.failed": {
+      const checkout = event.checkout;
+      if (!checkout || checkout.paymentStatus !== "unpaid") return "ignored";
+      const orderId = await orderIdForSession(admin, providerName, checkout.externalId);
+      if (!orderId || (checkout.reference.order_id && checkout.reference.order_id !== orderId)) return "ignored";
+      const { data, error } = await admin.from("orders")
+        .update({ status: "failed", error: { code: "async_payment_failed" } })
+        .eq("id", orderId).eq("status", "pending").eq("metadata->>checkout_session", checkout.externalId)
+        .select("id").maybeSingle();
+      if (error) throw error;
+      return data ? "payment failed" : "ignored";
     }
     case "subscription.created":
     case "subscription.updated":

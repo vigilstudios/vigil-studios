@@ -19,8 +19,8 @@ export const HERO = {
 /** The Products menu, in the order a customer buys them: build, plan, upgrade; the catalogue last. */
 export const PRODUCT_LINKS = [
   { label: "Websites", blurb: "Express, tailored Professional, bespoke Growth: find your fit", href: "/products/websites" },
-  { label: "Vigil", blurb: "The platform under every website: hosting, domain, updates, plans", href: "/products/vigil" },
-  { label: "Virtue", blurb: "The AI employee inside it", href: "/products/virtue" },
+  { label: "Vigil", blurb: "Managed hosting, Lead Hub, Bookings, reporting, and updates", href: "/products/vigil" },
+  { label: "Virtue", blurb: "Guided setup today and automation in development", href: "/products/virtue" },
   { label: "Express Catalogue", blurb: "Curated industry designs, customized around your brand", href: "/express" },
 ];
 
@@ -69,7 +69,8 @@ export const HOW_IT_WORKS_HEAD = {
 export const COMPARISON = [
   { dimension: "Website", builder: "You build and configure it", vigil: "Built for you by a person" },
   { dimension: "Operations", builder: "You operate the platform", vigil: "Vigil runs hosting, domain, security and updates" },
-  { dimension: "Changes", builder: "You edit the site yourself", vigil: "You send a request; Care and up handle it" },
+  { dimension: "Changes", builder: "You edit the site yourself", vigil: "Request updates on Care and above, or edit supported content in Content Hub" },
+  { dimension: "Inquiries and bookings", builder: "You connect and manage separate tools", vigil: "Connected inquiries appear in Lead Hub, with optional Bookings on compatible Care and higher sites" },
   { dimension: "Automation", builder: "You configure the tools", vigil: "Virtue automation is in development for Growth and Priority subscriptions" },
   { dimension: "Support", builder: "Help articles and a ticket queue", vigil: "A team that knows your site" },
   { dimension: "Leaving", builder: "Often tied to the builder", vigil: "Your code and your domain go with you" },
@@ -83,7 +84,7 @@ export const PLAN_COPY: Record<string, { headline: string }> = {
   priority: { headline: "A higher service tier; confirm allowances with the team." },
 };
 
-export const RECURRING_SERVICE_NOTE = "Your website build is paid once. Every Vigil-hosted site also needs an active recurring plan. Virtue guides setup on every plan; ongoing Virtue, Lead Hub and Insights are in development for eligible Growth and Priority subscriptions. Allowances are confirmed in your plan, not included in the website build.";
+export const RECURRING_SERVICE_NOTE = "Your website build is paid once. Every Vigil-hosted site also needs an active recurring plan. Virtue guides setup on every plan; ongoing Virtue automation and Vigil Insights are in development for eligible Growth and Priority subscriptions. Allowances are confirmed in your plan, not included in the website build.";
 
 export const BUILD_COPY = {
   express: { tagline: WEBSITE_TIERS.express.summary, bullets: [...WEBSITE_TIERS.express.included, "First look within two business days of onboarding", "One design direction, one revision round"] },
@@ -113,7 +114,7 @@ export const START = {
 /** The close: one line, three ways in, and the good news that pops up around the viewport while the reader decides. */
 export const GET_STARTED = {
   title: "Ready when you are.",
-  line: "No builders to learn · no settings to babysit · someone always watching",
+  line: "Your website, inquiries, and ongoing care in one workspace",
   primary: { label: PACKAGE_FINDER_LABEL, href: PACKAGE_FINDER_HREF },
   call: "Book a call",
   email: "hello@vigilstudios.co",
@@ -126,7 +127,9 @@ export const GET_STARTED = {
     "Cancel any time and keep your site",
     "A person replies within one business day",
     "Managed hosting, SSL and security on every plan",
-    "Virtue sets up every customer",
+    "Virtue guides you through setup",
+    "Website inquiries go to Lead Hub",
+    "Optional Bookings on compatible Care and higher sites",
     "The build is paid once, not rented",
     "No builders, no plugins, nothing to learn",
     "Export your site whenever you like",
@@ -187,29 +190,19 @@ export const WEBSITES_PAGE = {
   platformNote: "Every Vigil-hosted website needs a separate recurring plan. Hosting, domain connection and security are managed by Vigil; website changes and additional tools depend on the plan you choose. The build does not include a subscription.",
 };
 
-export const VIGIL_PAGE = {
-  title: "The platform under every website.",
-  lead: "Vigil is the dashboard you sign into and the team behind it. It hosts your website, keeps the domain connected and the certificate current, applies updates, takes your requests and sends one receipt. You see outcomes in plain words, never a hosting console.",
-  primary: { label: PACKAGE_FINDER_LABEL, href: PACKAGE_FINDER_HREF },
-  secondary: { label: "See the plans", href: "/pricing?tab=subscriptions" },
-  experience: [
-    { title: "You sign in, you do not configure", body: "There are no settings to get wrong. Every page tells you what is true right now and, if something needs you, what to do next." },
-    { title: "You ask, a person does it", body: "Changes are a request, not a project. Say it in a sentence, attach a photo if it helps, and watch it move to done." },
-    { title: "Virtue is already inside", body: "She guides setup on every plan. Ongoing lead follow-up, missed-call text-back and reviews are in development for eligible Growth and Priority subscriptions." },
-    { title: "You can always leave", body: "Your site's code and content are yours; download them from the dashboard any time. Your domain never leaves your name." },
-  ],
-};
-
 export const FAQ = [
   { q: "Which website package should I choose?", a: "Express is a polished single page with a curated design direction. Professional is a premium multi-page composition tailored around your brand. Growth is for original components, bespoke interactions or advanced functionality beyond our existing design systems. Each build needs a separate Vigil plan for hosting." },
   { q: "How is Professional designed for my business?", a: "We compose your site from Vigil’s premium design systems, selecting navigation, heroes, story, services, media, product presentation and social proof to suit your brand. Typography, art direction, imagery, page layouts, nested navigation and contextual calls to action make the experience your own. Compatible motion is configured where supported. New component invention is scoped under Growth." },
   { q: "Do you use templates?", a: "Express uses a curated industry foundation with a proven layout, customized with your brand and content. Professional offers much broader section selection and page composition from our premium design systems. Growth adds bespoke design and development when a project needs something beyond those systems." },
   { q: "How many pages and revisions are included?", a: "Express includes one page and one consolidated revision round. Professional includes up to eight primary pages and two rounds. Legal and simple utility pages do not count toward those eight; extra primary pages are quoted separately. Nested pages use the same primary-page allowance. Growth pages, revisions and timeline follow the written scope." },
-  { q: "Can you add booking, payments or custom functionality?", a: "Express supports links and embeds compatible with its chosen design. Professional includes standard booking embeds, advanced forms, simple payments, analytics and third-party integrations, plus CMS where appropriate. Native booking, complex commerce, custom APIs, portals and new bespoke components need an agreed add-on or Growth scope before purchase." },
+  { q: "Can you add booking, payments or custom functionality?", a: "Express supports links and embeds compatible with its chosen design. Professional includes standard booking embeds, advanced forms, simple payments, analytics and third-party integrations, plus CMS where appropriate. Vigil Bookings is optional on compatible Care and higher websites after setup. Discuss complex commerce, custom APIs and portals with us before buying." },
+  { q: "How do I manage inquiries and bookings after launch?", a: "Once your contact form is connected, website inquiries appear in Lead Hub so you can reply and track what happened. Compatible websites on Care and above can add Vigil Bookings for appointments or table reservations after setup." },
+  { q: "Can I see how my website is doing or update it myself?", a: "Overview shows traffic, inquiries, and site health where sources are connected. On Care and above, you can request changes from the team. Eligible Professional and Growth sites can also edit supported content in Content Hub." },
   { q: "Do I own my website?", a: "Yes. The site-specific code, content and assets built for you are yours under the service agreement. Vigil's platform, shared templates and Virtue stay ours; your site does not depend on them to exist." },
   { q: "What happens if I cancel?", a: "Hosting and the dashboard end at the close of your billing period. You get a clean export of your site and keep your domain. No lock-in, no ransom." },
   { q: "Do I have to deal with DNS or my registrar?", a: "Only if you already own a domain, and even then Virtue gives you the exact records for your registrar with copy buttons and checks them for you. If you need a domain, we register it in your name." },
   { q: "How fast is an Express site?", a: "A first look within two business days of finishing onboarding; launch follows your review, approval and domain setup." },
-  { q: "What does Virtue actually do today?", a: "She runs onboarding for every customer: sets up your sign-in, collects your business details, photos and domain, and hands them to the team. Lead follow-up, missed-call text-back and reviews are coming to Growth and Priority." },
+  { q: "What does Virtue actually do today?", a: "Virtue guides you through your business details, photos, and domain after purchase, then hands your brief to the team. Lead follow-up, missed-call text-back and reviews are coming to Growth and Priority." },
+  { q: "What happens after I pay?", a: "Your purchase is saved to your verified account. Open your dashboard to start guided setup, share your business details, and see what the team needs to start your website. You can save and continue later." },
   { q: "Why do I need a plan as well as the build?", a: "The build pays for the work. The plan pays for the site to stay online, secure, updated and supported, month after month. Every Vigil-hosted site needs one; Basic is the floor." },
 ];

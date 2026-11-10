@@ -10,7 +10,7 @@ import {
 } from "@/lib/vigil/auth/checkout-access";
 
 export const metadata: Metadata = {
-  title: "Payment received",
+  title: "Your order status",
   robots: { index: false },
 };
 
@@ -27,6 +27,7 @@ export default async function CheckoutSuccessPage({
   const { order: orderId } = await searchParams;
   const viewer = await requireCheckoutViewer(
     `/checkout/success?order=${encodeURIComponent(orderId ?? "")}`,
+    "login",
   );
   if (!orderId || !hasAdminClient() || !/^[0-9a-f-]{36}$/.test(orderId))
     notFound();
@@ -38,7 +39,7 @@ export default async function CheckoutSuccessPage({
     .maybeSingle();
   if (!order || !canViewPurchase(viewer, order)) notFound();
 
-  const { status, welcomeSent } = await settleOrder(admin, order.id, {
+  const { status } = await settleOrder(admin, order.id, {
     worker: "success-page",
   });
 
@@ -46,10 +47,8 @@ export default async function CheckoutSuccessPage({
     <CheckoutShell centered>
       <SuccessPanel
         orderId={order.id}
-        email={order.email}
         status={status}
         businessName={order.business_name}
-        emailSent={welcomeSent}
         accountOwned={order.buyer_user_id === viewer.user.id}
       />
     </CheckoutShell>

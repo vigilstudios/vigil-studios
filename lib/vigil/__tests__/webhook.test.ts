@@ -160,7 +160,7 @@ describe("receiveBillingEvent", () => {
     });
     expect(
       professional.rows("provisioning_jobs").map((job) => job.kind),
-    ).toEqual(["order.provision"]);
+    ).toEqual(["order.provision", "order.notify.staff"]);
     expect(professional.rows("websites")[0].repository_ref ?? null).toBeNull();
   });
 
@@ -172,11 +172,25 @@ describe("receiveBillingEvent", () => {
     expect(again).toEqual({ duplicate: true });
     expect(fake.rows("webhook_events")).toHaveLength(1);
     expect(fake.rows("organizations")).toHaveLength(1);
-    expect(fake.rows("provisioning_jobs")).toHaveLength(2);
+    expect(fake.rows("provisioning_jobs")).toHaveLength(3);
     expect(fake.rows("provisioning_jobs").map((job) => job.kind)).toEqual([
       "order.provision",
+      "order.notify.staff",
       "website.repository",
     ]);
+  });
+
+  it("marks a failed delayed payment without provisioning its order", async () => {
+    const checkout = (await getBillingProvider().getCheckoutSession(sessionId))!;
+    const event = {
+      ...checkoutCompleted(orderId, sessionId, checkout, "evt_delayed_failure"),
+      rawType: "checkout.session.async_payment_failed",
+      type: "checkout.failed" as const,
+      checkout: { ...checkout, paymentStatus: "unpaid" as const },
+    };
+    expect(await receiveBillingEvent(fake.asClient(), event)).toEqual({ duplicate: false, outcome: "payment failed" });
+    expect(fake.rows("orders")[0].status).toBe("failed");
+    expect(fake.rows("provisioning_jobs")).toHaveLength(0);
   });
 
   it("allows only one concurrent retry of a failed event", async () => {

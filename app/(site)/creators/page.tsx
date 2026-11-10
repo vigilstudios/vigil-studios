@@ -34,7 +34,7 @@ export default async function CreatorsPage() {
     <HeroCollage id="creator-hero" className={styles.hero} headingId="creator-title" titleClassName={styles.title} subtitleClassName={styles.heroLead}
       eyebrow={<div className={styles.heroEyebrow}><Eyebrow>Vigil Studios / For creators &amp; influencers</Eyebrow></div>}
       title={<>Your brand.<br /><em>Beyond the bio.</em></>}
-      subtitle="A real home for your content, collaborations and everything you’re becoming."
+      subtitle="A home for your content and collaborations, with a dashboard to keep track of new inquiries."
       images={["creator-desk", "car", "beauty", "fitness", "food", "fashion", "music"].map(name => `/creators/collage/${name}.webp`)}
       imageSrcSets={["creator-desk", "car", "beauty", "fitness", "food", "fashion", "music"].map(name => `/creators/collage/${name}-300.webp 300w, /creators/collage/${name}-450.webp 450w, /creators/collage/${name}.webp 600w`)}
       imageAlts={["A creator’s candid digital-camera desk snapshot", "A charcoal sports coupe photographed at dusk", "Pink makeup and satin ribbons on a vanity", "Dumbbells, trainers and a blush exercise mat", "Pastries and iced matcha on a cafe table", "A pink handbag, ballet flats and outfit details", "Headphones and piano keys in a home studio"]}
@@ -71,7 +71,7 @@ export default async function CreatorsPage() {
         <p>{basic?.prices.month != null ? `Vigil plans from ${formatMoney(basic.prices.month, basic.currency)}/month.` : "Choose your ongoing plan at checkout."}{campaign.promotion.enabled ? " Promotion applies to the build fee only." : ""}</p>
         {campaign.promotion.enabled ? <details><summary>Offer details</summary><p>{campaign.promotion.terms}</p></details> : null}
       </div>
-      <p className="mt-4 text-center text-sm leading-6 text-[color:var(--text-secondary)]">Need original components or a unique creative experience? <a href="/products/websites#custom" className="underline underline-offset-4">Explore bespoke Custom builds</a>; those projects are quoted separately and excluded from the creator offer.</p>
+      <p className="mt-4 text-center text-sm leading-6 text-[color:var(--text-secondary)]">Need original components or a unique creative experience? <a href="/products/websites#custom" className="underline underline-offset-4">Explore bespoke Growth builds</a>; those projects are quoted separately and excluded from the creator offer.</p>
       <p className={styles.processLine}>Choose your site <span>→</span> Share your brand <span>→</span> Review <span>→</span> Launch</p>
     </Container></Section>
 

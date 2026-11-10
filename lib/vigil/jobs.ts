@@ -1,5 +1,5 @@
 import { ProviderError, ProviderNotConfiguredError, isVigilError } from "@/lib/vigil/auth/errors";
-import { escapeHtml, layout, sendEmail, staffNotificationAddress } from "@/lib/vigil/email";
+import { button, escapeHtml, layout, sendEmail, staffNotificationAddress } from "@/lib/vigil/email";
 import type { DbClient, ProvisioningJob, Updates } from "@/lib/vigil/types";
 import type { Json } from "@/types/database.types";
 import { deployWebsite, finalizeWebsiteLaunch, provisionWebsite, syncDeployment } from "./services/deployment";
@@ -39,6 +39,7 @@ export const JOB_KINDS = {
   domainPurchase: "domain.purchase",
   domainLifecycleSync: "domain.lifecycle.sync",
   orderProvision: "order.provision",
+  orderNotifyStaff: "order.notify.staff",
 } as const;
 
 export type JobKind = (typeof JOB_KINDS)[keyof typeof JOB_KINDS];
@@ -191,6 +192,13 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
     const payload = (job.payload ?? {}) as { order_id?: string };
     if (!payload.order_id) throw new Error("order.provision requires payload.order_id");
     const result = await provisionOrder(admin, payload.order_id);
+    await enqueueJob(admin, {
+      kind: JOB_KINDS.orderNotifyStaff,
+      idempotencyKey: `order.notify.staff:${payload.order_id}`,
+      organizationId: result.organizationId,
+      payload: { order_id: payload.order_id },
+      maxAttempts: 8,
+    });
     // Express has a known purchased template and can be seeded immediately.
     // Professional/custom repos wait for staff to review scope and choose the
     // appropriate foundation, then use the explicit admin action.
@@ -206,6 +214,29 @@ const builtInHandlers: Record<JobKind, JobHandler> = {
       });
     }
     return { organization_id: result.organizationId, website_id: result.websiteId, already_provisioned: result.alreadyProvisioned };
+  },
+  [JOB_KINDS.orderNotifyStaff]: async ({ admin, job }) => {
+    const orderId = (job.payload as { order_id?: string } | null)?.order_id;
+    if (!orderId) throw new Error("order.notify.staff requires payload.order_id");
+    const { data: order, error } = await admin.from("orders")
+      .select("business_name, email, project_kind, template_slug, organization_id, status")
+      .eq("id", orderId).single();
+    if (error) throw error;
+    if (order.status !== "provisioned" || !order.organization_id) return { skipped: true };
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "https://www.vigilstudios.co").replace(/\/$/, "");
+    const adminUrl = `${appUrl}/admin/orders?order=${encodeURIComponent(orderId)}`;
+    const subject = `New customer: ${order.business_name}`;
+    const packageName = order.project_kind === "custom" ? "Growth" : order.project_kind === "express" ? "Express" : "Professional";
+    const details = `${order.business_name} (${order.email}) purchased a ${packageName} website${order.template_slug ? ` using ${order.template_slug}` : ""}.`;
+    const result = await sendEmail({
+      to: staffNotificationAddress(),
+      subject,
+      text: `${details}\n\nReview in Vigil Admin: ${adminUrl}`,
+      html: layout(subject, `<p>${escapeHtml(details)}</p>${button(adminUrl, "Open in Vigil Admin")}`),
+    }, job.idempotency_key);
+    if (!result.sent)
+      throw new ProviderError("resend", result.error ?? "Purchase notification email is not configured.", { retryable: true });
+    return { sent: true };
   },
   [JOB_KINDS.domainVerify]: async ({ admin, job }) => {
     if (!job.domain_id) throw new Error("domain.verify requires domain_id");
@@ -443,7 +474,7 @@ async function runOne(admin: DbClient, job: ProvisioningJob): Promise<JobOutcome
 export async function notifyPermanentFailure(job: Pick<ProvisioningJob, "id" | "kind" | "attempts" | "organization_id" | "website_id" | "domain_id" | "payload">, message: string, exhausted: boolean): Promise<void> {
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "https://www.vigilstudios.co").replace(/\/$/, "");
   const orderId = (job.payload as { order_id?: string } | null)?.order_id;
-  const what = job.kind === JOB_KINDS.orderProvision ? "A paid order could not be provisioned: the customer has paid and has no account yet." : `${job.kind} stopped.`;
+  const what = job.kind === JOB_KINDS.orderProvision ? "A paid order could not be provisioned: the customer has paid and their purchase still needs attention." : `${job.kind} stopped.`;
   const why = exhausted ? `Gave up after ${job.attempts} attempts. Last error: ${message}` : `Not retryable: ${message}`;
   const where = orderId ? `${appUrl}/admin/orders` : job.organization_id ? `${appUrl}/admin/organizations/${job.organization_id}` : `${appUrl}/admin/jobs`;
   await sendEmail({

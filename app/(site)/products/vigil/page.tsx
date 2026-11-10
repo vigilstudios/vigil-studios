@@ -1,156 +1,136 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CreditCard, Globe, Lock, MonitorSmartphone, RefreshCw, Shield } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUpRight, Check, CreditCard, Download, Globe, Minus, Shield, Sparkles } from "lucide-react";
 import { Footer } from "@/components/layout/Footer";
-import { Card, CardRow } from "@/components/site/Cards";
-import { DashboardMock } from "@/components/site/DashboardMock";
-import { Chip, Container, Eyebrow, Section, SectionIntro } from "@/components/site/primitives";
+import { FieldGuideClose } from "@/components/site/FieldGuideClose";
+import { WorkspaceFeatures } from "@/components/site/WorkspaceFeatures";
+import { PrimaryLink } from "@/components/site/primitives";
 import { Reveal } from "@/components/site/Reveal";
-import { planBullets, planHasVirtue } from "@/lib/vigil/plan-presentation";
-import { VirtueOrb } from "@/components/vigil/VirtueOrb";
-import { GetStartedSection } from "@/sections/GetStartedSection";
-import { PLAN_COPY, VIGIL_PAGE } from "@/lib/site-copy";
+import { VigilWorkspacePreview } from "@/components/site/VigilWorkspacePreview";
+import { PLAN_FEATURE_LABELS } from "@/lib/vigil/plan-presentation";
 import { formatMoney } from "@/lib/vigil/format";
 import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
+import styles from "@/components/site/field-guide.module.css";
 
 export const metadata: Metadata = {
   title: "The Vigil platform | Vigil Studios",
-  description: "Vigil is the dashboard and the team behind every Vigil website: hosting, domain, security, updates, requests and billing, said in outcomes rather than settings.",
+  description: "Manage website inquiries, bookings, reports, updates, hosting, and billing with Vigil.",
   alternates: { canonical: "/products/vigil" },
 };
 
-const OUTCOMES = [
-  { icon: MonitorSmartphone, title: "Website Live", body: "Hosting, deployments and a health check you never run. Live, Building or Needs attention, in words." },
-  { icon: Globe, title: "Domain Connected", body: "Own a domain? Virtue gives you the exact records and checks them. Need one? We register it in your name." },
-  { icon: Shield, title: "SSL and security", body: "Certificates, renewals and platform maintenance happen without you. A green tick, not a settings page." },
-  { icon: RefreshCw, title: "Website updates", body: "On Care and up, send a request with a sentence or a photo. A person makes the change." },
-  { icon: CreditCard, title: "Subscription and billing", body: "One plan, one receipt, a portal for invoices and your card. Monthly, annual or three years." },
-  { icon: Lock, title: "Yours to keep", body: "Your site's code and content are yours. Download them from the dashboard whenever you like." },
+const managed = [
+  { icon: Globe, title: "Hosting and domain connection", body: "We publish and monitor your site, help connect your existing domain, or register one in your name." },
+  { icon: Shield, title: "SSL and security", body: "We handle certificates, renewals, and platform maintenance so your site stays secure." },
+  { icon: CreditCard, title: "Plan and billing", body: "See your plan, get invoices, and manage your payment details in your account." },
+  { icon: Download, title: "Website ownership", body: "Your site’s code and content are yours. Download a copy from your dashboard." },
 ];
 
-/** The platform: what the customer sees and what it does for them, with the real dashboard on show. */
 export default async function VigilPage() {
   const { plans } = await getPublicPricing();
+
   return (
     <>
-      {/* Landing: the words, then the dashboard itself, cropped like a window onto the product. */}
-      <section className="relative overflow-hidden pt-32 sm:pt-40">
-        <Container>
-          <Reveal>
-            <SectionIntro eyebrow="Vigil" tone="teal" title={VIGIL_PAGE.title} lead={VIGIL_PAGE.lead} />
-          </Reveal>
-          <Reveal delay={0.1} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Link href={VIGIL_PAGE.primary.href} className="btn-primary min-h-12 !px-6 text-sm font-semibold">{VIGIL_PAGE.primary.label} <ArrowRight className="ml-2 h-4 w-4" /></Link>
-            <Link href={VIGIL_PAGE.secondary.href} className="btn-secondary min-h-12 !px-6 text-sm font-medium">{VIGIL_PAGE.secondary.label}</Link>
-          </Reveal>
-          <Reveal delay={0.2} className="relative mt-14 sm:mt-20">
-            <div className="overflow-hidden rounded-t-2xl border border-b-0 border-[color:var(--border)] bg-[color:var(--bg-primary)] shadow-[0_-20px_80px_-40px_rgba(0,0,0,0.6)]">
-              <DashboardMock className="max-h-[520px]" />
-            </div>
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-[linear-gradient(to_bottom,transparent,var(--bg-section-alt))]" aria-hidden />
-          </Reveal>
-        </Container>
-      </section>
-
-      <Section alt id="experience">
-        <Container>
-          <Reveal>
-            <SectionIntro eyebrow="What it is like" tone="teal" title="A dashboard that talks like a person." lead="Four things are true of every page in Vigil." />
-          </Reveal>
-          <CardRow className="mt-10 md:grid-cols-2 xl:grid-cols-4">
-            {VIGIL_PAGE.experience.map((x, i) => (
-              <Card key={x.title}>
-                <div className="flex h-full flex-col rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-5">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--accent-4)]">0{i + 1}</span>
-                  <h3 className="mt-2 text-base font-semibold">{x.title}</h3>
-                  <p className="mt-1.5 text-sm leading-6 text-[color:var(--text-secondary)]">{x.body}</p>
-                </div>
-              </Card>
-            ))}
-          </CardRow>
-        </Container>
-      </Section>
-
-      <Section id="outcomes">
-        <Container>
-          <Reveal>
-            <SectionIntro eyebrow="What it takes care of" tone="teal" title="Everything your website needs, said in plain words." lead="You see outcomes, not providers: no DNS panels, no hosting consoles, no invoices from services you have never heard of." />
-          </Reveal>
-          <Reveal delay={0.1}>
-            <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {OUTCOMES.map(({ icon: Icon, title, body }) => (
-                <li key={title} className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-5">
-                  <Icon className="h-5 w-5 text-[color:var(--accent-4)]" />
-                  <h3 className="mt-3 text-base font-semibold">{title}</h3>
-                  <p className="mt-1.5 text-sm leading-6 text-[color:var(--text-secondary)]">{body}</p>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-6 max-w-3xl text-sm leading-6 text-[color:var(--text-secondary)]">
-              Compatible websites on Care and above can add standard appointment
-              booking after setup. Vigil manages availability, requests and
-              confirmed appointments. An optional Google Calendar connection
-              copies appointments and unavailable time to a separate calendar;
-              it does not import your other Google calendars. Read the{" "}
-              <Link href="/calendar-privacy" className="underline underline-offset-4">
-                Calendar connection privacy notice
-              </Link>
-              .
-            </p>
-          </Reveal>
-        </Container>
-      </Section>
-
-      <Section alt id="plans">
-        <Container>
-          <Reveal>
-            <SectionIntro eyebrow="Four service levels" tone="teal" title="Pick how much we take off your plate." lead="Every Vigil-hosted website needs a separate plan. Basic manages hosting; Care adds website change requests. Growth and Priority include eligibility for additional tools in development. Features and allowances follow your plan." />
-          </Reveal>
-          <CardRow className="mt-10 md:grid-cols-2 xl:grid-cols-4">
-            {plans.map((p) => {
-              const copy = PLAN_COPY[p.code];
-              return (
-                <Card key={p.code}>
-                  <div className="flex h-full flex-col rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-5">
-                    <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-base font-semibold">{p.name}</h3>
-                      {planHasVirtue(p.includes) ? <VirtueOrb size="sm" label="Virtue automation in development" /> : null}
-                    </div>
-                    <p className="text-sm text-[color:var(--text-secondary)]">{p.tagline}</p>
-                    <p className="mt-3 text-sm">{copy?.headline}</p>
-                    <ul className="mt-3 space-y-1 text-xs leading-5 text-[color:var(--text-secondary)]">{planBullets(p.includes).map((label) => <li key={label}>{label}</li>)}</ul>
-                    <p className="mt-auto pt-4 text-sm font-medium">{p.prices.month != null ? `From ${formatMoney(p.prices.month, p.currency).replace(/\.00$/, "")} / month` : ""}</p>
-                  </div>
-                </Card>
-              );
-            })}
-          </CardRow>
-          <Reveal delay={0.1}>
-            <Link href="/pricing?tab=subscriptions" className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-[color:var(--accent)]">Full pricing, periods and what is included <ArrowRight className="h-4 w-4" /></Link>
-          </Reveal>
-        </Container>
-      </Section>
-
-      <Section>
-        <Container>
-          <Reveal>
-            <div className="flex flex-col items-start gap-6 rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-6 sm:flex-row sm:items-center sm:p-8">
-              <VirtueOrb size="lg" />
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Eyebrow tone="violet">Virtue</Eyebrow>
-                  <Chip tone="violet">Growth · Priority</Chip>
-                </div>
-                <h2 className="text-2xl font-semibold tracking-tight">The employee who lives in this dashboard.</h2>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)]">She guides setup on every plan. Ongoing lead follow-up, missed-call text-back and reviews are in development for eligible Growth and Priority subscriptions.</p>
+      <div className={styles.page}>
+        <header className={styles.masthead}>
+          <div className={`${styles.wrap} ${styles.heroSplit}`}>
+            <Reveal className={styles.fade}>
+              <p className={styles.marker}><Link href="/products" className="hover:underline">Products</Link> / Vigil</p>
+              <h1 className={styles.title}>Run your website with Vigil</h1>
+              <p className={styles.lead}>See who reached out, what’s booked, and how your site is doing. We handle the hosting and maintenance behind it.</p>
+              <div className={styles.actions}>
+                <PrimaryLink href="/pricing?tab=subscriptions" className="gap-2">Compare Vigil plans <ArrowRight size={16} aria-hidden /></PrimaryLink>
+                <a href="#workspace" className={styles.textLink}>Explore the dashboard <ArrowDown size={15} aria-hidden /></a>
               </div>
-              <Link href="/products/virtue" className="btn-secondary min-h-11 shrink-0 !px-5 !py-2 text-sm font-semibold">Meet Virtue <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
-            </div>
-          </Reveal>
-        </Container>
-      </Section>
+            </Reveal>
+            <Reveal className={styles.fade} delay={0.1}>
+              <VigilWorkspacePreview />
+            </Reveal>
+          </div>
+        </header>
 
-      <GetStartedSection />
+        <WorkspaceFeatures />
+
+        <section id="outcomes" className={styles.band} aria-labelledby="vigil-managed-title">
+          <div className={styles.wrap}>
+            <Reveal className={`${styles.bandIntro} ${styles.fade}`}>
+              <div>
+                <p className={styles.marker}>Managed service</p>
+                <h2 id="vigil-managed-title" className={styles.heading}>What we take care of</h2>
+              </div>
+              <p className={styles.body}>Vigil looks after your site’s infrastructure. Your dashboard shows its status and anything that needs your attention.</p>
+            </Reveal>
+            <Reveal className={styles.fade} delay={0.1}>
+              <dl className={styles.managed}>
+                {managed.map(({ icon: Icon, title, body }) => (
+                  <div key={title}>
+                    <dt><Icon size={17} aria-hidden /> {title}</dt>
+                    <dd className={styles.body}>{body}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Reveal>
+          </div>
+        </section>
+
+        <section id="plans" className={styles.band} aria-labelledby="vigil-plans-title">
+          <div className={styles.wrap}>
+            <Reveal className={`${styles.bandIntro} ${styles.fade}`}>
+              <div>
+                <p className={styles.marker}>Subscriptions</p>
+                <h2 id="vigil-plans-title" className={styles.heading}>Choose the support you need</h2>
+              </div>
+              <p className={styles.body}>A Vigil plan is billed separately from your website build. Basic covers managed hosting. Care and higher add change requests and optional Bookings on compatible sites.</p>
+            </Reveal>
+            {plans.length > 0 && (
+              <Reveal className={styles.fade} delay={0.1}>
+                <p className={`${styles.label} ${styles.tableHint}`}>Scroll to compare plans <ArrowRight size={13} aria-hidden /></p>
+                <div className={styles.planScroll} tabIndex={0} role="region" aria-label="Compare Vigil subscriptions">
+                  <table className={styles.planMatrix}>
+                    <caption className="sr-only">Vigil subscription prices and features</caption>
+                    <thead>
+                      <tr>
+                        <th scope="col" className={styles.label}>Included features</th>
+                        {plans.map((plan) => (
+                          <th key={plan.code} scope="col">
+                            <span className={styles.planName}>{plan.name}</span>
+                            {plan.prices.month != null && <span className={styles.body}>{formatMoney(plan.prices.month, plan.currency).replace(/\.00$/, "")} / month</span>}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {PLAN_FEATURE_LABELS.map(([code, label]) => (
+                        <tr key={code}>
+                          <th scope="row">{label}</th>
+                          {plans.map((plan) => (
+                            <td key={plan.code}>
+                              {plan.includes.some((feature) => feature.code === code && feature.on)
+                                ? <><Check size={18} className={styles.planCheck} aria-hidden /><span className="sr-only">Included</span></>
+                                : <><Minus size={16} aria-hidden /><span className="sr-only">Not included</span></>}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Reveal>
+            )}
+            <div className={styles.actions}>
+              <Link href="/pricing?tab=subscriptions" className={styles.textLink}>Compare plan features and billing periods <ArrowRight size={15} aria-hidden /></Link>
+            </div>
+            <Reveal className={`${styles.serviceRows} ${styles.fade} mt-10`}>
+              <article className={styles.serviceRow}>
+                <Sparkles size={19} aria-hidden />
+                <h3 className={styles.subhead}>Virtue</h3>
+                <p className={styles.body}>Virtue guides setup on every plan. Lead follow-up, missed-call text-back, and reviews are in development for eligible Growth and Priority subscriptions.</p>
+                <Link href="/products/virtue" className={styles.textLink}>Meet Virtue <ArrowUpRight size={15} aria-hidden /></Link>
+              </article>
+            </Reveal>
+          </div>
+        </section>
+        <FieldGuideClose />
+      </div>
       <Footer />
     </>
   );

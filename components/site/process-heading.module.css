@@ -1,0 +1,29 @@
+@media (prefers-reduced-motion: no-preference) {
+  .heading[data-typing="true"] .character {
+    --typing-tick: 24ms;
+    --typing-delay: calc(110ms + var(--character) * var(--typing-tick));
+    position: relative;
+    /* Use the glyph's normal opacity after the animation ends. */
+    animation: type-letter var(--typing-tick) step-start var(--typing-delay) backwards;
+  }
+
+  .heading[data-typing="true"] .character::after {
+    position: absolute;
+    inset: .12em -.055em .12em auto;
+    width: .035em;
+    background: var(--process-ink, var(--accent));
+    content: "";
+    opacity: 0;
+    animation: type-caret var(--typing-tick) linear var(--typing-delay);
+    pointer-events: none;
+  }
+}
+
+@keyframes type-letter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes type-caret {
+  from, to { opacity: 1; }
+}

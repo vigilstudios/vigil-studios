@@ -1,4 +1,5 @@
 import "server-only";
+import { randomUUID } from "node:crypto";
 import { ensureDesignWorkspace } from "@/lib/vigil/professional/workspace";
 import {
   CREATOR_CAMPAIGN,
@@ -19,7 +20,6 @@ import {
   escapeHtml,
   layout,
   sendEmail,
-  staffNotificationAddress,
 } from "@/lib/vigil/email";
 import {
   billingPeriodByKey,
@@ -28,6 +28,7 @@ import {
 import { slugify } from "@/lib/vigil/format";
 import { getBillingProvider } from "@/lib/vigil/providers/registry";
 import type {
+  BillingCheckoutInput,
   BillingCheckoutSnapshot,
   BillingProvider,
   CheckoutLineItem,
@@ -58,6 +59,8 @@ export type CheckoutRequest = {
   /** Verified account, supplied by the server session. */
   buyerUserId: string;
   checkoutToken?: string;
+  requestId?: string;
+  serviceAgreementUrl?: string;
   contactName?: string | null;
   businessName: string;
   projectKind: "express" | "professional" | "custom";
@@ -82,6 +85,29 @@ export async function startCheckout(
 ): Promise<{ orderId: string; url: string }> {
   if (!req.buyerUserId)
     throw new ValidationError("Sign in before starting checkout.");
+  if (req.existingOrderId && req.promotionCode?.trim())
+    throw new ValidationError("This promo code is not available for this order.");
+  let existing: Order | null = null;
+  const lookupId = req.existingOrderId ?? req.requestId;
+  if (req.existingOrderId) {
+    const { error } = await admin.rpc("claim_checkout_order", {
+      p_order: req.existingOrderId,
+      p_buyer: req.buyerUserId,
+      p_token: req.checkoutToken ?? "",
+    });
+    if (error)
+      throw new ValidationError("This order belongs to another account, is expired, or is no longer awaiting payment.");
+  }
+  if (lookupId) {
+    existing = await getBuyerOrder(admin, lookupId, req.buyerUserId);
+    if (existing) {
+      const resumed = await resumeCheckout(admin, existing, provider, req.appUrl);
+      if (resumed) return resumed;
+      if (!req.existingOrderId)
+        return { orderId: existing.id, url: `${req.appUrl}/checkout/${existing.checkout_token}` };
+    }
+  }
+
   const { data: plan, error: planError } = await admin
     .from("plans")
     .select("id, code, name")
@@ -151,28 +177,11 @@ export async function startCheckout(
     : null;
   const buildAmount =
     offer?.amountCents ?? req.buildAmountOverrideCents ?? build.amount_cents;
-  if (promotion && build.currency !== planPrice.currency)
+  if (buildAmount === null)
+    throw new ValidationError("The website build needs an approved price before checkout.");
+  if (build.currency !== planPrice.currency)
     throw new ValidationError("The build and plan currencies must match.");
-  let orderMetadata: Record<string, unknown> = {};
-  if (req.existingOrderId) {
-    const { error: ownershipError } = await admin.rpc("claim_checkout_order", {
-      p_order: req.existingOrderId,
-      p_buyer: req.buyerUserId,
-      p_token: req.checkoutToken ?? "",
-    });
-    if (ownershipError)
-      throw new ValidationError(
-        "This order belongs to another account, is expired, or is no longer awaiting payment.",
-      );
-    const { data: existing, error: metadataError } = await admin
-      .from("orders")
-      .select("metadata")
-      .eq("id", req.existingOrderId)
-      .maybeSingle();
-    if (metadataError) throw metadataError;
-    orderMetadata =
-      (existing?.metadata as Record<string, unknown> | null) ?? {};
-  }
+  const orderMetadata = { ...checkoutMetadata(existing) };
   if (promotion) orderMetadata.creator_promotion = promotion;
   const useCatalogBuild =
     req.buildAmountOverrideCents == null && build.amount_cents !== null;
@@ -185,7 +194,8 @@ export async function startCheckout(
   }
 
   const email = req.email.trim().toLowerCase();
-  let orderId = req.existingOrderId ?? null;
+  const orderId = existing?.id ?? req.requestId ?? randomUUID();
+  const token = existing?.checkout_token ?? randomUUID().replaceAll("-", "") + randomUUID().replaceAll("-", "");
   const snapshot = {
     email,
     buyer_user_id: req.buyerUserId,
@@ -200,34 +210,6 @@ export async function startCheckout(
     plan_amount_cents: planPrice.amount_cents,
     currency: planPrice.currency,
   };
-  if (orderId) {
-    const { data: updatedOrder, error } = await admin
-      .from("orders")
-      .update(snapshot)
-      .eq("id", orderId)
-      .eq("buyer_user_id", req.buyerUserId)
-      .eq("status", "pending")
-      .select("id")
-      .maybeSingle();
-    if (error) throw error;
-    if (!updatedOrder)
-      throw new ValidationError(
-        "This order changed. Refresh before continuing.",
-      );
-  } else {
-    const { data, error } = await admin
-      .from("orders")
-      .insert({
-        ...snapshot,
-        metadata: orderMetadata as NonNullable<Json>,
-        created_by: req.createdBy ?? null,
-      })
-      .select("id")
-      .single();
-    if (error) throw error;
-    orderId = data.id;
-  }
-
   const lineItems: CheckoutLineItem[] = [{ priceExternalId: planExternal }];
   if (buildExternal && !promotion)
     lineItems.push({ priceExternalId: buildExternal });
@@ -243,45 +225,94 @@ export async function startCheckout(
       },
     });
 
-  let session: { url: string; externalId: string };
-  try {
-    session = await provider.createCheckoutSession({
-      mode: "subscription",
-      lineItems,
-      customerEmail: email,
-      successUrl: `${req.appUrl}/checkout/success?order=${orderId}`,
-      cancelUrl: `${req.appUrl}/checkout/${await tokenFor(admin, orderId)}?canceled=1`,
-      reference: {
-        order_id: orderId,
-        plan_code: plan.code,
-        billing_period: period.key,
-        project_kind: req.projectKind,
-        template_slug: req.templateSlug ?? "",
-      },
-      collectTax: process.env.STRIPE_TAX === "true",
-      // Stripe's "Add promotion code" field. Codes only exist if staff create
-      // them (friends and family, a live test); CHECKOUT_PROMOTION_CODES=false hides it.
-      allowPromotionCodes:
-        !orderMetadata.creator_promotion &&
-        process.env.CHECKOUT_PROMOTION_CODES !== "false",
-    });
-  } catch (err) {
-    // A self-serve order with no payment page is dead; staff links stay pending for a retry.
-    if (!req.existingOrderId) {
-      await admin
-        .from("orders")
-        .update({
-          status: "failed",
-          error: {
-            message: err instanceof Error ? err.message : String(err),
-          } as unknown as NonNullable<Json>,
-        })
-        .eq("id", orderId)
-        .eq("status", "pending");
-    }
-    throw err;
+  const checkoutInput: BillingCheckoutInput = {
+    mode: "subscription",
+    lineItems,
+    customerEmail: email,
+    successUrl: `${req.appUrl}/checkout/success?order=${orderId}`,
+    cancelUrl: `${req.appUrl}/checkout/${token}?canceled=1`,
+    reference: {
+      order_id: orderId,
+      plan_code: plan.code,
+      billing_period: period.key,
+      project_kind: req.projectKind,
+      template_slug: req.templateSlug ?? "",
+    },
+    collectTax: process.env.STRIPE_TAX === "true",
+    allowPromotionCodes: !orderMetadata.creator_promotion && process.env.CHECKOUT_PROMOTION_CODES !== "false",
+    idempotencyKey: `vigil-checkout:${orderId}:${randomUUID()}`,
+  };
+  delete orderMetadata.checkout_session;
+  const startedAt = new Date().toISOString();
+  orderMetadata.checkout_attempt = { input: checkoutInput, startedAt };
+  if (req.serviceAgreementUrl) orderMetadata.service_agreement = { href: req.serviceAgreementUrl, accepted_at: startedAt };
+  const metadata = orderMetadata as NonNullable<Json>;
+  const written = existing
+    ? await admin.from("orders")
+      .update({ ...snapshot, metadata })
+      .eq("id", orderId)
+      .eq("buyer_user_id", req.buyerUserId)
+      .eq("status", "pending")
+      .eq("updated_at", existing.updated_at)
+      .select("id").maybeSingle()
+    : await admin.from("orders")
+      .insert({ ...snapshot, id: orderId, checkout_token: token, metadata, created_by: req.createdBy ?? null })
+      .select("id").single();
+  if (written.error && written.error.code !== "23505") throw written.error;
+  if (!written.data) {
+    // A competing submit already persisted its exact commercial snapshot.
+    const current = await getBuyerOrder(admin, orderId, req.buyerUserId);
+    const resumed = current && await resumeCheckout(admin, current, provider, req.appUrl);
+    if (resumed) return resumed;
+    throw new ValidationError("The order changed. Open your purchases to try again.");
   }
+  return openCheckout(admin, orderId, orderMetadata, checkoutInput, provider);
+}
 
+type CheckoutMetadata = Record<string, unknown> & {
+  checkout_session?: string;
+  checkout_attempt?: { input: BillingCheckoutInput; startedAt: string };
+};
+
+function checkoutMetadata(order: Pick<Order, "metadata"> | null): CheckoutMetadata {
+  return (order?.metadata as CheckoutMetadata | null) ?? {};
+}
+
+export function hasCheckoutAttempt(metadata: Json): boolean {
+  const attempt = metadata as CheckoutMetadata | null;
+  return Boolean(attempt?.checkout_session || attempt?.checkout_attempt);
+}
+
+async function getBuyerOrder(admin: DbClient, id: string, buyer: string) {
+  const { data, error } = await admin.from("orders").select("*")
+    .eq("id", id).eq("buyer_user_id", buyer).maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+async function resumeCheckout(admin: DbClient, order: Order, provider: BillingProvider, appUrl: string) {
+  const orderId = order.id;
+  const successUrl = `${appUrl}/checkout/success?order=${orderId}`;
+  if (order.status !== "pending") return { orderId, url: successUrl };
+  const meta = checkoutMetadata(order);
+  if (meta.checkout_session) {
+    const session = await provider.getCheckoutSession(meta.checkout_session);
+    if (!session) throw new ValidationError("We couldn’t check the last payment attempt. Try again in a moment.");
+    if (session.status === "open" && session.url) return { orderId, url: session.url };
+    if (session.status === "complete") return { orderId, url: successUrl };
+    if (session.status !== "expired") throw new ValidationError("We couldn’t reopen this payment page. Please contact Vigil.");
+  } else if (meta.checkout_attempt) {
+    const { input, startedAt } = meta.checkout_attempt;
+    // Stripe may prune idempotency keys after 24 hours. Ambiguous older attempts need review.
+    if (Date.now() - Date.parse(startedAt) >= 23 * 3_600_000)
+      throw new ValidationError("This payment attempt needs a review. Please contact Vigil.");
+    return openCheckout(admin, orderId, meta, input, provider);
+  }
+  return null;
+}
+
+async function openCheckout(admin: DbClient, orderId: string, meta: CheckoutMetadata, input: BillingCheckoutInput, provider: BillingProvider) {
+  const session = await provider.createCheckoutSession(input);
   await upsertProviderLink(admin, {
     provider: providerEnum(provider.name),
     resourceKind: "checkout_session",
@@ -289,27 +320,12 @@ export async function startCheckout(
     entityType: "order",
     entityId: orderId,
   });
-  await admin
-    .from("orders")
-    .update({
-      metadata: {
-        ...orderMetadata,
-        checkout_session: session.externalId,
-      } as unknown as NonNullable<Json>,
-    })
-    .eq("id", orderId);
-
-  return { orderId, url: session.url };
-}
-
-async function tokenFor(admin: DbClient, orderId: string): Promise<string> {
-  const { data, error } = await admin
-    .from("orders")
-    .select("checkout_token")
+  const { error } = await admin.from("orders")
+    .update({ metadata: { ...meta, checkout_session: session.externalId } as NonNullable<Json> })
     .eq("id", orderId)
-    .single();
+    .eq("status", "pending");
   if (error) throw error;
-  return data.checkout_token;
+  return { orderId, url: session.url };
 }
 
 /** Mark an order paid from a completed checkout. Idempotent. */
@@ -317,7 +333,6 @@ export async function completeCheckout(
   admin: DbClient,
   orderId: string,
   checkout: BillingCheckoutSnapshot,
-  provider: BillingProvider = getBillingProvider(),
 ): Promise<Order> {
   const { data: order, error } = await admin
     .from("orders")
@@ -332,12 +347,22 @@ export async function completeCheckout(
   )
     return order;
   if (order.status !== "pending") return order;
+  const metadata = checkoutMetadata(order);
+  if (
+    checkout.status !== "complete" ||
+    (checkout.reference.order_id && checkout.reference.order_id !== orderId) ||
+    (metadata.checkout_session && metadata.checkout_session !== checkout.externalId) ||
+    (checkout.currency && checkout.currency !== order.currency)
+  ) throw new ValidationError("This payment does not match the order.");
 
+  // Persist the winning session together with the paid transition. A webhook
+  // may arrive before the request that opened Checkout finishes its own write.
   const { data: updated, error: updateError } = await admin
     .from("orders")
     .update({
       status: "paid",
       paid_at: new Date().toISOString(),
+      metadata: { ...metadata, checkout_session: checkout.externalId } as NonNullable<Json>,
       email: order.buyer_user_id
         ? order.email
         : (checkout.customerEmail?.toLowerCase() ?? order.email),
@@ -345,21 +370,12 @@ export async function completeCheckout(
     .eq("id", orderId)
     .eq("status", "pending")
     .select("*")
-    .single();
+    .maybeSingle();
   if (updateError) throw updateError;
-
-  const providerName = providerEnum(provider.name);
-  if (checkout.customerExternalId) {
-    // Attach the customer to the order for now; provisioning re-links it to the organization.
-    await upsertProviderLink(admin, {
-      provider: providerName,
-      resourceKind: "customer",
-      externalId: checkout.customerExternalId,
-      entityType: "order",
-      entityId: orderId,
-    });
-  }
-  return updated;
+  if (updated) return updated;
+  const { data: latest, error: reloadError } = await admin.from("orders").select("*").eq("id", orderId).single();
+  if (reloadError) throw reloadError;
+  return latest;
 }
 
 /**
@@ -414,10 +430,10 @@ export async function provisionOrder(
   const checkout = sessionRef
     ? await provider.getCheckoutSession(sessionRef).catch(() => null)
     : null;
-  if (!order.buyer_user_id && !order.organization_id && sessionRef && !checkout)
+  if (sessionRef && !checkout)
     throw new ProviderError(
       provider.name,
-      "Could not verify the legacy checkout's customer identity.",
+      order.buyer_user_id ? "Could not retrieve the paid checkout." : "Could not verify the legacy checkout's customer identity.",
       { retryable: true },
     );
 
@@ -489,6 +505,8 @@ export async function provisionOrder(
         }
       }
     }
+    if (!linked && sessionRef && provider.name === "stripe")
+      throw new ProviderError(provider.name, "The paid Stripe subscription could not be linked yet.", { retryable: true });
     if (!linked && order.plan_id) {
       const { data: manual, error: subError } = await admin
         .from("subscriptions")
@@ -506,10 +524,9 @@ export async function provisionOrder(
       linked = manual.id;
     }
     subscriptionId = linked;
-    await admin
-      .from("orders")
-      .update({ subscription_id: subscriptionId })
-      .eq("id", orderId);
+    const { error: linkError } = await admin.from("orders")
+      .update({ subscription_id: subscriptionId }).eq("id", orderId);
+    if (linkError) throw linkError;
   }
 
   // 5. Done
@@ -538,7 +555,7 @@ export async function provisionOrder(
     order.email,
     order.business_name,
     appUrl,
-    !!order.buyer_user_id,
+    order.buyer_user_id ? orderId : false,
   ).catch((err) => ({
     sent: false,
     error: err instanceof Error ? err.message : String(err),
@@ -556,15 +573,6 @@ export async function provisionOrder(
       } as unknown as NonNullable<Json>,
     })
     .eq("id", orderId);
-  await sendEmail({
-    to: staffNotificationAddress(),
-    subject: `New customer: ${order.business_name}`,
-    text: `${order.business_name} (${order.email}) purchased a ${order.project_kind} site${order.template_slug ? ` on the ${order.template_slug} template` : ""}. Review in ${appUrl}/admin/organizations/${organizationId}`,
-    html: layout(
-      `New customer: ${order.business_name}`,
-      `<p>${escapeHtml(order.email)} purchased a ${escapeHtml(order.project_kind)} site${order.template_slug ? ` on the <b>${escapeHtml(order.template_slug)}</b> template` : ""}.</p>${button(`${appUrl}/admin/organizations/${organizationId}`, "Open in Vigil Admin")}`,
-    ),
-  }).catch(() => undefined);
 
   return {
     organizationId,
@@ -608,13 +616,13 @@ export async function sendWelcome(
   email: string,
   businessName: string,
   appUrl: string,
-  accountOwned = false,
+  accountOwned: string | false = false,
 ): Promise<{ sent: boolean; error?: string }> {
   const link = accountOwned
     ? null
     : await signInLinkFor(email, appUrl).catch(() => null);
   const cta = accountOwned
-    ? `${appUrl}/dashboard/onboarding`
+    ? `${appUrl}/checkout/success?order=${accountOwned}`
     : (link ?? `${appUrl}/login`);
   const signInNote = accountOwned
     ? "Use the Vigil account you purchased with."

@@ -116,7 +116,7 @@ export async function beginCheckout(
           "This checkout link has expired. Contact Vigil for a new one.",
         );
       if (order.status !== "pending")
-        throw new ValidationError("This order has already been paid.");
+        throw new ValidationError("Open your purchases to check this order’s status.");
       existingOrderId = order.id;
       // Commercial scope comes from the trusted staff-created order, never
       // hidden browser fields. The customer may still choose their plan.
@@ -129,6 +129,8 @@ export async function beginCheckout(
       email: v.email,
       buyerUserId: viewer.user.id,
       checkoutToken: v.checkout_token || undefined,
+      requestId: v.request_id,
+      serviceAgreementUrl: process.env.NEXT_PUBLIC_TERMS_URL || "/terms",
       contactName: v.contact_name || null,
       businessName: v.business_name,
       projectKind,
@@ -201,11 +203,11 @@ export async function resendWelcome(orderId: string): Promise<ActionResult> {
       order.email,
       order.business_name,
       await appUrl(),
-      !!order.buyer_user_id,
+      order.buyer_user_id ? orderId : false,
     );
     if (!res.sent)
       throw new ValidationError(
-        "We could not send the email right now. Use “Sign in with a link” below instead.",
+        "We could not send the email right now. Open your dashboard to continue.",
       );
     return { ok: true, data: undefined };
   } catch (error) {

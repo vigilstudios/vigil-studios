@@ -84,7 +84,7 @@ export async function reconcileOrders(admin: DbClient, options: ReconcileOptions
   // 2. Pending with a checkout session, past the window a buyer takes to pay.
   const { data: pending, error: pendingError } = await admin
     .from("orders")
-    .select("id, metadata, created_at")
+    .select("id, metadata, created_at, updated_at")
     .eq("status", "pending")
     .lt("created_at", iso(cfg.pendingAfterMs))
     .gt("created_at", iso(cfg.pendingWithinMs));
@@ -95,25 +95,25 @@ export async function reconcileOrders(admin: DbClient, options: ReconcileOptions
     const checkout = await provider.getCheckoutSession(sessionRef).catch(() => null);
     if (!checkout) continue;
     if (checkout.paymentStatus === "paid" || checkout.paymentStatus === "no_payment_required") {
-      await completeCheckout(admin, order.id, checkout, provider);
+      await completeCheckout(admin, order.id, checkout);
       const result = await settleOrder(admin, order.id, { provider, worker: "reconcile" }).catch(() => null);
       report.completed.push(order.id);
       if (result?.status === "provisioned") report.provisioned.push(order.id);
       else report.stillStuck.push(order.id);
     } else if (checkout.status === "expired") {
-      await admin.from("orders").update({ status: "expired" }).eq("id", order.id).eq("status", "pending");
+      await admin.from("orders").update({ status: "expired" }).eq("id", order.id).eq("status", "pending").eq("updated_at", order.updated_at);
       report.expired.push(order.id);
     }
   }
 
   // 3. Provisioned, but the welcome email never went out: one more try.
-  const { data: provisioned, error: provError } = await admin.from("orders").select("id, email, business_name, metadata").eq("status", "provisioned").gt("provisioned_at", iso(cfg.pendingWithinMs));
+  const { data: provisioned, error: provError } = await admin.from("orders").select("id, email, business_name, metadata, buyer_user_id").eq("status", "provisioned").gt("provisioned_at", iso(cfg.pendingWithinMs));
   if (provError) throw provError;
   for (const order of provisioned ?? []) {
     const meta = (order.metadata as Record<string, unknown> | null) ?? {};
     const welcome = meta.welcome_email as { sent?: boolean; retried?: boolean } | undefined;
-    if (!welcome || welcome.sent || welcome.retried) continue;
-    const res = await sendWelcome(order.email, order.business_name, appUrl).catch((err) => ({ sent: false, error: err instanceof Error ? err.message : String(err) }));
+    if (welcome?.sent || welcome?.retried) continue;
+    const res = await sendWelcome(order.email, order.business_name, appUrl, order.buyer_user_id ? order.id : false).catch((err) => ({ sent: false, error: err instanceof Error ? err.message : String(err) }));
     await admin
       .from("orders")
       .update({ metadata: { ...meta, welcome_email: { ...welcome, sent: res.sent, error: res.error ?? null, retried: true, retried_at: now.toISOString() } } as unknown as NonNullable<Json> })

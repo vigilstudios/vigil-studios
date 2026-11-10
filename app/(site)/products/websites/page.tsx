@@ -37,7 +37,7 @@ export default async function WebsitesPage() {
       <Section className="pt-32 sm:pt-40">
         <Container>
           <Reveal>
-            <SectionIntro eyebrow="Websites" title={WEBSITES_PAGE.title} lead={WEBSITES_PAGE.lead} />
+            <SectionIntro align="center" heading="h1" eyebrow="Websites" title={WEBSITES_PAGE.title} lead={WEBSITES_PAGE.lead} />
           </Reveal>
           <Reveal delay={0.1}>
             <CardRow className="mt-10 md:grid-cols-3">
@@ -174,10 +174,10 @@ export default async function WebsitesPage() {
             <div className="flex flex-col items-start gap-6 rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-6 sm:flex-row sm:items-center sm:p-8">
               <div className="min-w-0 flex-1">
                 <Eyebrow tone="teal">Underneath every one</Eyebrow>
-                <h2 className="text-2xl font-semibold tracking-tight">The Vigil platform comes with it.</h2>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)]">{WEBSITES_PAGE.platformNote}</p>
+                <h2 className="text-2xl font-semibold tracking-tight">Your website is the starting point.</h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--text-secondary)]">{WEBSITES_PAGE.platformNote} Connect contact forms to Lead Hub, and add Bookings on compatible sites with Care or above.</p>
               </div>
-              <Link href="/products/vigil" className="btn-secondary min-h-11 shrink-0 !px-5 !py-2 text-sm">See the platform <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+              <Link href="/products/vigil" className="btn-secondary min-h-11 shrink-0 !px-5 !py-2 text-sm">Explore your dashboard <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
             </div>
           </Reveal>
         </Container>

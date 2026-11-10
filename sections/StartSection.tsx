@@ -3,7 +3,7 @@ import { ArrowRight, Check } from "lucide-react";
 import { Chip, Container, Eyebrow, Section } from "@/components/site/primitives";
 import { Card, CardRow } from "@/components/site/Cards";
 import { Reveal } from "@/components/site/Reveal";
-import { EXPRESS_TEMPLATES } from "@/lib/constants";
+import { publishedExpressTemplates } from "@/lib/vigil/express/library";
 import { WebsiteFitCallout } from "@/components/site/WebsiteFitCallout";
 import { START } from "@/lib/site-copy";
 import { formatMoney } from "@/lib/vigil/format";
@@ -12,15 +12,13 @@ import { getPublicPricing } from "@/lib/vigil/queries/public-pricing";
 /**
  * Meet the customer where they are: the three builds as three starting
  * points on a green band. Names and prices are the build_prices rows; the
- * stage copy is START in site-copy. The section is pulled up by a viewport
- * so it slides over the story's finale while that stage still holds.
+ * stage copy is START in site-copy.
  */
 export async function StartSection() {
-  const { builds } = await getPublicPricing();
-  const available = EXPRESS_TEMPLATES.filter((t) => t.status === "available").map((t) => t.industry);
-  const coming = EXPRESS_TEMPLATES.filter((t) => t.status === "coming").length;
+  const [{ builds }, templates] = await Promise.all([getPublicPricing(), publishedExpressTemplates()]);
+  const available = [...new Set(templates.filter((t) => t.status === "available").map((t) => t.industry))];
   return (
-    <Section id="start" fill accent className="home-deferred-section -mt-[100svh] isolate overflow-hidden md:pt-28! md:pb-20!">
+    <Section id="start" tabIndex={-1} fill accent className="isolate overflow-hidden md:pt-28! md:pb-20!">
       <Container>
         <Reveal>
           <div className="mx-auto max-w-2xl text-center">
@@ -53,7 +51,6 @@ export async function StartSection() {
                       {available.map((name) => (
                         <Chip key={name}>{name}</Chip>
                       ))}
-                      {coming > 0 ? <Chip tone="amber">{coming} more coming</Chip> : null}
                     </div>
                   ) : null}
                   <div className="mt-auto pt-5">

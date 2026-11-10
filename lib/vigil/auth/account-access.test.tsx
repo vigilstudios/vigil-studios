@@ -96,10 +96,11 @@ describe("account access boundaries", () => {
       sessionCookieOptions({ path: "/", maxAge: 0 }, "browser").maxAge,
     ).toBe(0);
   });
-  it("prospects have Overview and Settings while business sections stay visibly locked", () => {
+  it("prospects have Overview, Purchases and Settings while business sections stay visibly locked", () => {
     const items = prospectNavigation.flatMap((g) => g.items);
     expect(items.filter((i) => !i.disabled).map((i) => i.href)).toEqual([
       "/dashboard",
+      "/dashboard/purchases",
       "/dashboard/settings",
     ]);
     expect(items.find((i) => i.label === "Bookings")).toMatchObject({

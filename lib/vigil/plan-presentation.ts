@@ -3,7 +3,7 @@ export const PLAN_FEATURE_LABELS: [string, string][] = [
   ["hosting.managed", "Managed hosting, SSL and security"],
   ["domain.managed", "Domain status and management"],
   ["requests.enabled", "Website updates and content changes"],
-  ["leads.enabled", "Lead Hub · in development"],
+  ["bookings.enabled", "Optional Bookings on compatible sites"],
   ["insights.enabled", "Vigil Insights · in development"],
   ["virtue.enabled", "Virtue automation · in development"],
 ];

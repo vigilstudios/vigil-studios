@@ -1,0 +1,107 @@
+.figure {
+  --metal-top: #191919;
+  --metal-front: #101010;
+  --metal-side: #141414;
+  --metal-paper: #222222;
+  --metal-recess: #080808;
+  --line: #bdbdbd;
+  --detail: #767676;
+  --guide: #494949;
+  --object-signal: var(--accent-fill, var(--accent));
+  margin: 0;
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  color: var(--text-secondary);
+}
+
+:global([data-theme="light"]) .figure {
+  --metal-top: #f7f7f7;
+  --metal-front: #e8e8e8;
+  --metal-side: #d8d8d8;
+  --metal-paper: #fff;
+  --metal-recess: #cdcdcd;
+  --line: #454545;
+  --detail: #686868;
+  --guide: #909090;
+}
+
+.svg {
+  width: 100%;
+  max-width: 32rem;
+  height: min(50svh, 29rem);
+  overflow: visible;
+  stroke: var(--line);
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.figure figcaption {
+  margin-top: -.35rem;
+  font: 500 .66rem/1.3 var(--font-jetbrains-mono), monospace;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.top { fill: var(--metal-top); }
+.left { fill: var(--metal-front); }
+.right { fill: var(--metal-side); }
+.paper { fill: var(--metal-paper); }
+.recess { fill: var(--metal-recess); }
+.detail { stroke: var(--detail); }
+.ink { stroke: var(--line); }
+.guide { stroke: var(--guide); stroke-dasharray: 3 5; }
+.signal { stroke: var(--object-signal); }
+.signalDot { stroke: var(--object-signal); fill: var(--object-signal); }
+
+.dateInk {
+  fill: var(--object-signal);
+  stroke: none;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-weight: 700;
+  letter-spacing: .045em;
+}
+
+/* The drawer face starts on the same plane as the two closed drawers. */
+.drawer { transform: translate(24.248px, -14px); }
+.letter { opacity: 0; }
+.figure[data-active="true"] .drawer { transform: translate(-21.65px, 12.5px); }
+.figure[data-active="true"] .letter { opacity: 1; transform: translate(-28px, 28px); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .figure[data-active="true"] .ruler { animation: align 1.4s .15s ease-out both; }
+  .figure[data-active="true"] .blueprint .signal { stroke-dasharray: 1; animation: sketch .85s .45s ease-out both; }
+  .figure[data-active="true"] .rocket { animation: lift 1.65s .1s cubic-bezier(.3,.01,.3,1) both; }
+  .figure[data-active="true"] .drawer { animation: open .95s .2s cubic-bezier(.2,.8,.25,1) both; }
+  .figure[data-active="true"] .letter { animation: deliver .95s .62s ease-out both; }
+  .figure[data-active="true"] .stamp { animation: stamp 1.4s .2s ease-in-out both; }
+  .figure[data-active="true"] .ticket { animation: feed 1.55s .15s ease-out both; }
+  .figure[data-active="true"] .dateInk { animation: print 1.4s .2s step-end both; }
+  .figure[data-active="true"] .scope { transform-origin: 260px 166px; animation: aim 1.5s .15s cubic-bezier(.2,.8,.3,1) both; }
+  .figure[data-active="true"] .constellation { animation: acquire 1s .7s ease both; }
+}
+
+@keyframes align { from { transform: translate(24px, -14px); } to { transform: translate(0, 0); } }
+@keyframes sketch { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes lift { 0%, 18% { transform: translateY(23px); } 100% { transform: translateY(-34px); } }
+@keyframes open { from { transform: translate(24.248px, -14px); } }
+@keyframes deliver { from { transform: translate(37px, -60px); opacity: 0; } to { transform: translate(-28px, 28px); opacity: 1; } }
+@keyframes stamp { 0%, 22%, 82%, 100% { transform: translateY(0); } 54%, 63% { transform: translateY(44px); } }
+@keyframes feed { 0%, 62% { transform: translate(34.64px, -20px); } 100% { transform: translate(-16px, 9px); } }
+@keyframes print { from { opacity: 0; } 54%, to { opacity: 1; } }
+@keyframes aim { from { transform: rotate(8deg); } to { transform: rotate(-21deg); } }
+@keyframes acquire { from { opacity: .15; } to { opacity: 1; } }
+
+@media (max-width: 47rem) {
+  .svg { height: min(32svh, 17rem); }
+}
+
+@media (max-width: 47rem) and (max-height: 43rem) {
+  .svg { height: min(23svh, 9rem); }
+  .figure figcaption { font-size: .54rem; }
+}
+
+@media (min-width: 47.01rem) and (max-height: 34rem) {
+  .svg { height: 36svh; }
+}

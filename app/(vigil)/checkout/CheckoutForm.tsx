@@ -43,6 +43,7 @@ export type CheckoutFormProps = {
   termsUrl: string | null;
   refundNote: string | null;
   accountEmail?: string;
+  requestId?: string;
 };
 
 export function CheckoutForm(p: CheckoutFormProps) {
@@ -141,20 +142,20 @@ export function CheckoutForm(p: CheckoutFormProps) {
     </details>
   );
 
-  if (purchasable.length === 0) {
+  if (purchasable.length === 0 || !p.build || p.build.amountCents === null) {
     return (
       <div className="space-y-4">
         {scope}
         <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-5 text-sm">
           <p className="font-semibold">
-            Online checkout is not switched on yet.
+            This package isn’t available for online checkout right now.
           </p>
           <p className="mt-2 text-[color:var(--text-secondary)]">
             Email{" "}
             <a className="underline" href="mailto:hello@vigilstudios.co">
               hello@vigilstudios.co
             </a>{" "}
-            and we will set you up by hand.
+            and we’ll help you finish your order.
           </p>
         </div>
       </div>
@@ -182,6 +183,7 @@ export function CheckoutForm(p: CheckoutFormProps) {
       className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]"
       noValidate
     >
+      {p.requestId && <input type="hidden" name="request_id" value={p.requestId} />}
       <input type="hidden" name="project_kind" value={p.projectKind} />
       <input
         type="hidden"
@@ -202,9 +204,9 @@ export function CheckoutForm(p: CheckoutFormProps) {
 
       <div className="space-y-6">
         <section className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-5">
-          <h2 className="text-base font-semibold">Hosting plan</h2>
+          <h2 className="text-base font-semibold">Vigil plan</h2>
           <p className="mt-1 text-xs text-[color:var(--text-secondary)]">
-            Required for hosting. Choose how often you pay.
+            This plan keeps your website running. Choose how often you pay.
           </p>
           {periods.length > 1 ? (
             <div
@@ -462,7 +464,7 @@ export function CheckoutForm(p: CheckoutFormProps) {
             </dd>
           </div>
           <div className="flex justify-between gap-3 border-t border-[color:var(--border)] pt-3 text-lg">
-            <dt className="font-semibold">Due today</dt>
+            <dt className="font-semibold">Due today before tax</dt>
             <dd className="font-semibold">
               {formatMoney(dueToday, plan?.currency ?? "usd")}
             </dd>
@@ -543,6 +545,7 @@ export function CheckoutForm(p: CheckoutFormProps) {
                 checked={fields.agree}
                 onChange={(e) => setField("agree", e.target.checked)}
                 className="mt-0.5"
+                required
                 disabled={pending}
               />
               <span>
@@ -575,7 +578,7 @@ export function CheckoutForm(p: CheckoutFormProps) {
           disabled={pending || !price?.purchasable}
         >
           <Lock className="mr-1.5 h-3.5 w-3.5" />
-          {pending ? "Opening payment…" : "Continue to payment"}
+          {pending ? "Opening payment…" : "Continue to secure payment"}
         </button>
         <p className="mt-2 text-center text-[11px] text-[color:var(--text-secondary)]">
           Secure payment with Stripe
