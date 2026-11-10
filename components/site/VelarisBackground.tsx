@@ -10,7 +10,7 @@ import Velaris, { DEFAULT_COLORS } from "@/components/ui/velaris";
  * violet keeps it from being one flat colour.
  */
 const DARK = { bg: "#050806", colors: ["#6ee7a5", "#22c55e", "#0b7a3e", "#1e2a4a"] };
-const LIGHT = { bg: "#fafafa", colors: ["#e6ece8", "#d6e4dc", "#12bf60", "#e5e2ee"] };
+const LIGHT = { bg: "#fafafa", colors: ["#eaf3ed", "#dcece4", "#b7e4cc", "#e8e4f1"] };
 
 export function VelarisBackground({ className, grain = 0.3, speed = 1.6 }: { className?: string; grain?: number; speed?: number }) {
   const [light, setLight] = useState(false);

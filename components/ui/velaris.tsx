@@ -81,9 +81,11 @@ void main() {
   col = mix(col, u_colors[3], smoothstep(0.0, 0.7, n1 * n2) * 0.5);
 
   float glow = smoothstep(0.8, 0.0, dist) * 0.3;
-  col += u_colors[1] * glow;
+  float lightGround = step(0.5, dot(u_bg, vec3(0.2126, 0.7152, 0.0722)));
+  col = mix(col + u_colors[1] * glow, mix(col, u_colors[1], glow), lightGround);
 
-  col = mix(col * 0.2, col, vignette);
+  // On a pale ground, fade the field into the page instead of shading its edges.
+  col = mix(mix(col * 0.2, u_bg, lightGround), col, vignette);
 
   float grain = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453 + u_time);
   col += (grain - 0.5) * u_grain * 0.1;

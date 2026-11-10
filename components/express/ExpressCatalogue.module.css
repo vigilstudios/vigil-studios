@@ -327,6 +327,7 @@
 }
 
 .browser {
+  --device-shadow: rgba(0, 0, 0, 0.35);
   display: flex;
   overflow: clip;
   flex-direction: column;
@@ -336,8 +337,12 @@
   border-radius: 16px;
   background: #ffffff;
   box-shadow:
-    0 40px 100px -42px color-mix(in srgb, var(--template-accent) 38%, transparent),
-    0 38px 100px -44px rgba(0, 0, 0, 0.86);
+    0 16px 44px -24px color-mix(in srgb, var(--template-accent) 25%, transparent),
+    0 10px 28px -13px var(--device-shadow);
+}
+
+:global([data-theme="light"]) .browser {
+  --device-shadow: rgba(0, 0, 0, 0.16);
 }
 
 .browserBar {
