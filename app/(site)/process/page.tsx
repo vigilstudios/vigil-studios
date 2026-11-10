@@ -25,7 +25,7 @@ const stages = journeyStages.slice(0, 2);
 export default function ProcessPage() {
   return (
     <>
-      <div className={styles.page}>
+      <div className={`${styles.page} ${styles.processPage}`}>
         <header className={styles.masthead}>
           <div className={styles.wrap}>
             <Reveal className={styles.fade}>
