@@ -65,7 +65,6 @@ function LaunchPad() {
       <Solid x={-77} y={-55} z={123} width={61} depth={12} height={7} />
       <path className={styles.detail} d={line([-76,-45,119],[-13,-45,119],[-69,-45,89])} />
       <g className={styles.rocket}>
-        <path className={styles.signal} d="M249 233l3 20m6-24 2 34m6-33 2 17" />
         <path className={styles.left} d="M239 194c-12 7-21 22-23 42l24-12m41-30c12 7 21 22 23 42l-24-12" />
         <path className={styles.paper} d="M238 219v-70c0-32 10-56 22-76 13 19 23 44 23 76v70c0 15-45 15-45 0Z" />
         <path className={styles.right} d="M260 74c15 21 23 48 23 76v69c-2 7-9 10-15 10v-83c0-27-2-51-8-72Z" />

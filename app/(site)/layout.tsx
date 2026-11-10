@@ -9,6 +9,7 @@ import { PromoBanner } from "@/components/creators/PromoBanner";
 import { themeBootstrapScript } from "@/lib/site-theme";
 import { Navigation } from "@/components/layout/Navigation";
 import { StarCursor } from "@/components/site/StarCursor";
+import { SiteScrollPosition } from "@/components/site/SiteScrollPosition";
 import {
   SITE_DESCRIPTION,
   SITE_NAME,
@@ -108,6 +109,7 @@ export default function RootLayout({
         <main id="site-root" className="h-dvh overflow-y-auto">
           {children}
         </main>
+        <SiteScrollPosition />
         <StarCursor />
         <Analytics />
         <SpeedInsights/>

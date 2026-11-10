@@ -190,19 +190,6 @@ export const WEBSITES_PAGE = {
   platformNote: "Every Vigil-hosted website needs a separate recurring plan. Hosting, domain connection and security are managed by Vigil; website changes and additional tools depend on the plan you choose. The build does not include a subscription.",
 };
 
-export const VIGIL_PAGE = {
-  title: "One workspace for what happens after launch.",
-  lead: "See new inquiries, manage bookings on eligible sites, and check how your website is doing. Vigil handles hosting, domain connection, and platform maintenance in the background.",
-  primary: { label: PACKAGE_FINDER_LABEL, href: PACKAGE_FINDER_HREF },
-  secondary: { label: "See the plans", href: "/pricing?tab=subscriptions" },
-  experience: [
-    { title: "Know what needs you", body: "Your workspace shows website status and the next steps for your build, domain, and connected tools." },
-    { title: "You ask, a person does it", body: "Changes are a request, not a project. Say it in a sentence, attach a photo if it helps, and watch it move to done." },
-    { title: "Virtue is already inside", body: "She guides setup on every plan. Ongoing lead follow-up, missed-call text-back and reviews are in development for eligible Growth and Priority subscriptions." },
-    { title: "You can always leave", body: "Your site's code and content are yours; download them from the dashboard any time. Your domain never leaves your name." },
-  ],
-};
-
 export const FAQ = [
   { q: "Which website package should I choose?", a: "Express is a polished single page with a curated design direction. Professional is a premium multi-page composition tailored around your brand. Growth is for original components, bespoke interactions or advanced functionality beyond our existing design systems. Each build needs a separate Vigil plan for hosting." },
   { q: "How is Professional designed for my business?", a: "We compose your site from Vigil’s premium design systems, selecting navigation, heroes, story, services, media, product presentation and social proof to suit your brand. Typography, art direction, imagery, page layouts, nested navigation and contextual calls to action make the experience your own. Compatible motion is configured where supported. New component invention is scoped under Growth." },
