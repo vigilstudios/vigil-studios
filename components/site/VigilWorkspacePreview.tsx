@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, type CSSProperties, type PointerEvent } from "react";
-import { ArrowUpRight, CalendarDays, Circle, ClipboardList, Globe, Inbox, LineChart, PencilLine } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import { ArrowUpRight, CalendarDays, Circle, ClipboardList, Globe, Inbox, LineChart, Pause, PencilLine, Play } from "lucide-react";
 import styles from "./field-guide.module.css";
 
 const views = [
@@ -32,21 +32,52 @@ function tilt(event: PointerEvent<HTMLDivElement>) {
   if (event.pointerType !== "mouse") return;
   const panel = event.currentTarget;
   const rect = panel.getBoundingClientRect();
-  panel.style.setProperty("--tilt-x", `${(0.5 - (event.clientY - rect.top) / rect.height) * 11}deg`);
-  panel.style.setProperty("--tilt-y", `${((event.clientX - rect.left) / rect.width - 0.5) * 12}deg`);
+  const x = (event.clientX - rect.left) / rect.width - .5;
+  const y = (event.clientY - rect.top) / rect.height - .5;
+  panel.style.setProperty("--tilt-x", `${-y * 11}deg`);
+  panel.style.setProperty("--tilt-y", `${x * 12}deg`);
+  panel.style.setProperty("--parallax-x", `${x * 12}px`);
+  panel.style.setProperty("--parallax-y", `${y * 8}px`);
 }
 
 function resetTilt(event: PointerEvent<HTMLDivElement>) {
-  event.currentTarget.style.removeProperty("--tilt-x");
-  event.currentTarget.style.removeProperty("--tilt-y");
+  for (const property of ["--tilt-x", "--tilt-y", "--parallax-x", "--parallax-y"]) {
+    event.currentTarget.style.removeProperty(property);
+  }
 }
 
 export function VigilWorkspacePreview() {
   const [active, setActive] = useState(0);
+  const [rotating, setRotating] = useState(true);
+  const sceneRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!rotating || !scene) return;
+
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const hover = window.matchMedia("(hover: hover)");
+    let visible = false;
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.intersectionRatio >= .5;
+    }, { threshold: .5 });
+    observer.observe(scene);
+
+    const timer = window.setInterval(() => {
+      if (!visible || document.hidden || motion.matches) return;
+      if ((hover.matches && scene.matches(":hover")) || scene.querySelector(":focus-visible")) return;
+      setActive((index) => (index + 1) % views.length);
+    }, 5500);
+
+    return () => {
+      observer.disconnect();
+      window.clearInterval(timer);
+    };
+  }, [rotating]);
 
   return (
     <figure aria-label="Sample Vigil workspace">
-      <div className={styles.stackScene} onPointerMove={tilt} onPointerLeave={resetTilt}>
+      <div ref={sceneRef} className={styles.stackScene} onPointerMove={tilt} onPointerLeave={resetTilt}>
         <div className={styles.stack}>
           {views.map(({ title, rows }, index) => {
             const front = active === index;
@@ -60,7 +91,6 @@ export function VigilWorkspacePreview() {
                 <div className={styles.sample} inert={!front}>
                   <div className={styles.sampleHeading}>
                     <strong>Marlow &amp; Fen</strong>
-                    <span className={styles.label}>Example data</span>
                   </div>
                   <ul>
                     {rows.map(({ href, icon: Icon, item, feature, status }) => (
@@ -79,7 +109,12 @@ export function VigilWorkspacePreview() {
           })}
         </div>
       </div>
-      <figcaption className={`${styles.label} ${styles.stackCaption}`}>Select a panel to explore the workspace</figcaption>
+      <figcaption className={`${styles.label} ${styles.stackCaption}`}>
+        <span>Select a panel to explore the workspace</span>
+        <button type="button" className={styles.stackToggle} onClick={() => setRotating((value) => !value)}>
+          {rotating ? <><Pause size={14} aria-hidden /> Pause rotation</> : <><Play size={14} aria-hidden /> Play rotation</>}
+        </button>
+      </figcaption>
     </figure>
   );
 }

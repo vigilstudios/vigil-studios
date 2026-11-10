@@ -14,21 +14,33 @@ function distanceToStop(root: HTMLElement, stop: HTMLElement) {
   return stop.getBoundingClientRect().top - root.getBoundingClientRect().top - inset;
 }
 
-function selectChapter(event: MouseEvent<HTMLAnchorElement>) {
-  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-  const { hash } = event.currentTarget;
-  const root = document.getElementById("site-root");
-  const stop = document.getElementById(hash.slice(1));
-  if (!root || !stop) return;
-  event.preventDefault();
-  if (window.location.hash !== hash) window.history.pushState(null, "", hash);
-  root.scrollTo({ top: root.scrollTop + distanceToStop(root, stop), behavior: "instant" });
-}
-
 export function HowItWorksSection({ hero }: { hero: ReactNode }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const originRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<number | null>();
+
+  const startOrigin = useRef<{ hash: string; search: string; top: number } | null>(null);
+
+  function jumpToStop(event: MouseEvent<HTMLAnchorElement>, animate = false) {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const { hash } = event.currentTarget;
+    const root = document.getElementById("site-root");
+    const stop = document.getElementById(hash.slice(1));
+    if (!root || !stop) return;
+    event.preventDefault();
+    if (window.location.hash !== hash) {
+      startOrigin.current = animate
+        ? { hash: window.location.hash, search: window.location.search, top: root.scrollTop }
+        : null;
+      window.history.pushState(null, "", hash);
+    }
+    if (animate) stop.focus({ preventScroll: true });
+    const smooth = animate && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    root.scrollTo({
+      top: root.scrollTop + distanceToStop(root, stop),
+      behavior: smooth ? "smooth" : "instant",
+    });
+  }
 
   useEffect(() => {
     const root = document.getElementById("site-root");
@@ -38,6 +50,21 @@ export function HowItWorksSection({ hero }: { hero: ReactNode }) {
 
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let frame = 0;
+    let historyFrame = 0;
+    const restoreStartHistory = () => {
+      const previous = startOrigin.current;
+      const { pathname, search, hash } = window.location;
+      if (!previous || pathname !== "/" || search !== previous.search) return;
+      if (hash !== previous.hash && hash !== "#start") return;
+
+      // A fast Back can interrupt native smooth scrolling before the browser restores its position.
+      cancelAnimationFrame(historyFrame);
+      historyFrame = requestAnimationFrame(() => {
+        const start = document.getElementById("start");
+        const top = hash === "#start" && start ? root.scrollTop + distanceToStop(root, start) : previous.top;
+        root.scrollTo({ top, behavior: "instant" });
+      });
+    };
     const update = () => {
       frame = 0;
       const position = clamp(-distanceToStop(root, origin) / origin.offsetHeight, 0, journeyStages.length);
@@ -107,14 +134,17 @@ export function HowItWorksSection({ hero }: { hero: ReactNode }) {
     root.addEventListener("scrollend", settle);
     root.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("resize", schedule);
+    window.addEventListener("popstate", restoreStartHistory);
     motion.addEventListener("change", schedule);
     update();
     return () => {
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(historyFrame);
       root.removeEventListener("scroll", schedule);
       root.removeEventListener("scrollend", settle);
       root.removeEventListener("wheel", onWheel);
       window.removeEventListener("resize", schedule);
+      window.removeEventListener("popstate", restoreStartHistory);
       motion.removeEventListener("change", schedule);
       setStoryProgress(0);
     };
@@ -162,7 +192,7 @@ export function HowItWorksSection({ hero }: { hero: ReactNode }) {
             <ol style={{ "--completed": (active ?? 0) / (journeyStages.length - 1) } as CSSProperties}>
               {journeyStages.map(({ id, name, icon: Icon }, index) => (
                 <li key={id}>
-                  <a href={`#${id}`} onClick={selectChapter} aria-current={active === index ? "step" : undefined} data-completed={active != null && index < active}>
+                  <a href={`#${id}`} onClick={jumpToStop} aria-current={active === index ? "step" : undefined} data-completed={active != null && index < active}>
                     <span className={styles.marker}><Icon size={17} aria-hidden /></span>
                     <span>{name}</span>
                   </a>
@@ -170,7 +200,7 @@ export function HowItWorksSection({ hero }: { hero: ReactNode }) {
               ))}
             </ol>
           </nav>
-          <a href="#start" className={`btn-primary ${styles.skip}`}>Find where you are <ArrowDown size={15} aria-hidden /></a>
+          <a href="#start" onClick={(event) => jumpToStop(event, true)} className={`btn-primary ${styles.skip}`}>Find where you are <ArrowDown size={15} aria-hidden /></a>
         </div>
       </div>
       <div className={styles.stop} ref={originRef} data-home-snap aria-hidden="true" />

@@ -10,7 +10,7 @@ import styles from "@/components/site/field-guide.module.css";
 
 export const metadata: Metadata = {
   title: "How it works | Vigil Studios",
-  description: "See how to choose your website, share your brief, review your design, and get your site online with Vigil.",
+  description: "See how Vigil builds and launches your website, then helps you manage inquiries, bookings, and ongoing updates.",
   alternates: { canonical: "/process" },
 };
 
@@ -20,23 +20,26 @@ const firstSteps = [
   { title: "Send us your brief.", body: "Open your dashboard after payment. Guided setup collects your business details, photos, and domain so we can start the build." },
 ];
 
-const stages = journeyStages.slice(0, 2);
+const stageGroups = [
+  { id: "build-and-publish", title: "Build and publish", stages: journeyStages.slice(0, 2) },
+  { id: "after-launch", title: "After your site goes live", stages: journeyStages.slice(2) },
+];
 
 export default function ProcessPage() {
   return (
     <>
-      <div className={`${styles.page} ${styles.processPage}`}>
+      <div className={styles.page}>
         <header className={styles.masthead}>
           <div className={styles.wrap}>
             <Reveal className={styles.fade}>
               <p className={styles.marker}>How it works</p>
-              <h1 className={styles.title}>From first brief to launch</h1>
-              <p className={styles.lead}>See what we need from you, when you’ll review your website, and how we’ll get it online.</p>
+              <h1 className={styles.title}>From first brief to ongoing care</h1>
+              <p className={styles.lead}>See how we build and launch your site, then how Vigil helps you handle inquiries, bookings, and updates.</p>
             </Reveal>
             <Reveal className={styles.fade} delay={0.1}>
               <nav aria-label="Jump to a process stage">
                 <ol className={styles.stageIndex}>
-                  {stages.map(({ name, id, icon: Icon }, index) => (
+                  {journeyStages.map(({ name, id, icon: Icon }, index) => (
                     <li key={name}>
                       <a href={`#${id}`}>
                         <span className={styles.label} aria-hidden>0{index + 1}</span>
@@ -51,27 +54,31 @@ export default function ProcessPage() {
           </div>
         </header>
 
-        <section className={`${styles.wrap} ${styles.stageGroup} pb-14 sm:pb-24`} aria-labelledby="build-and-publish">
-          <Reveal className={styles.fade}>
-            <h2 id="build-and-publish" className={styles.heading}>Build and publish</h2>
-          </Reveal>
-          {stages.map(({ name, id, label, title, body, href, link }) => (
-            <article key={name} id={id} tabIndex={-1} className={styles.stage} aria-labelledby={`${id}-title`}>
-              <Reveal className={`${styles.stageCopy} ${styles.fade}`}>
-                <p className={styles.marker}>{label}</p>
-                <h3 id={`${id}-title`} className={styles.subhead}>{title}</h3>
-                <p className={styles.body}>{name === "Build" ? "We design your site around the business details you share. You’ll get a preview in your dashboard to review before it goes live." : body}</p>
-                {name === "Build" && (
-                  <ol className={`${styles.checklist} ${styles.body}`}>
-                    {firstSteps.map(({ title, body }) => <li key={title}><strong>{title}</strong> {body}</li>)}
-                  </ol>
-                )}
-                <Link href={href} className={styles.textLink}>{link} <ArrowRight size={15} aria-hidden /></Link>
+        <div className={`${styles.wrap} pb-14 sm:pb-24`}>
+          {stageGroups.map(({ id: groupId, title: groupTitle, stages }) => (
+            <section key={groupId} className={styles.stageGroup} aria-labelledby={groupId}>
+              <Reveal className={styles.fade}>
+                <h2 id={groupId} className={styles.heading}>{groupTitle}</h2>
               </Reveal>
-              <Reveal className={styles.fade} delay={0.1}><ProcessStageArt stage={name} /></Reveal>
-            </article>
+              {stages.map(({ name, id, label, title, body, href, link }) => (
+                <article key={name} id={id} tabIndex={-1} className={styles.stage} aria-labelledby={`${id}-title`}>
+                  <Reveal className={`${styles.stageCopy} ${styles.fade}`}>
+                    <p className={styles.marker}>{label}</p>
+                    <h3 id={`${id}-title`} className={styles.subhead}>{title}</h3>
+                    <p className={styles.body}>{name === "Build" ? "We design your site around the business details you share. You’ll get a preview in your dashboard to review before it goes live." : body}</p>
+                    {name === "Build" && (
+                      <ol className={`${styles.checklist} ${styles.body}`}>
+                        {firstSteps.map(({ title, body }) => <li key={title}><strong>{title}</strong> {body}</li>)}
+                      </ol>
+                    )}
+                    <Link href={href} className={styles.textLink}>{link} <ArrowRight size={15} aria-hidden /></Link>
+                  </Reveal>
+                  <Reveal className={styles.fade} delay={0.1}><ProcessStageArt stage={name} /></Reveal>
+                </article>
+              ))}
+            </section>
           ))}
-        </section>
+        </div>
         <FieldGuideClose />
       </div>
       <Footer />

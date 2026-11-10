@@ -6,13 +6,6 @@
   color: var(--text-primary);
 }
 
-:global([data-theme="light"]) .page:not(.processPage) .marker {
-  width: fit-content;
-  border-radius: .15rem;
-  padding: .12rem .34rem;
-  background: #121212;
-}
-
 .wrap {
   width: min(100% - var(--guide-gutter) * 2, 70rem);
   margin-inline: auto;
@@ -158,7 +151,7 @@
 
 .stageIndex {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   margin-top: clamp(1.75rem, 4.5vw, 3rem);
   border-block: 1px solid var(--guide-rule);
 }
@@ -168,6 +161,7 @@
 .stageIndex a:hover, .stageIndex a:focus-visible { background: var(--bg-surface); color: var(--guide-accent); }
 .stageIndex a > svg { flex: none; color: var(--guide-accent); }
 
+.stageGroup + .stageGroup { margin-top: clamp(3rem, 7vw, 6rem); }
 .stageGroup .heading { margin-bottom: clamp(1.5rem, 4vw, 3rem); }
 
 .stage {
@@ -268,10 +262,11 @@
 .stackScene { perspective: 900px; }
 
 .stack {
-  --stack-step: 2.75rem;
+  --stack-step: 3rem;
   --stack-offset: clamp(.65rem, 2vw, 1.25rem);
   display: grid;
   isolation: isolate;
+  perspective: 850px;
   padding-top: calc(2 * var(--stack-step));
   margin-right: calc(2 * var(--stack-offset));
   transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
@@ -281,7 +276,14 @@
 .stackLayer {
   grid-area: 1 / 1;
   z-index: calc(3 - var(--depth));
-  transform: translate(calc(var(--depth) * var(--stack-offset)), calc(-1 * var(--depth) * var(--stack-step)));
+  --parallax-weight: calc(2 - var(--depth));
+  --layer-x: calc(var(--depth) * var(--stack-offset));
+  --layer-y: calc(-1 * var(--depth) * var(--stack-step));
+  transform: translate3d(
+    calc(var(--layer-x) + var(--parallax-x, 0px) * var(--parallax-weight)),
+    calc(var(--layer-y) + var(--parallax-y, 0px) * var(--parallax-weight)),
+    calc(-25px * var(--depth))
+  );
   transition: transform .46s cubic-bezier(.22, 1, .36, 1), box-shadow .3s ease;
 }
 
@@ -290,7 +292,25 @@
 .stackButton small { margin-right: .35rem; }
 .stackButton:hover { background: var(--bg-surface-soft); }
 .stackButton:focus-visible { outline: 2px solid var(--text-primary); outline-offset: -4px; border-radius: .45rem; }
-.stackCaption { margin-top: 1rem; }
+.stackCaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 .65rem;
+  margin-top: .5rem;
+}
+
+.stackToggle {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: .35rem;
+  cursor: pointer;
+}
+
+.stackToggle svg { color: var(--guide-accent); }
+.stackToggle:hover { color: var(--text-primary); }
 
 .planScroll { overflow-x: auto; }
 .planMatrix { width: 100%; min-width: 48rem; border-collapse: separate; border-spacing: 0; font-size: .875rem; }
@@ -321,7 +341,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .stack { transform: none; transition: none; }
-  .stackLayer { transition: none; }
+  .stackLayer { transform: translate(var(--layer-x), var(--layer-y)); transition: none; }
+  .stackToggle { display: none; }
 }
 
 @media (max-width: 47.99rem) {

@@ -18,7 +18,7 @@ export async function StartSection() {
   const [{ builds }, templates] = await Promise.all([getPublicPricing(), publishedExpressTemplates()]);
   const available = [...new Set(templates.filter((t) => t.status === "available").map((t) => t.industry))];
   return (
-    <Section id="start" fill accent className="isolate overflow-hidden md:pt-28! md:pb-20!">
+    <Section id="start" tabIndex={-1} fill accent className="isolate overflow-hidden md:pt-28! md:pb-20!">
       <Container>
         <Reveal>
           <div className="mx-auto max-w-2xl text-center">

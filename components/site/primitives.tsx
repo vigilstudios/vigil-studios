@@ -38,9 +38,9 @@ export function SectionIntro({ eyebrow, tone, title, lead, align = "left", headi
  * Every section is opaque and sits above z-0, so the page scrolls over the
  * sticky hero instead of showing it through.
  */
-export function Section({ children, className, id, alt, accent, fill }: { children: ReactNode; className?: string; id?: string; alt?: boolean; accent?: boolean; fill?: boolean }) {
+export function Section({ children, className, id, alt, accent, fill, tabIndex }: { children: ReactNode; className?: string; id?: string; alt?: boolean; accent?: boolean; fill?: boolean; tabIndex?: number }) {
   return (
-    <section id={id} className={clsx("relative z-[1]", fill ? "flex flex-col justify-center py-20 md:min-h-[100svh] md:py-24" : "py-16 sm:py-24", accent ? "section-accent" : alt ? "bg-[color:var(--bg-section-alt)]" : "bg-[color:var(--bg-primary)]", className)}>
+    <section id={id} tabIndex={tabIndex} className={clsx("relative z-[1]", fill ? "flex flex-col justify-center py-20 md:min-h-[100svh] md:py-24" : "py-16 sm:py-24", accent ? "section-accent" : alt ? "bg-[color:var(--bg-section-alt)]" : "bg-[color:var(--bg-primary)]", className)}>
       {children}
     </section>
   );
