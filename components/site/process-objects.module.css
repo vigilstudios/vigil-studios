@@ -1,13 +1,13 @@
 .figure {
-  --metal-top: #202522;
-  --metal-front: #121613;
-  --metal-side: #191d1a;
-  --metal-paper: #252c27;
-  --metal-recess: #090c0a;
-  --line: #a6b3a9;
-  --detail: #66746b;
-  --guide: #47524a;
-  --object-signal: var(--process-ink, var(--accent));
+  --metal-top: #191919;
+  --metal-front: #101010;
+  --metal-side: #141414;
+  --metal-paper: #222222;
+  --metal-recess: #080808;
+  --line: #bdbdbd;
+  --detail: #767676;
+  --guide: #494949;
+  --object-signal: var(--accent-fill, var(--accent));
   margin: 0;
   min-width: 0;
   display: grid;
@@ -16,15 +16,14 @@
 }
 
 :global([data-theme="light"]) .figure {
-  --metal-top: #f6f7f4;
-  --metal-front: #e1e6e0;
-  --metal-side: #cbd3cb;
+  --metal-top: #f7f7f7;
+  --metal-front: #e8e8e8;
+  --metal-side: #d8d8d8;
   --metal-paper: #fff;
-  --metal-recess: #b3beb4;
-  --line: #47574d;
-  --detail: #687c6d;
-  --guide: #869b8c;
-  --object-signal: #106c37;
+  --metal-recess: #cdcdcd;
+  --line: #454545;
+  --detail: #686868;
+  --guide: #909090;
 }
 
 .svg {

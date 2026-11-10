@@ -35,7 +35,6 @@ function DrawingDesk() {
       <Solid x={84} y={-56} z={0} width={14} depth={14} height={103} />
       <Solid x={-102} y={47} z={0} width={14} depth={14} height={103} />
       <Solid x={84} y={47} z={0} width={14} depth={14} height={103} />
-      <path className={styles.detail} d={line([-96, 61, 34], [90, 61, 34], [90, -49, 34])} />
       <Solid x={-115} y={-71} z={100} width={226} depth={143} height={12} />
       <Solid x={-92} y={-43} z={112} width={145} depth={91} height={2} />
       <g className={styles.blueprint}>

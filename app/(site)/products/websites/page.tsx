@@ -37,7 +37,7 @@ export default async function WebsitesPage() {
       <Section className="pt-32 sm:pt-40">
         <Container>
           <Reveal>
-            <SectionIntro heading="h1" eyebrow="Websites" title={WEBSITES_PAGE.title} lead={WEBSITES_PAGE.lead} />
+            <SectionIntro align="center" heading="h1" eyebrow="Websites" title={WEBSITES_PAGE.title} lead={WEBSITES_PAGE.lead} />
           </Reveal>
           <Reveal delay={0.1}>
             <CardRow className="mt-10 md:grid-cols-3">

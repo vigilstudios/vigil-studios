@@ -1,11 +1,10 @@
 .opening {
-  --process-ink: var(--accent);
+  --process-ink: var(--accent-fill, var(--accent));
   --process-border: color-mix(in srgb, var(--text-primary) 25%, var(--bg-primary));
   --chapter-screen: calc(100dvh - var(--creator-promo-height, 0px));
   isolation: isolate;
   background: var(--bg-primary);
 }
-:global([data-theme="light"]) .opening { --process-ink: #106c37; }
 
 .stage {
   position: sticky;
@@ -46,10 +45,12 @@
   text-transform: uppercase;
   letter-spacing: .12em;
 }
-.eyebrow { display: flex; align-items: center; gap: .55rem; color: var(--text-secondary); }
+.eyebrow { display: flex; align-items: center; gap: .55rem; color: var(--process-ink); width: fit-content; }
 .eyebrow > span { width: .35rem; height: .35rem; border-radius: 100%; background: var(--process-ink); }
 .eyebrow b { padding-left: .65rem; border-left: 1px solid var(--process-border); font-weight: 500; }
-.chapterName { margin-top: clamp(.8rem, 2.7svh, 1.9rem); color: var(--process-ink); }
+.chapterName { margin-top: clamp(.8rem, 2.7svh, 1.9rem); color: var(--process-ink); width: fit-content; }
+:global([data-theme="light"]) .eyebrow,
+:global([data-theme="light"]) .chapterName { background: #121212; padding: .12rem .34rem; border-radius: .15rem; }
 .copy h3 {
   max-width: 13ch;
   margin-block: .48rem .9rem;
@@ -58,7 +59,8 @@
   text-wrap: balance;
 }
 .description { max-width: 43ch; font-size: clamp(.94rem, 1.3vw, 1.09rem); line-height: 1.58; color: var(--text-secondary); }
-.detailLink { display: inline-flex; min-height: 2.75rem; align-items: center; gap: .45rem; margin-top: .38rem; color: var(--process-ink); font-size: .86rem; font-weight: 600; }
+.detailLink { display: inline-flex; min-height: 2.75rem; align-items: center; gap: .45rem; margin-top: .38rem; color: var(--text-primary); font-size: .86rem; font-weight: 600; }
+.detailLink svg { color: var(--process-ink); }
 .detailLink:hover { text-decoration: underline; text-underline-offset: 4px; }
 
 .controls {
@@ -102,9 +104,8 @@
 .marker { display: grid; place-items: center; width: 2rem; height: 2rem; border: 1px solid var(--process-border); border-radius: 100%; background: var(--bg-primary); }
 .rail a:hover, .rail a[aria-current="step"] { color: var(--text-primary); }
 .rail a[data-completed="true"] .marker,
-.rail a:hover .marker,
-.rail a[aria-current="step"] .marker { border-color: var(--process-ink); color: var(--process-ink); }
-.rail a[aria-current="step"] .marker { color: var(--on-accent); background: var(--accent-fill, var(--accent)); border-color: var(--accent-fill, var(--accent)); }
+.rail a:hover .marker { border-color: var(--process-ink); color: var(--text-primary); }
+.rail a[aria-current="step"] .marker { color: var(--on-accent); background: var(--process-ink); border-color: var(--process-ink); }
 
 .skip {
   min-height: 2.75rem;

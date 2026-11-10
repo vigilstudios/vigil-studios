@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, CalendarDays, LineChart, Inbox, PencilLine } from "lucide-react";
+import { Reveal } from "./Reveal";
 import styles from "./field-guide.module.css";
 
 const features = [
@@ -29,25 +30,25 @@ export function WorkspaceFeatures() {
   return (
     <section id="workspace" className={styles.band} aria-labelledby="vigil-workspace-title">
       <div className={styles.wrap}>
-        <div className={styles.bandIntro}>
+        <Reveal className={`${styles.bandIntro} ${styles.fade}`}>
           <div>
             <p className={styles.marker}>Your dashboard</p>
             <h2 id="vigil-workspace-title" className={styles.heading}>What you can do in Vigil</h2>
           </div>
           <p className={styles.body}>Follow up with customers, check how your site is doing, and send changes to the team from the same place.</p>
-        </div>
+        </Reveal>
         <div className={styles.featureRows}>
           {features.map(({ id, icon: Icon, label, title, body, availability }) => (
             <article key={id} id={id} tabIndex={-1} className={styles.featureRow} aria-labelledby={`${id}-title`}>
-              <div>
+              <Reveal className={styles.fade}>
                 <p className={styles.marker}>{label}</p>
                 <h3 id={`${id}-title`} className={styles.subhead}><Icon size={18} aria-hidden /> {title}</h3>
-              </div>
-              <div>
+              </Reveal>
+              <Reveal className={styles.fade} delay={0.08}>
                 <p className={styles.body}>{body}</p>
                 <p className={styles.label}>{availability}</p>
                 {id === "bookings" && <Link href="/calendar-privacy" className={styles.textLink}>Calendar privacy <ArrowUpRight size={14} aria-hidden /></Link>}
-              </div>
+              </Reveal>
             </article>
           ))}
         </div>
