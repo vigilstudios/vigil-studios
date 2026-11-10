@@ -312,7 +312,11 @@
 .stackToggle svg { color: var(--guide-accent); }
 .stackToggle:hover { color: var(--text-primary); }
 
-.planScroll { overflow-x: auto; }
+.planScroll {
+  /* Keep the sticky feature column's overflow inside the table during its reveal. */
+  contain: layout;
+  overflow-x: auto;
+}
 .planMatrix { width: 100%; min-width: 48rem; border-collapse: separate; border-spacing: 0; font-size: .875rem; }
 .planMatrix th, .planMatrix td { padding: 1rem .8rem; border-bottom: 1px solid var(--guide-rule); }
 .planMatrix thead th { vertical-align: bottom; border-top: 1px solid var(--guide-rule); }
