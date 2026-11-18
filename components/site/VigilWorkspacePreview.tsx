@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
-import { ArrowUpRight, CalendarDays, Circle, ClipboardList, Globe, Inbox, LineChart, Pause, PencilLine, Play } from "lucide-react";
+import { ArrowUpRight, CalendarDays, Circle, ClipboardList, Globe, Inbox, LineChart, Package, Pause, PencilLine, Play } from "lucide-react";
 import styles from "./field-guide.module.css";
 
 const views = [
@@ -17,6 +17,13 @@ const views = [
     rows: [
       { href: "#lead-hub", icon: Inbox, item: "Private dining inquiry", feature: "Lead Hub", status: "New" },
       { href: "#bookings", icon: CalendarDays, item: "Table for two · 7:30 pm", feature: "Bookings", status: "Confirmed" },
+    ],
+  },
+  {
+    title: "Products",
+    rows: [
+      { href: "#products", icon: Package, item: "Signature collection", feature: "Product listings & imagery", status: "Published" },
+      { href: "#product-plans", icon: PencilLine, item: "Seasonal gift set", feature: "Product details & price label", status: "Draft" },
     ],
   },
   {
@@ -83,7 +90,7 @@ export function VigilWorkspacePreview() {
             const front = active === index;
             const depth = (index - active + views.length) % views.length;
             return (
-              <div key={title} className={`${styles.window} ${styles.stackLayer}`} data-front={front} style={{ "--depth": depth } as CSSProperties}>
+              <div key={title} className={`${styles.window} ${styles.stackLayer}`} data-front={front} style={{ "--depth": depth, "--stack-count": views.length } as CSSProperties}>
                 <button type="button" className={`${styles.windowBar} ${styles.stackButton}`} aria-pressed={front} onClick={() => setActive(index)}>
                   <span><small className={styles.label}>0{index + 1}</small> {title}</span>
                   {front ? <Circle size={8} fill="currentColor" aria-hidden /> : <ArrowUpRight size={14} aria-hidden />}

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowDown, ArrowRight, ArrowUpRight, Check, CreditCard, Download, Globe, Minus, Shield, Sparkles } from "lucide-react";
 import { Footer } from "@/components/layout/Footer";
-import { FieldGuideClose } from "@/components/site/FieldGuideClose";
+import { GetStartedSection } from "@/sections/GetStartedSection";
+import { ProductPlanComparison } from "@/components/site/ProductPlanComparison";
 import { WorkspaceFeatures } from "@/components/site/WorkspaceFeatures";
 import { PrimaryLink } from "@/components/site/primitives";
 import { Reveal } from "@/components/site/Reveal";
@@ -14,7 +15,7 @@ import styles from "@/components/site/field-guide.module.css";
 
 export const metadata: Metadata = {
   title: "The Vigil platform | Vigil Studios",
-  description: "Manage website inquiries, bookings, reports, updates, hosting, and billing with Vigil.",
+  description: "Manage customer inquiries, bookings, products, reports, and ongoing website care with the Vigil business platform.",
   alternates: { canonical: "/products/vigil" },
 };
 
@@ -30,13 +31,13 @@ export default async function VigilPage() {
 
   return (
     <>
-      <div className={styles.page}>
+      <div className={`${styles.page} relative z-[1]`}>
         <header className={styles.masthead}>
           <div className={`${styles.wrap} ${styles.heroSplit}`}>
             <Reveal className={styles.fade}>
               <p className={styles.marker}><Link href="/products" className="hover:underline">Products</Link> / Vigil</p>
-              <h1 className={styles.title}>Run your website with Vigil</h1>
-              <p className={styles.lead}>See who reached out, what’s booked, and how your site is doing. We handle the hosting and maintenance behind it.</p>
+              <h1 className={styles.title}>Your business, together in Vigil</h1>
+              <p className={styles.lead}>Your website is the foundation. Manage customer inquiries, bookings, products, and day-to-day updates in a business platform built around you.</p>
               <div className={styles.actions}>
                 <PrimaryLink href="/pricing?tab=subscriptions" className="gap-2">Compare Vigil plans <ArrowRight size={16} aria-hidden /></PrimaryLink>
                 <a href="#workspace" className={styles.textLink}>Explore the dashboard <ArrowDown size={15} aria-hidden /></a>
@@ -119,6 +120,7 @@ export default async function VigilPage() {
             <div className={styles.actions}>
               <Link href="/pricing?tab=subscriptions" className={styles.textLink}>Compare plan features and billing periods <ArrowRight size={15} aria-hidden /></Link>
             </div>
+            <ProductPlanComparison />
             <Reveal className={`${styles.serviceRows} ${styles.fade} mt-10`}>
               <article className={styles.serviceRow}>
                 <Sparkles size={19} aria-hidden />
@@ -129,8 +131,8 @@ export default async function VigilPage() {
             </Reveal>
           </div>
         </section>
-        <FieldGuideClose />
       </div>
+      <GetStartedSection />
       <Footer />
     </>
   );

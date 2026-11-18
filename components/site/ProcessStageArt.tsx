@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { StudioStoryVisual } from "./StudioStoryVisual";
 import { ProcessObject } from "./ProcessObjects";
 import type { journeyStages } from "./journey-stages";
 import styles from "./field-guide.module.css";
@@ -17,5 +18,5 @@ export function ProcessStageArt({ stage }: { stage: (typeof journeyStages)[numbe
     return () => observer.disconnect();
   }, []);
 
-  return <div ref={host} className={styles.stageArt}><ProcessObject stage={stage} active={visible} /></div>;
+  return <div ref={host} className={styles.stageArt}>{stage === "Products" ? <StudioStoryVisual stage={stage} active={visible} /> : <ProcessObject stage={stage} active={visible} />}</div>;
 }

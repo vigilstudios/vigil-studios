@@ -2,7 +2,7 @@ import { useId, type ReactNode } from "react";
 import type { journeyStages } from "./journey-stages";
 import styles from "./process-objects.module.css";
 
-type Stage = (typeof journeyStages)[number]["name"];
+type Stage = Exclude<(typeof journeyStages)[number]["name"], "Products">;
 type Point = [x: number, y: number, z: number];
 
 const project = ([x, y, z]: Point) => [260 + (x - y) * .866, 278 + (x + y) * .5 - z];

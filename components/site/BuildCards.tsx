@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Check } from "lucide-react";
+import { PricingFeatureIcon } from "./PricingFeatureIcon";
+import { ArrowRight } from "lucide-react";
 import type { PublicBuild } from "@/lib/vigil/queries/public-pricing";
 import { formatMoney } from "@/lib/vigil/format";
 import { WebsiteFitCallout } from "./WebsiteFitCallout";
@@ -33,7 +34,7 @@ export function BuildCards({ builds, bullets = 4 }: { builds: PublicBuild[]; bul
               <ul className="mt-4 space-y-2 text-[13px] text-[color:var(--text-secondary)]">
                 {(copy?.bullets ?? []).slice(0, bullets).map((x) => (
                   <li key={x} className="flex items-start gap-2">
-                    <Check className="mt-1 h-3.5 w-3.5 shrink-0 text-[color:var(--accent)]" /> {x}
+                    <PricingFeatureIcon label={x} /> {x}
                   </li>
                 ))}
               </ul>

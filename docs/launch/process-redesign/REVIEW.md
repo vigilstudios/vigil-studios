@@ -1,0 +1,9 @@
+# Process and platform page refresh — November 17, 2026
+
+Rebuilt Process with an interactive six-stage hero map, a sticky chapter navigator that tracks scrolling, full-size themed product scenes, chapter reveals, and concrete customer/team responsibilities. The page uses normal vertical scrolling and preserves stage deep links. Added the shared floating-V contact/fit section at the end of Process, Products, and Vigil, using the original one-viewport overlap so the preceding opaque content reveals the pinned V as it scrolls away.
+
+Vigil's feature order now matches its preview stack: Overview, Customer activity (Lead Hub and Bookings), Products, Updates. A visible divider separates product bundles from subscription content. Product bundle, website build, and subscription pricing cards now use feature-specific icons. Availability checks in the comparison table retain their semantic check/minus treatment.
+
+Validation: scoped ESLint, TypeScript, diff whitespace; desktop and mobile browser inspection in both themes; all tested chapter links update the active rail, keyboard Enter navigation, 320px overflow check, reduced-motion animation check, actual WebGL floating-V rendering on Products and Vigil, product divider and six feature icons verified. Prices and billing behavior are unchanged. No deployment performed.
+
+Contact correction: removed the standalone variant and restored the exact shared overlap. Products and Vigil now give their opaque preceding page wrappers z-index 1, matching Process and the existing Section primitive. Browser measurements at 30% and 70% of reveal match /products/websites on all three routes: the stage stays at y=36 while the covering content moves from y=630 to y=270 (900px viewport). Mobile contact anchor, canvas, and no horizontal overflow verified.
