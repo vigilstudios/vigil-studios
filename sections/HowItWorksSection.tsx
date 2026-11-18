@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { journeyStages } from "@/components/site/journey-stages";
 import { clamp, PHASE, rng, setStoryProgress } from "@/components/site/story/progress";
-import { ProcessHeading } from "@/components/site/ProcessHeading";
-import { ProcessObject } from "@/components/site/ProcessObjects";
+import { StudioStoryVisual } from "@/components/site/StudioStoryVisual";
 import styles from "./home-process.module.css";
 
 function distanceToStop(root: HTMLElement, stop: HTMLElement) {
@@ -157,10 +156,11 @@ export function HowItWorksSection({ hero }: { hero: ReactNode }) {
         <div className="hero-grid absolute inset-0" aria-hidden="true" />
         <section className={styles.hero} inert={hasChapter} aria-hidden={hasChapter || undefined}>{hero}</section>
 
+        <div className={styles.backdrop} aria-hidden="true" />
         <div className={styles.viewport} role="region" aria-labelledby="home-process-title">
-          <h2 id="home-process-title" className="sr-only">How Vigil works, from build through ongoing care</h2>
+          <h2 id="home-process-title" className="sr-only">How Vigil grows from your website into your business platform</h2>
           <div className={styles.track}>
-            {journeyStages.map(({ id, name, title, body, href, link }, index) => {
+            {journeyStages.map(({ id, name, title, accent, kicker, note, body, href, link }, index) => {
               const offscreen = active !== undefined && active !== index;
               return (
                 <section
@@ -170,16 +170,18 @@ export function HowItWorksSection({ hero }: { hero: ReactNode }) {
                   aria-hidden={offscreen || undefined}
                   inert={offscreen}
                   className={styles.chapter}
+                  data-active={active === index}
                 >
                   <div className={styles.scene}>
                     <div className={styles.copy}>
-                      <p className={styles.eyebrow}><span /> The Vigil process <b>0{index + 1} / 0{journeyStages.length}</b></p>
-                      <p className={styles.chapterName}>{name}</p>
-                      <ProcessHeading id={`${id}-title`} title={title} active={active === index} />
+                      <p className={styles.eyebrow}><span /> Your business. Connected. <b>0{index + 1} / 0{journeyStages.length}</b></p>
+                      <p className={styles.chapterName}>{kicker}</p>
+                      <h3 id={`${id}-title`}>{title}<span>{accent}</span></h3>
                       <p className={styles.description}>{body}</p>
                       <Link href={href} prefetch={false} className={styles.detailLink}>{link} <ArrowUpRight size={15} aria-hidden /></Link>
+                      <p className={styles.note}>{note}</p>
                     </div>
-                    <ProcessObject stage={name} active={active === index} />
+                    <StudioStoryVisual stage={name} active={active === index} />
                   </div>
                 </section>
               );
@@ -188,19 +190,20 @@ export function HowItWorksSection({ hero }: { hero: ReactNode }) {
         </div>
 
         <div className={styles.controls} data-visible={hasChapter} inert={!hasChapter}>
+          <p className={styles.railIntro}>A website to begin.<br /><span>A platform to grow.</span></p>
           <nav aria-label="Vigil process stages" className={styles.rail}>
-            <ol style={{ "--completed": (active ?? 0) / (journeyStages.length - 1) } as CSSProperties}>
-              {journeyStages.map(({ id, name, icon: Icon }, index) => (
+            <ol>
+              {journeyStages.map(({ id, name }, index) => (
                 <li key={id}>
                   <a href={`#${id}`} onClick={jumpToStop} aria-current={active === index ? "step" : undefined} data-completed={active != null && index < active}>
-                    <span className={styles.marker}><Icon size={17} aria-hidden /></span>
+                    <span className={styles.marker}>0{index + 1}</span>
                     <span>{name}</span>
                   </a>
                 </li>
               ))}
             </ol>
           </nav>
-          <a href="#start" onClick={(event) => jumpToStop(event, true)} className={`btn-primary ${styles.skip}`}>Find where you are <ArrowDown size={15} aria-hidden /></a>
+          <a href="#start" onClick={(event) => jumpToStop(event, true)} className={styles.skip}>Find your starting point <ArrowDown size={15} aria-hidden /></a>
         </div>
       </div>
       <div className={styles.stop} ref={originRef} data-home-snap aria-hidden="true" />

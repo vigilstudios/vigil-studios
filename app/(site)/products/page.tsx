@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowDown, ArrowRight, ArrowUpRight, LayoutDashboard, Sparkles } from "lucide-react";
 import { Footer } from "@/components/layout/Footer";
-import { FieldGuideClose } from "@/components/site/FieldGuideClose";
+import { GetStartedSection } from "@/sections/GetStartedSection";
 import { Reveal } from "@/components/site/Reveal";
 import Hub from "@/components/ui/hub";
 import { PrimaryLink } from "@/components/site/primitives";
@@ -28,7 +28,7 @@ export default async function ProductsPage() {
 
   return (
     <>
-      <div className={styles.page}>
+      <div className={`${styles.page} relative z-[1]`}>
         <header className={styles.masthead}>
           <div className={`${styles.wrap} ${styles.heroSplit}`}>
             <Reveal className={styles.fade}>
@@ -129,8 +129,8 @@ export default async function ProductsPage() {
             </Reveal>
           </div>
         </section>
-        <FieldGuideClose />
       </div>
+      <GetStartedSection />
       <Footer />
     </>
   );

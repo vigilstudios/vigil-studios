@@ -25,10 +25,10 @@ export function GetStartedSection() {
       <section className="sticky top-0 z-0 isolate -mt-[100svh] flex h-[100svh] flex-col overflow-hidden bg-[color:var(--bg-primary)] text-[color:var(--text-primary)]" style={{ scrollSnapAlign: "none", scrollSnapStop: "normal" }} aria-labelledby="get-started-title">
         <div className="hero-grid absolute inset-0" aria-hidden />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_55%_at_50%_40%,rgba(var(--scene-bg-rgb),0)_0%,rgba(var(--scene-bg-rgb),0.55)_100%)]" aria-hidden />
-        <WireMark className="absolute inset-0 block h-full w-full" story={false} size={{ desktop: 0.24, phone: 0.56 }} lift={{ desktop: 1.6, phone: 1.7 }} />
+        <WireMark className="absolute inset-0 block h-full w-full" story={false} size={{ desktop: 0.24, phone: 0.56 }} lift={{ desktop: 1.35, phone: 1.45 }} />
         <HeroNotes good items={GET_STARTED.notes} avoid={{ x: [18, 82], y: [50, 92] }} count={{ desktop: 5, phone: 3 }} />
 
-        <div className="absolute inset-x-0 top-[57%] z-[5] px-6 text-center">
+        <div className="absolute inset-x-0 top-[60%] z-[5] px-6 text-center">
           <h2 id="get-started-title" className="mx-auto max-w-3xl font-[family-name:var(--font-space-grotesk)] text-[clamp(28px,3.4vw,48px)] font-medium leading-[1.06] tracking-[-0.02em] text-balance">{GET_STARTED.title}</h2>
           <p className="mt-4 font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:var(--text-secondary)]">{GET_STARTED.line}</p>
           {/* One row on desktop; on a phone the main step on top, the two ways to reach a person side by side beneath it. */}

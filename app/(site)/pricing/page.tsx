@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Footer } from "@/components/layout/Footer";
 import { Container, Section, SectionIntro } from "@/components/site/primitives";
+import { ProductPlanComparison } from "@/components/site/ProductPlanComparison";
 import { PricingTabs, type PricingTab } from "@/components/site/PricingTabs";
 import { Reveal } from "@/components/site/Reveal";
 import { FAQSection } from "@/sections/FAQSection";
@@ -33,6 +34,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
               Basic covers managed hosting. Care and higher add website change requests and optional Bookings on compatible sites. Content Hub editing is available on eligible Professional and Growth sites with Care or higher. <Link href="/products/vigil#workspace" className="underline underline-offset-4">Explore the workspace.</Link> Prices are in USD. Annual and three-year plans are paid up front.
             </p>
           </Reveal>
+          <ProductPlanComparison />
         </Container>
       </Section>
 

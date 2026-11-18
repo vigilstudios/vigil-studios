@@ -3,8 +3,9 @@
 import { PACKAGE_FINDER_HREF } from "@/lib/vigil/package-finder";
 import { useState } from "react";
 import Link from "next/link";
+import { PricingFeatureIcon } from "./PricingFeatureIcon";
 import { clsx } from "clsx";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { BILLING_PERIODS, savingsPercent, type BillingPeriodKey } from "@/lib/vigil/billing-periods";
 import { formatMoney } from "@/lib/vigil/format";
 import type { PublicPlan } from "@/lib/vigil/queries/public-pricing";
@@ -93,7 +94,7 @@ export function PricingTable({ plans, planHref = PACKAGE_FINDER_HREF, bullets = 
               <ul className="mt-4 space-y-2 text-[13px] text-[color:var(--text-secondary)]">
                 {planBullets(p.includes).slice(0, bullets).map((b) => (
                   <li key={b} className="flex items-start gap-2">
-                    <Check className="mt-1 h-3.5 w-3.5 shrink-0 text-[color:var(--accent)]" /> {b}
+                    <PricingFeatureIcon label={b} /> {b}
                   </li>
                 ))}
               </ul>

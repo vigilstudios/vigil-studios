@@ -275,8 +275,8 @@
 
 .stackLayer {
   grid-area: 1 / 1;
-  z-index: calc(3 - var(--depth));
-  --parallax-weight: calc(2 - var(--depth));
+  z-index: calc(var(--stack-count, 3) - var(--depth));
+  --parallax-weight: max(0, calc(2 - var(--depth)));
   --layer-x: calc(var(--depth) * var(--stack-offset));
   --layer-y: calc(-1 * var(--depth) * var(--stack-step));
   transform: translate3d(
